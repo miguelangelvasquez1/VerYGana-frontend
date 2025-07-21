@@ -25,7 +25,7 @@ const LoginForm = () => {
                         <input id="email" type="email" value={email}
                             onChange={(e) => setEmail(e.target.value)} required
                             placeholder="Ingrese su correo electrónico" 
-                            className="w-full"/>
+                            className="w-full mt-1 px-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2"/>
                     </div>
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium">
