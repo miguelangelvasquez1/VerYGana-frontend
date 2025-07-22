@@ -1,33 +1,58 @@
-import { User } from "lucide-react"; // o cualquier ícono de perfil
-import Image from "next/image"; // si usas Next.js
+'use client';
+
+import { User } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 
 export default function Navbar() {
+  const [openMenu, setOpenMenu] = useState(false);
+  const buttonsStyle = "bg-white text-blue-900 font-semibold px-4 py-1 rounded-full shadow-md";
+
   return (
-    <nav className="w-full flex items-center justify-between px-6 py-3 bg-gradient-to-b from-[#014C92] via-[#1EA5BD] to-[#014C92] text-white shadow">
+    <nav className="sticky top-0 w-full flex items-center justify-between px-6 py-4 bg-gradient-to-b from-[#014C92] via-[#1EA5BD] to-[#014C92] text-white shadow-md">
       {/* LOGO */}
       <div className="flex items-center gap-4">
-        <Image src="/logo.svg" alt="Logo" width={40} height={40} />
+        <Image src="/logos/logo2.png" alt="Logo" width={80} height={80} />
       </div>
 
       {/* BOTONES */}
       <div className="flex gap-3">
-        <button className="bg-white text-blue-900 font-semibold px-4 py-1 rounded-full shadow-sm">Inicio</button>
-        <button className="bg-yellow-400 text-black font-bold px-4 py-1 rounded-full shadow-sm">Juega ya!</button>
-        <button className="bg-white text-blue-900 font-semibold px-4 py-1 rounded-full shadow-sm">Celulares</button>
-        <button className="bg-white text-blue-900 font-semibold px-4 py-1 rounded-full shadow-sm">Ganadores</button>
+        <button className={buttonsStyle}>Inicio</button>
+        <button className="bg-yellow-400 text-black text-shadow-lg font-bold px-4 py-1 rounded-full shadow-sm">Juega ya!</button>
+        <button className={buttonsStyle}>Celulares</button>
+        <button className={buttonsStyle}>Ganadores</button>
       </div>
 
       {/* PERFIL Y SALDO */}
-      <div className="flex items-center gap-4">
-        <div className="text-right leading-tight">
+      <div className="relative flex items-center gap-4">
+        <div className="flex items-center gap-4 text-right leading-tight">
           <div className="font-semibold">Depositar</div>
-          <div className="text-sm">10.000 $<br />Saldo</div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center">
-            <User className="text-white w-4 h-4" />
+          <div className="flex flex-col text-sm items-center">
+            <span className="text-yellow-400">10.000</span>
+            <span className="text-yellow-400">Saldo</span>
           </div>
-          <span className="font-semibold">Juan</span>
+        </div>
+
+        <div className="relative">
+          <button
+            onClick={() => setOpenMenu(!openMenu)}
+            className="flex items-center gap-2 focus:outline-none"
+          >
+            <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center">
+              <User className="text-white w-4 h-4" />
+            </div>
+            <span className="font-semibold">Juan</span>
+          </button>
+
+          {openMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg z-50">
+              <ul className="py-1">
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Perfil</li>
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Configuración</li>
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Cerrar Sesión</li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </nav>
