@@ -6,7 +6,7 @@ export default function Navbar() {
     <nav className="w-full flex items-center justify-between px-6 py-3 bg-gradient-to-b from-[#014C92] via-[#1EA5BD] to-[#014C92] text-white shadow">
       {/* LOGO */}
       <div className="flex items-center gap-4">
-        <Image src="/logo.svg" alt="Logo" width={40} height={40} />
+        <Image src="/logo.png" alt="Logo" width={40} height={40} />
       </div>
 
       {/* BOTONES */}
