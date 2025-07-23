@@ -2,10 +2,25 @@
 
 import { User } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Navbar() {
   const [openMenu, setOpenMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: { target: any; }) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenu(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const buttonsStyle = "bg-white text-blue-900 font-semibold px-4 py-1 rounded-full shadow-md";
 
   return (
@@ -33,15 +48,15 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <button
             onClick={() => setOpenMenu(!openMenu)}
-            className="flex items-center gap-2 focus:outline-none"
+            className="group flex items-center gap-2 focus:outline-none"
           >
-            <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center">
-              <User className="text-white w-4 h-4" />
+            <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center group-hover:border-yellow-400">
+              <User className="text-white w-4 h-4 group-hover:text-yellow-400" />
             </div>
-            <span className="font-semibold">Juan</span>
+            <span className="font-semibold group-hover:text-yellow-400">Juan</span>
           </button>
 
           {openMenu && (

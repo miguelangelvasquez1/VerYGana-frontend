@@ -1,7 +1,9 @@
 import RegisterForm from "@/components/RegisterForm"
 import Navbar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 export default function RegisterPage() {
     return (
+        <>
         <div className="min-h-screen flex flex-col">
             <Navbar />
             <div className="flex-1 flex">
@@ -20,5 +22,7 @@ export default function RegisterPage() {
                 </div>
             </div>
         </div>
+        <Footer/>
+        </>
     );
 }

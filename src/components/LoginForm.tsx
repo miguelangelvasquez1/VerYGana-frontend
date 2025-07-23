@@ -1,7 +1,6 @@
 'use client';
 import { useState } from "react";
 
-
 const LoginForm = () => {
 
     const [email, setEmail] = useState('');
