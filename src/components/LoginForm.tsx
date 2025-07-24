@@ -36,12 +36,12 @@ const LoginForm = () => {
                 </div>
                 <div>
                     <button type="submit"
-                        className="w-full px-4 py-2 font-medium text-white bg-[#4f2dfc] rounded-md hover:bg-indigo-800 cursor-pointer">
+                        className="w-full px-4 py-2 font-medium text-white bg-blue-950 rounded-md hover:bg-blue-900 cursor-pointer">
                         Iniciar Sesión
                     </button>
                 </div>
             </form>
-            <p className="mt-5">
+            <p className="text-center mt-5">
                 ¿No tienes una cuenta?
                 <a href="/register" className="hover:text-gray-500"> Regístrate aquí</a>
             </p>

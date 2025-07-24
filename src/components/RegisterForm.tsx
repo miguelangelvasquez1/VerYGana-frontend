@@ -78,7 +78,7 @@ export default function RegisterForm() {
 
         <button
           type="submit"
-          className="mt-6 w-full bg-gradient-to-r from-[#014C92] via-[#1EA5BD] to-[#014C92] text-white py-2 rounded-md font-semibold hover:bg-sky-700 transition"
+          className="mt-6 w-full bg-blue-950 text-white py-2 rounded-md hover:bg-blue-900 transition"
         >
           Siguiente
         </button>

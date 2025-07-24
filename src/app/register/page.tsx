@@ -16,9 +16,9 @@ export default function RegisterPage() {
                         <li>📱 Canjea por recargas o productos</li>
                     </ul>
                 </div>
-                <div className="w-3/5 bg-white text-blue">
-                    <h1 className="text-3xl text-blue-900 text-center font-bold mt-10">Registrarse</h1>
-                    <RegisterForm />
+                <div className="w-3/5 bg-white text-blue p-8 flex flex-col justify-center items-center">
+                    <h1 className="text-3xl text-blue-950 text-center font-bold mt-10">Registrarse</h1>
+                    <RegisterForm/>
                 </div>
             </div>
         </div>
