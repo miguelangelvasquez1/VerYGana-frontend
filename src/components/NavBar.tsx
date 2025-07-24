@@ -24,7 +24,7 @@ export default function Navbar() {
   const buttonsStyle = "bg-white text-blue-900 font-semibold px-4 py-1 rounded-full shadow-md";
 
   return (
-    <nav className="sticky top-0 w-full flex items-center justify-between px-6 py-4 bg-gradient-to-b from-[#014C92] via-[#1EA5BD] to-[#014C92] text-white shadow-md">
+    <nav className="sticky top-0 w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#014C92] via-[#1EA5BD] to-[#014C92] text-white shadow-md">
       {/* LOGO */}
       <div className="flex items-center gap-4">
         <Image src="/logos/logo2.png" alt="Logo" width={80} height={80} />

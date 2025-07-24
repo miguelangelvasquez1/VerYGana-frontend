@@ -5,7 +5,7 @@ import { Facebook, Twitter, Instagram } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-gradient-to-t from-[#014C92] via-[#1EA5BD] to-[#014C92] text-white py-8">
+    <footer className="w-full bg-blue-950 text-white py-8">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Company Info */}
         <div className="flex flex-col gap-4">
