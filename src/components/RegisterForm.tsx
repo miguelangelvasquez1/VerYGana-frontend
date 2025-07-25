@@ -60,7 +60,7 @@ export default function RegisterForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {fields.map(({ label, name, type = "text" }) => (
             <div key={name}>
-              <label className="block font-semibold mb-1" htmlFor={name}>
+              <label className="block mb-1" htmlFor={name}>
                 {label}
               </label>
               <input
@@ -69,7 +69,7 @@ export default function RegisterForm() {
                 id={name}
                 value={(formData as any)[name]}
                 onChange={handleChange}
-                className="w-full p-2 rounded-md bg-gray-300 text-white focus:outline-none"
+                className="w-full p-2 rounded-md bg-gray-300 focus:outline-none"
                 required
               />
             </div>
