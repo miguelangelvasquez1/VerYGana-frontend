@@ -92,7 +92,7 @@ export default function Carousel({ phones }: Props) {
           <img
             src={phone.image}
             alt={phone.name}
-            className="w-full h-[400px] object-contain rounded-t-xl bg-white"
+            className="w-full h-[300px] object-contain rounded-t-xl bg-white"
           />
 
           {/* Información del celular */}

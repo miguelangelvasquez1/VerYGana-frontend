@@ -2,9 +2,11 @@
 
 import Image from "next/image"
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function NavBarNoAuth() {
 
+    const pathName = usePathname(); //Seguir con esto
     const router = useRouter();
 
     const handleLoginClick = () => {
@@ -14,9 +16,9 @@ export default function NavBarNoAuth() {
         router.push("/register");
     };
 
-    const buttonsStyle = "cursor-pointer bg-white text-blue-900 font-semibold px-4 py-1 rounded-full shadow-md hover:bg-gray-300";//bg-[#003C71]
+    const buttonsStyle = "cursor-pointer bg-white text-blue-900 font-semibold px-4 py-1 rounded-full shadow-md hover:bg-gray-300";
     return (
-        <nav className="sticky top-0 w-full flex items-center justify-between px-6 py-5 bg-gradient-to-r from-[#014C92] via-[#1EA5BD] to-[#014C92] text-white shadow">
+        <nav className="sticky top-0 z-50 w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#014C92] via-[#1EA5BD] to-[#014C92] text-white shadow">
             <div className="flex items-center gap-4">
                 <Image src={"/logos/logo2.png"} alt="logo" width={80} height={80} />
             </div>
