@@ -2,6 +2,7 @@ import Image from "next/image";
 import Login from "./login/page";
 import NavBarNoAuth from "@/components/NavBarNoAuth";
 import Carousel from "@/components/Carousel";
+import Footer from "@/components/Footer";
 
 const phones = [
   {
@@ -91,6 +92,7 @@ export default function Home() {
           </section>
         </div>
       </main>
+      <Footer/>
     </>
   );
 }

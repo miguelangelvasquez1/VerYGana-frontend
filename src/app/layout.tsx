@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Days_One } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
 const daysOne = Days_One({
   variable: "--font-days-one",
@@ -20,11 +21,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body
-        className={`${daysOne.variable} font-sans antialiased`}
-      >
+      <body className={`${daysOne.variable} font-sans antialiased`}>
         {children}
+        <Toaster // 👉 colocar el toaster aquí
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+          }}
+        />
       </body>
     </html>
   );
 }
+

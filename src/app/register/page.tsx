@@ -12,7 +12,7 @@ export default function RegisterPage() {
                     <p className="text-lg text-center mb-6">¡Descubre como puedes ganar recompensas!</p>
                     <ul className="text-lg text-center mb-6">
                         <li>💰 Gana dinero viendo anuncios</li>
-                        <li>🎁 Participa en rifas cada semana</li>
+                        <li>🎁 Participa en rifas diarias</li>
                         <li>📱 Canjea por recargas o productos</li>
                     </ul>
                 </div>
