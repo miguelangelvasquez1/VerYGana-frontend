@@ -1,7 +1,7 @@
-import NavBar from "@/components/NavBar";
-import LoginForm from "../../components/LoginForm";
+import NavBar from "@/components/bars/NavBar";
+import LoginForm from "../../components/forms/LoginForm";
 import Footer from "@/components/Footer";
-import NavBarNoAuth from "@/components/NavBarNoAuth";
+import NavBarNoAuth from "@/components/bars/NavBarNoAuth";
 
 export default function Login() {
     return (

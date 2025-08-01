@@ -1,7 +1,7 @@
 'use client';
 
 import Footer from "@/components/Footer";
-import Navbar from "@/components/NavBar";
+import Navbar from "@/components/bars/NavBar";
 import { useState } from "react";
 
 export default function Profile() {

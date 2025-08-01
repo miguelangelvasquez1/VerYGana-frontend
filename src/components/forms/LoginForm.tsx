@@ -24,7 +24,7 @@ const LoginForm = () => {
             const { token } = await loginUser(identifier, password);
             localStorage.setItem('authToken', token);
             toast.success("Inicio de sesión exitoso 🎉");
-            router.push("/dashboard");
+            router.push("/");
         } catch (error) {
             console.error("Login failed:", error);
             toast.error("Credenciales inválidas");
