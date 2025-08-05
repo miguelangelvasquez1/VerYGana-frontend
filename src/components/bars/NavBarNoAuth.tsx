@@ -1,6 +1,7 @@
 'use client';
 
 import Image from "next/image"
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 
@@ -12,7 +13,7 @@ export default function NavBarNoAuth() {
     const handleLoginClick = () => {
         router.push("/login");
     };
-     const handleRegisterClick = () => {
+    const handleRegisterClick = () => {
         router.push("/register");
     };
 
@@ -23,10 +24,18 @@ export default function NavBarNoAuth() {
                 <Image src={"/logos/logo2.png"} alt="logo" width={80} height={80} />
             </div>
             <div className="flex gap-3">
-                <button className={buttonsStyle}>Inicio</button>
-                <button className="cursor-pointer bg-yellow-400 text-black text-shadow-lg font-bold px-4 py-1 rounded-full shadow-sm">Juega ya!</button>
-                <button className={buttonsStyle}>Celulares</button>
-                <button className={buttonsStyle}>Ganadores</button>
+                <Link href={"/"}>
+                    <button className={buttonsStyle}>Inicio</button>
+                </Link>
+                <Link href={"/raffles"}>
+                    <button className="bg-yellow-400 text-black text-shadow-lg font-bold px-4 py-1 rounded-full shadow-sm">Rifas</button>
+                </Link>
+                <Link href={"/ads"}>
+                    <button className={buttonsStyle}>Anuncios</button>
+                </Link>
+                <Link href={"/products"}>
+                    <button className={buttonsStyle}>Productos</button>
+                </Link>
             </div>
             <div className="flex gap-3">
                 <button className="bg-white text-blue-900 font-semibold px-4 py-1 rounded-full shadow-md cursor-pointer hover:bg-gray-300"

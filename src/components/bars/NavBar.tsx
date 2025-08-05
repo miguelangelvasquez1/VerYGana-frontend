@@ -33,10 +33,18 @@ export default function Navbar() {
 
       {/* BOTONES */}
       <div className="flex gap-3">
+        <Link href={"/"}>
         <button className={buttonsStyle}>Inicio</button>
-        <button className="bg-yellow-400 text-black text-shadow-lg font-bold px-4 py-1 rounded-full shadow-sm">Juega ya!</button>
-        <button className={buttonsStyle}>Celulares</button>
-        <button className={buttonsStyle}>Ganadores</button>
+        </Link>
+        <Link href={"/raffles"}>
+        <button className="bg-yellow-400 text-black text-shadow-lg font-bold px-4 py-1 rounded-full shadow-sm">Rifas</button>
+        </Link>
+        <Link href={"/ads"}>
+        <button className={buttonsStyle}>Anuncios</button>
+        </Link>
+        <Link href={"/products"}>
+        <button className={buttonsStyle}>Productos</button>
+        </Link>
       </div>
 
       {/* PERFIL Y SALDO */}
