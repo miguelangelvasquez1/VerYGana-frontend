@@ -4,6 +4,7 @@ import React from 'react';
 import NavBar from '@/components/bars/NavBar';
 import Footer from '@/components/Footer';
 import WinnersCarousel from '@/components/winnersCarousel';
+import Carousel from '@/components/Carousel';
 
 const raffles = [
   {
@@ -31,15 +32,40 @@ const raffles = [
   // Más rifas...
 ];
 
+const phones = [
+  {
+    id: 1,
+    name: 'iPhone 14 Pro Max',
+    image: '/phones/iphone.webp',
+    date: '22 de julio de 2025',
+  },
+  {
+    id: 2,
+    name: 'Samsung Galaxy S24',
+    image: '/phones/samsung.png',
+    date: '23 de julio de 2025',
+  },
+  {
+    id: 3,
+    name: 'Xiaomi Redmi Note 13',
+    image: '/phones/xiaomi.png',
+    date: '24 de julio de 2025',
+  },
+]
+
 export default function RafflesPage() {
   return (
     <>
       <NavBar />
-
-      {/* Carrusel lateral fijo */}
       <WinnersCarousel />
+      {/* Carrusel lateral fijo */}
+      
 
       <main className="bg-gradient-to-b from-[#E6F2FF] to-[#F4F8FB] min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+        <div className='mb-6'>
+        <h2 className='text-center font-bold text-2xl text-gray-800 mb-6 sm:text-3xl'>Teléfonos en juego hoy!</h2>
+        <Carousel phones={phones}/>
+        </div>
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center sm:text-left">
             🎟️ Rifas activas
