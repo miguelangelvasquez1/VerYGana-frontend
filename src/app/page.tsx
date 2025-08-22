@@ -79,11 +79,11 @@ export default function Home() {
     <>
       <NavBarNoAuth />
 
-      <main className="bg-gray-50 py-10 min-h-screen">
+      <main className="primary-bg py-10 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Sección: Gana Créditos */} 
-          <section className="bg-white rounded-xl shadow-md p-8 mb-12">
+          <section className="bg-white w-full max-w-6xl mx-auto rounded-xl shadow-md p-8">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">🎥 Gana Créditos viendo anuncios</h1>
             <p className="text-gray-600 mb-4">Ve anuncios y acumula créditos para participar por increíbles premios.</p>
             <button
@@ -101,7 +101,7 @@ export default function Home() {
           </section>
 
           {/* Carrusel de Rifas */}
-          <section className="mb-16">
+          <section id="rifas" className="scroll-mt-[80px] mt-12">
             <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
               📆 Celulares en Rifa Hoy
             </h2>
@@ -109,7 +109,7 @@ export default function Home() {
           </section>
 
           {/* Cómo funciona */}
-          <section className="bg-white rounded-xl shadow-md p-8 mb-16">
+          <section id="comoganar" className="scroll-mt-[80px] bg-white w-full max-w-6xl mx-auto rounded-xl shadow-md p-8 mt-16">
             <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">
               🤑 ¿Cómo puedes ganar en VerYGana?
             </h2>
@@ -123,7 +123,7 @@ export default function Home() {
           </section>
 
           {/* Tienda */}
-          <section className="mb-20">
+          <section id="tienda" className="scroll-mt-[80px] mb-20">
             <h2 className="text-2xl font-bold text-gray-800 mt-5 mb-6">🛒 Tienda</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
               {products.map((product) => (

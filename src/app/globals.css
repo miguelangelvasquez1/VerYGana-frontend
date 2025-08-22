@@ -4,6 +4,7 @@
   --background: #ffffff;
   --foreground: #171717;
   --gradient-bg: linear-gradient(to bottom, #014C92, #1EA5BD, #014C92);
+  --primary-bg: linear-gradient(to bottom, #E6F2FF, #F4F8FB);
 }
 
 @theme inline {
@@ -13,6 +14,7 @@
   --font-mono: var(--font-geist-mono);
   --font-daysOne: var(--font-days-one);
   --bg-gradient: var(--gradient-bg);
+  --primary-bg: var(--primary-bg);
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -30,4 +32,8 @@ body {
 
 .bg-gradient {
   background: var(--bg-gradient);
+}
+
+.primary-bg {
+  background: var(--primary-bg);
 }

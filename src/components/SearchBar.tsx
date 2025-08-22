@@ -1,7 +1,11 @@
 import React, {useState} from "react";
 import { SearchIcon } from "lucide-react";
 
-const SearchBar: React.FC = () => {
+interface SearchBarProps {
+  onSearch: (value: string) => void;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
     const [query, setQuery] = useState('');
 
     const handleSearch = () => {

@@ -81,7 +81,7 @@ export default function Carousel({ phones }: Props) {
   )
 
   return (
-    <div ref={sliderRef} className="keen-slider w-full max-w-6xl mx-auto">
+    <div ref={sliderRef} className="keen-slider w-full max-w-6xl mx-auto shadow-lg rounded-2xl">
       {/* Recorremos todos los celulares para generar una slide por cada uno */}
       {phones.map((phone) => (
         <div
