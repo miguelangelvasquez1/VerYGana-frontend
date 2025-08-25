@@ -36,11 +36,12 @@ export default function AnunciosPage() {
 
                 {/* Sidebar */}
                 <aside className={`
-                    fixed md:static top-0 left-0 h-full w-80 z-40
+                    fixed md:static top-0 left-0 h-[calc(100vh-144px)] w-80 z-40
                     transform transition-transform duration-300 ease-in-out
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
                     md:w-72 lg:w-80
                     md:h-[calc(100vh-144px)] lg:h-[calc(100vh-64px)]
+                    mt-[74px] md:mt-0
                 `}>
                     <Sidebar onClose={() => setIsSidebarOpen(false)} />
                 </aside>

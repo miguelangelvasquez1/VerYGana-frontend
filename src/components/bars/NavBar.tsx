@@ -1,6 +1,6 @@
 'use client';
 
-import { User, Menu, X, Wallet, Home, Gift, Megaphone, Package } from "lucide-react";
+import { User, Menu, X, Wallet, Home, Gift, Megaphone, Package, Smartphone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -73,6 +73,11 @@ export default function Navbar() {
                 Productos
               </button>
             </Link>
+            <Link href={"/plans/mobile-plans"}>
+              <button className={pathname === '/plans/mobile-plans' ? activeButtonStyle : buttonsStyle}>
+                Recargas
+              </button>
+            </Link>
           </div>
 
           {/* WALLET AND PROFILE SECTION */}
@@ -136,7 +141,7 @@ export default function Navbar() {
                 <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-xl z-50 border">
                   <ul className="py-2">
                     <li>
-                      <Link href="/profile" className="block px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
+                      <Link href="/explore/profile" className="block px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
                         Mi Perfil
                       </Link>
                     </li>
@@ -300,7 +305,18 @@ export default function Navbar() {
             </button>
           </Link>
 
-          <button 
+          <Link href="/plans/mobile-plans" className="flex-1">
+            <button className={`flex flex-col items-center py-2 px-1 transition-all duration-200 ${
+              pathname === '/plans/mobile-plans' 
+                ? 'text-purple-600 bg-purple-50 rounded-lg mx-1' 
+                : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50 hover:rounded-lg mx-1'
+            }`}>
+              <Smartphone className={`w-6 h-6 mb-1 ${pathname === '/plans/mobile-plans' ? 'text-purple-600' : ''}`} />
+              <span className="text-xs font-medium">Recargas</span>
+            </button>
+          </Link>
+
+          {/* <button 
             onClick={() => setIsWalletOpen(!isWalletOpen)}
             className={`flex flex-col items-center py-2 px-1 flex-1 transition-all duration-200 ${
               isWalletOpen 
@@ -310,12 +326,12 @@ export default function Navbar() {
           >
             <Wallet className={`w-6 h-6 mb-1 ${isWalletOpen ? 'text-orange-600' : ''}`} />
             <span className="text-xs font-medium">Monedero</span>
-          </button>
+          </button> */}
         </div>
       </div>
 
       {/* Spacer for mobile bottom navigation */}
-      <div className="lg:hidden h-16"></div>
+      {/* <div className="lg:hidden h-16"></div> */}
     </>
   );
 }

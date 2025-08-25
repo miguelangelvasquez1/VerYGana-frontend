@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import { Filter, Grid3X3, List, ChevronDown, Star, Heart, ShoppingCart, Shirt } from "lucide-react";
 import Navbar from "@/components/bars/NavBar";
-import CategoryCard from "@/components/CategoryCard";
-import ProductCard from "@/components/ProductCard";
-import SearchBar from "@/components/SearchBar";
+import CategoryCard from "@/components/ProductsPage/CategoryCard";
+import ProductCard from "@/components/ProductsPage/ProductCard";
+import SearchBar from "@/components/ProductsPage/SearchBar";
+import Footer from "@/components/Footer";
 
 const products = [
   {
@@ -170,7 +171,7 @@ export default function ProductsPage() {
     }
 
     // Filtrar por precio
-    result = result.filter(product => 
+    result = result.filter(product =>
       product.price >= priceRange[0] && product.price <= priceRange[1]
     );
 
@@ -216,7 +217,7 @@ export default function ProductsPage() {
   return (
     <>
       <Navbar />
-      
+
       {/* Hero Section con Search */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
@@ -233,7 +234,7 @@ export default function ProductsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Sección de Anuncios/Banners */}
         <section className="my-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -247,7 +248,7 @@ export default function ProductsPage() {
               </div>
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
             </div>
-            
+
             <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-6 text-white relative overflow-hidden">
               <div className="relative z-10">
                 <h4 className="text-xl font-bold mb-2">Envío Gratis</h4>
@@ -268,18 +269,17 @@ export default function ProductsPage() {
               Ver todas →
             </button>
           </div>
-          
+
           {/* Grid responsivo de categorías */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {categories.map((category) => (
               <div
                 key={category.id}
                 onClick={() => setSelectedCategory(category.name)}
-                className={`cursor-pointer transition-all duration-200 ${
-                  selectedCategory === category.name
+                className={`cursor-pointer transition-all duration-200 ${selectedCategory === category.name
                     ? 'ring-2 ring-blue-500 scale-105'
                     : 'hover:scale-105 hover:shadow-lg'
-                }`}
+                  }`}
               >
                 <CategoryCard category={category} />
               </div>
@@ -290,7 +290,7 @@ export default function ProductsPage() {
         {/* Filtros y Controles */}
         <section className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-4 bg-white rounded-xl shadow-sm border">
-            
+
             {/* Filtros izquierda */}
             <div className="flex flex-wrap items-center gap-4">
               <button
@@ -301,7 +301,7 @@ export default function ProductsPage() {
                 Filtros
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showFilters ? 'rotate-180' : ''}`} />
               </button>
-              
+
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-700">Categoría:</span>
                 <select
@@ -369,7 +369,7 @@ export default function ProductsPage() {
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">Estado</label>
                   <div className="space-y-2">
@@ -393,7 +393,7 @@ export default function ProductsPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-6 flex gap-4">
                 <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                   Aplicar filtros
@@ -427,11 +427,10 @@ export default function ProductsPage() {
 
           {/* Grid de productos */}
           {!loading && (
-            <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${
-              viewMode === 'grid'
+            <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${viewMode === 'grid'
                 ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6'
                 : 'grid-cols-1'
-            }`}>
+              }`}>
               {filteredProducts.map((product) => (
                 <div key={product.id} className="group">
                   <ProductCard product={product} viewMode={viewMode} />
@@ -483,6 +482,9 @@ export default function ProductsPage() {
             </button>
           </div>
         </section>
+      </div>
+      <div className="mb-18 lg:mb-0">
+        <Footer />
       </div>
     </>
   );

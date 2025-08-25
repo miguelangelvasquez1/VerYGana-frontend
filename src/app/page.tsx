@@ -4,7 +4,7 @@ import AdCard from "@/components/AdCard";
 import NavBarNoAuth from "@/components/bars/NavBarNoAuth";
 import Carousel from "@/components/Carousel";
 import Footer from "@/components/Footer";
-import ProductCard from "@/components/ProductCard"; // Asegúrate de tenerlo
+import ProductCard from "@/components/ProductsPage/ProductCard"; // Asegúrate de tenerlo
 import { useState } from "react";
 
 const phones = [
