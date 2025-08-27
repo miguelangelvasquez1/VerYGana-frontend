@@ -1,19 +1,19 @@
 import RegisterForm from "@/components/forms/RegisterForm"
 import Footer from "@/components/Footer";
 import NavBarNoAuth from "@/components/bars/NavBarNoAuth";
+import NavBarNoAuth2 from "@/components/bars/NavBarNoAuth2";
 
 export default function RegisterPage() {
   return (
     <>
       <div className="min-h-screen flex flex-col bg-gray-50 overflow-hidden">
-        <NavBarNoAuth />
         
         {/* Hero Section - Mobile */}
         <div className="lg:hidden bg-gradient-to-br from-[#014C92] via-[#1EA5BD] to-[#0369A1] text-white px-4 py-6">
           <div className="text-center max-w-md mx-auto">
             <div className="mb-4">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">
-                Bienvenido a Rifacel
+                Bienvenido a Ver y Gana
               </h2>
               <p className="text-sm text-blue-100 mb-4">
                 ¡Descubre cómo puedes ganar recompensas!
@@ -45,7 +45,7 @@ export default function RegisterPage() {
               <div className="max-w-sm text-center">
                 <div className="mb-6">
                   <h2 className="text-2xl xl:text-3xl font-bold mb-3 leading-tight">
-                    Bienvenido a Rifacel
+                    Bienvenido a Ver y Gana
                   </h2>
                   <p className="text-base text-blue-100 mb-6 leading-relaxed">
                     ¡Descubre cómo puedes ganar recompensas!

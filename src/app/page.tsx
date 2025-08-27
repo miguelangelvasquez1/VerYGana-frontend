@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import NavBarNoAuth from "@/components/bars/NavBarNoAuth";
 import Footer from "@/components/Footer";
+import Link from "next/link";
+import NavBarNoAuth2 from "@/components/bars/NavBarNoAuth2";
 
 // Datos simulados
 const phones = [
@@ -204,33 +206,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavBarNoAuth />
-      {/* Navbar simulado */}
-      <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-8">
-              <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                VerYGana
-              </div>
-              <div className="hidden md:flex items-center gap-6">
-                <a href="#rifas" className="text-gray-700 hover:text-blue-600 transition-colors">Rifas</a>
-                <a href="#tienda" className="text-gray-700 hover:text-blue-600 transition-colors">Tienda</a>
-                <a href="#como-funciona" className="text-gray-700 hover:text-blue-600 transition-colors">Cómo Funciona</a>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-yellow-100 px-3 py-1 rounded-full">
-                <Coins className="w-4 h-4 text-yellow-600" />
-                <span className="text-yellow-700 font-medium">{adCredits.toLocaleString()}</span>
-              </div>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Iniciar Sesión
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+
+      <NavBarNoAuth2 />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
