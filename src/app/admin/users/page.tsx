@@ -2,12 +2,12 @@
 
 import React from 'react';
 import AdminLayout from '@/components/AdminComponents/AdminLayout';
-import Dashboard from '@/components/AdminComponents/Dashboard';
+import UserManagement from '@/components/AdminComponents/UserManagement';
 
-export default function AdminPage() {
+export default function UsersPage() {
   return (
     <AdminLayout>
-      <Dashboard />
+      <UserManagement />
     </AdminLayout>
   );
 }
