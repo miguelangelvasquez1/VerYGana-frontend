@@ -22,46 +22,39 @@ type Props = {
  * Mueve el slider automáticamente cada 3 segundos.
  * Se pausa cuando el mouse está encima.
  */
-function AutoplayPlugin(slider: any) {
+import type { KeenSliderPlugin, KeenSliderInstance } from 'keen-slider/react'
+
+const AutoplayPlugin: KeenSliderPlugin = (slider: KeenSliderInstance) => {
   let timeout: ReturnType<typeof setTimeout>
   let mouseOver = false
 
-  // Cancela el siguiente paso del autoplay
   function clearNextTimeout() {
     clearTimeout(timeout)
   }
 
-  // Programa el siguiente movimiento automático
   function nextTimeout() {
     clearTimeout(timeout)
     if (mouseOver) return
     timeout = setTimeout(() => {
       slider.next()
-    }, 3000) // Tiempo entre slides (3 segundos)
+    }, 3000)
   }
 
-  // Eventos que controlan el autoplay
   slider.on('created', () => {
-    // Pausar autoplay cuando el mouse entra
-    slider.container.addEventListener('mouseover', () => {
-      mouseOver = true
-      clearNextTimeout()
-    })
-
-    // Reanudar autoplay cuando el mouse sale
-    slider.container.addEventListener('mouseout', () => {
-      mouseOver = false
-      nextTimeout()
-    })
-
-    // Iniciar autoplay
+    if (slider.container) {
+      slider.container.addEventListener('mouseover', () => {
+        mouseOver = true
+        clearNextTimeout()
+      })
+      slider.container.addEventListener('mouseout', () => {
+        mouseOver = false
+        nextTimeout()
+      })
+    }
     nextTimeout()
   })
 
-  // Detener autoplay cuando el usuario interactúa
   slider.on('dragStarted', clearNextTimeout)
-
-  // Reanudar autoplay después de animaciones
   slider.on('animationEnded', nextTimeout)
   slider.on('updated', nextTimeout)
 }

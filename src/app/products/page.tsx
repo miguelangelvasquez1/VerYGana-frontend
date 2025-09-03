@@ -236,7 +236,7 @@ export default function ProductsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Sección de Anuncios/Banners */}
-        <section className="my-12">
+        {/* <section className="my-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-8 text-white relative overflow-hidden">
               <div className="relative z-10">
@@ -259,10 +259,10 @@ export default function ProductsPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Categorías */}
-        <section className="mb-16">
+        <section className="mb-16 mt-15">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Categorías</h2>
             <button className="text-blue-600 hover:text-blue-800 font-medium">
@@ -466,7 +466,7 @@ export default function ProductsPage() {
         </section>
 
         {/* Call to Action */}
-        <section className="mb-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white text-center">
+        {/* <section className="mb-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white text-center">
           <h3 className="text-2xl md:text-3xl font-bold mb-4">
             ¿No encontraste lo que buscabas?
           </h3>
@@ -481,7 +481,7 @@ export default function ProductsPage() {
               Contactar Soporte
             </button>
           </div>
-        </section>
+        </section> */}
       </div>
       <div className="mb-18 lg:mb-0">
         <Footer />

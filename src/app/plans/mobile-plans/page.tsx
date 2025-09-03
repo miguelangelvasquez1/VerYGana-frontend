@@ -470,7 +470,7 @@ export default function MobileServicesPage() {
         </section>
 
         {/* Sección informativa */}
-        <section className="mb-20">
+        {/* <section className="mb-20">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
               <div className="flex items-center mb-4">
@@ -544,7 +544,7 @@ export default function MobileServicesPage() {
               </ul>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Sección de operadores */}
         <section className="mb-20 bg-gray-50 rounded-2xl p-8">
@@ -642,7 +642,7 @@ export default function MobileServicesPage() {
         </section>
 
         {/* Call to Action */}
-        <section className="mb-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white text-center">
+        {/* <section className="mb-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white text-center">
           <h3 className="text-2xl md:text-3xl font-bold mb-4">
             ¿Necesitas ayuda personalizada?
           </h3>
@@ -659,7 +659,7 @@ export default function MobileServicesPage() {
               Chat en Vivo
             </button>
           </div>
-        </section>
+        </section> */}
       </div>
 
       <div className="mb-18 lg:mb-0">

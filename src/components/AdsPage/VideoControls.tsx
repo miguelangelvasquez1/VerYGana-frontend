@@ -23,13 +23,13 @@ export default function VideoControls({
       active: isLiked,
       className: isLiked ? "animate-pulse" : ""
     },
-    {
-      icon: "💬",
-      label: "Comentar",
-      count: "1.2K",
-      onClick: () => {/* Handle comment */},
-      active: false
-    },
+    // {
+    //   icon: "💬",
+    //   label: "Comentar",
+    //   count: "1.2K",
+    //   onClick: () => {/* Handle comment */},
+    //   active: false
+    // },
     {
       icon: "🔄",
       label: "Compartir",

@@ -81,7 +81,7 @@ export default function PasswordRecovery() {
     }, 2000);
   };
 
-  const handleCodeChange = (index: number, value: string | any[]) => {
+  const handleCodeChange = (index: number, value: string | number[]) => {
     if (value.length > 1) return; // Solo un carácter
     
     const newCode = [...code];

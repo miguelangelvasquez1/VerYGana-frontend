@@ -11,6 +11,7 @@ interface FormData {
   telefono: string;
   contrasena: string;
   confirmarContrasena: string;
+  [key: string]: string; // Add index signature
 }
 
 export default function RegisterForm() {
@@ -100,7 +101,7 @@ export default function RegisterForm() {
                 type={type}
                 name={name}
                 id={name}
-                value={(formData as any)[name]}
+                value={(formData)[name]}
                 onChange={handleChange}
                 placeholder={placeholder}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm 

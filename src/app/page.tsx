@@ -659,7 +659,7 @@ export default function Home() {
                 </div>
                 
                 <blockquote className="text-2xl font-medium text-center mb-8 leading-relaxed">
-                  "{testimonials[currentTestimonial].text}"
+                  {testimonials[currentTestimonial].text}
                 </blockquote>
                 
                 <div className="flex items-center justify-center gap-4">

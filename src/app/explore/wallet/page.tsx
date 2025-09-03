@@ -179,7 +179,7 @@ const TransactionHistoryPage = () => {
 
   // Filtrar transacciones
   useEffect(() => {
-    let filtered = transactions.filter(transaction => {
+    const filtered = transactions.filter(transaction => {
       const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            transaction.id.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = selectedStatus === 'all' || transaction.status === selectedStatus;

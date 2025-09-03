@@ -536,7 +536,7 @@ export default function RafflesPage() {
         </section>
 
         {/* Sección de garantías */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        {/* <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -585,10 +585,10 @@ export default function RafflesPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Call to Action */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
+        {/* <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
           <div className="max-w-4xl mx-auto text-center text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               ¿Listo Para Cambiar Tu Vida?
@@ -605,7 +605,7 @@ export default function RafflesPage() {
             </button>
           </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Testimonios */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
@@ -628,7 +628,7 @@ export default function RafflesPage() {
                   </div>
                 </div>
                 <p className="text-gray-700">
-                  "No podía creer cuando me llamaron para decirme que había ganado. El proceso fue súper transparente y recibí mi premio en perfecto estado."
+                  No podía creer cuando me llamaron para decirme que había ganado. El proceso fue súper transparente y recibí mi premio en perfecto estado.
                 </p>
                 <div className="flex items-center mt-4">
                   {[...Array(5)].map((_, i) => (
@@ -648,7 +648,7 @@ export default function RafflesPage() {
                   </div>
                 </div>
                 <p className="text-gray-700">
-                  "Llevaba meses tratando de conseguir una PS5 y aquí la gané con solo un ticket. La plataforma es confiable y el sorteo fue en vivo."
+                  Llevaba meses tratando de conseguir una PS5 y aquí la gané con solo un ticket. La plataforma es confiable y el sorteo fue en vivo.
                 </p>
                 <div className="flex items-center mt-4">
                   {[...Array(5)].map((_, i) => (
@@ -668,7 +668,7 @@ export default function RafflesPage() {
                   </div>
                 </div>
                 <p className="text-gray-700">
-                  "Perfecto para mis estudios universitarios. La experiencia fue increíble desde la compra del ticket hasta recibir mi premio."
+                  Perfecto para mis estudios universitarios. La experiencia fue increíble desde la compra del ticket hasta recibir mi premio.
                 </p>
                 <div className="flex items-center mt-4">
                   {[...Array(5)].map((_, i) => (
@@ -681,7 +681,7 @@ export default function RafflesPage() {
         </section>
 
         {/* FAQ */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        {/* <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -736,7 +736,7 @@ export default function RafflesPage() {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
       </main>
 
       <div className="mb-18 lg:mb-0">
