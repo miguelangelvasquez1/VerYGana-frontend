@@ -78,6 +78,11 @@ export default function Navbar() {
                 Recargas
               </button>
             </Link>
+            <Link href={"/forum"}>
+              <button className={pathname === '/forum' ? activeButtonStyle : buttonsStyle}>
+                Foro
+              </button>
+            </Link>
           </div>
 
           {/* WALLET AND PROFILE SECTION */}

@@ -1,11 +1,14 @@
 'use client'
-import { useState, useEffect } from "react";
-import { Filter, Grid3X3, List, ChevronDown, Star, Heart, ShoppingCart, Shirt } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Filter, Grid3X3, List, ChevronDown, Star, ShoppingCart } from "lucide-react";
 import Navbar from "@/components/bars/NavBar";
 import CategoryCard from "@/components/ProductsPage/CategoryCard";
 import ProductCard from "@/components/ProductsPage/ProductCard";
 import SearchBar from "@/components/ProductsPage/SearchBar";
+import ProductModal from "@/components/ProductsPage/ProductModal";
+import InfiniteScroll from "@/components/ProductsPage/InfiniteScroll";
 import Footer from "@/components/Footer";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 
 const products = [
   {
@@ -24,6 +27,7 @@ const products = [
     discount: 20,
     isNew: false,
     isFeatured: true,
+    description: "Camiseta clásica de algodón 100% premium, perfecta para el uso diario. Diseño moderno y cómodo que se adapta a cualquier ocasión casual."
   },
   {
     id: "2",
@@ -41,6 +45,7 @@ const products = [
     discount: 0,
     isNew: false,
     isFeatured: false,
+    description: "Casco integral de alta seguridad con certificación DOT y ECE 2206. Construcción robusta con tecnología avanzada para máxima protección."
   },
   {
     id: "3",
@@ -58,58 +63,27 @@ const products = [
     discount: 15,
     isNew: true,
     isFeatured: true,
+    description: "Hermosos anillos de plata 925 para parejas, diseño elegante y romántico perfecto para compromisos y aniversarios especiales."
   },
-  {
-    id: "4",
-    name: "Balón de Fútbol Profesional FIFA Approved",
-    imageUrl: "/products/balon.png",
-    image: "/products/balon.png",
-    date: '2024-06-02',
-    price: 85000,
-    originalPrice: 85000,
-    stock: 45,
-    isActive: true,
-    rating: 4.6,
-    reviews: 67,
-    category: "Deporte",
-    discount: 0,
-    isNew: true,
-    isFeatured: false,
-  },
-  {
-    id: "5",
-    name: "Cuaderno Universitario Espiral A4",
-    imageUrl: "/products/cuaderno.png",
-    image: "/products/cuaderno.png",
-    date: '2024-06-02',
-    price: 8500,
-    originalPrice: 10000,
-    stock: 200,
-    isActive: true,
-    rating: 4.3,
-    reviews: 156,
-    category: "Papelería",
-    discount: 15,
-    isNew: false,
-    isFeatured: false,
-  },
-  {
-    id: "6",
-    name: "Vestido Casual de Verano para Mujer",
-    imageUrl: "/products/vestido.png",
-    image: "/products/vestido.png",
-    date: '2024-06-02',
-    price: 75000,
-    originalPrice: 95000,
-    stock: 23,
-    isActive: true,
-    rating: 4.4,
-    reviews: 98,
-    category: "Ropa de mujer",
-    discount: 21,
-    isNew: false,
-    isFeatured: true,
-  }
+  // Agregando más productos para demostrar el scroll infinito
+  ...Array.from({ length: 50 }, (_, i) => ({
+    id: `${i + 4}`,
+    name: `Producto ${i + 4} - ${['Deportivo', 'Casual', 'Elegante', 'Moderno'][i % 4]}`,
+    imageUrl: ['/products/camiseta.png', '/products/casco.png', '/products/anillos.png', '/products/balon.png'][i % 4],
+    image: ['/products/camiseta.png', '/products/casco.png', '/products/anillos.png', '/products/balon.png'][i % 4],
+    date: '2024-06-01',
+    price: Math.floor(Math.random() * 300000) + 10000,
+    originalPrice: Math.floor(Math.random() * 400000) + 15000,
+    stock: Math.floor(Math.random() * 100),
+    isActive: Math.random() > 0.1,
+    rating: 4 + Math.random(),
+    reviews: Math.floor(Math.random() * 500) + 10,
+    category: ['Deporte', 'Ropa de hombre', 'Ropa de mujer', 'Joyería', 'Papelería', 'Tecnología'][i % 6],
+    discount: Math.random() > 0.7 ? Math.floor(Math.random() * 30) + 5 : 0,
+    isNew: Math.random() > 0.8,
+    isFeatured: Math.random() > 0.9,
+    description: `Descripción detallada del producto ${i + 4}. Un artículo de alta calidad con características premium y diseño moderno.`
+  }))
 ];
 
 const categories = [
@@ -117,52 +91,55 @@ const categories = [
     id: "1",
     name: "Deporte",
     imageUrl: "/categories/deporte.jpg",
-    productCount: 45,
+    productCount: products.filter(p => p.category === "Deporte").length,
   },
   {
     id: "2",
-    name: "Juguetes",
+    name: "Juguetería",
     imageUrl: "/categories/juguetes.jpg",
-    productCount: 128,
+    productCount: products.filter(p => p.category === "Juguetería").length,
   },
   {
     id: "3",
-    name: "Ropa de hombre",
-    imageUrl: "/categories/ropaHombre.jpg",
-    productCount: 234,
+    name: "Servicios", 
+    imageUrl: "/categories/servicios.jpg",
+    productCount: products.filter(p => p.category === "Servicios").length,
   },
   {
     id: "4",
-    name: "Ropa de mujer",
-    imageUrl: "/categories/ropaMujer.webp",
-    productCount: 189,
+    name: "Tecnología",
+    imageUrl: "/categories/iphone13.jpg",
+    productCount: products.filter(p => p.category === "Tecnología").length,
   },
   {
     id: "5",
     name: "Papelería",
     imageUrl: "/categories/papeleria.webp",
-    productCount: 67,
+    productCount: products.filter(p => p.category === "Papelería").length,
   },
   {
     id: "6",
     name: "Joyería",
-    imageUrl: "/categories/joyeria.jpg",
-    productCount: 89,
+    imageUrl: "/categories/joyeria.webp",
+    productCount: products.filter(p => p.category === "Joyería").length,
   }
 ];
 
 export default function ProductsPage() {
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  // Estados para filtros
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [sortBy, setSortBy] = useState("featured");
   const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 500000]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
+  
+  // Estado para modal
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Filtros y ordenamiento
-  useEffect(() => {
+  // Productos filtrados
+  const filteredProducts = useMemo(() => {
     let result = [...products];
 
     // Filtrar por categoría
@@ -202,8 +179,14 @@ export default function ProductsPage() {
         break;
     }
 
-    setFilteredProducts(result);
+    return result;
   }, [selectedCategory, sortBy, priceRange, searchTerm]);
+
+  // Hook de scroll infinito
+  const { displayedItems, loading, hasMore, loadMore } = useInfiniteScroll({
+    items: filteredProducts,
+    itemsPerPage: 12,
+  });
 
   const formatPrice = (price: string | number | bigint) => {
     const numericPrice = typeof price === "string" ? Number(price) : price;
@@ -212,6 +195,16 @@ export default function ProductsPage() {
       currency: 'COP',
       minimumFractionDigits: 0,
     }).format(numericPrice);
+  };
+
+  const handleProductClick = (product: any) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
   };
 
   return (
@@ -234,33 +227,6 @@ export default function ProductsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Sección de Anuncios/Banners */}
-        {/* <section className="my-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="col-span-1 md:col-span-2 lg:col-span-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-8 text-white relative overflow-hidden">
-              <div className="relative z-10">
-                <h3 className="text-2xl md:text-3xl font-bold mb-4">¡Ofertas Especiales!</h3>
-                <p className="text-lg mb-6">Hasta 50% de descuento en productos seleccionados</p>
-                <button className="bg-white text-purple-600 font-bold px-6 py-3 rounded-full hover:bg-gray-100 transition-colors duration-200">
-                  Ver Ofertas
-                </button>
-              </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-6 text-white relative overflow-hidden">
-              <div className="relative z-10">
-                <h4 className="text-xl font-bold mb-2">Envío Gratis</h4>
-                <p className="text-sm mb-4">En compras mayores a $100.000</p>
-                <button className="text-green-100 hover:text-white transition-colors duration-200">
-                  Más info →
-                </button>
-              </div>
-            </div>
-          </div>
-        </section> */}
-
         {/* Categorías */}
         <section className="mb-16 mt-15">
           <div className="flex items-center justify-between mb-8">
@@ -290,7 +256,6 @@ export default function ProductsPage() {
         {/* Filtros y Controles */}
         <section className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-4 bg-white rounded-xl shadow-sm border">
-
             {/* Filtros izquierda */}
             <div className="flex flex-wrap items-center gap-4">
               <button
@@ -398,7 +363,14 @@ export default function ProductsPage() {
                 <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                   Aplicar filtros
                 </button>
-                <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                <button 
+                  onClick={() => {
+                    setSelectedCategory("Todos");
+                    setSearchTerm("");
+                    setPriceRange([0, 500000]);
+                  }}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                >
                   Limpiar filtros
                 </button>
               </div>
@@ -406,7 +378,7 @@ export default function ProductsPage() {
           )}
         </section>
 
-        {/* Productos */}
+        {/* Productos con Scroll Infinito */}
         <section className="mb-20">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -418,29 +390,8 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Loading state */}
-          {loading && (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            </div>
-          )}
-
-          {/* Grid de productos */}
-          {!loading && (
-            <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${viewMode === 'grid'
-                ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6'
-                : 'grid-cols-1'
-              }`}>
-              {filteredProducts.map((product) => (
-                <div key={product.id} className="group">
-                  <ProductCard product={product} viewMode={viewMode} />
-                </div>
-              ))}
-            </div>
-          )}
-
           {/* Estado vacío */}
-          {!loading && filteredProducts.length === 0 && (
+          {filteredProducts.length === 0 ? (
             <div className="text-center py-12">
               <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <ShoppingCart className="w-12 h-12 text-gray-400" />
@@ -462,27 +413,42 @@ export default function ProductsPage() {
                 Limpiar filtros
               </button>
             </div>
+          ) : (
+            <InfiniteScroll
+              loading={loading}
+              hasMore={hasMore}
+              onLoadMore={loadMore}
+              threshold={300}
+            >
+              {/* Grid de productos */}
+              <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${viewMode === 'grid'
+                  ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6'
+                  : 'grid-cols-1'
+                }`}>
+                {displayedItems.map((product) => (
+                  <div key={product.id} className="group">
+                    <ProductCard 
+                      product={product} 
+                      viewMode={viewMode}
+                      onProductClick={handleProductClick}
+                    />
+                  </div>
+                ))}
+              </div>
+            </InfiniteScroll>
           )}
         </section>
-
-        {/* Call to Action */}
-        {/* <section className="mb-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white text-center">
-          <h3 className="text-2xl md:text-3xl font-bold mb-4">
-            ¿No encontraste lo que buscabas?
-          </h3>
-          <p className="text-lg mb-8 text-blue-100">
-            Regístrate para recibir notificaciones de nuevos productos y ofertas exclusivas
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-3 bg-white text-blue-600 font-bold rounded-full hover:bg-gray-100 transition-colors duration-200">
-              Registrarse
-            </button>
-            <button className="px-8 py-3 border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-blue-600 transition-all duration-200">
-              Contactar Soporte
-            </button>
-          </div>
-        </section> */}
       </div>
+
+      {/* Modal de producto */}
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
+
       <div className="mb-18 lg:mb-0">
         <Footer />
       </div>

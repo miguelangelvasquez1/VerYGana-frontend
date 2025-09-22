@@ -48,14 +48,14 @@ export default function Sidebar({ onClose }: SidebarProps) {
               <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-xs font-bold text-white">R</span>
               </div>
-              <h3 className="text-sm font-bold text-white">Rifacel</h3>
+              <h3 className="text-sm font-bold text-white">VerYGana</h3>
             </div>
             <p className="text-xs text-gray-400 leading-relaxed mb-2">
-              ¡Gana tu próximo celular con nosotros! Participa en nuestras rifas y vive la emoción de ganar.
+              ¡Visualiza AnunciosPage para ganar dinero con nosotros! Puedes comprar productos, planes y participar en nuestras rifas ¡Vive la emoción de ganar!
             </p>
             <div className="space-y-0.5 text-xs text-gray-500">
               <p>Versión 2.1.0</p>
-              <p>© 2025 Rifacel</p>
+              <p>© 2025 VerYGana</p>
               <p>Todos los derechos reservados</p>
             </div>
           </div>
@@ -66,7 +66,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             <div className="space-y-1 text-xs text-gray-400">
               <div className="flex items-center gap-2">
                 <span>📧</span>
-                <span>soporte@rifacel.com</span>
+                <span>soporte@VerYGana.com</span>
               </div>
               <div className="flex items-center gap-2">
                 <span>📞</span>

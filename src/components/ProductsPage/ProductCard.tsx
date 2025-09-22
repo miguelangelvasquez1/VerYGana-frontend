@@ -20,9 +20,10 @@ export type ProductCardProps = {
     isFeatured: boolean;
   };
   viewMode?: string;
+  onProductClick?: (product: any) => void;
 };
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid", onProductClick }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -49,7 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
         stars.push(
           <div key={i} className="relative">
             <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-300" />
-            <div className="absolute inset-0 overflow-hidden" style={{width: '50%'}}>
+            <div className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
               <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-yellow-400 text-yellow-400" />
             </div>
           </div>
@@ -65,7 +66,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
 
   if (viewMode === "list") {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group hover:scale-[1.01] transform cursor-pointer">
         <div className="flex flex-col sm:flex-row">
           {/* Image Section */}
           <div className="relative w-full sm:w-48 md:w-64 h-48 sm:h-40 flex-shrink-0">
@@ -74,7 +75,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
                 <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
               </div>
             )}
-            
+
             {imageError ? (
               <div className="w-full h-full bg-gray-100 rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none flex items-center justify-center">
                 <div className="text-center text-gray-400">
@@ -86,9 +87,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className={`w-full h-full object-cover rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none transition-all duration-300 ${
-                  imageLoaded ? 'opacity-100' : 'opacity-0'
-                }`}
+                className={`w-full h-full object-cover rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none transition-all duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
                 onLoad={() => setImageLoaded(true)}
                 onError={() => setImageError(true)}
               />
@@ -120,11 +120,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
               className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200 group/heart"
             >
               <Heart
-                className={`w-4 h-4 transition-all duration-200 ${
-                  isWishlisted
+                className={`w-4 h-4 transition-all duration-200 ${isWishlisted
                     ? 'fill-red-500 text-red-500'
                     : 'text-gray-600 group-hover/heart:text-red-500'
-                }`}
+                  }`}
               />
             </button>
           </div>
@@ -167,13 +166,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className={`text-sm px-3 py-1 rounded-full font-medium ${
-                    product.stock > 10
+                  <span className={`text-sm px-3 py-1 rounded-full font-medium ${product.stock > 10
                       ? 'bg-green-100 text-green-700'
                       : product.stock > 0
-                      ? 'bg-yellow-100 text-yellow-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}>
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
                     {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock'}
                   </span>
                 </div>
@@ -200,7 +198,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
 
   // Grid View (Default)
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group hover:scale-[1.01] transform">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group hover:scale-[1.01] transform"
+      onClick={() => onProductClick?.(product)}
+    >
+
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden">
         {!imageLoaded && !imageError && (
@@ -208,7 +209,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
             <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
           </div>
         )}
-        
+
         {imageError ? (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
             <div className="text-center text-gray-400">
@@ -220,9 +221,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
           <img
             src={product.imageUrl}
             alt={product.name}
-            className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
           />
@@ -255,11 +255,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
             className="w-6 h-6 sm:w-8 sm:h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200 group/heart"
           >
             <Heart
-              className={`w-3 h-3 sm:w-4 sm:h-4 transition-all duration-200 ${
-                isWishlisted
+              className={`w-3 h-3 sm:w-4 sm:h-4 transition-all duration-200 ${isWishlisted
                   ? 'fill-red-500 text-red-500'
                   : 'text-gray-600 group-hover/heart:text-red-500'
-              }`}
+                }`}
             />
           </button>
           <button className="w-6 h-6 sm:w-8 sm:h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200  sm:flex">
@@ -316,13 +315,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = "grid" })
 
         {/* Stock Status */}
         <div className="mb-2">
-          <span className={`text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full font-medium ${
-            product.stock > 10
+          <span className={`text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full font-medium ${product.stock > 10
               ? 'bg-green-100 text-green-700'
               : product.stock > 0
-              ? 'bg-yellow-100 text-yellow-700'
-              : 'bg-red-100 text-red-700'
-          }`}>
+                ? 'bg-yellow-100 text-yellow-700'
+                : 'bg-red-100 text-red-700'
+            }`}>
             {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock'}
           </span>
         </div>
