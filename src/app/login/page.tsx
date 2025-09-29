@@ -11,7 +11,7 @@ export default function Login() {
                 {/* Logo arriba a la izquierda */}
                 <div className="absolute top-6 left-6">
                     <Link href="/">
-                        <Image src="/logos/logo3.png" alt="Logo" width={80} height={80} />
+                        <Image src="/logos/logo.png" alt="Logo" width={60} height={60} />
                     </Link>
                 </div>
 

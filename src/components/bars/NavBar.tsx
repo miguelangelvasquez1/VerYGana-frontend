@@ -45,7 +45,7 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center justify-between px-6 py-2">
           {/* LOGO */}
           <div className="flex items-center gap-4">
-            <Image src="/logos/logo2.png" alt="Logo" width={80} height={80} />
+            <Image src="/logos/logo.png" alt="Logo" width={60} height={60} />
           </div>
 
           {/* NAVIGATION BUTTONS */}

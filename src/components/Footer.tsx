@@ -10,7 +10,7 @@ export default function Footer() {
         {/* Company Info */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <Image src="/logos/logo3.png" alt="VeryGana Logo" width={60} height={60} className="object-contain" />
+            <Image src="/logos/logo.png" alt="VeryGana Logo" width={60} height={60} className="object-contain" />
             <h3 className="text-xl font-bold">VerYGana</h3>
           </div>
           <p className="text-sm text-gray-200">

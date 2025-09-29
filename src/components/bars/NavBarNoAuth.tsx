@@ -33,7 +33,7 @@ export default function NavBarNoAuth() {
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center justify-between px-6 py-4">
                 <div className="flex items-center gap-4">
-                    <Image src={"/logos/logo2.png"} alt="logo" width={80} height={80} />
+                    <Image src={"/logos/logo.png"} alt="logo" width={60} height={60} />
                 </div>
                 
                 <div className="flex gap-3">
