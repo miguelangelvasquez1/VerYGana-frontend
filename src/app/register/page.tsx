@@ -89,31 +89,13 @@ export default function RegisterPage() {
 
           {/* Right Panel - Form */}
           <div className="w-full lg:w-3/5 bg-white flex-1 flex flex-col">
-            <div className="flex-1 flex flex-col justify-center p-4 sm:p-6 lg:p-8">
-              <div className="w-full max-w-2xl mx-auto">
+            <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-12">
+              <div className="w-full max-w-3xl mx-auto px-2 sm:px-4">
                 <div className="text-center mb-4 sm:mb-6">
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                    Crear cuenta
-                  </h1>
-                  <p className="text-gray-600 text-sm sm:text-base">
-                    Completa el formulario para comenzar
-                  </p>
                 </div>
 
                 <div className="bg-white shadow-xl shadow-gray-200/50 rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-100">
                   <RegisterForm />
-                </div>
-
-                <div className="mt-4 text-center">
-                  <p className="text-gray-600 text-xs sm:text-sm">
-                    ¿Ya tienes una cuenta?{" "}
-                    <a 
-                      href="/login" 
-                      className="text-blue-600 hover:text-blue-700 font-semibold underline decoration-2 underline-offset-2"
-                    >
-                      Inicia sesión aquí
-                    </a>
-                  </p>
                 </div>
               </div>
             </div>
