@@ -2,19 +2,29 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, DollarSign, Heart, Calculator, Calendar, MapPin, Tag } from 'lucide-react';
+import { useCategories } from '@/hooks/useCategories';
+import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
+import { useCreateAd } from '@/hooks/useCreateAd';
 
 interface CreateAdFormData {
   title: string;
   description: string;
   type: 'image' | 'video';
   file: File | null;
-  budget: number;
+  rewardPerLike: number;
+  maxLikes: number;
+  totalBudget: number;
+  categoryIds: number[];
+  startImmediately: boolean;
+  startDate: string;
+  endWhenBudgetExhausted: boolean;
+  endDate: string;
   targetAudience: {
     ageRange: [number, number];
     gender: 'all' | 'male' | 'female';
-    interests: string[];
-    location: string[];
+    selectedDepartments: string[];
+    municipalityCodes: string[];
   };
 }
 
@@ -24,19 +34,55 @@ export function CreateAdForm() {
     description: '',
     type: 'image',
     file: null,
-    budget: 0,
+    rewardPerLike: 0.50,
+    maxLikes: 100,
+    totalBudget: 50.00,
+    categoryIds: [],
+    startImmediately: true,
+    startDate: '',
+    endWhenBudgetExhausted: true,
+    endDate: '',
     targetAudience: {
       ageRange: [18, 65],
       gender: 'all',
-      interests: [],
-      location: []
+      selectedDepartments: [],
+      municipalityCodes: []
     }
   });
 
   const [dragActive, setDragActive] = useState(false);
-  const [newInterest, setNewInterest] = useState('');
-  const [newLocation, setNewLocation] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
 
+  // Custom hooks
+  const { categories, loading: loadingCategories } = useCategories();
+  const { departments, loading: loadingDepartments } = useDepartments();
+  const { municipalities, loading: loadingMunicipalities } = useMunicipalities(selectedDepartment);
+  const { createAd, loading: submitting, error: submitError } = useCreateAd();
+
+  // Cálculo de presupuesto
+  const calculateBudget = (reward: number, maxLikes: number) => {
+    return (reward * maxLikes).toFixed(2);
+  };
+
+  const handleRewardChange = (value: number) => {
+    const newBudget = Number(calculateBudget(value, formData.maxLikes));
+    setFormData(prev => ({
+      ...prev,
+      rewardPerLike: value,
+      totalBudget: newBudget
+    }));
+  };
+
+  const handleMaxLikesChange = (value: number) => {
+    const newBudget = Number(calculateBudget(formData.rewardPerLike, value));
+    setFormData(prev => ({
+      ...prev,
+      maxLikes: value,
+      totalBudget: newBudget
+    }));
+  };
+
+  // Manejo de archivo
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -63,94 +109,136 @@ export function CreateAdForm() {
     }
   };
 
-  const addInterest = () => {
-    if (newInterest.trim()) {
+  // Manejo de categorías
+  const toggleCategory = (categoryId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      categoryIds: prev.categoryIds.includes(categoryId)
+        ? prev.categoryIds.filter(id => id !== categoryId)
+        : [...prev.categoryIds, categoryId]
+    }));
+  };
+
+  // Manejo de ubicaciones
+  const addDepartment = (departmentCode: string) => {
+    if (!formData.targetAudience.selectedDepartments.includes(departmentCode)) {
       setFormData(prev => ({
         ...prev,
         targetAudience: {
           ...prev.targetAudience,
-          interests: [...prev.targetAudience.interests, newInterest.trim()]
+          selectedDepartments: [...prev.targetAudience.selectedDepartments, departmentCode]
         }
       }));
-      setNewInterest('');
     }
   };
 
-  const removeInterest = (index: number) => {
+  const removeDepartment = (departmentCode: string) => {
     setFormData(prev => ({
       ...prev,
       targetAudience: {
         ...prev.targetAudience,
-        interests: prev.targetAudience.interests.filter((_, i) => i !== index)
+        selectedDepartments: prev.targetAudience.selectedDepartments.filter(d => d !== departmentCode),
+        municipalityCodes: prev.targetAudience.municipalityCodes.filter(
+          m => !municipalities.find(mun => mun.code === m && mun.departmentCode === departmentCode)
+        )
       }
     }));
   };
 
-  const addLocation = () => {
-    if (newLocation.trim()) {
+  const addMunicipality = (municipalityCode: string) => {
+    if (!formData.targetAudience.municipalityCodes.includes(municipalityCode)) {
       setFormData(prev => ({
         ...prev,
         targetAudience: {
           ...prev.targetAudience,
-          location: [...prev.targetAudience.location, newLocation.trim()]
+          municipalityCodes: [...prev.targetAudience.municipalityCodes, municipalityCode]
         }
       }));
-      setNewLocation('');
     }
   };
 
-  const removeLocation = (index: number) => {
+  const removeMunicipality = (municipalityCode: string) => {
     setFormData(prev => ({
       ...prev,
       targetAudience: {
         ...prev.targetAudience,
-        location: prev.targetAudience.location.filter((_, i) => i !== index)
+        municipalityCodes: prev.targetAudience.municipalityCodes.filter(m => m !== municipalityCode)
       }
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Submit
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí manejarías el envío del formulario
-    console.log('Formulario enviado:', formData);
+
+    // Validaciones
+    if (formData.categoryIds.length === 0) {
+      alert('Debes seleccionar al menos una categoría');
+      return;
+    }
+
+    if (!formData.startImmediately && !formData.startDate) {
+      alert('Debes seleccionar una fecha de inicio');
+      return;
+    }
+
+    if (!formData.endWhenBudgetExhausted && !formData.endDate) {
+      alert('Debes seleccionar una fecha de finalización');
+      return;
+    }
+
+    // Preparar datos
+    const requestData = {
+      title: formData.title,
+      description: formData.description,
+      rewardPerLike: formData.rewardPerLike,
+      maxLikes: formData.maxLikes,
+      totalBudget: formData.totalBudget,
+      categoryIds: formData.categoryIds,
+      startDate: formData.startImmediately ? undefined : formData.startDate,
+      endDate: formData.endWhenBudgetExhausted ? undefined : formData.endDate,
+      startImmediately: formData.startImmediately,
+      endWhenBudgetExhausted: formData.endWhenBudgetExhausted,
+      targetAudience: {
+        ageRange: formData.targetAudience.ageRange,
+        gender: formData.targetAudience.gender,
+        municipalityCodes: formData.targetAudience.municipalityCodes
+      }
+    };
+
+    try {
+      await createAd(requestData, formData.file);
+    } catch (error) {
+      console.error('Error al crear anuncio:', error);
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Crear Nuevo Anuncio</h2>
       
+      {submitError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-800 text-sm">{submitError}</p>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información básica */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Título del Anuncio
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ingresa el título de tu anuncio"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Presupuesto ($)
-            </label>
-            <input
-              type="number"
-              value={formData.budget}
-              onChange={(e) => setFormData(prev => ({ ...prev, budget: Number(e.target.value) }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="0.00"
-              min="1"
-              step="0.01"
-              required
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Título del Anuncio
+          </label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Ingresa el título de tu anuncio"
+            required
+            minLength={5}
+            maxLength={100}
+          />
         </div>
 
         <div>
@@ -164,31 +252,179 @@ export function CreateAdForm() {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Describe tu anuncio..."
             required
+            minLength={10}
+            maxLength={1000}
           />
         </div>
 
-        {/* Tipo de archivo */}
+        {/* Presupuesto y Recompensas */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+          <div className="flex items-center mb-4">
+            <Calculator className="w-5 h-5 text-blue-600 mr-2" />
+            <h3 className="text-lg font-semibold text-gray-900">Presupuesto y Recompensas</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="flex items-center">
+                  <DollarSign className="w-4 h-4 mr-1" />
+                  Recompensa por Like ($)
+                </div>
+              </label>
+              <input
+                type="number"
+                value={formData.rewardPerLike}
+                onChange={(e) => handleRewardChange(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0.01"
+                max="100"
+                step="0.01"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">Mínimo: $0.01 - Máximo: $100.00</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="flex items-center">
+                  <Heart className="w-4 h-4 mr-1" />
+                  Máximo de Likes
+                </div>
+              </label>
+              <input
+                type="number"
+                value={formData.maxLikes}
+                onChange={(e) => handleMaxLikesChange(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="1"
+                max="10000"
+                step="1"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">Mínimo: 1 - Máximo: 10,000</p>
+            </div>
+          </div>
+
+          <div className="mt-4 p-4 bg-white rounded-lg border-2 border-blue-300">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-600">Presupuesto Total Calculado</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  ${formData.rewardPerLike.toFixed(2)} × {formData.maxLikes} likes
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-blue-600">
+                  ${formData.totalBudget.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Fechas de Campaña */}
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
+          <div className="flex items-center mb-4">
+            <Calendar className="w-5 h-5 text-purple-600 mr-2" />
+            <h3 className="text-lg font-semibold text-gray-900">Duración de la Campaña</h3>
+          </div>
+
+          <div className="space-y-4">
+            {/* Fecha de inicio */}
+            <div>
+              <div className="flex items-center mb-2">
+                <input
+                  type="checkbox"
+                  id="startImmediately"
+                  checked={formData.startImmediately}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    startImmediately: e.target.checked,
+                    startDate: e.target.checked ? '' : prev.startDate
+                  }))}
+                  className="mr-2"
+                />
+                <label htmlFor="startImmediately" className="text-sm font-medium text-gray-700">
+                  Iniciar cuando el admin apruebe el anuncio
+                </label>
+              </div>
+
+              {!formData.startImmediately && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fecha de Inicio
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Fecha de fin */}
+            <div>
+              <div className="flex items-center mb-2">
+                <input
+                  type="checkbox"
+                  id="endWhenBudgetExhausted"
+                  checked={formData.endWhenBudgetExhausted}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    endWhenBudgetExhausted: e.target.checked,
+                    endDate: e.target.checked ? '' : prev.endDate
+                  }))}
+                  className="mr-2"
+                />
+                <label htmlFor="endWhenBudgetExhausted" className="text-sm font-medium text-gray-700">
+                  Finalizar cuando se agote el presupuesto
+                </label>
+              </div>
+
+              {!formData.endWhenBudgetExhausted && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fecha de Finalización
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    min={formData.startDate || new Date().toISOString().slice(0, 16)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Tipo y archivo */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Tipo de Anuncio
           </label>
           <div className="flex space-x-4">
-            <label className="flex items-center">
+            <label className="flex items-center cursor-pointer">
               <input
                 type="radio"
                 value="image"
                 checked={formData.type === 'image'}
-                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'image' | 'video' }))}
+                onChange={() => setFormData(prev => ({ ...prev, type: 'image', file: null }))}
                 className="mr-2"
               />
               Imagen
             </label>
-            <label className="flex items-center">
+            <label className="flex items-center cursor-pointer">
               <input
                 type="radio"
                 value="video"
                 checked={formData.type === 'video'}
-                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'image' | 'video' }))}
+                onChange={() => setFormData(prev => ({ ...prev, type: 'video', file: null }))}
                 className="mr-2"
               />
               Video
@@ -196,16 +432,13 @@ export function CreateAdForm() {
           </div>
         </div>
 
-        {/* Upload de archivo */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Subir {formData.type === 'image' ? 'Imagen' : 'Video'}
           </label>
           <div
             className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-              dragActive
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+              dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -238,9 +471,49 @@ export function CreateAdForm() {
                     />
                   </label>
                 </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.type === 'image' ? 'Máx 5MB - JPG, PNG, WebP' : 'Máx 100MB - MP4, WebM'}
+                </p>
               </div>
             )}
           </div>
+        </div>
+
+        {/* Categorías (Intereses) */}
+        <div className="bg-gray-50 rounded-lg p-6">
+          <div className="flex items-center mb-4">
+            <Tag className="w-5 h-5 text-gray-600 mr-2" />
+            <h3 className="text-lg font-semibold text-gray-900">Categorías / Intereses</h3>
+          </div>
+
+          {loadingCategories ? (
+            <p className="text-sm text-gray-500">Cargando categorías...</p>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {categories.map((category) => (
+                <label
+                  key={category.id}
+                  className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                    formData.categoryIds.includes(category.id)
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.categoryIds.includes(category.id)}
+                    onChange={() => toggleCategory(category.id)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium">{category.name}</span>
+                </label>
+              ))}
+            </div>
+          )}
+          
+          {formData.categoryIds.length === 0 && (
+            <p className="text-sm text-red-500 mt-2">Debes seleccionar al menos una categoría</p>
+          )}
         </div>
 
         {/* Audiencia objetivo */}
@@ -308,100 +581,115 @@ export function CreateAdForm() {
             </div>
           </div>
 
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Intereses
-            </label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {formData.targetAudience.interests.map((interest, index) => (
-                <span
-                  key={index}
-                  className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center"
-                >
-                  {interest}
-                  <button
-                    type="button"
-                    onClick={() => removeInterest(index)}
-                    className="ml-1 text-blue-600 hover:text-blue-800"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
+          {/* Ubicaciones */}
+          <div className="mt-6">
+            <div className="flex items-center mb-4">
+              <MapPin className="w-5 h-5 text-green-600 mr-2" />
+              <label className="block text-sm font-medium text-gray-700">
+                Ubicaciones Geográficas
+              </label>
             </div>
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                value={newInterest}
-                onChange={(e) => setNewInterest(e.target.value)}
-                placeholder="Agregar interés"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
-              />
-              <button
-                type="button"
-                onClick={addInterest}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Agregar
-              </button>
-            </div>
-          </div>
 
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Ubicaciones
-            </label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {formData.targetAudience.location.map((location, index) => (
-                <span
-                  key={index}
-                  className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm flex items-center"
-                >
-                  {location}
-                  <button
-                    type="button"
-                    onClick={() => removeLocation(index)}
-                    className="ml-1 text-green-600 hover:text-green-800"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                value={newLocation}
-                onChange={(e) => setNewLocation(e.target.value)}
-                placeholder="Agregar ubicación"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addLocation())}
-              />
-              <button
-                type="button"
-                onClick={addLocation}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            {/* Selector de departamento */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Seleccionar Departamento
+              </label>
+              <select
+                value={selectedDepartment || ''}
+                onChange={(e) => setSelectedDepartment(e.target.value || null)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                disabled={loadingDepartments}
               >
-                Agregar
-              </button>
+                <option value="">-- Selecciona un departamento --</option>
+                {departments.map((dept) => (
+                  <option key={dept.code} value={dept.code}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* Selector de municipio */}
+            {selectedDepartment && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Seleccionar Municipio
+                </label>
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      addMunicipality(e.target.value);
+                      e.target.value = '';
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  disabled={loadingMunicipalities}
+                >
+                  <option value="">-- Selecciona un municipio --</option>
+                  {municipalities.map((mun) => (
+                    <option
+                      key={mun.code}
+                      value={mun.code}
+                      disabled={formData.targetAudience.municipalityCodes.includes(mun.code)}
+                    >
+                      {mun.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Ubicaciones seleccionadas */}
+            <div className="space-y-2">
+              {formData.targetAudience.municipalityCodes.map((code) => {
+                const allMunicipalities = departments.flatMap(dept =>
+                  municipalities.filter(m => m.departmentCode === dept.code)
+                );
+                const municipality = allMunicipalities.find(m => m.code === code);
+                const department = departments.find(d => d.code === municipality?.departmentCode);
+                
+                return (
+                  <div
+                    key={code}
+                    className="inline-flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm mr-2"
+                  >
+                    <span>{municipality?.name}, {department?.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeMunicipality(code)}
+                      className="ml-2 text-green-600 hover:text-green-800"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {formData.targetAudience.municipalityCodes.length === 0 && (
+              <p className="text-sm text-gray-500 mt-2">
+                Sin ubicaciones específicas (el anuncio se mostrará en todo el país)
+              </p>
+            )}
           </div>
         </div>
 
         {/* Botones de acción */}
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-end space-x-4 pt-6 border-t">
           <button
             type="button"
             className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+            disabled={submitting}
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={submitting}
           >
-            Crear Anuncio
+            {submitting ? 'Creando...' : 'Crear Anuncio'}
           </button>
         </div>
       </form>

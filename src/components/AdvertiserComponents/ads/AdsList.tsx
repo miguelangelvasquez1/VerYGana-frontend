@@ -139,7 +139,7 @@ export function AdsList() {
 
           {/* Botón crear anuncio */}
           <Link
-            href="/ads/create"
+            href="/advertiser/ads/create"
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4 mr-2" />
