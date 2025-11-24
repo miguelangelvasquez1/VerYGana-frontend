@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, X, Plus, DollarSign, Package, Image, AlertCircle } from 'lucide-react';
-
-// IMPORTS CORREGIDOS (asegúrate que existe productService.ts -- NO ProductService.ts)
 import * as productService from '@/services/ProductService';
 import { getProductCategories } from '@/services/ProductCategoryService';
 
