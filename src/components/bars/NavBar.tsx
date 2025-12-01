@@ -239,7 +239,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between px-4 py-3">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <Image src="/logos/logo2.png" alt="Logo" width={40} height={40} />
+              <Image src="/logos/logo.png" alt="Logo" width={40} height={40} />
             </div>
 
             {/* Top Right: Wallet & Profile */}

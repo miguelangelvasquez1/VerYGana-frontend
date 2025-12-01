@@ -57,7 +57,7 @@ export interface AdResponse {
 class AdService {
   // Obtener todas las categorías
   async getCategories(): Promise<Category[]> {
-    const response = await apiClient.get<Category[]>('/categories');
+    const response = await apiClient.get<Category[]>('/categories/all');
     return response.data;
   }
 
@@ -116,7 +116,7 @@ export const adService = new AdService();
 // lib/api/client.ts
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -138,14 +138,14 @@ apiClient.interceptors.request.use(
 );
 
 // Interceptor para manejar errores
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Redirigir a login o refrescar token
-      localStorage.removeItem('accessToken');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+// apiClient.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       // Redirigir a login o refrescar token
+//       localStorage.removeItem('accessToken');
+//       window.location.href = '/login';
+//     }
+//     return Promise.reject(error);
+//   }
+// );

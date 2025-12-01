@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Days_One } from "next/font/google";
+import { SessionProvider } from './providers/SessionProvider';
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 
@@ -22,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${daysOne.variable} font-sans antialiased`}>
-        {children}
+        <SessionProvider>{children}</SessionProvider>
         <Toaster // 👉 colocar el toaster aquí
           position="top-right"
           toastOptions={{
