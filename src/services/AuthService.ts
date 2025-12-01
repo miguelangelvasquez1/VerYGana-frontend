@@ -13,7 +13,7 @@ export interface LoginResponse {
  * Login general (funciona para todos los roles)
  */
 export const loginUser = async (
-  identifier: string, 
+  identifier: string,
   password: string
 ): Promise<LoginResponse> => {
   const response = await api.post('/auth/login', {

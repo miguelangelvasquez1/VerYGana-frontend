@@ -67,7 +67,7 @@ export default function NavBarNoAuth() {
             <div className="lg:hidden">
                 <div className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-3">
-                        <Image src={"/logos/logo2.png"} alt="logo" width={50} height={50} />
+                        <Image src={"/logos/logo.png"} alt="logo" width={50} height={50} />
                     </div>
                     
                     {/* Hamburger Button */}
@@ -134,7 +134,7 @@ export default function NavBarNoAuth() {
             {/* Tablet Navigation (md to lg) */}
             <div className="hidden md:flex lg:hidden items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-3">
-                    <Image src={"/logos/logo2.png"} alt="logo" width={60} height={60} />
+                    <Image src={"/logos/logo.png"} alt="logo" width={60} height={60} />
                 </div>
                 
                 <div className="flex gap-2">
