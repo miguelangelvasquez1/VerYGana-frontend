@@ -188,6 +188,14 @@ export const getMyProducts = async (
 };
 
 /**
+ * Obtener la cantidad de productos (SELLER)
+ */
+export const getTotalSellerProducts = async (): Promise<number> => {
+  const response = await api.get('/products/totalProducts');
+  return response.data;
+};
+
+/**
  * Obtener productos favoritos (CONSUMER)
  */
 export const getFavorites = async (

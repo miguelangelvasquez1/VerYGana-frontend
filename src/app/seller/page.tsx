@@ -17,6 +17,8 @@ import {
   List
 } from 'lucide-react';
 import CreateProductForm from '@/components/forms/CreateProductForm';
+import { useAuth } from '@/hooks/useAuth';
+import { useSession } from 'next-auth/react';
 
 // Tipos de datos
 interface Product {
@@ -37,9 +39,13 @@ interface DashboardStats {
   averageRating: number;
 }
 
+
 export default function SellerDashboard() {
   const [activeSection, setActiveSection] = useState<'dashboard' | 'products' | 'create' | 'analytics' | 'withdrawals'>('dashboard');
   const [products, setProducts] = useState<Product[]>([]);
+  const {user, role, isAuthenticated} = useAuth();
+  const {data: session} = useSession();
+  const token = session?.accessToken;
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
     totalSales: 0,

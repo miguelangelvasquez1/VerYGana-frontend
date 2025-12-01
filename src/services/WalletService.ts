@@ -1,30 +1,30 @@
 import api from "@/lib/axios";
 
 export interface DepositRequest {
-    amount : number,
+    amount : number;
     paymentMethod : string;
 }
 
 export interface WithdrawalRequest {
-    amount : number,
+    amount : number;
     paymentMethod: string;
 }
 
 export interface TransferRequest {
-    amount : number,
+    amount : number;
     receiverId : number;
 }
 
 export interface TransactionResponse {
-    message : string,
-    amount : number,
-    referenceId : string,
+    message : string;
+    amount : number;
+    referenceId : string;
     timeStamp : string;
 }
 
 export interface WalletResponse {
-    balance : number,
-    blockedBalance : number,
+    balance : number;
+    blockedBalance : number;
     lastUpDateTime : string;
 }
 
