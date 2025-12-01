@@ -16,6 +16,7 @@ import {
   Grid,
   List
 } from 'lucide-react';
+import CreateProductForm from '@/components/forms/CreateProductForm';
 
 // Tipos de datos
 interface Product {
@@ -349,9 +350,8 @@ export default function SellerDashboard() {
         <h2 className="text-3xl font-bold text-gray-900">Publicar Producto</h2>
         <p className="text-gray-600 mt-1">Completa el formulario para agregar un nuevo producto</p>
       </div>
+      <CreateProductForm/>
       <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-        <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-600">Aquí irá el formulario de creación de producto que ya creamos anteriormente</p>
         <button
           onClick={() => setActiveSection('products')}
           className="mt-4 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
@@ -361,6 +361,8 @@ export default function SellerDashboard() {
       </div>
     </div>
   );
+
+  
 
   // Analytics (placeholder)
   const renderAnalytics = () => (

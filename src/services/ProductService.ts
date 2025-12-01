@@ -1,14 +1,22 @@
 import api from "@/lib/axios";
 import { EntityCreatedResponse } from "@/types/products/types";
 
-export interface CreateOrEditProductRequest {
+export interface ProductStockRequest {
+  code: string;
+  additionalInfo: string;
+  expirationDate: string; // formato ISO
+}
+
+export interface CreateOrEditProductRequestDTO {
   name: string;
   description: string;
-  categoryId: number;
-  imagesUrls: string[];
-  stock: number;
+  productCategoryId: number;
   price: number;
+  deliveryType: string;   // "AUTO" | "MANUAL"
+  digitalFormat: string;  // "CODE" | "ACCOUNT"
+  stockItems: ProductStockRequest[];
 }
+
 
 export interface ProductSummaryResponse {
   id: number;
@@ -70,9 +78,23 @@ export interface FilterProductsParams {
  * Crear nuevo producto (SELLER)
  */
 export const createProduct = async (
-  data: CreateOrEditProductRequest
+  product: CreateOrEditProductRequestDTO,
+  productImage: File
 ): Promise<EntityCreatedResponse> => {
-  const response = await api.post('/products/create', data);
+  const formData = new FormData();
+
+  // Backend espera product como STRING JSON
+  formData.append("product", JSON.stringify(product));
+
+  // Imagen
+  formData.append("productImage", productImage);
+
+  const response = await api.post("/products/create", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   return response.data;
 };
 
@@ -81,7 +103,7 @@ export const createProduct = async (
  */
 export const editProduct = async (
   productId: number,
-  data: CreateOrEditProductRequest
+  data: CreateOrEditProductRequestDTO
 ): Promise<void> => {
   await api.put(`/products/edit/${productId}`, data);
 };
