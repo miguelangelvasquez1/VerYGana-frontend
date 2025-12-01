@@ -29,8 +29,8 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      // Leer valores directamente del form para asegurar el valor real (incluye autofill)
-      const identifier = formData.identifier.trim();
+    // Leer valores directamente del form para asegurar el valor real (incluye autofill)
+    const identifier = formData.identifier.trim();
     const password = formData.password.trim();
 
       // Validación cliente rápida
@@ -56,8 +56,20 @@ const LoginForm = () => {
 
       console.log('✅ NextAuth session synchronized');
 
-      router.push('/raffles');
-      // router.refresh();
+      const role = loginResponse.role;
+      console.log('🔐 Logged in as role:', role);
+
+    if (role === "ROLE_ADMIN") {
+      router.push("/admin/dashboard");
+    } else if (role === "ROLE_CONSUMER") {
+      router.push("/raffles");
+    } else if (role === "ROLE_SELLER") {
+      router.push("/seller/home");
+    } else if (role === "ROLE_ADVERTISER") {
+      router.push("/advertiser");
+    } else {
+      setError('Error al iniciar sesión');
+    }
 
     } catch (err: any) {
       console.error('❌ Login error:', err);
