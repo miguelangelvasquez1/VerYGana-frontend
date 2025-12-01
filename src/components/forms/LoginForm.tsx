@@ -61,15 +61,17 @@ const LoginForm = () => {
 
     if (role === "ROLE_ADMIN") {
       router.push("/admin/dashboard");
+      return;
     } else if (role === "ROLE_CONSUMER") {
       router.push("/raffles");
+      return;
     } else if (role === "ROLE_SELLER") {
       router.push("/seller/home");
+      return;
     } else if (role === "ROLE_ADVERTISER") {
       router.push("/advertiser");
-    } else {
-      setError('Error al iniciar sesión');
-    }
+      return;
+    } 
 
     } catch (err: any) {
       console.error('❌ Login error:', err);

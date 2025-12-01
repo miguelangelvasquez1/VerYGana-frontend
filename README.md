@@ -2,6 +2,7 @@
 - poner pestaña de recompensas?
 - use effect del navbar para tamaño móvil para que los modales se cierren al dar clic fuera de ellos.
 - arreglar el contenido de advertiser
+- hacer refresh personalizado por velocidad?
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
