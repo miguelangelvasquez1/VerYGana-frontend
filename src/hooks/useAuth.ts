@@ -1,7 +1,3 @@
-// ============================================
-// hooks/useAuth.ts
-// Hook personalizado para autenticación
-// ============================================
 'use client';
 
 import { useSession } from 'next-auth/react';
@@ -13,6 +9,12 @@ export function useAuth(requireAuth = true) {
   const router = useRouter();
   const loading = status === 'loading';
 
+  // Normalizar el rol (quitar ROLE_)
+  const rawRole = session?.user?.role || null;
+  const role = rawRole?.startsWith("ROLE_")
+    ? rawRole.replace("ROLE_", "")
+    : rawRole;
+
   useEffect(() => {
     if (requireAuth && !loading && !session) {
       router.push('/login');
@@ -22,27 +24,27 @@ export function useAuth(requireAuth = true) {
   return {
     session,
     user: session?.user,
+    role,
     loading,
     isAuthenticated: !!session,
-    isAdvertiser: session?.user?.role === 'ADVERTISER',
-    isConsumer: session?.user?.role === 'CONSUMER',
-    isSeller: session?.user?.role === 'SELLER',
+    isAdvertiser: role === 'ADVERTISER',
+    isConsumer: role === 'CONSUMER',
+    isSeller: role === 'SELLER',
+    isAdmin: role === 'ADMIN',
   };
 }
 
-// Hook para requerir role específico
 export function useRequireRole(allowedRoles: string[]) {
-  const { session, loading } = useAuth();
+  const { session, loading, role } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && session) {
-      const userRole = session.user?.role;
-      if (userRole && !allowedRoles.includes(userRole)) {
+      if (role && !allowedRoles.includes(role)) {
         router.push('/unauthorized');
       }
     }
-  }, [session, loading, allowedRoles, router]);
+  }, [session, loading, role, allowedRoles, router]);
 
   return { session, loading };
 }
