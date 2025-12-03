@@ -1,26 +1,17 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { 
-  Package, 
-  Plus, 
-  TrendingUp, 
-  DollarSign, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  ShoppingBag,
-  BarChart3,
-  Wallet,
-  Search,
-  Filter,
-  Grid,
-  List
+import {
+  Package, Plus, TrendingUp, DollarSign, Eye, Edit, Trash2,
+  ShoppingBag, BarChart3, Wallet, Search, Filter, Grid, List
 } from 'lucide-react';
 import CreateProductForm from '@/components/forms/CreateProductForm';
 import { useAuth } from '@/hooks/useAuth';
-import { useSession } from 'next-auth/react';
 
-// Tipos de datos
+// ========== IMPORTS DE SERVICES ==========
+import * as productService from '@/services/ProductService';
+import * as walletService from '@/services/WalletService';
+// import { purchaseService } from '@/services/PurchaseService';
+// ========== INTERFACES ==========
 interface Product {
   id: number;
   name: string;
@@ -39,13 +30,11 @@ interface DashboardStats {
   averageRating: number;
 }
 
-
 export default function SellerDashboard() {
+  // ========== ESTADOS ==========
   const [activeSection, setActiveSection] = useState<'dashboard' | 'products' | 'create' | 'analytics' | 'withdrawals'>('dashboard');
   const [products, setProducts] = useState<Product[]>([]);
-  const {user, role, isAuthenticated} = useAuth();
-  const {data: session} = useSession();
-  const token = session?.accessToken;
+  const { user, role, isAuthenticated } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
     totalSales: 0,
@@ -55,58 +44,64 @@ export default function SellerDashboard() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>('');
 
-  // Simular carga de datos
+  // ========== CARGAR DATOS AL MONTAR EL COMPONENTE ==========
   useEffect(() => {
-    loadData();
-  }, []);
+    if (isAuthenticated && role === 'SELLER') {
+      loadDashboardData();
+    }
+  }, [isAuthenticated, role]);
 
-  const loadData = () => {
-    // Aquí harías: productService.getMyProducts()
-    setStats({
-      totalProducts: 24,
-      totalSales: 156,
-      totalRevenue: 12450000,
-      averageRating: 4.7
-    });
+  // ========== FUNCIÓN PRINCIPAL PARA CARGAR DATOS ==========
+  const loadDashboardData = async () => {
+    setIsLoading(true);
+    setError('');
 
-    setProducts([
-      {
-        id: 1,
-        name: 'Camiseta Deportiva Premium',
-        price: 45000,
-        mainImageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
-        stock: 50,
-        categoryName: 'Deporte',
-        rating: 4.8,
-        reviewCount: 24
-      },
-      {
-        id: 2,
-        name: 'Audífonos Bluetooth Pro',
-        price: 120000,
-        mainImageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
-        stock: 15,
-        categoryName: 'Tecnología',
-        rating: 4.5,
-        reviewCount: 18
-      },
-      {
-        id: 3,
-        name: 'Reloj Inteligente X200',
-        price: 280000,
-        mainImageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
-        stock: 8,
-        categoryName: 'Tecnología',
-        rating: 4.9,
-        reviewCount: 32
-      }
-    ]);
+    try {
+      // Llamar a todos los servicios en paralelo
+      const [
+        totalProductsData,
+        availableBalanceData,
+        myProductsData,
+        // totalPurchasesData, // Descomentar cuando esté el endpoint
+        // averageRatingData    // Descomentar cuando esté el endpoint
+      ] = await Promise.all([
+        productService.getTotalSellerProducts(),
+        walletService.getAvailableBalance(),
+        productService.getMyProducts(0), // Página 0
+        // purchaseService.getTotalPurchases(),  // Pendiente backend
+        // productService.getAverageRating()     // Pendiente backend
+      ]);
+
+      // Actualizar estadísticas
+      setStats({
+        totalProducts: totalProductsData,
+        totalSales: 0, // Usar totalPurchasesData cuando esté disponible
+        totalRevenue: availableBalanceData,
+        averageRating: 0 // Usar averageRatingData cuando esté disponible
+      });
+
+      // Actualizar productos
+      const content = myProductsData?.content ?? [];
+      setProducts(content.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        mainImageUrl: p.ImageUrl,
+        stock: p.stock,
+        categoryName: p.categoryName,
+        rating: p.rating,
+        reviewCount: p.reviewCount
+      })));
+
+    } catch (err: any) {
+      console.error('Error cargando datos del dashboard:', err);
+      setError(err.response?.data?.message || 'Error al cargar los datos');
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   // Renderizar sección activa
   const renderActiveSection = () => {
@@ -126,7 +121,85 @@ export default function SellerDashboard() {
     }
   };
 
-  // Dashboard Overview
+  // ========== FUNCIÓN PARA ELIMINAR PRODUCTO ==========
+  const handleDeleteProduct = async (productId: number) => {
+    if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+
+    try {
+      await productService.deleteProduct(productId);
+
+      // Recargar productos después de eliminar
+      await loadDashboardData();
+
+      alert('Producto eliminado exitosamente');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Error al eliminar el producto');
+    }
+  };
+
+  // ========== FUNCIÓN PARA SOLICITAR RETIRO ==========
+  const handleWithdrawal = async () => {
+    const amount = prompt('¿Cuánto deseas retirar?');
+    const paymentMethod = prompt('Cuenta bancaria:');
+
+    const value = Number(amount);
+    if (isNaN(value) || value <= 0) {
+      alert("Cantidad inválida");
+      return;
+    }
+
+    if (!value || !paymentMethod) return;
+
+    try {
+      await walletService.doWithdrawal({
+        amount: value,
+        paymentMethod: paymentMethod
+      });
+
+      alert('Solicitud de retiro creada exitosamente');
+
+      // Recargar balance
+      await loadDashboardData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Error al procesar el retiro');
+    }
+  };
+
+  // ========== FILTRAR PRODUCTOS ==========
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // ========== MANEJO DE LOADING Y ERROR ==========
+  if (isLoading && products.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+          <h3 className="text-red-800 font-semibold mb-2">Error</h3>
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={loadDashboardData}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ========== DASHBOARD OVERVIEW ==========
   const renderDashboard = () => (
     <div className="space-y-6">
       <div>
@@ -153,6 +226,7 @@ export default function SellerDashboard() {
             <div>
               <p className="text-green-100 text-sm font-medium">Ventas Totales</p>
               <p className="text-3xl font-bold mt-2">{stats.totalSales}</p>
+              <p className="text-green-100 text-xs mt-1">Próximamente</p>
             </div>
             <div className="bg-white bg-opacity-20 rounded-lg p-3">
               <ShoppingBag className="w-8 h-8" />
@@ -163,9 +237,9 @@ export default function SellerDashboard() {
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm font-medium">Ingresos</p>
+              <p className="text-purple-100 text-sm font-medium">Balance Disponible</p>
               <p className="text-3xl font-bold mt-2">
-                ${stats.totalRevenue.toLocaleString()}
+                ${stats.totalRevenue.toLocaleString('es-CO')}
               </p>
             </div>
             <div className="bg-white bg-opacity-20 rounded-lg p-3">
@@ -178,7 +252,10 @@ export default function SellerDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-yellow-100 text-sm font-medium">Rating Promedio</p>
-              <p className="text-3xl font-bold mt-2">{stats.averageRating} ⭐</p>
+              <p className="text-3xl font-bold mt-2">
+                {stats.averageRating > 0 ? `${stats.averageRating} ⭐` : 'N/A'}
+              </p>
+              <p className="text-yellow-100 text-xs mt-1">Próximamente</p>
             </div>
             <div className="bg-white bg-opacity-20 rounded-lg p-3">
               <TrendingUp className="w-8 h-8" />
@@ -199,6 +276,9 @@ export default function SellerDashboard() {
           </button>
         </div>
         <div className="space-y-4">
+          {products.length === 0 && (
+            <p className='text-gray-500 text-center'>No tienes productos aun</p>
+          )}
           {products.slice(0, 3).map(product => (
             <div key={product.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
               <img
@@ -211,7 +291,7 @@ export default function SellerDashboard() {
                 <p className="text-sm text-gray-600">{product.categoryName}</p>
               </div>
               <div className="text-right">
-                <p className="font-bold text-gray-900">${product.price.toLocaleString()}</p>
+                <p className="font-bold text-gray-900">${product.price.toLocaleString('es-CO')}</p>
                 <p className="text-sm text-gray-600">Stock: {product.stock}</p>
               </div>
             </div>
@@ -302,7 +382,10 @@ export default function SellerDashboard() {
                     <Edit className="w-4 h-4" />
                     Editar
                   </button>
-                  <button className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
+                  <button
+                    onClick={() => handleDeleteProduct(product.id)}
+                    className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -349,26 +432,39 @@ export default function SellerDashboard() {
     </div>
   );
 
-  // Crear Producto (placeholder)
-  const renderCreateProduct = () => (
+  // ========== RETIROS ==========
+  const renderWithdrawals = () => (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900">Publicar Producto</h2>
-        <p className="text-gray-600 mt-1">Completa el formulario para agregar un nuevo producto</p>
+        <h2 className="text-3xl font-bold text-gray-900">Retiros</h2>
+        <p className="text-gray-600 mt-1">Gestiona tus pagos y retiros</p>
       </div>
-      <CreateProductForm/>
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+      <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="text-center mb-8">
+          <Wallet className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <p className="text-gray-600 mb-4">Saldo disponible</p>
+          <p className="text-5xl font-bold text-gray-900">
+            ${stats.totalRevenue.toLocaleString('es-CO')}
+          </p>
+        </div>
         <button
-          onClick={() => setActiveSection('products')}
-          className="mt-4 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+          onClick={handleWithdrawal}
+          className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all"
         >
-          Volver a Mis Productos
+          Solicitar Retiro
         </button>
       </div>
     </div>
   );
 
-  
+  // Crear Producto (placeholder)
+  const renderCreateProduct = () => (
+      <div className="p-4">
+        <CreateProductForm />
+      </div>
+  );
+
+
 
   // Analytics (placeholder)
   const renderAnalytics = () => (
@@ -384,25 +480,6 @@ export default function SellerDashboard() {
     </div>
   );
 
-  // Withdrawals (placeholder)
-  const renderWithdrawals = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900">Retiros</h2>
-        <p className="text-gray-600 mt-1">Gestiona tus pagos y retiros</p>
-      </div>
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <div className="text-center mb-8">
-          <Wallet className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <p className="text-gray-600 mb-4">Saldo disponible</p>
-          <p className="text-5xl font-bold text-gray-900">${stats.totalRevenue.toLocaleString()}</p>
-        </div>
-        <button className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all">
-          Solicitar Retiro
-        </button>
-      </div>
-    </div>
-  );
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -423,11 +500,10 @@ export default function SellerDashboard() {
         <nav className="p-4 space-y-2">
           <button
             onClick={() => setActiveSection('dashboard')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'dashboard'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'dashboard'
                 ? 'bg-blue-50 text-blue-600'
                 : 'text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             <BarChart3 className="w-5 h-5" />
             <span className="font-medium">Dashboard</span>
@@ -435,11 +511,10 @@ export default function SellerDashboard() {
 
           <button
             onClick={() => setActiveSection('products')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'products'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'products'
                 ? 'bg-blue-50 text-blue-600'
                 : 'text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             <Package className="w-5 h-5" />
             <span className="font-medium">Mis Productos</span>
@@ -447,11 +522,10 @@ export default function SellerDashboard() {
 
           <button
             onClick={() => setActiveSection('create')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'create'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'create'
                 ? 'bg-blue-50 text-blue-600'
                 : 'text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             <Plus className="w-5 h-5" />
             <span className="font-medium">Publicar Producto</span>
@@ -459,11 +533,10 @@ export default function SellerDashboard() {
 
           <button
             onClick={() => setActiveSection('analytics')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'analytics'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'analytics'
                 ? 'bg-blue-50 text-blue-600'
                 : 'text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             <TrendingUp className="w-5 h-5" />
             <span className="font-medium">Análisis de Ventas</span>
@@ -471,11 +544,10 @@ export default function SellerDashboard() {
 
           <button
             onClick={() => setActiveSection('withdrawals')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeSection === 'withdrawals'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === 'withdrawals'
                 ? 'bg-blue-50 text-blue-600'
                 : 'text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             <Wallet className="w-5 h-5" />
             <span className="font-medium">Retiros</span>

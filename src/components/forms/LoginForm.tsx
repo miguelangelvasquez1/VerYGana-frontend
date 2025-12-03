@@ -66,7 +66,7 @@ const LoginForm = () => {
       router.push("/raffles");
       return;
     } else if (role === "ROLE_SELLER") {
-      router.push("/seller/home");
+      router.push("/seller");
       return;
     } else if (role === "ROLE_ADVERTISER") {
       router.push("/advertiser");

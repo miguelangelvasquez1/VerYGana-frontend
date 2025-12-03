@@ -1,4 +1,4 @@
-import api from '@/lib/axios';
+import apiClient from '@/lib/api/client';
 import { EntityCreatedResponse } from '@/types/products/types';
 
 // ============================================
@@ -26,7 +26,7 @@ export interface CreateProductCategoryRequest {
  * Obtener todas las categorías disponibles (PÚBLICO)
  */
 export const getProductCategories = async (): Promise<ProductCategory[]> => {
-  const response = await api.get('/productCategories');
+  const response = await apiClient.get('/productCategories');
   return response.data;
 };
 
@@ -36,7 +36,7 @@ export const getProductCategories = async (): Promise<ProductCategory[]> => {
 export const createProductCategory = async (
   data: CreateProductCategoryRequest
 ): Promise<EntityCreatedResponse> => {
-  const response = await api.post('/productCategories/create', data);
+  const response = await apiClient.post('/productCategories/create', data);
   return response.data;
 };
 
@@ -44,5 +44,5 @@ export const createProductCategory = async (
  * Eliminar categoría de producto (ADMIN)
  */
 export const deleteProductCategory = async (id: number): Promise<void> => {
-  await api.delete(`/productCategories/delete/${id}`); // ⬅️ Corregido: Faltaban paréntesis
+  await apiClient.delete(`/productCategories/delete/${id}`); // ⬅️ Corregido: Faltaban paréntesis
 };

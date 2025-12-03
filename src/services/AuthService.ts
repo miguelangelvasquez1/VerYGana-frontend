@@ -1,4 +1,4 @@
-import api from '../lib/axios';
+import apiClient from "@/lib/api/client";
 
 export interface LoginResponse {
   token: string;
@@ -16,7 +16,7 @@ export const loginUser = async (
   identifier: string,
   password: string
 ): Promise<LoginResponse> => {
-  const response = await api.post('/auth/login', {
+  const response = await apiClient.post('/auth/login', {
     identifier,
     password,
   });
@@ -27,7 +27,7 @@ export const loginUser = async (
  * Logout
  */
 export const logoutUser = async (): Promise<void> => {
-  await api.post('/auth/logout');
+  await apiClient.post('/auth/logout');
   // Limpiar token del localStorage
   localStorage.removeItem('authToken');
 };
@@ -37,7 +37,7 @@ export const logoutUser = async (): Promise<void> => {
  */
 export const verifyToken = async (): Promise<boolean> => {
   try {
-    await api.get('/auth/verify');
+    await apiClient.get('/auth/verify');
     return true;
   } catch {
     return false;
@@ -48,14 +48,14 @@ export const verifyToken = async (): Promise<boolean> => {
  * Recuperar contraseña
  */
 export const requestPasswordReset = async (email: string): Promise<void> => {
-  await api.post('/auth/password-reset/request', { email });
+  await apiClient.post('/auth/password-reset/request', { email });
 };
 
 /**
  * Cambiar contraseña
  */
 export const resetPassword = async (token: string, newPassword: string): Promise<void> => {
-  await api.post('/auth/password-reset/confirm', {
+  await apiClient.post('/auth/password-reset/confirm', {
     token,
     newPassword
   });
