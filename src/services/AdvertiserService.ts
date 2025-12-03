@@ -1,4 +1,4 @@
-import api from '../lib/axios';
+import apiClient from "@/lib/api/client";
 
 // ============================================
 // INTERFACES
@@ -61,7 +61,7 @@ export const registerAdvertiser = async (data: {
     nit: data.nit
   };
 
-  const response = await api.post('/auth/register/advertiser', payload);
+  const response = await apiClient.post('/auth/register/advertiser', payload);
   return response.data;
 };
 
@@ -69,7 +69,7 @@ export const registerAdvertiser = async (data: {
  * Obtener perfil del anunciante
  */
 export const getAdvertiserProfile = async (advertiserId: number): Promise<AdvertiserProfile> => {
-  const response = await api.get(`/advertisers/${advertiserId}`);
+  const response = await apiClient.get(`/advertisers/${advertiserId}`);
   return response.data;
 };
 
@@ -80,7 +80,7 @@ export const updateAdvertiserProfile = async (
   advertiserId: number,
   data: Partial<RegisterAdvertiserDTO>
 ): Promise<AdvertiserProfile> => {
-  const response = await api.put(`/advertisers/${advertiserId}`, data);
+  const response = await apiClient.put(`/advertisers/${advertiserId}`, data);
   return response.data;
 };
 
@@ -88,7 +88,7 @@ export const updateAdvertiserProfile = async (
  * Obtener anuncios del anunciante
  */
 export const getAdvertiserAds = async (advertiserId: number): Promise<Advertisement[]> => {
-  const response = await api.get(`/advertisers/${advertiserId}/ads`);
+  const response = await apiClient.get(`/advertisers/${advertiserId}/ads`);
   return response.data;
 };
 
@@ -99,7 +99,7 @@ export const createAdvertisement = async (
   advertiserId: number,
   adData: CreateAdDTO
 ): Promise<Advertisement> => {
-  const response = await api.post(`/advertisers/${advertiserId}/ads`, adData);
+  const response = await apiClient.post(`/advertisers/${advertiserId}/ads`, adData);
   return response.data;
 };
 
@@ -111,7 +111,7 @@ export const updateAdvertisement = async (
   adId: number,
   adData: Partial<CreateAdDTO>
 ): Promise<Advertisement> => {
-  const response = await api.put(`/advertisers/${advertiserId}/ads/${adId}`, adData);
+  const response = await apiClient.put(`/advertisers/${advertiserId}/ads/${adId}`, adData);
   return response.data;
 };
 
@@ -119,7 +119,7 @@ export const updateAdvertisement = async (
  * Eliminar un anuncio
  */
 export const deleteAdvertisement = async (advertiserId: number, adId: number): Promise<void> => {
-  await api.delete(`/advertisers/${advertiserId}/ads/${adId}`);
+  await apiClient.delete(`/advertisers/${advertiserId}/ads/${adId}`);
 };
 
 /**
@@ -130,7 +130,7 @@ export const toggleAdvertisement = async (
   adId: number,
   action: 'pause' | 'resume'
 ): Promise<Advertisement> => {
-  const response = await api.patch(`/advertisers/${advertiserId}/ads/${adId}/${action}`);
+  const response = await apiClient.patch(`/advertisers/${advertiserId}/ads/${adId}/${action}`);
   return response.data;
 };
 
@@ -138,7 +138,7 @@ export const toggleAdvertisement = async (
  * Obtener estadísticas de anuncios
  */
 export const getAdvertiserStats = async (advertiserId: number): Promise<any> => {
-  const response = await api.get(`/advertisers/${advertiserId}/stats`);
+  const response = await apiClient.get(`/advertisers/${advertiserId}/stats`);
   return response.data;
 };
 
@@ -149,7 +149,7 @@ export const rechargeAdBudget = async (
   advertiserId: number,
   amount: number
 ): Promise<any> => {
-  const response = await api.post(`/advertisers/${advertiserId}/budget/recharge`, {
+  const response = await apiClient.post(`/advertisers/${advertiserId}/budget/recharge`, {
     amount
   });
   return response.data;
@@ -159,6 +159,6 @@ export const rechargeAdBudget = async (
  * Obtener historial de transacciones
  */
 export const getAdvertiserTransactions = async (advertiserId: number): Promise<any[]> => {
-  const response = await api.get(`/advertisers/${advertiserId}/transactions`);
+  const response = await apiClient.get(`/advertisers/${advertiserId}/transactions`);
   return response.data;
 };

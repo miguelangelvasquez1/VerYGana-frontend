@@ -1,4 +1,4 @@
-import api from '../lib/axios';
+import apiClient from "@/lib/api/client";
 
 // ============================================
 // INTERFACES
@@ -63,7 +63,7 @@ export const registerSeller = async (data: {
     nit: data.nit
   };
 
-  const response = await api.post('/auth/register/seller', payload);
+  const response = await apiClient.post('/auth/register/seller', payload);
   return response.data;
 };
 
@@ -71,7 +71,7 @@ export const registerSeller = async (data: {
  * Obtener perfil del vendedor
  */
 export const getSellerProfile = async (sellerId: number): Promise<SellerProfile> => {
-  const response = await api.get(`/sellers/${sellerId}`);
+  const response = await apiClient.get(`/sellers/${sellerId}`);
   return response.data;
 };
 
@@ -82,7 +82,7 @@ export const updateSellerProfile = async (
   sellerId: number,
   data: Partial<RegisterSellerDTO>
 ): Promise<SellerProfile> => {
-  const response = await api.put(`/sellers/${sellerId}`, data);
+  const response = await apiClient.put(`/sellers/${sellerId}`, data);
   return response.data;
 };
 
@@ -90,7 +90,7 @@ export const updateSellerProfile = async (
  * Obtener productos del vendedor
  */
 export const getSellerProducts = async (sellerId: number): Promise<Product[]> => {
-  const response = await api.get(`/sellers/${sellerId}/products`);
+  const response = await apiClient.get(`/sellers/${sellerId}/products`);
   return response.data;
 };
 
@@ -98,7 +98,7 @@ export const getSellerProducts = async (sellerId: number): Promise<Product[]> =>
  * Crear un nuevo producto
  */
 export const createProduct = async (sellerId: number, productData: any): Promise<Product> => {
-  const response = await api.post(`/sellers/${sellerId}/products`, productData);
+  const response = await apiClient.post(`/sellers/${sellerId}/products`, productData);
   return response.data;
 };
 
@@ -110,7 +110,7 @@ export const updateProduct = async (
   productId: number,
   productData: any
 ): Promise<Product> => {
-  const response = await api.put(`/sellers/${sellerId}/products/${productId}`, productData);
+  const response = await apiClient.put(`/sellers/${sellerId}/products/${productId}`, productData);
   return response.data;
 };
 
@@ -118,14 +118,14 @@ export const updateProduct = async (
  * Eliminar un producto
  */
 export const deleteProduct = async (sellerId: number, productId: number): Promise<void> => {
-  await api.delete(`/sellers/${sellerId}/products/${productId}`);
+  await apiClient.delete(`/sellers/${sellerId}/products/${productId}`);
 };
 
 /**
  * Obtener historial de ventas
  */
 export const getSellerSales = async (sellerId: number): Promise<Sale[]> => {
-  const response = await api.get(`/sellers/${sellerId}/sales`);
+  const response = await apiClient.get(`/sellers/${sellerId}/sales`);
   return response.data;
 };
 
@@ -137,7 +137,7 @@ export const requestWithdrawal = async (
   amount: number,
   bankInfo: any
 ): Promise<any> => {
-  const response = await api.post(`/sellers/${sellerId}/withdrawals`, {
+  const response = await apiClient.post(`/sellers/${sellerId}/withdrawals`, {
     amount,
     bankInfo
   });
@@ -148,7 +148,7 @@ export const requestWithdrawal = async (
  * Obtener estadísticas de ventas
  */
 export const getSellerStats = async (sellerId: number): Promise<any> => {
-  const response = await api.get(`/sellers/${sellerId}/stats`);
+  const response = await apiClient.get(`/sellers/${sellerId}/stats`);
   return response.data;
 };
 
@@ -156,6 +156,6 @@ export const getSellerStats = async (sellerId: number): Promise<any> => {
  * Obtener monedero del vendedor
  */
 export const getSellerWallet = async (sellerId: number): Promise<any> => {
-  const response = await api.get(`/sellers/${sellerId}/wallet`);
+  const response = await apiClient.get(`/sellers/${sellerId}/wallet`);
   return response.data;
 };

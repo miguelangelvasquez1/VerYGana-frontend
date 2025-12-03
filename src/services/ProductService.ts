@@ -1,10 +1,10 @@
-import api from "@/lib/axios";
+import apiClient from "@/lib/api/client";
 import { EntityCreatedResponse } from "@/types/products/types";
 
 export interface ProductStockRequest {
   code: string;
   additionalInfo: string;
-  expirationDate: string; // formato ISO
+  expirationDate: string | null; // formato ISO
 }
 
 export interface CreateOrEditProductRequestDTO {
@@ -12,17 +12,17 @@ export interface CreateOrEditProductRequestDTO {
   description: string;
   productCategoryId: number;
   price: number;
-  deliveryType: string;   // "AUTO" | "MANUAL"
-  digitalFormat: string;  // "CODE" | "ACCOUNT"
+  deliveryType: "AUTO" | "MANUAL" | "EXTERNAL_API"; 
+  digitalFormat: "LINK" | "CODE" | "FILE"; 
   stockItems: ProductStockRequest[];
 }
 
 
-export interface ProductSummaryResponse {
+export interface ProductSummaryResponseDTO {
   id: number;
   name: string;
   price: number;
-  mainImageUrl: string;
+  ImageUrl: string;
   rating: number;
   reviewCount: number;
   stock: number;
@@ -31,7 +31,7 @@ export interface ProductSummaryResponse {
   isFavorite?: boolean;
 }
 
-export interface ProductResponse {
+export interface ProductResponseDTO {
   id: number;
   name: string;
   description: string;
@@ -89,7 +89,7 @@ export const createProduct = async (
   // Imagen
   formData.append("productImage", productImage);
 
-  const response = await api.post("/products/create", formData, {
+  const response = await apiClient.post("/products/create", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -105,21 +105,21 @@ export const editProduct = async (
   productId: number,
   data: CreateOrEditProductRequestDTO
 ): Promise<void> => {
-  await api.put(`/products/edit/${productId}`, data);
+  await apiClient.put(`/products/edit/${productId}`, data);
 };
 
 /**
  * Eliminar producto (SELLER)
  */
 export const deleteProduct = async (productId: number): Promise<void> => {
-  await api.delete(`/products/delete/${productId}`);
+  await apiClient.delete(`/products/delete/${productId}`);
 };
 
 /**
  * Eliminar producto como administrador (ADMIN)
  */
 export const deleteProductForAdmin = async (productId: number): Promise<void> => {
-  await api.delete(`/products/delete/admin/${productId}`);
+  await apiClient.delete(`/products/delete/admin/${productId}`);
 };
 
 /**
@@ -127,8 +127,8 @@ export const deleteProductForAdmin = async (productId: number): Promise<void> =>
  */
 export const getAllProducts = async (
   page: number = 0
-): Promise<PageResponse<ProductSummaryResponse>> => {
-  const response = await api.get('/products', {
+): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+  const response = await apiClient.get('/products', {
     params: { page }
   });
   return response.data;
@@ -139,8 +139,8 @@ export const getAllProducts = async (
  */
 export const filterProducts = async (
   params: FilterProductsParams
-): Promise<PageResponse<ProductSummaryResponse>> => {
-  const response = await api.get('/products/filter', {
+): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+  const response = await apiClient.get('/products/filter', {
     params: {
       searchQuery: params.searchQuery,
       categoryId: params.categoryId,
@@ -157,8 +157,8 @@ export const filterProducts = async (
 /**
  * Obtener detalle completo de un producto (PÚBLICO)
  */
-export const getProductDetail = async (productId: number): Promise<ProductResponse> => {
-  const response = await api.get(`/products/${productId}`);
+export const getProductDetail = async (productId: number): Promise<ProductResponseDTO> => {
+  const response = await apiClient.get(`/products/${productId}`);
   return response.data;
 };
 
@@ -168,8 +168,8 @@ export const getProductDetail = async (productId: number): Promise<ProductRespon
 export const getSellerProducts = async (
   sellerId: number,
   page: number = 0
-): Promise<PageResponse<ProductSummaryResponse>> => {
-  const response = await api.get(`/products/${sellerId}`, {
+): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+  const response = await apiClient.get(`/products/${sellerId}`, {
     params: { page }
   });
   return response.data;
@@ -180,8 +180,8 @@ export const getSellerProducts = async (
  */
 export const getMyProducts = async (
   page: number = 0
-): Promise<PageResponse<ProductSummaryResponse>> => {
-  const response = await api.get('/products/myProducts', {
+): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+  const response = await apiClient.get('/products/myProducts', {
     params: { page }
   });
   return response.data;
@@ -191,7 +191,7 @@ export const getMyProducts = async (
  * Obtener la cantidad de productos (SELLER)
  */
 export const getTotalSellerProducts = async (): Promise<number> => {
-  const response = await api.get('/products/totalProducts');
+  const response = await apiClient.get('/products/totalProducts');
   return response.data;
 };
 
@@ -200,8 +200,8 @@ export const getTotalSellerProducts = async (): Promise<number> => {
  */
 export const getFavorites = async (
   page: number = 0
-): Promise<PageResponse<ProductSummaryResponse>> => {
-  const response = await api.get('/products/favorites', {
+): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+  const response = await apiClient.get('/products/favorites', {
     params: { page }
   });
   return response.data;
@@ -211,12 +211,12 @@ export const getFavorites = async (
  * Agregar producto a favoritos (CONSUMER)
  */
 export const addToFavorites = async (productId: number): Promise<void> => {
-  await api.post(`/products/${productId}/favorites`);
+  await apiClient.post(`/products/${productId}/favorites`);
 };
 
 /**
  * Eliminar producto de favoritos (CONSUMER)
  */
 export const removeFromFavorites = async (productId: number): Promise<void> => {
-  await api.delete(`/products/${productId}/favorites`);
+  await apiClient.delete(`/products/${productId}/favorites`);
 };

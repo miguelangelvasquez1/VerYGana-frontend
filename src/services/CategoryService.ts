@@ -1,5 +1,5 @@
 // services/CategoryService.ts
-import api from '../lib/axios';
+import apiClient from "@/lib/api/client";
 
 // ============================================
 // INTERFACES
@@ -18,7 +18,7 @@ export interface Category {
  */
 export const getAllCategories = async (): Promise<Category[]> => {
   try {
-    const response = await api.get('/categories/all');
+    const response = await apiClient.get('/categories/all');
     return response.data;
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -30,7 +30,7 @@ export const getAllCategories = async (): Promise<Category[]> => {
  * Obtener una categoría por ID
  */
 export const getCategoryById = async (categoryId: number): Promise<Category> => {
-  const response = await api.get(`/categories/${categoryId}`);
+  const response = await apiClient.get(`/categories/${categoryId}`);
   return response.data;
 };
 
@@ -38,7 +38,7 @@ export const getCategoryById = async (categoryId: number): Promise<Category> => 
  * Buscar categorías por nombre
  */
 export const searchCategories = async (searchTerm: string): Promise<Category[]> => {
-  const response = await api.get('/categories/search', {
+  const response = await apiClient.get('/categories/search', {
     params: { query: searchTerm }
   });
   return response.data;

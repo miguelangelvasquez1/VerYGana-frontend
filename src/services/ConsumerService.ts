@@ -1,4 +1,4 @@
-import api from '../lib/axios';
+import apiClient from "@/lib/api/client";
 
 // ============================================
 // INTERFACES
@@ -71,7 +71,7 @@ export const registerConsumer = async (data: {
     categories: data.categories || []
   };
 
-  const response = await api.post('/auth/register/consumer', payload);
+  const response = await apiClient.post('/auth/register/consumer', payload);
   return response.data;
 };
 
@@ -79,7 +79,7 @@ export const registerConsumer = async (data: {
  * Obtener perfil del consumidor
  */
 export const getConsumerProfile = async (consumerId: number): Promise<ConsumerProfile> => {
-  const response = await api.get(`/consumers/${consumerId}`);
+  const response = await apiClient.get(`/consumers/${consumerId}`);
   return response.data;
 };
 
@@ -90,7 +90,7 @@ export const updateConsumerProfile = async (
   consumerId: number, 
   data: UpdateConsumerDTO
 ): Promise<ConsumerProfile> => {
-  const response = await api.put(`/consumers/${consumerId}`, data);
+  const response = await apiClient.put(`/consumers/${consumerId}`, data);
   return response.data;
 };
 
@@ -98,7 +98,7 @@ export const updateConsumerProfile = async (
  * Obtener historial de compras
  */
 export const getConsumerPurchases = async (consumerId: number): Promise<any[]> => {
-  const response = await api.get(`/consumers/${consumerId}/purchases`);
+  const response = await apiClient.get(`/consumers/${consumerId}/purchases`);
   return response.data;
 };
 
@@ -106,7 +106,7 @@ export const getConsumerPurchases = async (consumerId: number): Promise<any[]> =
  * Obtener monedero del consumidor
  */
 export const getConsumerWallet = async (consumerId: number): Promise<any> => {
-  const response = await api.get(`/consumers/${consumerId}/wallet`);
+  const response = await apiClient.get(`/consumers/${consumerId}/wallet`);
   return response.data;
 };
 
@@ -117,7 +117,7 @@ export const rechargeWallet = async (
   consumerId: number, 
   amount: number
 ): Promise<any> => {
-  const response = await api.post(`/consumers/${consumerId}/wallet/recharge`, {
+  const response = await apiClient.post(`/consumers/${consumerId}/wallet/recharge`, {
     amount
   });
   return response.data;
@@ -127,7 +127,7 @@ export const rechargeWallet = async (
  * Obtener productos recomendados basados en intereses
  */
 export const getRecommendedProducts = async (consumerId: number): Promise<any[]> => {
-  const response = await api.get(`/consumers/${consumerId}/recommendations`);
+  const response = await apiClient.get(`/consumers/${consumerId}/recommendations`);
   return response.data;
 };
 
@@ -135,5 +135,5 @@ export const getRecommendedProducts = async (consumerId: number): Promise<any[]>
  * Eliminar cuenta de consumidor
  */
 export const deleteConsumerAccount = async (consumerId: number): Promise<void> => {
-  await api.delete(`/consumers/${consumerId}`);
+  await apiClient.delete(`/consumers/${consumerId}`);
 };

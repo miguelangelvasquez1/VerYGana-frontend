@@ -1,4 +1,4 @@
-import api from "@/lib/axios";
+import apiClient from "@/lib/api/client";
 
 // ===== DTOs =====
 export interface CreatePurchaseItemRequestDTO {
@@ -61,7 +61,7 @@ export const purchaseService = {
      * POST /purchases/buy
      */
     async createPurchase(request: CreatePurchaseRequestDTO): Promise<EntityCreatedResponse> {
-        const response = await api.post<EntityCreatedResponse>("/purchases/buy", request);
+        const response = await apiClient.post<EntityCreatedResponse>("/purchases/buy", request);
         return response.data;
     },
 
@@ -70,7 +70,7 @@ export const purchaseService = {
      * GET /purchases?page=0&size=10
      */
     async getPurchases(page: number = 0, size: number = 10): Promise<PagedResponse<Purchase>> {
-        const response = await api.get<PagedResponse<Purchase>>("/purchases", {
+        const response = await apiClient.get<PagedResponse<Purchase>>("/purchases", {
             params: { page, size },
         });
         return response.data;
@@ -81,8 +81,13 @@ export const purchaseService = {
      * GET /purchases/{id}/transactions
      */
     async getPurchaseTransactions(purchaseId: number): Promise<Transaction[]> {
-        const response = await api.get<Transaction[]>(`/purchases/${purchaseId}/transactions`);
+        const response = await apiClient.get<Transaction[]>(`/purchases/${purchaseId}/transactions`);
         return response.data;
-    }
+    },
+
+    async getTotalPurchases(): Promise<number> {
+    const response = await apiClient.get<number>("/purchases/totalPurchases");
+    return response.data;
+  }
 
 };
