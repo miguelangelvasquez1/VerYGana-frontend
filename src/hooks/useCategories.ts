@@ -1,5 +1,9 @@
+// hooks/useCategories.ts
+'use client';
+
 import { useState, useEffect } from 'react';
-import { adService, Category } from '@/lib/api/adService';
+import { categoryService, Category } from '@/services/CategoryService';
+import { AxiosError } from 'axios';
 
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -10,11 +14,12 @@ export function useCategories() {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const data = await adService.getCategories();
+        const data = await categoryService.getAllCategories();
         setCategories(data);
         setError(null);
       } catch (err) {
-        setError('Error al cargar categorías');
+        const axiosError = err as AxiosError;
+        setError(axiosError.message || 'Error al cargar categorías');
         console.error('Error fetching categories:', err);
       } finally {
         setLoading(false);
@@ -24,5 +29,19 @@ export function useCategories() {
     fetchCategories();
   }, []);
 
-  return { categories, loading, error };
+  const refetch = async () => {
+    setLoading(true);
+    try {
+      const data = await categoryService.getAllCategories();
+      setCategories(data);
+      setError(null);
+    } catch (err) {
+      const axiosError = err as AxiosError;
+      setError(axiosError.message || 'Error al cargar categorías');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { categories, loading, error, refetch };
 }

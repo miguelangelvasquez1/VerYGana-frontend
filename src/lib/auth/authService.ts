@@ -62,13 +62,13 @@ export const authService = {
   async refresh(): Promise<LoginResponse> {
     const response = await fetch(`${API_URL}/auth/refresh`, {
       method: 'POST',
-      credentials: 'include', // ✅ Envía cookie automáticamente
+      credentials: 'include',
     });
 
     if (!response.ok) {
       throw new Error('Error al refrescar token');
     }
-
+    console.log('Refresh successful');
     return response.json();
   },
 
@@ -120,5 +120,7 @@ export const authService = {
       method: 'POST',
       credentials: 'include', // ✅ Envía cookie para revocación
     });
+    // En tu función de logout
+    // broadcastChannel?.postMessage({ type: 'logout' });
   },
 };

@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Upload, X, DollarSign, Heart, Calculator, Calendar, MapPin, Tag } from 'lucide-react';
+import { Upload, X, DollarSign, Heart, Calculator, Calendar, MapPin, Tag, Link as LinkIcon } from 'lucide-react';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { useCreateAd } from '@/hooks/useCreateAd';
@@ -20,6 +20,7 @@ interface CreateAdFormData {
   startDate: string;
   endWhenBudgetExhausted: boolean;
   endDate: string;
+  targetUrl: string;
   targetAudience: {
     ageRange: [number, number];
     gender: 'all' | 'male' | 'female';
@@ -42,6 +43,7 @@ export function CreateAdForm() {
     startDate: '',
     endWhenBudgetExhausted: true,
     endDate: '',
+    targetUrl: '',
     targetAudience: {
       ageRange: [18, 65],
       gender: 'all',
@@ -120,31 +122,6 @@ export function CreateAdForm() {
   };
 
   // Manejo de ubicaciones
-  const addDepartment = (departmentCode: string) => {
-    if (!formData.targetAudience.selectedDepartments.includes(departmentCode)) {
-      setFormData(prev => ({
-        ...prev,
-        targetAudience: {
-          ...prev.targetAudience,
-          selectedDepartments: [...prev.targetAudience.selectedDepartments, departmentCode]
-        }
-      }));
-    }
-  };
-
-  const removeDepartment = (departmentCode: string) => {
-    setFormData(prev => ({
-      ...prev,
-      targetAudience: {
-        ...prev.targetAudience,
-        selectedDepartments: prev.targetAudience.selectedDepartments.filter(d => d !== departmentCode),
-        municipalityCodes: prev.targetAudience.municipalityCodes.filter(
-          m => !municipalities.find(mun => mun.code === m && mun.departmentCode === departmentCode)
-        )
-      }
-    }));
-  };
-
   const addMunicipality = (municipalityCode: string) => {
     if (!formData.targetAudience.municipalityCodes.includes(municipalityCode)) {
       setFormData(prev => ({
@@ -172,6 +149,11 @@ export function CreateAdForm() {
     e.preventDefault();
 
     // Validaciones
+    if (!formData.file) {
+      alert('Debes subir un archivo');
+      return;
+    }
+
     if (formData.categoryIds.length === 0) {
       alert('Debes seleccionar al menos una categoría');
       return;
@@ -187,27 +169,49 @@ export function CreateAdForm() {
       return;
     }
 
-    // Preparar datos
-    const requestData = {
-      title: formData.title,
-      description: formData.description,
-      rewardPerLike: formData.rewardPerLike,
-      maxLikes: formData.maxLikes,
-      totalBudget: formData.totalBudget,
-      categoryIds: formData.categoryIds,
-      startDate: formData.startImmediately ? undefined : formData.startDate,
-      endDate: formData.endWhenBudgetExhausted ? undefined : formData.endDate,
-      startImmediately: formData.startImmediately,
-      endWhenBudgetExhausted: formData.endWhenBudgetExhausted,
-      targetAudience: {
-        ageRange: formData.targetAudience.ageRange,
-        gender: formData.targetAudience.gender,
-        municipalityCodes: formData.targetAudience.municipalityCodes
-      }
-    };
+    // Preparar FormData
+    const formDataToSend = new FormData();
+    
+    // Agregar datos del anuncio
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('rewardPerLike', formData.rewardPerLike.toString());
+    formDataToSend.append('maxLikes', formData.maxLikes.toString());
+    formDataToSend.append('mediaType', formData.type);
+    
+    if (formData.targetUrl) {
+      formDataToSend.append('targetUrl', formData.targetUrl);
+    }
+    
+    // Agregar fechas si no son inmediatas/automáticas
+    if (!formData.startImmediately && formData.startDate) {
+      formDataToSend.append('startDate', new Date(formData.startDate).toISOString());
+    }
+    
+    if (!formData.endWhenBudgetExhausted && formData.endDate) {
+      formDataToSend.append('endDate', new Date(formData.endDate).toISOString());
+    }
+    
+    // Agregar archivo
+    formDataToSend.append('file', formData.file);
+    
+    // Agregar categorías
+    formData.categoryIds.forEach(id => {
+      formDataToSend.append('categoryIds', id.toString());
+    });
+    
+    // Agregar municipios
+    formData.targetAudience.municipalityCodes.forEach(code => {
+      formDataToSend.append('targetMunicipalitiesCodes', code);
+    });
+    
+    // Agregar targeting demográfico
+    formDataToSend.append('minAge', formData.targetAudience.ageRange[0].toString());
+    formDataToSend.append('maxAge', formData.targetAudience.ageRange[1].toString());
+    formDataToSend.append('targetGender', formData.targetAudience.gender.toUpperCase());
 
     try {
-      await createAd(requestData, formData.file);
+      await createAd(formDataToSend);
     } catch (error) {
       console.error('Error al crear anuncio:', error);
     }
@@ -255,6 +259,27 @@ export function CreateAdForm() {
             minLength={10}
             maxLength={1000}
           />
+        </div>
+
+        {/* URL de destino */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="flex items-center">
+              <LinkIcon className="w-4 h-4 mr-1" />
+              URL de Destino (Opcional)
+            </div>
+          </label>
+          <input
+            type="url"
+            value={formData.targetUrl}
+            onChange={(e) => setFormData(prev => ({ ...prev, targetUrl: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://ejemplo.com/tu-pagina"
+            maxLength={500}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Link al que se redirigirá cuando los usuarios hagan clic en tu anuncio
+          </p>
         </div>
 
         {/* Presupuesto y Recompensas */}

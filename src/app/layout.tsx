@@ -3,6 +3,7 @@ import { Days_One } from "next/font/google";
 import { SessionProvider } from './providers/SessionProvider';
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./providers/AuthProvider";
 
 const daysOne = Days_One({
   variable: "--font-days-one",
@@ -23,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${daysOne.variable} font-sans antialiased`}>
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider><AuthProvider>{children}</AuthProvider></SessionProvider>
         <Toaster // 👉 colocar el toaster aquí
           position="top-right"
           toastOptions={{

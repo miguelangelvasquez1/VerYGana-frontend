@@ -3,6 +3,7 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { JWT } from 'next-auth/jwt';
 import { authService } from './authService';
+import { parseJwt } from '../utils/parseJwt';
 
 export interface AuthResponse {
   accessToken: string;
@@ -22,29 +23,6 @@ async function parseResponseError(response: Response): Promise<string> {
     try { return await response.text(); } catch { /* fallback */ }
   }
   return `Error ${response.status} ${response.statusText}`;
-}
-
-/** parse JWT payload (unverified) - universal */
-function 
-parseJwt(token: string): any | null {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    if (typeof window === 'undefined') {
-      return JSON.parse(Buffer.from(base64, 'base64').toString('utf8'));
-    } else {
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-      return JSON.parse(jsonPayload);
-    }
-  } catch (e) {
-    console.error('parseJwt error', e);
-    return null;
-  }
 }
 
 export const authOptions: NextAuthOptions = {
@@ -91,7 +69,9 @@ export const authOptions: NextAuthOptions = {
       // On initial sign in, save user data and accessToken
       if (user) {
         const expSec = parseJwt(user.accessToken)?.exp;
-        const expMs = expSec ? expSec * 1000 : Date.now() + 15 * 60 * 1000;
+
+        const expMs = Date.now() + 0.25 * 60 * 1000; // Default 15 seg
+        // const expMs = expSec ? expSec * 1000 : Date.now() + 15 * 60 * 1000;
         return {
           ...token,
           accessToken: user.accessToken,
@@ -103,13 +83,12 @@ export const authOptions: NextAuthOptions = {
 
       // If token not expired, return it
       if (Date.now() < (token.accessTokenExpires as number)) {
-        console.log('✅ Access token valid, expires in: ' + token.accessTokenExpires);
         return token;
       }
-      console.log('⏳ Access token expired, refreshing...');
-
-      // Access token expired -> refresh using cookie-based refresh endpoint
-      return await refreshAccessToken(token);
+        // Token expired, try to refresh it      
+        console.log('🚫 Server-side: Token expired, throwing error');
+        return { ...token, error: 'RefreshAccessTokenError' };
+      
     },
 
     async session({ session, token }) {
@@ -136,34 +115,3 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV !== 'production',
 };
-
-/**
- * Refresca el access token usando la cookie HttpOnly
- * El navegador envía automáticamente la cookie al backend
- */
-async function refreshAccessToken(token: JWT): Promise<JWT> {
-  try {
-    console.log('🔄 Calling refresh endpoint...');
-    
-    // La cookie HttpOnly se envía automáticamente con credentials: 'include'
-    const refreshed = await authService.refresh();
-
-    // Decodificar nuevo token
-    const payload = parseJwt(refreshed.accessToken);
-    
-    console.log('✅ Token refreshed successfully');
-
-    return {
-      ...token,
-      accessToken: refreshed.accessToken,
-      accessTokenExpires: payload?.exp ? payload.exp * 1000 : Date.now() + 15 * 60 * 1000,
-    };
-  } catch (error) {
-    console.error('❌ Error refreshing token:', error);
-    
-    return {
-      ...token,
-      error: 'RefreshAccessTokenError',
-    };
-  }
-}
