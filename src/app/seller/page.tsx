@@ -16,11 +16,9 @@ interface Product {
   id: number;
   name: string;
   price: number;
-  mainImageUrl: string;
+  imageUrl: string;
   stock: number;
-  categoryName: string;
-  rating: number;
-  reviewCount: number;
+  averageRate: number;
 }
 
 interface DashboardStats {
@@ -88,11 +86,9 @@ export default function SellerDashboard() {
         id: p.id,
         name: p.name,
         price: p.price,
-        mainImageUrl: p.ImageUrl,
+        imageUrl: p.imageUrl,
         stock: p.stock,
-        categoryName: p.categoryName,
-        rating: p.rating,
-        reviewCount: p.reviewCount
+        averageRate: p.averageRate,
       })));
 
     } catch (err: any) {
@@ -282,13 +278,12 @@ export default function SellerDashboard() {
           {products.slice(0, 3).map(product => (
             <div key={product.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
               <img
-                src={product.mainImageUrl}
+                src={product.imageUrl}
                 alt={product.name}
                 className="w-16 h-16 rounded-lg object-cover"
               />
               <div className="flex-1">
                 <h4 className="font-semibold text-gray-900">{product.name}</h4>
-                <p className="text-sm text-gray-600">{product.categoryName}</p>
               </div>
               <div className="text-right">
                 <p className="font-bold text-gray-900">${product.price.toLocaleString('es-CO')}</p>
@@ -352,18 +347,15 @@ export default function SellerDashboard() {
           {filteredProducts.map(product => (
             <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
               <img
-                src={product.mainImageUrl}
+                src={product.imageUrl}
                 alt={product.name}
                 className="w-full h-48 object-cover"
               />
               <div className="p-4">
-                <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                  {product.categoryName}
-                </span>
                 <h3 className="font-bold text-gray-900 mt-2">{product.name}</h3>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-yellow-500">★</span>
-                  <span className="text-sm text-gray-600">{product.rating} ({product.reviewCount})</span>
+                  <span className="text-sm text-gray-600">{product.averageRate}</span>
                 </div>
                 <div className="flex items-center justify-between mt-3">
                   <span className="text-xl font-bold text-gray-900">
@@ -398,16 +390,14 @@ export default function SellerDashboard() {
           {filteredProducts.map(product => (
             <div key={product.id} className="flex items-center gap-4 p-4 border-b last:border-b-0 hover:bg-gray-50 transition-colors">
               <img
-                src={product.mainImageUrl}
+                src={product.imageUrl}
                 alt={product.name}
                 className="w-20 h-20 rounded-lg object-cover"
               />
               <div className="flex-1">
                 <h3 className="font-bold text-gray-900">{product.name}</h3>
-                <p className="text-sm text-gray-600">{product.categoryName}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-yellow-500 text-sm">★ {product.rating}</span>
-                  <span className="text-sm text-gray-500">({product.reviewCount} reviews)</span>
+                  <span className="text-yellow-500 text-sm">★ {product.averageRate}</span>
                 </div>
               </div>
               <div className="text-right">

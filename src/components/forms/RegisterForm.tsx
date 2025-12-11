@@ -6,6 +6,7 @@ import { registerConsumer } from "@/services/ConsumerService";
 import { registerSeller } from "@/services/SellerService";
 import { registerAdvertiser } from "@/services/AdvertiserService";
 import { getAllCategories, Category } from "@/services/CategoryService";
+import { useCategories } from "@/hooks/useCategories";
 
 type Role = "BENEFICIARIO" | "VENDEDOR" | "ANUNCIANTE";
 
@@ -25,12 +26,14 @@ export default function RegisterForm() {
   const [role, setRole] = useState<Role | null>(null);
   const [formData, setFormData] = useState<any>({});
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
   const [loadingMunicipalities, setLoadingMunicipalities] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { categories, loading, error, refetch } = useCategories();
+
+  // const CategoryService cs;
   // 🟢 Cargar departamentos desde el JSON local
   useEffect(() => {
     const loadDepartments = async () => {
@@ -55,24 +58,6 @@ export default function RegisterForm() {
     };
     loadDepartments();
   }, []);
-
-   // 🟢 Cargar categorías desde el backend
-   useEffect(() => {
-    const loadCategories = async () => {
-      setLoadingCategories(true);
-      try {
-        const fetchedCategories = await getAllCategories();
-        setCategories(fetchedCategories);
-        console.log("✅ Categorías cargadas:", fetchedCategories);
-      } catch(error){
-        console.error("❌ Error cargando categorías:", error);
-        toast.error("Error al cargar las categorías. Intenta recargar la página.");
-      } finally{
-        setLoadingCategories(false);
-      }
-    };
-    loadCategories();
-   }, []);
 
   // 🟢 Cargar municipios al seleccionar departamento
   useEffect(() => {
@@ -228,7 +213,7 @@ export default function RegisterForm() {
             onClick={() => setRole("BENEFICIARIO")}
             className="p-3 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition"
           >
-            🛍️ Soy Beneficiario
+            🛍 Soy Beneficiario
           </button>
           <button
             onClick={() => setRole("VENDEDOR")}
@@ -554,6 +539,6 @@ export default function RegisterForm() {
           </button>
         </div>
       </form>
-    </div>
-  );
+    </div>
+  );
 }
