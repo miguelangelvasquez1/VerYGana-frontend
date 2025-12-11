@@ -1,3 +1,5 @@
+'use client';
+
 import Sidebar from "@/components/AdsComponents/Sidebar";
 import VideoAdPlayer from "@/components/AdsComponents/VideoAdPlayer";
 import Navbar from "@/components/bars/NavBar";

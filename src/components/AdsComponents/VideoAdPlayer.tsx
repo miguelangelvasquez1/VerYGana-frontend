@@ -45,7 +45,18 @@ export default function VideoAdPlayer() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
   const currentVideo = mockVideos[currentVideoIndex];
+
+  useEffect(() => {
+    // Esto ya corre en el cliente (window existe)
+    const check = () => setIsMobile(window.innerWidth < 1024);
+
+    check();
+    window.addEventListener("resize", check);
+
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -127,7 +138,9 @@ export default function VideoAdPlayer() {
           <div className="absolute inset-0 flex items-center justify-center z-20">
             <button 
               onClick={togglePlayPause}
-              className="w-20 h-20 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/30"
+              className={`
+                      absolute left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent bottom-18 md:bottom-0
+                    `}            
             >
               <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z"/>
@@ -138,8 +151,7 @@ export default function VideoAdPlayer() {
 
         {/* Video Info Overlay */}
         <div className={`
-          absolute left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 z-20
-          ${window.innerWidth < 1024 ? "bottom-18" : "bottom-0"}
+          absolute left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 z-20 bottom-18 md:bottom-0
         `}>
           <div>
             <div className="flex items-center justify-between mb-2">

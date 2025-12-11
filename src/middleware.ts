@@ -16,6 +16,7 @@ export const config = {
     '/consumer/wallet/:path*',
     '/raffles',
     "/ads",
+    // "/forum",
 
     // role prefixes (literal entries)
     '/advertiser/:path*',
@@ -115,6 +116,11 @@ export default withAuth(function middleware(req: NextRequest) {
 },
 {
   callbacks: {
-    authorized: ({ token }) => !!token,
-  },
+      // Desactiva la validación automática en dev mode
+      authorized: ({ token }) => {
+        const dev_mode = process.env.MIDDLEWARE !== 'ACTIVE';
+        if (dev_mode) return true; // ✅ Siempre permite en dev
+        return !!token; // 🔒 Valida token en producción
+      },
+    },
 });

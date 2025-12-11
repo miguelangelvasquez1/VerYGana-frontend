@@ -1,5 +1,5 @@
-// services/categoryService.ts
-import apiClient from '@/lib/api/client';
+// services/CategoryService.ts
+import apiClient from "@/lib/api/client";
 
 export interface Category {
   id: number;
@@ -9,40 +9,47 @@ export interface Category {
   isActive?: boolean;
 }
 
-class CategoryService {
-  // Obtener todas las categorías
-  async getAllCategories(): Promise<Category[]> {
-    const response = await apiClient.get<Category[]>('/categories/all');
+// ============================================
+// MÉTODOS DEL SERVICE
+// ============================================
+
+/**
+ * Obtener todas las categorías disponibles
+ */
+export const getAllCategories = async (): Promise<Category[] | null> => {
+  try {
+    const response = await apiClient.get('/categories/all');
     return response.data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return null;
   }
+};
 
-  // Obtener todas las categorías (alias para compatibilidad)
-  async getCategories(): Promise<Category[]> {
-    return this.getAllCategories();
-  }
-
-  // Obtener una categoría por ID
-  async getCategoryById(id: number): Promise<Category> {
-    const response = await apiClient.get<Category>(`/categories/${id}`);
+/**
+ * Obtener una categoría por ID
+ */
+export const getCategoryById = async (categoryId: number): Promise<Category | null> => {
+  try {
+    const response = await apiClient.get(`/categories/${categoryId}`);
     return response.data;
+  } catch (error) {
+    console.error(`Error fetching category ${categoryId}:`, error);
+    return null;
   }
+};
 
-  // Crear una nueva categoría (admin)
-  async createCategory(data: Omit<Category, 'id'>): Promise<Category> {
-    const response = await apiClient.post<Category>('/categories/create', data);
+/**
+ * Buscar categorías por nombre
+ */
+export const searchCategories = async (searchTerm: string): Promise<Category[] | null> => {
+  try {
+    const response = await apiClient.get('/categories/search', {
+      params: { query: searchTerm },
+    });
     return response.data;
+  } catch (error) {
+    console.error("Error searching categories:", error);
+    return null;
   }
-
-  // Actualizar una categoría (admin)
-  async updateCategory(id: number, data: Partial<Category>): Promise<Category> {
-    const response = await apiClient.put<Category>(`/categories/${id}`, data);
-    return response.data;
-  }
-
-  // Eliminar una categoría (admin)
-  async deleteCategory(id: number): Promise<void> {
-    await apiClient.delete(`/categories/${id}`);
-  }
-}
-
-export const categoryService = new CategoryService();
+};
