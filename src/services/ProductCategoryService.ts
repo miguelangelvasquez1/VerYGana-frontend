@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api/client';
-import { EntityCreatedResponse } from '@/types/products/types';
+import { EntityCreatedResponseDTO } from '@/types/GenericTypes';
 
 // ============================================
 // INTERFACES
@@ -35,7 +35,7 @@ export const getProductCategories = async (): Promise<ProductCategory[]> => {
  */
 export const createProductCategory = async (
   data: CreateProductCategoryRequest
-): Promise<EntityCreatedResponse> => {
+): Promise<EntityCreatedResponseDTO> => {
   const response = await apiClient.post('/productCategories/create', data);
   return response.data;
 };

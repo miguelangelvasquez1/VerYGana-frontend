@@ -1,7 +1,7 @@
 // app/(dashboard)/campaigns/page.tsx
 import React from 'react';
-import { DashboardLayout } from '@/components/AdvertiserComponents/layout/DashboardLayout';
-import { CampaignManager } from '@/components/AdvertiserComponents/dashboard/CampaignManager';
+import { DashboardLayout } from '@/components/Advertiser/layout/DashboardLayout';
+import { CampaignManager } from '@/components/Advertiser/dashboard/CampaignManager';
 
 export default function CampaignsPage() {
   return (

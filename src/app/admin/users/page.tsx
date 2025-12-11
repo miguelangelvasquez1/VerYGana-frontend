@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import AdminLayout from '@/components/AdminComponents/AdminLayout';
-import UserManagement from '@/components/AdminComponents/UserManagement';
+import AdminLayout from '@/components/Admin/AdminLayout';
+import UserManagement from '@/components/Admin/UserManagement';
 
 export default function UsersPage() {
   return (

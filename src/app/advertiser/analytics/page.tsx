@@ -1,7 +1,7 @@
 // app/(dashboard)/analytics/page.tsx
 import React from 'react';
-import { DashboardLayout } from '@/components/AdvertiserComponents/layout/DashboardLayout';
-import { AnalyticsDashboard } from '@/components/AdvertiserComponents/dashboard/AnalyticsDashboard';
+import { DashboardLayout } from '@/components/Advertiser/layout/DashboardLayout';
+import { AnalyticsDashboard } from '@/components/Advertiser/dashboard/AnalyticsDashboard';
 
 export default function AnalyticsPage() {
   return (

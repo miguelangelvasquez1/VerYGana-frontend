@@ -1,5 +1,24 @@
 import apiClient from "@/lib/api/client";
 
+export interface carItem{
+    productId: number;
+    name: string;
+    imageUrl: string;
+    price: number;
+    quantity: number;
+
+     // Información para el procesado de la compra
+    deliveryType: "AUTO" | "MANUAL" | "EXTERNAL_API";
+    digitalFormat: "LINK" | "CODE" | "FILE";
+    isInstantDelivery: boolean;
+
+    sellerId: number;
+    shopName: string;
+
+    // Para validaciones
+    stock: number;
+}
+
 // ===== DTOs =====
 export interface CreatePurchaseItemRequestDTO {
     productId: number;

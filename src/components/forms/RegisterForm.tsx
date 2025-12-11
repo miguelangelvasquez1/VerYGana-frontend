@@ -213,7 +213,7 @@ export default function RegisterForm() {
             onClick={() => setRole("BENEFICIARIO")}
             className="p-3 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition"
           >
-            🛍️ Soy Beneficiario
+            🛍 Soy Beneficiario
           </button>
           <button
             onClick={() => setRole("VENDEDOR")}
@@ -539,6 +539,6 @@ export default function RegisterForm() {
           </button>
         </div>
       </form>
-    </div>
-  );
+    </div>
+  );
 }

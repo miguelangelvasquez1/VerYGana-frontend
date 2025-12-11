@@ -1,7 +1,7 @@
 // app/(dashboard)/ads/page.tsx
 import React from 'react';
-import { DashboardLayout } from '@/components/AdvertiserComponents/layout/DashboardLayout';
-import { AdsList } from '@/components/AdvertiserComponents/ads/AdsList';
+import { DashboardLayout } from '@/components/Advertiser/layout/DashboardLayout';
+import { AdsList } from '@/components/Advertiser/ads/AdsList';
 
 export default function AdsPage() {
   return (

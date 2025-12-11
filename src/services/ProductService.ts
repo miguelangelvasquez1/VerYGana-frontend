@@ -1,75 +1,6 @@
 import apiClient from "@/lib/api/client";
-import { EntityCreatedResponse } from "@/types/products/types";
-
-export interface ProductStockRequest {
-  code: string;
-  additionalInfo: string;
-  expirationDate: string | null; // formato ISO
-}
-
-export interface CreateOrEditProductRequestDTO {
-  name: string;
-  description: string;
-  productCategoryId: number;
-  price: number;
-  deliveryType: "AUTO" | "MANUAL" | "EXTERNAL_API"; 
-  digitalFormat: "LINK" | "CODE" | "FILE"; 
-  stockItems: ProductStockRequest[];
-}
-
-
-export interface ProductSummaryResponseDTO {
-  id: number;
-  name: string;
-  price: number;
-  ImageUrl: string;
-  rating: number;
-  reviewCount: number;
-  stock: number;
-  categoryName: string;
-  sellerName: string;
-  isFavorite?: boolean;
-}
-
-export interface ProductResponseDTO {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  rating: number;
-  reviewCount: number;
-  imagesUrls: string[];
-  categoryId: number;
-  categoryName: string;
-  sellerId: number;
-  sellerName: string;
-  createdAt: string;
-  updatedAt: string;
-  isAvailable: boolean;
-}
-
-export interface PageResponse<T> {
-  content: T[];
-  totalPages: number;
-  totalElements: number;
-  size: number;
-  number: number;
-  first: boolean;
-  last: boolean;
-  empty: boolean;
-}
-
-export interface FilterProductsParams {
-  searchQuery?: string;
-  categoryId?: number;
-  minRating?: number;
-  maxPrice?: number;
-  page?: number;
-  sortBy?: string;
-  sortDirection?: string;
-}
-
+import * as ProductTypes from "@/types/products/Product.types";
+import { EntityCreatedResponseDTO, PageResponse } from "@/types/GenericTypes";
 // ============================================
 // MÉTODOS DEL SERVICE
 // ============================================
@@ -78,9 +9,9 @@ export interface FilterProductsParams {
  * Crear nuevo producto (SELLER)
  */
 export const createProduct = async (
-  product: CreateOrEditProductRequestDTO,
+  product: ProductTypes.CreateOrEditProductRequestDTO,
   productImage: File
-): Promise<EntityCreatedResponse> => {
+): Promise<EntityCreatedResponseDTO> => {
   const formData = new FormData();
 
   // Backend espera product como STRING JSON
@@ -103,7 +34,7 @@ export const createProduct = async (
  */
 export const editProduct = async (
   productId: number,
-  data: CreateOrEditProductRequestDTO
+  data: ProductTypes.CreateOrEditProductRequestDTO
 ): Promise<void> => {
   await apiClient.put(`/products/edit/${productId}`, data);
 };
@@ -127,7 +58,7 @@ export const deleteProductForAdmin = async (productId: number): Promise<void> =>
  */
 export const getAllProducts = async (
   page: number = 0
-): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get('/products', {
     params: { page }
   });
@@ -138,8 +69,8 @@ export const getAllProducts = async (
  * Filtrar productos con múltiples criterios (PÚBLICO)
  */
 export const filterProducts = async (
-  params: FilterProductsParams
-): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+  params: ProductTypes.FilterProductsParams
+): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get('/products/filter', {
     params: {
       searchQuery: params.searchQuery,
@@ -157,7 +88,7 @@ export const filterProducts = async (
 /**
  * Obtener detalle completo de un producto (PÚBLICO)
  */
-export const getProductDetail = async (productId: number): Promise<ProductResponseDTO> => {
+export const getProductDetail = async (productId: number): Promise<ProductTypes.ProductResponseDTO> => {
   const response = await apiClient.get(`/products/${productId}`);
   return response.data;
 };
@@ -168,7 +99,7 @@ export const getProductDetail = async (productId: number): Promise<ProductRespon
 export const getSellerProducts = async (
   sellerId: number,
   page: number = 0
-): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get(`/products/${sellerId}`, {
     params: { page }
   });
@@ -180,7 +111,7 @@ export const getSellerProducts = async (
  */
 export const getMyProducts = async (
   page: number = 0
-): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get('/products/myProducts', {
     params: { page }
   });
@@ -200,7 +131,7 @@ export const getTotalSellerProducts = async (): Promise<number> => {
  */
 export const getFavorites = async (
   page: number = 0
-): Promise<PageResponse<ProductSummaryResponseDTO>> => {
+): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get('/products/favorites', {
     params: { page }
   });

@@ -1,6 +1,6 @@
 import React from 'react';
-import { DashboardLayout } from '@/components/AdvertiserComponents/layout/DashboardLayout';
-import { BillingDashboard } from '@/components/AdvertiserComponents/dashboard/BillingDashboard';
+import { DashboardLayout } from '@/components/Advertiser/layout/DashboardLayout';
+import { BillingDashboard } from '@/components/Advertiser/dashboard/BillingDashboard';
 
 export default function BillingPage() {
   return (
