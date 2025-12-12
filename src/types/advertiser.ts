@@ -1,4 +1,3 @@
-
 // types/advertiser.ts
 export interface Ad {
   id: string;
@@ -46,4 +45,45 @@ export interface AdvertiserStats {
   averageCTR: number;
   activeAds: number;
   pendingApproval: number;
+}
+
+export type AdStatus = 
+  | 'PENDING' 
+  | 'APPROVED' 
+  | 'ACTIVE' 
+  | 'PAUSED' 
+  | 'COMPLETED' 
+  | 'REJECTED';
+
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+}
+
+export interface AdResponseDTO {
+  id: number;
+  title: string;
+  description: string;
+  rewardPerLike: number;
+  maxLikes: number;
+  currentLikes: number;
+  status: AdStatus;
+  createdAt: string;
+  updatedAt: string;
+  startDate: string | null;
+  endDate: string | null;
+  totalBudget: number;
+  spentBudget: number;
+  remainingBudget: number;
+  remainingLikes: number;
+  completionPercentage: number;
+  contentUrl: string;
+  targetUrl: string | null;
+  categories: Category[];
+  minAge: number;
+  maxAge: number;
+  targetGender: string;
+  rejectionReason: string | null;
+  mediaType?: string;
 }

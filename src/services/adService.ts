@@ -1,23 +1,6 @@
 // services/adService.ts
 import apiClient from '@/lib/api/client';
-
-export interface AdResponse {
-  id: number;
-  title: string;
-  description: string;
-  rewardPerLike: number;
-  maxLikes: number;
-  currentLikes: number;
-  totalBudget: number;
-  spentBudget: number;
-  status: string;
-  contentUrl?: string;
-  targetUrl?: string;
-  mediaType?: string;
-  createdAt: string;
-  startDate?: string;
-  endDate?: string;
-}
+import { AdResponseDTO } from '@/types/advertiser';
 
 export interface AdStats {
   totalViews: number;
@@ -28,10 +11,24 @@ export interface AdStats {
   conversionRate: number;
 }
 
+// 🔥 NUEVA INTERFAZ para PagedResponse
+interface PagedResponse<T> {
+  data: T[];
+  meta: {
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+    sorted: boolean;
+  };
+}
+
 class AdService {
   // Crear un nuevo anuncio
-  async createAd(formData: FormData): Promise<AdResponse> {
-    const response = await apiClient.post<AdResponse>('/ads', formData, {
+  async createAd(formData: FormData): Promise<AdResponseDTO> {
+    const response = await apiClient.post<AdResponseDTO>('/ads', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -39,28 +36,34 @@ class AdService {
     return response.data;
   }
 
-  // Obtener todos los anuncios del usuario
+  // 🔥 ACTUALIZADO: Obtener todos los anuncios del usuario
   async getMyAds(page: number = 0, size: number = 10): Promise<{
-    content: AdResponse[];
+    content: AdResponseDTO[];
     totalElements: number;
     totalPages: number;
     currentPage: number;
   }> {
-    const response = await apiClient.get('/ads/my-ads', {
+    const response = await apiClient.get<PagedResponse<AdResponseDTO>>('/ads/my-ads/filter', {
       params: { page, size }
     });
-    return response.data;
+    
+    return {
+      content: response.data.data,
+      totalElements: response.data.meta.totalElements,
+      totalPages: response.data.meta.totalPages,
+      currentPage: response.data.meta.page
+    };
   }
 
   // Obtener un anuncio por ID
-  async getAdById(id: number): Promise<AdResponse> {
-    const response = await apiClient.get<AdResponse>(`/ads/${id}`);
+  async getAdById(id: number): Promise<AdResponseDTO> {
+    const response = await apiClient.get<AdResponseDTO>(`/ads/${id}`);
     return response.data;
   }
 
   // Actualizar un anuncio
-  async updateAd(id: number, formData: FormData): Promise<AdResponse> {
-    const response = await apiClient.put<AdResponse>(`/ads/${id}`, formData, {
+  async updateAd(id: number, formData: FormData): Promise<AdResponseDTO> {
+    const response = await apiClient.put<AdResponseDTO>(`/ads/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -74,14 +77,14 @@ class AdService {
   }
 
   // Pausar un anuncio
-  async pauseAd(id: number): Promise<AdResponse> {
-    const response = await apiClient.patch<AdResponse>(`/ads/${id}/pause`);
+  async pauseAd(id: number): Promise<AdResponseDTO> {
+    const response = await apiClient.patch<AdResponseDTO>(`/ads/${id}/pause`);
     return response.data;
   }
 
   // Reanudar un anuncio
-  async resumeAd(id: number): Promise<AdResponse> {
-    const response = await apiClient.patch<AdResponse>(`/ads/${id}/resume`);
+  async resumeAd(id: number): Promise<AdResponseDTO> {
+    const response = await apiClient.patch<AdResponseDTO>(`/ads/${id}/resume`);
     return response.data;
   }
 
@@ -91,16 +94,21 @@ class AdService {
     return response.data;
   }
 
-  // Obtener anuncios activos (para usuarios)
+  // 🔥 ACTUALIZADO: Obtener anuncios activos (para usuarios)
   async getActiveAds(page: number = 0, size: number = 10): Promise<{
-    content: AdResponse[];
+    content: AdResponseDTO[];
     totalElements: number;
     totalPages: number;
   }> {
-    const response = await apiClient.get('/ads/active', {
+    const response = await apiClient.get<PagedResponse<AdResponseDTO>>('/ads/active', {
       params: { page, size }
     });
-    return response.data;
+    
+    return {
+      content: response.data.data,
+      totalElements: response.data.meta.totalElements,
+      totalPages: response.data.meta.totalPages
+    };
   }
 
   // Dar like a un anuncio

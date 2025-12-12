@@ -47,6 +47,12 @@ export default function VideoAdPlayer() {
 
   const [isMobile, setIsMobile] = useState(false);
   const currentVideo = mockVideos[currentVideoIndex];
+  const [formattedLikes, setFormattedLikes] = useState<string>(String(currentVideo.likes));
+
+  useEffect(() => {
+    // formatea según la localización real del navegador al montarse
+    setFormattedLikes(new Intl.NumberFormat(navigator.language || 'en-US').format(currentVideo.likes));
+  }, [currentVideo.likes]);
 
   useEffect(() => {
     // Esto ya corre en el cliente (window existe)
@@ -172,7 +178,7 @@ export default function VideoAdPlayer() {
 
             <div className="flex items-center gap-4 text-gray-300 text-xs">
               <span>👁️ {currentVideo.views}</span>
-              <span>❤️ {currentVideo.likes.toLocaleString()}</span>
+    +         <span>❤️ {formattedLikes}</span>
               <span>⏱️ {Math.floor(watchTime)}s / {currentVideo.duration}s</span>
             </div>
           </div>

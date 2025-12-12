@@ -61,6 +61,10 @@ export function CreateAdForm() {
   const { municipalities, loading: loadingMunicipalities } = useMunicipalities(selectedDepartment);
   const { createAd, loading: submitting, error: submitError } = useCreateAd();
 
+  const [selectedMunicipalitiesData, setSelectedMunicipalitiesData] = useState<
+    { code: string; name: string; departmentCode: string; departmentName: string }[]
+  >([]);
+
   // Cálculo de presupuesto
   const calculateBudget = (reward: number, maxLikes: number) => {
     return (reward * maxLikes).toFixed(2);
@@ -124,6 +128,21 @@ export function CreateAdForm() {
   // Manejo de ubicaciones
   const addMunicipality = (municipalityCode: string) => {
     if (!formData.targetAudience.municipalityCodes.includes(municipalityCode)) {
+      const municipality = municipalities.find(m => m.code === municipalityCode);
+      const department = departments.find(d => d.code === selectedDepartment);
+      
+      if (municipality && department) {
+        setSelectedMunicipalitiesData(prev => [
+          ...prev,
+          {
+            code: municipality.code,
+            name: municipality.name,
+            departmentCode: department.code,
+            departmentName: department.name
+          }
+        ]);
+      }
+
       setFormData(prev => ({
         ...prev,
         targetAudience: {
@@ -135,6 +154,10 @@ export function CreateAdForm() {
   };
 
   const removeMunicipality = (municipalityCode: string) => {
+    setSelectedMunicipalitiesData(prev => 
+      prev.filter(m => m.code !== municipalityCode)
+    );
+    
     setFormData(prev => ({
       ...prev,
       targetAudience: {
@@ -169,51 +192,38 @@ export function CreateAdForm() {
       return;
     }
 
+    // Crear el DTO del anuncio
+    const adDto = {
+      title: formData.title,
+      description: formData.description,
+      rewardPerLike: formData.rewardPerLike,
+      maxLikes: formData.maxLikes,
+      mediaType: formData.type,
+      targetUrl: formData.targetUrl || null,
+      startDate: formData.startImmediately ? null : new Date(formData.startDate!).toISOString(),
+      endDate: formData.endWhenBudgetExhausted ? null : new Date(formData.endDate!).toISOString(),
+      categoryIds: formData.categoryIds,
+      targetMunicipalitiesCodes: formData.targetAudience.municipalityCodes,
+      minAge: formData.targetAudience.ageRange[0],
+      maxAge: formData.targetAudience.ageRange[1],
+      targetGender: formData.targetAudience.gender.toUpperCase(),
+    };
+
     // Preparar FormData
     const formDataToSend = new FormData();
     
-    // Agregar datos del anuncio
-    formDataToSend.append('title', formData.title);
-    formDataToSend.append('description', formData.description);
-    formDataToSend.append('rewardPerLike', formData.rewardPerLike.toString());
-    formDataToSend.append('maxLikes', formData.maxLikes.toString());
-    formDataToSend.append('mediaType', formData.type);
+    // Agregar el DTO como JSON string
+    formDataToSend.append('ad', new Blob([JSON.stringify(adDto)], { type: 'application/json' }));
     
-    if (formData.targetUrl) {
-      formDataToSend.append('targetUrl', formData.targetUrl);
-    }
-    
-    // Agregar fechas si no son inmediatas/automáticas
-    if (!formData.startImmediately && formData.startDate) {
-      formDataToSend.append('startDate', new Date(formData.startDate).toISOString());
-    }
-    
-    if (!formData.endWhenBudgetExhausted && formData.endDate) {
-      formDataToSend.append('endDate', new Date(formData.endDate).toISOString());
-    }
-    
-    // Agregar archivo
+    // Agregar el archivo
     formDataToSend.append('file', formData.file);
-    
-    // Agregar categorías
-    formData.categoryIds.forEach(id => {
-      formDataToSend.append('categoryIds', id.toString());
-    });
-    
-    // Agregar municipios
-    formData.targetAudience.municipalityCodes.forEach(code => {
-      formDataToSend.append('targetMunicipalitiesCodes', code);
-    });
-    
-    // Agregar targeting demográfico
-    formDataToSend.append('minAge', formData.targetAudience.ageRange[0].toString());
-    formDataToSend.append('maxAge', formData.targetAudience.ageRange[1].toString());
-    formDataToSend.append('targetGender', formData.targetAudience.gender.toUpperCase());
 
     try {
       await createAd(formDataToSend);
+      alert('Anuncio creado con éxito');
     } catch (error) {
       console.error('Error al crear anuncio:', error);
+      alert('Error al crear anuncio');
     }
   };
 
@@ -667,36 +677,30 @@ export function CreateAdForm() {
 
             {/* Ubicaciones seleccionadas */}
             <div className="space-y-2">
-              {formData.targetAudience.municipalityCodes.map((code) => {
-                const allMunicipalities = departments.flatMap(dept =>
-                  municipalities.filter(m => m.departmentCode === dept.code)
-                );
-                const municipality = allMunicipalities.find(m => m.code === code);
-                const department = departments.find(d => d.code === municipality?.departmentCode);
-                
-                return (
-                  <div
-                    key={code}
-                    className="inline-flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm mr-2"
-                  >
-                    <span>{municipality?.name}, {department?.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeMunicipality(code)}
-                      className="ml-2 text-green-600 hover:text-green-800"
+              {selectedMunicipalitiesData.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {selectedMunicipalitiesData.map((municipality) => (
+                    <div
+                      key={municipality.code}
+                      className="inline-flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm"
                     >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                );
-              })}
+                      <span>{municipality.name}, {municipality.departmentName}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeMunicipality(municipality.code)}
+                        className="ml-2 text-green-600 hover:text-green-800"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 mt-2">
+                  Sin ubicaciones específicas (el anuncio se mostrará en todo el país)
+                </p>
+              )}
             </div>
-
-            {formData.targetAudience.municipalityCodes.length === 0 && (
-              <p className="text-sm text-gray-500 mt-2">
-                Sin ubicaciones específicas (el anuncio se mostrará en todo el país)
-              </p>
-            )}
           </div>
         </div>
 
