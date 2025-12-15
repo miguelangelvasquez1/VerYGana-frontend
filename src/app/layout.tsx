@@ -8,6 +8,7 @@ import { CartProvider } from "@/context/CartContext";
 
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Toaster } from "react-hot-toast";
+import { ReactQueryProvider } from "./providers/ReactQueryProvider";
 
 const daysOne = Days_One({
   variable: "--font-days-one",
@@ -28,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${daysOne.variable} font-sans antialiased`}>
+        <ReactQueryProvider>
         <SessionProvider>
           <AuthProvider>
             <CartProvider>
@@ -39,6 +41,7 @@ export default function RootLayout({
             </CartProvider>
           </AuthProvider>
         </SessionProvider>
+        </ReactQueryProvider>
 
         {/* 👉 Toaster global */}
         <Toaster

@@ -1,6 +1,6 @@
-// services/adService.ts
 import apiClient from '@/lib/api/client';
-import { AdResponseDTO } from '@/types/advertiser';
+import { AdForAdminDTO, AdForConsumerDTO, AdResponseDTO } from '@/types/ads/advertiser';
+import { PagedResponse } from '@/types/common';
 
 export interface AdStats {
   totalViews: number;
@@ -9,20 +9,6 @@ export interface AdStats {
   spentBudget: number;
   remainingBudget: number;
   conversionRate: number;
-}
-
-// 🔥 NUEVA INTERFAZ para PagedResponse
-interface PagedResponse<T> {
-  data: T[];
-  meta: {
-    page: number;
-    size: number;
-    totalElements: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrevious: boolean;
-    sorted: boolean;
-  };
 }
 
 class AdService {
@@ -36,7 +22,7 @@ class AdService {
     return response.data;
   }
 
-  // 🔥 ACTUALIZADO: Obtener todos los anuncios del usuario
+  // Obtener todos los anuncios del usuario
   async getMyAds(page: number = 0, size: number = 10): Promise<{
     content: AdResponseDTO[];
     totalElements: number;
@@ -45,6 +31,53 @@ class AdService {
   }> {
     const response = await apiClient.get<PagedResponse<AdResponseDTO>>('/ads/my-ads/filter', {
       params: { page, size }
+    });
+    
+    return {
+      content: response.data.data,
+      totalElements: response.data.meta.totalElements,
+      totalPages: response.data.meta.totalPages,
+      currentPage: response.data.meta.page
+    };
+  }
+
+  // Obtener anuncios pendientes (Admin)
+  async getPendingAds(page: number = 0, size: number = 20): Promise<{
+    content: AdResponseDTO[];
+    totalElements: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
+    const response = await apiClient.get<PagedResponse<AdResponseDTO>>('/admin/ads/pending', {
+      params: { page, size }
+    });
+    
+    return {
+      content: response.data.data,
+      totalElements: response.data.meta.totalElements,
+      totalPages: response.data.meta.totalPages,
+      currentPage: response.data.meta.page
+    };
+  }
+
+   // Obtener todos los anuncios (Admin) - con filtros
+  async getAllAds(
+    page: number = 0, 
+    size: number = 20,
+    status?: string
+  ): Promise<{
+    content: AdForAdminDTO[];
+    totalElements: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
+    const params: any = { page, size };
+    if (status && status !== 'all') {
+      params.status = status.toUpperCase();
+    }
+
+    const response = await apiClient.get<PagedResponse<AdForAdminDTO>>('/ads/admin/all', {
+      params
     });
     
     return {
@@ -78,13 +111,19 @@ class AdService {
 
   // Pausar un anuncio
   async pauseAd(id: number): Promise<AdResponseDTO> {
-    const response = await apiClient.patch<AdResponseDTO>(`/ads/${id}/pause`);
+    const response = await apiClient.post<AdResponseDTO>(`/ads/admin/${id}/pause`);
     return response.data;
   }
 
-  // Reanudar un anuncio
+  // Activar un anuncio
   async resumeAd(id: number): Promise<AdResponseDTO> {
-    const response = await apiClient.patch<AdResponseDTO>(`/ads/${id}/resume`);
+    const response = await apiClient.post<AdResponseDTO>(`/ads/admin/${id}/activate`);
+    return response.data;
+  }
+
+  // Bloquear un anuncio
+  async blockAd(id: number): Promise<AdResponseDTO> {
+    const response = await apiClient.post<AdResponseDTO>(`/ads/admin/${id}/block`);
     return response.data;
   }
 
@@ -94,13 +133,13 @@ class AdService {
     return response.data;
   }
 
-  // 🔥 ACTUALIZADO: Obtener anuncios activos (para usuarios)
+  // Obtener anuncios activos (para usuarios)
   async getActiveAds(page: number = 0, size: number = 10): Promise<{
-    content: AdResponseDTO[];
+    content: AdForConsumerDTO[];
     totalElements: number;
     totalPages: number;
   }> {
-    const response = await apiClient.get<PagedResponse<AdResponseDTO>>('/ads/active', {
+    const response = await apiClient.get<PagedResponse<AdForConsumerDTO>>('/ads/user/available', {
       params: { page, size }
     });
     
@@ -109,6 +148,24 @@ class AdService {
       totalElements: response.data.meta.totalElements,
       totalPages: response.data.meta.totalPages
     };
+  }
+
+  // Obtener anuncios pendientes de aprobación (Admin)
+  // async getPendingAds(page: number = 0, size: number = 10): Promise<{
+  //   content: AdResponseDTO[];
+
+  // Aprobar anuncio (Admin)
+  async approveAd(id: number): Promise<AdResponseDTO> {
+    const response = await apiClient.post<AdResponseDTO>(`/ads/admin/${id}/approve`);
+    return response.data;
+  }
+
+  // Rechazar anuncio (Admin)
+  async rejectAd(id: number, reason: string): Promise<AdResponseDTO> {
+    const response = await apiClient.post<AdResponseDTO>(`/ads/admin/${id}/reject`, {
+      reason
+    });
+    return response.data;
   }
 
   // Dar like a un anuncio

@@ -13,7 +13,8 @@ import {
   Home,
   Shield,
   DollarSign,
-  Bell
+  Bell,
+  MonitorSmartphone
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -35,6 +36,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
       title: 'Usuarios',
       icon: Users,
       href: '/admin/users',
+      color: 'text-green-500'
+    },
+    {
+      title: 'Anuncios',
+      icon: MonitorSmartphone,
+      href: '/admin/ads',
       color: 'text-green-500'
     },
     {

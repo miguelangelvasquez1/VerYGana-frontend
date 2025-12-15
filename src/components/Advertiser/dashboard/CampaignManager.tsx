@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { Play, Pause, Edit, Trash2, Plus, BarChart3 } from 'lucide-react';
-import { Campaign } from '@/types/advertiser';
+import { Campaign } from '@/types/ads/advertiser';
 
 export function CampaignManager() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([

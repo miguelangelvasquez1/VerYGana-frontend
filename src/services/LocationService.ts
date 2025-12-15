@@ -14,6 +14,13 @@ export interface Municipality {
   population?: number;
 }
 
+export interface MunicipalityDTO {
+  code: string;
+  name: string;
+  departmentCode: string;
+  departmentName: string;
+}
+
 class LocationService {
   // Obtener todos los departamentos
   async getDepartments(): Promise<Department[]> {
