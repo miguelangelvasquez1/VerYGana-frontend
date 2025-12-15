@@ -1,125 +1,119 @@
 // hooks/useLocation.ts
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { locationService, Department, Municipality } from '@/services/LocationService';
-import { AxiosError } from 'axios';
 
+// Query keys
+export const locationKeys = {
+  all: ['locations'] as const,
+  departments: () => [...locationKeys.all, 'departments'] as const,
+  municipalities: (departmentCode: string) => 
+    [...locationKeys.all, 'municipalities', departmentCode] as const,
+  municipalitiesSearch: (query: string) => 
+    [...locationKeys.all, 'municipalities', 'search', query] as const,
+};
+
+// Hook para departamentos
 export function useDepartments() {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        setLoading(true);
-        const data = await locationService.getDepartments();
-        setDepartments(data);
-        setError(null);
-      } catch (err) {
-        const axiosError = err as AxiosError;
-        setError(axiosError.message || 'Error al cargar departamentos');
-        console.error('Error fetching departments:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const query = useQuery({
+    queryKey: locationKeys.departments(),
+    queryFn: () => locationService.getDepartments(),
+    staleTime: 10 * 60 * 1000, // Los departamentos casi nunca cambian, 10 minutos
+    gcTime: 30 * 60 * 1000, // Cache por 30 minutos
+    retry: 2,
+  });
 
-    fetchDepartments();
-  }, []);
-
-  const refetch = async () => {
-    setLoading(true);
-    try {
-      const data = await locationService.getDepartments();
-      setDepartments(data);
-      setError(null);
-    } catch (err) {
-      const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Error al cargar departamentos');
-    } finally {
-      setLoading(false);
-    }
+  const refetch = () => {
+    queryClient.invalidateQueries({ queryKey: locationKeys.departments() });
   };
 
-  return { departments, loading, error, refetch };
+  return {
+    data: query.data,
+    departments: query.data || [],
+    loading: query.isLoading,
+    isLoading: query.isLoading,
+    error: query.error?.message || null,
+    isError: query.isError,
+    refetch,
+  };
 }
 
+// Hook para municipios por departamento
 export function useMunicipalities(departmentCode: string | null) {
-  const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!departmentCode) {
-      setMunicipalities([]);
-      setError(null);
-      return;
-    }
+  const query = useQuery({
+    queryKey: locationKeys.municipalities(departmentCode || ''),
+    queryFn: () => locationService.getMunicipalities(departmentCode!),
+    enabled: !!departmentCode, // Solo ejecuta si hay departmentCode
+    staleTime: 10 * 60 * 1000, // 10 minutos
+    gcTime: 30 * 60 * 1000, // Cache por 30 minutos
+    retry: 2,
+  });
 
-    const fetchMunicipalities = async () => {
-      try {
-        setLoading(true);
-        const data = await locationService.getMunicipalities(departmentCode);
-        setMunicipalities(data);
-        setError(null);
-      } catch (err) {
-        const axiosError = err as AxiosError;
-        setError(axiosError.message || 'Error al cargar municipios');
-        console.error('Error fetching municipalities:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMunicipalities();
-  }, [departmentCode]);
-
-  const refetch = async () => {
-    if (!departmentCode) return;
-    
-    setLoading(true);
-    try {
-      const data = await locationService.getMunicipalities(departmentCode);
-      setMunicipalities(data);
-      setError(null);
-    } catch (err) {
-      const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Error al cargar municipios');
-    } finally {
-      setLoading(false);
+  const refetch = () => {
+    if (departmentCode) {
+      queryClient.invalidateQueries({ 
+        queryKey: locationKeys.municipalities(departmentCode) 
+      });
     }
   };
 
-  return { municipalities, loading, error, refetch };
+  return {
+    data: query.data,
+    municipalities: query.data || [],
+    loading: query.isLoading,
+    isLoading: query.isLoading,
+    error: query.error?.message || null,
+    isError: query.isError,
+    refetch,
+  };
 }
 
-// Hook adicional para buscar municipios
-export function useSearchMunicipalities() {
-  const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// Hook para buscar municipios
+export function useSearchMunicipalities(searchQuery: string, options?: { enabled?: boolean }) {
+  const query = useQuery({
+    queryKey: locationKeys.municipalitiesSearch(searchQuery),
+    queryFn: () => locationService.searchMunicipalities(searchQuery),
+    enabled: (options?.enabled ?? true) && searchQuery.length >= 2, // Mínimo 2 caracteres
+    staleTime: 2 * 60 * 1000, // Búsquedas se refrescan más seguido, 2 minutos
+    gcTime: 5 * 60 * 1000, // Cache por 5 minutos
+    retry: 1,
+  });
+
+  return {
+    municipalities: query.data || [],
+    loading: query.isLoading,
+    isLoading: query.isLoading,
+    error: query.error?.message || null,
+    isError: query.isError,
+  };
+}
+
+// Hook imperativo para búsqueda (si prefieres control manual)
+export function useSearchMunicipalitiesManual() {
+  const queryClient = useQueryClient();
 
   const searchMunicipalities = async (query: string) => {
     if (!query || query.length < 2) {
-      setMunicipalities([]);
-      return;
+      return [];
     }
 
     try {
-      setLoading(true);
-      const data = await locationService.searchMunicipalities(query);
-      setMunicipalities(data);
-      setError(null);
-    } catch (err) {
-      const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Error al buscar municipios');
-      console.error('Error searching municipalities:', err);
-    } finally {
-      setLoading(false);
+      const data = await queryClient.fetchQuery({
+        queryKey: locationKeys.municipalitiesSearch(query),
+        queryFn: () => locationService.searchMunicipalities(query),
+        staleTime: 2 * 60 * 1000,
+      });
+      return data;
+    } catch (error) {
+      console.error('Error searching municipalities:', error);
+      throw error;
     }
   };
 
-  return { municipalities, loading, error, searchMunicipalities };
+  return { searchMunicipalities };
 }

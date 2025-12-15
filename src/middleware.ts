@@ -23,8 +23,8 @@ export const config = {
     '/advertiser',
     '/seller/:path*',
     '/seller',
-    '/admin/:path*',
-    '/admin',
+    // '/admin/:path*',
+    // '/admin',
   ],
 };
 

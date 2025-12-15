@@ -60,7 +60,7 @@ const LoginForm = () => {
       console.log('🔐 Logged in as role:', role);
 
     if (role === "ROLE_ADMIN") {
-      router.push("/admin/dashboard");
+      router.push("/admin");
       return;
     } else if (role === "ROLE_CONSUMER") {
       router.push("/raffles");

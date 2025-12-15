@@ -17,7 +17,7 @@ import {
   MoreVertical,
   X
 } from 'lucide-react';
-import { AdResponseDTO } from '@/types/advertiser';
+import { AdResponseDTO } from '@/types/ads/advertiser';
 
 interface AdCardProps {
   ad: AdResponseDTO;

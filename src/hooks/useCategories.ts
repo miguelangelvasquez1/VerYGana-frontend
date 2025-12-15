@@ -1,77 +1,35 @@
 // hooks/useCategories.ts
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Category, getAllCategories } from '@/services/CategoryService';
-import { AxiosError } from 'axios';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getAllCategories, Category } from '@/services/CategoryService';
+
+// Query keys
+export const categoryKeys = {
+  all: ['categories'] as const,
+  lists: () => [...categoryKeys.all, 'list'] as const,
+};
 
 export function useCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    let mounted = true; // evita setState después del unmount
+  const query = useQuery({
+    queryKey: categoryKeys.lists(),
+    queryFn: getAllCategories,
+    staleTime: 5 * 60 * 1000, // Las categorías son estables, 5 minutos
+    gcTime: 10 * 60 * 1000, // Cache por 10 minutos (antes cacheTime)
+    retry: 2,
+  });
 
-    const fetchCategories = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getAllCategories();
-        // Si el service devuelve null (error manejado internamente), lo tratamos:
-        if (!mounted) return;
-        if (data && Array.isArray(data)) {
-          setCategories(data);
-        } else {
-          // No hay datos válidos: vaciar lista y setear mensaje
-          setCategories([]);
-          setError('No se encontraron categorías');
-        }
-      } catch (err) {
-        if (!mounted) return;
-        // Manejo seguro del error: intenta leer message de Axios u objeto general
-        const message =
-          (err instanceof AxiosError && err.message) ||
-          (err && typeof (err as any).message === 'string' && (err as any).message) ||
-          'Error al cargar categorías';
-        setError(message);
-        console.error('Error fetching categories:', err);
-      } finally {
-        if (!mounted) return;
-        setLoading(false);
-      }
-    };
+  const refetch = () => {
+    queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+  };
 
-    fetchCategories();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // refetch estable con useCallback y mismo comportamiento seguro
-  const refetch = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getAllCategories();
-      if (data && Array.isArray(data)) {
-        setCategories(data);
-      } else {
-        setCategories([]);
-        setError('No se encontraron categorías');
-      }
-    } catch (err) {
-      const message =
-        (err instanceof AxiosError && err.message) ||
-        (err && typeof (err as any).message === 'string' && (err as any).message) ||
-        'Error al recargar categorías';
-      setError(message);
-      console.error('Error refetching categories:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return { categories, loading, error, refetch };
+  return {
+    categories: query.data || [],
+    loading: query.isLoading,
+    error: query.error?.message || null,
+    isError: query.isError,
+    refetch,
+  };
 }

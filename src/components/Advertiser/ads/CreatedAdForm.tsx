@@ -5,7 +5,8 @@ import React, { useState } from 'react';
 import { Upload, X, DollarSign, Heart, Calculator, Calendar, MapPin, Tag, Link as LinkIcon } from 'lucide-react';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
-import { useCreateAd } from '@/hooks/useCreateAd';
+import { useCreateAd } from '@/hooks/ads/mutations';
+import { useRouter } from 'next/navigation';
 
 interface CreateAdFormData {
   title: string;
@@ -52,6 +53,8 @@ export function CreateAdForm() {
     }
   });
 
+  const router = useRouter();
+  const createAdMutation = useCreateAd();
   const [dragActive, setDragActive] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
 
@@ -59,7 +62,6 @@ export function CreateAdForm() {
   const { categories, loading: loadingCategories } = useCategories();
   const { departments, loading: loadingDepartments } = useDepartments();
   const { municipalities, loading: loadingMunicipalities } = useMunicipalities(selectedDepartment);
-  const { createAd, loading: submitting, error: submitError } = useCreateAd();
 
   const [selectedMunicipalitiesData, setSelectedMunicipalitiesData] = useState<
     { code: string; name: string; departmentCode: string; departmentName: string }[]
@@ -219,13 +221,20 @@ export function CreateAdForm() {
     formDataToSend.append('file', formData.file);
 
     try {
-      await createAd(formDataToSend);
+      await createAdMutation.mutateAsync(formDataToSend);
       alert('Anuncio creado con éxito');
-    } catch (error) {
-      console.error('Error al crear anuncio:', error);
-      alert('Error al crear anuncio');
+      router.push('/advertiser/ads');
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error al crear anuncio');
     }
   };
+
+  const submitting = createAdMutation.isPending;
+  const submitError = (() => {
+    const err = createAdMutation.error as any;
+    if (!err) return undefined;
+    return err?.response?.data?.message ?? err?.message ?? undefined;
+  })();
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">

@@ -4,6 +4,7 @@ import { SessionProvider } from './providers/SessionProvider';
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./providers/AuthProvider";
+import { ReactQueryProvider } from "./providers/ReactQueryProvider";
 
 const daysOne = Days_One({
   variable: "--font-days-one",
@@ -24,8 +25,14 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${daysOne.variable} font-sans antialiased`}>
-        <SessionProvider><AuthProvider>{children}</AuthProvider></SessionProvider>
-        <Toaster // 👉 colocar el toaster aquí
+        <ReactQueryProvider>
+          <SessionProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </SessionProvider>
+        </ReactQueryProvider>
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 3000,

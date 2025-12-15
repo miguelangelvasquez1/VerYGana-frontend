@@ -2,12 +2,12 @@
 
 import React from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import RaffleManagement from '@/components/admin/RaffleManagement';
+import AdManagement from '@/components/admin/ads/AdMangement';
 
-export default function RafflesPage() {
+export default function AdminAdsPage() {
   return (
     <AdminLayout>
-      <RaffleManagement />
+      <AdManagement />
     </AdminLayout>
   );
 }
