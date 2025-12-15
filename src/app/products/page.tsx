@@ -11,11 +11,10 @@ import {
 } from "lucide-react";
 
 import Navbar from "@/components/bars/NavBar";
-import CategoryCard from "@/components/ProductsPage/ProductCategoryCard";
-import ProductCard from "@/components/ProductsPage/ProductCard";
-import SearchBar from "@/components/ProductsPage/SearchBar";
-import ProductModal from "@/components/ProductsPage/ProductModal";
-import InfiniteScroll from "@/components/ProductsPage/InfiniteScroll";
+import CategoryCard from "@/components/products/ProductCategoryCard";
+import ProductCard from "@/components/products/ProductCard";
+import SearchBar from "@/components/products/SearchBar";
+import InfiniteScroll from "@/components/products/InfiniteScroll";
 import Footer from "@/components/Footer";
 
 // SERVICES
@@ -94,19 +93,6 @@ export default function ProductsPage() {
 
     setHasMore(!res.last);
     setLoading(false);
-  };
-
-  // ================================
-  // Abrir modal
-  // ================================
-  const handleProductClick = (product: any) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedProduct(null);
-    setIsModalOpen(false);
   };
 
   const formatPrice = (price: number) => {
@@ -300,8 +286,7 @@ export default function ProductsPage() {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  viewMode={viewMode}
-                  onProductClick={() => handleProductClick(product)}
+                  mode="consumer"
                 />
               ))}
             </div>

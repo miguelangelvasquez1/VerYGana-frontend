@@ -19,8 +19,8 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/bars/NavBar";
 import Footer from "@/components/Footer";
-import { PlanCard } from "@/components/PlansPage/PlanCard";
-import { RechargeCard } from "@/components/PlansPage/RechargeCard";
+import { PlanCard } from "@/components/plans/PlanCard";
+import { RechargeCard } from "@/components/plans/RechargeCard";
 
 // Datos de planes móviles
 const mobilePlans = [

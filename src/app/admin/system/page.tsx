@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import AdminLayout from '@/components/Admin/AdminLayout';
-import SystemManagement from '@/components/Admin/SystemManagement';
+import AdminLayout from '@/components/admin/AdminLayout';
+import SystemManagement from '@/components/admin/SystemManagement';
 
 export default function SystemPage() {
   return (

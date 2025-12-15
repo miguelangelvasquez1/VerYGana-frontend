@@ -1,3 +1,14 @@
+import { CategoryResponseDTO } from "@/types/Category.types";
+export interface RegisterConsumerDTO {
+  email: string;
+  password: string;
+  phoneNumber: string;
+  name: string;
+  lastName: string;
+  department: string;
+  municipality: string;
+  categories?: CategoryResponseDTO[];
+}
 
 export interface ConsumerInitialDataResponseDTO {
     id : number;
@@ -22,10 +33,4 @@ export interface ConsumerUpdateProfileRequestDTO {
     phoneNumber ?: string;
     department ?: string;
     municipality ?: string;
-}
-
-export interface EntityUpdatedResponse {
-    id: number;
-    message: string;
-    timestamp: string;
 }

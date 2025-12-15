@@ -2,9 +2,9 @@
 
 'use client';
 import React from 'react';
-import { DashboardLayout } from '@/components/Advertiser/layout/DashboardLayout';
-import { StatsCards } from '@/components/Advertiser/dashboard/StatsCards';
-import { PerformanceChart } from '@/components/Advertiser/dashboard/PerformanceChart';
+import { DashboardLayout } from '@/components/advertiser/layout/DashboardLayout';
+import { StatsCards } from '@/components/advertiser/dashboard/StatsCards';
+import { PerformanceChart } from '@/components/advertiser/dashboard/PerformanceChart';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function DashboardPage() {

@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import { Days_One } from "next/font/google";
-import { SessionProvider } from './providers/SessionProvider';
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
+
+import { SessionProvider } from "./providers/SessionProvider";
 import { AuthProvider } from "./providers/AuthProvider";
+import { CartProvider } from "@/context/CartContext";
+
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { Toaster } from "react-hot-toast";
 
 const daysOne = Days_One({
   variable: "--font-days-one",
   subsets: ["latin"],
-  weight: "400"
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -18,20 +22,32 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="es">
       <body className={`${daysOne.variable} font-sans antialiased`}>
-        <SessionProvider><AuthProvider>{children}</AuthProvider></SessionProvider>
-        <Toaster // 👉 colocar el toaster aquí
+        <SessionProvider>
+          <AuthProvider>
+            <CartProvider>
+              
+              {children}
+
+              {/* 👉 Drawer GLOBAL del carrito */}
+              <CartDrawer />
+            </CartProvider>
+          </AuthProvider>
+        </SessionProvider>
+
+        {/* 👉 Toaster global */}
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 3000,
             style: {
-              background: '#333',
-              color: '#fff',
+              background: "#333",
+              color: "#fff",
             },
           }}
         />
@@ -39,4 +55,3 @@ export default function RootLayout({
     </html>
   );
 }
-

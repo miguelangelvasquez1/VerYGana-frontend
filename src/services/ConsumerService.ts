@@ -1,48 +1,7 @@
 import apiClient from "@/lib/api/client";
-
-// ============================================
-// INTERFACES
-// ============================================
-export interface Category {
-  id: number;
-  name: string;
-}
-
-export interface RegisterConsumerDTO {
-  email: string;
-  password: string;
-  phoneNumber: string;
-  name: string;
-  lastName: string;
-  department: string;
-  municipality: string;
-  categories?: Category[];
-}
-
-export interface ConsumerProfile {
-  id: number;
-  name: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  department: string;
-  municipio: string;
-  categories: Category[];
-  wallet: {
-    balance: number;
-  };
-}
-
-export interface UpdateConsumerDTO {
-  name?: string;
-  lastName?: string;
-  phoneNumber?: string;
-  department?: string;
-  municipio?: string;
-  categories?: Category[];
-}
-
-
+import { CategoryResponseDTO } from "@/types/Category.types";
+import { RegisterConsumerDTO, ConsumerInitialDataResponseDTO, ConsumerProfileResponseDTO, ConsumerUpdateProfileRequestDTO} from "@/types/Consumer.types";
+import { EntityUpdatedResponseDTO } from "@/types/GenericTypes";
 // ============================================
 // MÉTODOS DEL SERVICE
 // ============================================
@@ -58,7 +17,7 @@ export const registerConsumer = async (data: {
   lastNames: string;
   department: string;
   municipality: string;
-  categories?: Category[];
+  categories?: CategoryResponseDTO[];
 }): Promise<any> => {
   const payload: RegisterConsumerDTO = {
     email: data.email,
@@ -76,10 +35,18 @@ export const registerConsumer = async (data: {
 };
 
 /**
+ * Obtener datos iniciales del consumidor
+ */
+export const getConsumerInitialData = async (): Promise<ConsumerInitialDataResponseDTO> => {
+  const response = await apiClient.get(`/consumers/initialData`);
+  return response.data;
+}
+
+/**
  * Obtener perfil del consumidor
  */
-export const getConsumerProfile = async (consumerId: number): Promise<ConsumerProfile> => {
-  const response = await apiClient.get(`/consumers/${consumerId}`);
+export const getConsumerProfile = async (): Promise<ConsumerProfileResponseDTO> => {
+  const response = await apiClient.get(`/consumers/profile`);
   return response.data;
 };
 
@@ -87,10 +54,9 @@ export const getConsumerProfile = async (consumerId: number): Promise<ConsumerPr
  * Actualizar perfil del consumidor
  */
 export const updateConsumerProfile = async (
-  consumerId: number, 
-  data: UpdateConsumerDTO
-): Promise<ConsumerProfile> => {
-  const response = await apiClient.put(`/consumers/${consumerId}`, data);
+  data: ConsumerUpdateProfileRequestDTO
+): Promise<EntityUpdatedResponseDTO> => {
+  const response = await apiClient.put(`/consumers/profile/edit`, data);
   return response.data;
 };
 

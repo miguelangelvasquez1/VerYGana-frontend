@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import AdminLayout from '@/components/Admin/AdminLayout';
-import RaffleManagement from '@/components/Admin/RaffleManagement';
+import AdminLayout from '@/components/admin/AdminLayout';
+import RaffleManagement from '@/components/admin/RaffleManagement';
 
 export default function RafflesPage() {
   return (

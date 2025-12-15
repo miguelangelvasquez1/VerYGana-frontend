@@ -1,6 +1,6 @@
 import React from "react";
 import { Users, Gift, Award, Eye, Heart } from "lucide-react";
-import CharityPost from "@/components/forumComponents/CharityPost";
+import CharityPost from "@/components/forum/CharityPost";
 import Navbar from "@/components/bars/NavBar";
 import Footer from "@/components/Footer";
 export default function ForumPage() {

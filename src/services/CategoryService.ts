@@ -1,13 +1,6 @@
 // services/CategoryService.ts
 import apiClient from "@/lib/api/client";
-
-export interface Category {
-  id: number;
-  name: string;
-  description?: string;
-  icon?: string;
-  isActive?: boolean;
-}
+import { Category } from "@/types/Category.types";
 
 // ============================================
 // MÉTODOS DEL SERVICE
