@@ -12,6 +12,7 @@ import { CartService } from '@/services/CartService';
 import { CreatePurchaseRequestDTO } from '@/types/cart.types';
 import Navbar from '@/components/bars/NavBar';
 import Footer from '@/components/Footer';
+import {purchaseService} from '@/services/PurchaseService';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -53,24 +54,8 @@ export default function CheckoutPage() {
       };
 
       // Llamar a tu endpoint de compra
-      const response = await fetch('/api/purchases/buy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Aquí debes agregar tu token de autenticación
-          // 'Authorization': `Bearer ${yourToken}`,
-        },
-        body: JSON.stringify(purchaseRequest),
-      });
+      const result = await purchaseService.createPurchase(purchaseRequest);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al procesar la compra');
-      }
-
-      const result = await response.json();
-
-      // Limpiar el carrito
       clearCart();
 
       // Redirigir a página de confirmación
@@ -186,6 +171,20 @@ export default function CheckoutPage() {
                   placeholder="Instrucciones especiales..."
                 />
               </div>
+              <button
+                type="submit"
+                disabled={isProcessing || !stockValidation.isValid}
+                className="w-full mt-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {isProcessing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Procesando...
+                  </span>
+                ) : (
+                  'Confirmar Compra'
+                )}
+              </button>
             </form>
           </div>
 
@@ -223,22 +222,6 @@ export default function CheckoutPage() {
                   </span>
                 </div>
               </div>
-
-              <button
-                type="submit"
-                disabled={isProcessing || !stockValidation.isValid}
-                onClick={handleSubmit}
-                className="w-full mt-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-              >
-                {isProcessing ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Procesando...
-                  </span>
-                ) : (
-                  'Confirmar Compra'
-                )}
-              </button>
             </div>
           </div>
         </div>

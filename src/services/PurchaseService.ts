@@ -1,76 +1,9 @@
 import apiClient from "@/lib/api/client";
-
-export interface carItem{
-    productId: number;
-    name: string;
-    imageUrl: string;
-    price: number;
-    quantity: number;
-
-     // Información para el procesado de la compra
-    deliveryType: "AUTO" | "MANUAL" | "EXTERNAL_API";
-    digitalFormat: "LINK" | "CODE" | "FILE";
-    isInstantDelivery: boolean;
-
-    sellerId: number;
-    shopName: string;
-
-    // Para validaciones
-    stock: number;
-}
-
-// ===== DTOs =====
-export interface CreatePurchaseItemRequestDTO {
-    productId: number;
-    quantity: number;
-}
-
-export interface CreatePurchaseRequestDTO {
-    items: CreatePurchaseItemRequestDTO[];
-    contactEmail?: string;
-    notes?: string;
-    couponCode?: string;
-}
-
-export interface EntityCreatedResponse {
-    id: number;
-    message: string;
-    timestamp: string;
-}
-
-export interface PagedResponse<T> {
-    data: T[];
-    meta: {
-        page: number;
-        size: number;
-        totalElements: number;
-        totalPages: number;
-        hasNext: boolean;
-        hasPrevious: boolean;
-        sorted: boolean;
-    };
-}
-
-// Modelo Transaction (según tu backend)
-export interface Transaction {
-    id: number;
-    referenceId: string;
-    amount: number;
-    transactionType: string;
-    transactionState: string;
-    paymentMethod: string;
-    createdAt: string;
-    completedAt: string | null;
-}
-
-// Modelo Purchase (puede ajustarse si tienes el DTO exacto)
-export interface Purchase {
-    id: number;
-    createdAt: string;
-    totalAmount: number;
-    status: string;
-    items: any[]; 
-}
+import { PagedResponse } from "@/types/common";
+import { Transaction } from "@/types/transaction.types"; 
+import { CreatePurchaseItemRequestDTO } from "@/types/cart.types";
+import { EntityCreatedResponseDTO } from "@/types/GenericTypes";
+import { PurchaseResponseDTO, CreatePurchaseRequestDTO } from "@/types/purchases/purchase.types";
 
 // ===== SERVICE METHODS =====
 export const purchaseService = {
@@ -79,17 +12,21 @@ export const purchaseService = {
      * Crear una compra
      * POST /purchases/buy
      */
-    async createPurchase(request: CreatePurchaseRequestDTO): Promise<EntityCreatedResponse> {
-        const response = await apiClient.post<EntityCreatedResponse>("/purchases/buy", request);
+    async createPurchase(request: CreatePurchaseRequestDTO): Promise<EntityCreatedResponseDTO> {
+        const response = await apiClient.post<EntityCreatedResponseDTO>("/purchases/buy", request);
         return response.data;
     },
 
+    async getPurchaseById(purchaseId: number): Promise<PurchaseResponseDTO> {
+        const response = await apiClient.get<PurchaseResponseDTO>(`/purchases/${purchaseId}`);
+        return response.data;
+    },
     /**
      * Obtener compras paginadas del consumidor actual
      * GET /purchases?page=0&size=10
      */
-    async getPurchases(page: number = 0, size: number = 10): Promise<PagedResponse<Purchase>> {
-        const response = await apiClient.get<PagedResponse<Purchase>>("/purchases", {
+    async getPurchases(page: number = 0, size: number = 10): Promise<PagedResponse<PurchaseResponseDTO>> {
+        const response = await apiClient.get<PagedResponse<PurchaseResponseDTO>>("/purchases", {
             params: { page, size },
         });
         return response.data;
