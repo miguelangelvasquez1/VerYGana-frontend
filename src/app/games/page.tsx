@@ -22,8 +22,8 @@ export interface GameCardDTO {
 /* =========================
    COMPONENTE: Banner
 ========================= */
-const CasinoBanner: React.FC<{ title: string; subtitle: string }> = ({ title, subtitle }) => (
-  <div className="w-full rounded-2xl bg-gradient-to-r from-indigo-700 to-blue-600 p-6 text-white shadow">
+const CasinoBanner: React.FC<{ title: string; subtitle: string, color: string }> = ({ title, subtitle, color }) => (
+  <div className={`w-full h-40 rounded-2xl bg-gradient-to-r ${color} p-14 text-white shadow`}>
     <h2 className="text-2xl font-bold">{title}</h2>
     <p className="mt-1 text-sm opacity-90">{subtitle}</p>
   </div>
@@ -79,14 +79,15 @@ const GameSection: React.FC<{
   title: string;
   icon?: React.ReactNode;
   games: GameCardDTO[];
-}> = ({ title, icon, games }) => (
+  selectable?: boolean; // permite o no seleccionar juegos
+}> = ({ title, icon, games, selectable = true }) => (
   <section className="mt-8">
     <div className="mb-4 flex items-center gap-2">
       {icon}
       <h2 className="text-lg font-bold">{title}</h2>
     </div>
 
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 ${!selectable ? 'pointer-events-none opacity-90' : ''}`}>
       {games.map(game => (
         <GameCard key={game.id} game={game} />
       ))}
@@ -98,6 +99,10 @@ const GameSection: React.FC<{
    PANEL PRINCIPAL
 ========================= */
 const GamesPanelPage = () => {
+  const handleSponsoredPlay = () => {
+    // En el futuro: lógica de selección aleatoria + tracking
+    alert('Iniciando un juego patrocinado aleatorio');
+  };
   // Datos mock (luego vienen de la API)
   const sponsoredGames: GameCardDTO[] = [
     {
@@ -134,12 +139,23 @@ const GamesPanelPage = () => {
   return (
     <>
       <Navbar />
+      <div className="bg-gradient-to-br from-green-500 via-cyan-600 to-purple-500 text-white py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+              Gana dinero jugando nuestros juegos patrocinados
+            </h1>
+          </div>
+        <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
+          Disfruta de una variedad de juegos diseñados para entretenerte y ofrecerte la oportunidad de ganar premios reales. ¡Empieza a jugar ahora y convierte tu diversión en ganancias!
+        </p>
+        </div>
       <main className="p-4 md:p-8 max-w-7xl mx-auto">
-
+      
         {/* Banner subliminal */}
         <CasinoBanner
           title="Juega, gana y vuelve a intentarlo"
           subtitle="Cada partida puede acercarte a tu próxima recompensa"
+          color='from-indigo-700 to-blue-600'
         />
 
         {/* Buscador */}
@@ -148,13 +164,41 @@ const GamesPanelPage = () => {
         </div>
 
         {/* Juegos patrocinados */}
-        <GameSection
-          title="Juegos Patrocinados"
-          icon={<Star className="h-5 w-5 text-yellow-500" />}
-          games={sponsoredGames}
+        {/* Juegos patrocinados (no seleccionables) */}
+        <div className="mt-10 mb-10 rounded-2xl border border-dashed p-6 bg-gradient-to-br from-yellow-50 to-white">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              <h2 className="text-lg font-bold">Juegos Patrocinados</h2>
+            </div>
+
+            <button
+              onClick={handleSponsoredPlay}
+              className="rounded-xl bg-yellow-400 px-6 py-2 text-sm font-bold text-black hover:bg-yellow-300 transition"
+            >
+              Jugar ahora 🎲
+            </button>
+          </div>
+
+          <p className="text-sm text-gray-600 mb-6">
+            Un juego se selecciona de forma aleatoria para garantizar igualdad entre anunciantes.
+          </p>
+
+          <GameSection
+            title=""
+            games={sponsoredGames}
+            selectable={false}
+          />
+        </div>
+
+        <CasinoBanner
+          title="Juega y diviertete sin límites"
+          subtitle="Diviértete con nuestros increibles juegos gratuitos"
+          color='from-green-500 to-green-700'
         />
 
         {/* Juegos solo diversión */}
+        {/* Juegos solo diversión (seleccionables) */}
         <GameSection
           title="Juegos para divertirse"
           icon={<Gamepad2 className="h-5 w-5 text-blue-500" />}
