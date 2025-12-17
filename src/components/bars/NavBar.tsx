@@ -125,6 +125,12 @@ export default function Navbar() {
               </button>
             </Link>
 
+            <Link href={"/games"}>
+              <button className={pathname === "/ads" ? activeButtonStyle : buttonsStyle}>
+                Juegos
+              </button>
+            </Link>
+
             <Link href={"/ads"}>
               <button className={pathname === "/ads" ? activeButtonStyle : buttonsStyle}>
                 Anuncios
