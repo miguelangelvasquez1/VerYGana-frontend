@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import LoginForm from "../../components/forms/LoginForm";
+import LoginForm from "../../../components/forms/LoginForm";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
