@@ -8,13 +8,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const product = await getProductDetail(Number(id));
 
   return (
-    <div>
+    <>
       <Navbar/>
       <div className="container mx-auto px-4 py-6">
         <ProductDetail product={product} />
         <AddToCartButton product={product} variant="primary" />
       </div>
       <Footer />
-    </div>
+    </>
   );
 }

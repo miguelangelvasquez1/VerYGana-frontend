@@ -16,6 +16,8 @@ import type {
   ConsumerProfileResponseDTO,
   ConsumerUpdateProfileRequestDTO,
 } from "@/types/Consumer.types";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/bars/NavBar";
 
 // ----------------------------
 // VALIDATION SCHEMA (Zod)
@@ -123,105 +125,109 @@ export default function EditConsumerProfilePage() {
   // RENDER PAGE
   // ----------------------------
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      {/* Back Button */}
-      <Link
-        href="/explore/profile"
-        className="flex items-center text-blue-600 hover:underline mb-6"
-      >
-        <ArrowLeft className="w-5 h-5 mr-2" />
-        Volver al perfil
-      </Link>
+    <>
+      <Navbar />
+      <div className="max-w-3xl mx-auto px-6 py-10">
+        {/* Back Button */}
+        <Link
+          href="/explore/profile"
+          className="flex items-center text-blue-600 hover:underline mb-6"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Volver al perfil
+        </Link>
 
-      <div className="bg-white shadow-lg rounded-2xl p-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">
-          Editar Información Personal
-        </h1>
+        <div className="bg-white shadow-lg rounded-2xl p-8">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+            Editar Información Personal
+          </h1>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              {...register("email")}
-              className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                {...register("email")}
+                className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Número de Teléfono
-            </label>
-            <input
-              type="text"
-              {...register("phoneNumber")}
-              className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.phoneNumber && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.phoneNumber.message}
-              </p>
-            )}
-          </div>
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Número de Teléfono
+              </label>
+              <input
+                type="text"
+                {...register("phoneNumber")}
+                className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {errors.phoneNumber && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.phoneNumber.message}
+                </p>
+              )}
+            </div>
 
-          {/* Department */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Departamento
-            </label>
-            <input
-              type="text"
-              {...register("department")}
-              className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.department && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.department.message}
-              </p>
-            )}
-          </div>
+            {/* Department */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Departamento
+              </label>
+              <input
+                type="text"
+                {...register("department")}
+                className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {errors.department && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.department.message}
+                </p>
+              )}
+            </div>
 
-          {/* Municipality */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Municipio
-            </label>
-            <input
-              type="text"
-              {...register("municipality")}
-              className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.municipality && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.municipality.message}
-              </p>
-            )}
-          </div>
+            {/* Municipality */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Municipio
+              </label>
+              <input
+                type="text"
+                {...register("municipality")}
+                className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {errors.municipality && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.municipality.message}
+                </p>
+              )}
+            </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full flex justify-center items-center gap-2 bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition disabled:bg-gray-400"
-          >
-            {saving ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Save className="w-5 h-5" />
-            )}
-            Guardar Cambios
-          </button>
-        </form>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={saving}
+              className="w-full flex justify-center items-center gap-2 bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition disabled:bg-gray-400"
+            >
+              {saving ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Save className="w-5 h-5" />
+              )}
+              Guardar Cambios
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
