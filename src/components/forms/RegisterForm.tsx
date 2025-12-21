@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { registerConsumer } from "@/services/ConsumerService";
 import { registerSeller } from "@/services/SellerService";
 import { registerAdvertiser } from "@/services/AdvertiserService";
-import { getAllCategories, Category } from "@/services/CategoryService";
+import { Category } from "@/types/Category.types";
 import { useCategories } from "@/hooks/useCategories";
 
 type Role = "BENEFICIARIO" | "VENDEDOR" | "ANUNCIANTE";
