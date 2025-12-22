@@ -23,6 +23,7 @@ const menuItems = [
   { href: '/advertiser/ads', icon: FileImage, label: 'Mis Anuncios' },
   { href: '/advertiser/ads/create', icon: PlusCircle, label: 'Crear Anuncio' },
   { href: '/advertiser/campaigns', icon: Target, label: 'Campañas' },
+  { href: '/advertiser/campaigns/create', icon: PlusCircle, label: 'Crear campaña' },
   { href: '/advertiser/analytics', icon: BarChart3, label: 'Estadísticas' },
   { href: '/advertiser/billing', icon: CreditCard, label: 'Facturación' },
   { href: '/advertiser/balance', icon: Wallet, label: 'Mi Saldo' },
@@ -87,7 +88,7 @@ export function Sidebar({ onClose }: SidebarProps) {
 
       {/* Saldo y información */}
       <div className="p-4 border-t border-gray-800">
-        <div className="bg-gray-800 rounded-lg p-4 mb-4">
+        {/* <div className="bg-gray-800 rounded-lg p-4 mb-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-300">Saldo Actual</span>
             <TrendingUp className="w-4 h-4 text-green-400" />
@@ -103,7 +104,7 @@ export function Sidebar({ onClose }: SidebarProps) {
               Recargar Saldo
             </Link>
           </div>
-        </div>
+        </div> */}
 
         {/* Botón de logout */}
         <button className="w-full flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">

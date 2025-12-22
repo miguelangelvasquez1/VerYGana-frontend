@@ -9,14 +9,14 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function DashboardPage() {
 
-  const { user, role, isAuthenticated } = useAuth();
+  // const { user, role, isAuthenticated } = useAuth();
 
   return (
     <DashboardLayout title="Dashboard">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <p className="text-gray-600">
-            {`Bienvenido de vuelta ${typeof user === 'string' ? user : user?.email ?? 'usuario'}. Aquí tienes un resumen de tu actividad publicitaria.`}
+            {/* {`Bienvenido de vuelta ${typeof user === 'string' ? user : user?.email ?? 'usuario'}. Aquí tienes un resumen de tu actividad publicitaria.`} */}
           </p>
         </div>
         

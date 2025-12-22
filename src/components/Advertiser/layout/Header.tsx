@@ -2,7 +2,8 @@
 'use client';
 
 import React from 'react';
-import { Menu, Bell, User, Search } from 'lucide-react';
+import { Menu, Bell, User, Search, Wallet } from 'lucide-react';
+import Link from 'next/link';
 
 interface HeaderProps {
   title?: string;
@@ -44,6 +45,21 @@ export function Header({ title, onMenuClick, showMenuButton }: HeaderProps) {
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
+            </div>
+
+            {/* Saldo */}
+            <div className="hidden sm:flex items-center bg-gray-100 rounded-lg px-3 py-2 space-x-2">
+              <Wallet className="w-4 h-4 text-gray-600" />
+              <div className="text-right leading-tight">
+                <p className="text-xs text-gray-500">Saldo</p>
+                <p className="text-sm font-semibold text-gray-900">$1,250.00</p>
+              </div>
+              <Link
+                href="/advertiser/balance"
+                className="ml-2 text-xs bg-blue-600 text-white px-2 py-1 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Recargar
+              </Link>
             </div>
 
             {/* Notificaciones */}

@@ -1,8 +1,6 @@
 // lib/auth/authOptions.ts
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { JWT } from 'next-auth/jwt';
-import { authService } from './authService';
 import { parseJwt } from '../utils/parseJwt';
 
 export interface AuthResponse {
