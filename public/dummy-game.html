@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dummy Game</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>🎮 Juego cargado correctamente</h1>
+    <p>SessionToken:</p>
+    <code id="token"></code>
+    <br /><br />
+    <button onclick="endGame()">Finalizar juego</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('token').innerText =
+      params.get('sessionToken');
+
+    function endGame() {
+      window.parent.postMessage({
+        type: 'GAME_END',
+        payload: {
+          score: 100,
+          completed: true
+        }
+      }, '*');
+    }
+  </script>
+</body>
+</html>

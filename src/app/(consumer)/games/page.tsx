@@ -3,72 +3,93 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Star, Gamepad2 } from 'lucide-react';
 import Navbar from '@/components/bars/NavBar';
 import Footer from '@/components/Footer';
 import GameSection from '@/components/games/GameSection';
-import { GameCardResponseDTO } from '@/types/game.types';
+import { GameCardResponseDTO } from '@/types/games/game.types';
 import Banner from '@/components/games/Banner';
 import GameSearchBar from '@/components/games/GameSearchBar';
-
+import { getAvailableGamesPage, init } from '@/services/GameService';
+import { useRouter } from 'next/navigation';
 
 /* =========================
    PANEL PRINCIPAL
 ========================= */
 const GamesPanelPage = () => {
-  const handleSponsoredPlay = () => {
-    // En el futuro: lógica de selección aleatoria + tracking
-    alert('Iniciando un juego patrocinado aleatorio');
-  };
-  // Datos mock (luego vienen de la API)
-  const sponsoredGames: GameCardResponseDTO[] = [
-    {
-      id: 1,
-      title: 'Rifa Diaria Oro',
-      imageUrl: 'https://via.placeholder.com/300x200',
-      sponsored: true,
-      rewardText: 'Gana créditos reales'
-    },
-    {
-      id: 2,
-      title: 'Ruleta Patrocinada',
-      imageUrl: 'https://via.placeholder.com/300x200',
-      sponsored: true,
-      rewardText: 'Hasta $2.000'
-    }
-  ];
+  const router = useRouter();
 
-  const freeGames: GameCardResponseDTO[] = [
-    {
-      id: 3,
-      title: 'Memoria Clásica',
-      imageUrl: 'https://via.placeholder.com/300x200',
+  const [sponsoredGames, setSponsoredGames] = useState<GameCardResponseDTO[]>([]);
+  const [freeGames, setFreeGames] = useState<GameCardResponseDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadGames = async () => {
+      try {
+        const page = await getAvailableGamesPage(0, 20);
+
+        const sponsored = page.data.filter(g => g.sponsored);
+        const free = page.data.filter(g => !g.sponsored);
+
+        setSponsoredGames(sponsored);
+        setFreeGames(free);
+      } catch (error) {
+        console.error('Error loading games', error);
+      }
+      finally {
+        setLoading(false);
+      }
+    };
+
+    loadGames();
+  }, []);
+
+  const handleSponsoredPlay = async () => {
+    if (!sponsoredGames.length) return;
+
+    const response = await init({
+      gameId: sponsoredGames[0].id,
+      sponsored: true
+    });
+
+    router.push(`/games/play?token=${response.sessionToken}`)
+  };
+
+  const handlePlay = async (game: GameCardResponseDTO) => {
+    if (!freeGames.length) return;
+
+    const response = await init({
+      gameId: game.id,
       sponsored: false
-    },
-    {
-      id: 4,
-      title: 'Puzzle Express',
-      imageUrl: 'https://via.placeholder.com/300x200',
-      sponsored: false
-    }
-  ];
+    });
+
+    router.push(`/games/play?token=${response.sessionToken}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-lg font-semibold">Cargando juegos...</p>
+      </div>
+    );
+  }
 
   return (
     <>
       <Navbar />
       <div className="bg-gradient-to-br from-green-500 via-cyan-600 to-purple-500 text-white py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Gana dinero jugando nuestros juegos patrocinados
-            </h1>
-          </div>
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            Gana dinero jugando nuestros juegos patrocinados
+          </h1>
+        </div>
         <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
           Disfruta de una variedad de juegos diseñados para entretenerte y ofrecerte la oportunidad de ganar premios reales. ¡Empieza a jugar ahora y convierte tu diversión en ganancias!
         </p>
-        </div>
+      </div>
       <main className="p-4 md:p-8 max-w-7xl mx-auto">
-      
+
         {/* Banner subliminal */}
         <Banner
           title="Juega, gana y vuelve a intentarlo"
@@ -121,6 +142,7 @@ const GamesPanelPage = () => {
           title="Juegos para divertirse"
           icon={<Gamepad2 className="h-5 w-5 text-blue-500" />}
           games={freeGames}
+          onGameClick={(game) => handlePlay(game)}
         />
       </main>
       <Footer />
