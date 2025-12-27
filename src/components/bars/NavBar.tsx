@@ -314,7 +314,7 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
                   >
                     <ShoppingBag className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
-                    <span>Mis Pedidos</span>
+                    <span>Mis compras</span>
                   </Link>
 
                   <Link
