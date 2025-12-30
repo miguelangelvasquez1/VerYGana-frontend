@@ -310,7 +310,7 @@ export default function Navbar() {
                   </Link>
 
                   <Link
-                    href="/orders"
+                    href="/purchases"
                     className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
                   >
                     <ShoppingBag className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
