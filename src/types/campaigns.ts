@@ -1,6 +1,26 @@
 // types/campaigns.ts
 
+import { MunicipalityDTO } from "@/services/LocationService";
+import { Category } from "./Category.types";
+
 // ==================== Enums ====================
+
+export const MIME_TYPE_MAP: Record<string, string> = {
+  IMAGE_PNG: 'image/png',
+  IMAGE_JPEG: 'image/jpeg',
+  IMAGE_WEBP: 'image/webp',
+  AUDIO_MP3: 'audio/mpeg',
+  AUDIO_OGG: 'audio/ogg',
+  VIDEO_MP4: 'video/mp4',
+};
+
+export type SupportedMimeType =
+  | 'IMAGE_PNG'
+  | 'IMAGE_JPEG'
+  | 'IMAGE_WEBP'
+  | 'AUDIO_MP3'
+  | 'AUDIO_OGG'
+  | 'VIDEO_MP4';
 
 export enum AssetType {
   BANNER_IMAGE = 'BANNER_IMAGE',
@@ -21,9 +41,11 @@ export enum MediaType {
 }
 
 export enum CampaignStatus {
-  ACTIVE = 'active',
-  PAUSED = 'paused',
-  COMPLETED = 'completed'
+  DRAFT = 'DRAFT',
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED'
 }
 
 // ==================== Entidades ====================
@@ -40,6 +62,7 @@ export interface GameAssetDefinition {
   id: number;
   assetType: string;
   mediaType: MediaType;
+  allowedMimeTypes: SupportedMimeType[];
   required: boolean;
   multiple: boolean;
   description: string;
@@ -54,29 +77,33 @@ export interface Asset {
 }
 
 export interface Campaign {
-  id: string | number;
-  name: string;
-  gameId?: number;
-  advertiserId?: number;
-  ads: any[];
-  totalBudget: number;
-  totalSpent: number;
+  id: number;
+  gameId: number;
+  gameTitle: string;
+  budget: number;
+  spent: number;
+  sessionsPlayed: number;
+  completedSessions: number;
+  totalPlayTimeSeconds: number;
   status: CampaignStatus;
-  startDate: Date;
-  endDate?: Date;
-  totalImpressions: number;
-  totalClicks: number;
-  averageCTR: number;
-  assets?: Asset[];
-  active?: boolean;
+  startDate?: string;
+  endDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  // 🔽 Edit modal
+  targetUrl: string | null;
+  categories: Category[];
+  minAge: number;
+  maxAge: number;
+  targetGender: 'ALL' | 'MALE' | 'FEMALE';
+  targetMunicipalities: MunicipalityDTO[];
 }
 
 // ==================== DTOs de Request ====================
 
-export interface FileUploadRequest {
-  originalFileName: string;
-  contentType: string;
-  sizeBytes: number;
+export interface CreateCampaignRequest {
+  gameId: number;
+  assets: CreateAssetRequest[];
 }
 
 export interface CreateAssetRequest {
@@ -84,27 +111,49 @@ export interface CreateAssetRequest {
   fileMetadata: FileUploadRequest;
 }
 
-export interface CreateCampaignRequest {
-  gameId: number;
-  assets: CreateAssetRequest[];
+export interface FileUploadRequest {
+  originalFileName: string;
+  contentType: string;
+  sizeBytes: number;
+}
+
+export interface CampaignDetails {
+  budget: number;
+  targetUrl: string | null;
+  categoryIds: number[];
+  targetAudience: {
+    minAge: number;
+    maxAge: number;
+    gender: 'ALL' | 'MALE' | 'FEMALE';
+    municipalityCodes: string[];
+  };
 }
 
 // ==================== DTOs de Response ====================
 
 export interface AssetUploadPermission {
+  assetId: number;
+  permission: FileUploadPermission;
+}
+
+export interface FileUploadPermission {
   uploadUrl: string;
   publicUrl: string;
   expiresInSeconds: number;
 }
 
-export interface CampaignResponse {
-  id: number;
-  gameId: number;
-  advertiserId: number;
-  active: boolean;
-  assets: Asset[];
-  createdAt: string;
-  updatedAt: string;
+export type PrepareCampaignResponse = Record<number, FileUploadPermission>;
+
+
+/**
+ * DTO que retorna el backend después de preparar un asset
+ * Contiene el ID del asset creado y las URLs para subir
+ */
+export interface FileUploadPermissionDTO {
+  assetId: number;           // ID del asset creado en BD
+  uploadUrl: string;         // URL pre-firmada para PUT
+  publicUrl: string;         // URL pública final del asset
+  expiresInSeconds: number;  // Tiempo de expiración de uploadUrl
 }
 
 // ==================== UI State ====================
@@ -117,7 +166,7 @@ export interface FileWithPreview {
   uploaded: boolean;
   progress: number;
   error?: string;
-  objectKey?: string;
+  assetId?: number;  // ID del asset una vez creado
 }
 
 export interface UploadState {
@@ -129,17 +178,17 @@ export interface UploadState {
 
 // ==================== Validación ====================
 
-export const ACCEPTED_FILE_TYPES: Record<MediaType, string[]> = {
+export const ACCEPTED_FILE_TYPES: Record<MediaType, readonly string[]> = {
   [MediaType.IMAGE]: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
   [MediaType.VIDEO]: ['video/mp4', 'video/webm', 'video/quicktime'],
   [MediaType.AUDIO]: ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg']
 };
 
-export const MAX_FILE_SIZES = {
+export const MAX_FILE_SIZES: Record<MediaType, number> = {
   [MediaType.IMAGE]: 10 * 1024 * 1024,  // 10 MB
   [MediaType.VIDEO]: 100 * 1024 * 1024, // 100 MB
   [MediaType.AUDIO]: 20 * 1024 * 1024   // 20 MB
-} as const;
+};
 
 // ==================== Helpers ====================
 
@@ -147,8 +196,8 @@ export function getAcceptedTypes(mediaType: MediaType): string {
   return ACCEPTED_FILE_TYPES[mediaType].join(',');
 }
 
-export function isValidFileType(file: File, mediaType: MediaType): boolean {
-  return ACCEPTED_FILE_TYPES[mediaType].includes(file.type);
+export function isValidFileType(file: File, allowedMimeTypes: string[]): boolean {
+  return allowedMimeTypes.map((t) => MIME_TYPE_MAP[t]).includes(file.type);
 }
 
 export function isValidFileSize(file: File, mediaType: MediaType): boolean {

@@ -1,25 +1,23 @@
 // hooks/campaigns/useCampaignUpload.ts
 import { useState, useCallback } from 'react';
 import { campaignService } from '@/services/campaignService';
+import { fileUploadService } from '@/services/FileUploadService';
 import {
   FileWithPreview,
   CreateAssetRequest,
   UploadState,
   GameAssetDefinition,
+  CampaignDetails,
 } from '@/types/campaigns';
 
 interface UseCampaignUploadProps {
   gameId: number;
-  advertiserId: number;
-  onSuccess?: (campaignId: number) => void;
-  onError?: (error: string) => void;
+  campaignDetails: CampaignDetails;
 }
 
 export function useCampaignUpload({
   gameId,
-  advertiserId,
-  onSuccess,
-  onError,
+  campaignDetails,
 }: UseCampaignUploadProps) {
   const [uploadState, setUploadState] = useState<UploadState>({
     status: 'idle',
@@ -52,7 +50,7 @@ export function useCampaignUpload({
       files: Map<number, FileWithPreview[]>,
       assetDefinitions: GameAssetDefinition[],
       setFiles: React.Dispatch<React.SetStateAction<Map<number, FileWithPreview[]>>>
-    ) => {
+    ): Promise<UploadCampaignResult> => {
       try {
         setUploadState({ status: 'preparing', progress: 0 });
 
@@ -71,18 +69,22 @@ export function useCampaignUpload({
           });
         });
 
-        // PASO 2: Obtener pre-signed URLs
+        console.log('📤 [STEP 1] Preparando assets:', assetsToUpload);
+
+        // PASO 2: Obtener pre-signed URLs y assetIds (sin detalles de campaña aún)
         const uploadPermissions = await campaignService.prepareAssetUploads({
           gameId,
           assets: assetsToUpload,
         });
 
+        console.log('✅ [STEP 2] Permisos recibidos (array):', uploadPermissions);
+
         setUploadState({ status: 'uploading', progress: 0 });
 
-        // PASO 3: Subir archivos a R2
-        const uploadedAssets: Record<number, string> = {};
+        // PASO 3: Subir archivos a R2 y recolectar assetIds
+        const uploadedAssetIds: number[] = [];
         let completedUploads = 0;
-        const totalUploads = assetsToUpload.length;
+        const totalUploads = uploadPermissions.length;
 
         // Marcar todos como "uploading"
         setFiles((prev) => {
@@ -96,14 +98,22 @@ export function useCampaignUpload({
           return updated;
         });
 
-        for (const asset of assetsToUpload) {
-          const permission = uploadPermissions[asset.assetDefinitionId];
-          const fileList = files.get(asset.assetDefinitionId);
+        // Iterar sobre cada asset usando el array de permissions
+        for (let i = 0; i < uploadPermissions.length; i++) {
+          const { assetId, permission } = uploadPermissions[i];
+          const assetRequest = assetsToUpload[i];
+
+          const defId = assetRequest.assetDefinitionId;
+          const fileList = files.get(defId);
+
           const fileWithPreview = fileList?.find(
-            (f) => f.file.name === asset.fileMetadata.originalFileName
+            (f) => f.file.name === assetRequest.fileMetadata.originalFileName
           );
 
-          if (!fileWithPreview || !permission) continue;
+          if (!fileWithPreview) {
+            console.error(`❌ Archivo no encontrado: ${assetRequest.fileMetadata.originalFileName}`);
+            throw new Error(`Archivo no encontrado: ${assetRequest.fileMetadata.originalFileName}`);
+          }
 
           try {
             setUploadState((prev) => ({
@@ -111,16 +121,17 @@ export function useCampaignUpload({
               currentFile: fileWithPreview.file.name,
             }));
 
-            // Upload con progress tracking
-            await campaignService.uploadAssetToR2(
+            console.log(`📤 [STEP 3] Subiendo: ${fileWithPreview.file.name}`);
+            console.log(`📤 [STEP 3] AssetId: ${assetId}, URL: ${permission.uploadUrl}`);
+
+            await fileUploadService.uploadToR2(
               permission.uploadUrl,
               fileWithPreview.file,
-              fileWithPreview.file.type,
               (progress) => {
                 setFiles((prev) =>
                   updateFileProgress(
                     prev,
-                    asset.assetDefinitionId,
+                    defId,
                     fileWithPreview.file.name,
                     { progress }
                   )
@@ -128,29 +139,37 @@ export function useCampaignUpload({
               }
             );
 
-            // Extraer objectKey
-            const objectKey = new URL(permission.publicUrl).pathname.substring(1);
-            uploadedAssets[asset.assetDefinitionId] = objectKey;
+            console.log(`✅ [STEP 3] Subido exitosamente. AssetId: ${assetId}`);
 
-            // Marcar como uploaded
+            uploadedAssetIds.push(assetId);
+
             setFiles((prev) =>
               updateFileProgress(
                 prev,
-                asset.assetDefinitionId,
+                defId,
                 fileWithPreview.file.name,
-                { uploading: false, uploaded: true, progress: 100, objectKey }
+                {
+                  uploading: false,
+                  uploaded: true,
+                  progress: 100,
+                  assetId,
+                }
               )
             );
 
             completedUploads++;
-            const overallProgress = (completedUploads / totalUploads) * 100;
-            setUploadState((prev) => ({ ...prev, progress: overallProgress }));
-          } catch (uploadError) {
-            // Marcar este archivo con error
+            setUploadState((prev) => ({
+              ...prev,
+              progress: (completedUploads / totalUploads) * 100,
+            }));
+
+          } catch (e) {
+            console.error(`❌ [STEP 3] Error subiendo ${fileWithPreview.file.name}:`, e);
+            
             setFiles((prev) =>
               updateFileProgress(
                 prev,
-                asset.assetDefinitionId,
+                defId,
                 fileWithPreview.file.name,
                 {
                   uploading: false,
@@ -159,39 +178,42 @@ export function useCampaignUpload({
                 }
               )
             );
-            throw new Error(`Error subiendo ${fileWithPreview.file.name}`);
+            throw e;
           }
         }
 
-        // PASO 4: Crear campaña
+        console.log('✅ [STEP 3] Todos los archivos subidos. AssetIds:', uploadedAssetIds);
+
+        // Verificar que tenemos assetIds
+        if (uploadedAssetIds.length === 0) {
+          throw new Error('No se pudieron obtener IDs de assets');
+        }
+
+        // PASO 4: Crear campaña con los IDs de assets y detalles
         setUploadState({ status: 'creating', progress: 100 });
 
-        const campaign = await campaignService.createCampaign(
+        const success = await campaignService.createCampaign(
           gameId,
-          advertiserId,
-          uploadedAssets
+          uploadedAssetIds,
+          campaignDetails
         );
+
+        console.log('✅ [STEP 4] Campaña creada:', success);
 
         setUploadState({ status: 'success', progress: 100 });
 
-        if (onSuccess) {
-          onSuccess(campaign.id);
-        }
+        return { ok: true };
 
-        return campaign;
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Error creando campaña';
-        setUploadState({ status: 'error', progress: 0, error: errorMessage });
+      } catch (error: any) {
+        console.error('❌ Error en uploadCampaign:', error);
 
-        if (onError) {
-          onError(errorMessage);
-        }
+        const errorMsg = error?.message ?? 'Error inesperado al crear la campaña';
+        setUploadState({ status: 'error', progress: 100, error: errorMsg });
 
-        throw error;
+        return { ok: false, errorMsg };
       }
     },
-    [gameId, advertiserId, onSuccess, onError, updateFileProgress]
+    [gameId, campaignDetails, updateFileProgress]
   );
 
   const resetUpload = useCallback(() => {
@@ -204,3 +226,7 @@ export function useCampaignUpload({
     resetUpload,
   };
 }
+
+type UploadCampaignResult =
+  | { ok: true; campaignId?: number }
+  | { ok: false; errorMsg: string };

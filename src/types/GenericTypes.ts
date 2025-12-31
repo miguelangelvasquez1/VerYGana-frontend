@@ -20,3 +20,9 @@ export interface PageResponse<T> {
   last: boolean;
   empty: boolean;
 }
+
+export interface FileUploadPermission {
+  uploadUrl: string;
+  publicUrl: string;
+  expiresInSeconds: number;
+}

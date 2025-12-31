@@ -2,7 +2,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAllCategories, Category } from '@/services/CategoryService';
+import { getAllCategories } from '@/services/CategoryService';
 
 // Query keys
 export const categoryKeys = {

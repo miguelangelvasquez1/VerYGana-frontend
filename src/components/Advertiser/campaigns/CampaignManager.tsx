@@ -2,85 +2,133 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, Edit, Trash2, Plus, BarChart3, ArrowLeft } from 'lucide-react';
-import { Campaign } from '@/types/ads/advertiser';
+import { Plus, BarChart3, ArrowLeft } from 'lucide-react';
 import { CreateCampaignForm } from './CreateCampaignForm';
+import { EditCampaignModal } from './EditCampaignModal';
+import { CampaignCard } from './CampaignCard';
+import { useCampaigns, useUpdateCampaignStatus } from '@/hooks/campaigns/useCampaigns';
+import { Campaign } from '@/types/campaigns';
 
 export function CampaignManager() {
   const [view, setView] = useState<'list' | 'create'>('list');
-  const [campaigns, setCampaigns] = useState<Campaign[]>([
-    {
-      id: '1',
-      name: 'Campaña Black Friday',
-      ads: [],
-      totalBudget: 1000,
-      totalSpent: 347.80,
-      status: 'active',
-      startDate: new Date('2024-11-01'),
-      endDate: new Date('2024-11-30'),
-      totalImpressions: 25430,
-      totalClicks: 1247,
-      averageCTR: 4.9
-    },
-    {
-      id: '2',
-      name: 'Promoción Producto Verano',
-      ads: [],
-      totalBudget: 750,
-      totalSpent: 623.45,
-      status: 'paused',
-      startDate: new Date('2024-10-15'),
-      endDate: new Date('2024-12-15'),
-      totalImpressions: 18920,
-      totalClicks: 876,
-      averageCTR: 4.6
+  const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
+  
+  // Queries y mutations
+  const { data: campaignsPage, isLoading, error } = useCampaigns(0, 10);
+  const updateStatusMutation = useUpdateCampaignStatus();
+
+  const campaigns = campaignsPage ?? [];
+
+  /**
+   * Valida las transiciones de estado según las reglas del backend
+   */
+  const validateStatusTransition = (campaign: Campaign, toStatus: string
+  ): { valid: boolean; error?: string } => {
+
+    const fromStatus = campaign.status;
+
+    if (fromStatus === toStatus) {
+      return { valid: false, error: 'La campaña ya está en ese estado' };
     }
-  ]);
 
-  const getStatusBadge = (status: Campaign['status']) => {
-    const styles = {
-      active: 'bg-green-100 text-green-800',
-      paused: 'bg-yellow-100 text-yellow-800',
-      completed: 'bg-blue-100 text-blue-800'
-    };
+    switch (fromStatus) {
+      case 'DRAFT':
+        if (toStatus !== 'ACTIVE' && toStatus !== 'PAUSED') {
+          return { valid: false, error: 'Desde BORRADOR solo puedes activar o pausar la campaña' };
+        }
+        break;
 
-    const labels = {
-      active: 'Activa',
-      paused: 'Pausada',
-      completed: 'Completada'
-    };
+      case 'ACTIVE':
+        if (toStatus !== 'PAUSED' && toStatus !== 'CANCELLED') {
+          return { valid: false, error: 'Desde ACTIVA solo puedes pausar o cancelar la campaña' };
+        }
+        break;
 
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status]}`}>
-        {labels[status]}
-      </span>
-    );
+      case 'PAUSED':
+        if (toStatus !== 'ACTIVE' && toStatus !== 'CANCELLED') {
+          return { valid: false, error: 'Desde PAUSADA solo puedes activar o cancelar la campaña' };
+        }
+        break;
+
+      case 'CANCELLED':
+        return { valid: false, error: 'Una campaña cancelada no puede modificarse' };
+
+      case 'COMPLETED':
+        return { valid: false, error: 'Una campaña completada no puede modificarse' };
+
+      default:
+        return { valid: false, error: 'Estado de campaña desconocido' };
+    }
+
+    return { valid: true };
   };
 
-  const toggleCampaignStatus = (campaignId: string) => {
-    setCampaigns(prev => prev.map(campaign => 
-      campaign.id === campaignId 
-        ? { ...campaign, status: campaign.status === 'active' ? 'paused' : 'active' }
-        : campaign
-    ));
-  };
-
-  const handleCampaignCreated = (campaignId: number) => {
-    // Recargar lista de campañas
-    console.log('Campaña creada:', campaignId);
-    // TODO: Fetch campaigns from API
-    setView('list');
-  };
-
-  const handleDeleteCampaign = async (campaignId: string) => {
-    if (!confirm('¿Estás seguro de eliminar esta campaña?')) return;
+  const handleToggleStatus = async (campaign: Campaign) => {
+    // Determinar el nuevo estado según el estado actual
+    let newStatus: string;
+    
+    if (campaign.status === 'DRAFT') {
+      // Desde DRAFT, intentar activar
+      newStatus = 'ACTIVE';
+    } else if (campaign.status === 'ACTIVE') {
+      // Desde ACTIVE, pausar
+      newStatus = 'PAUSED';
+    } else if (campaign.status === 'PAUSED') {
+      // Desde PAUSED, activar
+      newStatus = 'ACTIVE';
+    } else {
+      alert('No se puede cambiar el estado de esta campaña');
+      return;
+    }
+console.log(campaign.status);
+    // Validar la transición
+    const validation = validateStatusTransition(campaign, newStatus);
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
+    }
 
     try {
-      // TODO: Call API to delete
-      setCampaigns(prev => prev.filter(c => c.id !== campaignId));
-    } catch (error) {
-      console.error('Error eliminando campaña:', error);
+      await updateStatusMutation.mutateAsync({
+        campaignId: Number(campaign.id),
+        status: newStatus,
+      });
+    } catch (error: any) {
+      console.error('Error actualizando estado:', error);
+      alert(error.response?.data?.message || 'Error al actualizar el estado de la campaña');
     }
+  };
+
+  const handleCancelCampaign = async (campaign: Campaign) => {
+    // Validar que se puede cancelar
+    const validation = validateStatusTransition(campaign, 'CANCELLED');
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
+    }
+
+    if (!confirm('¿Estás seguro de cancelar esta campaña? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      await updateStatusMutation.mutateAsync({
+        campaignId: Number(campaign.id),
+        status: 'CANCELLED',
+      });
+    } catch (error: any) {
+      console.error('Error cancelando campaña:', error);
+      alert(error.response?.data?.message || 'Error al cancelar la campaña');
+    }
+  };
+
+  const handleEditCampaign = (campaign: Campaign) => {
+    // Verificar que se puede editar (solo DRAFT o PAUSED)
+    if (campaign.status !== 'DRAFT' && campaign.status !== 'PAUSED') {
+      alert(`No se puede editar una campaña en estado ${campaign.status}. Solo se pueden editar campañas en BORRADOR o PAUSADAS.`);
+      return;
+    }
+    setEditingCampaign(campaign);
   };
 
   if (view === 'create') {
@@ -102,9 +150,8 @@ export function CampaignManager() {
         </div>
 
         <CreateCampaignForm
-          onSuccess={handleCampaignCreated}
           onCancel={() => setView('list')} 
-          advertiserId={0}        />
+        />
       </div>
     );
   }
@@ -127,7 +174,17 @@ export function CampaignManager() {
         </button>
       </div>
 
-      {campaigns.length === 0 ? (
+      {isLoading ? (
+        <div className="bg-white rounded-lg shadow-md p-12 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-600 mt-4">Cargando campañas...</p>
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-800 font-medium">Error cargando campañas</p>
+          <p className="text-red-600 text-sm mt-2">{error.message}</p>
+        </div>
+      ) : campaigns.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center">
           <div className="max-w-md mx-auto">
             <div className="bg-blue-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
@@ -151,103 +208,24 @@ export function CampaignManager() {
       ) : (
         <div className="grid gap-6">
           {campaigns.map((campaign) => (
-            <div key={campaign.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {campaign.startDate.toLocaleDateString('es-CO')} -{' '}
-                    {campaign.endDate?.toLocaleDateString('es-CO')}
-                  </p>
-
-                </div>
-                <div className="flex items-center space-x-2">
-                  {getStatusBadge(campaign.status)}
-                  <div className="flex space-x-1">
-                    <button
-                      onClick={() => toggleCampaignStatus(campaign.id)}
-                      className={`p-2 rounded-md transition-colors ${
-                        campaign.status === 'active'
-                          ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200'
-                          : 'bg-green-100 text-green-600 hover:bg-green-200'
-                      }`}
-                      title={campaign.status === 'active' ? 'Pausar campaña' : 'Activar campaña'}
-                    >
-                      {campaign.status === 'active' ? 
-                        <Pause className="w-4 h-4" /> : 
-                        <Play className="w-4 h-4" />
-                      }
-                    </button>
-                    <button 
-                      className="p-2 bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition-colors"
-                      title="Editar campaña"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button 
-                      className="p-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 transition-colors"
-                      title="Ver estadísticas"
-                    >
-                      <BarChart3 className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteCampaign(campaign.id)}
-                      className="p-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition-colors"
-                      title="Eliminar campaña"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-sm text-gray-600">Presupuesto</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    ${campaign.totalBudget.toFixed(2)}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-sm text-gray-600">Gastado</p>
-                  <p className="text-lg font-semibold text-red-600">
-                    ${campaign.totalSpent.toFixed(2)}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-sm text-gray-600">Impresiones</p>
-                  <p className="text-lg font-semibold text-blue-600">
-                    {campaign.totalImpressions.toLocaleString()}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-sm text-gray-600">Clicks</p>
-                  <p className="text-lg font-semibold text-green-600">
-                    {campaign.totalClicks.toLocaleString()}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-sm text-gray-600">CTR Promedio</p>
-                  <p className="text-lg font-semibold text-purple-600">
-                    {campaign.averageCTR.toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${Math.min((campaign.totalSpent / campaign.totalBudget) * 100, 100)}%`
-                  }}
-                ></div>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">
-                {((campaign.totalSpent / campaign.totalBudget) * 100).toFixed(1)}% del presupuesto utilizado
-              </p>
-            </div>
+            <CampaignCard
+              key={campaign.id}
+              campaign={campaign}
+              onEdit={handleEditCampaign}
+              onToggleStatus={handleToggleStatus}
+              onCancel={handleCancelCampaign}
+              isUpdating={updateStatusMutation.isPending}
+            />
           ))}
         </div>
+      )}
+
+      {/* Modal de edición */}
+      {editingCampaign && (
+        <EditCampaignModal
+          campaign={editingCampaign}
+          onClose={() => setEditingCampaign(null)}
+        />
       )}
     </div>
   );

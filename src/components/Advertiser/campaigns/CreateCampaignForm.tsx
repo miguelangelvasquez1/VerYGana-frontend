@@ -1,16 +1,16 @@
-// components/campaigns/CreateCampaignForm.tsx
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { ArrowLeft, Check, Loader2, AlertCircle } from 'lucide-react';
-import { useGames } from '@/hooks/campaigns/useGames';
-import { useGameAssetDefinitions } from '@/hooks/campaigns/useGameAssetDefinitions';
+import { ArrowLeft, Check, Loader2, AlertCircle, DollarSign, Tag } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useGames, useGameAssetDefinitions } from '@/hooks/campaigns/useCampaigns';
 import { useCampaignUpload } from '@/hooks/campaigns/useCampaignUpload';
 import {
   Game,
   FileWithPreview,
   isValidFileSize,
   isValidFileType,
+  CampaignDetails,
 } from '@/types/campaigns';
 
 // Componentes
@@ -18,33 +18,42 @@ import { GameSelection } from './GameSelection';
 import { StepIndicator } from './StepIndicator';
 import { AssetUploadCard } from './AssetUploadCard';
 import { UploadProgress } from './UploadProgress';
+import { CampaignDetailsForm } from './CampaignsDetailsForm';
 
 interface CreateCampaignFormProps {
-  advertiserId: number;
-  onSuccess?: (campaignId: number) => void;
+  onSuccess?: (success: boolean) => void;
   onCancel?: () => void;
 }
 
-type Step = 'select-game' | 'upload-assets';
+type Step = 'select-game' | 'campaign-details' | 'upload-assets';
 
 export function CreateCampaignForm({
-  advertiserId,
   onSuccess,
   onCancel,
 }: CreateCampaignFormProps) {
+  const router = useRouter();
+
   // State
   const [step, setStep] = useState<Step>('select-game');
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [campaignDetails, setCampaignDetails] = useState<CampaignDetails>({
+    budget: 0,
+    targetUrl: null,
+    categoryIds: [],
+    targetAudience: {
+      minAge: 18,
+      maxAge: 65,
+      gender: 'ALL',
+      municipalityCodes: [],
+    },
+  });
   const [files, setFiles] = useState<Map<number, FileWithPreview[]>>(new Map());
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Queries
-  // Games (respuesta paginada)
-  const {data: gamesPage, isLoading: loadingGames, error: gamesError} = useGames();
-
-  // Lista real de juegos
+  const { data: gamesPage, isLoading: loadingGames, error: gamesError } = useGames();
   const games = gamesPage?.content ?? [];
-
+  
   const {
     data: assetDefinitions = [],
     isLoading: loadingDefinitions,
@@ -54,17 +63,7 @@ export function CreateCampaignForm({
   // Upload hook
   const { uploadState, uploadCampaign, resetUpload } = useCampaignUpload({
     gameId: selectedGame?.id ?? 0,
-    advertiserId,
-    onSuccess: (campaignId) => {
-      // Limpiar previews
-      files.forEach((fileList) => {
-        fileList.forEach((f) => URL.revokeObjectURL(f.preview));
-      });
-      onSuccess?.(campaignId);
-    },
-    onError: (error) => {
-      setValidationError(error);
-    },
+    campaignDetails,
   });
 
   // Cleanup previews on unmount
@@ -74,20 +73,24 @@ export function CreateCampaignForm({
         fileList.forEach((f) => URL.revokeObjectURL(f.preview));
       });
     };
-  }, []);
+  }, [files]);
 
   // Handlers
   const handleGameSelect = useCallback((game: Game) => {
     setSelectedGame(game);
+    setStep('campaign-details');
+    setValidationError(null);
+  }, []);
+
+  const handleCampaignDetailsSubmit = useCallback((details: CampaignDetails) => {
+    setCampaignDetails(details);
     setStep('upload-assets');
-    setFiles(new Map());
     setValidationError(null);
   }, []);
 
   const handleFileSelect = useCallback(
     (definitionId: number, selectedFiles: FileList | null) => {
-      // selectedFiles can be null when used from input.files, bail out early
-      if (!selectedFiles) return;
+      if (!selectedFiles || selectedFiles.length === 0) return;
 
       const definition = assetDefinitions.find((d) => d.id === definitionId);
       if (!definition) return;
@@ -103,7 +106,7 @@ export function CreateCampaignForm({
 
       // Validar archivos
       for (const fileItem of newFiles) {
-        if (!isValidFileType(fileItem.file, definition.mediaType)) {
+        if (!isValidFileType(fileItem.file, definition.allowedMimeTypes)) {
           setValidationError(
             `Tipo de archivo no válido para ${definition.assetType}`
           );
@@ -122,7 +125,6 @@ export function CreateCampaignForm({
         const updated = new Map(prev);
         const existing = updated.get(definitionId) || [];
 
-        // Si no permite múltiples, reemplazar
         if (!definition.multiple) {
           existing.forEach((f) => URL.revokeObjectURL(f.preview));
           updated.set(definitionId, newFiles);
@@ -179,24 +181,50 @@ export function CreateCampaignForm({
   const handleSubmit = useCallback(async () => {
     if (!validateAssets() || !selectedGame) return;
 
-    try {
-      await uploadCampaign(files, assetDefinitions, setFiles);
-    } catch (error) {
-      // Error ya manejado por el hook
-      console.error('Upload error:', error);
+    const result = await uploadCampaign(files, assetDefinitions, setFiles);
+
+    if (result.ok) {
+      router.push('/advertiser/campaigns');
     }
-  }, [validateAssets, selectedGame, uploadCampaign, files, assetDefinitions]);
+  }, [validateAssets, selectedGame, uploadCampaign, files, assetDefinitions, router]);
 
   const handleBack = useCallback(() => {
+    if (step === 'campaign-details') {
+      setStep('select-game');
+      setSelectedGame(null);
+    } else if (step === 'upload-assets') {
+      setStep('campaign-details');
+      files.forEach((fileList) => {
+        fileList.forEach((f) => URL.revokeObjectURL(f.preview));
+      });
+      setFiles(new Map());
+    }
+    setValidationError(null);
+    resetUpload();
+  }, [step, files, resetUpload]);
+
+  const handleCancelAll = useCallback(() => {
     setStep('select-game');
     setSelectedGame(null);
+    setCampaignDetails({
+      budget: 0,
+      targetUrl: null,
+      categoryIds: [],
+      targetAudience: {
+        minAge: 18,
+        maxAge: 65,
+        gender: 'ALL',
+        municipalityCodes: [],
+      },
+    });
     files.forEach((fileList) => {
       fileList.forEach((f) => URL.revokeObjectURL(f.preview));
     });
     setFiles(new Map());
     setValidationError(null);
     resetUpload();
-  }, [files, resetUpload]);
+    onCancel?.();
+  }, [files, resetUpload, onCancel]);
 
   // Render
   const isLoading =
@@ -222,7 +250,36 @@ export function CreateCampaignForm({
           />
         )}
 
-        {/* Step 2: Upload Assets */}
+        {/* Step 2: Campaign Details */}
+        {step === 'campaign-details' && selectedGame && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Detalles de la campaña: {selectedGame.title}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Configura el presupuesto y las fechas de tu campaña
+                </p>
+              </div>
+              <button
+                onClick={handleBack}
+                className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                Cambiar juego
+              </button>
+            </div>
+
+            <CampaignDetailsForm
+              initialDetails={campaignDetails}
+              onSubmit={handleCampaignDetailsSubmit}
+              onCancel={handleCancelAll}
+            />
+          </div>
+        )}
+
+        {/* Step 3: Upload Assets */}
         {step === 'upload-assets' && (
           <div className="space-y-6">
             {/* Header */}
@@ -234,6 +291,16 @@ export function CreateCampaignForm({
                 <p className="text-sm text-gray-600 mt-1">
                   Completa todos los assets requeridos para tu campaña
                 </p>
+                <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                  <span className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-1" />
+                    Presupuesto: ${campaignDetails.budget.toLocaleString()}
+                  </span>
+                  <span className="flex items-center">
+                    <Tag className="w-4 h-4 mr-1" />
+                    {campaignDetails.categoryIds.length} categoría(s)
+                  </span>
+                </div>
               </div>
               <button
                 onClick={handleBack}
@@ -241,7 +308,7 @@ export function CreateCampaignForm({
                 className="text-sm text-blue-600 hover:text-blue-700 flex items-center disabled:opacity-50"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
-                Cambiar juego
+                Volver
               </button>
             </div>
 
@@ -301,7 +368,7 @@ export function CreateCampaignForm({
             {/* Action Buttons */}
             <div className="flex justify-between pt-4 border-t">
               <button
-                onClick={onCancel}
+                onClick={handleCancelAll}
                 disabled={isLoading}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >

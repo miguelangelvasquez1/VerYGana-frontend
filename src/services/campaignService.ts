@@ -1,12 +1,13 @@
 // services/campaignService.ts
+import { extractErrorMessage } from '@/helpers/ErrorHelper';
 import apiClient from '@/lib/api/client';
 import {
   Game,
   GameAssetDefinition,
-  AssetUploadPermission,
   CreateCampaignRequest,
-  CampaignResponse,
-  Campaign
+  Campaign,
+  AssetUploadPermission,
+  CampaignDetails
 } from '@/types/campaigns';
 import { PagedResponse } from '@/types/common';
 
@@ -16,24 +17,23 @@ class CampaignService {
   async getGames(
     page: number = 0,
     size: number = 10
-    ): Promise<{
+  ): Promise<{
     content: Game[];
     totalElements: number;
     totalPages: number;
     currentPage: number;
-    }> {
-    const response = await apiClient.get<PagedResponse<Game>>('/games', {
-        params: { page, size },
+  }> {
+    const response = await apiClient.get<PagedResponse<Game>>('/campaigns/games', {
+      params: { page, size },
     });
 
     return {
-        content: response.data.data,
-        totalElements: response.data.meta.totalElements,
-        totalPages: response.data.meta.totalPages,
-        currentPage: response.data.meta.page,
+      content: response.data.data,
+      totalElements: response.data.meta.totalElements,
+      totalPages: response.data.meta.totalPages,
+      currentPage: response.data.meta.page,
     };
-    }
-
+  }
 
   async getGameById(gameId: number): Promise<Game> {
     const response = await apiClient.get<Game>(`/games/${gameId}`);
@@ -49,116 +49,98 @@ class CampaignService {
 
   // ==================== Preparación de Assets ====================
 
+  /**
+   * PASO 1: Preparar assets y obtener pre-signed URLs
+   */
   async prepareAssetUploads(
     request: CreateCampaignRequest
-  ): Promise<Record<number, AssetUploadPermission>> {
-    const response = await apiClient.post<Record<number, AssetUploadPermission>>(
+  ): Promise<AssetUploadPermission[]> {
+    try {
+    const response = await apiClient.post<AssetUploadPermission[]>(
       '/campaigns/prepare',
       request
     );
+
     return response.data;
-  }
+    } catch (error: any) {
+      const backendMessage = extractErrorMessage(error);
 
-  // ==================== Upload a R2 ====================
-
-  async uploadAssetToR2(
-    uploadUrl: string,
-    file: File,
-    contentType: string,
-    onProgress?: (progress: number) => void
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-
-      // Configurar progress
-      if (onProgress) {
-        xhr.upload.addEventListener('progress', (e) => {
-          if (e.lengthComputable) {
-            const percentComplete = (e.loaded / e.total) * 100;
-            onProgress(percentComplete);
-          }
-        });
-      }
-
-      xhr.addEventListener('load', () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve();
-        } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
-        }
-      });
-
-      xhr.addEventListener('error', () => {
-        reject(new Error('Network error during upload'));
-      });
-
-      xhr.addEventListener('abort', () => {
-        reject(new Error('Upload aborted'));
-      });
-
-      xhr.open('PUT', uploadUrl);
-      xhr.setRequestHeader('Content-Type', contentType);
-      xhr.send(file);
-    });
+      throw new Error(backendMessage);
+    }
   }
 
   // ==================== Creación de Campaña ====================
 
+  /**
+   * PASO 2: Confirmar creación de campaña con assets ya subidos
+   */
   async createCampaign(
     gameId: number,
-    advertiserId: number,
-    uploadedAssets: Record<number, string>
-  ): Promise<CampaignResponse> {
-    const response = await apiClient.post<CampaignResponse>(
-      `/campaigns/create`,
-      uploadedAssets,
-      {
-        params: { gameId, advertiserId }
+    assetIds: number[],
+    campaignDetails: CampaignDetails
+  ): Promise<boolean> {
+
+    try {
+      const payload = {
+        assetIds,
+        budget: campaignDetails.budget,
+        targetUrl: campaignDetails.targetUrl,
+        categoryIds: campaignDetails.categoryIds,
+        minAge: campaignDetails.targetAudience.minAge,
+        maxAge: campaignDetails.targetAudience.maxAge,
+        targetGender: campaignDetails.targetAudience.gender.toUpperCase(),
+        targetMunicipalityCodes: campaignDetails.targetAudience.municipalityCodes
+      };
+
+      const response = await apiClient.post<{data: boolean;}>(
+        '/campaigns/create',
+        payload,
+        {
+          params: { gameId },
+        }
+      );
+
+      console.log('📥 Response de create:', response);
+
+      if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+        return response.data.data;
       }
-    );
-    return response.data;
+
+      return response.data;
+
+    } catch (error: any) {
+      // ⬅️ AQUÍ está la clave
+      const backendMessage = extractErrorMessage(error);
+
+      console.error('❌ Error createCampaign:', backendMessage);
+
+      // relanza SOLO el mensaje
+      throw new Error(backendMessage);
+    }
   }
 
   // ==================== Gestión de Campañas ====================
 
-  async getCampaigns(
-    page: number = 0,
-    size: number = 10
-  ): Promise<{ content: Campaign[]; totalElements: number; totalPages: number }> {
-    const response = await apiClient.get('/campaigns', {
-      params: { page, size }
-    });
+  async getMyCampaigns(page = 0, size = 10): Promise<Campaign[]> {
+    const response = await apiClient.get<Campaign[]>('/campaigns');
     return response.data;
   }
 
-  async getCampaignById(campaignId: number): Promise<Campaign> {
-    const response = await apiClient.get<Campaign>(`/campaigns/${campaignId}`);
-    return response.data;
+  async updateCampaign(
+    campaignId: number,
+    payload: CampaignDetails
+  ): Promise<void> {
+    await apiClient.put(`/campaigns/${campaignId}`, payload);
   }
 
   async updateCampaignStatus(
     campaignId: number,
-    active: boolean
-  ): Promise<Campaign> {
-    const response = await apiClient.patch<Campaign>(
-      `/campaigns/${campaignId}/status`,
-      { active }
+    status: string
+  ): Promise<void> {
+    await apiClient.patch(
+      `/campaigns/update-status/${campaignId}`,
+      { status }
     );
-    return response.data;
-  }
-
-  async deleteCampaign(campaignId: number): Promise<void> {
-    await apiClient.delete(`/campaigns/${campaignId}`);
-  }
-
-  async getCampaignStats(campaignId: number): Promise<{
-    impressions: number;
-    clicks: number;
-    ctr: number;
-    spent: number;
-  }> {
-    const response = await apiClient.get(`/campaigns/${campaignId}/stats`);
-    return response.data;
   }
 }
 

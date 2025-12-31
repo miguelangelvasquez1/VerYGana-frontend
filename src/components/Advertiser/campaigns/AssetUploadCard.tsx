@@ -1,23 +1,22 @@
-// Simple asset upload card used by CreateCampaignForm
-import React, { useRef } from 'react';
-import type { FileWithPreview } from '@/types/campaigns';
-
-interface AssetDefinition {
-  id: number;
-  description?: string;
-  assetType?: string;
-  mediaType?: string;
-  multiple?: boolean;
-  required?: boolean;
-}
+import React, { useRef, useMemo } from 'react';
+import type { FileWithPreview, GameAssetDefinition } from '@/types/campaigns';
 
 interface Props {
-  definition: AssetDefinition;
+  definition: GameAssetDefinition;
   files: FileWithPreview[];
   loading: boolean;
   onFileSelect: (files: FileList | null) => void;
   onRemoveFile: (index: number) => void;
 }
+
+const MIME_TYPE_MAP: Record<string, string> = {
+  IMAGE_PNG: 'image/png',
+  IMAGE_JPEG: 'image/jpeg',
+  IMAGE_WEBP: 'image/webp',
+  AUDIO_MP3: 'audio/mpeg',
+  AUDIO_OGG: 'audio/ogg',
+  VIDEO_MP4: 'video/mp4',
+};
 
 export const AssetUploadCard: React.FC<Props> = ({
   definition,
@@ -34,7 +33,14 @@ export const AssetUploadCard: React.FC<Props> = ({
     }
   };
 
-  const acceptAttr = definition.mediaType ? definition.mediaType : undefined;
+  const acceptAttr = useMemo(() => {
+    if (!definition.allowedMimeTypes?.length) return undefined;
+
+    return definition.allowedMimeTypes
+      .map((t) => MIME_TYPE_MAP[t])
+      .filter(Boolean)
+      .join(',');
+  }, [definition.allowedMimeTypes]);
 
   return (
     <div className="border rounded-lg p-4 bg-gray-50">
@@ -44,20 +50,29 @@ export const AssetUploadCard: React.FC<Props> = ({
             {definition.description || 'Asset'}
             {definition.required ? ' *' : ''}
           </p>
-          {definition.assetType && (
-            <p className="text-sm text-gray-600">{definition.assetType}</p>
+
+          <p className="text-sm text-gray-600">
+            {definition.assetType} · {definition.mediaType}
+          </p>
+
+          {definition.allowedMimeTypes?.length > 0 && (
+            <p className="text-xs text-gray-500 mt-1">
+              Tipos permitidos:{' '}
+              {definition.allowedMimeTypes
+                .map((t) => t.replace('_', '/').toLowerCase())
+                .join(', ')}
+            </p>
           )}
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            type="button"
-            onClick={handleChoose}
-            disabled={loading}
-            className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-          >
-            Seleccionar
-          </button>
-        </div>
+
+        <button
+          type="button"
+          onClick={handleChoose}
+          disabled={loading}
+          className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+        >
+          Seleccionar
+        </button>
       </div>
 
       <input
@@ -85,7 +100,6 @@ export const AssetUploadCard: React.FC<Props> = ({
             >
               <div className="w-full h-28 flex items-center justify-center bg-gray-100">
                 {isImage ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={f.preview}
                     alt={f.file.name}
@@ -100,7 +114,9 @@ export const AssetUploadCard: React.FC<Props> = ({
               </div>
 
               <div className="p-2 flex items-center justify-between">
-                <div className="text-xs text-gray-600 truncate">{f.file.name}</div>
+                <div className="text-xs text-gray-600 truncate">
+                  {f.file.name}
+                </div>
                 <button
                   type="button"
                   onClick={() => onRemoveFile(idx)}

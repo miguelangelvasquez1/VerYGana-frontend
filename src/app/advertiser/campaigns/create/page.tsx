@@ -1,4 +1,4 @@
-import { CreateAdForm } from "@/components/advertiser/ads/CreatedAdForm";
+import { CreateAdForm } from "@/components/advertiser/ads/CreateAdForm";
 import { CreateCampaignForm } from "@/components/advertiser/campaigns/CreateCampaignForm";
 import { DashboardLayout } from "@/components/advertiser/layout/DashboardLayout";
 

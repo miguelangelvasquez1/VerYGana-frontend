@@ -31,22 +31,27 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
   const [showMenu, setShowMenu] = useState(false);
 
   const getStatusBadge = (status: AdResponseDTO['status']) => {
-    const styles = {
+    const styles: Record<AdResponseDTO['status'], string> = {
       PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       APPROVED: 'bg-green-100 text-green-800 border-green-200',
       REJECTED: 'bg-red-100 text-red-800 border-red-200',
       ACTIVE: 'bg-blue-100 text-blue-800 border-blue-200',
       PAUSED: 'bg-gray-100 text-gray-800 border-gray-200',
-      COMPLETED: 'bg-purple-100 text-purple-800 border-purple-200'
+      COMPLETED: 'bg-purple-100 text-purple-800 border-purple-200',
+      EXPIRED: 'bg-gray-200 text-gray-700 border-gray-300',
+      BLOCKED: 'bg-gray-200 text-gray-700 border-gray-300'
     };
 
-    const labels = {
+    const labels: Record<AdResponseDTO['status'], string> = {
       PENDING: 'Pendiente',
       APPROVED: 'Aprobado',
       ACTIVE: 'Activo',
       PAUSED: 'Pausado',
       COMPLETED: 'Completado',
-      REJECTED: 'Rechazado'
+      REJECTED: 'Rechazado',
+      EXPIRED: 'Expirado',
+      BLOCKED: 'Bloqueado'
+
     };
 
     return (

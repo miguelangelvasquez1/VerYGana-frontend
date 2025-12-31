@@ -44,17 +44,35 @@ export function GameSelection({ games, loading, error, onSelect }: GameSelection
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
         Selecciona el juego para tu campaña
       </h3>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {games.map((game) => (
           <button
             key={game.id}
             onClick={() => onSelect(game)}
-            className="group text-left p-6 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
+            className="group text-left bg-white border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all overflow-hidden"
           >
-            <h4 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-              {game.title}
-            </h4>
-            <p className="text-sm text-gray-600">{game.description}</p>
+            {/* Portada */}
+            {game.frontPageUrl && (
+              <div className="w-full h-40 overflow-hidden bg-gray-100">
+                <img
+                  src={game.frontPageUrl}
+                  alt={`Portada de ${game.title}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
+            )}
+
+            {/* Contenido */}
+            <div className="p-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                {game.title}
+              </h4>
+              <p className="text-sm text-gray-600">
+                {game.description}
+              </p>
+            </div>
           </button>
         ))}
       </div>
