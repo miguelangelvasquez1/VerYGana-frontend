@@ -9,6 +9,20 @@ export interface ProductSummaryResponseDTO {
   averageRate : number;
   categoryName : string;
   stock : number;
+  isFavorite : boolean;
+}
+
+export interface ProductEditInfoResponseDTO {
+  id: number;
+  name: string;
+  description: string;
+  productCategoryId: number;
+  price: number;
+  deliveryType: "AUTO" | "MANUAL" | "EXTERNAL_API"; 
+  digitalFormat: "LINK" | "CODE" | "FILE"; 
+  imageUrl: string;
+  totalStockItems: number;
+  availableStockItems: number;
 }
 
 export interface ProductResponseDTO {
@@ -23,9 +37,10 @@ export interface ProductResponseDTO {
   stock : number;
   reviewCount : number;
   reviews : ProductReviewResponseDTO[];
+  isFavorite : boolean;
 }
 
-export interface CreateOrEditProductRequestDTO {
+export interface CreateProductRequestDTO {
   name: string;
   description: string;
   productCategoryId: number;
@@ -33,6 +48,15 @@ export interface CreateOrEditProductRequestDTO {
   deliveryType: "AUTO" | "MANUAL" | "EXTERNAL_API"; 
   digitalFormat: "LINK" | "CODE" | "FILE"; 
   stockItems: ProductStockRequestDTO[];
+}
+
+export interface UpdateProductRequestDTO {
+  name : string;
+  description : string;
+  productCategoryId : number;
+  price : number;
+  deliveryType : "AUTO" | "MANUAL" | "EXTERNAL_API"; 
+  digitalFormat: "LINK" | "CODE" | "FILE"; 
 }
 
 export interface FilterProductsParams {

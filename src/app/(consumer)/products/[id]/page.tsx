@@ -3,15 +3,25 @@ import { getProductDetail } from "@/services/ProductService";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/bars/NavBar";
-export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const product = await getProductDetail(Number(id));
+
+interface ProductPageProps {
+  params: {
+    id: string;
+  };
+  searchParams?: {
+    mode?: "consumer" | "seller";
+  };
+}
+
+export default async function ProductPage({ params, searchParams }: ProductPageProps){
+  const product = await getProductDetail(Number(params.id));
+  const mode = searchParams?.mode ?? "consumer";
 
   return (
     <>
       <Navbar/>
       <div className="container mx-auto px-4 py-6">
-        <ProductDetail product={product} />
+        <ProductDetail product={product} mode ={mode} />
         <AddToCartButton product={product} variant="primary" />
       </div>
       <Footer />

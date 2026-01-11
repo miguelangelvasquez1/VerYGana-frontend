@@ -30,10 +30,6 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
   const [categories, setCategories] = useState<ProductCategoryResponseDTO[]>([]);
 
-  // Modal producto
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   // Filtros
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null
@@ -65,10 +61,13 @@ export default function ProductsPage() {
   // Cargar productos iniciales
   // ================================
   useEffect(() => {
-    loadProducts(true);
+    setCurrentPage(0);
+    setHasMore(true);
+    loadProducts(0, true);
   }, [searchTerm, selectedCategoryId, sortBy, sortDirection, maxPrice, minRating]);
 
-  const loadProducts = async (reset = false) => {
+
+  const loadProducts = async (pageToLoad: number, reset = false) => {
     if (loading) return;
 
     setLoading(true);
@@ -76,24 +75,23 @@ export default function ProductsPage() {
     const res = await filterProducts({
       searchQuery: searchTerm || undefined,
       categoryId: selectedCategoryId || undefined,
-      minRating: minRating || undefined,
-      maxPrice: maxPrice || undefined,
+      minRating,
+      maxPrice,
       sortBy,
       sortDirection,
-      page: reset ? 0 : currentPage,
+      page: pageToLoad,
     });
 
     if (reset) {
-      setProducts(res.content);
-      setCurrentPage(1);
+      setProducts(res.data);
     } else {
-      setProducts((prev) => [...prev, ...res.content]);
-      setCurrentPage((prev) => prev + 1);
+      setProducts((prev) => [...prev, ...res.data]);
     }
 
-    setHasMore(!res.last);
+    setHasMore(res.meta.hasNext); // ✅ CORRECTO
     setLoading(false);
   };
+
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("es-CO", {
@@ -139,8 +137,8 @@ export default function ProductsPage() {
                   )
                 }
                 className={`cursor-pointer transition-all ${selectedCategoryId === cat.id
-                    ? "ring-2 ring-blue-500 scale-105"
-                    : "hover:scale-105"
+                  ? "ring-2 ring-blue-500 scale-105"
+                  : "hover:scale-105"
                   }`}
               >
                 <CategoryCard category={cat} />
@@ -182,8 +180,8 @@ export default function ProductsPage() {
                 <div className="flex items-center gap-2">
                   <button
                     className={`p-2 rounded ${viewMode === "grid"
-                        ? "bg-blue-100 text-blue-600"
-                        : "text-gray-400"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-400"
                       }`}
                     onClick={() => setViewMode("grid")}
                   >
@@ -192,8 +190,8 @@ export default function ProductsPage() {
 
                   <button
                     className={`p-2 rounded ${viewMode === "list"
-                        ? "bg-blue-100 text-blue-600"
-                        : "text-gray-400"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-400"
                       }`}
                     onClick={() => setViewMode("list")}
                   >
@@ -231,8 +229,8 @@ export default function ProductsPage() {
                         key={n}
                         onClick={() => setMinRating(n)}
                         className={`w-6 h-6 cursor-pointer ${minRating && minRating >= n
-                            ? "text-yellow-400"
-                            : "text-gray-300"
+                          ? "text-yellow-400"
+                          : "text-gray-300"
                           }`}
                       />
                     ))}
@@ -260,7 +258,11 @@ export default function ProductsPage() {
           <InfiniteScroll
             loading={loading}
             hasMore={hasMore}
-            onLoadMore={() => loadProducts(false)}
+            onLoadMore={() => {
+              const nextPage = currentPage + 1;
+              setCurrentPage(nextPage);
+              loadProducts(nextPage);
+            }}
             threshold={300}
           >
             {products.length === 0 ? (
@@ -273,8 +275,8 @@ export default function ProductsPage() {
             ) : (
               <div
                 className={`grid gap-5 ${viewMode === "grid"
-                    ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-                    : "grid-cols-1"
+                  ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+                  : "grid-cols-1"
                   }`}
               >
                 {products.map((product) => (

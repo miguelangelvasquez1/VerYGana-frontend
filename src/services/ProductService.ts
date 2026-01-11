@@ -1,6 +1,7 @@
 import apiClient from "@/lib/api/client";
 import * as ProductTypes from "@/types/products/Product.types";
-import { EntityCreatedResponseDTO, PageResponse } from "@/types/GenericTypes";
+import { EntityCreatedResponseDTO, EntityUpdatedResponseDTO, PagedResponse } from "@/types/GenericTypes";
+import { ProductStockParams, ProductStockRequestDTO, ProductStockResponseDTO } from "@/types/products/ProductStock.types";
 // ============================================
 // MÉTODOS DEL SERVICE
 // ============================================
@@ -9,7 +10,7 @@ import { EntityCreatedResponseDTO, PageResponse } from "@/types/GenericTypes";
  * Crear nuevo producto (SELLER)
  */
 export const createProduct = async (
-  product: ProductTypes.CreateOrEditProductRequestDTO,
+  product: ProductTypes.CreateProductRequestDTO,
   productImage: File
 ): Promise<EntityCreatedResponseDTO> => {
   const formData = new FormData();
@@ -30,20 +31,10 @@ export const createProduct = async (
 };
 
 /**
- * Editar producto existente (SELLER)
- */
-export const editProduct = async (
-  productId: number,
-  data: ProductTypes.CreateOrEditProductRequestDTO
-): Promise<void> => {
-  await apiClient.put(`/products/edit/${productId}`, data);
-};
-
-/**
  * Eliminar producto (SELLER)
  */
 export const deleteProduct = async (productId: number): Promise<void> => {
-  await apiClient.delete(`/products/delete/${productId}`);
+  await apiClient.delete(`/products/${productId}`);
 };
 
 /**
@@ -54,11 +45,95 @@ export const deleteProductForAdmin = async (productId: number): Promise<void> =>
 };
 
 /**
+ * obtener producto existente para editarlo (SELLER)
+ */
+export const getProductEditInfo = async (productId: number): Promise<ProductTypes.ProductEditInfoResponseDTO> => {
+  const response = await apiClient.get(`/products/edit/${productId}`);
+  return response.data;
+};
+
+/**
+ * Editar producto existente (SELLER)
+ */
+export const editProduct = async (
+  productId: number,
+  product: ProductTypes.UpdateProductRequestDTO,
+  productImage?: File
+): Promise<EntityUpdatedResponseDTO> => {
+
+  const formData = new FormData();
+  formData.append("product", JSON.stringify(product));
+
+  if (productImage) {
+    formData.append("productImage", productImage);
+  }
+
+  const response = await apiClient.put(
+    `/products/edit/${productId}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+  * Obtener el listado de codigos registrados de un producto
+  */
+export const getProductStock = async (
+  productId: number,
+  params: ProductStockParams
+): Promise<PagedResponse<ProductStockResponseDTO>> => {
+  const response = await apiClient.get(
+    `/products/${productId}/stock`,
+    { params }
+  );
+  return response.data;
+};
+
+
+/**
+  * Agregar un nuevo código de stock
+  */
+export const addStockItem = async (productId: number, request: ProductStockRequestDTO): Promise<ProductStockResponseDTO> => {
+  const response = await apiClient.post(`/products/${productId}/stock`, request);
+  return response.data;
+}
+
+/**
+  * Editar un código de stock específico
+  */
+export const updateStockItem = async (productId: number, stockId: number, request: ProductStockRequestDTO) => {
+  const response = await apiClient.put(`/products/${productId}/stock/${stockId}`, request);
+  return response.data;
+}
+
+/**
+  * Eliminar un código de stock específico
+  */
+export const deleteStockItem = async (productId : number, stockId : number): Promise<void> => {
+  await apiClient.delete(`/products/${productId}/stock/${stockId}`)
+}
+
+/**
+  * Agregar múltiples códigos de stock de una vez
+  */
+
+export const addBulkStockItems = async (productId : number, requests : ProductStockRequestDTO[]) => {
+  const response = await apiClient.post(`/products/${productId}/stock/bulk`, requests);
+  return response.data;
+}
+
+/**
  * Obtener todos los productos con paginación (PÚBLICO)
  */
 export const getAllProducts = async (
   page: number = 0
-): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
+): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get('/products', {
     params: { page }
   });
@@ -70,7 +145,7 @@ export const getAllProducts = async (
  */
 export const filterProducts = async (
   params: ProductTypes.FilterProductsParams
-): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
+): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get('/products/filter', {
     params: {
       searchQuery: params.searchQuery,
@@ -99,8 +174,8 @@ export const getProductDetail = async (productId: number): Promise<ProductTypes.
 export const getSellerProducts = async (
   sellerId: number,
   page: number = 0
-): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
-  const response = await apiClient.get(`/products/${sellerId}`, {
+): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
+  const response = await apiClient.get(`/products/seller/${sellerId}`, {
     params: { page }
   });
   return response.data;
@@ -111,7 +186,7 @@ export const getSellerProducts = async (
  */
 export const getMyProducts = async (
   page: number = 0
-): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
+): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get('/products/myProducts', {
     params: { page }
   });
@@ -131,7 +206,7 @@ export const getTotalSellerProducts = async (): Promise<number> => {
  */
 export const getFavorites = async (
   page: number = 0
-): Promise<PageResponse<ProductTypes.ProductSummaryResponseDTO>> => {
+): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get('/products/favorites', {
     params: { page }
   });

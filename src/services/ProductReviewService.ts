@@ -8,6 +8,11 @@ export const gerProductAvgRating = async (productId: number): Promise<number> =>
     return response.data;
 };
 
+export const getSellerAvgRating = async (): Promise<number> => {
+    const response = await apiClient.get<number>("/productsReviews/seller/avg");
+    return response.data;
+};
+
 export const createProductReview = async (request: CreateProductReviewRequestDTO): Promise<EntityCreatedResponseDTO> => {
     const response = await apiClient.post<EntityCreatedResponseDTO>("/productsReviews/create", request);
     return response.data;

@@ -10,15 +10,17 @@ export interface EntityUpdatedResponseDTO {
     timestamp: string;
 }
 
-export interface PageResponse<T> {
-  content: T[];
-  totalPages: number;
-  totalElements: number;
-  size: number;
-  number: number;
-  first: boolean;
-  last: boolean;
-  empty: boolean;
+export interface PagedResponse<T> {
+  data: T[];
+  meta: {
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+    sorted: boolean;
+  };
 }
 
 export interface FileUploadPermission {
