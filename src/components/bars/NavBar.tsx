@@ -7,11 +7,9 @@ import { usePathname } from "next/navigation";
 import {
   User,
   Wallet,
-  Home,
   Gift,
   Megaphone,
   Package,
-  Smartphone,
   History,
   UserCircle,
   ShoppingBag,
@@ -458,7 +456,7 @@ export default function Navbar() {
                 pathname === "/games" ? "text-blue-600" : "text-gray-500"
               }`}
             >
-              <Gamepad2 className={`w-6 h-6 ${pathname === "/games" ? "scale-110" : ""}`} />
+              <Heart className={`w-6 h-6 ${pathname === "/games" ? "scale-110" : ""}`} />
               <span className="text-xs mt-1 font-medium">Juegos</span>
             </div>
           </Link>
