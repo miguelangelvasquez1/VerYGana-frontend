@@ -9,3 +9,12 @@ export interface PurchaseItemResponseDTO {
     productName: string;
     imageUrl: string;
 }
+
+export interface FeaturedProductResponseDTO {
+    id: number;
+    name: string;
+    imageUrl: string;
+    price: number;
+    averageRate: number;
+    totalSales: number;
+}

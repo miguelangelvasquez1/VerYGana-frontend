@@ -18,19 +18,37 @@ import {
 import CreateProductForm from "@/components/forms/CreateProductForm";
 import { useAuth } from "@/hooks/useAuth";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
+import { EarningsByMonthResponseDTO } from "@/types/transaction.types";
 import { DashboardStats } from "@/types/Seller.types";
 import ProductCard from "@/components/products/ProductCard";
 import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import TopSellingProducts from "@/components/sellerStats/TopSellingProducts";
+import SellerEarningsBarChart from "@/components/sellerStats/SellerEarningsBarChart";
+import SellerEarningsCards from "@/components/sellerStats/SellerEarningsCards";
 
 // Servicios
 import * as productService from "@/services/ProductService";
 import * as walletService from "@/services/WalletService";
 import * as productReviewService from "@/services/ProductReviewService";
 import * as purchaseItemService from "@/services/PurchaseItemService";
+import * as transactionService from "@/services/TransactionService";
+import SellerPayoutsList from "@/components/sellerStats/SellerPayoutsList";
+
 
 export default function SellerDashboard() {
+  // Estados UI
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const section = searchParams.get("section") ?? "dashboard";
+  const { role, isAuthenticated } = useAuth();
+
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedPayoutMonth, setSelectedPayoutMonth] = useState<number>(new Date().getMonth() + 1);
+
+  // ================== Estados ==================
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
@@ -39,22 +57,35 @@ export default function SellerDashboard() {
     averageRating: 0,
   });
 
-  const { role, isAuthenticated } = useAuth();
-  const router = useRouter();
+  const [earningsByMonth, setEarningsByMonth] = useState<EarningsByMonthResponseDTO[]>([]);
+  const [earningsLoading, setEarningsLoading] = useState(false);
 
-  // Estados UI
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
-  const searchParams = useSearchParams();
-  const section = searchParams.get("section") ?? "dashboard";
+
+  const MONTHS = [
+    { value: 1, label: "Enero" },
+    { value: 2, label: "Febrero" },
+    { value: 3, label: "Marzo" },
+    { value: 4, label: "Abril" },
+    { value: 5, label: "Mayo" },
+    { value: 6, label: "Junio" },
+    { value: 7, label: "Julio" },
+    { value: 8, label: "Agosto" },
+    { value: 9, label: "Septiembre" },
+    { value: 10, label: "Octubre" },
+    { value: 11, label: "Noviembre" },
+    { value: 12, label: "Diciembre" },
+  ];
+
+
 
   // ========== Cargar datos ==========
   const loadDashboardData = async () => {
     setIsLoading(true);
     setError("");
-
     try {
       const [
         totalProductsData,
@@ -92,7 +123,6 @@ export default function SellerDashboard() {
           stock: p.stock,
           categoryName: p.categoryName,
           averageRate: p.averageRate,
-          isFavorite: p.isFavorite,
         }))
       );
     } catch (err: any) {
@@ -103,12 +133,34 @@ export default function SellerDashboard() {
     }
   };
 
+  // ================== EARNINGS ==================
+  const loadEarningsByYear = async (year: number) => {
+    setEarningsLoading(true);
+    try {
+      const data =
+        await transactionService.getSellerEarningsByYearList(year);
+      setEarningsByMonth(data);
+    } catch (error) {
+      console.error("Error loading earnings", error);
+    } finally {
+      setEarningsLoading(false);
+    }
+  };
+
+
   // ========== EFFECT: Cargar datos al montar y cuando cambie la sección ==========
   useEffect(() => {
     if (isAuthenticated && role === "SELLER") {
       loadDashboardData();
     }
-  }, [isAuthenticated, role, section]);
+  }, [isAuthenticated, role]);
+
+  useEffect(() => {
+    if (section === "analytics") {
+      loadEarningsByYear(selectedYear);
+    }
+  }, [section, selectedYear]);
+
 
   // ========== Eliminar producto ==========
   const handleDeleteProduct = async (productId: number) => {
@@ -195,14 +247,13 @@ export default function SellerDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <p className="text-blue-100 text-sm">Total Productos</p>
+          <p className="text-blue-100 text-sm">Productos activos</p>
           <p className="text-3xl font-bold mt-2">{stats.totalProducts}</p>
         </div>
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
           <p className="text-green-100 text-sm">Ventas Totales</p>
           <p className="text-3xl font-bold mt-2">{stats.totalSales}</p>
-          <p className="text-green-100 text-xs">Próximamente</p>
         </div>
 
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
@@ -215,9 +266,14 @@ export default function SellerDashboard() {
         <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white">
           <p className="text-yellow-100 text-sm">Rating Promedio</p>
           <p className="text-3xl font-bold mt-2">
-            {stats.averageRating > 0 ? `${stats.averageRating} ⭐` : "N/A"}
+            {stats.averageRating > 0 ? `${stats.averageRating.toFixed(2)} ⭐` : "N/A"}
           </p>
+
         </div>
+      </div>
+      {/* Top Selling Products */}
+      <div>
+        <TopSellingProducts />
       </div>
     </div>
   );
@@ -299,14 +355,78 @@ export default function SellerDashboard() {
   );
 
   const renderAnalytics = () => (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-900">Análisis de Ventas</h2>
-      <div className="bg-white p-8 rounded-xl shadow text-center">
-        <BarChart3 className="w-16 h-16 text-gray-400 mx-auto" />
-        <p className="text-gray-500 mt-4">
-          Próximamente gráficos y estadísticas...
-        </p>
+    <div className="flex flex-col gap-8">
+
+      {/* ===== Header ===== */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">
+            Análisis de Ventas
+          </h2>
+          <p className="text-gray-600">
+            Ganancias mensuales del {selectedYear}
+          </p>
+        </div>
+
+        {/* Selector de año */}
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          className="border rounded-lg px-4 py-2 w-full sm:w-32"
+        >
+          {[currentYear, currentYear - 1, currentYear - 2].map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
       </div>
+
+      {/* ===== Gráfico ===== */}
+      <div className="bg-white rounded-xl shadow p-4">
+        <SellerEarningsBarChart
+          data={earningsByMonth}
+          year={selectedYear}
+        />
+      </div>
+
+      {/* ===== Cards de resumen ===== */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">Resumen de ganancias</h2>
+      </div>
+      <SellerEarningsCards data={earningsByMonth} />
+
+      {/* ===== Pagos realizados ===== */}
+      <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-4">
+
+        {/* Header pagos + selector mes */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3">
+          <h3 className="text-2xl font-semibold text-gray-900">
+            Pagos realizados
+          </h3>
+
+          {/* Selector de mes */}
+          <select
+            value={selectedPayoutMonth}
+            onChange={(e) => setSelectedPayoutMonth(Number(e.target.value))}
+            className="border rounded-lg px-4 py-2 w-full sm:w-44 text-sm"
+          >
+            {MONTHS.map((month) => (
+              <option key={month.value} value={month.value}>
+                {month.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Lista de pagos */}
+        <SellerPayoutsList
+          year={selectedYear}
+          month={selectedPayoutMonth}
+        />
+      </div>
+
+
     </div>
   );
 

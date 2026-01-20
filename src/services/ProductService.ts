@@ -205,7 +205,7 @@ export const getTotalSellerProducts = async (): Promise<number> => {
  * Obtener productos favoritos (CONSUMER)
  */
 export const getFavorites = async (
-  page: number = 0
+  page?: number
 ): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
   const response = await apiClient.get('/products/favorites', {
     params: { page }
@@ -217,12 +217,22 @@ export const getFavorites = async (
  * Agregar producto a favoritos (CONSUMER)
  */
 export const addToFavorites = async (productId: number): Promise<void> => {
-  await apiClient.post(`/products/${productId}/favorites`);
+  const response = await apiClient.post(`/products/favorites/${productId}`);
+  return response.data;
 };
 
 /**
  * Eliminar producto de favoritos (CONSUMER)
  */
 export const removeFromFavorites = async (productId: number): Promise<void> => {
-  await apiClient.delete(`/products/${productId}/favorites`);
+  const response = await apiClient.delete(`/products/favorites/${productId}`);
+  return response.data;
+};
+
+/**
+ * Contar productos favoritos (CONSUMER)
+ */
+export const countFavorites = async (): Promise<number> => {
+  const response = await apiClient.get('/products/favorites/count');
+  return response.data;
 };

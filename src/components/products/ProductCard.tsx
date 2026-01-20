@@ -6,8 +6,8 @@ import { Star, Eye, Pencil, Trash, Heart } from "lucide-react";
 
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { AddToCartButton } from "./AddToCartButton";
-import { addToFavorites, removeFromFavorites } from "@/services/ProductService";
 import { useAuth } from "@/hooks/useAuth";
+import { useFavorites } from "@/hooks/useFavorites";
 
 interface ProductCardProps {
   product: ProductSummaryResponseDTO;
@@ -27,9 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const router = useRouter();
   const { role, isAuthenticated } = useAuth();
 
-  // ====== Estado local para favoritos (UX optimista) ======
-  const [isFavorite, setIsFavorite] = useState<boolean>(product.isFavorite);
-  const [favLoading, setFavLoading] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   // ====== Click principal de la card ======
   const handleClick = () => {
@@ -40,31 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
-  // ====== Favoritos (solo CONSUMER) ======
-  const handleToggleFavorite = async (
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    e.stopPropagation();
-
-    if (!isAuthenticated || role !== "CONSUMER") return;
-
-    try {
-      setFavLoading(true);
-
-      if (isFavorite) {
-        await removeFromFavorites(product.id);
-        setIsFavorite(false);
-      } else {
-        await addToFavorites(product.id);
-        setIsFavorite(true);
-      }
-    } catch (error) {
-      console.error("Error toggling favorite", error);
-    } finally {
-      setFavLoading(false);
-    }
-  };
-
+  
   return (
     <div
       className="bg-white rounded-2xl shadow hover:shadow-lg transition cursor-pointer overflow-hidden border"
@@ -81,18 +55,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {/* ===== Favorite button (CONSUMER only) ===== */}
         {mode === "consumer" && role === "CONSUMER" && (
           <button
-            onClick={handleToggleFavorite}
-            disabled={favLoading}
-            className="absolute top-3 right-3 bg-white rounded-full p-2 shadow hover:scale-105 transition"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(product.id);
+            }}
+            className="absolute top-3 right-3 bg-white rounded-full p-2 shadow cursor-pointer"
           >
             <Heart
-              className={`w-5 h-5 ${
-                isFavorite
+              className={`w-5 h-5 ${isFavorite(product.id)
                   ? "fill-red-500 text-red-500"
                   : "text-gray-400"
-              }`}
+                }`}
             />
           </button>
+
         )}
       </div>
 
@@ -117,11 +93,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {Array.from({ length: 5 }).map((_, i) => (
             <Star
               key={i}
-              className={`w-4 h-4 ${
-                i < Math.round(product.averageRate ?? 0)
+              className={`w-4 h-4 ${i < Math.round(product.averageRate ?? 0)
                   ? "fill-yellow-400 text-yellow-400"
                   : "text-gray-300"
-              }`}
+                }`}
             />
           ))}
           <span className="text-sm text-gray-600 ml-1">
@@ -131,13 +106,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Stock */}
         <p
-          className={`text-sm font-medium px-3 py-1 rounded-full inline-block ${
-            product.stock > 10
+          className={`text-sm font-medium px-3 py-1 rounded-full inline-block ${product.stock > 10
               ? "bg-green-100 text-green-700"
               : product.stock > 0
-              ? "bg-yellow-100 text-yellow-700"
-              : "bg-red-100 text-red-700"
-          }`}
+                ? "bg-yellow-100 text-yellow-700"
+                : "bg-red-100 text-red-700"
+            }`}
         >
           {product.stock > 0
             ? `${product.stock} disponibles`

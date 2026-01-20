@@ -9,7 +9,6 @@ export interface ProductSummaryResponseDTO {
   averageRate : number;
   categoryName : string;
   stock : number;
-  isFavorite : boolean;
 }
 
 export interface ProductEditInfoResponseDTO {
@@ -37,7 +36,6 @@ export interface ProductResponseDTO {
   stock : number;
   reviewCount : number;
   reviews : ProductReviewResponseDTO[];
-  isFavorite : boolean;
 }
 
 export interface CreateProductRequestDTO {

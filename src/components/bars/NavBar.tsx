@@ -18,7 +18,8 @@ import {
   Settings,
   LogOut,
   Plus,
-  Bell
+  Bell,
+  Heart
 } from "lucide-react";
 
 import { getConsumerInitialData } from "@/services/ConsumerService";
@@ -310,11 +311,19 @@ export default function Navbar() {
                   </Link>
 
                   <Link
-                    href="/purchases"
+                    href="/explore/purchases"
                     className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
                   >
                     <ShoppingBag className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                     <span>Mis compras</span>
+                  </Link>
+
+                  <Link
+                    href={"/explore/favorites"}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
+                  >
+                    <Heart className="w-5 h-5 text-gray-400 group-hover:text-blue-600"/>
+                    <span>Mis favoritos</span>
                   </Link>
 
                   <Link

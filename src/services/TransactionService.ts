@@ -1,6 +1,6 @@
 import apiClient from "@/lib/api/client";
-import { PagedResponse } from "@/types/common";
-import { TransactionResponseDTO } from "@/types/transaction.types";
+import { PagedResponse } from "@/types/GenericTypes";
+import { EarningsByMonthResponseDTO, TransactionPayoutResponseDTO, TransactionResponseDTO } from "@/types/transaction.types";
 
 export const getMyTransactions = async (): Promise<PagedResponse<TransactionResponseDTO>> => {
   const response = await apiClient.get("/transactions");
@@ -59,3 +59,34 @@ export const getByReferenceCode = async (
 
   return response.data;
 };
+
+export const getSellerEarningsByYearList = async (year: number): Promise<EarningsByMonthResponseDTO[]> => {
+  const response = await apiClient.get("/transactions/earnings/anually", {
+    params: {
+      year
+    }
+  });
+  return response.data;
+}
+
+export const getTotalEarningsByMonth = async (year: number, month: number): Promise<number> => {
+  const response = await apiClient.get("/transactions/earnings/monthly", {
+    params: {
+      year,
+      month
+    }
+  });
+  return response.data;
+}
+
+export const getSellerPayoutsPage = async (year: number, month: number, size?: number, page?: number): Promise<PagedResponse<TransactionPayoutResponseDTO>> => {
+  const response = await apiClient.get("/transactions/payouts", {
+    params: {
+      year,
+      month,
+      size,
+      page
+    }
+  });
+  return response.data;
+}
