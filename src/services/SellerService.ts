@@ -1,4 +1,5 @@
 import apiClient from "@/lib/api/client";
+import { MonthlyReportResponseDTO } from "@/types/Seller.types";
 
 // ============================================
 // INTERFACES
@@ -159,3 +160,16 @@ export const getSellerWallet = async (sellerId: number): Promise<any> => {
   const response = await apiClient.get(`/sellers/${sellerId}/wallet`);
   return response.data;
 };
+
+/**
+ * Reporte mensual del vendedor
+ */
+export const getMonthlyReport = async (year: number, month: number): Promise<MonthlyReportResponseDTO> => {
+  const response = await apiClient.get("/sellers/report", {
+    params: {
+    year,
+    month
+  },
+});
+return response.data;
+}

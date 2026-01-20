@@ -19,3 +19,19 @@ export interface TransactionResponseDTO {
     transactionType: string;
     transactionState: string;
 }
+
+export interface EarningsByMonthResponseDTO {
+    sellerId: number;
+    year: number;
+    month: number;
+    earnings: number;
+}
+
+
+export interface TransactionPayoutResponseDTO {
+    id: number;
+    referenceId: string;
+    createdAt: string;
+    amount: number;
+    transactionState: string;
+}
