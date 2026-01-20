@@ -135,6 +135,7 @@ export interface AdForConsumerDTO {
   advertiserId: number;
   advertiserName: string;
   mediaType: AdMediaType;
+  sessionUUID: string;
 }
 
 export type AdForAdminDTO = {

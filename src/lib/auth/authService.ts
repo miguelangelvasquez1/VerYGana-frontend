@@ -38,7 +38,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export const authService = {
 
-  // Login directo para guardar refresh token en cookie HttpOnly
+  // Login directo para guardar refresh token en cookie HttpOnly cliente
   async login(identifier: string, password: string): Promise<LoginResponse> {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',

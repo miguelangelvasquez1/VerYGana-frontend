@@ -18,7 +18,8 @@ import {
   Settings,
   LogOut,
   Plus,
-  Bell
+  Bell,
+  Gamepad2
 } from "lucide-react";
 
 import { getConsumerInitialData } from "@/services/ConsumerService";
@@ -39,7 +40,7 @@ export default function Navbar() {
   const [loadingUser, setLoadingUser] = useState<boolean>(true);
   const [errorUser, setErrorUser] = useState<string | null>(null);
 
-  // refs independientes (corregido)
+  // refs independientes
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const walletMenuRef = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRef = useRef<HTMLDivElement | null>(null);
@@ -60,7 +61,7 @@ export default function Navbar() {
     loadUser();
   }, []);
 
-  // click outside (CORREGIDO)
+  // click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node | null;
@@ -95,11 +96,9 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full bg-gradient-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
-
-        {/* ---------- DESKTOP NAV ---------- */}
-        <div className="hidden lg:flex items-center justify-between px-6 py-2">
-
+      {/* ---------- DESKTOP NAV (top) ---------- */}
+      <nav className="hidden lg:block sticky top-0 z-50 w-full bg-gradient-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
+        <div className="flex items-center justify-between px-6 py-2">
           {/* LOGO */}
           <div className="flex items-center gap-4">
             <Image src="/logos/logo.png" alt="Logo" width={60} height={60} />
@@ -126,7 +125,7 @@ export default function Navbar() {
             </Link>
 
             <Link href={"/games"}>
-              <button className={pathname === "/ads" ? activeButtonStyle : buttonsStyle}>
+              <button className={pathname === "/games" ? activeButtonStyle : buttonsStyle}>
                 Juegos
               </button>
             </Link>
@@ -160,9 +159,9 @@ export default function Navbar() {
 
           {/* -------- WALLET + CART + NOTIFS + USER -------- */}
           <div className="flex items-center gap-6">
-
             {/* CART BUTTON */}
             <CartButton />
+            
             {/* WALLET */}
             <div className="relative" ref={walletMenuRef}>
               <button
@@ -180,10 +179,11 @@ export default function Navbar() {
 
               {/* WALLET DROPDOWN */}
               <div
-                className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${isWalletOpen
-                  ? "opacity-100 scale-100 pointer-events-auto"
-                  : "opacity-0 scale-95 pointer-events-none"
-                  }`}
+                className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
+                  isWalletOpen
+                    ? "opacity-100 scale-100 pointer-events-auto"
+                    : "opacity-0 scale-95 pointer-events-none"
+                }`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="text-center">
@@ -199,7 +199,6 @@ export default function Navbar() {
                 </div>
 
                 <div className="p-4 space-y-4">
-
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-green-50 p-3 rounded-xl text-center">
                       <div className="text-lg font-bold text-green-600">—</div>
@@ -223,7 +222,6 @@ export default function Navbar() {
                       Ver Historial Completo
                     </button>
                   </Link>
-
                 </div>
               </div>
             </div>
@@ -235,26 +233,24 @@ export default function Navbar() {
                 className="relative flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full hover:bg-white/20 transition-all"
               >
                 <Bell className="w-5 h-5 text-white" />
-
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
                   0
                 </span>
               </button>
 
               <div
-                className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${isNotificationsOpen
-                  ? "opacity-100 scale-100 pointer-events-auto"
-                  : "opacity-0 scale-95 pointer-events-none"
-                  }`}
+                className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
+                  isNotificationsOpen
+                    ? "opacity-100 scale-100 pointer-events-auto"
+                    : "opacity-0 scale-95 pointer-events-none"
+                }`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="text-lg font-semibold">Notificaciones</div>
                 </div>
 
                 <div className="p-4">
-                  <p className="text-sm text-gray-600">
-                    No hay notificaciones aún.
-                  </p>
+                  <p className="text-sm text-gray-600">No hay notificaciones aún.</p>
                 </div>
               </div>
             </div>
@@ -279,10 +275,11 @@ export default function Navbar() {
 
               {/* PROFILE DROPDOWN */}
               <div
-                className={`absolute right-0 mt-2 w-64 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${openMenu
-                  ? "opacity-100 scale-100 pointer-events-auto"
-                  : "opacity-0 scale-95 pointer-events-none"
-                  }`}
+                className={`absolute right-0 mt-2 w-64 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
+                  openMenu
+                    ? "opacity-100 scale-100 pointer-events-auto"
+                    : "opacity-0 scale-95 pointer-events-none"
+                }`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="flex items-center gap-3">
@@ -300,7 +297,6 @@ export default function Navbar() {
                 </div>
 
                 <div className="py-2">
-
                   <Link
                     href="/explore/profile"
                     className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
@@ -339,16 +335,255 @@ export default function Navbar() {
                       <span>Cerrar Sesión</span>
                     </button>
                   </div>
-
                 </div>
               </div>
             </div>
           </div>
         </div>
-        {/* ---------- MOBILE NAVBAR ---------- */}
-        {/* (Lo dejé igual que tu versión anterior, si deseas también lo optimizo) */}
-
       </nav>
+
+      {/* ---------- MOBILE TOP BAR ---------- */}
+      <div className="lg:hidden sticky top-0 z-50 w-full bg-gradient-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* LOGO */}
+          <Image src="/logos/logo.png" alt="Logo" width={45} height={45} />
+
+          {/* WALLET Y NOTIFICACIONES */}
+          <div className="flex items-center gap-3">
+            {/* WALLET */}
+            <div className="relative" ref={walletMenuRef}>
+              <button
+                onClick={() => setIsWalletOpen((v) => !v)}
+                className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full"
+              >
+                <Wallet className="w-4 h-4 text-yellow-400" />
+                <span className="text-yellow-400 font-bold text-sm">
+                  {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+                </span>
+              </button>
+
+              {/* WALLET DROPDOWN MOBILE */}
+              <div
+                className={`fixed inset-x-0 top-16 mx-4 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
+                  isWalletOpen
+                    ? "opacity-100 scale-100 pointer-events-auto"
+                    : "opacity-0 scale-95 pointer-events-none"
+                }`}
+              >
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-white/20 rounded-full mx-auto mb-2 flex items-center justify-center">
+                      <Wallet className="w-6 h-6" />
+                    </div>
+                    <div className="text-2xl font-bold">
+                      {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+                    </div>
+                    <div className="text-sm text-blue-100">Saldo actual</div>
+                  </div>
+                </div>
+
+                <div className="p-4 space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-green-50 p-3 rounded-xl text-center">
+                      <div className="text-lg font-bold text-green-600">—</div>
+                      <div className="text-xs text-green-700">Créditos</div>
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded-xl text-center">
+                      <div className="text-lg font-bold text-blue-600">—</div>
+                      <div className="text-xs text-blue-700">Transacciones</div>
+                    </div>
+                  </div>
+
+                  <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Depositar Fondos
+                  </button>
+
+                  <Link href="/explore/wallet">
+                    <button className="w-full bg-gray-50 text-gray-700 py-3 px-4 rounded-xl flex items-center justify-center gap-2">
+                      <History className="w-4 h-4" />
+                      Ver Historial Completo
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* NOTIFICATIONS */}
+            <div className="relative" ref={notificationsMenuRef}>
+              <button
+                onClick={() => setIsNotificationsOpen((v) => !v)}
+                className="relative bg-white/10 p-2 rounded-full"
+              >
+                <Bell className="w-5 h-5 text-white" />
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                  0
+                </span>
+              </button>
+
+              <div
+                className={`fixed inset-x-0 top-16 mx-4 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
+                  isNotificationsOpen
+                    ? "opacity-100 scale-100 pointer-events-auto"
+                    : "opacity-0 scale-95 pointer-events-none"
+                }`}
+              >
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
+                  <div className="text-lg font-semibold">Notificaciones</div>
+                </div>
+                <div className="p-4">
+                  <p className="text-sm text-gray-600">No hay notificaciones aún.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------- MOBILE BOTTOM NAVIGATION ---------- */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg pb-safe">
+        <div className="grid grid-cols-5 h-16">
+          {/* JUEGOS */}
+          <Link href="/games" className="flex flex-col items-center justify-center">
+            <div
+              className={`flex flex-col items-center justify-center transition-all ${
+                pathname === "/games" ? "text-blue-600" : "text-gray-500"
+              }`}
+            >
+              <Gamepad2 className={`w-6 h-6 ${pathname === "/games" ? "scale-110" : ""}`} />
+              <span className="text-xs mt-1 font-medium">Juegos</span>
+            </div>
+          </Link>
+
+          {/* ANUNCIOS */}
+          <Link href="/ads" className="flex flex-col items-center justify-center">
+            <div
+              className={`flex flex-col items-center justify-center transition-all ${
+                pathname === "/ads" ? "text-blue-600" : "text-gray-500"
+              }`}
+            >
+              <Megaphone className={`w-6 h-6 ${pathname === "/ads" ? "scale-110" : ""}`} />
+              <span className="text-xs mt-1 font-medium">Anuncios</span>
+            </div>
+          </Link>
+
+          {/* RIFAS */}
+          <Link href="/raffles" className="flex flex-col items-center justify-center">
+            <div
+              className={`flex flex-col items-center justify-center transition-all ${
+                pathname === "/raffles" ? "text-blue-600" : "text-gray-500"
+              }`}
+            >
+              <Gift className={`w-6 h-6 ${pathname === "/raffles" ? "scale-110" : ""}`} />
+              <span className="text-xs mt-1 font-medium">Rifas</span>
+            </div>
+          </Link>
+
+          {/* PRODUCTOS */}
+          <Link href="/products" className="flex flex-col items-center justify-center">
+            <div
+              className={`flex flex-col items-center justify-center transition-all ${
+                pathname === "/products" ? "text-blue-600" : "text-gray-500"
+              }`}
+            >
+              <Package className={`w-6 h-6 ${pathname === "/products" ? "scale-110" : ""}`} />
+              <span className="text-xs mt-1 font-medium">Productos</span>
+            </div>
+          </Link>
+
+          {/* PERFIL */}
+          <button
+            onClick={() => setOpenMenu((v) => !v)}
+            className="flex flex-col items-center justify-center"
+          >
+            <div
+              className={`flex flex-col items-center justify-center transition-all ${
+                openMenu ? "text-blue-600" : "text-gray-500"
+              }`}
+            >
+              <User className={`w-6 h-6 ${openMenu ? "scale-110" : ""}`} />
+              <span className="text-xs mt-1 font-medium">Perfil</span>
+            </div>
+          </button>
+        </div>
+      </nav>
+
+      {/* MOBILE PROFILE MENU (FULL SCREEN) */}
+      <div
+        className={`lg:hidden fixed inset-0 z-[60] bg-black/50 transition-opacity duration-300 ${
+          openMenu ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setOpenMenu(false)}
+      >
+        <div
+          className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl transition-transform duration-300 ${
+            openMenu ? "translate-y-0" : "translate-y-full"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-3xl text-white">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                <User className="w-8 h-8" />
+              </div>
+              <div>
+                <div className="font-bold text-lg">
+                  {loadingUser ? "Cargando..." : consumer?.name ?? "Usuario"}
+                </div>
+                <div className="text-sm text-blue-100">Beneficiario</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="py-2 pb-20">
+            <Link
+              href="/explore/profile"
+              className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all"
+              onClick={() => setOpenMenu(false)}
+            >
+              <UserCircle className="w-6 h-6 text-gray-600" />
+              <span className="font-medium">Mi Perfil</span>
+            </Link>
+
+            <Link
+              href="/purchases"
+              className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all"
+              onClick={() => setOpenMenu(false)}
+            >
+              <ShoppingBag className="w-6 h-6 text-gray-600" />
+              <span className="font-medium">Mis compras</span>
+            </Link>
+
+            <Link
+              href="/explore/referrals"
+              className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all"
+              onClick={() => setOpenMenu(false)}
+            >
+              <UserCircle className="w-6 h-6 text-gray-600" />
+              <span className="font-medium">Mis Referidos</span>
+            </Link>
+
+            <Link
+              href="/settings"
+              className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all"
+              onClick={() => setOpenMenu(false)}
+            >
+              <Settings className="w-6 h-6 text-gray-600" />
+              <span className="font-medium">Configuración</span>
+            </Link>
+
+            <div className="border-t border-gray-200 mt-2 pt-2">
+              <button className="w-full flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 transition-all">
+                <LogOut className="w-6 h-6" />
+                <span className="font-medium">Cerrar Sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SPACER para el contenido en móvil */}
+      {/* <div className="lg:hidden h-16"></div> */}
     </>
   );
 }

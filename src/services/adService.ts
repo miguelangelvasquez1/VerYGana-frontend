@@ -168,9 +168,27 @@ class AdService {
     return response.data;
   }
 
-  // Dar like a un anuncio
-  async likeAd(adId: number): Promise<{ success: boolean; reward: number }> {
-    const response = await apiClient.post(`/ads/${adId}/like`);
+  async getNextAd(): Promise<AdForConsumerDTO | null> {
+    try {
+      const res = await apiClient.get('/ads/next');
+      return res.data;
+    } catch (e: any) {
+      if (e.response?.status === 204) {
+        return null;
+      }
+      throw e;
+    }
+  }
+
+  async likeAd(adId: number, sessionUUID: string): Promise<{
+    liked: boolean;
+    rewardAmount: number;
+  }> {
+  // Dar like a un anuncio (handled by likeAd method above)
+    const response = await apiClient.post(`/adLike/like`, {
+      sessionUUID,
+      adId
+    });
     return response.data;
   }
 

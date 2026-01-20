@@ -17,7 +17,7 @@ export default function AdPage() {
         </aside>
 
         {/* Contenido principal */}
-        <main className="flex flex-1 justify-center items-center">
+        <main className="flex flex-1 justify-center items-center mb-16 md:mb-0">
           <VideoAdPlayer />
         </main>
       </div>

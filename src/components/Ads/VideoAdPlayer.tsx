@@ -1,149 +1,74 @@
 // components/VideoAdPlayer.tsx
 'use client'
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import VideoControls from './VideoControls';
-import { useActiveAds } from '@/hooks/ads/querys';
+import { useNextAd, useLikeAd } from '@/hooks/ads/mutations';
 import { AdForConsumerDTO } from '@/types/ads/advertiser';
+import toast from 'react-hot-toast';
 
-interface VideoAdPlayerProps {
-  page?: number;
-  size?: number;
-}
-
-export default function VideoAdPlayer({ page = 0, size = 10 }: VideoAdPlayerProps) {
-  // ✅ MEJORA 1: Solo hacer la petición UNA VEZ al montar el componente
-  const { data, isLoading, isError, error } = useActiveAds(page, size);
-
-  // ✅ MEJORA 2: Usar useMemo para evitar recalcular en cada render
-  const adsArray = useMemo<AdForConsumerDTO[]>(() => {
-    if (!data) return [];
-    
-    // Soportar diferentes estructuras de respuesta
-    if ((data as any).content) return (data as any).content;
-    if ((data as any).items) return (data as any).items;
-    if (Array.isArray(data)) return data;
-    
-    return [];
-  }, [data]);
-
-  const medias = useMemo(() => 
-    adsArray.map((ad) => ({
-      id: ad.id,
-      src: ad.contentUrl,
-      title: ad.title,
-      description: ad.description ?? '',
-      brand: ad.advertiserName ?? 'Anunciante',
-      likes: ad.currentLikes ?? 0,
-      type: ad.mediaType ?? 'VIDEO',
-      duration: ad.mediaType === 'VIDEO' ? 0 : 30,
-    })),
-    [adsArray]
-  );
-
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+export default function VideoAdPlayer() {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [watchTime, setWatchTime] = useState(0);
   const [duration, setDuration] = useState(30);
   const [isLiked, setIsLiked] = useState(false);
+  const [rewardAmount, setRewardAmount] = useState<number | null>(null);
   const [showReward, setShowReward] = useState(false);
+  const [hasReachedEnd, setHasReachedEnd] = useState(false);
+  const [currentAd, setCurrentAd] = useState<AdForConsumerDTO | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef<number | null>(null);
-  const isSwitching = useRef(false);
 
-  const currentMedia = medias[currentMediaIndex];
+  const { mutate: getNextAd, isPending: isLoadingAd } = useNextAd();
+  const { mutate: likeAd, isPending: isLikingAd } = useLikeAd();
 
-  // Formatear likes
-  const formattedLikes = useMemo(() => {
-    if (!currentMedia) return '0';
-    return new Intl.NumberFormat(navigator.language || 'en-US').format(currentMedia.likes);
-  }, [currentMedia?.likes]);
-
-  // ✅ MEJORA 3: Navegación con wheel y touch (solo se configura una vez)
+  // Cargar el primer anuncio al montar el componente
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container || medias.length === 0) return;
+    loadNextAd();
+  }, []);
 
-    const handleWheel = (e: WheelEvent) => {
-      if (isSwitching.current) return;
-
-      if (Math.abs(e.deltaY) > 50) {
-        isSwitching.current = true;
-        setTimeout(() => { isSwitching.current = false; }, 500);
-
-        if (e.deltaY > 0) handleNext();
-        else handlePrev();
+  const loadNextAd = () => {
+    getNextAd(undefined, {
+      onSuccess: (ad) => {
+        if (ad) {
+          setCurrentAd(ad);
+          resetAdState();
+        } else {
+          setCurrentAd(null);
+        }
+      },
+      onError: (error) => {
+        console.error('Error cargando anuncio:', error);
       }
-    };
+    });
+  };
 
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY;
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (touchStartY.current === null) return;
-      const diff = touchStartY.current - e.changedTouches[0].clientY;
-
-      if (Math.abs(diff) > 50) {
-        if (diff > 0) handleNext();
-        else handlePrev();
-      }
-
-      touchStartY.current = null;
-    };
-
-    container.addEventListener('wheel', handleWheel, { passive: true });
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [medias.length]);
-
-  // Reset cuando cambia la lista de medias
-  useEffect(() => {
-    if (medias.length === 0) {
-      setCurrentMediaIndex(0);
-      setIsPlaying(false);
-      return;
-    }
-    if (currentMediaIndex >= medias.length) {
-      setCurrentMediaIndex(0);
-    }
-  }, [medias.length, currentMediaIndex]);
-
-  // Reset estados cuando cambia el media actual
-  useEffect(() => {
-    if (!currentMedia) return;
-    
+  const resetAdState = () => {
     setProgress(0);
     setWatchTime(0);
     setIsLiked(false);
     setShowReward(false);
-    setDuration(currentMedia.type === 'IMAGE' ? 30 : 0);
-  }, [currentMedia?.id]);
+    setHasReachedEnd(false);
+    setIsPlaying(true);
+    setIsExpanded(false);
+  };
 
-  // ✅ MEJORA 4: Manejo de reproducción optimizado
+  // Efecto para manejar la reproducción del medio actual
   useEffect(() => {
-    if (!currentMedia) return;
+    if (!currentAd) return;
 
-    const isImage = currentMedia.type === 'IMAGE';
+    const isImage = currentAd.mediaType === 'IMAGE';
     const video = videoRef.current;
 
-    // Limpiar timer anterior
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
 
     if (!isImage && video) {
-      // VIDEO
       video.load();
       
       if (isPlaying) {
@@ -160,7 +85,9 @@ export default function VideoAdPlayer({ page = 0, size = 10 }: VideoAdPlayerProp
       };
 
       const handleEnded = () => {
-        handleNext();
+        setHasReachedEnd(true);
+        setProgress(100);
+        setIsPlaying(false);
       };
 
       const handleTimeUpdate = () => {
@@ -168,14 +95,9 @@ export default function VideoAdPlayer({ page = 0, size = 10 }: VideoAdPlayerProp
         const dur = video.duration || duration || 30;
         
         if (dur > 0) {
-          setProgress((currentTime / dur) * 100);
+          const progressPercent = (currentTime / dur) * 100;
+          setProgress(progressPercent);
           setWatchTime(currentTime);
-
-          // Mostrar recompensa al 80%
-          if (currentTime / dur > 0.8 && !showReward) {
-            setShowReward(true);
-            setTimeout(() => setShowReward(false), 3000);
-          }
         }
       };
 
@@ -189,7 +111,6 @@ export default function VideoAdPlayer({ page = 0, size = 10 }: VideoAdPlayerProp
         video.removeEventListener('timeupdate', handleTimeUpdate);
       };
     } else if (isImage && isPlaying) {
-      // IMAGEN
       const imageDuration = 30;
       const startTime = Date.now() - (watchTime * 1000);
       
@@ -198,18 +119,15 @@ export default function VideoAdPlayer({ page = 0, size = 10 }: VideoAdPlayerProp
         
         if (elapsed >= imageDuration) {
           clearInterval(timerRef.current!);
-          handleNext();
+          setHasReachedEnd(true);
+          setProgress(100);
+          setIsPlaying(false);
           return;
         }
 
         setWatchTime(elapsed);
-        setProgress((elapsed / imageDuration) * 100);
-
-        // Mostrar recompensa al 80%
-        if (elapsed / imageDuration > 0.8 && !showReward) {
-          setShowReward(true);
-          setTimeout(() => setShowReward(false), 3000);
-        }
+        const progressPercent = (elapsed / imageDuration) * 100;
+        setProgress(progressPercent);
       }, 1000 / 60);
 
       return () => {
@@ -218,11 +136,12 @@ export default function VideoAdPlayer({ page = 0, size = 10 }: VideoAdPlayerProp
         }
       };
     }
-  }, [currentMedia?.id, isPlaying]);
+  }, [currentAd?.id, isPlaying, hasReachedEnd]);
 
-  // Handlers
   const togglePlayPause = async () => {
-    const isImage = currentMedia?.type === 'IMAGE';
+    if (!currentAd || hasReachedEnd) return;
+    
+    const isImage = currentAd.mediaType === 'IMAGE';
     
     if (isImage) {
       setIsPlaying(prev => !prev);
@@ -245,71 +164,92 @@ export default function VideoAdPlayer({ page = 0, size = 10 }: VideoAdPlayerProp
   };
 
   const handleLike = () => {
-    setIsLiked(prev => !prev);
-    // TODO: Llamar API para registrar like
+    if (!currentAd || isLikingAd || isLiked || !hasReachedEnd) return;
+    likeAd(
+      {
+        adId: currentAd.id,
+        sessionUUID: currentAd.sessionUUID
+      },
+      {
+        onSuccess: (res) => {
+          setIsLiked(true);
+
+          if (res.rewardAmount > 0) {
+            // Mostrar notificación de recompensa
+            setRewardAmount(res.rewardAmount);
+            setShowReward(true);
+            setTimeout(() => {
+              setShowReward(false);
+              setRewardAmount(null);
+              // Cargar el siguiente anuncio después de mostrar la recompensa
+              loadNextAd();
+            }, 3000);
+          } else {
+            // Si no hay recompensa, cargar el siguiente inmediatamente
+            setTimeout(() => {
+              loadNextAd();
+            }, 500);
+          }
+        },
+        onError: (error) => {
+          const message = (error as any)?.response?.data?.message;
+          toast.error('No se pudo registrar el like. Intenta nuevamente.');
+          console.error('Error al dar like:', message);
+        }
+      }
+    );
   };
 
-  const handleNext = () => {
-    setCurrentMediaIndex(prev => (prev < medias.length - 1 ? prev + 1 : 0));
-    setIsPlaying(true);
+  const handleVisitAd = () => {
+    if (!currentAd?.targetUrl) return;
+
+    window.open(currentAd.targetUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handlePrev = () => {
-    setCurrentMediaIndex(prev => (prev > 0 ? prev - 1 : medias.length - 1));
-    setIsPlaying(true);
-  };
 
   const handleShare = () => {
-    // TODO: Implementar compartir
-    console.log('Compartir:', currentMedia);
+    if (!currentAd) return;
+    console.log('Compartir:', currentAd);
   };
 
   const handleSave = () => {
-    // TODO: Implementar guardar
-    console.log('Guardar:', currentMedia);
+    if (!currentAd) return;
+    console.log('Guardar:', currentAd);
   };
 
-  // Estados de carga/error
-  if (isLoading) {
+  if (isLoadingAd && !currentAd) {
     return (
       <div className="flex justify-center items-center w-full h-[100dvh] bg-black">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white">Cargando anuncios...</p>
+          <p className="text-white">Cargando anuncio...</p>
         </div>
       </div>
     );
   }
 
-  if (isError) {
+  if (!currentAd) {
     return (
       <div className="flex justify-center items-center w-full h-[100dvh] bg-black">
-        <div className="text-center text-red-500 p-6">
-          <p className="text-xl mb-2">⚠️ Error cargando anuncios</p>
-          <p className="text-sm">{(error as any)?.message ?? 'Error desconocido'}</p>
+        <div className="text-center text-white p-6">
+          <p className="text-xl mb-4">No hay más anuncios disponibles</p>
         </div>
       </div>
     );
   }
 
-  if (!currentMedia) {
-    return (
-      <div className="flex justify-center items-center w-full h-[100dvh] bg-black">
-        <p className="text-white text-center p-6">No hay anuncios activos disponibles.</p>
-      </div>
-    );
-  }
-
-  const isImage = currentMedia.type === 'IMAGE';
+  const isImage = currentAd.mediaType === 'IMAGE';
+  const formattedLikes = new Intl.NumberFormat(navigator.language || 'en-US').format(currentAd.currentLikes);
 
   return (
     <div 
       ref={containerRef} 
       className="relative flex justify-center items-center w-full h-[100dvh] overflow-hidden bg-black touch-none"
     >
-      <div className="relative w-full max-w-[500px] h-full overflow-hidden rounded-none md:rounded-2xl md:my-5">
+      <div className="relative max-w-full max-h-[100dvh] overflow-hidden rounded-lg">
+
         {/* Progress bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gray-800 z-30">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-white/20 z-30">
           <div
             className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-200"
             style={{ width: `${progress}%` }}
@@ -319,80 +259,134 @@ export default function VideoAdPlayer({ page = 0, size = 10 }: VideoAdPlayerProp
         {/* Media */}
         {isImage ? (
           <img
-            src={currentMedia.src}
-            alt={currentMedia.title}
-            className="w-full h-full object-contain bg-black cursor-pointer"
+            src={currentAd.contentUrl}
+            alt={currentAd.title}
+            className="max-w-full max-h-[calc(80dvh-1rem)] w-auto h-auto object-contain cursor-pointer"
             onClick={togglePlayPause}
           />
         ) : (
           <video
             ref={videoRef}
-            src={currentMedia.src}
+            src={currentAd.contentUrl}
             autoPlay
             loop={false}
             muted
             playsInline
             preload="metadata"
-            className="w-full h-full object-contain bg-black cursor-pointer"
+            className="max-w-full h-[calc(80dvh-1rem)] w-auto object-contain cursor-pointer"
             onClick={togglePlayPause}
           />
         )}
 
         {/* Play overlay */}
-        {!isPlaying && (
+        {!isPlaying && !hasReachedEnd && (
           <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/30">
             <button 
               onClick={togglePlayPause} 
-              className="p-4 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all hover:scale-110"
+              className="p-3 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all hover:scale-110"
             >
-              <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             </button>
           </div>
         )}
 
+        {/* End of ad overlay - Like prompt */}
+        {hasReachedEnd && !isLiked && (
+          <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/50">
+            <div className="text-center bg-white/10 backdrop-blur-md rounded-2xl p-8 mx-4">
+              <p className="text-white text-xl font-bold mb-4">¡Anuncio completado!</p>
+              <p className="text-white/90 mb-6">Dale like para continuar</p>
+              <button
+                onClick={handleLike}
+                disabled={isLikingAd}
+                className="px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full font-bold text-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLikingAd ? 'Procesando...' : '❤️ Me gusta'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Loading next ad overlay */}
+        {isLiked && isLoadingAd && (
+          <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/70">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+              <p className="text-white">Cargando siguiente anuncio...</p>
+            </div>
+          </div>
+        )}
+
         {/* Media Info Overlay */}
-        <div className="absolute left-0 right-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 pb-6 z-20">
-          <div className="flex items-center justify-between mb-3">
+        <div className={`absolute left-0 right-0 bottom-0 bg-gradient-to-t from-black/40 to-transparent p-3 pb-4 md:pb-4 z-20 pt-5 
+          ${isExpanded ? 'bg-gradient-to-t from-black/60 to-transparent' : ''}`}>
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-sm font-bold text-white">
-                  {currentMedia.brand?.[0]?.toUpperCase() ?? 'A'}
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-xs font-bold text-white">
+                  {currentAd.advertiserName?.[0]?.toUpperCase() ?? 'A'}
                 </span>
               </div>
-              <span className="text-white font-semibold text-sm drop-shadow-lg">
-                {currentMedia.brand}
+              <span className="text-white font-semibold text-xs drop-shadow-lg">
+                {currentAd.advertiserName}
               </span>
             </div>
           </div>
 
-          <h3 className="text-white font-bold text-lg mb-2 leading-tight drop-shadow-lg">
-            {currentMedia.title}
+          <h3 className="text-white font-bold text-base mb-1 leading-tight drop-shadow-lg">
+            {currentAd.title}
           </h3>
-          <p className="text-white/90 text-sm mb-3 leading-snug drop-shadow-lg line-clamp-2">
-            {currentMedia.description}
+          
+          <p
+            className={`text-white/90 text-sm leading-snug drop-shadow-lg transition-all ${
+              isExpanded ? '' : 'line-clamp-2'
+            }`}
+          >
+            {currentAd.description}
           </p>
 
-          <div className="flex items-center gap-4 text-white/80 text-xs font-medium">
-            <span className="flex items-center gap-1">
-              <span>❤️</span> {formattedLikes}
-            </span>
-            <span className="flex items-center gap-1">
-              <span>⏱️</span> {Math.floor(watchTime)}s / {Math.floor(duration)}s
-            </span>
-          </div>
+          {currentAd.description && currentAd.description.length > 100 && (
+            <button
+              onClick={() => setIsExpanded(v => !v)}
+              className="text-blue-400 text-[10px] mt-0.5 font-medium"
+            >
+              {isExpanded ? 'Ver menos' : 'Ver más'}
+            </button>
+          )}
         </div>
 
         {/* Reward notification */}
-        {showReward && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 animate-bounce">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-full shadow-2xl">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🎉</span>
-                <div>
-                  <p className="font-bold text-lg">¡Recompensa desbloqueada!</p>
-                  <p className="text-sm opacity-90">Sigue viendo para ganar más</p>
+        {showReward && rewardAmount !== null && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+            <div className="animate-[scale-in_0.4s_ease-out]">
+              <div className="relative bg-gradient-to-br from-emerald-500 via-green-500 to-lime-400 text-white px-8 py-6 rounded-2xl shadow-[0_20px_50px_rgba(16,185,129,0.6)]">
+                
+                {/* Halo / glow */}
+                <div className="absolute -inset-1 rounded-2xl bg-emerald-400 opacity-30 blur-xl"></div>
+
+                <div className="relative flex items-center gap-4">
+                  {/* Icono */}
+                  <div className="text-4xl drop-shadow-md">
+                    🎉
+                  </div>
+
+                  {/* Texto */}
+                  <div className="text-left">
+                    <p className="text-xs uppercase tracking-wide opacity-90">
+                      Recompensa obtenida
+                    </p>
+
+                    <p className="text-3xl font-extrabold leading-tight">
+                      +{rewardAmount}
+                      <span className="text-lg font-semibold ml-1">puntos</span>
+                    </p>
+
+                    <p className="text-xs opacity-90 mt-1">
+                      Gracias por ver el anuncio
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -400,28 +394,22 @@ export default function VideoAdPlayer({ page = 0, size = 10 }: VideoAdPlayerProp
         )}
 
         {/* Mobile controls */}
-        <div className="absolute right-4 bottom-24 flex flex-col gap-4 md:hidden z-30">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col gap-3 md:hidden z-30">
           <VideoControls
-            isLiked={isLiked}
-            onLike={handleLike}
+            onVisit={handleVisitAd}
             onShare={handleShare}
             onSave={handleSave}
-            onNext={handleNext}
-            onPrev={handlePrev}
             size="md"
           />
         </div>
       </div>
 
       {/* Desktop controls */}
-      <div className="hidden md:block absolute right-8">
+      <div className="hidden md:flex flex-col justify-center ml-4">
         <VideoControls
-          isLiked={isLiked}
-          onLike={handleLike}
+          onVisit={handleVisitAd}
           onShare={handleShare}
           onSave={handleSave}
-          onNext={handleNext}
-          onPrev={handlePrev}
           size="lg"
         />
       </div>

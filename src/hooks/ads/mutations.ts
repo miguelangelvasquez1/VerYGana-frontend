@@ -2,7 +2,7 @@ import { adService } from "@/services/adService";
 import { adKeys } from "./adKeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminAdKeys } from "./adminQuerys";
-import { AdForAdminDTO, AdResponseDTO } from "@/types/ads/advertiser";
+import { AdForAdminDTO, AdForConsumerDTO, AdResponseDTO } from "@/types/ads/advertiser";
 
 // Helper para actualizar listas en caché
 const updateAdInLists = (
@@ -178,16 +178,23 @@ export function useDeleteAd() {
   });
 }
 
-// Hook para dar like a un anuncio
-export function useLikeAd() {
-  const queryClient = useQueryClient();
+// hook para obtener siguiente anuncio
+export function useNextAd() {
+  return useMutation<AdForConsumerDTO | null>({
+    mutationFn: () => adService.getNextAd()
+  })
+}
 
+
+// Hook para registrar like en anuncio
+export function useLikeAd() {
   return useMutation({
-    mutationFn: (adId: number) => adService.likeAd(adId),
-    onSuccess: (_, adId) => {
-      // Invalida el anuncio específico y la lista de anuncios activos
-      queryClient.invalidateQueries({ queryKey: adKeys.detail(adId) });
-      queryClient.invalidateQueries({ queryKey: ['ads', 'active'] });
-    },
-  });
+    mutationFn: ({
+      adId,
+      sessionUUID
+    }: {
+      adId: number
+      sessionUUID: string
+    }) => adService.likeAd(adId, sessionUUID)
+  })
 }
