@@ -29,8 +29,8 @@ const GamesPanelPage = () => {
       try {
         const page = await getAvailableGamesPage(0, 20);
 
-        const sponsored = page.data.filter(g => g.sponsored);
-        const free = page.data.filter(g => !g.sponsored);
+        const sponsored = page.data.filter((g: { sponsored: any; }) => g.sponsored);
+        const free = page.data.filter((g: { sponsored: any; }) => !g.sponsored);
 
         setSponsoredGames(sponsored);
         setFreeGames(free);
