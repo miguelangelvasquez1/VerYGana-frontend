@@ -1,7 +1,5 @@
 import RegisterForm from "@/components/forms/RegisterForm"
 import Footer from "@/components/Footer";
-import NavBarNoAuth from "@/components/bars/NavBarNoAuth";
-import NavBarNoAuth2 from "@/components/bars/NavBarNoAuth2";
 
 export default function RegisterPage() {
   return (

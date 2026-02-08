@@ -8,13 +8,10 @@ import {
   Smartphone,
   Star,
   Users,
-  TrendingUp,
   Shield,
   Clock,
-  Zap,
   Heart,
   Award,
-  ChevronRight,
   Eye,
   Coins,
   Target,
@@ -22,9 +19,7 @@ import {
   ArrowRight,
   Sparkles
 } from "lucide-react";
-import NavBarNoAuth from "@/components/bars/NavBarNoAuth";
 import Footer from "@/components/Footer";
-import Link from "next/link";
 import NavBarNoAuth2 from "@/components/bars/NavBarNoAuth2";
 
 // Datos simulados

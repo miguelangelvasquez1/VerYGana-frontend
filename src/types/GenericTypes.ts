@@ -25,6 +25,5 @@ export interface PagedResponse<T> {
 
 export interface FileUploadPermission {
   uploadUrl: string;
-  publicUrl: string;
   expiresInSeconds: number;
 }

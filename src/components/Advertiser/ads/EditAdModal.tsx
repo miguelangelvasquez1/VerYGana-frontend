@@ -2,11 +2,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Upload, Calculator, Tag, Link as LinkIcon, Save, Loader2, MapPin, Calendar } from 'lucide-react';
+import { X, Calculator, Tag, Link as LinkIcon, Save, Loader2, MapPin, Calendar, Info } from 'lucide-react';
 import { AdResponseDTO, EditAdFormData, SelectedMunicipalityData } from '@/types/ads/advertiser';
+import { AdUpdateDTO } from '@/types/ads/advertiser';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { useUpdateAd } from '@/hooks/ads/mutations';
+import toast from 'react-hot-toast';
 
 interface EditAdModalProps {
   ad: AdResponseDTO;
@@ -34,9 +36,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
     categoryIds: ad.categories.map(c => c.id),
     startDate: ad.startDate ? new Date(ad.startDate).toISOString().slice(0, 16) : '',
     endDate: ad.endDate ? new Date(ad.endDate).toISOString().slice(0, 16) : '',
-    mediaType: (ad.mediaType || '').toString().toLowerCase() === 'video' ? 'video' : 'image',
     targetUrl: ad.targetUrl || '',
-    file: null,
     targetAudience: {
       ageRange: [ad.minAge, ad.maxAge],
       gender: (ad.targetGender?.toLowerCase() ?? 'all') as 'all' | 'male' | 'female',
@@ -46,7 +46,6 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
 
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [selectedMunicipalitiesData, setSelectedMunicipalitiesData] = useState<SelectedMunicipalityData[]>(initialSelectedMunicipalities);
-  const [filePreview, setFilePreview] = useState<string | null>(ad.contentUrl);
 
   // React Query hooks
   const { categories, loading: loadingCategories } = useCategories();
@@ -83,38 +82,6 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
         ? prev.categoryIds.filter(id => id !== categoryId)
         : [...prev.categoryIds, categoryId]
     }));
-  };
-
-  const validateFileByTypeAndSize = (file: File, type: 'image' | 'video') => {
-    if (type === 'image') {
-      const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-      const maxBytes = 5 * 1024 * 1024; // 5MB
-      if (!allowed.includes(file.type)) return 'Formato de imagen no permitido';
-      if (file.size > maxBytes) return 'Imagen supera 5MB';
-    } else {
-      const allowed = ['video/mp4', 'video/webm', 'video/quicktime'];
-      const maxBytes = 100 * 1024 * 1024; // 100MB
-      if (!allowed.includes(file.type)) return 'Formato de video no permitido';
-      if (file.size > maxBytes) return 'Video supera 100MB';
-    }
-    return null;
-  };
-
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const err = validateFileByTypeAndSize(file, formData.mediaType);
-      if (err) return alert(err);
-
-
-      setFormData(prev => ({ ...prev, file }));
-
-
-      const reader = new FileReader();
-      reader.onloadend = () => setFilePreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
   };
 
   const addMunicipality = (municipalityCode: string) => {
@@ -158,12 +125,6 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
     }));
   };
 
-  const handleTypeChange = (mediaType: 'image' | 'video') => {
-    setFormData(prev => ({ ...prev, mediaType, file: null }));
-    // si preferimos limpiar preview cuando se cambia de tipo:
-    setFilePreview(ad.contentUrl || null);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -172,37 +133,28 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
       return;
     }
 
-    const adDto = {
+    const updateDto: AdUpdateDTO = {
       title: formData.title,
       description: formData.description,
       rewardPerLike: formData.rewardPerLike,
       maxLikes: formData.maxLikes,
-      targetUrl: formData.targetUrl || null,
+      targetUrl: formData.targetUrl || undefined,
       startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
       endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
-      mediaType: formData.mediaType,
       categoryIds: formData.categoryIds,
       targetMunicipalitiesCodes: formData.targetAudience.municipalityCodes,
       minAge: formData.targetAudience.ageRange[0],
       maxAge: formData.targetAudience.ageRange[1],
-      targetGender: formData.targetAudience.gender.toUpperCase(),
+      targetGender: formData.targetAudience.gender.toUpperCase() as 'ALL' | 'MALE' | 'FEMALE',
     };
 
-    const formDataToSend = new FormData();
-    formDataToSend.append('ad', new Blob([JSON.stringify(adDto)], { type: 'application/json' }));
-
-    // Agregar archivo solo si se seleccionó uno nuevo
-    if (formData.file) {
-      formDataToSend.append('file', formData.file);
-    }
-
     try {
-      await updateAdMutation.mutateAsync({ id: ad.id, formData: formDataToSend });
-      alert('Anuncio actualizado con éxito');
+      await updateAdMutation.mutateAsync({ id: ad.id, updateDto });
+      toast.success('Anuncio actualizado con éxito');
       onSuccess();
       onClose();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al actualizar anuncio');
+      toast.error('Error al actualizar anuncio: ' + (error.response?.data?.message || 'Error desconocido'));
     }
   };
 
@@ -279,87 +231,33 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
             </div>
           </div>
 
-          {/* Cambiar archivo multimedia */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+          {/* Vista previa del archivo multimedia (solo lectura) */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-300">
             <div className="flex items-center mb-4">
-              <Upload className="w-5 h-5 text-purple-600 mr-2" />
-              <h3 className="text-lg font-bold text-gray-900">Cambiar Archivo Multimedia</h3>
+              <Info className="w-5 h-5 text-gray-600 mr-2" />
+              <h3 className="text-lg font-bold text-gray-900">Archivo Multimedia Actual</h3>
             </div>
 
-
-            {/* Selector de tipo (imagen / video) */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Anuncio</label>
-              <div className="flex space-x-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    value="image"
-                    checked={formData.mediaType === 'image'}
-                    onChange={() => handleTypeChange('image')}
-                    className="mr-2"
-                  />
-                  Imagen
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    value="video"
-                    checked={formData.mediaType === 'video'}
-                    onChange={() => handleTypeChange('video')}
-                    className="mr-2"
-                  />
-                  Video
-                </label>
-              </div>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-yellow-800">
+                <strong>Nota:</strong> No es posible cambiar el archivo multimedia una vez creado el anuncio. 
+                Si necesitas cambiar la imagen o video, deberás crear un nuevo anuncio.
+              </p>
             </div>
 
-
-            {/* Preview actual */}
-            {filePreview && (
-              <div className="mb-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">Vista previa actual:</p>
-                <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
-                  {ad.mediaType === 'VIDEO' || formData.mediaType === 'video' ? (
-                    <video src={filePreview} className="w-full h-full object-cover" controls />
-                  ) : (
-                    <img src={filePreview} alt="Preview" className="w-full h-full object-cover" />
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2 mt-2">
-                    Subir nuevo archivo (opcional)
-                  </label>
-
-                  {/* Input simple (visible) */}
-                  <input
-                    type="file"
-                    accept={formData.mediaType === 'image' ? 'image/*' : 'video/*'}
-                    onChange={handleFileChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    {formData.mediaType === 'image'
-                      ? 'Máx 5MB - JPG, PNG, WebP'
-                      : 'Máx 100MB - MP4, WebM'}
-                  </p>
-
-                  {/* Mostrar nombre y botón para eliminar selección si hay file */}
-                  {formData.file && (
-                    <div className="mt-3 flex items-center justify-between bg-gray-50 p-2 rounded">
-                      <span className="text-sm text-gray-700 truncate">{formData.file.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => { setFormData(prev => ({ ...prev, file: null })); setFilePreview(ad.contentUrl || null); }}
-                        className="text-red-500 hover:text-red-700 ml-4"
-                      >
-                        Quitar
-                      </button>
-                    </div>
-                  )}
-                </div>
+            {ad.contentUrl && (
+              <div className="relative w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
+                {ad.mediaType === 'VIDEO' ? (
+                  <video src={ad.contentUrl} className="w-full h-full object-cover" controls />
+                ) : (
+                  <img src={ad.contentUrl} alt="Preview" className="w-full h-full object-cover" />
+                )}
               </div>
             )}
+
+            <div className="mt-3 text-sm text-gray-600">
+              <p><strong>Tipo:</strong> {ad.mediaType === 'VIDEO' ? 'Video' : 'Imagen'}</p>
+            </div>
           </div>
 
           {/* Presupuesto y Recompensas */}

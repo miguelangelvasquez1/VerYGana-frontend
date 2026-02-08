@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { AdResponseDTO } from '@/types/ads/advertiser';
 import { useAds } from '@/hooks/ads/querys';
 import { usePauseAd, useResumeAd, useDeleteAd } from '@/hooks/ads/mutations';
+import toast from 'react-hot-toast';
 
 export function AdsList() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,16 +46,18 @@ export function AdsList() {
   const handlePause = async (adId: number) => {
     try {
       await pauseAdMutation.mutateAsync(adId);
+      toast.success('Anuncio pausado correctamente');
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Error al pausar el anuncio');
+      toast.error(err.response?.data?.message || 'Error al pausar el anuncio');
     }
   };
 
   const handleResume = async (adId: number) => {
     try {
       await resumeAdMutation.mutateAsync(adId);
+      toast.success('Anuncio reanudado correctamente')
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Error al reanudar el anuncio');
+      toast.error(err.response?.data?.message || 'Error al reanudar el anuncio');
     }
   };
 
@@ -62,8 +65,9 @@ export function AdsList() {
     if (confirm('¿Estás seguro de que deseas eliminar este anuncio? Esta acción no se puede deshacer.')) {
       try {
         await deleteAdMutation.mutateAsync(adId);
+        toast.success('Anuncio eliminado correctamente');
       } catch (err: any) {
-        alert(err.response?.data?.message || 'Error al eliminar el anuncio');
+        toast.error(err.response?.data?.message || 'Error al eliminar el anuncio');
       }
     }
   };

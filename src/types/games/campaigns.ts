@@ -1,7 +1,8 @@
 // types/campaigns.ts
 
 import { MunicipalityDTO } from "@/services/LocationService";
-import { Category } from "./Category.types";
+import { Category } from "../Category.types";
+import { GameConfigFormData } from "./gameConfig";
 
 // ==================== Enums ====================
 
@@ -80,6 +81,14 @@ export interface Campaign {
   id: number;
   gameId: number;
   gameTitle: string;
+
+  coinValue: number;
+  completionCoins: number;
+  budgetCoins: number;
+  spentCoins: number;
+  maxCoinsPerSession: number;
+  maxSessionsPerUserPerDay: number;
+
   budget: number;
   spent: number;
   sessionsPlayed: number;
@@ -97,6 +106,7 @@ export interface Campaign {
   maxAge: number;
   targetGender: 'ALL' | 'MALE' | 'FEMALE';
   targetMunicipalities: MunicipalityDTO[];
+  version: number;
 }
 
 // ==================== DTOs de Request ====================
@@ -118,15 +128,29 @@ export interface FileUploadRequest {
 }
 
 export interface CampaignDetails {
+  // Sistema de monedas y recompensas
+  coinValue: number; // Valor de cada moneda en dinero real
+  completionCoins: number; // Monedas ganadas por completar el juego
+  budgetCoins: number; // Presupuesto total en monedas
+  maxCoinsPerSession: number; // Máximo de monedas que se pueden ganar por sesión
+  maxSessionsPerUserPerDay: number; // Máximo de sesiones por usuario por día
+  
+  // Presupuesto calculado (coinValue * budgetCoins)
   budget: number;
+  
+  // Configuración de campaña
   targetUrl: string | null;
   categoryIds: number[];
+  
+  // Audiencia objetivo
   targetAudience: {
     minAge: number;
     maxAge: number;
     gender: 'ALL' | 'MALE' | 'FEMALE';
     municipalityCodes: string[];
   };
+
+  gameConfig: GameConfigFormData | undefined;
 }
 
 // ==================== DTOs de Response ====================
@@ -138,23 +162,10 @@ export interface AssetUploadPermission {
 
 export interface FileUploadPermission {
   uploadUrl: string;
-  publicUrl: string;
   expiresInSeconds: number;
 }
 
 export type PrepareCampaignResponse = Record<number, FileUploadPermission>;
-
-
-/**
- * DTO que retorna el backend después de preparar un asset
- * Contiene el ID del asset creado y las URLs para subir
- */
-export interface FileUploadPermissionDTO {
-  assetId: number;           // ID del asset creado en BD
-  uploadUrl: string;         // URL pre-firmada para PUT
-  publicUrl: string;         // URL pública final del asset
-  expiresInSeconds: number;  // Tiempo de expiración de uploadUrl
-}
 
 // ==================== UI State ====================
 

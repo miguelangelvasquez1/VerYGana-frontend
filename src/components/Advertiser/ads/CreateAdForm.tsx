@@ -1,17 +1,19 @@
 // components/forms/CreateAdForm.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { Upload, X, DollarSign, Heart, Calculator, Calendar, MapPin, Tag, Link as LinkIcon } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Upload, X, DollarSign, Heart, Calculator, Calendar, MapPin, Tag, Link as LinkIcon, Loader2 } from 'lucide-react';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
-import { useCreateAd } from '@/hooks/ads/mutations';
+import { useAdUpload } from '@/hooks/ads/useAdUpload';
 import { useRouter } from 'next/navigation';
+import { AdDetails } from '@/types/ads/advertiser';
+import toast from 'react-hot-toast';
 
 interface CreateAdFormData {
   title: string;
   description: string;
-  type: 'image' | 'video';
+  type: 'IMAGE' | 'VIDEO';
   file: File | null;
   rewardPerLike: number;
   maxLikes: number;
@@ -34,7 +36,7 @@ export function CreateAdForm() {
   const [formData, setFormData] = useState<CreateAdFormData>({
     title: '',
     description: '',
-    type: 'image',
+    type: 'IMAGE',
     file: null,
     rewardPerLike: 0.50,
     maxLikes: 100,
@@ -54,7 +56,6 @@ export function CreateAdForm() {
   });
 
   const router = useRouter();
-  const createAdMutation = useCreateAd();
   const [dragActive, setDragActive] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
 
@@ -66,6 +67,34 @@ export function CreateAdForm() {
   const [selectedMunicipalitiesData, setSelectedMunicipalitiesData] = useState<
     { code: string; name: string; departmentCode: string; departmentName: string }[]
   >([]);
+
+  // Preparar AdDetails para el hook (useMemo para evitar recreaciones innecesarias)
+  const adDetails: AdDetails = useMemo(() => ({
+    title: formData.title,
+    description: formData.description,
+    rewardPerLike: formData.rewardPerLike,
+    maxLikes: formData.maxLikes,
+    mediaType: formData.type,
+    targetUrl: formData.targetUrl || null,
+    startDate: formData.startImmediately
+      ? null
+      : formData.startDate
+      ? new Date(formData.startDate).toISOString()
+      : null,
+    endDate: formData.endWhenBudgetExhausted
+      ? null
+      : formData.endDate
+      ? new Date(formData.endDate).toISOString()
+      : null,
+    categoryIds: formData.categoryIds,
+    targetMunicipalitiesCodes: formData.targetAudience.municipalityCodes,
+    minAge: formData.targetAudience.ageRange[0],
+    maxAge: formData.targetAudience.ageRange[1],
+    targetGender: formData.targetAudience.gender.toUpperCase() as 'MALE' | 'FEMALE' | 'ALL',
+  }), [formData]);
+
+  // Hook de subida con el nuevo sistema
+  const { uploadState, fileState, uploadAd, resetUpload } = useAdUpload({ adDetails });
 
   // Cálculo de presupuesto
   const calculateBudget = (reward: number, maxLikes: number) => {
@@ -169,7 +198,7 @@ export function CreateAdForm() {
     }));
   };
 
-  // Submit
+  // Submit usando el nuevo hook
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -194,59 +223,102 @@ export function CreateAdForm() {
       return;
     }
 
-    // Crear el DTO del anuncio
-    const adDto = {
-      title: formData.title,
-      description: formData.description,
-      rewardPerLike: formData.rewardPerLike,
-      maxLikes: formData.maxLikes,
-      mediaType: formData.type,
-      targetUrl: formData.targetUrl || null,
-      startDate: formData.startImmediately ? null : new Date(formData.startDate!).toISOString(),
-      endDate: formData.endWhenBudgetExhausted ? null : new Date(formData.endDate!).toISOString(),
-      categoryIds: formData.categoryIds,
-      targetMunicipalitiesCodes: formData.targetAudience.municipalityCodes,
-      minAge: formData.targetAudience.ageRange[0],
-      maxAge: formData.targetAudience.ageRange[1],
-      targetGender: formData.targetAudience.gender.toUpperCase(),
-    };
+    // Usar el hook para subir (el hook ya tiene los adDetails actualizados)
+    const result = await uploadAd(formData.file);
 
-    // Preparar FormData
-    const formDataToSend = new FormData();
-    
-    // Agregar el DTO como JSON string
-    formDataToSend.append('ad', new Blob([JSON.stringify(adDto)], { type: 'application/json' }));
-    
-    // Agregar el archivo
-    formDataToSend.append('file', formData.file);
-
-    try {
-      await createAdMutation.mutateAsync(formDataToSend);
-      alert('Anuncio creado con éxito');
+    if (result.ok) {
+      toast.success(`¡Anuncio creado con éxito! ID: ${result.adId}`);
       router.push('/advertiser/ads');
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al crear anuncio');
+    } else {
+      toast.error(result.errorMsg);
     }
   };
 
-  const submitting = createAdMutation.isPending;
-  const submitError = (() => {
-    const err = createAdMutation.error as any;
-    if (!err) return undefined;
-    return err?.response?.data?.message ?? err?.message ?? undefined;
-  })();
+  const isSubmitting = uploadState.status !== 'idle' && uploadState.status !== 'error';
+
+  // Función para renderizar el estado de subida
+  const renderUploadStatus = () => {
+    if (uploadState.status === 'idle') return null;
+
+    const statusConfig: Record<string, { icon: React.ReactNode; text: string; color: string }> = {
+      preparing: {
+        icon: <Loader2 className="w-5 h-5 animate-spin text-blue-600" />,
+        text: '📦 Preparando subida...',
+        color: 'bg-blue-50 border-blue-200 text-blue-800'
+      },
+      uploading: {
+        icon: <Loader2 className="w-5 h-5 animate-spin text-purple-600" />,
+        text: `📤 Subiendo archivo... ${fileState?.progress?.toFixed(0) || 0}%`,
+        color: 'bg-purple-50 border-purple-200 text-purple-800'
+      },
+      creating: {
+        icon: <Loader2 className="w-5 h-5 animate-spin text-green-600" />,
+        text: '✨ Creando anuncio...',
+        color: 'bg-green-50 border-green-200 text-green-800'
+      },
+      success: {
+        icon: <span className="text-2xl">✅</span>,
+        text: '¡Anuncio creado exitosamente!',
+        color: 'bg-green-50 border-green-200 text-green-800'
+      },
+      error: {
+        icon: <span className="text-2xl">❌</span>,
+        text: `Error: ${uploadState.error || 'Error desconocido'}`,
+        color: 'bg-red-50 border-red-200 text-red-800'
+      }
+    };
+
+    const config = statusConfig[uploadState.status];
+
+    return (
+      <div className={`rounded-lg border-2 p-4 ${config.color}`}>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
+            {config.icon}
+            <span className="font-medium">{config.text}</span>
+          </div>
+          {uploadState.currentFile && (
+            <span className="text-sm opacity-75">{uploadState.currentFile}</span>
+          )}
+        </div>
+
+        {/* Barra de progreso */}
+        {uploadState.progress > 0 && uploadState.status !== 'error' && (
+          <div className="mt-3">
+            <div className="h-2 w-full rounded-full bg-white/50">
+              <div
+                className="h-2 rounded-full bg-current transition-all duration-300"
+                style={{ width: `${uploadState.progress}%` }}
+              />
+            </div>
+            <p className="mt-1 text-xs text-right opacity-75">
+              {uploadState.progress.toFixed(0)}%
+            </p>
+          </div>
+        )}
+
+        {/* Botón de reintentar en caso de error */}
+        {uploadState.status === 'error' && (
+          <button
+            type="button"
+            onClick={resetUpload}
+            className="mt-3 w-full px-4 py-2 bg-white border border-current rounded-md hover:bg-current/10 transition-colors"
+          >
+            Reintentar
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Crear Nuevo Anuncio</h2>
-      
-      {submitError && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-800 text-sm">{submitError}</p>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Estado de subida */}
+        {renderUploadStatus()}
+
         {/* Información básica */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -261,6 +333,7 @@ export function CreateAdForm() {
             required
             minLength={5}
             maxLength={100}
+            disabled={isSubmitting}
           />
         </div>
 
@@ -277,6 +350,7 @@ export function CreateAdForm() {
             required
             minLength={10}
             maxLength={1000}
+            disabled={isSubmitting}
           />
         </div>
 
@@ -295,6 +369,7 @@ export function CreateAdForm() {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="https://ejemplo.com/tu-pagina"
             maxLength={500}
+            disabled={isSubmitting}
           />
           <p className="text-xs text-gray-500 mt-1">
             Link al que se redirigirá cuando los usuarios hagan clic en tu anuncio
@@ -325,6 +400,7 @@ export function CreateAdForm() {
                 max="100"
                 step="0.01"
                 required
+                disabled={isSubmitting}
               />
               <p className="text-xs text-gray-500 mt-1">Mínimo: $0.01 - Máximo: $100.00</p>
             </div>
@@ -345,6 +421,7 @@ export function CreateAdForm() {
                 max="10000"
                 step="1"
                 required
+                disabled={isSubmitting}
               />
               <p className="text-xs text-gray-500 mt-1">Mínimo: 1 - Máximo: 10,000</p>
             </div>
@@ -388,9 +465,10 @@ export function CreateAdForm() {
                     startDate: e.target.checked ? '' : prev.startDate
                   }))}
                   className="mr-2"
+                  disabled={isSubmitting}
                 />
                 <label htmlFor="startImmediately" className="text-sm font-medium text-gray-700">
-                  Iniciar cuando el admin apruebe el anuncio
+                  Iniciar cuando el administrador apruebe el anuncio
                 </label>
               </div>
 
@@ -405,6 +483,7 @@ export function CreateAdForm() {
                     onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     min={new Date().toISOString().slice(0, 16)}
+                    disabled={isSubmitting}
                   />
                 </div>
               )}
@@ -423,6 +502,7 @@ export function CreateAdForm() {
                     endDate: e.target.checked ? '' : prev.endDate
                   }))}
                   className="mr-2"
+                  disabled={isSubmitting}
                 />
                 <label htmlFor="endWhenBudgetExhausted" className="text-sm font-medium text-gray-700">
                   Finalizar cuando se agote el presupuesto
@@ -440,6 +520,7 @@ export function CreateAdForm() {
                     onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     min={formData.startDate || new Date().toISOString().slice(0, 16)}
+                    disabled={isSubmitting}
                   />
                 </div>
               )}
@@ -456,20 +537,22 @@ export function CreateAdForm() {
             <label className="flex items-center cursor-pointer">
               <input
                 type="radio"
-                value="image"
-                checked={formData.type === 'image'}
-                onChange={() => setFormData(prev => ({ ...prev, type: 'image', file: null }))}
+                value="IMAGE"
+                checked={formData.type === 'IMAGE'}
+                onChange={() => setFormData(prev => ({ ...prev, type: 'IMAGE', file: null }))}
                 className="mr-2"
+                disabled={isSubmitting}
               />
               Imagen
             </label>
             <label className="flex items-center cursor-pointer">
               <input
                 type="radio"
-                value="video"
-                checked={formData.type === 'video'}
-                onChange={() => setFormData(prev => ({ ...prev, type: 'video', file: null }))}
+                value="VIDEO"
+                checked={formData.type === 'VIDEO'}
+                onChange={() => setFormData(prev => ({ ...prev, type: 'VIDEO', file: null }))}
                 className="mr-2"
+                disabled={isSubmitting}
               />
               Video
             </label>
@@ -478,27 +561,52 @@ export function CreateAdForm() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Subir {formData.type === 'image' ? 'Imagen' : 'Video'}
+            Subir {formData.type === 'IMAGE' ? 'Imagen' : 'Video'}
           </label>
           <div
             className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
               dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
+            } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onDragEnter={!isSubmitting ? handleDrag : undefined}
+            onDragLeave={!isSubmitting ? handleDrag : undefined}
+            onDragOver={!isSubmitting ? handleDrag : undefined}
+            onDrop={!isSubmitting ? handleDrop : undefined}
           >
             {formData.file ? (
-              <div className="flex items-center justify-center space-x-2">
-                <span className="text-sm text-gray-600">{formData.file.name}</span>
-                <button
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, file: null }))}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+              <div className="space-y-2">
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-sm text-gray-600">{formData.file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, file: null }))}
+                    className="text-red-500 hover:text-red-700"
+                    disabled={isSubmitting}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Estado del archivo durante la subida */}
+                {fileState && (
+                  <div className="mt-2 text-sm">
+                    {fileState.uploading && (
+                      <div className="flex items-center justify-center space-x-2 text-blue-600">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Subiendo: {fileState.progress?.toFixed(0)}%</span>
+                      </div>
+                    )}
+                    {fileState.uploaded && (
+                      <p className="text-green-600 flex items-center justify-center">
+                        <span className="mr-1">✓</span> Archivo subido exitosamente
+                      </p>
+                    )}
+                    {fileState.error && (
+                      <p className="text-red-600 flex items-center justify-center">
+                        <span className="mr-1">✗</span> {fileState.error}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div>
@@ -510,13 +618,14 @@ export function CreateAdForm() {
                     <input
                       type="file"
                       className="hidden"
-                      accept={formData.type === 'image' ? 'image/*' : 'video/*'}
+                      accept={formData.type === 'IMAGE' ? 'image/*' : 'video/*'}
                       onChange={handleFileChange}
+                      disabled={isSubmitting}
                     />
                   </label>
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  {formData.type === 'image' ? 'Máx 5MB - JPG, PNG, WebP' : 'Máx 100MB - MP4, WebM'}
+                  {formData.type === 'IMAGE' ? 'Máx 5MB - JPG, PNG, WebP' : 'Máx 100MB - MP4, WebM'}
                 </p>
               </div>
             )}
@@ -541,13 +650,14 @@ export function CreateAdForm() {
                     formData.categoryIds.includes(category.id)
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <input
                     type="checkbox"
                     checked={formData.categoryIds.includes(category.id)}
                     onChange={() => toggleCategory(category.id)}
                     className="mr-2"
+                    disabled={isSubmitting}
                   />
                   <span className="text-sm font-medium">{category.name}</span>
                 </label>
@@ -583,6 +693,7 @@ export function CreateAdForm() {
                   className="w-20 px-2 py-1 border border-gray-300 rounded"
                   min="13"
                   max="100"
+                  disabled={isSubmitting}
                 />
                 <span>a</span>
                 <input
@@ -598,6 +709,7 @@ export function CreateAdForm() {
                   className="w-20 px-2 py-1 border border-gray-300 rounded"
                   min="13"
                   max="100"
+                  disabled={isSubmitting}
                 />
                 <span>años</span>
               </div>
@@ -617,6 +729,7 @@ export function CreateAdForm() {
                   }
                 }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isSubmitting}
               >
                 <option value="all">Todos</option>
                 <option value="male">Masculino</option>
@@ -643,7 +756,7 @@ export function CreateAdForm() {
                 value={selectedDepartment || ''}
                 onChange={(e) => setSelectedDepartment(e.target.value || null)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                disabled={loadingDepartments}
+                disabled={loadingDepartments || isSubmitting}
               >
                 <option value="">-- Selecciona un departamento --</option>
                 {departments.map((dept) => (
@@ -668,7 +781,7 @@ export function CreateAdForm() {
                     }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  disabled={loadingMunicipalities}
+                  disabled={loadingMunicipalities || isSubmitting}
                 >
                   <option value="">-- Selecciona un municipio --</option>
                   {municipalities.map((mun) => (
@@ -698,6 +811,7 @@ export function CreateAdForm() {
                         type="button"
                         onClick={() => removeMunicipality(municipality.code)}
                         className="ml-2 text-green-600 hover:text-green-800"
+                        disabled={isSubmitting}
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -717,17 +831,19 @@ export function CreateAdForm() {
         <div className="flex justify-end space-x-4 pt-6 border-t">
           <button
             type="button"
+            onClick={() => router.back()}
             className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-            disabled={submitting}
+            disabled={isSubmitting}
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            disabled={submitting}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-2"
+            disabled={isSubmitting}
           >
-            {submitting ? 'Creando...' : 'Crear Anuncio'}
+            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            <span>{isSubmitting ? 'Creando anuncio...' : 'Crear Anuncio'}</span>
           </button>
         </div>
       </form>

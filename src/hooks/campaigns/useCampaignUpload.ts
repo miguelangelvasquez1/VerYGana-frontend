@@ -8,7 +8,7 @@ import {
   UploadState,
   GameAssetDefinition,
   CampaignDetails,
-} from '@/types/campaigns';
+} from '@/types/games/campaigns';
 
 interface UseCampaignUploadProps {
   gameId: number;
@@ -191,7 +191,7 @@ export function useCampaignUpload({
 
         // PASO 4: Crear campaña con los IDs de assets y detalles
         setUploadState({ status: 'creating', progress: 100 });
-
+        console.log('📥 jdklhjasdlkdjlksdjflkdsjlkfjksljfksjd:', campaignDetails);
         const success = await campaignService.createCampaign(
           gameId,
           uploadedAssetIds,

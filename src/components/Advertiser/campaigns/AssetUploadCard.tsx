@@ -1,5 +1,5 @@
 import React, { useRef, useMemo } from 'react';
-import type { FileWithPreview, GameAssetDefinition } from '@/types/campaigns';
+import type { FileWithPreview, GameAssetDefinition } from '@/types/games/campaigns';
 
 interface Props {
   definition: GameAssetDefinition;

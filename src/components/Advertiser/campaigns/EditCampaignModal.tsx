@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Campaign, CampaignDetails } from '@/types/campaigns';
+import { Campaign, CampaignDetails } from '@/types/games/campaigns';
 import { CampaignDetailsForm } from './CampaignsDetailsForm';
 import { useUpdateCampaign, useUpdateCampaignStatus } from '@/hooks/campaigns/useCampaigns';
 

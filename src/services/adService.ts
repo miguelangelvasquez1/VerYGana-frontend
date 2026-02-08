@@ -1,6 +1,6 @@
 import apiClient from '@/lib/api/client';
-import { AdForAdminDTO, AdForConsumerDTO, AdResponseDTO } from '@/types/ads/advertiser';
-import { PagedResponse } from '@/types/common';
+import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, CreateAdAssetRequest } from '@/types/ads/advertiser';
+import { PagedResponse } from '@/types/GenericTypes';
 
 export interface AdStats {
   totalViews: number;
@@ -13,14 +13,14 @@ export interface AdStats {
 
 class AdService {
   // Crear un nuevo anuncio
-  async createAd(formData: FormData): Promise<AdResponseDTO> {
-    const response = await apiClient.post<AdResponseDTO>('/ads', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  }
+  // async createAd(formData: FormData): Promise<AdResponseDTO> {
+  //   const response = await apiClient.post<AdResponseDTO>('/ads', formData, {
+  //     headers: {
+  //       'Content-Type': 'multipart/form-data',
+  //     },
+  //   });
+  //   return response.data;
+  // }
 
   // Obtener todos los anuncios del usuario
   async getMyAds(page: number = 0, size: number = 10): Promise<{
@@ -95,10 +95,10 @@ class AdService {
   }
 
   // Actualizar un anuncio
-  async updateAd(id: number, formData: FormData): Promise<AdResponseDTO> {
-    const response = await apiClient.put<AdResponseDTO>(`/ads/${id}`, formData, {
+  async updateAd(id: number, updateDto: AdUpdateDTO): Promise<AdResponseDTO> {
+    const response = await apiClient.put<AdResponseDTO>(`/ads/${id}`, updateDto, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/json',
       },
     });
     return response.data;
@@ -111,13 +111,13 @@ class AdService {
 
   // Pausar un anuncio
   async pauseAd(id: number): Promise<AdResponseDTO> {
-    const response = await apiClient.post<AdResponseDTO>(`/ads/admin/${id}/pause`);
+    const response = await apiClient.post<AdResponseDTO>(`/ads/${id}/pause`);
     return response.data;
   }
 
   // Activar un anuncio
   async resumeAd(id: number): Promise<AdResponseDTO> {
-    const response = await apiClient.post<AdResponseDTO>(`/ads/admin/${id}/activate`);
+    const response = await apiClient.post<AdResponseDTO>(`/ads/${id}/activate`);
     return response.data;
   }
 
@@ -195,6 +195,54 @@ class AdService {
   // Registrar un clic en el anuncio
   async clickAd(adId: number): Promise<void> {
     await apiClient.post(`/ads/${adId}/click`);
+  }
+
+  /**
+   * PASO 1: Preparar la subida del asset (obtener pre-signed URL)
+   * Este endpoint devuelve el assetId y la URL para subir a R2
+   */
+  async prepareAdAssetUpload(
+    request: CreateAdAssetRequest
+  ): Promise<AdUploadPermission> {
+    try {
+      console.log('📤 [AdService] Preparando asset upload:', request);
+
+      const response = await apiClient.post<AdUploadPermission>(
+        '/ads/assets/prepare-upload',
+        request
+      );
+
+      console.log('✅ [AdService] Permiso recibido:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ [AdService] Error preparando upload:', error);
+      throw new Error(
+        error?.response?.data?.message || 'Error preparando la subida del archivo'
+      );
+    }
+  }
+
+  /**
+   * PASO 2: Crear el anuncio con el assetId y los detalles
+   * Se llama después de que el archivo se haya subido exitosamente a R2
+   */
+  async createAd(assetId: number, adDetails: AdDetails): Promise<{ id: number }> {
+    try {
+      console.log('📤 [AdService] Creando anuncio:', { assetId, adDetails });
+
+      const response = await apiClient.post<{ id: number }>('/ads/assets', {
+        assetId,
+        ...adDetails,
+      });
+
+      console.log('✅ [AdService] Anuncio creado:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ [AdService] Error creando anuncio:', error);
+      throw new Error(
+        error?.response?.data?.message || 'Error creando el anuncio'
+      );
+    }
   }
 }
 

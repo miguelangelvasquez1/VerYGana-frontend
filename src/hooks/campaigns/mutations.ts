@@ -1,4 +1,4 @@
-import { CampaignDetails } from "@/types/campaigns";
+import { CampaignDetails } from "@/types/games/campaigns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { campaignKeys } from "./campaignKeys";
 import { campaignService } from "@/services/campaignService";

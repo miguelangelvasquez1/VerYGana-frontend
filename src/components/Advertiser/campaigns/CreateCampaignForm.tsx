@@ -1,17 +1,19 @@
+// components/campaigns/CreateCampaignForm.tsx (ACTUALIZADO)
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { ArrowLeft, Check, Loader2, AlertCircle, DollarSign, Tag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useGames, useGameAssetDefinitions } from '@/hooks/campaigns/useCampaigns';
+import { useGames, useGameAssetDefinitions, useGameConfigDefinitions } from '@/hooks/campaigns/querys';
 import { useCampaignUpload } from '@/hooks/campaigns/useCampaignUpload';
 import {
   Game,
   FileWithPreview,
   isValidFileSize,
   isValidFileType,
-  CampaignDetails,
-} from '@/types/campaigns';
+  CampaignDetails 
+} from '@/types/games/campaigns';
+import { GameConfigFormData } from '@/types/games/gameConfig';
 
 // Componentes
 import { GameSelection } from './GameSelection';
@@ -19,13 +21,15 @@ import { StepIndicator } from './StepIndicator';
 import { AssetUploadCard } from './AssetUploadCard';
 import { UploadProgress } from './UploadProgress';
 import { CampaignDetailsForm } from './CampaignsDetailsForm';
+import { GameConfigForm } from './GameConfigForm';
 
 interface CreateCampaignFormProps {
   onSuccess?: (success: boolean) => void;
   onCancel?: () => void;
 }
 
-type Step = 'select-game' | 'campaign-details' | 'upload-assets';
+// ACTUALIZADO: Nuevo paso 'game-config'
+type Step = 'select-game' | 'campaign-details' | 'game-config' | 'upload-assets';
 
 export function CreateCampaignForm({
   onSuccess,
@@ -38,6 +42,11 @@ export function CreateCampaignForm({
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [campaignDetails, setCampaignDetails] = useState<CampaignDetails>({
     budget: 0,
+    coinValue: 0,
+    completionCoins: 0,
+    budgetCoins: 0,
+    maxCoinsPerSession: 0,
+    maxSessionsPerUserPerDay: 0,
     targetUrl: null,
     categoryIds: [],
     targetAudience: {
@@ -46,6 +55,7 @@ export function CreateCampaignForm({
       gender: 'ALL',
       municipalityCodes: [],
     },
+    gameConfig: undefined, // NUEVO
   });
   const [files, setFiles] = useState<Map<number, FileWithPreview[]>>(new Map());
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -59,6 +69,12 @@ export function CreateCampaignForm({
     isLoading: loadingDefinitions,
     error: definitionsError,
   } = useGameAssetDefinitions(selectedGame?.id ?? null);
+
+  // NUEVO: Query para obtener las definiciones de configuración del juego
+  const {
+    data: gameConfigDefinitions = [],
+    isLoading: loadingConfigDefinitions,
+  } = useGameConfigDefinitions(selectedGame?.id ?? null);
 
   // Upload hook
   const { uploadState, uploadCampaign, resetUpload } = useCampaignUpload({
@@ -84,6 +100,14 @@ export function CreateCampaignForm({
 
   const handleCampaignDetailsSubmit = useCallback((details: CampaignDetails) => {
     setCampaignDetails(details);
+    // ACTUALIZADO: Ir al paso de configuración del juego
+    setStep('game-config');
+    setValidationError(null);
+  }, []);
+
+  // NUEVO: Handler para la configuración del juego
+  const handleGameConfigSubmit = useCallback((gameConfig: GameConfigFormData) => {
+    setCampaignDetails(prev => ({ ...prev, gameConfig }));
     setStep('upload-assets');
     setValidationError(null);
   }, []);
@@ -192,8 +216,12 @@ export function CreateCampaignForm({
     if (step === 'campaign-details') {
       setStep('select-game');
       setSelectedGame(null);
-    } else if (step === 'upload-assets') {
+    } else if (step === 'game-config') {
+      // ACTUALIZADO: Volver a campaign-details
       setStep('campaign-details');
+    } else if (step === 'upload-assets') {
+      // ACTUALIZADO: Volver a game-config
+      setStep('game-config');
       files.forEach((fileList) => {
         fileList.forEach((f) => URL.revokeObjectURL(f.preview));
       });
@@ -208,6 +236,11 @@ export function CreateCampaignForm({
     setSelectedGame(null);
     setCampaignDetails({
       budget: 0,
+      coinValue: 0,
+      completionCoins: 0,
+      budgetCoins: 0,
+      maxCoinsPerSession: 0,
+      maxSessionsPerUserPerDay: 0,
       targetUrl: null,
       categoryIds: [],
       targetAudience: {
@@ -216,6 +249,7 @@ export function CreateCampaignForm({
         gender: 'ALL',
         municipalityCodes: [],
       },
+      gameConfig: undefined,
     });
     files.forEach((fileList) => {
       fileList.forEach((f) => URL.revokeObjectURL(f.preview));
@@ -259,7 +293,7 @@ export function CreateCampaignForm({
                   Detalles de la campaña: {selectedGame.title}
                 </h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  Configura el presupuesto y las fechas de tu campaña
+                  Configura el presupuesto y audiencia de tu campaña
                 </p>
               </div>
               <button
@@ -279,7 +313,27 @@ export function CreateCampaignForm({
           </div>
         )}
 
-        {/* Step 3: Upload Assets */}
+        {/* Step 3: Game Config (NUEVO) */}
+        {step === 'game-config' && selectedGame && (
+          <div className="space-y-6">
+            {loadingConfigDefinitions ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 text-blue-600 animate-spin mr-3" />
+                <span className="text-gray-600">Cargando configuración...</span>
+              </div>
+            ) : (
+              <GameConfigForm
+                gameTitle={selectedGame.title}
+                definitions={gameConfigDefinitions}
+                initialData={campaignDetails.gameConfig}
+                onSubmit={handleGameConfigSubmit}
+                onBack={handleBack}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Step 4: Upload Assets (antes era step 3) */}
         {step === 'upload-assets' && (
           <div className="space-y-6">
             {/* Header */}

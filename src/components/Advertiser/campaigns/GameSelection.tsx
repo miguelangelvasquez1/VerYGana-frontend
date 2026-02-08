@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Loader2 } from 'lucide-react';
-import { Game } from '@/types/campaigns';
+import { Game } from '@/types/games/campaigns';
 
 interface GameSelectionProps {
   games: Game[];

@@ -7,7 +7,7 @@ import { CreateCampaignForm } from './CreateCampaignForm';
 import { EditCampaignModal } from './EditCampaignModal';
 import { CampaignCard } from './CampaignCard';
 import { useCampaigns, useUpdateCampaignStatus } from '@/hooks/campaigns/useCampaigns';
-import { Campaign } from '@/types/campaigns';
+import { Campaign } from '@/types/games/campaigns';
 
 export function CampaignManager() {
   const [view, setView] = useState<'list' | 'create'>('list');

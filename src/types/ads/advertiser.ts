@@ -102,14 +102,28 @@ export interface EditAdFormData {
   categoryIds: number[];
   startDate: string;
   endDate: string;
-  mediaType: 'image' | 'video';
   targetUrl: string;
-  file: File | null;
   targetAudience: {
     ageRange: [number, number];
     gender: 'all' | 'male' | 'female';
     municipalityCodes: string[];
   };
+}
+
+export interface AdUpdateDTO {
+
+  title?: string;
+  description?: string;
+  rewardPerLike?: number;
+  maxLikes?: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  targetUrl?: string;
+  categoryIds?: number[];
+  targetMunicipalitiesCodes?: string[];
+  minAge?: number;
+  maxAge?: number;
+  targetGender: 'ALL' | 'MALE' | 'FEMALE';
 }
 
 export interface SelectedMunicipalityData {
@@ -179,3 +193,61 @@ export type MunicipalityResponseDTO = {
   departmentCode: string;
   departmentName: string;
 };
+
+// types/ads.ts
+
+export interface AdDetails {
+  title: string;
+  description: string;
+  rewardPerLike: number;
+  maxLikes: number;
+  mediaType: 'IMAGE' | 'VIDEO';
+  targetUrl: string | null;
+  startDate: string | null; // ISO string or null if immediate
+  endDate: string | null; // ISO string or null if budget-exhausted
+  categoryIds: number[];
+  targetMunicipalitiesCodes: string[];
+  minAge: number;
+  maxAge: number;
+  targetGender: 'MALE' | 'FEMALE' | 'ALL';
+}
+
+export interface FileWithProgress {
+  file: File;
+  preview?: string;
+  uploading?: boolean;
+  uploaded?: boolean;
+  progress?: number;
+  error?: string;
+  assetId?: number;
+}
+
+export interface CreateAdAssetRequest {
+    originalFileName: string;
+    contentType: string;
+    sizeBytes: number;
+}
+
+export interface AdUploadPermission {
+  assetId: number;
+  permission: {
+    uploadUrl: string;
+    expiresAt: string;
+  };
+}
+
+export interface PrepareAdAssetUploadResponse {
+  permissions: AdUploadPermission[];
+}
+
+export interface UploadState {
+  status: 'idle' | 'preparing' | 'uploading' | 'creating' | 'success' | 'error';
+  progress: number;
+  currentFile?: string;
+  error?: string;
+}
+
+export interface CreateAdRequest {
+  adDetails: AdDetails;
+  assetId: number;
+}

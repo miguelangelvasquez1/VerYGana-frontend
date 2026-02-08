@@ -2,8 +2,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Info, AlertCircle, LinkIcon, Tag, MapPin, X } from 'lucide-react';
-import { Campaign, CampaignDetails } from '@/types/campaigns';
+import { DollarSign, Info, AlertCircle, LinkIcon, Tag, MapPin, X, Coins, Calculator, Award, TrendingUp } from 'lucide-react';
+import { Campaign, CampaignDetails } from '@/types/games/campaigns';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 
@@ -20,7 +20,13 @@ export function CampaignDetailsForm({
   onCancel,
   existingCampaign,
 }: CampaignDetailsFormProps) {
-  const [budget, setBudget] = useState(initialDetails.budget.toString());
+  // Campos de configuración de recompensas y monedas
+  const [coinValue, setCoinValue] = useState('0.01'); // Valor de cada moneda en dinero real
+  const [completionCoins, setCompletionCoins] = useState('10'); // Monedas por completar el juego
+  const [budgetCoins, setBudgetCoins] = useState('1000'); // Presupuesto total en monedas
+  const [maxCoinsPerSession, setMaxCoinsPerSession] = useState('15'); // Máximo de monedas por sesión
+  const [maxSessionsPerUserPerDay, setMaxSessionsPerUserPerDay] = useState('3'); // Máximo de sesiones por usuario por día
+  
   const [targetUrl, setTargetUrl] = useState(initialDetails.targetUrl || '');
   const [categoryIds, setCategoryIds] = useState<number[]>(initialDetails.categoryIds || []);
   const [minAge, setMinAge] = useState(initialDetails.targetAudience?.minAge || 18);
@@ -38,7 +44,11 @@ export function CampaignDetailsForm({
   >([]);
   
   const [errors, setErrors] = useState<{
-    budget?: string;
+    coinValue?: string;
+    completionCoins?: string;
+    budgetCoins?: string;
+    maxCoinsPerSession?: string;
+    maxSessionsPerUserPerDay?: string;
     targetUrl?: string;
     categoryIds?: string;
   }>({});
@@ -48,11 +58,26 @@ export function CampaignDetailsForm({
   const { departments, loading: loadingDepartments } = useDepartments();
   const { municipalities, loading: loadingMunicipalities } = useMunicipalities(selectedDepartment);
 
+  // Calcular presupuesto total (coinValue * budgetCoins)
+  const calculateBudget = (): number => {
+    const coinVal = parseFloat(coinValue);
+    const budgetCoin = parseInt(budgetCoins);
+    
+    if (isNaN(coinVal) || isNaN(budgetCoin)) return 0;
+    return coinVal * budgetCoin;
+  };
+
   // Cargar datos de campaña existente
   useEffect(() => {
     if (existingCampaign) {
+      // Cargar configuración de monedas y recompensas
+      setCoinValue(existingCampaign.coinValue.toString());
+      setCompletionCoins(existingCampaign.completionCoins.toString());
+      setBudgetCoins(existingCampaign.budgetCoins.toString());
+      setMaxCoinsPerSession(existingCampaign.maxCoinsPerSession.toString());
+      setMaxSessionsPerUserPerDay(existingCampaign.maxSessionsPerUserPerDay.toString());
+      
       // Cargar datos básicos
-      setBudget(existingCampaign.budget.toString());
       setTargetUrl(existingCampaign.targetUrl || '');
       
       // Cargar categorías existentes
@@ -86,12 +111,49 @@ export function CampaignDetailsForm({
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
 
-    // Validar presupuesto
-    const budgetNum = parseFloat(budget);
-    if (!budget || budgetNum <= 0) {
-      newErrors.budget = 'El presupuesto debe ser mayor a 0';
-    } else if (budgetNum < 10) {
-      newErrors.budget = 'El presupuesto mínimo es $10';
+    // Validar coinValue
+    const coinVal = parseFloat(coinValue);
+    if (!coinValue || isNaN(coinVal) || coinVal <= 0) {
+      newErrors.coinValue = 'El valor de moneda debe ser mayor a 0';
+    } else if (coinVal < 0.01) {
+      newErrors.coinValue = 'El valor mínimo por moneda es $0.01';
+    } else if (coinVal > 100) {
+      newErrors.coinValue = 'El valor máximo por moneda es $100';
+    }
+
+    // Validar completionCoins
+    const compCoins = parseInt(completionCoins);
+    if (!completionCoins || isNaN(compCoins) || compCoins < 0) {
+      newErrors.completionCoins = 'Las monedas de completación deben ser 0 o más';
+    }
+
+    // Validar budgetCoins
+    const budgetCoin = parseInt(budgetCoins);
+    if (!budgetCoins || isNaN(budgetCoin) || budgetCoin <= 0) {
+      newErrors.budgetCoins = 'El presupuesto en monedas debe ser mayor a 0';
+    }
+
+    // Validar maxCoinsPerSession
+    const maxCoins = parseInt(maxCoinsPerSession);
+    if (!maxCoinsPerSession || isNaN(maxCoins) || maxCoins <= 0) {
+      newErrors.maxCoinsPerSession = 'Las monedas máximas por sesión deben ser mayor a 0';
+    }
+
+    // Validar que maxCoinsPerSession >= completionCoins
+    if (!isNaN(maxCoins) && !isNaN(compCoins) && maxCoins < compCoins) {
+      newErrors.maxCoinsPerSession = 'Debe ser mayor o igual a las monedas de completación';
+    }
+
+    // Validar maxSessionsPerUserPerDay
+    const maxSessions = parseInt(maxSessionsPerUserPerDay);
+    if (!maxSessionsPerUserPerDay || isNaN(maxSessions) || maxSessions <= 0) {
+      newErrors.maxSessionsPerUserPerDay = 'Las sesiones máximas por día deben ser mayor a 0';
+    }
+
+    // Validar presupuesto calculado
+    const totalBudget = calculateBudget();
+    if (totalBudget < 10) {
+      newErrors.budgetCoins = 'El presupuesto total debe ser al menos $10';
     }
 
     // Validar URL si está presente
@@ -118,7 +180,12 @@ export function CampaignDetailsForm({
     if (!validateForm()) return;
 
     const details: CampaignDetails = {
-      budget: parseFloat(budget),
+      coinValue: parseFloat(coinValue),
+      completionCoins: parseInt(completionCoins),
+      budgetCoins: parseInt(budgetCoins),
+      maxCoinsPerSession: parseInt(maxCoinsPerSession),
+      maxSessionsPerUserPerDay: parseInt(maxSessionsPerUserPerDay),
+      budget: calculateBudget(),
       targetUrl: targetUrl.trim() || null,
       categoryIds,
       targetAudience: {
@@ -168,40 +235,193 @@ export function CampaignDetailsForm({
     setMunicipalityCodes(prev => prev.filter(m => m !== municipalityCode));
   };
 
+  const budget = calculateBudget();
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Presupuesto */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Presupuesto de la campaña *
-        </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <DollarSign className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="number"
-            step="0.01"
-            min="10"
-            value={budget}
-            onChange={(e) => setBudget(e.target.value)}
-            className={`block w-full pl-10 pr-3 py-3 border ${
-              errors.budget ? 'border-red-300' : 'border-gray-300'
-            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg`}
-            placeholder="100.00"
-            required
-          />
+      {/* Configuración de Monedas y Recompensas */}
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200">
+        <div className="flex items-center mb-4">
+          <Coins className="w-6 h-6 text-purple-600 mr-2" />
+          <h3 className="text-lg font-bold text-gray-900">Sistema de Recompensas</h3>
         </div>
-        {errors.budget && (
-          <p className="mt-2 text-sm text-red-600 flex items-center">
-            <AlertCircle className="w-4 h-4 mr-1" />
-            {errors.budget}
-          </p>
-        )}
-        <p className="mt-2 text-sm text-gray-500 flex items-center">
-          <Info className="w-4 h-4 mr-1" />
-          Este será el presupuesto máximo que se gastará en esta campaña
-        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Valor de Moneda */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Valor por Moneda ($) *
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <DollarSign className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                max="100"
+                value={coinValue}
+                onChange={(e) => setCoinValue(e.target.value)}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${
+                  errors.coinValue ? 'border-red-300' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-purple-500`}
+                placeholder="0.01"
+                required
+              />
+            </div>
+            {errors.coinValue && (
+              <p className="mt-1 text-xs text-red-600 flex items-center">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                {errors.coinValue}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Cuánto vale cada moneda en dinero real
+            </p>
+          </div>
+
+          {/* Presupuesto en Monedas */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Presupuesto en Monedas *
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Coins className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="number"
+                min="1"
+                value={budgetCoins}
+                onChange={(e) => setBudgetCoins(e.target.value)}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${
+                  errors.budgetCoins ? 'border-red-300' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-purple-500`}
+                placeholder="1000"
+                required
+              />
+            </div>
+            {errors.budgetCoins && (
+              <p className="mt-1 text-xs text-red-600 flex items-center">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                {errors.budgetCoins}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Total de monedas disponibles para la campaña
+            </p>
+          </div>
+
+          {/* Monedas de Completación */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Monedas por Completar *
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Award className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="number"
+                min="0"
+                value={completionCoins}
+                onChange={(e) => setCompletionCoins(e.target.value)}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${
+                  errors.completionCoins ? 'border-red-300' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-purple-500`}
+                placeholder="10"
+                required
+              />
+            </div>
+            {errors.completionCoins && (
+              <p className="mt-1 text-xs text-red-600 flex items-center">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                {errors.completionCoins}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Monedas ganadas al completar el juego
+            </p>
+          </div>
+
+          {/* Máximo de Monedas por Sesión */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Máximo por Sesión *
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <TrendingUp className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="number"
+                min="1"
+                value={maxCoinsPerSession}
+                onChange={(e) => setMaxCoinsPerSession(e.target.value)}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${
+                  errors.maxCoinsPerSession ? 'border-red-300' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-purple-500`}
+                placeholder="15"
+                required
+              />
+            </div>
+            {errors.maxCoinsPerSession && (
+              <p className="mt-1 text-xs text-red-600 flex items-center">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                {errors.maxCoinsPerSession}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Monedas máximas que se pueden ganar por sesión
+            </p>
+          </div>
+
+          {/* Sesiones Máximas por Usuario por Día */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Máximo Sesiones por Usuario/Día *
+            </label>
+            <input
+              type="number"
+              min="1"
+              value={maxSessionsPerUserPerDay}
+              onChange={(e) => setMaxSessionsPerUserPerDay(e.target.value)}
+              className={`w-full md:w-1/2 px-3 py-2.5 border ${
+                errors.maxSessionsPerUserPerDay ? 'border-red-300' : 'border-gray-300'
+              } rounded-lg focus:ring-2 focus:ring-purple-500`}
+              placeholder="3"
+              required
+            />
+            {errors.maxSessionsPerUserPerDay && (
+              <p className="mt-1 text-xs text-red-600 flex items-center">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                {errors.maxSessionsPerUserPerDay}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Cuántas sesiones puede jugar un usuario por día
+            </p>
+          </div>
+        </div>
+
+        {/* Cálculo del Presupuesto Total */}
+        <div className="mt-6 p-4 bg-white rounded-lg border-2 border-purple-300 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center mb-1">
+                <Calculator className="w-5 h-5 text-purple-600 mr-2" />
+                <p className="text-sm text-gray-600 font-semibold">Presupuesto Total Calculado</p>
+              </div>
+              <p className="text-xs text-gray-500 ml-7">
+                ${parseFloat(coinValue || '0').toFixed(4)} × {parseInt(budgetCoins || '0').toLocaleString()} monedas
+              </p>
+            </div>
+            <p className="text-3xl font-bold text-purple-600">
+              ${budget.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* URL de destino */}
@@ -411,18 +631,23 @@ export function CampaignDetailsForm({
       </div>
 
       {/* Resumen */}
-      {budget && parseFloat(budget) > 0 && (
+      {budget > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-blue-900 mb-2">Resumen</h4>
+          <h4 className="text-sm font-semibold text-blue-900 mb-2">Resumen de la Campaña</h4>
           <ul className="space-y-1 text-sm text-blue-800">
-            <li>• Presupuesto: ${parseFloat(budget).toLocaleString('en-US', { 
+            <li>• Presupuesto Total: <strong>${budget.toLocaleString('en-US', { 
               minimumFractionDigits: 2, 
               maximumFractionDigits: 2 
-            })}</li>
-            <li>• Categorías: {categoryIds.length} seleccionada(s)</li>
-            <li>• Edad: {minAge} - {maxAge} años</li>
-            <li>• Género: {gender === 'ALL' ? 'Todos' : gender === 'MALE' ? 'Masculino' : 'Femenino'}</li>
-            <li>• Ubicaciones: {municipalityCodes.length > 0 ? `${municipalityCodes.length} municipio(s)` : 'Todo el país'}</li>
+            })}</strong></li>
+            <li>• Valor por Moneda: <strong>${parseFloat(coinValue).toFixed(4)}</strong></li>
+            <li>• Monedas Totales: <strong>{parseInt(budgetCoins).toLocaleString()}</strong></li>
+            <li>• Monedas por Completar: <strong>{completionCoins}</strong></li>
+            <li>• Máximo por Sesión: <strong>{maxCoinsPerSession}</strong></li>
+            <li>• Sesiones Máx/Usuario/Día: <strong>{maxSessionsPerUserPerDay}</strong></li>
+            <li>• Categorías: <strong>{categoryIds.length} seleccionada(s)</strong></li>
+            <li>• Edad: <strong>{minAge} - {maxAge} años</strong></li>
+            <li>• Género: <strong>{gender === 'ALL' ? 'Todos' : gender === 'MALE' ? 'Masculino' : 'Femenino'}</strong></li>
+            <li>• Ubicaciones: <strong>{municipalityCodes.length > 0 ? `${municipalityCodes.length} municipio(s)` : 'Todo el país'}</strong></li>
           </ul>
         </div>
       )}

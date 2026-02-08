@@ -1,7 +1,7 @@
 // components/VideoAdPlayer.tsx
 'use client'
 import { useEffect, useRef, useState } from 'react';
-import VideoControls from './VideoControls';
+import VideoControls from '../Ads/VideoControls';
 import { useNextAd, useLikeAd } from '@/hooks/ads/mutations';
 import { AdForConsumerDTO } from '@/types/ads/advertiser';
 import toast from 'react-hot-toast';
@@ -17,7 +17,7 @@ export default function VideoAdPlayer() {
   const [showReward, setShowReward] = useState(false);
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [currentAd, setCurrentAd] = useState<AdForConsumerDTO | null>(null);
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);

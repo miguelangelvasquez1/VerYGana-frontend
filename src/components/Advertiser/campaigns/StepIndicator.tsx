@@ -2,70 +2,88 @@
 'use client';
 
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Check, Gamepad2, DollarSign, Settings, Upload } from 'lucide-react';
 
-type Step = 'select-game' | 'campaign-details' | 'upload-assets';
+type Step = 'select-game' | 'campaign-details' | 'game-config' | 'upload-assets';
 
 interface StepIndicatorProps {
   currentStep: Step;
 }
 
-const steps = [
-  { id: 'select-game' as Step, label: 'Seleccionar Juego', number: 1 },
-  { id: 'campaign-details' as Step, label: 'Detalles', number: 2 },
-  { id: 'upload-assets' as Step, label: 'Subir Assets', number: 3 },
+const steps: { key: Step; label: string; icon: React.ReactNode }[] = [
+  { 
+    key: 'select-game', 
+    label: 'Seleccionar Juego',
+    icon: <Gamepad2 className="w-5 h-5" />
+  },
+  { 
+    key: 'campaign-details', 
+    label: 'Detalles de Campaña',
+    icon: <DollarSign className="w-5 h-5" />
+  },
+  { 
+    key: 'game-config', 
+    label: 'Configuración del Juego',
+    icon: <Settings className="w-5 h-5" />
+  },
+  { 
+    key: 'upload-assets', 
+    label: 'Subir Assets',
+    icon: <Upload className="w-5 h-5" />
+  },
 ];
 
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
-  const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
+  const currentIndex = steps.findIndex(s => s.key === currentStep);
 
   return (
-    <div className="flex items-center justify-center mb-8">
-      <div className="flex items-center space-x-2 md:space-x-4">
+    <div className="mb-8">
+      <div className="flex items-center justify-between">
         {steps.map((step, index) => {
-          const isCompleted = index < currentStepIndex;
-          const isCurrent = step.id === currentStep;
-          const isUpcoming = index > currentStepIndex;
+          const isCompleted = index < currentIndex;
+          const isCurrent = index === currentIndex;
+          const isUpcoming = index > currentIndex;
 
           return (
-            <React.Fragment key={step.id}>
-              {/* Step */}
-              <div
-                className={`flex items-center ${
-                  isCurrent
-                    ? 'text-blue-600'
-                    : isCompleted
-                    ? 'text-green-600'
-                    : 'text-gray-400'
-                }`}
-              >
+            <React.Fragment key={step.key}>
+              {/* Step Circle */}
+              <div className="flex flex-col items-center flex-1">
                 <div
-                  className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-semibold text-sm md:text-base ${
-                    isCurrent
-                      ? 'bg-blue-600 text-white ring-4 ring-blue-100'
-                      : isCompleted
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                  } transition-all duration-300`}
+                  className={`
+                    w-12 h-12 rounded-full flex items-center justify-center transition-all
+                    ${isCompleted ? 'bg-green-500 text-white' : ''}
+                    ${isCurrent ? 'bg-blue-600 text-white ring-4 ring-blue-100' : ''}
+                    ${isUpcoming ? 'bg-gray-200 text-gray-400' : ''}
+                  `}
                 >
                   {isCompleted ? (
-                    <Check className="w-5 h-5" />
+                    <Check className="w-6 h-6" />
                   ) : (
-                    <span>{step.number}</span>
+                    step.icon
                   )}
                 </div>
-                <span className="ml-2 text-xs md:text-sm font-medium hidden sm:inline">
+                <p
+                  className={`
+                    mt-2 text-xs sm:text-sm font-medium text-center
+                    ${isCurrent ? 'text-blue-600' : ''}
+                    ${isCompleted ? 'text-green-600' : ''}
+                    ${isUpcoming ? 'text-gray-400' : ''}
+                  `}
+                >
                   {step.label}
-                </span>
+                </p>
               </div>
 
-              {/* Connector */}
+              {/* Connector Line */}
               {index < steps.length - 1 && (
-                <div
-                  className={`w-8 md:w-16 h-0.5 transition-all duration-300 ${
-                    isCompleted ? 'bg-green-600' : 'bg-gray-300'
-                  }`}
-                />
+                <div className="flex-1 h-1 mx-2">
+                  <div
+                    className={`
+                      h-full transition-all
+                      ${index < currentIndex ? 'bg-green-500' : 'bg-gray-200'}
+                    `}
+                  />
+                </div>
               )}
             </React.Fragment>
           );

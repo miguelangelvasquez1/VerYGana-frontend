@@ -26,3 +26,15 @@ export function useGames(page: number = 0, size: number = 10) {
     staleTime: 60 * 1000,
   });
 }
+
+/**
+ * Hook para obtener las definiciones de configuración de un juego
+ */
+export function useGameConfigDefinitions(gameId: number | null) {
+  return useQuery({
+    queryKey: ['game-config-definitions', gameId],
+    queryFn: async () => campaignService.getGameConfigDefinitions(gameId!),
+    enabled: !!gameId,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+}

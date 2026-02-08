@@ -8,8 +8,9 @@ import {
   Campaign,
   AssetUploadPermission,
   CampaignDetails
-} from '@/types/campaigns';
+} from '@/types/games/campaigns';
 import { PagedResponse } from '@/types/GenericTypes';
+import { GameConfigDefinition, GameConfigFormData } from '@/types/games/gameConfig';
 
 class CampaignService {
   // ==================== Juegos ====================
@@ -37,6 +38,13 @@ class CampaignService {
 
   async getGameById(gameId: number): Promise<Game> {
     const response = await apiClient.get<Game>(`/games/${gameId}`);
+    return response.data;
+  }
+
+  async getGameConfigDefinitions(gameId: number): Promise<GameConfigDefinition[]> {
+    const response = await apiClient.get<GameConfigDefinition[]>(
+      `/campaigns/config-definitions/${gameId}`
+    );
     return response.data;
   }
 
@@ -81,16 +89,31 @@ class CampaignService {
   ): Promise<boolean> {
 
     try {
+      // Construir GameConfigDTO
+      const gameConfigDTO = buildGameConfigDTO(campaignDetails.gameConfig);
+
       const payload = {
         assetIds,
-        budget: campaignDetails.budget,
+        // Sistema de monedas y recompensas
+        coinValue: campaignDetails.coinValue,
+        completionCoins: campaignDetails.completionCoins,
+        budgetCoins: campaignDetails.budgetCoins,
+        maxCoinsPerSession: campaignDetails.maxCoinsPerSession,
+        maxSessionsPerUserPerDay: campaignDetails.maxSessionsPerUserPerDay,
+        // Configuración
         targetUrl: campaignDetails.targetUrl,
         categoryIds: campaignDetails.categoryIds,
+        // Segmentación demográfica
         minAge: campaignDetails.targetAudience.minAge,
         maxAge: campaignDetails.targetAudience.maxAge,
         targetGender: campaignDetails.targetAudience.gender.toUpperCase(),
-        targetMunicipalityCodes: campaignDetails.targetAudience.municipalityCodes
+        // Segmentación geográfica
+        targetMunicipalityCodes: campaignDetails.targetAudience.municipalityCodes,
+        // Configuración del juego (NUEVO)
+        ...gameConfigDTO
       };
+
+      console.log('📤 Payload enviado a backend:', payload);
 
       const response = await apiClient.post<{data: boolean;}>(
         '/campaigns/create',
@@ -109,12 +132,8 @@ class CampaignService {
       return response.data;
 
     } catch (error: any) {
-      // ⬅️ AQUÍ está la clave
       const backendMessage = extractErrorMessage(error);
-
       console.error('❌ Error createCampaign:', backendMessage);
-
-      // relanza SOLO el mensaje
       throw new Error(backendMessage);
     }
   }
@@ -142,6 +161,39 @@ class CampaignService {
       { status }
     );
   }
+}
+
+/**
+ * Construye el DTO GameConfigDTO a partir de GameConfigFormData
+ */
+function buildGameConfigDTO(
+  gameConfig?: GameConfigFormData
+): {
+  gameConfig: {
+    colors: Record<string, string>;
+    texts: Record<string, string>;
+    specifications: Record<string, any>;
+  };
+} {
+  if (!gameConfig) {
+    return {
+      gameConfig: {
+        colors: {},
+        texts: {},
+        specifications: {}
+      }
+    };
+  }
+
+  const { colors = {}, texts = {}, ...rest } = gameConfig;
+
+  return {
+    gameConfig: {
+      colors,
+      texts,
+      specifications: rest
+    }
+  };
 }
 
 export const campaignService = new CampaignService();

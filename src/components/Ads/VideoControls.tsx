@@ -11,7 +11,6 @@ interface VideoControlsProps {
 export default function VideoControls({ 
   onVisit,
   onShare,
-  onSave,
   size = "lg" 
 }: VideoControlsProps) {
 
@@ -31,7 +30,7 @@ export default function VideoControls({
       {/* BOTÓN VISITAR */}
       <button
         onClick={onVisit}
-        className="flex flex-col items-center group transition-transform hover:scale-110"
+        className="flex flex-col items-center group transition-transform hover:scale-110 cursor-pointer"
       >
         <div className="relative">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm rounded-full scale-150 -z-10"></div>
@@ -51,7 +50,7 @@ export default function VideoControls({
       {/* COMPARTIR */}
       <button
         onClick={onShare}
-        className="flex flex-col items-center group transition-transform hover:scale-110"
+        className="flex flex-col items-center group transition-transform hover:scale-110 cursor-pointer"
       >
         <div className="relative">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm rounded-full scale-150 -z-10"></div>

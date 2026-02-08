@@ -2,7 +2,7 @@ import { adService } from "@/services/adService";
 import { adKeys } from "./adKeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminAdKeys } from "./adminQuerys";
-import { AdForAdminDTO, AdForConsumerDTO, AdResponseDTO } from "@/types/ads/advertiser";
+import { AdForAdminDTO, AdForConsumerDTO, AdResponseDTO, AdUpdateDTO } from "@/types/ads/advertiser";
 
 // Helper para actualizar listas en caché
 const updateAdInLists = (
@@ -27,25 +27,25 @@ const updateAdInLists = (
 };
 
 // Hook para crear anuncio
-export function useCreateAd() {
-  const queryClient = useQueryClient();
+// export function useCreateAd() {
+//   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (formData: FormData) => adService.createAd(formData),
-    onSuccess: () => {
-      // Invalida todas las listas de anuncios para que se recarguen
-      queryClient.invalidateQueries({ queryKey: adKeys.lists() });
-    },
-  });
-}
+//   return useMutation({
+//     mutationFn: (formData: FormData) => adService.createAd(formData),
+//     onSuccess: () => {
+//       // Invalida todas las listas de anuncios para que se recarguen
+//       queryClient.invalidateQueries({ queryKey: adKeys.lists() });
+//     },
+//   });
+// }
 
 // Actualizar anuncio (Manual cache update, post-success)
 export function useUpdateAd() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, formData }: { id: number; formData: FormData }) =>
-      adService.updateAd(id, formData),
+    mutationFn: ({ id, updateDto }: { id: number; updateDto: AdUpdateDTO }) =>
+      adService.updateAd(id, updateDto),
     
     onSuccess: (updatedAd) => {
       // Actualizar detalle

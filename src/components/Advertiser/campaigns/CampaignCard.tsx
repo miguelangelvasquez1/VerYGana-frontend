@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Play, Pause, Edit, Trash2, BarChart3, Ban, CheckCircle } from 'lucide-react';
-import { Campaign } from '@/types/campaigns';
+import { Campaign } from '@/types/games/campaigns';
 
 interface CampaignCardProps {
   campaign: Campaign;
