@@ -3,29 +3,20 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-interface GameSessionData {
-  sessionToken: string;
-  iframeUrl: string;
-}
-
 export default function PlayGamePage() {
   const searchParams = useSearchParams();
-  const sessionToken = searchParams.get('token');
+  const encodedUrl = searchParams.get('url');
 
   const [loading, setLoading] = useState(true);
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!sessionToken) return;
+    if (!encodedUrl) return;
 
-    // 🔴 TEMPORAL: luego viene del backend
-    const baseIframeUrl = '/dummy-game.html';
-
-    const url = `${baseIframeUrl}?sessionToken=${sessionToken}`;
-
-    setIframeUrl(url);
+    const decodedUrl = decodeURIComponent(encodedUrl);
+    setIframeUrl(decodedUrl);
     setLoading(false);
-  }, [sessionToken]);
+  }, [encodedUrl]);
 
   if (loading) {
     return (
@@ -41,6 +32,7 @@ export default function PlayGamePage() {
         src={iframeUrl!}
         className="w-full h-full border-0"
         allow="fullscreen"
+        allowFullScreen
       />
     </div>
   );

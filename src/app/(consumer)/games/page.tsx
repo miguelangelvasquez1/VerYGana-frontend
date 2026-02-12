@@ -53,7 +53,7 @@ const GamesPanelPage = () => {
       sponsored: true
     });
 
-    router.push(`/games/play?token=${response.sessionToken}`)
+    router.push(`/games/play?url=${encodeURIComponent(response.url)}`);
   };
 
   const handlePlay = async (game: GameCardResponseDTO) => {
@@ -64,7 +64,7 @@ const GamesPanelPage = () => {
       sponsored: false
     });
 
-    router.push(`/games/play?token=${response.sessionToken}`);
+    router.push(`/games/play?url=${encodeURIComponent(response.url)}`);
   };
 
   if (loading) {

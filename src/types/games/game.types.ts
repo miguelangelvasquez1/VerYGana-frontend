@@ -37,12 +37,7 @@ export interface InitGameRequestDTO {
 }
 
 export interface InitGameResponseDTO {
-  sessionToken: string;
-  userHash: string;
-  gameId: number;
-  campaignId: number;
-  assets: AssetDTO[];
-  jsonConfig: string;
+  url: string;
 }
 
 export interface GameEventDTO<T> {
