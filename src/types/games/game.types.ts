@@ -17,7 +17,8 @@ export interface GameDTO {
 export interface GameCardResponseDTO {
   id: number;
   title: string;
-  imageUrl: string;
+  description: string;
+  frontPageUrl: string;
   sponsored: boolean;
   rewardText?: string; // ej: "Gana hasta $500"
 }

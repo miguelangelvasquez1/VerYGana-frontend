@@ -22,7 +22,7 @@ const GameCard: React.FC<GameCardProps> = ({
       `}
     >
       <img
-        src={game.imageUrl}
+        src={game.frontPageUrl}
         alt={game.title}
         className="h-40 w-full object-cover"
       />

@@ -61,7 +61,7 @@ const GamesPanelPage = () => {
 
     const response = await init({
       gameId: game.id,
-      sponsored: false
+      sponsored: true
     });
 
     router.push(`/games/play?url=${encodeURIComponent(response.url)}`);
