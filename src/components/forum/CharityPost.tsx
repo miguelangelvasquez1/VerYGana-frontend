@@ -1,192 +1,357 @@
-import React from 'react';
-import { Heart, MessageCircle, Share2, Gift, Users, Award, Calendar, Play, Eye } from 'lucide-react';
+'use client';
 
-// Definir los tipos TypeScript
-interface MediaContent {
-  type: 'image' | 'video';
-  url: string;
-  thumbnail?: string;
+import React, { useState, useRef, useCallback } from 'react';
+import { Users, DollarSign, MapPin, Tag, Calendar, Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import type { ImpactStoryResponse, StoryMediaResponse } from '@/types/impactStory.types';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatDate(dateStr: string) {
+  return new Intl.DateTimeFormat('es-CO', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  }).format(new Date(dateStr));
 }
 
-interface Comment {
-  author: string;
-  text: string;
-  date: string;
+function formatMoney(amount: number, currency: string) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency', currency, maximumFractionDigits: 0,
+  }).format(amount);
 }
 
-interface Post {
-  id: number;
-  title: string;
-  description: string;
-  date: string;
-  category: string;
-  beneficiaries: number;
-  likes: number;
-  views?: number;
-  amount?: number;
-  winners?: string[];
-  media?: MediaContent;
-  comments?: Comment[];
-}
-
-interface CharityPostProps {
-  post: Post;
-}
-
-const CharityPost: React.FC<CharityPostProps> = ({ post }) => {
-  const formatDate = (date: string): string => {
-    return new Date(date).toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6 hover:shadow-xl transition-shadow duration-300">
-      {/* Header de la publicación */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <Gift className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-800 text-lg">{post.title}</h3>
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <Calendar className="w-4 h-4" />
-                <span>{formatDate(post.date)}</span>
-                <span>•</span>
-                <span className="flex items-center space-x-1">
-                  <Users className="w-4 h-4" />
-                  <span>{post.beneficiaries} beneficiados</span>
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Award className="w-6 h-6 text-yellow-500" />
-            <span className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
-              {post.category}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Contenido de la publicación */}
-      <div className="p-4">
-        <p className="text-gray-700 mb-4 leading-relaxed">{post.description}</p>
-        
-        {/* Media content */}
-        {post.media && (
-          <div className="relative rounded-xl overflow-hidden mb-4">
-            {post.media.type === 'image' ? (
-              <img 
-                src={post.media.url} 
-                alt={post.title}
-                className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
-              />
-            ) : post.media.type === 'video' ? (
-              <div className="relative">
-                <video 
-                  src={post.media.url}
-                  controls
-                  className="w-full h-64 object-cover rounded-xl"
-                  poster={post.media.thumbnail}
-                >
-                  Tu navegador no soporta videos HTML5.
-                </video>
-                <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded flex items-center space-x-1">
-                  <Play className="w-4 h-4" />
-                  <span className="text-sm">Video</span>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        )}
-
-        {/* Ganadores destacados */}
-        {post.winners && post.winners.length > 0 && (
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4 mb-4">
-            <h4 className="font-semibold text-gray-800 mb-2 flex items-center space-x-2">
-              <Award className="w-5 h-5 text-yellow-600" />
-              <span>Ganadores Destacados</span>
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {post.winners.map((winner: string, index: number) => (
-                <span key={index} className="bg-white text-yellow-700 px-3 py-1 rounded-full text-sm font-medium border border-yellow-300">
-                  {winner}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Información de la publicación (solo lectura) */}
-      <div className="px-4 py-3 border-t border-gray-100 bg-gray-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2 text-gray-500">
-              <Heart className="w-5 h-5" />
-              <span className="text-sm font-medium">{post.likes}</span>
-              <span className="text-sm">Me gusta</span>
-            </div>
-            
-            <div className="flex items-center space-x-2 text-gray-500">
-              <MessageCircle className="w-5 h-5" />
-              <span className="text-sm font-medium">{post.comments?.length || 0}</span>
-              <span className="text-sm">Comentarios</span>
-            </div>
-            
-            <div className="flex items-center space-x-2 text-gray-500">
-              <Eye className="w-5 h-5" />
-              <span className="text-sm font-medium">{post.views || 0}</span>
-              <span className="text-sm">Visualizaciones</span>
-            </div>
-          </div>
-          
-          <div className="text-sm text-gray-500">
-            <span className="font-medium text-purple-600">${post.amount?.toLocaleString()}</span> invertidos
-          </div>
-        </div>
-
-        {/* Mostrar comentarios existentes (solo lectura) */}
-        {post.comments && post.comments.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-gray-200">
-            <h5 className="text-sm font-semibold text-gray-700 mb-3">Comentarios de la comunidad:</h5>
-            <div className="space-y-3">
-              {post.comments.slice(0, 3).map((comment: Comment, index: number) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-bold">
-                      {comment.author.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
-                      <p className="font-semibold text-sm text-gray-800">{comment.author}</p>
-                      <p className="text-sm text-gray-700">{comment.text}</p>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">{formatDate(comment.date)}</p>
-                  </div>
-                </div>
-              ))}
-              {post.comments.length > 3 && (
-                <div className="text-center">
-                  <span className="text-sm text-purple-600 font-medium">
-                    +{post.comments.length - 3} comentarios más
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+const CATEGORY_COLORS: Record<string, string> = {
+  'Educación':       'bg-blue-100 text-blue-700',
+  'Salud':           'bg-red-100 text-red-700',
+  'Medio Ambiente':  'bg-green-100 text-green-700',
+  'Comunidad':       'bg-amber-100 text-amber-700',
+  'Infraestructura': 'bg-slate-100 text-slate-700',
+  'Emprendimiento':  'bg-purple-100 text-purple-700',
+  'Alimentación':    'bg-orange-100 text-orange-700',
+  'Tecnología':      'bg-cyan-100 text-cyan-700',
+  'Otro':            'bg-gray-100 text-gray-600',
 };
 
-export default CharityPost;
+// ─── MediaSlide ───────────────────────────────────────────────────────────────
+
+function MediaSlide({
+  media,
+  title,
+  active,
+}: {
+  media: StoryMediaResponse;
+  title: string;
+  active: boolean;
+}) {
+  const [playing, setPlaying] = useState(false);
+
+  // Reset video when slide becomes inactive
+  React.useEffect(() => {
+    if (!active) setPlaying(false);
+  }, [active]);
+
+  if (media.mediaType === 'VIDEO') {
+    return playing ? (
+      <video
+        src={media.publicUrl}
+        controls
+        autoPlay
+        className="w-full h-full object-contain bg-black"
+      />
+    ) : (
+      <>
+        <img
+          src={media.thumbnailUrl ?? media.publicUrl}
+          alt={media.altText || title}
+          className="w-full h-full object-contain"
+          draggable={false}
+        />
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        {/* Play button */}
+        <button
+          onClick={() => setPlaying(true)}
+          aria-label="Reproducir video"
+          className="absolute inset-0 flex items-center justify-center group"
+        >
+          <div className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl group-hover:scale-110 group-active:scale-95 transition-transform duration-150">
+            <Play className="w-7 h-7 text-emerald-700 ml-1" fill="currentColor" />
+          </div>
+        </button>
+        {/* Video label */}
+        <span className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
+          <Play className="w-3 h-3" fill="currentColor" /> Video
+        </span>
+      </>
+    );
+  }
+
+  return (
+    <img
+      src={media.publicUrl}
+      alt={media.altText || title}
+      className="w-full h-full object-contain"
+      draggable={false}
+    />
+  );
+}
+
+// ─── MediaCarousel ────────────────────────────────────────────────────────────
+
+function MediaCarousel({
+  files,
+  title,
+  category,
+}: {
+  files: StoryMediaResponse[];
+  title: string;
+  category?: string;
+}) {
+  const [index, setIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchDeltaX = useRef<number>(0);
+
+  const total = files.length;
+
+  const prev = useCallback(() => setIndex((i) => (i - 1 + total) % total), [total]);
+  const next = useCallback(() => setIndex((i) => (i + 1) % total),         [total]);
+
+  // ── Touch handlers ──────────────────────────────────────────────────────────
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+
+  const onTouchEnd = () => {
+    if (Math.abs(touchDeltaX.current) > 40) {
+      touchDeltaX.current < 0 ? next() : prev();
+    }
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
+  };
+
+  const catColor = CATEGORY_COLORS[category ?? ''] ?? 'bg-gray-100 text-gray-600';
+
+  return (
+    <div className="relative h-72 sm:h-80 md:h-96 bg-gray-900 overflow-hidden select-none"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* ── Slides ── */}
+      <div
+        className="flex h-full transition-transform duration-300 ease-in-out will-change-transform"
+        style={{ transform: `translateX(-${index * 100}%)` }}
+      >
+        {files.map((media, i) => (
+          <div key={media.id} className="relative w-full h-full flex-shrink-0">
+            <MediaSlide media={media} title={title} active={i === index} />
+          </div>
+        ))}
+      </div>
+
+      {/* ── Category badge ── */}
+      {category && (
+        <span className={`absolute top-3 left-3 z-10 px-3 py-1 rounded-full text-xs font-bold shadow-sm ${catColor}`}>
+          {category}
+        </span>
+      )}
+
+      {/* ── Arrow buttons (only when > 1 slide) ── */}
+      {total > 1 && (
+        <>
+          <button
+            onClick={prev}
+            aria-label="Anterior"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10
+              w-9 h-9 rounded-full bg-black/40 hover:bg-black/65 active:scale-95
+              flex items-center justify-center text-white backdrop-blur-sm
+              transition-all duration-150 shadow-md"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={next}
+            aria-label="Siguiente"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10
+              w-9 h-9 rounded-full bg-black/40 hover:bg-black/65 active:scale-95
+              flex items-center justify-center text-white backdrop-blur-sm
+              transition-all duration-150 shadow-md"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+
+      {/* ── Dot indicators + counter ── */}
+      {total > 1 && (
+        <div className="absolute bottom-3 left-0 right-0 z-10 flex flex-col items-center gap-1.5">
+          {/* Dots */}
+          <div className="flex items-center gap-1.5">
+            {files.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIndex(i)}
+                aria-label={`Ir a imagen ${i + 1}`}
+                className={`rounded-full transition-all duration-200 ${
+                  i === index
+                    ? 'w-5 h-2 bg-white'
+                    : 'w-2 h-2 bg-white/50 hover:bg-white/80'
+                }`}
+              />
+            ))}
+          </div>
+          {/* Counter */}
+          <span className="text-[11px] text-white/70 font-medium tabular-nums">
+            {index + 1} / {total}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── CharityPost ──────────────────────────────────────────────────────────────
+
+interface CharityPostProps {
+  story: ImpactStoryResponse;
+}
+
+const DESCRIPTION_LIMIT = 180;
+
+export default function CharityPost({ story }: CharityPostProps) {
+  const [descExpanded, setDescExpanded] = useState(false);
+
+  // Sort: cover first, then by displayOrder
+  const sortedMedia = [...story.mediaFiles].sort((a, b) => {
+    if (a.isCover && !b.isCover) return -1;
+    if (!a.isCover && b.isCover) return 1;
+    return a.displayOrder - b.displayOrder;
+  });
+
+  const tagList = story.tags
+    ? story.tags.split(',').map((t) => t.trim()).filter(Boolean)
+    : [];
+
+  const catColor = CATEGORY_COLORS[story.category ?? ''] ?? 'bg-gray-100 text-gray-600';
+  const isLongDesc = story.description.length > DESCRIPTION_LIMIT;
+  const displayedDesc = isLongDesc && !descExpanded
+    ? story.description.slice(0, DESCRIPTION_LIMIT).trimEnd() + '…'
+    : story.description;
+
+  return (
+    <article className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+
+      {/* ── Carousel or placeholder ── */}
+      {sortedMedia.length > 0 ? (
+        <MediaCarousel files={sortedMedia} title={story.title} category={story.category} />
+      ) : (
+        // No media: show category badge inline
+        null
+      )}
+
+      {/* ── Body ── */}
+      <div className="p-5">
+
+        {/* Category badge (only when no media) */}
+        {story.category && sortedMedia.length === 0 && (
+          <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold mb-2 ${catColor}`}>
+            {story.category}
+          </span>
+        )}
+
+        {/* Title */}
+        <h2 className="text-base font-bold text-gray-900 leading-snug mb-2 line-clamp-2">
+          {story.title}
+        </h2>
+
+        {/* Meta: date · location · author */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400 mb-3">
+          <span className="flex items-center gap-1">
+            <Calendar className="w-3.5 h-3.5" />
+            {formatDate(story.storyDate)}
+          </span>
+          {story.location && (
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" />
+              {story.location}
+            </span>
+          )}
+          {story.authorName && (
+            <span className="text-gray-400">
+              por <span className="font-medium text-gray-600">{story.authorName}</span>
+            </span>
+          )}
+        </div>
+
+        {/* Description */}
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 leading-relaxed">
+            {displayedDesc}
+          </p>
+          {isLongDesc && (
+            <button
+              className="mt-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 transition-colors"
+              onClick={() => setDescExpanded((v) => !v)}
+            >
+              {descExpanded ? 'Ver menos ↑' : 'Ver más ↓'}
+            </button>
+          )}
+        </div>
+
+        {/* Stats chips */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <StatChip
+            icon={<Users className="w-3.5 h-3.5" />}
+            label={`${story.beneficiariesCount.toLocaleString('es-CO')} beneficiados`}
+            color="blue"
+          />
+          {story.investedAmount > 0 && (
+            <StatChip
+              icon={<DollarSign className="w-3.5 h-3.5" />}
+              label={formatMoney(story.investedAmount, story.investedCurrency)}
+              color="emerald"
+            />
+          )}
+        </div>
+
+        {/* Tags */}
+        {tagList.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {tagList.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[11px] font-medium"
+              >
+                <Tag className="w-3 h-3" />
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+      </div>
+    </article>
+  );
+}
+
+// ─── StatChip ─────────────────────────────────────────────────────────────────
+
+function StatChip({
+  icon, label, color,
+}: {
+  icon: React.ReactNode; label: string; color: 'blue' | 'emerald';
+}) {
+  const cls = color === 'blue'
+    ? 'bg-blue-50 text-blue-700 border-blue-100'
+    : 'bg-emerald-50 text-emerald-700 border-emerald-100';
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${cls}`}>
+      {icon}{label}
+    </span>
+  );
+}

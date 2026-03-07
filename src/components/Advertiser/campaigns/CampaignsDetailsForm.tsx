@@ -194,6 +194,7 @@ export function CampaignDetailsForm({
         gender,
         municipalityCodes,
       },
+      gameConfig: undefined
     };
 
     onSubmit(details);

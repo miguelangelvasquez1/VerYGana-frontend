@@ -14,7 +14,8 @@ import {
   Shield,
   DollarSign,
   Bell,
-  MonitorSmartphone
+  MonitorSmartphone,
+  MessageSquare
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -48,6 +49,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
       title: 'Rifas',
       icon: Gift,
       href: '/admin/raffles',
+      color: 'text-purple-500'
+    },
+    {
+      title: 'Foro',
+      icon: MessageSquare,
+      href: '/admin/forum',
       color: 'text-purple-500'
     },
     {

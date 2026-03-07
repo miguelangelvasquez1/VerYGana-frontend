@@ -4,6 +4,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Search, Star, Gamepad2 } from 'lucide-react';
 import Navbar from '@/components/bars/NavBar';
 import Footer from '@/components/Footer';

@@ -37,3 +37,14 @@ body {
 .primary-bg {
   background: var(--primary-bg);
 }
+
+/* RJSF overrides for Campaign Form*/
+/* CONTENEDOR GENERAL */
+.rjsf-form input,
+.rjsf-form select,
+.rjsf-form textarea {
+  @apply w-full rounded-xl border border-gray-300 px-3 py-2
+         focus:outline-none focus:ring-2 focus:ring-blue-500
+         transition;
+}
+

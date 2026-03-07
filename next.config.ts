@@ -13,7 +13,15 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'games.verygana.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'verygana-bucket.e1cb6cf5ad3bfde79bd415645b6a29e0.r2.cloudflarestorage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'freepnglogo.com',
       },
     ],
   }

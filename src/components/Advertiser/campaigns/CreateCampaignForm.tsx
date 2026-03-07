@@ -1,41 +1,41 @@
-// components/campaigns/CreateCampaignForm.tsx (ACTUALIZADO)
+// components/campaigns/CreateCampaignForm.tsx
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { ArrowLeft, Check, Loader2, AlertCircle, DollarSign, Tag } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useGames, useGameAssetDefinitions, useGameConfigDefinitions } from '@/hooks/campaigns/querys';
-import { useCampaignUpload } from '@/hooks/campaigns/useCampaignUpload';
+import { ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
+
+// Hooks
+import { useGames, useGameSchema } from '@/hooks/campaigns/querys';
+
+// Types
 import {
   Game,
-  FileWithPreview,
-  isValidFileSize,
-  isValidFileType,
-  CampaignDetails 
+  CampaignDetails, 
 } from '@/types/games/campaigns';
-import { GameConfigFormData } from '@/types/games/gameConfig';
 
-// Componentes
+// Components
 import { GameSelection } from './GameSelection';
 import { StepIndicator } from './StepIndicator';
-import { AssetUploadCard } from './AssetUploadCard';
-import { UploadProgress } from './UploadProgress';
 import { CampaignDetailsForm } from './CampaignsDetailsForm';
 import { GameConfigForm } from './GameConfigForm';
+import { CampaignSummary } from './CampaignSummary';
+import { useCreateCampaign } from '@/hooks/campaigns/mutations';
+import { CreateCampaignRequest } from '@/services/games-campaigns/campaignService';
 
 interface CreateCampaignFormProps {
   onSuccess?: (success: boolean) => void;
   onCancel?: () => void;
 }
 
-// ACTUALIZADO: Nuevo paso 'game-config'
-type Step = 'select-game' | 'campaign-details' | 'game-config' | 'upload-assets';
+type Step = 'select-game' | 'campaign-details' | 'game-config' | 'review-summary';
 
 export function CreateCampaignForm({
   onSuccess,
   onCancel,
 }: CreateCampaignFormProps) {
   const router = useRouter();
+  const { mutateAsync: createCampaign, isPending } = useCreateCampaign();
 
   // State
   const [step, setStep] = useState<Step>('select-game');
@@ -55,181 +55,72 @@ export function CreateCampaignForm({
       gender: 'ALL',
       municipalityCodes: [],
     },
-    gameConfig: undefined, // NUEVO
+    gameConfig: undefined,
   });
-  const [files, setFiles] = useState<Map<number, FileWithPreview[]>>(new Map());
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Queries
   const { data: gamesPage, isLoading: loadingGames, error: gamesError } = useGames();
   const games = gamesPage?.content ?? [];
-  
+
   const {
-    data: assetDefinitions = [],
-    isLoading: loadingDefinitions,
-    error: definitionsError,
-  } = useGameAssetDefinitions(selectedGame?.id ?? null);
-
-  // NUEVO: Query para obtener las definiciones de configuración del juego
-  const {
-    data: gameConfigDefinitions = [],
-    isLoading: loadingConfigDefinitions,
-  } = useGameConfigDefinitions(selectedGame?.id ?? null);
-
-  // Upload hook
-  const { uploadState, uploadCampaign, resetUpload } = useCampaignUpload({
-    gameId: selectedGame?.id ?? 0,
-    campaignDetails,
-  });
-
-  // Cleanup previews on unmount
-  useEffect(() => {
-    return () => {
-      files.forEach((fileList) => {
-        fileList.forEach((f) => URL.revokeObjectURL(f.preview));
-      });
-    };
-  }, [files]);
+    data: gameSchemaResponse,
+    isLoading: loadingSchema,
+    error: schemaError,
+  } = useGameSchema(selectedGame?.id ?? null);
 
   // Handlers
   const handleGameSelect = useCallback((game: Game) => {
     setSelectedGame(game);
     setStep('campaign-details');
-    setValidationError(null);
   }, []);
 
   const handleCampaignDetailsSubmit = useCallback((details: CampaignDetails) => {
     setCampaignDetails(details);
-    // ACTUALIZADO: Ir al paso de configuración del juego
     setStep('game-config');
-    setValidationError(null);
   }, []);
 
-  // NUEVO: Handler para la configuración del juego
-  const handleGameConfigSubmit = useCallback((gameConfig: GameConfigFormData) => {
+  const handleGameConfigSubmit = useCallback((gameConfig: any) => {
     setCampaignDetails(prev => ({ ...prev, gameConfig }));
-    setStep('upload-assets');
-    setValidationError(null);
+    setStep('review-summary');
   }, []);
 
-  const handleFileSelect = useCallback(
-    (definitionId: number, selectedFiles: FileList | null) => {
-      if (!selectedFiles || selectedFiles.length === 0) return;
+  const handleEditDetails = useCallback(() => {
+    setStep('campaign-details');
+  }, []);
 
-      const definition = assetDefinitions.find((d) => d.id === definitionId);
-      if (!definition) return;
+  const handleEditConfig = useCallback(() => {
+    setStep('game-config');
+  }, []);
 
-      const newFiles: FileWithPreview[] = Array.from(selectedFiles).map((file) => ({
-        file,
-        preview: URL.createObjectURL(file),
-        definitionId,
-        uploading: false,
-        uploaded: false,
-        progress: 0,
-      }));
+  // Create campaign
+  const handleConfirmAndCreate = useCallback(async () => {
+    if (!selectedGame) return;
 
-      // Validar archivos
-      for (const fileItem of newFiles) {
-        if (!isValidFileType(fileItem.file, definition.allowedMimeTypes)) {
-          setValidationError(
-            `Tipo de archivo no válido para ${definition.assetType}`
-          );
-          return;
-        }
+    try {
+      await createCampaign(
+        buildCreateCampaignRequest(selectedGame.id, campaignDetails)
+      );
 
-        if (!isValidFileSize(fileItem.file, definition.mediaType)) {
-          setValidationError(
-            `Archivo demasiado grande: ${fileItem.file.name}`
-          );
-          return;
-        }
-      }
-
-      setFiles((prev) => {
-        const updated = new Map(prev);
-        const existing = updated.get(definitionId) || [];
-
-        if (!definition.multiple) {
-          existing.forEach((f) => URL.revokeObjectURL(f.preview));
-          updated.set(definitionId, newFiles);
-        } else {
-          updated.set(definitionId, [...existing, ...newFiles]);
-        }
-
-        return updated;
-      });
-
-      setValidationError(null);
-    },
-    [assetDefinitions]
-  );
-
-  const handleRemoveFile = useCallback(
-    (definitionId: number, index: number) => {
-      setFiles((prev) => {
-        const updated = new Map(prev);
-        const existing = updated.get(definitionId) || [];
-        const file = existing[index];
-
-        if (file) {
-          URL.revokeObjectURL(file.preview);
-        }
-
-        existing.splice(index, 1);
-        if (existing.length === 0) {
-          updated.delete(definitionId);
-        } else {
-          updated.set(definitionId, existing);
-        }
-
-        return updated;
-      });
-    },
-    []
-  );
-
-  const validateAssets = useCallback((): boolean => {
-    const requiredDefinitions = assetDefinitions.filter((d) => d.required);
-
-    for (const def of requiredDefinitions) {
-      const defFiles = files.get(def.id);
-      if (!defFiles || defFiles.length === 0) {
-        setValidationError(`Falta el asset requerido: ${def.description}`);
-        return false;
-      }
-    }
-
-    return true;
-  }, [assetDefinitions, files]);
-
-  const handleSubmit = useCallback(async () => {
-    if (!validateAssets() || !selectedGame) return;
-
-    const result = await uploadCampaign(files, assetDefinitions, setFiles);
-
-    if (result.ok) {
+      onSuccess?.(true);
       router.push('/advertiser/campaigns');
+    } catch (error) {
+      console.error(error);
+      alert('Error al crear la campaña.');
     }
-  }, [validateAssets, selectedGame, uploadCampaign, files, assetDefinitions, router]);
+  }, [selectedGame, campaignDetails, createCampaign, router, onSuccess]);
+
 
   const handleBack = useCallback(() => {
     if (step === 'campaign-details') {
       setStep('select-game');
       setSelectedGame(null);
     } else if (step === 'game-config') {
-      // ACTUALIZADO: Volver a campaign-details
       setStep('campaign-details');
-    } else if (step === 'upload-assets') {
-      // ACTUALIZADO: Volver a game-config
+    } else if (step === 'review-summary') {
       setStep('game-config');
-      files.forEach((fileList) => {
-        fileList.forEach((f) => URL.revokeObjectURL(f.preview));
-      });
-      setFiles(new Map());
     }
-    setValidationError(null);
-    resetUpload();
-  }, [step, files, resetUpload]);
+  }, [step]);
 
   const handleCancelAll = useCallback(() => {
     setStep('select-game');
@@ -251,27 +142,31 @@ export function CreateCampaignForm({
       },
       gameConfig: undefined,
     });
-    files.forEach((fileList) => {
-      fileList.forEach((f) => URL.revokeObjectURL(f.preview));
-    });
-    setFiles(new Map());
-    setValidationError(null);
-    resetUpload();
     onCancel?.();
-  }, [files, resetUpload, onCancel]);
+  }, [onCancel]);
 
-  // Render
-  const isLoading =
-    uploadState.status === 'preparing' ||
-    uploadState.status === 'uploading' ||
-    uploadState.status === 'creating';
-
-  const canSubmit =
-    !isLoading && files.size > 0 && step === 'upload-assets';
+  function buildCreateCampaignRequest(
+    gameId: number,
+    details: CampaignDetails
+  ): CreateCampaignRequest {
+    return {
+      gameId,
+      budget: details.budget,
+      coinValue: details.coinValue,
+      completionCoins: details.completionCoins,
+      budgetCoins: details.budgetCoins,
+      maxCoinsPerSession: details.maxCoinsPerSession,
+      maxSessionsPerUserPerDay: details.maxSessionsPerUserPerDay,
+      targetUrl: details.targetUrl || undefined,
+      categoryIds: details.categoryIds,
+      targetAudience: details.targetAudience,
+      configData: details.gameConfig ?? {},
+    };
+  }
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="bg-white rounded-lg shadow-md p-8">
+    <div className="max-w-6xl mx-auto">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
         <StepIndicator currentStep={step} />
 
         {/* Step 1: Select Game */}
@@ -289,7 +184,7 @@ export function CreateCampaignForm({
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-xl font-semibold text-gray-900">
                   Detalles de la campaña: {selectedGame.title}
                 </h3>
                 <p className="text-sm text-gray-600 mt-1">
@@ -298,7 +193,7 @@ export function CreateCampaignForm({
               </div>
               <button
                 onClick={handleBack}
-                className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
+                className="text-sm text-blue-600 hover:text-blue-700 flex items-center transition-colors"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 Cambiar juego
@@ -313,19 +208,31 @@ export function CreateCampaignForm({
           </div>
         )}
 
-        {/* Step 3: Game Config (NUEVO) */}
+        {/* Step 3: Game Config */}
         {step === 'game-config' && selectedGame && (
           <div className="space-y-6">
-            {loadingConfigDefinitions ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 text-blue-600 animate-spin mr-3" />
-                <span className="text-gray-600">Cargando configuración...</span>
+            {schemaError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
+                <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-red-800">Error cargando configuración</p>
+                  <p className="text-sm text-red-700 mt-1">{schemaError.message}</p>
+                </div>
+              </div>
+            )}
+
+            {loadingSchema ? (
+              <div className="flex items-center justify-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
+                <Loader2 className="w-8 h-8 text-blue-600 animate-spin mr-3" />
+                <span className="text-gray-700 font-medium">Cargando configuración del juego...</span>
               </div>
             ) : (
               <GameConfigForm
                 gameTitle={selectedGame.title}
-                definitions={gameConfigDefinitions}
+                jsonSchema={gameSchemaResponse?.jsonSchema ?? {}}
+                uiSchema={gameSchemaResponse?.uiSchema}
                 initialData={campaignDetails.gameConfig}
+                loading={loadingSchema}
                 onSubmit={handleGameConfigSubmit}
                 onBack={handleBack}
               />
@@ -333,122 +240,17 @@ export function CreateCampaignForm({
           </div>
         )}
 
-        {/* Step 4: Upload Assets (antes era step 3) */}
-        {step === 'upload-assets' && (
-          <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Sube los assets para: {selectedGame?.title}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Completa todos los assets requeridos para tu campaña
-                </p>
-                <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                  <span className="flex items-center">
-                    <DollarSign className="w-4 h-4 mr-1" />
-                    Presupuesto: ${campaignDetails.budget.toLocaleString()}
-                  </span>
-                  <span className="flex items-center">
-                    <Tag className="w-4 h-4 mr-1" />
-                    {campaignDetails.categoryIds.length} categoría(s)
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={handleBack}
-                disabled={isLoading}
-                className="text-sm text-blue-600 hover:text-blue-700 flex items-center disabled:opacity-50"
-              >
-                <ArrowLeft className="w-4 h-4 mr-1" />
-                Volver
-              </button>
-            </div>
-
-            {/* Error Alert */}
-            {(validationError || uploadState.error) && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
-                <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-red-800">Error</p>
-                  <p className="text-sm text-red-700 mt-1">
-                    {validationError || uploadState.error}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Loading Definitions */}
-            {loadingDefinitions && (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 text-blue-600 animate-spin mr-3" />
-                <span className="text-gray-600">Cargando requisitos...</span>
-              </div>
-            )}
-
-            {/* Asset Upload Cards */}
-            {!loadingDefinitions &&
-              assetDefinitions.map((definition) => (
-                <AssetUploadCard
-                  key={definition.id}
-                  definition={definition}
-                  files={files.get(definition.id) || []}
-                  loading={isLoading}
-                  onFileSelect={(selectedFiles) =>
-                    handleFileSelect(definition.id, selectedFiles)
-                  }
-                  onRemoveFile={(index) =>
-                    handleRemoveFile(definition.id, index)
-                  }
-                />
-              ))}
-
-            {/* Upload Progress */}
-            {isLoading && uploadState.progress > 0 && (
-              <UploadProgress
-                progress={uploadState.progress}
-                currentFile={uploadState.currentFile}
-                status={
-                  uploadState.status === 'preparing'
-                    ? 'preparing'
-                    : uploadState.status === 'creating'
-                    ? 'creating'
-                    : 'uploading'
-                }
-              />
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex justify-between pt-4 border-t">
-              <button
-                onClick={handleCancelAll}
-                disabled={isLoading}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {uploadState.status === 'preparing' && 'Preparando...'}
-                    {uploadState.status === 'uploading' && 'Subiendo...'}
-                    {uploadState.status === 'creating' && 'Creando campaña...'}
-                  </>
-                ) : (
-                  <>
-                    <Check className="w-4 h-4 mr-2" />
-                    Crear Campaña
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+        {/* Step 4: Review Summary */}
+        {step === 'review-summary' && selectedGame && (
+          <CampaignSummary
+            gameTitle={selectedGame.title}
+            campaignDetails={campaignDetails}
+            onBack={handleBack}
+            onConfirm={handleConfirmAndCreate}
+            onEditDetails={handleEditDetails}
+            onEditConfig={handleEditConfig}
+            loading={isSubmitting}
+          />
         )}
       </div>
     </div>
