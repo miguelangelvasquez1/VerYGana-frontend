@@ -2,9 +2,9 @@
 'use client';
 
 import React from 'react';
-import { Check, Gamepad2, DollarSign, Settings, Upload } from 'lucide-react';
+import { Check, Gamepad2, DollarSign, Settings, FileCheck } from 'lucide-react';
 
-type Step = 'select-game' | 'campaign-details' | 'game-config' | 'upload-assets';
+type Step = 'select-game' | 'campaign-details' | 'game-config' | 'review-summary';
 
 interface StepIndicatorProps {
   currentStep: Step;
@@ -27,9 +27,9 @@ const steps: { key: Step; label: string; icon: React.ReactNode }[] = [
     icon: <Settings className="w-5 h-5" />
   },
   { 
-    key: 'upload-assets', 
-    label: 'Subir Assets',
-    icon: <Upload className="w-5 h-5" />
+    key: 'review-summary', 
+    label: 'Revisar y Confirmar',
+    icon: <FileCheck className="w-5 h-5" />
   },
 ];
 

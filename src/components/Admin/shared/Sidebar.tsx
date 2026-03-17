@@ -15,8 +15,9 @@ import {
   DollarSign,
   Bell,
   MonitorSmartphone,
-  TicketIcon,
-  TargetIcon
+  MessageSquare,
+  TargetIcon,
+  TicketIcon
 } from 'lucide-react';
 
 interface MenuItem {
@@ -70,7 +71,49 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           icon: TargetIcon,
           href: '/admin/products',
           color: 'text-yellow-500'
-        }
+        },
+        {
+      title: 'Rifas',
+      icon: Gift,
+      href: '/admin/raffles',
+      color: 'text-purple-500'
+    },
+    {
+      title: 'Foro',
+      icon: MessageSquare,
+      href: '/admin/forum',
+      color: 'text-purple-500'
+    },
+    {
+      title: 'Reportes',
+      icon: BarChart3,
+      href: '/admin/reports',
+      color: 'text-orange-500'
+    },
+    {
+      title: 'Finanzas',
+      icon: DollarSign,
+      href: '/admin/finance',
+      color: 'text-emerald-500'
+    },
+    {
+      title: 'Notificaciones',
+      icon: Bell,
+      href: '/admin/notifications',
+      color: 'text-yellow-500'
+    },
+    {
+      title: 'Sistema',
+      icon: Shield,
+      href: '/admin/system',
+      color: 'text-red-500'
+    },
+    {
+      title: 'Configuración',
+      icon: Settings,
+      href: '/admin/settings',
+      color: 'text-gray-500'
+    }
       ]
     },
     {
@@ -90,41 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         }
       ]
     },
-    {
-      section: 'Administración',
-      items: [
-        {
-          title: 'Reportes',
-          icon: BarChart3,
-          href: '/admin/reports',
-          color: 'text-orange-500'
-        },
-        {
-          title: 'Finanzas',
-          icon: DollarSign,
-          href: '/admin/finance',
-          color: 'text-emerald-500'
-        },
-        {
-          title: 'Notificaciones',
-          icon: Bell,
-          href: '/admin/notifications',
-          color: 'text-yellow-500'
-        },
-        {
-          title: 'Sistema',
-          icon: Shield,
-          href: '/admin/system',
-          color: 'text-red-500'
-        },
-        {
-          title: 'Configuración',
-          icon: Settings,
-          href: '/admin/settings',
-          color: 'text-gray-500'
-        }
-      ]
-    }
+    
   ];
 
   return (

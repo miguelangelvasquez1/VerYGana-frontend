@@ -2,7 +2,6 @@
 
 import { MunicipalityDTO } from "@/services/LocationService";
 import { Category } from "../Category.types";
-import { GameConfigFormData } from "./gameConfig";
 
 // ==================== Enums ====================
 
@@ -111,23 +110,19 @@ export interface Campaign {
 
 // ==================== DTOs de Request ====================
 
-export interface CreateCampaignRequest {
-  gameId: number;
-  assets: CreateAssetRequest[];
-}
-
 export interface CreateAssetRequest {
   assetDefinitionId: number;
   fileMetadata: FileUploadRequest;
 }
 
-export interface FileUploadRequest {
+export interface FileUploadRequest { //cambiar a import global
   originalFileName: string;
   contentType: string;
   sizeBytes: number;
 }
 
 export interface CampaignDetails {
+
   // Sistema de monedas y recompensas
   coinValue: number; // Valor de cada moneda en dinero real
   completionCoins: number; // Monedas ganadas por completar el juego
@@ -150,7 +145,7 @@ export interface CampaignDetails {
     municipalityCodes: string[];
   };
 
-  gameConfig: GameConfigFormData | undefined;
+  gameConfig: undefined;
 }
 
 // ==================== DTOs de Response ====================
