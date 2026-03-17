@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api/client";
-import { PagedResponse } from "@/types/common";
+import { PagedResponse } from "@/types/GenericTypes";
 import { Transaction } from "@/types/transaction.types"; 
 import { CreatePurchaseItemRequestDTO } from "@/types/cart.types";
 import { EntityCreatedResponseDTO } from "@/types/GenericTypes";

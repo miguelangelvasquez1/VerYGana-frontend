@@ -112,7 +112,7 @@ export default function PurchaseConfirmationPage() {
             {/* ACTIONS */}
             <div className="space-y-3">
               <button
-                onClick={() => router.push('/purchases')}
+                onClick={() => router.push('/explore/purchases')}
                 className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 Ver mis compras
@@ -137,7 +137,7 @@ export default function PurchaseConfirmationPage() {
             <p className="text-gray-600 mb-6">{errorMessage}</p>
 
             <button
-              onClick={() => router.push('/purchases')}
+              onClick={() => router.push('/explore/purchases')}
               className="w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition"
             >
               Ir a mis compras

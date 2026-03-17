@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api/client';
-import { FileUploadPermission } from '@/types/GenericTypes';
+import { FileUploadPermissionDTO } from '@/types/GenericTypes';
 
 /**
  * Servicio genérico para preparar uploads de archivos hacia R2

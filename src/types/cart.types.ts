@@ -34,8 +34,3 @@ export interface CreatePurchaseRequestDTO {
   notes?: string;
   couponCode?: string;
 }
-
-export interface EntityCreatedResponseDTO {
-  id: number;
-  message: string;
-}

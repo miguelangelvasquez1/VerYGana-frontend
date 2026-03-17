@@ -23,7 +23,13 @@ export interface PagedResponse<T> {
   };
 }
 
-export interface FileUploadPermission {
+export interface FileUploadRequestDTO {
+  originalFileName: string;
+  contentType: string;
+  sizeBytes: number;
+}
+
+export interface FileUploadPermissionDTO {
   uploadUrl: string;
   expiresInSeconds: number;
 }

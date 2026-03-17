@@ -14,8 +14,22 @@ import {
   Shield,
   DollarSign,
   Bell,
-  MonitorSmartphone
+  MonitorSmartphone,
+  TicketIcon,
+  TargetIcon
 } from 'lucide-react';
+
+interface MenuItem {
+  title: string;
+  icon: any;
+  href: string;
+  color: string;
+}
+
+interface MenuGroup {
+  section?: string;
+  items: MenuItem[];
+}
 
 interface SidebarProps {
   className?: string;
@@ -25,65 +39,100 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
 
-  const menuItems = [
+  const menuGroups: MenuGroup[] = [
     {
-      title: 'Dashboard',
-      icon: Home,
-      href: '/admin',
-      color: 'text-blue-500'
+      items: [
+        {
+          title: 'Dashboard',
+          icon: Home,
+          href: '/admin',
+          color: 'text-blue-500'
+        }
+      ]
     },
     {
-      title: 'Usuarios',
-      icon: Users,
-      href: '/admin/users',
-      color: 'text-green-500'
+      section: 'Gestión',
+      items: [
+        {
+          title: 'Usuarios',
+          icon: Users,
+          href: '/admin/users',
+          color: 'text-green-500'
+        },
+        {
+          title: 'Anuncios',
+          icon: MonitorSmartphone,
+          href: '/admin/ads',
+          color: 'text-emerald-500'
+        },
+        {
+          title: 'Productos',
+          icon: TargetIcon,
+          href: '/admin/products',
+          color: 'text-yellow-500'
+        }
+      ]
     },
     {
-      title: 'Anuncios',
-      icon: MonitorSmartphone,
-      href: '/admin/ads',
-      color: 'text-green-500'
+      section: 'Rifas',
+      items: [
+        {
+          title: 'Gestión de Rifas',
+          icon: Gift,
+          href: '/admin/raffles',
+          color: 'text-purple-500'
+        },
+        {
+          title: 'Reglas de boletos',
+          icon: TicketIcon,
+          href: '/admin/ticket-rules',
+          color: 'text-pink-500'
+        }
+      ]
     },
     {
-      title: 'Rifas',
-      icon: Gift,
-      href: '/admin/raffles',
-      color: 'text-purple-500'
-    },
-    {
-      title: 'Reportes',
-      icon: BarChart3,
-      href: '/admin/reports',
-      color: 'text-orange-500'
-    },
-    {
-      title: 'Finanzas',
-      icon: DollarSign,
-      href: '/admin/finance',
-      color: 'text-emerald-500'
-    },
-    {
-      title: 'Notificaciones',
-      icon: Bell,
-      href: '/admin/notifications',
-      color: 'text-yellow-500'
-    },
-    {
-      title: 'Sistema',
-      icon: Shield,
-      href: '/admin/system',
-      color: 'text-red-500'
-    },
-    {
-      title: 'Configuración',
-      icon: Settings,
-      href: '/admin/settings',
-      color: 'text-gray-500'
+      section: 'Administración',
+      items: [
+        {
+          title: 'Reportes',
+          icon: BarChart3,
+          href: '/admin/reports',
+          color: 'text-orange-500'
+        },
+        {
+          title: 'Finanzas',
+          icon: DollarSign,
+          href: '/admin/finance',
+          color: 'text-emerald-500'
+        },
+        {
+          title: 'Notificaciones',
+          icon: Bell,
+          href: '/admin/notifications',
+          color: 'text-yellow-500'
+        },
+        {
+          title: 'Sistema',
+          icon: Shield,
+          href: '/admin/system',
+          color: 'text-red-500'
+        },
+        {
+          title: 'Configuración',
+          icon: Settings,
+          href: '/admin/settings',
+          color: 'text-gray-500'
+        }
+      ]
     }
   ];
 
   return (
-    <div className={`bg-white shadow-lg h-screen transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'} ${className}`}>
+    <div
+      className={`bg-white shadow-lg h-screen transition-all duration-300 ${
+        isCollapsed ? 'w-16' : 'w-64'
+      } ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b h-18">
         {!isCollapsed && (
@@ -97,40 +146,54 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         </button>
       </div>
 
-      {/* Menu Items */}
-      <nav className="mt-4">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center px-4 py-3 mx-2 rounded-lg transition-all duration-200 ${
-                isActive
-                  ? 'bg-blue-50 border-r-4 border-blue-500 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-              }`}
-            >
-              <Icon 
-                size={20} 
-                className={`${isActive ? 'text-blue-500' : item.color} ${isCollapsed ? '' : 'mr-3'}`}
-              />
-              {!isCollapsed && (
-                <span className="font-medium">{item.title}</span>
-              )}
-            </Link>
-          );
-        })}
+      {/* Menu */}
+      <nav className="mt-4 space-y-6">
+        {menuGroups.map((group, index) => (
+          <div key={index}>
+            {group.section && !isCollapsed && (
+              <p className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                {group.section}
+              </p>
+            )}
+
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center px-4 py-3 mx-2 rounded-lg transition-all duration-200 ${
+                    isActive
+                      ? 'bg-blue-50 border-r-4 border-blue-500 text-blue-700'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                  }`}
+                >
+                  <Icon
+                    size={20}
+                    className={`${isActive ? 'text-blue-500' : item.color} ${
+                      isCollapsed ? '' : 'mr-3'
+                    }`}
+                  />
+                  {!isCollapsed && (
+                    <span className="font-medium">{item.title}</span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* Footer */}
       {!isCollapsed && (
-        <div className="p-4">
+        <div className="p-4 mt-auto">
           <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white">
             <p className="text-sm font-medium">Panel de Administración</p>
-            <p className="text-xs opacity-90">Gestiona tu sistema completo</p>
+            <p className="text-xs opacity-90">
+              Gestiona tu sistema completo
+            </p>
           </div>
         </div>
       )}
