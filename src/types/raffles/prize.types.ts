@@ -1,11 +1,16 @@
 import { FileUploadPermissionDTO } from "../GenericTypes";
 
+export enum PrizeType {
+    PHYSICAL = 'PHYSICAL',
+    DIGITAL = 'DIGITAL'
+}
+
 export interface CreatePrizeRequestDTO {
     title: string;
     description: string;
     brand: string;
     value: number;
-    prizeType: 'PHYSICAL' | 'DIGITAL';
+    prizeType: PrizeType;
     position: number;
     quantity: number;
     requiresShipping: boolean;
@@ -26,7 +31,7 @@ export interface PrizeResponseDTO {
     brand: string;
     value: number;
     imageUrl: string;
-    prizeType: 'PHYSICAL' | 'DIGITAL';
+    prizeType: PrizeType;
     position: number;
     quantity: number;
 }

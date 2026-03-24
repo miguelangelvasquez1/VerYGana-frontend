@@ -1,6 +1,7 @@
 import apiClient from "@/lib/api/client";
 import { PagedResponse } from "@/types/GenericTypes";
 import { ParticipantLeaderboardDTO, RaffleResponseDTO, RaffleStatsResponseDTO, RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
+import { RaffleResultResponseDTO, RaffleSummaryResultResponseDTO } from "@/types/raffles/raffleResult.types";
 import { RaffleTicketResponseDTO } from "@/types/raffles/raffleTicket.types";
 import { PrizeWonResponseDTO, WinnerSummaryResponseDTO } from "@/types/raffles/raffleWinner.types";
 
@@ -32,6 +33,21 @@ export const getRaffleLeaderBoard = async (raffleId: number): Promise<Participan
     return response.data;
 }
 
+export const getLiveRaffles = async (): Promise<RaffleSummaryResponseDTO[]> => {
+    const response = await apiClient.get("/api/raffles/lives");
+    return response.data;
+}
+
+export const getActiveRaffles = async (type: string, pageNumber: number): Promise<PagedResponse<RaffleSummaryResponseDTO>> => {
+    const response = await apiClient.get("/api/raffles/actives", {
+        params: {
+            type,
+            pageNumber
+        }
+    });
+    return response.data;
+}
+
 // RaffleWinnerController
 
 export const getRaffleWinners = async (raffleId: number): Promise<WinnerSummaryResponseDTO[]> => {
@@ -46,6 +62,11 @@ export const getWonPrizes = async (size?: 10, page?: 0): Promise<PagedResponse<P
             page
         }
     });
+    return response.data;
+}
+
+export const getLastWinners = async (): Promise<WinnerSummaryResponseDTO[]> => {
+    const response = await apiClient.get("/api/winners/last");
     return response.data;
 }
 
@@ -91,5 +112,17 @@ export const getUserTicketBalanceInRaffle = async (raffleId: number, status?: st
 
 export const canUserReceiveTickets = async (raffleType: string): Promise<boolean> => {
     const response = await apiClient.get(`/api/my/raffle-tickets/eligibility/${raffleType}`);
+    return response.data;
+}
+
+// RaffleResultController
+
+export const getRaffleResultByRaffleId = async (raffleId: number): Promise<RaffleResultResponseDTO> => {
+    const response = await apiClient.get(`/api/results/raffle/${raffleId}`);
+    return response.data;
+}
+
+export const getLastRafflesResults = async (): Promise<RaffleSummaryResultResponseDTO[]> => {
+    const response = await apiClient.get("/api/results/last");
     return response.data;
 }

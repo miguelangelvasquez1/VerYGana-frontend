@@ -110,6 +110,12 @@ export default function AdminRafflesDashboard() {
         prepareRequest
       );
 
+      // En handleCreateRaffle, antes del STEP 2
+      console.log('raffleImageFile size:', raffleImageFile.size);
+      prizeImageFiles.forEach((f, i) =>
+        console.log(`prize[${i}] size:`, f.size, 'type:', f.type)
+      );
+
       // 🔹 STEP 2 — UPLOADS
       await Promise.all([
         fileUploadService.uploadToR2(
@@ -248,14 +254,14 @@ export default function AdminRafflesDashboard() {
 
         <div>
           <p className="text-sm font-medium text-gray-700 mb-1">Tipo</p>
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="border px-3 py-2 rounded-lg"
-        >
-          <option value="STANDARD">Estándar</option>
-          <option value="PREMIUM">Premium</option>
-        </select>
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="border px-3 py-2 rounded-lg"
+          >
+            <option value="STANDARD">Estándar</option>
+            <option value="PREMIUM">Premium</option>
+          </select>
         </div>
       </div>
 

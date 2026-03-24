@@ -50,6 +50,7 @@ export interface UpdateRaffleRequestDTO {
 export interface RaffleSummaryResponseDTO {
     id: number;
     title: string;
+    imageUrl: string;
     raffleType: 'PREMIUM' | 'STANDARD';
     raffleStatus: 'DRAFT' | 'ACTIVE' | 'CLOSED' | 'DRAWING' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
     startDate: string;

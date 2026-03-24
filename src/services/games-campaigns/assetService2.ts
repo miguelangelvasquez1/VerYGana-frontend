@@ -1,6 +1,6 @@
 import apiClient from '@/lib/api/client';
 import { FileUploadRequest } from '@/types/games/campaigns';
-import { FileUploadPermission } from '@/types/GenericTypes';
+import { FileUploadPermissionDTO } from '@/types/GenericTypes';
 
 /**
  * Asset API Client
@@ -11,7 +11,7 @@ export interface AssetUploadPermissionDTO {
   assetId: number;
   temporalUrl: string;
   publicUrl: string;
-  permission: FileUploadPermission;
+  permission: FileUploadPermissionDTO;
 }
 
 export interface AssetConfirmRequest {

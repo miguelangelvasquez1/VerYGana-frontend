@@ -1,9 +1,18 @@
 export interface WinnerSummaryResponseDTO {
-    winnerId: number;
-    consumerId: number;
-    consumerName: string;
+    userName: string;
+    raffleTitle: string;
+    prizeTitle: string;
+    prizeValue: number;
+    position: number;
+}
+
+export interface WinnerDetailResponseDTO {
+    userName: string;
     ticketNumber: string;
     prizeTitle: string;
+    prizeImageUrl: string;
+    prizeType: 'PHYSICAL' | 'DIGITAL';
+    prizeValue: number;
     position: number;
 }
 

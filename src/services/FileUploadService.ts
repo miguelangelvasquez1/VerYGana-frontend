@@ -15,6 +15,7 @@ class FileUploadService {
     file: File,
     onProgress?: (progress: number) => void
   ): Promise<void> {
+    
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
 
@@ -39,7 +40,6 @@ class FileUploadService {
 
       xhr.open('PUT', uploadUrl);
       xhr.setRequestHeader('Content-Type', file.type);
-      xhr.send(file);
     });
   }
 }
