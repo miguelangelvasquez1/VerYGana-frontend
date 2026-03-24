@@ -2,6 +2,7 @@ import apiClient from "@/lib/api/client";
 import { CategoryResponseDTO } from "@/types/Category.types";
 import { RegisterConsumerDTO, ConsumerInitialDataResponseDTO, ConsumerProfileResponseDTO, ConsumerUpdateProfileRequestDTO} from "@/types/Consumer.types";
 import { EntityUpdatedResponseDTO } from "@/types/GenericTypes";
+import { Gender } from "@/types/Consumer.types";
 // ============================================
 // MÉTODOS DEL SERVICE
 // ============================================
@@ -18,6 +19,12 @@ export const registerConsumer = async (data: {
   department: string;
   municipality: string;
   categories?: CategoryResponseDTO[];
+  referredByCode?: string;
+  avatarId: number;
+  userName: string;      
+  birthDate: string;       
+  gender: Gender;  
+
 }): Promise<any> => {
   const payload: RegisterConsumerDTO = {
     email: data.email,
@@ -27,7 +34,12 @@ export const registerConsumer = async (data: {
     lastName: data.lastNames,
     department: data.department,
     municipality: data.municipality,
-    categories: data.categories || []
+    categories: data.categories || [],
+    avatarId: data.avatarId,                              
+    referredByCode: data.referredByCode || undefined,
+    userName: data.userName,
+    birthDate: data.birthDate,    
+    gender: data.gender,    
   };
 
   const response = await apiClient.post('/auth/register/consumer', payload);
