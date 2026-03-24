@@ -8,7 +8,15 @@ export interface RegisterConsumerDTO {
   department: string;
   municipality: string;
   categories?: CategoryResponseDTO[];
+  avatarId: number;
+  referredByCode?: string;
+  birthDate: string; 
+  gender: "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
+  userName:string;
+  
 }
+
+export type Gender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
 
 export interface ConsumerInitialDataResponseDTO {
     id : number;

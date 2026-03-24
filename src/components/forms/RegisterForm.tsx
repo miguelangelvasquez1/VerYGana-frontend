@@ -7,6 +7,8 @@ import { registerSeller } from "@/services/SellerService";
 import { registerAdvertiser } from "@/services/AdvertiserService";
 import { Category } from "@/types/Category.types";
 import { useCategories } from "@/hooks/useCategories";
+import { getActiveAvatars, AvatarDTO } from "@/services/AvatarService";
+import AvatarSelector from "@/components/AvatarSelector";
 
 type Role = "BENEFICIARIO" | "VENDEDOR" | "ANUNCIANTE";
 
@@ -30,7 +32,8 @@ export default function RegisterForm() {
   const [loadingMunicipalities, setLoadingMunicipalities] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [avatars, setAvatars] = useState<AvatarDTO[]>([]);
+  const [loadingAvatars, setLoadingAvatars] = useState(false);
   const { categories, loading, error, refetch } = useCategories();
 
   // const CategoryService cs;
@@ -58,6 +61,20 @@ export default function RegisterForm() {
     };
     loadDepartments();
   }, []);
+    useEffect(() => {
+    const loadAvatars = async () => {
+      setLoadingAvatars(true);
+      try {
+        const data = await getActiveAvatars();
+        setAvatars(data);
+      } catch (error) {
+        toast.error("Error al cargar los avatares");
+      } finally {
+        setLoadingAvatars(false);
+      }
+    };
+    loadAvatars();
+  }, []);
 
   // 🟢 Cargar municipios al seleccionar departamento
   useEffect(() => {
@@ -72,6 +89,16 @@ export default function RegisterForm() {
       setLoadingMunicipalities(false);
     }
   }, [formData.department, departments]);
+
+  // 🟢 Leer código de referido desde la URL (?ref=XXXX)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) {
+      setRole('BENEFICIARIO');
+      setFormData((prev: any) => ({ ...prev, referredByCode: ref.toUpperCase() }));
+    }
+}, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -119,6 +146,47 @@ export default function RegisterForm() {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
+    // Validaciones específicas de BENEFICIARIO
+  if (role === "BENEFICIARIO") {
+    if (!formData.avatarId) {
+      toast.error("Debes seleccionar un avatar");
+      setIsSubmitting(false);
+      return;
+    }
+    if (!formData.userName) {
+      toast.error("El nombre de usuario es requerido");
+      setIsSubmitting(false);
+      return;
+    }
+    if (!formData.birthDay || !formData.birthMonth || !formData.birthYear) {
+      toast.error("La fecha de nacimiento es requerida");
+      setIsSubmitting(false);
+      return;
+    }
+    if (!formData.gender) {
+      toast.error("El género es requerido");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validar edad mínima (13 años)
+    const birth = new Date(
+      Number(formData.birthYear),
+      Number(formData.birthMonth) - 1,
+      Number(formData.birthDay)
+    );
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    if (age < 13) {
+      toast.error("Debes tener al menos 13 años para registrarte");
+      setIsSubmitting(false);
+      return;
+    }
+  }
     try {
       let response;
 
@@ -133,7 +201,12 @@ export default function RegisterForm() {
             lastNames: formData.lastNames,
             department: formData.department,
             municipality: formData.municipality,
-            categories: formData.categories || []
+            categories: formData.categories || [],
+            avatarId: formData.avatarId,   
+            referredByCode: formData.referredByCode?.trim() || undefined,
+            userName: formData.userName,                    
+            birthDate: `${formData.birthYear}-${String(formData.birthMonth).padStart(2, "0")}-${String(formData.birthDay).padStart(2, "0")}`, 
+            gender: formData.gender,   
           });
           break;
 
@@ -269,7 +342,97 @@ export default function RegisterForm() {
                   required
                 />
               </div>
+              {/* Username */}
+              <input
+                name="userName"
+                placeholder="Nombre de usuario"
+                onChange={handleChange}
+                value={formData.userName || ""}
+                maxLength={20}
+                className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                required
+              />
+              <p className="text-xs text-gray-400 -mt-2 ml-1">
+                Solo letras, números, puntos y guion bajo. Entre 3 y 20 caracteres.
+              </p>
 
+              {/* Fecha de nacimiento */}
+              <div>
+                <label className="block font-semibold text-gray-700 mb-2">
+                  Fecha de nacimiento <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  <select
+                    name="birthDay"
+                    onChange={handleChange}
+                    value={formData.birthDay || ""}
+                    className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                  >
+                    <option value="">Día</option>
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    name="birthMonth"
+                    onChange={handleChange}
+                    value={formData.birthMonth || ""}
+                    className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                  >
+                    <option value="">Mes</option>
+                    {[
+                      "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                      "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+                    ].map((m, i) => (
+                      <option key={i + 1} value={i + 1}>{m}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    name="birthYear"
+                    onChange={handleChange}
+                    value={formData.birthYear || ""}
+                    className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                  >
+                    <option value="">Año</option>
+                    {Array.from(
+                      { length: new Date().getFullYear() - 1924 },
+                      (_, i) => new Date().getFullYear() - 13 - i
+                    ).map((y) => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Género */}
+              <div>
+                <label className="block font-semibold text-gray-700 mb-2">
+                  Género <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { value: "MALE", label: "♂ Masculino" },
+                    { value: "FEMALE", label: "♀ Femenino" },
+                    { value: "OTHER", label: "⚧ Otro" },
+                    { value: "PREFER_NOT_TO_SAY", label: "🤐 Prefiero no decir" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setFormData((prev: any) => ({ ...prev, gender: option.value }))}
+                      className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition
+                        ${formData.gender === option.value
+                          ? "border-blue-500 bg-blue-50 text-blue-700"
+                          : "border-gray-200 bg-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-200"
+                        }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>              
               {/* Email */}
               <input
                 type="email"
@@ -290,7 +453,27 @@ export default function RegisterForm() {
                 className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
                 required
               />
-
+              {/* Código de referido */}
+              <div className="relative">
+                <input
+                  name="referredByCode"
+                  placeholder="Código de referido (opcional)"
+                  onChange={handleChange}
+                  value={formData.referredByCode || ""}
+                  maxLength={20}
+                  className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition pr-24"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-1">
+                  Opcional
+                </span>
+              </div>
+              {/* Avatar */}
+              <AvatarSelector
+                avatars={avatars}
+                selectedId={formData.avatarId ?? null}
+                onSelect={(id) => setFormData((prev: any) => ({ ...prev, avatarId: id }))}
+                loading={loadingAvatars}
+              />
               {/* Contraseñas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
