@@ -1,4 +1,3 @@
-// components/ads/AdCard.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -12,8 +11,7 @@ import {
   TrendingUp, 
   Edit2, 
   Pause, 
-  PlayCircle, 
-  Trash2, 
+  PlayCircle,
   MoreVertical,
   X,
   Maximize2

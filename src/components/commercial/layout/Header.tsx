@@ -1,9 +1,11 @@
 // components/layout/Header.tsx
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Menu, Bell, User, Search, Wallet } from 'lucide-react';
 import Link from 'next/link';
+import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
+import { getCommercialInitialData } from '@/services/commercialService';
 
 interface HeaderProps {
   title?: string;
@@ -12,6 +14,25 @@ interface HeaderProps {
 }
 
 export function Header({ title, onMenuClick, showMenuButton }: HeaderProps) {
+
+  const [commercial, setCommercial] = useState<CommercialInitialDataResponseDTO | null>(null);
+
+  useEffect(() => {
+      async function loadUser() {
+        // setLoadingUser(true);
+        try {
+          const data = await getCommercialInitialData();
+          setCommercial(data);
+        } catch (err: any) {
+          console.error("Error cargando datos:", err);
+          // setErrorUser("No se pudieron cargar los datos del usuario");
+        } finally {
+          // setLoadingUser(false);
+        }
+      }
+      loadUser();
+    }, []);
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
       <div className="px-4 lg:px-6 py-4">
@@ -35,23 +56,11 @@ export function Header({ title, onMenuClick, showMenuButton }: HeaderProps) {
           </div>
 
           <div className="flex items-center space-x-2 lg:space-x-4">
-            {/* Barra de búsqueda - oculta en móvil */}
-            <div className="hidden md:flex items-center">
-              <div className="relative">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Buscar anuncios..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
             {/* Saldo */}
             <div className="hidden sm:flex items-center bg-gray-100 rounded-lg px-3 py-2 space-x-2">
               <Wallet className="w-4 h-4 text-gray-600" />
               <div className="text-right leading-tight">
-                <p className="text-xs text-gray-500">Saldo</p>
+                <p className="text-xs text-gray-500">Saldo QUITAR</p>
                 <p className="text-sm font-semibold text-gray-900">$1,250.00</p>
               </div>
               <Link
@@ -71,8 +80,8 @@ export function Header({ title, onMenuClick, showMenuButton }: HeaderProps) {
             {/* Perfil de usuario */}
             <div className="flex items-center space-x-3">
               <div className="hidden lg:block text-right">
-                <p className="text-sm font-medium text-gray-900">Juan Pérez</p>
-                <p className="text-xs text-gray-600">Commercial Pro</p>
+                <p className="text-sm font-medium text-gray-900">{commercial?.companyName}</p>
+                <p className="text-xs text-gray-600">{commercial?.email}</p> 
               </div>
               <button className="p-1 rounded-full bg-gray-200 hover:bg-gray-300">
                 <User className="w-6 h-6 text-gray-600" />

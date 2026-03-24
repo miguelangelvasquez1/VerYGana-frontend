@@ -3,30 +3,24 @@
 import React, { useState, useEffect } from "react";
 import {
   Package,
-  Plus,
-  TrendingUp,
-  DollarSign,
   Search,
   Filter,
   Grid,
   List,
-  ShoppingBag,
-  BarChart3,
   Wallet,
 } from "lucide-react";
 
-import CreateProductForm from "@/components/forms/CreateProductForm";
+import CreateProductForm from "@/components/commercial/products/CreateProductForm";
 import { useAuth } from "@/hooks/useAuth";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { EarningsByMonthResponseDTO } from "@/types/transaction.types";
 import { DashboardStats } from "@/types/Seller.types";
-import ProductCard from "@/components/products/ProductCard";
+import ProductCard from "@/components/consumer/products/ProductCard";
 import { useRouter } from "next/navigation";
-import { Heart } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import TopSellingProducts from "@/components/sellerStats/TopSellingProducts";
-import SellerEarningsBarChart from "@/components/sellerStats/SellerEarningsBarChart";
-import SellerEarningsCards from "@/components/sellerStats/SellerEarningsCards";
+import TopSellingProducts from "@/components/commercial/products/sellerStats/TopSellingProducts";
+import SellerEarningsBarChart from "@/components/commercial/products/sellerStats/SellerEarningsBarChart";
+import SellerEarningsCards from "@/components/commercial/products/sellerStats/SellerEarningsCards";
 
 // Servicios
 import * as productService from "@/services/ProductService";
@@ -34,7 +28,7 @@ import * as walletService from "@/services/WalletService";
 import * as productReviewService from "@/services/ProductReviewService";
 import * as purchaseItemService from "@/services/PurchaseItemService";
 import * as transactionService from "@/services/TransactionService";
-import SellerPayoutsList from "@/components/sellerStats/SellerPayoutsList";
+import SellerPayoutsList from "@/components/commercial/products/sellerStats/SellerPayoutsList";
 
 
 export default function SellerDashboard() {

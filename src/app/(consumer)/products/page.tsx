@@ -11,10 +11,10 @@ import {
 } from "lucide-react";
 
 import Navbar from "@/components/bars/NavBar";
-import CategoryCard from "@/components/products/ProductCategoryCard";
-import ProductCard from "@/components/products/ProductCard";
-import SearchBar from "@/components/products/SearchBar";
-import InfiniteScroll from "@/components/products/InfiniteScroll";
+import CategoryCard from "@/components/consumer/products/ProductCategoryCard";
+import ProductCard from "@/components/consumer/products/ProductCard";
+import SearchBar from "@/components/consumer/products/SearchBar";
+import InfiniteScroll from "@/components/consumer/products/InfiniteScroll";
 import Footer from "@/components/Footer";
 
 // SERVICES

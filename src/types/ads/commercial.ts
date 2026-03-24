@@ -1,5 +1,11 @@
 import { MunicipalityDTO } from "@/services/LocationService";
 
+export interface CommercialInitialDataResponseDTO {
+    companyName : string;
+    nit : string;
+    email : string;
+}
+
 // types/commercial.ts
 export interface Ad {
   id: string;

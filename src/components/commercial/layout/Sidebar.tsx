@@ -12,7 +12,7 @@ import {
   PlusCircle,
   Settings,
   Target,
-  TrendingUp,
+  Package,
   Wallet,
   X,
   LogOut
@@ -24,6 +24,7 @@ const menuItems = [
   { href: '/commercial/ads/create', icon: PlusCircle, label: 'Crear Anuncio' },
   { href: '/commercial/campaigns', icon: Target, label: 'Campañas' },
   { href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Crear campaña' },
+  { href: '/commercial/products', icon: Package, label: 'Mis productos' },
   { href: '/commercial/analytics', icon: BarChart3, label: 'Estadísticas' },
   { href: '/commercial/billing', icon: CreditCard, label: 'Facturación' },
   { href: '/commercial/balance', icon: Wallet, label: 'Mi Saldo' },
@@ -43,7 +44,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       <div className="p-6 border-b border-gray-800">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-blue-400">AdManager</h1>
+            <h1 className="text-2xl font-bold text-blue-400">Control Panel</h1>
             <p className="text-gray-400 text-sm mt-1">Panel de Comerciante</p>
           </div>
           {onClose && (

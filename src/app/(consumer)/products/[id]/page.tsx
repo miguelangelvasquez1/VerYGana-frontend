@@ -1,4 +1,4 @@
-import ProductDetail from "@/components/products/ProductDetail";
+import ProductDetail from "@/components/consumer/products/ProductDetail";
 import { getProductDetail } from "@/services/ProductService";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/bars/NavBar";

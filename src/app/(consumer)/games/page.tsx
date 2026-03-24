@@ -4,14 +4,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Search, Star, Gamepad2 } from 'lucide-react';
+import { Star, Gamepad2 } from 'lucide-react';
 import Navbar from '@/components/bars/NavBar';
 import Footer from '@/components/Footer';
-import GameSection from '@/components/games/GameSection';
+import GameSection from '@/components/consumer/games/GameSection';
 import { GameCardResponseDTO } from '@/types/games/game.types';
-import Banner from '@/components/games/Banner';
-import GameSearchBar from '@/components/games/GameSearchBar';
+import Banner from '@/components/consumer/games/Banner';
+import GameSearchBar from '@/components/consumer/games/GameSearchBar';
 import { getAvailableGamesPage, init } from '@/services/GameService';
 import { useRouter } from 'next/navigation';
 

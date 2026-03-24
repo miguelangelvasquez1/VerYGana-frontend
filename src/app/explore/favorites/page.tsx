@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getFavorites, countFavorites } from "@/services/ProductService";
-import ProductCard from "@/components/products/ProductCard";
+import ProductCard from "@/components/consumer/products/ProductCard";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import Navbar from "@/components/bars/NavBar";
 import Footer from "@/components/Footer";

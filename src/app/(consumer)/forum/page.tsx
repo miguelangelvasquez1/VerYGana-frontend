@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Users, Gift, Award, Eye, Heart, Loader2, AlertCircle } from 'lucide-react';
-import CharityPost from '@/components/forum/CharityPost';
+import CharityPost from '@/components/consumer/forum/CharityPost';
 import Navbar from '@/components/bars/NavBar';
 import Footer from '@/components/Footer';
 import { useImpactStoriesForConsumer } from '@/hooks/useImpactStory';

@@ -1,7 +1,7 @@
 'use client';
 
-import Sidebar from "@/components/ads/Sidebar";
-import VideoAdPlayer from "@/components/ads/VideoAdPlayer";
+import Sidebar from "@/components/consumer/ads/Sidebar";
+import VideoAdPlayer from "@/components/consumer/ads/VideoAdPlayer";
 import Navbar from "@/components/bars/NavBar";
 
 export default function AdPage() {
