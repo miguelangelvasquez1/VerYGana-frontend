@@ -17,7 +17,9 @@ import {
   LogOut,
   Plus,
   Bell,
-  Heart
+  Heart,
+  Home,
+  ClipboardList,
 } from "lucide-react";
 
 import { getConsumerInitialData } from "@/services/ConsumerService";
@@ -63,20 +65,10 @@ export default function Navbar() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node | null;
-
-      if (profileMenuRef.current && !profileMenuRef.current.contains(target)) {
-        setOpenMenu(false);
-      }
-
-      if (walletMenuRef.current && !walletMenuRef.current.contains(target)) {
-        setIsWalletOpen(false);
-      }
-
-      if (notificationsMenuRef.current && !notificationsMenuRef.current.contains(target)) {
-        setIsNotificationsOpen(false);
-      }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(target)) setOpenMenu(false);
+      if (walletMenuRef.current && !walletMenuRef.current.contains(target)) setIsWalletOpen(false);
+      if (notificationsMenuRef.current && !notificationsMenuRef.current.contains(target)) setIsNotificationsOpen(false);
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -104,8 +96,8 @@ export default function Navbar() {
 
           {/* NAV BUTTONS */}
           <div className="flex gap-3">
-            <Link href={"/"}>
-              <button className={pathname === "/" ? activeButtonStyle : buttonsStyle}>
+            <Link href={"/home"}>
+              <button className={pathname === "/home" ? activeButtonStyle : buttonsStyle}>
                 Inicio
               </button>
             </Link>
@@ -134,6 +126,12 @@ export default function Navbar() {
               </button>
             </Link>
 
+            <Link href={"/surveys"}>
+              <button className={pathname === "/surveys" ? activeButtonStyle : buttonsStyle}>
+                Encuestas
+              </button>
+            </Link>
+
             <Link href={"/products"}>
               <button className={pathname === "/products" ? activeButtonStyle : buttonsStyle}>
                 Productos
@@ -141,9 +139,7 @@ export default function Navbar() {
             </Link>
 
             <Link href={"/plans/mobile-plans"}>
-              <button
-                className={pathname === "/plans/mobile-plans" ? activeButtonStyle : buttonsStyle}
-              >
+              <button className={pathname === "/plans/mobile-plans" ? activeButtonStyle : buttonsStyle}>
                 Recargas
               </button>
             </Link>
@@ -159,7 +155,7 @@ export default function Navbar() {
           <div className="flex items-center gap-6">
             {/* CART BUTTON */}
             <CartButton />
-            
+
             {/* WALLET */}
             <div className="relative" ref={walletMenuRef}>
               <button
@@ -175,12 +171,9 @@ export default function Navbar() {
                 </div>
               </button>
 
-              {/* WALLET DROPDOWN */}
               <div
                 className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  isWalletOpen
-                    ? "opacity-100 scale-100 pointer-events-auto"
-                    : "opacity-0 scale-95 pointer-events-none"
+                  isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
                 }`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
@@ -188,32 +181,27 @@ export default function Navbar() {
                     <div className="w-12 h-12 bg-white/20 rounded-full mx-auto mb-2 flex items-center justify-center">
                       <Wallet className="w-6 h-6" />
                     </div>
-
                     <div className="text-2xl font-bold">
                       {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
                     </div>
                     <div className="text-sm text-blue-100">Saldo actual</div>
                   </div>
                 </div>
-
                 <div className="p-4 space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-green-50 p-3 rounded-xl text-center">
                       <div className="text-lg font-bold text-green-600">—</div>
                       <div className="text-xs text-green-700">Créditos</div>
                     </div>
-
                     <div className="bg-blue-50 p-3 rounded-xl text-center">
                       <div className="text-lg font-bold text-blue-600">—</div>
                       <div className="text-xs text-blue-700">Transacciones</div>
                     </div>
                   </div>
-
                   <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
                     <Plus className="w-4 h-4" />
                     Depositar Fondos
                   </button>
-
                   <Link href="/explore/wallet">
                     <button className="w-full bg-gray-50 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-100 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
                       <History className="w-4 h-4" />
@@ -235,18 +223,14 @@ export default function Navbar() {
                   0
                 </span>
               </button>
-
               <div
                 className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  isNotificationsOpen
-                    ? "opacity-100 scale-100 pointer-events-auto"
-                    : "opacity-0 scale-95 pointer-events-none"
+                  isNotificationsOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
                 }`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="text-lg font-semibold">Notificaciones</div>
                 </div>
-
                 <div className="p-4">
                   <p className="text-sm text-gray-600">No hay notificaciones aún.</p>
                 </div>
@@ -262,7 +246,6 @@ export default function Navbar() {
                 <div className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center">
                   <User className="text-white w-5 h-5" />
                 </div>
-
                 <div>
                   <div className="font-semibold">
                     {loadingUser ? "Cargando..." : consumer?.name ?? "Usuario"}
@@ -271,12 +254,9 @@ export default function Navbar() {
                 </div>
               </button>
 
-              {/* PROFILE DROPDOWN */}
               <div
                 className={`absolute right-0 mt-2 w-64 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  openMenu
-                    ? "opacity-100 scale-100 pointer-events-auto"
-                    : "opacity-0 scale-95 pointer-events-none"
+                  openMenu ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
                 }`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
@@ -284,7 +264,6 @@ export default function Navbar() {
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
                       <User className="w-6 h-6" />
                     </div>
-
                     <div>
                       <div className="font-semibold">
                         {loadingUser ? "..." : consumer?.name ?? "Usuario"}
@@ -293,48 +272,27 @@ export default function Navbar() {
                     </div>
                   </div>
                 </div>
-
                 <div className="py-2">
-                  <Link
-                    href="/explore/profile"
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
-                  >
+                  <Link href="/explore/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
                     <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                     <span>Mi Perfil</span>
                   </Link>
-
-                  <Link
-                    href="/explore/purchases"
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
-                  >
+                  <Link href="/explore/purchases" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
                     <ShoppingBag className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                     <span>Mis compras</span>
                   </Link>
-
-                  <Link
-                    href={"/explore/favorites"}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
-                  >
-                    <Heart className="w-5 h-5 text-gray-400 group-hover:text-blue-600"/>
+                  <Link href={"/explore/favorites"} className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
+                    <Heart className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                     <span>Mis favoritos</span>
                   </Link>
-
-                  <Link
-                    href="/explore/referrals"
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
-                  >
+                  <Link href="/explore/referrals" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
                     <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                     <span>Mis Referidos</span>
                   </Link>
-
-                  <Link
-                    href="/settings"
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group"
-                  >
+                  <Link href="/settings" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
                     <Settings className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                     <span>Configuración</span>
                   </Link>
-
                   <div className="border-t border-gray-100 mt-2 pt-2">
                     <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all">
                       <LogOut className="w-5 h-5" />
@@ -351,10 +309,7 @@ export default function Navbar() {
       {/* ---------- MOBILE TOP BAR ---------- */}
       <div className="lg:hidden sticky top-0 z-50 w-full bg-gradient-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-3">
-          {/* LOGO */}
           <Image src="/logos/logo.png" alt="Logo" width={45} height={45} />
-
-          {/* WALLET Y NOTIFICACIONES */}
           <div className="flex items-center gap-3">
             {/* WALLET */}
             <div className="relative" ref={walletMenuRef}>
@@ -367,13 +322,9 @@ export default function Navbar() {
                   {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
                 </span>
               </button>
-
-              {/* WALLET DROPDOWN MOBILE */}
               <div
                 className={`fixed inset-x-0 top-16 mx-4 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  isWalletOpen
-                    ? "opacity-100 scale-100 pointer-events-auto"
-                    : "opacity-0 scale-95 pointer-events-none"
+                  isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
                 }`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
@@ -387,7 +338,6 @@ export default function Navbar() {
                     <div className="text-sm text-blue-100">Saldo actual</div>
                   </div>
                 </div>
-
                 <div className="p-4 space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-green-50 p-3 rounded-xl text-center">
@@ -399,12 +349,10 @@ export default function Navbar() {
                       <div className="text-xs text-blue-700">Transacciones</div>
                     </div>
                   </div>
-
                   <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2">
                     <Plus className="w-4 h-4" />
                     Depositar Fondos
                   </button>
-
                   <Link href="/explore/wallet">
                     <button className="w-full bg-gray-50 text-gray-700 py-3 px-4 rounded-xl flex items-center justify-center gap-2">
                       <History className="w-4 h-4" />
@@ -426,12 +374,9 @@ export default function Navbar() {
                   0
                 </span>
               </button>
-
               <div
                 className={`fixed inset-x-0 top-16 mx-4 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  isNotificationsOpen
-                    ? "opacity-100 scale-100 pointer-events-auto"
-                    : "opacity-0 scale-95 pointer-events-none"
+                  isNotificationsOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
                 }`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
@@ -449,25 +394,18 @@ export default function Navbar() {
       {/* ---------- MOBILE BOTTOM NAVIGATION ---------- */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg pb-safe">
         <div className="grid grid-cols-5 h-16">
-          {/* JUEGOS */}
-          <Link href="/games" className="flex flex-col items-center justify-center">
-            <div
-              className={`flex flex-col items-center justify-center transition-all ${
-                pathname === "/games" ? "text-blue-600" : "text-gray-500"
-              }`}
-            >
-              <Heart className={`w-6 h-6 ${pathname === "/games" ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Juegos</span>
+
+          {/* HOME — nuevo */}
+          <Link href="/" className="flex flex-col items-center justify-center">
+            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/" ? "text-blue-600" : "text-gray-500"}`}>
+              <Home className={`w-6 h-6 ${pathname === "/" ? "scale-110" : ""}`} />
+              <span className="text-xs mt-1 font-medium">Inicio</span>
             </div>
           </Link>
 
           {/* ANUNCIOS */}
           <Link href="/ads" className="flex flex-col items-center justify-center">
-            <div
-              className={`flex flex-col items-center justify-center transition-all ${
-                pathname === "/ads" ? "text-blue-600" : "text-gray-500"
-              }`}
-            >
+            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/ads" ? "text-blue-600" : "text-gray-500"}`}>
               <Megaphone className={`w-6 h-6 ${pathname === "/ads" ? "scale-110" : ""}`} />
               <span className="text-xs mt-1 font-medium">Anuncios</span>
             </div>
@@ -475,11 +413,7 @@ export default function Navbar() {
 
           {/* RIFAS */}
           <Link href="/raffles" className="flex flex-col items-center justify-center">
-            <div
-              className={`flex flex-col items-center justify-center transition-all ${
-                pathname === "/raffles" ? "text-blue-600" : "text-gray-500"
-              }`}
-            >
+            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/raffles" ? "text-blue-600" : "text-gray-500"}`}>
               <Gift className={`w-6 h-6 ${pathname === "/raffles" ? "scale-110" : ""}`} />
               <span className="text-xs mt-1 font-medium">Rifas</span>
             </div>
@@ -487,44 +421,30 @@ export default function Navbar() {
 
           {/* PRODUCTOS */}
           <Link href="/products" className="flex flex-col items-center justify-center">
-            <div
-              className={`flex flex-col items-center justify-center transition-all ${
-                pathname === "/products" ? "text-blue-600" : "text-gray-500"
-              }`}
-            >
+            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/products" ? "text-blue-600" : "text-gray-500"}`}>
               <Package className={`w-6 h-6 ${pathname === "/products" ? "scale-110" : ""}`} />
               <span className="text-xs mt-1 font-medium">Productos</span>
             </div>
           </Link>
 
           {/* PERFIL */}
-          <button
-            onClick={() => setOpenMenu((v) => !v)}
-            className="flex flex-col items-center justify-center"
-          >
-            <div
-              className={`flex flex-col items-center justify-center transition-all ${
-                openMenu ? "text-blue-600" : "text-gray-500"
-              }`}
-            >
+          <button onClick={() => setOpenMenu((v) => !v)} className="flex flex-col items-center justify-center">
+            <div className={`flex flex-col items-center justify-center transition-all ${openMenu ? "text-blue-600" : "text-gray-500"}`}>
               <User className={`w-6 h-6 ${openMenu ? "scale-110" : ""}`} />
               <span className="text-xs mt-1 font-medium">Perfil</span>
             </div>
           </button>
+
         </div>
       </nav>
 
       {/* MOBILE PROFILE MENU (FULL SCREEN) */}
       <div
-        className={`lg:hidden fixed inset-0 z-[60] bg-black/50 transition-opacity duration-300 ${
-          openMenu ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`lg:hidden fixed inset-0 z-[60] bg-black/50 transition-opacity duration-300 ${openMenu ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         onClick={() => setOpenMenu(false)}
       >
         <div
-          className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl transition-transform duration-300 ${
-            openMenu ? "translate-y-0" : "translate-y-full"
-          }`}
+          className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl transition-transform duration-300 ${openMenu ? "translate-y-0" : "translate-y-full"}`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-3xl text-white">
@@ -540,44 +460,23 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-
           <div className="py-2 pb-20">
-            <Link
-              href="/explore/profile"
-              className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all"
-              onClick={() => setOpenMenu(false)}
-            >
+            <Link href="/explore/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
               <UserCircle className="w-6 h-6 text-gray-600" />
               <span className="font-medium">Mi Perfil</span>
             </Link>
-
-            <Link
-              href="/purchases"
-              className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all"
-              onClick={() => setOpenMenu(false)}
-            >
+            <Link href="/purchases" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
               <ShoppingBag className="w-6 h-6 text-gray-600" />
               <span className="font-medium">Mis compras</span>
             </Link>
-
-            <Link
-              href="/explore/referrals"
-              className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all"
-              onClick={() => setOpenMenu(false)}
-            >
+            <Link href="/explore/referrals" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
               <UserCircle className="w-6 h-6 text-gray-600" />
               <span className="font-medium">Mis Referidos</span>
             </Link>
-
-            <Link
-              href="/settings"
-              className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all"
-              onClick={() => setOpenMenu(false)}
-            >
+            <Link href="/settings" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
               <Settings className="w-6 h-6 text-gray-600" />
               <span className="font-medium">Configuración</span>
             </Link>
-
             <div className="border-t border-gray-200 mt-2 pt-2">
               <button className="w-full flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 transition-all">
                 <LogOut className="w-6 h-6" />
@@ -587,9 +486,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-
-      {/* SPACER para el contenido en móvil */}
-      {/* <div className="lg:hidden h-16"></div> */}
     </>
   );
 }

@@ -19,6 +19,7 @@ import {
   TargetIcon,
   TicketIcon
 } from 'lucide-react';
+import { Bar } from 'recharts';
 
 interface MenuItem {
   title: string;
@@ -77,6 +78,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
       icon: Gift,
       href: '/admin/raffles',
       color: 'text-purple-500'
+    },
+    {
+      title: 'Encuestas',
+      icon: BarChart3,
+      href: '/admin/surveys',
+      color: 'text-emerald-500'
     },
     {
       title: 'Foro',
