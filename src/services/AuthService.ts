@@ -5,7 +5,7 @@ export interface LoginResponse {
   user: {
     id: number;
     email: string;
-    role: 'CONSUMER' | 'SELLER' | 'ADVERTISER';
+    role: 'CONSUMER' | 'SELLER' | 'COMMERCIAL';
   };
 }
 

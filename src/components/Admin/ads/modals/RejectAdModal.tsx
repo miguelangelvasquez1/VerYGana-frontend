@@ -1,5 +1,5 @@
 import React from 'react';
-import { AdForAdminDTO } from '@/types/ads/advertiser';
+import { AdForAdminDTO } from '@/types/ads/commercial';
 
 interface RejectAdModalProps {
   ad: AdForAdminDTO;

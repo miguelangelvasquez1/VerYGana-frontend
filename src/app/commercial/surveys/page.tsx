@@ -2,12 +2,12 @@
 
 import React from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import AdManagement from '@/components/admin/ads/AdMangement';
+import SurveyManagement from '@/components/admin/surveys/SurveyManagement';
 
-export default function AdminAdsPage() {
+export default function AdminSurveysPage() {
   return (
     <AdminLayout>
-      <AdManagement />
+      <SurveyManagement />
     </AdminLayout>
   );
 }

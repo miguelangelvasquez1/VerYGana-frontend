@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { adService } from '@/services/adService';
 import { fileUploadService } from '@/services/FileUploadService';
-import {FileWithProgress, UploadState, AdDetails} from '@/types/ads/advertiser';
+import {FileWithProgress, UploadState, AdDetails} from '@/types/ads/commercial';
 
 interface UseAdUploadProps {
   adDetails: AdDetails;

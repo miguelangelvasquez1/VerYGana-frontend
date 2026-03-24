@@ -47,28 +47,6 @@ export interface Sale {
 // ============================================
 
 /**
- * Registrar un nuevo vendedor
- */
-export const registerSeller = async (data: {
-  email: string;
-  password: string;
-  phoneNumber: string;
-  shopName: string;
-  nit: string;
-}): Promise<any> => {
-  const payload: RegisterSellerDTO = {
-    email: data.email,
-    password: data.password,
-    phoneNumber: data.phoneNumber,
-    shopName: data.shopName,
-    nit: data.nit
-  };
-
-  const response = await apiClient.post('/auth/register/seller', payload);
-  return response.data;
-};
-
-/**
  * Obtener perfil del vendedor
  */
 export const getSellerProfile = async (sellerId: number): Promise<SellerProfile> => {

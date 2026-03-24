@@ -3,12 +3,11 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { registerConsumer } from "@/services/ConsumerService";
-import { registerSeller } from "@/services/SellerService";
-import { registerAdvertiser } from "@/services/AdvertiserService";
+import { registerCommercial } from "@/services/AdvertiserService";
 import { Category } from "@/types/Category.types";
 import { useCategories } from "@/hooks/useCategories";
 
-type Role = "BENEFICIARIO" | "VENDEDOR" | "ANUNCIANTE";
+type Role = "BENEFICIARIO" | "COMERCIANTE";
 
 interface Municipality {
   id: number;
@@ -137,18 +136,8 @@ export default function RegisterForm() {
           });
           break;
 
-        case "VENDEDOR":
-          response = await registerSeller({
-            email: formData.email,
-            password: formData.password,
-            phoneNumber: formData.phoneNumber,
-            shopName: formData.shopName,
-            nit: formData.nit
-          });
-          break;
-
-        case "ANUNCIANTE":
-          response = await registerAdvertiser({
+        case "COMERCIANTE":
+          response = await registerCommercial({
             email: formData.email,
             password: formData.password,
             phoneNumber: formData.phoneNumber,
@@ -211,21 +200,15 @@ export default function RegisterForm() {
         <div className="grid gap-4">
           <button
             onClick={() => setRole("BENEFICIARIO")}
-            className="p-3 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition"
+            className="p-3 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition cursor-pointer"
           >
             🛍 Soy Beneficiario
           </button>
           <button
-            onClick={() => setRole("VENDEDOR")}
-            className="p-3 border-2 border-green-500 rounded-lg hover:bg-green-50 transition"
+            onClick={() => setRole("COMERCIANTE")}
+            className="p-3 border-2 border-purple-500 rounded-lg hover:bg-purple-50 transition cursor-pointer"
           >
-            🏪 Soy Vendedor
-          </button>
-          <button
-            onClick={() => setRole("ANUNCIANTE")}
-            className="p-3 border-2 border-purple-500 rounded-lg hover:bg-purple-50 transition"
-          >
-            📢 Soy Anunciante
+            📢 Soy Comerciante
           </button>
         </div>
 
@@ -394,70 +377,8 @@ export default function RegisterForm() {
           </>
         )}
 
-        {/* 🔹 VENDEDOR */}
-        {role === "VENDEDOR" && (
-          <div className="space-y-4">
-            <input
-              name="shopName"
-              placeholder="Nombre del negocio"
-              onChange={handleChange}
-              value={formData.shopName || ""}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-              required
-            />
-            <input
-              name="nit"
-              placeholder="NIT"
-              onChange={handleChange}
-              value={formData.nit || ""}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-              required
-            />
-
-            <input
-              type="email"
-              name="email"
-              placeholder="Correo electrónico"
-              onChange={handleChange}
-              value={formData.email || ""}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-              required
-            />
-            <input
-              name="phoneNumber"
-              placeholder="Teléfono"
-              onChange={handleChange}
-              value={formData.phoneNumber || ""}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-              required
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input
-                type="password"
-                name="password"
-                placeholder="Contraseña"
-                onChange={handleChange}
-                value={formData.password || ""}
-                className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                required
-              />
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirmar contraseña"
-                onChange={handleChange}
-                value={formData.confirmPassword || ""}
-                className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                required
-              />
-            </div>
-
-          </div>
-        )}
-
-        {/* 🔹 ANUNCIANTE */}
-        {role === "ANUNCIANTE" && (
+        {/* 🔹 COMERCIANTE */}
+        {role === "COMERCIANTE" && (
           <div className="space-y-4">
             <input
               name="name"

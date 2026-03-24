@@ -2,7 +2,7 @@ import { adService } from "@/services/adService";
 import { adKeys } from "./adKeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminAdKeys } from "./adminQuerys";
-import { AdForAdminDTO, AdForConsumerDTO, AdResponseDTO, AdUpdateDTO } from "@/types/ads/advertiser";
+import { AdForAdminDTO, AdForConsumerDTO, AdResponseDTO, AdUpdateDTO } from "@/types/ads/commercial";
 
 // Helper para actualizar listas en caché
 const updateAdInLists = (

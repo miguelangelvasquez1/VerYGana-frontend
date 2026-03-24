@@ -1,9 +1,9 @@
 // components/VideoAdPlayer.tsx
 'use client'
 import { useEffect, useRef, useState } from 'react';
-import VideoControls from '../Ads/VideoControls';
+import VideoControls from './VideoControls';
 import { useNextAd, useLikeAd } from '@/hooks/ads/mutations';
-import { AdForConsumerDTO } from '@/types/ads/advertiser';
+import { AdForConsumerDTO } from '@/types/ads/commercial';
 import toast from 'react-hot-toast';
 
 export default function VideoAdPlayer() {
@@ -326,11 +326,11 @@ export default function VideoAdPlayer() {
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-xs font-bold text-white">
-                  {currentAd.advertiserName?.[0]?.toUpperCase() ?? 'A'}
+                  {currentAd.commercialName?.[0]?.toUpperCase() ?? 'A'}
                 </span>
               </div>
               <span className="text-white font-semibold text-xs drop-shadow-lg">
-                {currentAd.advertiserName}
+                {currentAd.commercialName}
               </span>
             </div>
           </div>

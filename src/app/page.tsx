@@ -20,7 +20,7 @@ import {
   Sparkles
 } from "lucide-react";
 import Footer from "@/components/Footer";
-import NavBarNoAuth2 from "@/components/bars/NavBarNoAuth2";
+import NavBarNoAuth2 from "@/components/bars/NavBarNoAuth";
 
 // Datos simulados
 const phones = [

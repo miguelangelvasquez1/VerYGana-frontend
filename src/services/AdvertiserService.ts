@@ -3,7 +3,7 @@ import apiClient from "@/lib/api/client";
 // ============================================
 // INTERFACES
 // ============================================
-export interface RegisterAdvertiserDTO {
+export interface RegisterCommercialDTO {
   email: string;
   password: string;
   phoneNumber: string;
@@ -11,7 +11,7 @@ export interface RegisterAdvertiserDTO {
   nit: string;
 }
 
-export interface AdvertiserProfile {
+export interface CommercialProfile {
   id: number;
   companyName: string;
   nit: string;
@@ -44,16 +44,16 @@ export interface CreateAdDTO {
 // ============================================
 
 /**
- * Registrar un nuevo anunciante
+ * Registrar un nuevo comerciante
  */
-export const registerAdvertiser = async (data: {
+export const registerCommercial = async (data: {
   email: string;
   password: string;
   phoneNumber: string;
   name: string;
   nit: string;
 }): Promise<any> => {
-  const payload: RegisterAdvertiserDTO = {
+  const payload: RegisterCommercialDTO = {
     email: data.email,
     password: data.password,
     phoneNumber: data.phoneNumber,
@@ -61,34 +61,34 @@ export const registerAdvertiser = async (data: {
     nit: data.nit
   };
 
-  const response = await apiClient.post('/auth/register/advertiser', payload);
+  const response = await apiClient.post('/auth/register/commercial', payload);
   return response.data;
 };
 
 /**
- * Obtener perfil del anunciante
+ * Obtener perfil del comerciante
  */
-export const getAdvertiserProfile = async (advertiserId: number): Promise<AdvertiserProfile> => {
-  const response = await apiClient.get(`/advertisers/${advertiserId}`);
+export const getCommercialProfile = async (commercialId: number): Promise<CommercialProfile> => {
+  const response = await apiClient.get(`/commercials/${commercialId}`);
   return response.data;
 };
 
 /**
- * Actualizar perfil del anunciante
+ * Actualizar perfil del comerciante
  */
-export const updateAdvertiserProfile = async (
-  advertiserId: number,
-  data: Partial<RegisterAdvertiserDTO>
-): Promise<AdvertiserProfile> => {
-  const response = await apiClient.put(`/advertisers/${advertiserId}`, data);
+export const updateCommercialProfile = async (
+  commercialId: number,
+  data: Partial<RegisterCommercialDTO>
+): Promise<CommercialProfile> => {
+  const response = await apiClient.put(`/commercials/${commercialId}`, data);
   return response.data;
 };
 
 /**
- * Obtener anuncios del anunciante
+ * Obtener anuncios del comerciante
  */
-export const getAdvertiserAds = async (advertiserId: number): Promise<Advertisement[]> => {
-  const response = await apiClient.get(`/advertisers/${advertiserId}/ads`);
+export const getCommercialAds = async (commercialId: number): Promise<Advertisement[]> => {
+  const response = await apiClient.get(`/commercials/${commercialId}/ads`);
   return response.data;
 };
 
@@ -96,10 +96,10 @@ export const getAdvertiserAds = async (advertiserId: number): Promise<Advertisem
  * Crear un nuevo anuncio
  */
 export const createAdvertisement = async (
-  advertiserId: number,
+  commercialId: number,
   adData: CreateAdDTO
 ): Promise<Advertisement> => {
-  const response = await apiClient.post(`/advertisers/${advertiserId}/ads`, adData);
+  const response = await apiClient.post(`/commercials/${commercialId}/ads`, adData);
   return response.data;
 };
 
@@ -107,38 +107,38 @@ export const createAdvertisement = async (
  * Actualizar un anuncio
  */
 export const updateAdvertisement = async (
-  advertiserId: number,
+  commercialId: number,
   adId: number,
   adData: Partial<CreateAdDTO>
 ): Promise<Advertisement> => {
-  const response = await apiClient.put(`/advertisers/${advertiserId}/ads/${adId}`, adData);
+  const response = await apiClient.put(`/commercials/${commercialId}/ads/${adId}`, adData);
   return response.data;
 };
 
 /**
  * Eliminar un anuncio
  */
-export const deleteAdvertisement = async (advertiserId: number, adId: number): Promise<void> => {
-  await apiClient.delete(`/advertisers/${advertiserId}/ads/${adId}`);
+export const deleteAdvertisement = async (commercialId: number, adId: number): Promise<void> => {
+  await apiClient.delete(`/commercials/${commercialId}/ads/${adId}`);
 };
 
 /**
  * Pausar/reanudar un anuncio
  */
 export const toggleAdvertisement = async (
-  advertiserId: number,
+commercialId: number,
   adId: number,
   action: 'pause' | 'resume'
 ): Promise<Advertisement> => {
-  const response = await apiClient.patch(`/advertisers/${advertiserId}/ads/${adId}/${action}`);
+  const response = await apiClient.patch(`/commercials/${commercialId}/ads/${adId}/${action}`);
   return response.data;
 };
 
 /**
  * Obtener estadísticas de anuncios
  */
-export const getAdvertiserStats = async (advertiserId: number): Promise<any> => {
-  const response = await apiClient.get(`/advertisers/${advertiserId}/stats`);
+export const getCommercialStats = async (commercialId: number): Promise<any> => {
+  const response = await apiClient.get(`/commercials/${commercialId}/stats`);
   return response.data;
 };
 
@@ -146,10 +146,10 @@ export const getAdvertiserStats = async (advertiserId: number): Promise<any> => 
  * Recargar presupuesto publicitario
  */
 export const rechargeAdBudget = async (
-  advertiserId: number,
+  commercialId: number,
   amount: number
 ): Promise<any> => {
-  const response = await apiClient.post(`/advertisers/${advertiserId}/budget/recharge`, {
+  const response = await apiClient.post(`/commercials/${commercialId}/budget/recharge`, {
     amount
   });
   return response.data;
@@ -158,7 +158,7 @@ export const rechargeAdBudget = async (
 /**
  * Obtener historial de transacciones
  */
-export const getAdvertiserTransactions = async (advertiserId: number): Promise<any[]> => {
-  const response = await apiClient.get(`/advertisers/${advertiserId}/transactions`);
+export const getCommercialTransactions = async (commercialId: number): Promise<any[]> => {
+  const response = await apiClient.get(`/commercials/${commercialId}/transactions`);
   return response.data;
 };

@@ -19,8 +19,8 @@ export const config = {
     // "/forum",
 
     // role prefixes (literal entries)
-    '/advertiser/:path*',
-    '/advertiser',
+    '/commercial/:path*',
+    '/commercial',
     '/seller/:path*',
     '/seller',
     // '/admin/:path*',
@@ -45,7 +45,7 @@ const CONSUMER_ALLOWED = [
 /**
  * Roles que usan prefijo (las rutas que empiezan con su nombre).
  */
-const ROLE_PREFIXES = ['advertiser', 'seller', 'admin'] as const;
+const ROLE_PREFIXES = ['commercial', 'seller', 'admin'] as const;
 
 /** Helpers para comprobar patrones simples como '/consumer/orders/:path*' */
 function patternBase(pattern: string): string {

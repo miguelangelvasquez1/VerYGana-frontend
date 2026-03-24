@@ -1,4 +1,4 @@
-import { AdForAdminDTO } from '@/types/ads/advertiser';
+import { AdForAdminDTO } from '@/types/ads/commercial';
 
 export const formatCurrency = (amount: number): string => {
   return `$${amount.toLocaleString('es-CO', { 

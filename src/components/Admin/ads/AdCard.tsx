@@ -3,7 +3,7 @@ import {
   Heart, DollarSign, TrendingUp, Calendar, Target, Users,
   CheckCircle, XCircle, Play, Pause, Ban, Eye, Video, Image as ImageIcon
 } from 'lucide-react';
-import { AdForAdminDTO } from '@/types/ads/advertiser';
+import { AdForAdminDTO } from '@/types/ads/commercial';
 import { AD_STATUS_STYLES, AD_STATUS_LABELS } from './utils/adConstants';
 import { formatCurrency, formatDate } from './utils/adHelper';
 
@@ -128,7 +128,7 @@ export const AdCard: React.FC<AdCardProps> = ({
           </div>
           <div className="flex items-center">
             <Users className="w-3.5 h-3.5 mr-2" />
-            <span>Anunciante: {ad.advertiserName || `ID: ${ad.advertiserId}`}</span>
+            <span>Comerciante: {ad.commercialName || `ID: ${ad.commercialId}`}</span>
           </div>
         </div>
 

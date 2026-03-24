@@ -121,7 +121,7 @@ const GamesPanelPage = () => {
           </div>
 
           <p className="text-sm text-gray-600 mb-6">
-            Un juego se selecciona de forma aleatoria para garantizar igualdad entre anunciantes.
+            Un juego se selecciona de forma aleatoria para garantizar igualdad entre comerciantes.
           </p>
 
           <GameSection

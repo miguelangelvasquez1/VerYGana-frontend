@@ -27,7 +27,7 @@ export function useAuth(requireAuth = true) {
     role,
     loading,
     isAuthenticated: !!session,
-    isAdvertiser: role === 'ADVERTISER',
+    isCommercial: role === 'COMMERCIAL',
     isConsumer: role === 'CONSUMER',
     isSeller: role === 'SELLER',
     isAdmin: role === 'ADMIN',

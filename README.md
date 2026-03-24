@@ -1,7 +1,6 @@
 ## Observations:
 - poner pestaña de recompensas?
 - use effect del navbar para tamaño móvil para que los modales se cierren al dar clic fuera de ellos.
-- arreglar el contenido de advertiser
 - hacer refresh personalizado por velocidad?
 - probra el refresh funcional
 

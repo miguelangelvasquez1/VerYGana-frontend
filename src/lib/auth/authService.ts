@@ -9,7 +9,7 @@ export interface LoginCredentials {
 
 export interface LoginResponse {
   accessToken: string;
-  role: 'ROLE_CONSUMER' | 'ROLE_ADVERTISER' | 'ROLE_SELLER' | 'ROLE_ADMIN';
+  role: 'ROLE_CONSUMER' | 'ROLE_COMMERCIAL' | 'ROLE_SELLER' | 'ROLE_ADMIN';
 }
 
 export interface RegisterConsumerData {
@@ -24,7 +24,7 @@ export interface RegisterConsumerData {
   preferences: number[];
 }
 
-export interface RegisterAdvertiserData {
+export interface RegisterCommercialData {
   username: string;
   email: string;
   password: string;
@@ -88,9 +88,9 @@ export const authService = {
     return response.json();
   },
 
-  // Registro de Advertiser
-  async registerAdvertiser(data: RegisterAdvertiserData) {
-    const response = await fetch(`${API_URL}/auth/register/advertiser`, {
+  // Registro de Commercial
+  async registerCommercial(data: RegisterCommercialData) {
+    const response = await fetch(`${API_URL}/auth/register/commercial`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAllAdsAdmin } from '@/hooks/ads/adminQuerys';
 import { useApproveAd, useRejectAd, usePauseAd, useResumeAd, useBlockAd } from '@/hooks/ads/mutations';
-import { AdForAdminDTO } from '@/types/ads/advertiser';
+import { AdForAdminDTO } from '@/types/ads/commercial';
 import { AdStats } from './AdStats';
 import { AdFilters } from './AdFilters';
 import { AdCard } from './AdCard';

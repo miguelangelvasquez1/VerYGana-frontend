@@ -68,8 +68,8 @@ const LoginForm = () => {
     } else if (role === "ROLE_SELLER") {
       router.push("/seller");
       return;
-    } else if (role === "ROLE_ADVERTISER") {
-      router.push("/advertiser");
+    } else if (role === "ROLE_COMMERCIAL") {
+      router.push("/commercial");
       return;
     } 
 

@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api/client';
-import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, CreateAdAssetRequest } from '@/types/ads/advertiser';
+import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, CreateAdAssetRequest } from '@/types/ads/commercial';
 import { PagedResponse } from '@/types/GenericTypes';
 
 export interface AdStats {

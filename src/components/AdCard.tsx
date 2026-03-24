@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 type Ad = {
   title: string;
   description: string;
-  advertiser: string;
+  commercial: string;
   minimumViewTime: number;
   creditReward: number;
   url: string; // Ruta del video (puede ser local o remota)
@@ -23,7 +23,7 @@ const AdCard: React.FC<AdCardProps> = ({ ad }) => {
   return (
     <div className="w-full max-w-md mx-auto border rounded-xl p-4 shadow-md bg-white space-y-4">
       <h2 className="text-xl font-bold text-gray-800">{ad.title}</h2>
-      <p className="text-sm text-gray-600">Anunciante: {ad.advertiser}</p>
+    <p className="text-sm text-gray-600">Comerciante: {ad.commercial}</p>
 
       {showVideo ? (
         <video
