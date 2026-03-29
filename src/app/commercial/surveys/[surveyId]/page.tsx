@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import AdminLayout from '@/components/admin/AdminLayout';
-import SurveyResponsesPage from '@/components/admin/surveys/surveyResponses/SurveyResponsesPage';
-import { useAdminSurveyDetail } from '@/hooks/surveys/useAdminSurvey';
+import SurveyResponsesPage from '@/components/commercial/surveys/surveyResponses/SurveyResponsesPage';
+import { useAdminSurveyDetail } from '@/hooks/surveys/useCommercialSurvey';
+import { DashboardLayout } from '@/components/commercial/layout/DashboardLayout';
 
 export default function SurveyResponsesRoute() {
   const params   = useParams<{ surveyId: string }>();
@@ -15,12 +15,12 @@ export default function SurveyResponsesRoute() {
   const { data: survey } = useAdminSurveyDetail(surveyId);
 
   return (
-    <AdminLayout>
+    <DashboardLayout title="Mis Encuestas">
       <SurveyResponsesPage
         surveyId={surveyId}
         surveyTitle={survey?.title ?? '…'}
-        onBack={() => router.push('/admin/surveys')}
+        onBack={() => router.push('/commercial/surveys')}
       />
-    </AdminLayout>
+    </DashboardLayout>
   );
 }

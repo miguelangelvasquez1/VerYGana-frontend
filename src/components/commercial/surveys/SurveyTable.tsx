@@ -13,7 +13,7 @@ import {
   ClipboardList,
   BarChart2,
 } from 'lucide-react';
-import { usePublishSurvey, useUpdateSurveyStatus } from '@/hooks/surveys/useAdminSurvey';
+import { usePublishSurvey, useUpdateSurveyStatus } from '@/hooks/surveys/useCommercialSurvey';
 import {
   STATUS_LABELS,
   STATUS_COLORS, 
@@ -91,7 +91,7 @@ export default function SurveyTable({
                 survey={survey}
                 onView={() => setDetailId(survey.id)}
                 onViewResponses={() =>
-                  router.push(`/admin/surveys/${survey.id}`)
+                  router.push(`/commercial/surveys/${survey.id}`)
                 }
                 onPublish={() => publishMutation.mutate(survey.id)}
                 onStatusChange={handleStatusChange}

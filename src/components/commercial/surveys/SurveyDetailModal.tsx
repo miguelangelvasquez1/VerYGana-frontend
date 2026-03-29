@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { X, Users, Clock, Tag, MapPin, Loader2 } from 'lucide-react';
-import { useAdminSurveyDetail } from '@/hooks/surveys/useAdminSurvey';
+import { X, Users, Tag, MapPin, Loader2 } from 'lucide-react';
+import { useAdminSurveyDetail } from '@/hooks/surveys/useCommercialSurvey';
 import {
   STATUS_LABELS,
   STATUS_COLORS,

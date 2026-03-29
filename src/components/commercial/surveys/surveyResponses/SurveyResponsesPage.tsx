@@ -13,7 +13,7 @@ import {
   useSurveyAnalytics,
   useSurveyResponses,
   useExportResponses,
-} from '@/hooks/surveys/useAdminSurvey';
+} from '@/hooks/surveys/useCommercialSurvey';
 import { SurveyApiError } from '@/services/surveyService';
 import ResponsesTable from './ResponsesTable';
 import AnalyticsPanel from './AnalyticsPanel';
@@ -48,7 +48,7 @@ export default function SurveyResponsesPage({ surveyId, surveyTitle, onBack }: P
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="rounded-xl border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 transition-colors"
+            className="rounded-xl border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer"
             title="Volver a encuestas"
           >
             <ArrowLeft className="h-4 w-4" />
