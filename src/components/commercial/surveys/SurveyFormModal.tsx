@@ -13,12 +13,11 @@ import {
   Tag,
   DollarSign,
 } from 'lucide-react';
-import { useCreateSurvey, useSurveyConfigs } from '@/hooks/surveys/useAdminSurvey';
+import { useCreateSurvey, useSurveyConfigs } from '@/hooks/surveys/useCommercialSurvey';
 import { useSurveyForm } from '@/hooks/surveys/useSurveyForm';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { QUESTION_TYPE_LABELS, GENDER_LABELS } from '@/hooks/surveys/surveyUtils';
-// import { SurveyApiError } from '@/services/surveys/surveyAdmin.service';
 import type { QuestionType, TargetGender } from '@/types/survey.types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────

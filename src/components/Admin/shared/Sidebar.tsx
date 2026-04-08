@@ -19,7 +19,6 @@ import {
   TargetIcon,
   TicketIcon
 } from 'lucide-react';
-import { Bar } from 'recharts';
 
 interface MenuItem {
   title: string;

@@ -10,6 +10,7 @@ import type {
   SurveyStatus,
   SurveyResponseDetail,
   SurveyAnalytics,
+  AdminSurveySummary,
 } from '@/types/survey.types';
 import { PagedResponse } from '@/types/Generic.types';
 import apiClient from '@/lib/api/client';
@@ -17,7 +18,7 @@ import apiClient from '@/lib/api/client';
 // ─── User endpoints ───────────────────────────────────────────────────────────
 
 export const surveyService = {
-  /** Ranked list of active surveys for the logged-in user */
+  /** Ranked list of active surveys for the logged-in user */ 
   getAvailableSurveys: async (
     page = 0,
     size = 10,
@@ -49,7 +50,7 @@ export const surveyService = {
   },
 };
 
-// ─── Admin endpoints ──────────────────────────────────────────────────────────
+// ─── commercial endpoints ──────────────────────────────────────────────────────────
 
 export const surveyAdminService = {
 
@@ -72,14 +73,6 @@ export const surveyAdminService = {
     return data;
   },
 
-  /** Publish a DRAFT survey → ACTIVE */
-  publishSurvey: async (surveyId: number): Promise<SurveyResponse> => {
-    const { data } = await apiClient.patch(
-      `/surveys/${surveyId}/publish`,
-    );
-    return data;
-  },
-
   /** Change survey status freely */
   updateSurveyStatus: async (
     surveyId: number,
@@ -99,7 +92,7 @@ export const surveyAdminService = {
     size = 10,
     status?: SurveyStatus,
   ): Promise<PagedResponse<SurveySummary>> => {
-    const { data } = await apiClient.get('/surveys/admin', {
+    const { data } = await apiClient.get('/surveys/commercial', {
       params: { page, size, ...(status && { status }) },
     });
     return data;
@@ -191,6 +184,79 @@ export const surveyAdminService = {
       handleError(err);
     }
   },
+
+// ----------------Admin----------------------
+
+/**
+   * GET /api/v1/admin/surveys?page=&size=&status=
+   * Paginated list of all surveys, optionally filtered by status.
+   */
+  getSurveys: async (
+    page = 0,
+    size = 15,
+    status?: SurveyStatus,
+  ): Promise<PagedResponse<AdminSurveySummary>> => {
+    try {
+      const { data } = await apiClient.get<PagedResponse<AdminSurveySummary>>(
+        '/surveys/admin',
+        { params: { page, size, ...(status && { status }) } },
+      );
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
+  },
+ 
+  /**
+   * GET /api/v1/admin/surveys/:id
+   * Full survey detail (metadata + targeting + questions).
+   */
+  getSurveyDetail: async (surveyId: number): Promise<SurveyResponse> => {
+    try {
+      const { data } = await apiClient.get<SurveyResponse>(
+        `/surveys/admin/${surveyId}`,
+      );
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
+  },
+ 
+  /**
+   * PATCH /api/v1/admin/surveys/:id/publish
+   * DRAFT → ACTIVE shortcut.
+   */
+  publishSurvey: async (surveyId: number): Promise<SurveyResponse> => {
+    try {
+      const { data } = await apiClient.patch<SurveyResponse>(
+        `/surveys/${surveyId}/publish`,
+      );
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
+  },
+ 
+  /**
+   * PATCH /api/v1/admin/surveys/:id/status?status=
+   * Change status freely (ACTIVE → PAUSED → CLOSED, etc.).
+   */
+  updateStatus: async (
+    surveyId: number,
+    status: SurveyStatus,
+  ): Promise<SurveyResponse> => {
+    try {
+      const { data } = await apiClient.patch<SurveyResponse>(
+        `/surveys/${surveyId}/status`,
+        null,
+        { params: { status } },
+      );
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
+  },
+
 };
 
 export class SurveyApiError extends Error {

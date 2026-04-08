@@ -209,3 +209,17 @@ export interface SurveyFormState {
   surveyConfigId: number | null;
   questions: QuestionFormState[];
 }
+
+export interface AdminSurveySummary {
+  id: number;
+  title: string;
+  description: string | null;
+  rewardAmount: number;
+  totalResponses: number;
+  maxResponses: number | null;
+  status: SurveyStatus;
+  createdAt: string;
+  startsAt: string | null;
+  endsAt: string | null;
+  categoryNames: string[];
+}

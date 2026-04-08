@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { useAdminSurveys } from '@/hooks/surveys/useAdminSurvey';
+import { useCommercialSurveys } from '@/hooks/surveys/useCommercialSurvey';
 import SurveyTable from './SurveyTable';
 import SurveyFormModal from './SurveyFormModal';
 import SurveyStatusFilter from './SurveyStatusFIlter';
@@ -13,7 +13,7 @@ export default function SurveyManagement() {
   const [statusFilter, setStatusFilter] = useState<SurveyStatus | undefined>();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const { data, isLoading, isError } = useAdminSurveys(page, 10, statusFilter);
+  const { data, isLoading, isError } = useCommercialSurveys(page, 10, statusFilter);
 
   return (
     <div className="space-y-6">

@@ -1,13 +1,13 @@
 'use client';
 
 import React from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import SurveyManagement from '@/components/admin/surveys/SurveyManagement';
+import SurveyManagement from '@/components/commercial/surveys/SurveyManagement';
+import { DashboardLayout } from '@/components/commercial/layout/DashboardLayout';
 
 export default function AdminSurveysPage() {
   return (
-    <AdminLayout>
+    <DashboardLayout title="Mis Encuestas">
       <SurveyManagement />
-    </AdminLayout>
+    </DashboardLayout>
   );
 }
