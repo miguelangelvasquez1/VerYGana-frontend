@@ -46,7 +46,7 @@ export default function SurveyCompletionScreen({ result, onClose }: Props) {
           Tu recompensa
         </p>
         <p className="text-3xl font-black">
-          {formatReward(reward.amount, reward.rewardType)}
+          {formatReward(reward.amount)}
         </p>
         <p className="mt-2 text-xs text-indigo-200">
           {reward.status === 'PROCESSED'
