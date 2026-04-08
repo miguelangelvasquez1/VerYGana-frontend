@@ -1,6 +1,6 @@
 import apiClient from '@/lib/api/client';
 import { FileUploadRequest } from '@/types/games/campaigns';
-import { FileUploadPermissionDTO } from '@/types/GenericTypes';
+import { FileUploadPermissionDTO } from '@/types/Generic.types';
 
 /**
  * Asset API Client

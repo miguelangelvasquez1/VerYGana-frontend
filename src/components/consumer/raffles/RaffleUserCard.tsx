@@ -1,12 +1,14 @@
 "use client";
 
 import { RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
+import Link from "next/link";
 
 interface Props {
   raffle: RaffleSummaryResponseDTO;
 }
 
 export default function RaffleCard({ raffle }: Props) {
+
   const getDaysRemaining = () => {
     const diff =
       new Date(raffle.drawDate).getTime() - new Date().getTime();
@@ -18,8 +20,8 @@ export default function RaffleCard({ raffle }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition">
-      
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:scale-[1.03] hover:shadow-xl transition-all duration-300">
+
       {/* Imagen */}
       <div className="relative">
         <img
@@ -37,7 +39,7 @@ export default function RaffleCard({ raffle }: Props) {
       {/* Contenido */}
       <div className="p-4">
         {/* Título */}
-        <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">
+        <h3 className="font-semibold text-gray-900 text-base line-clamp-2">
           {raffle.title}
         </h3>
 
@@ -54,9 +56,10 @@ export default function RaffleCard({ raffle }: Props) {
         </div>
 
         {/* CTA */}
-        <button className="mt-4 w-full bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-semibold py-2 rounded-lg transition">
+        <Link href={`/raffles/${raffle.id}`}
+          className="mt-5 w-full bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold py-3 rounded-xl transition text-center block cursor-pointer">
           Ver detalles
-        </button>
+        </Link>
       </div>
     </div>
   );

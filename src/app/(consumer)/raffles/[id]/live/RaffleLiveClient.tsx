@@ -6,14 +6,15 @@ import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRaffleDraw } from '@/hooks/UseRaffleDraw'
 import { DrawEventType } from '@/types/raffles/drawEvents.types'
-import { WaitingRoomScreen }   from '@/components/consumer/raffles/draw/WaitingRoomScreen'
-import { DrawingScreen }       from '@/components/consumer/raffles/draw/DrawingScreen'
-import { WinnerRevealScreen }  from '@/components/consumer/raffles/draw/WinnerRevealScreen'
+import { WaitingRoomScreen } from '@/components/consumer/raffles/draw/WaitingRoomScreen'
+import { DrawingScreen } from '@/components/consumer/raffles/draw/DrawingScreen'
+import { WinnerRevealScreen } from '@/components/consumer/raffles/draw/WinnerRevealScreen'
 import { DrawCompletedScreen } from '@/components/consumer/raffles/draw/DrawCompletedScreen'
+import { AnnouncingScreen } from '@/components/consumer/raffles/draw/AnnouncingScreen'
 
 interface Props {
   raffleId: number
-  raffle:   { title: string; imageUrl?: string }
+  raffle: { title: string; imageUrl?: string }
 }
 
 export function RaffleLiveClient({ raffleId, raffle }: Props) {
@@ -26,12 +27,13 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
     totalWinners,
     drawCompleted,
     errorMessage,
+    announcementLabel,
   } = useRaffleDraw(raffleId)
 
   // Redirección automática 15 segundos después de que termine el sorteo
   useEffect(() => {
     if (currentPhase !== DrawEventType.DRAW_COMPLETED) return
-    const timer = setTimeout(() => router.push('/rifas'), 15_000)
+    const timer = setTimeout(() => router.push('/raffles'), 15_000)
     return () => clearTimeout(timer)
   }, [currentPhase, router])
 
@@ -57,7 +59,7 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
           <motion.div key="waiting"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-            <WaitingRoomScreen payload={waitingRoom} raffleTitle={raffle.title} />
+            <WaitingRoomScreen payload={waitingRoom} />
           </motion.div>
         )}
 
@@ -69,18 +71,44 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
           </motion.div>
         )}
 
-        {(currentPhase === DrawEventType.WINNER_REVEALED ||
-          currentPhase === DrawEventType.DRAWING_STARTED) &&
-          revealedWinners.length > 0 && (
-          <motion.div key="reveal"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-            <WinnerRevealScreen
-              winners={revealedWinners}
+        {currentPhase === DrawEventType.ANNOUNCING && (
+          <motion.div key="announcing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          >
+            <AnnouncingScreen label={announcementLabel} />
+          </motion.div>
+        )}
+
+        {currentPhase === DrawEventType.REVEALING && (
+          <motion.div key="revealing"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.3 }}
+          >
+            <DrawingScreen
               totalWinners={totalWinners}
+              revealNumber={revealedWinners.length + 1}  // "Revelando ganador 2 de 3"
+              isRevealing={true}
             />
           </motion.div>
         )}
+
+        {(currentPhase === DrawEventType.WINNER_REVEALED ||
+          currentPhase === DrawEventType.DRAWING_STARTED) &&
+          revealedWinners.length > 0 && (
+            <motion.div key="reveal"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+              <WinnerRevealScreen
+                winners={revealedWinners}
+                totalWinners={totalWinners}
+              />
+            </motion.div>
+          )}
 
         {currentPhase === DrawEventType.DRAW_COMPLETED && drawCompleted && (
           <motion.div key="completed"

@@ -1,6 +1,6 @@
 import apiClient from '@/lib/api/client';
 import { Game } from '@/types/games/campaigns';
-import { PagedResponse } from '@/types/GenericTypes';
+import { PagedResponse } from '@/types/Generic.types';
 
 /**
  * Game Schema API Client

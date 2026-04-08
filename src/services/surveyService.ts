@@ -12,7 +12,7 @@ import type {
   SurveyAnalytics,
   AdminSurveySummary,
 } from '@/types/survey.types';
-import { PagedResponse } from '@/types/GenericTypes';
+import { PagedResponse } from '@/types/Generic.types';
 import apiClient from '@/lib/api/client';
 
 // ─── User endpoints ───────────────────────────────────────────────────────────

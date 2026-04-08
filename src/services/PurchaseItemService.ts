@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api/client";
-import { PagedResponse } from "@/types/GenericTypes";
+import { PagedResponse } from "@/types/Generic.types";
 import { FeaturedProductResponseDTO } from "@/types/purchases/purchaseItem.types";
 
 export const getTotalSellerSales = async (): Promise<number> => {

@@ -7,7 +7,6 @@ import { WaitingRoomPayloadDTO } from '@/types/raffles/drawEvents.types'
 
 interface Props {
   payload: WaitingRoomPayloadDTO
-  raffleTitle: string
 }
 
 function formatTime(seconds: number): { h: string; m: string; s: string } {
@@ -53,7 +52,7 @@ function TimeUnit({ value, label }: { value: string; label: string }) {
   )
 }
 
-export function WaitingRoomScreen({ payload, raffleTitle }: Props) {
+export function WaitingRoomScreen({ payload}: Props) {
   // Countdown local que se decrementa cada segundo
   // Se sincroniza con el valor del servidor cada vez que llega un update
   const [seconds, setSeconds] = useState(payload.secondsUntilDraw)
@@ -94,7 +93,6 @@ export function WaitingRoomScreen({ payload, raffleTitle }: Props) {
       {/* Mensaje principal */}
       <div>
         <p className="text-gray-400 text-sm uppercase tracking-widest mb-2">El sorteo comienza en</p>
-        <p className="text-white font-bold text-xl">{raffleTitle}</p>
       </div>
 
       {/* Countdown */}
@@ -112,7 +110,7 @@ export function WaitingRoomScreen({ payload, raffleTitle }: Props) {
       <div className="flex gap-6">
         <div className="text-center">
           <p className="text-2xl font-bold text-white">{payload.totalTickets.toLocaleString()}</p>
-          <p className="text-gray-500 text-xs">boletas vendidas</p>
+          <p className="text-gray-500 text-xs">Participantes</p>
         </div>
       </div>
 

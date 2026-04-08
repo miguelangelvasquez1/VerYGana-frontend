@@ -1,7 +1,7 @@
 import apiClient from "@/lib/api/client";
 import { CategoryResponseDTO } from "@/types/Category.types";
 import { RegisterConsumerDTO, ConsumerInitialDataResponseDTO, ConsumerProfileResponseDTO, ConsumerUpdateProfileRequestDTO} from "@/types/Consumer.types";
-import { EntityUpdatedResponseDTO } from "@/types/GenericTypes";
+import { EntityUpdatedResponseDTO } from "@/types/Generic.types";
 import { Gender } from "@/types/Consumer.types";
 // ============================================
 // MÉTODOS DEL SERVICE

@@ -1,37 +1,57 @@
 import { CreatePrizeRequestDTO, PrizeResponseDTO, PrizeUploadSlotDTO } from "./prize.types";
 import { CreateRaffleRuleRequestDTO, RaffleRuleResponseDTO } from "./raffleRule.types";
 import { WinnerSummaryResponseDTO } from "./raffleWinner.types";
-import { FileUploadPermissionDTO, FileUploadRequestDTO } from "../GenericTypes";
+import { FileUploadPermissionDTO, FileUploadRequestDTO } from "../Generic.types";
+
+export enum RaffleType {
+    PREMIUM = 'PREMIUM',
+    STANDARD = 'STANDARD'
+}
+
+export enum RaffleStatus {
+    DRAFT = 'DRAFT',
+    ACTIVE = 'ACTIVE',
+    CLOSED = 'CLOSED',
+    DRAWING = 'DRAWING',
+    LIVE = 'LIVE',
+    COMPLETED = 'COMPLETED',
+    CANCELLED = 'CANCELLED'
+}
+
+export enum DrawMethod {
+    RANDOM_ORG = 'RANDOM_ORG',
+    SYSTEM_RANDOM = 'SYSTEM_RANDOM'
+}
 
 export interface PrepareRaffleCreationResponseDTO {
-    raffleAssetId : number;
-    raffleImagePermission : FileUploadPermissionDTO;
+    raffleAssetId: number;
+    raffleImagePermission: FileUploadPermissionDTO;
     prizeUploadSlots: PrizeUploadSlotDTO[];
 }
 
 export interface PrepareRaffleCreationRequestBodyDTO {
-    raffleData : CreateRaffleRequestDTO;
-    raffleImageMetadata : FileUploadRequestDTO;
-    prizeImageMetadataList : FileUploadRequestDTO[];
+    raffleData: CreateRaffleRequestDTO;
+    raffleImageMetadata: FileUploadRequestDTO;
+    prizeImageMetadataList: FileUploadRequestDTO[];
 }
 
 export interface ConfirmRaffleCreationRequestDTO {
-    raffleAssetId : number;
-    prizeAssetIds : number[];
-    raffleData : CreateRaffleRequestDTO;
+    raffleAssetId: number;
+    prizeAssetIds: number[];
+    raffleData: CreateRaffleRequestDTO;
 }
 
 export interface CreateRaffleRequestDTO {
     title: string;
     description: string;
-    raffleType: 'PREMIUM' | 'STANDARD';
+    raffleType: RaffleType
     startDate: string;
     endDate: string;
     drawDate: string;
     maxTotalTickets: number;
     maxTicketsPerUser: number;
     requiresPet: boolean;
-    drawMethod: 'RANDOM_ORG' | 'SYSTEM_RANDOM';
+    drawMethod: DrawMethod
     prizes: CreatePrizeRequestDTO[];
     rules: CreateRaffleRuleRequestDTO[];
     termsAndConditions: string;
@@ -40,7 +60,7 @@ export interface CreateRaffleRequestDTO {
 export interface UpdateRaffleRequestDTO {
     title: string;
     description: string;
-    raffleType: 'PREMIUM' | 'STANDARD';
+    raffleType: RaffleType
     requiresPet: boolean;
     startDate: string;
     endDate: string;
@@ -51,8 +71,8 @@ export interface RaffleSummaryResponseDTO {
     id: number;
     title: string;
     imageUrl: string;
-    raffleType: 'PREMIUM' | 'STANDARD';
-    raffleStatus: 'DRAFT' | 'ACTIVE' | 'CLOSED' | 'DRAWING' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
+    raffleType: RaffleType
+    raffleStatus: RaffleStatus
     startDate: string;
     endDate: string;
     drawDate: string;
@@ -67,8 +87,8 @@ export interface RaffleResponseDTO {
     imageUrl: string;
     title: string;
     description: string;
-    raffleType: 'PREMIUM' | 'STANDARD';
-    raffleStatus: 'DRAFT' | 'ACTIVE' | 'CLOSED' | 'DRAWING' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
+    raffleType: RaffleType
+    raffleStatus: RaffleStatus
     startDate: string;
     endDate: string;
     drawDate: string;
@@ -79,7 +99,7 @@ export interface RaffleResponseDTO {
     prizes: PrizeResponseDTO[];
     rules: RaffleRuleResponseDTO[];
     requiresPet: boolean;
-    drawMethod: 'RANDOM_ORG' | 'SYSTEM_RANDOM';
+    drawMethod: DrawMethod
     termsAndConditions: string;
 }
 
@@ -106,4 +126,15 @@ export interface ParticipantLeaderboardDTO {
     avatarUrl: string;
     ticketsCount: number;
     winProbability: number;
+}
+
+export interface UserRaffleSummaryResponseDTO {
+    id: number;
+    title: string;
+    imageUrl: string;
+    raffleType: RaffleType;
+    raffleStatus: RaffleStatus;
+    drawDate: string;
+    userTicketCount: number;
+    isWinner: boolean;
 }

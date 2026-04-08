@@ -20,11 +20,14 @@ import {
   Heart,
   Home,
   ClipboardList,
+  Ticket,
 } from "lucide-react";
 
 import { getConsumerInitialData } from "@/services/ConsumerService";
 import type { ConsumerInitialDataResponseDTO } from "@/types/Consumer.types";
-import { CartButton } from "../cart/CartButton";
+import { CartButton } from "../consumer/cart/CartButton";
+import { useNotifications } from "@/hooks/useNotifications";
+import { NotificationPanel } from "../notifications/NotificationsPanel";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -34,6 +37,14 @@ export default function Navbar() {
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    hasMore,
+    markAllAsRead,
+    loadMore,
+  } = useNotifications();
 
   // Data state
   const [consumer, setConsumer] = useState<ConsumerInitialDataResponseDTO | null>(null);
@@ -42,8 +53,10 @@ export default function Navbar() {
 
   // refs independientes
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
-  const walletMenuRef = useRef<HTMLDivElement | null>(null);
-  const notificationsMenuRef = useRef<HTMLDivElement | null>(null);
+  const walletMenuRefDesktop = useRef<HTMLDivElement | null>(null);
+  const walletMenuRefMobile = useRef<HTMLDivElement | null>(null);
+  const notificationsMenuRefDesktop = useRef<HTMLDivElement | null>(null);
+  const notificationsMenuRefMobile = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     async function loadUser() {
@@ -65,9 +78,18 @@ export default function Navbar() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node | null;
-      if (profileMenuRef.current && !profileMenuRef.current.contains(target)) setOpenMenu(false);
-      if (walletMenuRef.current && !walletMenuRef.current.contains(target)) setIsWalletOpen(false);
-      if (notificationsMenuRef.current && !notificationsMenuRef.current.contains(target)) setIsNotificationsOpen(false);
+      if (profileMenuRef.current && !profileMenuRef.current.contains(target))
+        setOpenMenu(false);
+      if (
+        walletMenuRefDesktop.current && !walletMenuRefDesktop.current.contains(target) &&
+        walletMenuRefMobile.current && !walletMenuRefMobile.current.contains(target)
+      )
+        setIsWalletOpen(false);
+      if (
+        notificationsMenuRefDesktop.current && !notificationsMenuRefDesktop.current.contains(target) &&
+        notificationsMenuRefMobile.current && !notificationsMenuRefMobile.current.contains(target)
+      )
+        setIsNotificationsOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -157,7 +179,7 @@ export default function Navbar() {
             <CartButton />
 
             {/* WALLET */}
-            <div className="relative" ref={walletMenuRef}>
+            <div className="relative" ref={walletMenuRefDesktop}>
               <button
                 onClick={() => setIsWalletOpen((v) => !v)}
                 className="group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-full hover:bg-white/20 hover:scale-105 transition-all"
@@ -172,9 +194,8 @@ export default function Navbar() {
               </button>
 
               <div
-                className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-                }`}
+                onMouseDown={(e) => e.stopPropagation()}
+                className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="text-center">
@@ -202,40 +223,25 @@ export default function Navbar() {
                     <Plus className="w-4 h-4" />
                     Depositar Fondos
                   </button>
-                  <Link href="/explore/wallet">
-                    <button className="w-full bg-gray-50 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-100 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
-                      <History className="w-4 h-4" />
-                      Ver Historial Completo
-                    </button>
+                  <Link href="/explore/wallet" className="w-full bg-gray-50 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-100 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                    <History className="w-4 h-4" />
+                    Ver Historial Completo
                   </Link>
                 </div>
               </div>
             </div>
 
-            {/* NOTIFICATIONS */}
-            <div className="relative" ref={notificationsMenuRef}>
-              <button
-                onClick={() => setIsNotificationsOpen((v) => !v)}
-                className="relative flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full hover:bg-white/20 transition-all"
-              >
-                <Bell className="w-5 h-5 text-white" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                  0
-                </span>
-              </button>
-              <div
-                className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  isNotificationsOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-                }`}
-              >
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
-                  <div className="text-lg font-semibold">Notificaciones</div>
-                </div>
-                <div className="p-4">
-                  <p className="text-sm text-gray-600">No hay notificaciones aún.</p>
-                </div>
-              </div>
-            </div>
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              loading={loading}
+              hasMore={hasMore}
+              isOpen={isNotificationsOpen}
+              onToggle={() => setIsNotificationsOpen((v) => !v)}
+              onMarkAllAsRead={markAllAsRead}
+              onLoadMore={loadMore}
+              menuRef={notificationsMenuRefDesktop}
+            />
 
             {/* PROFILE MENU */}
             <div className="relative" ref={profileMenuRef}>
@@ -255,9 +261,8 @@ export default function Navbar() {
               </button>
 
               <div
-                className={`absolute right-0 mt-2 w-64 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  openMenu ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-                }`}
+                onMouseDown={(e) => e.stopPropagation()}
+                className={`absolute right-0 mt-2 w-64 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${openMenu ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="flex items-center gap-3">
@@ -284,6 +289,10 @@ export default function Navbar() {
                   <Link href={"/explore/favorites"} className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
                     <Heart className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                     <span>Mis favoritos</span>
+                  </Link>
+                  <Link href="/explore/participations" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
+                    <Ticket className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
+                    <span>Mis participaciones</span>
                   </Link>
                   <Link href="/explore/referrals" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
                     <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
@@ -312,7 +321,7 @@ export default function Navbar() {
           <Image src="/logos/logo.png" alt="Logo" width={45} height={45} />
           <div className="flex items-center gap-3">
             {/* WALLET */}
-            <div className="relative" ref={walletMenuRef}>
+            <div className="relative" ref={walletMenuRefMobile}>
               <button
                 onClick={() => setIsWalletOpen((v) => !v)}
                 className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full"
@@ -323,9 +332,8 @@ export default function Navbar() {
                 </span>
               </button>
               <div
-                className={`fixed inset-x-0 top-16 mx-4 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-                }`}
+                onMouseDown={(e) => e.stopPropagation()}
+                className={`fixed inset-x-0 top-16 mx-4 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="text-center">
@@ -364,29 +372,17 @@ export default function Navbar() {
             </div>
 
             {/* NOTIFICATIONS */}
-            <div className="relative" ref={notificationsMenuRef}>
-              <button
-                onClick={() => setIsNotificationsOpen((v) => !v)}
-                className="relative bg-white/10 p-2 rounded-full"
-              >
-                <Bell className="w-5 h-5 text-white" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                  0
-                </span>
-              </button>
-              <div
-                className={`fixed inset-x-0 top-16 mx-4 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${
-                  isNotificationsOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-                }`}
-              >
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
-                  <div className="text-lg font-semibold">Notificaciones</div>
-                </div>
-                <div className="p-4">
-                  <p className="text-sm text-gray-600">No hay notificaciones aún.</p>
-                </div>
-              </div>
-            </div>
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              loading={loading}
+              hasMore={hasMore}
+              isOpen={isNotificationsOpen}
+              onToggle={() => setIsNotificationsOpen((v) => !v)}
+              onMarkAllAsRead={markAllAsRead}
+              onLoadMore={loadMore}
+              menuRef={notificationsMenuRefMobile}
+            />
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ import {
   AssetUploadPermission,
   CampaignDetails
 } from '@/types/games/campaigns';
-import { PagedResponse } from '@/types/GenericTypes';
+import { PagedResponse } from '@/types/Generic.types';
 
 class CampaignService {
   // ==================== Juegos ====================

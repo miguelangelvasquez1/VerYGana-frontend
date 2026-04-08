@@ -4,8 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { CheckCircle, XCircle } from 'lucide-react';
 
-import Navbar from '@/components/bars/NavBar';
-import Footer from '@/components/Footer';
 import { purchaseService } from '@/services/PurchaseService';
 import { PurchaseResponseDTO } from '@/types/purchases/purchase.types';
 
@@ -47,7 +45,6 @@ export default function PurchaseConfirmationPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
 
       <main className="flex-1 flex items-center justify-center px-4">
         {status === 'loading' && (
@@ -146,7 +143,6 @@ export default function PurchaseConfirmationPage() {
         )}
       </main>
 
-      <Footer />
     </div>
   );
 }

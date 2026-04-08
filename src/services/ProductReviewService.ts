@@ -1,6 +1,6 @@
 import apiClient from "@/lib/api/client";
-import { PagedResponse } from "@/types/common";
-import { EntityCreatedResponseDTO } from "@/types/GenericTypes";
+import { PagedResponse } from "@/types/Generic.types";
+import { EntityCreatedResponseDTO } from "@/types/Generic.types";
 import { CreateProductReviewRequestDTO, ProductReviewResponseDTO, PurchaseItemToReviewResponseDTO, ReviewableProductResponseDTO } from "@/types/productReview.types";
 
 export const gerProductAvgRating = async (productId: number): Promise<number> => {

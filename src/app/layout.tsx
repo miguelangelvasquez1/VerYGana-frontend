@@ -6,7 +6,7 @@ import { SessionProvider } from "./providers/SessionProvider";
 import { AuthProvider } from "./providers/AuthProvider";
 import { CartProvider } from "@/context/CartContext";
 
-import { CartDrawer } from "@/components/cart/CartDrawer";
+import { CartDrawer } from "@/components/consumer/cart/CartDrawer";
 import { Toaster } from "react-hot-toast";
 import { ReactQueryProvider } from "./providers/ReactQueryProvider";
 

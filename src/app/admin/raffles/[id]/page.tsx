@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import RaffleDetailCard from "@/components/admin/raffles/RaffleDetailCard";
+import RaffleDetailCard from "@/components/admin/raffles/RaffleDetailAdmin";
 import { RaffleResponseDTO } from "@/types/raffles/raffle.types";
 import {
     getRaffleById,

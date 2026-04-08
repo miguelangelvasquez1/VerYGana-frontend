@@ -1,101 +1,145 @@
-// src/components/raffle-draw/DrawingScreen.tsx
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Props {
   totalWinners: number
+  revealNumber?: number   // qué número de ganador se está revelando
+  isRevealing?: boolean   // true cuando es entre ganadores, false al inicio
 }
 
-// Genera un número de boleta aleatorio con formato de 4 dígitos
 function randomTicket(): string {
   return String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')
 }
 
-// Una boleta individual que "gira" cambiando su número
-function SpinningTicket({ speed }: { speed: number }) {
+export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = false }: Props) {
   const [ticket, setTicket] = useState(randomTicket())
-  const [flipping, setFlipping] = useState(false)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  useEffect(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-
-    intervalRef.current = setInterval(() => {
-      setFlipping(true)
-      setTimeout(() => {
-        setTicket(randomTicket())
-        setFlipping(false)
-      }, 80)
-    }, speed)
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
-  }, [speed])
-
-  return (
-    <motion.div
-      animate={{ rotateY: flipping ? 90 : 0 }}
-      transition={{ duration: 0.08 }}
-      style={{ perspective: 400 }}
-      className="bg-white/5 border border-violet-500/30 rounded-xl p-4 min-w-[88px] text-center"
-    >
-      <p className="text-violet-300 text-xs mb-1 font-mono">#</p>
-      <p className="text-white font-bold text-xl font-mono tracking-widest">{ticket}</p>
-    </motion.div>
-  )
-}
-
-export function DrawingScreen({ totalWinners }: Props) {
-  // La velocidad disminuye con el tiempo para crear efecto de desaceleración
-  const [speed, setSpeed] = useState(80)
+  const [speed, setSpeed] = useState(60)
+  const [phase, setPhase] = useState<'fast' | 'slowing' | 'suspense'>('fast')
   const elapsed = useRef(0)
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    // Máquina de estados de la animación
+    const phaseTimer = setInterval(() => {
       elapsed.current += 500
 
-      // A los 3 segundos empieza a desacelerar
-      if (elapsed.current > 3000) {
-        setSpeed(prev => Math.min(prev + 15, 400))
-      }
+      if (elapsed.current === 3000) setPhase('slowing')
+      if (elapsed.current === 6000) setPhase('suspense')
     }, 500)
 
-    return () => clearInterval(timer)
+    return () => clearInterval(phaseTimer)
   }, [])
 
-  // Mostrar entre 6 y 12 boletas según cantidad de ganadores
-  const ticketCount = Math.max(6, Math.min(12, totalWinners * 3))
+  // Velocidad según fase
+  useEffect(() => {
+    if (phase === 'fast') setSpeed(60)
+    if (phase === 'slowing') setSpeed(prev => Math.min(prev + 25, 350))
+    if (phase === 'suspense') setSpeed(600)
+  }, [phase])
+
+  // Ticker central
+  useEffect(() => {
+    const interval = setInterval(() => setTicket(randomTicket()), speed)
+    return () => clearInterval(interval)
+  }, [speed])
+
+  const suspenseMessages = isRevealing
+    ? [
+      `Premio ${revealNumber} de ${totalWinners}...`,
+      'Girando los números...',
+      'El siguiente boleto está por salir...'
+    ]
+    : [
+      'Girando todos los boletos...',
+      'El destino decide...',
+      'Un boleto va a cambiar todo...'
+    ]
+  const [msgIndex, setMsgIndex] = useState(0)
+
+  useEffect(() => {
+    const phaseTimer = setInterval(() => {
+      elapsed.current += 500
+
+      if (elapsed.current === 4000) setPhase('slowing')  // empieza a desacelerar a los 4s
+      if (elapsed.current === 7000) setPhase('suspense') // suspense en los últimos 1s
+    }, 500)
+
+    return () => clearInterval(phaseTimer)
+  }, [])
 
   return (
-    <div className="flex flex-col items-center gap-10 text-center">
+    <div className="flex flex-col items-center gap-12 text-center w-full max-w-lg">
 
-      {/* Encabezado pulsante */}
+      {/* Badge pulsante */}
       <motion.div
-        animate={{ opacity: [1, 0.5, 1] }}
-        transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-        className="flex items-center gap-3"
+        animate={{ opacity: [1, 0.4, 1] }}
+        transition={{ duration: 1.2, repeat: Infinity }}
+        className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/30"
       >
-        <span className="relative flex h-3 w-3">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-violet-500" />
+        <span className="w-2 h-2 rounded-full bg-violet-400 animate-ping" />
+        <span className="text-violet-300 text-sm font-medium tracking-wide uppercase">
+          Sorteo en curso
         </span>
-        <p className="text-violet-300 font-semibold tracking-wide uppercase text-sm">
-          Seleccionando ganadores
-        </p>
       </motion.div>
 
-      {/* Grid de boletas girando */}
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-        {Array.from({ length: ticketCount }).map((_, i) => (
-          <SpinningTicket key={i} speed={speed + i * 10} />
-        ))}
+      {/* Ticker de boleta GRANDE — el foco principal */}
+      <div className="relative">
+        {/* Halo animado detrás */}
+        <motion.div
+          animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="absolute inset-0 rounded-3xl bg-violet-600/20 blur-xl"
+        />
+        <div className="relative bg-white/5 border border-violet-500/40 rounded-3xl px-16 py-10">
+          <p className="text-gray-500 text-xs uppercase tracking-widest mb-3">Boleta</p>
+          <AnimatePresence mode="popLayout">
+            <motion.p
+              key={ticket}
+              initial={{ y: phase === 'fast' ? -8 : -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: phase === 'fast' ? 8 : 20, opacity: 0 }}
+              transition={{ duration: phase === 'suspense' ? 0.4 : 0.06 }}
+              className="text-7xl font-black text-white font-mono tracking-widest"
+            >
+              #{ticket}
+            </motion.p>
+          </AnimatePresence>
+        </div>
       </div>
 
-      <p className="text-gray-600 text-sm">
-        {totalWinners} {totalWinners === 1 ? 'ganador' : 'ganadores'} por revelar
+      {/* Mensaje de suspenso */}
+      <div className="h-8">
+        <AnimatePresence mode="wait">
+          {phase === 'suspense' ? (
+            <motion.p
+              key={msgIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="text-violet-300 text-lg font-semibold"
+            >
+              {suspenseMessages[msgIndex]}
+            </motion.p>
+          ) : (
+            <motion.p
+              key="selecting"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-gray-500 text-sm"
+            >
+              Seleccionando entre {(10000).toLocaleString()} boletas...
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Info */}
+      <p className="text-gray-600 text-xs">
+        {isRevealing
+          ? `Ganador ${revealNumber} de ${totalWinners}`
+          : `${totalWinners} ${totalWinners === 1 ? 'ganador' : 'ganadores'} por revelar`
+        }
       </p>
     </div>
   )

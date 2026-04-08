@@ -5,7 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { getTicketEarningRulesList } from "@/services/admin/AdminRaffleService";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { CreatePrizeRequestDTO } from "@/types/raffles/prize.types";
+import { CreatePrizeRequestDTO, PrizeType } from "@/types/raffles/prize.types";
 import { CreateRaffleRequestDTO } from "@/types/raffles/raffle.types";
 import { CreateRaffleRuleRequestDTO } from "@/types/raffles/raffleRule.types";
 import { TicketEarningRuleResponseDTO } from "@/types/raffles/ticketEarningRule.types";
@@ -113,7 +113,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
       description: "",
       brand: "",
       value: "" as any,
-      prizeType: "PHYSICAL",
+      prizeType: PrizeType.PHYSICAL,
       position: formData.prizes.length + 1,
       quantity: 1,
       requiresShipping: false,

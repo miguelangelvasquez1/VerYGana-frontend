@@ -16,8 +16,6 @@ import type {
   ConsumerProfileResponseDTO,
   ConsumerUpdateProfileRequestDTO,
 } from "@/types/Consumer.types";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/bars/NavBar";
 
 // ----------------------------
 // VALIDATION SCHEMA (Zod)
@@ -126,7 +124,6 @@ export default function EditConsumerProfilePage() {
   // ----------------------------
   return (
     <>
-      <Navbar />
       <div className="max-w-3xl mx-auto px-6 py-10">
         {/* Back Button */}
         <Link
@@ -227,7 +224,6 @@ export default function EditConsumerProfilePage() {
           </form>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

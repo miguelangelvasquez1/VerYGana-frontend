@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'pub-0fec976d129742a0bb0410d3aa1abc86.r2.dev',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'games.verygana.com',
       },
       {

@@ -10,8 +10,6 @@ import { ShoppingBag, AlertCircle } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { CartService } from '@/services/CartService';
 import { CreatePurchaseRequestDTO } from '@/types/cart.types';
-import Navbar from '@/components/bars/NavBar';
-import Footer from '@/components/Footer';
 import { purchaseService } from '@/services/PurchaseService';
 
 export default function CheckoutPage() {
@@ -71,7 +69,7 @@ export default function CheckoutPage() {
   // Si el carrito está vacío
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4 mt-4">
         <div className="text-center">
           <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -82,7 +80,7 @@ export default function CheckoutPage() {
           </p>
           <button
             onClick={() => router.push('/products')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
           >
             Explorar Productos
           </button>
@@ -93,8 +91,7 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <Navbar />
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 py-8 mt-4">
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">
             Finalizar Compra
@@ -228,7 +225,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

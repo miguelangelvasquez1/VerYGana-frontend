@@ -13,7 +13,7 @@ import {
 import { getRafflesByStatusAndType } from "@/services/raffleService";
 import { fileUploadService } from "@/services/FileUploadService";
 
-import RaffleCard from "@/components/admin/raffles/RaffleCard";
+import RaffleCard from "@/components/admin/raffles/RaffleCardAdmin";
 import CreateRaffleForm, {
   CreateRaffleFormSubmitPayload,
 } from "@/components/admin/raffles/CreateRaffleForm";

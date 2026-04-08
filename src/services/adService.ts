@@ -1,6 +1,6 @@
 import apiClient from '@/lib/api/client';
 import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, CreateAdAssetRequest } from '@/types/ads/commercial';
-import { PagedResponse } from '@/types/GenericTypes';
+import { PagedResponse } from '@/types/Generic.types';
 
 export interface AdStats {
   totalViews: number;

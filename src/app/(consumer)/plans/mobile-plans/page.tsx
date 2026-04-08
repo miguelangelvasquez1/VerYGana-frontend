@@ -17,8 +17,6 @@ import {
   Clock,
   ShoppingCart
 } from "lucide-react";
-import Navbar from "@/components/bars/NavBar";
-import Footer from "@/components/Footer";
 import { PlanCard } from "@/components/plans/PlanCard";
 import { RechargeCard } from "@/components/plans/RechargeCard";
 
@@ -268,8 +266,6 @@ export default function MobileServicesPage() {
 
   return (
     <>
-      <Navbar />
-
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
@@ -660,10 +656,6 @@ export default function MobileServicesPage() {
             </button>
           </div>
         </section> */}
-      </div>
-
-      <div className="mb-18 lg:mb-0">
-        <Footer />
       </div>
     </>
   );

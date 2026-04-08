@@ -1,5 +1,3 @@
-import apiClient from '@/lib/api/client';
-import { FileUploadPermissionDTO } from '@/types/GenericTypes';
 
 /**
  * Servicio genérico para preparar uploads de archivos hacia R2
@@ -40,6 +38,7 @@ class FileUploadService {
 
       xhr.open('PUT', uploadUrl);
       xhr.setRequestHeader('Content-Type', file.type);
+      xhr.send(file);
     });
   }
 }

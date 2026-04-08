@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api/client";
-import { PagedResponse } from "@/types/GenericTypes";
+import { PagedResponse } from "@/types/Generic.types";
 import { EarningsByMonthResponseDTO, TransactionPayoutResponseDTO, TransactionResponseDTO } from "@/types/transaction.types";
 
 export const getMyTransactions = async (): Promise<PagedResponse<TransactionResponseDTO>> => {

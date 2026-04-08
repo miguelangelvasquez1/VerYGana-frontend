@@ -1,7 +1,5 @@
 "use client";
 
-import Navbar from "@/components/bars/NavBar";
-import Footer from "@/components/Footer";
 import { usePurchases } from "@/hooks/usePurchases";
 import PurchaseCard from "@/components/purchases/PurchaseCard";
 
@@ -10,7 +8,6 @@ const PurchasesPage = () => {
 
   return (
     <>
-      <Navbar />
 
       <main className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
@@ -38,7 +35,6 @@ const PurchasesPage = () => {
         </div>
       </main>
 
-      <Footer />
     </>
   );
 };

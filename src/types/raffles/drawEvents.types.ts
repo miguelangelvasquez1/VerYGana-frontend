@@ -3,6 +3,8 @@ import { PrizeType } from "./prize.types"
 export enum DrawEventType {
   WAITING_ROOM_UPDATE = 'WAITING_ROOM_UPDATE',
   DRAWING_STARTED     = 'DRAWING_STARTED',
+  REVEALING           = 'REVEALING', 
+  ANNOUNCING          = 'ANNOUNCING',
   WINNER_REVEALED     = 'WINNER_REVEALED',
   DRAW_COMPLETED      = 'DRAW_COMPLETED',
   DRAW_ERROR          = 'DRAW_ERROR',
@@ -18,7 +20,9 @@ export interface WinnerRevealPayloadDTO {
   position: number
   ticketNumber: string
   userName: string
+  userAvatarUrl: string
   prizeTitle: string
+  prizeImageUrl: string
   prizeValue: number
   prizeType: PrizeType
   revealOrder: number

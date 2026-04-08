@@ -8,6 +8,7 @@ export interface RaffleTicketResponseDTO {
     raffleId: number;
     issuedAt: string;
     usedAt: string | null;
+    isWinner: boolean;
 }
 
 export interface TicketBalanceResponseDTO {

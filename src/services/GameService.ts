@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api/client"
-import { PagedResponse } from "@/types/GenericTypes"
+import { PagedResponse } from "@/types/Generic.types"
 import { EndSessionDTO, GameCardResponseDTO, GameEventDTO, GameMetricDTO, InitGameRequestDTO, InitGameResponseDTO } from "@/types/games/game.types"
 
 export const init = async (request: InitGameRequestDTO): Promise<InitGameResponseDTO> => {

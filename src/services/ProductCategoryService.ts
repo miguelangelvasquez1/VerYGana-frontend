@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api/client';
-import { EntityCreatedResponseDTO } from '@/types/GenericTypes';
+import { EntityCreatedResponseDTO } from '@/types/Generic.types';
 
 // ============================================
 // INTERFACES

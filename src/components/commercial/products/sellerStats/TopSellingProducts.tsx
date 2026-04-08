@@ -5,7 +5,7 @@ import Image from "next/image";
 import { TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { FeaturedProductResponseDTO } from "@/types/purchases/purchaseItem.types";
-import { PagedResponse } from "@/types/GenericTypes";
+import { PagedResponse } from "@/types/Generic.types";
 import * as purchaseItemService from "@/services/PurchaseItemService";
 
 export default function TopSellingProducts() {
