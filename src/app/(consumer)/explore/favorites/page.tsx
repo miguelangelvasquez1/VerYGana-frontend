@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { getFavorites, countFavorites } from "@/services/ProductService";
 import ProductCard from "@/components/consumer/products/ProductCard";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
-import Navbar from "@/components/bars/NavBar";
-import Footer from "@/components/Footer";
 
 export default function FavoritesPage() {
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
@@ -27,7 +25,6 @@ export default function FavoritesPage() {
 
   return (
     <>
-      <Navbar />
 
       {/* ===== Main content ===== */}
       <main className="min-h-screen bg-gray-50">
@@ -78,7 +75,6 @@ export default function FavoritesPage() {
         </div>
       </main>
 
-      <Footer />
     </>
   );
 }

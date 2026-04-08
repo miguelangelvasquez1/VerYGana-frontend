@@ -1,4 +1,4 @@
-import { FileUploadPermissionDTO } from "../GenericTypes";
+import { FileUploadPermissionDTO } from "../Generic.types";
 
 export enum PrizeType {
     PHYSICAL = 'PHYSICAL',

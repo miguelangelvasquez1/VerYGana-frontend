@@ -1,8 +1,8 @@
 import apiClient from "@/lib/api/client";
-import { PagedResponse } from "@/types/GenericTypes";
+import { PagedResponse } from "@/types/Generic.types";
 import { Transaction } from "@/types/transaction.types"; 
 import { CreatePurchaseItemRequestDTO } from "@/types/cart.types";
-import { EntityCreatedResponseDTO } from "@/types/GenericTypes";
+import { EntityCreatedResponseDTO } from "@/types/Generic.types";
 import { PurchaseResponseDTO, CreatePurchaseRequestDTO } from "@/types/purchases/purchase.types";
 
 // ===== SERVICE METHODS =====

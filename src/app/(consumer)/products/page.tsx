@@ -10,12 +10,11 @@ import {
   ShoppingCart,
 } from "lucide-react";
 
-import Navbar from "@/components/bars/NavBar";
 import CategoryCard from "@/components/consumer/products/ProductCategoryCard";
 import ProductCard from "@/components/consumer/products/ProductCard";
 import SearchBar from "@/components/consumer/products/SearchBar";
 import InfiniteScroll from "@/components/consumer/products/InfiniteScroll";
-import Footer from "@/components/Footer";
+
 
 // SERVICES
 import { filterProducts, getAllProducts } from "@/services/ProductService";
@@ -103,8 +102,6 @@ export default function ProductsPage() {
 
   return (
     <>
-      <Navbar />
-
       {/* HERO */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12 px-4">
         <div className="max-w-7xl mx-auto text-center">
@@ -291,7 +288,6 @@ export default function ProductsPage() {
           </InfiniteScroll>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

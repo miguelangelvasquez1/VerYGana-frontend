@@ -24,7 +24,7 @@ export interface PrizeWonResponseDTO {
     brand: string;
     value: number;
     imageUrl: string;
-    prizeType: 'PHYSICAL' | 'DIGITAL' | 'CASH' | 'VOUCHER' | 'SERVICE';
+    prizeType: 'PHYSICAL' | 'DIGITAL';
     position: number;
     quantity: number;
     ticketWinnerNumber: string;

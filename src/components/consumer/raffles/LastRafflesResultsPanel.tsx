@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getLastRafflesResults } from "@/services/raffleService";
 import { RaffleSummaryResultResponseDTO } from "@/types/raffles/raffleResult.types";
+import Link from "next/link";
 
 const VISIBLE_ITEMS = 5;
 const INTERVAL = 3000;
@@ -42,33 +43,50 @@ export default function LastRafflesResultsPanel() {
   );
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4 h-[420px] flex flex-col">
-      {/* Header */}
-      <h3 className="text-lg font-bold text-gray-900 mb-4">
-        Resultados de Rifas
-      </h3>
+    <div className="bg-white rounded-2xl shadow-md p-5 h-[460px] flex flex-col">
 
-      {/* Lista animada */}
-      <div className="flex flex-col gap-3 overflow-hidden relative">
-        {visibleResults.map((result, index) => (
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-gray-900">
+          Resultados de Rifas
+        </h3>
+      </div>
+
+      {/* Lista */}
+      <div className="flex flex-col justify-between flex-1 gap-3">
+
+        {visibleResults.map((result) => (
           <div
-            key={index}
-            className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2 transition-all duration-500 hover:bg-gray-100"
+            key={result.raffleId}
+            className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 hover:bg-gray-100 transition"
           >
-            <div>
-              <p className="text-sm font-semibold text-gray-800 line-clamp-1">
+            {/* Info */}
+            <div className="flex flex-col gap-1 flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800 truncate">
                 {result.raffleTitle}
               </p>
-              <p className="text-xs text-gray-500">
-                {new Date(result.drawnAt).toLocaleDateString()}
-              </p>
+
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span>
+                  {new Date(result.drawnAt).toLocaleDateString()}
+                </span>
+
+                <span className="px-2 py-0.5 rounded-full bg-yellow-500 text-black font-bold text-[10px]">
+                  {result.raffleType}
+                </span>
+              </div>
             </div>
 
-            <span className="text-xs font-bold px-2 py-1 rounded-full bg-yellow-500 text-black">
-              {result.raffleType}
-            </span>
+            {/* CTA */}
+            <Link
+              href={`/raffles/${result.raffleId}/results`}
+              className="ml-3 px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition"
+            >
+              Ver
+            </Link>
           </div>
         ))}
+
       </div>
     </div>
   );

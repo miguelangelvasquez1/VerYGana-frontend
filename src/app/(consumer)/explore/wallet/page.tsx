@@ -1,7 +1,5 @@
 'use client';
 
-import Navbar from '@/components/bars/NavBar';
-import Footer from '@/components/Footer';
 import { useTransactions } from '@/hooks/useTransactions';
 import TransactionStats from '@/components/transactions/TransactionStats';
 import TransactionFilters from '@/components/transactions/TransactionFilters';
@@ -18,7 +16,6 @@ const TransactionHistoryPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar />
 
       {/* ===== HEADER ===== */}
       <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
@@ -51,7 +48,6 @@ const TransactionHistoryPage = () => {
         />
       </main>
 
-      <Footer />
     </div>
   );
 };

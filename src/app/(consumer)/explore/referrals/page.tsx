@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import Navbar from '@/components/bars/NavBar';
-import Footer from '@/components/Footer';
 import ReferralPageShell from '@/components/referrals/ReferralPageShell';
 import { getReferralInfo, type ReferralInfoDTO } from '@/services/ReferralService';
 
@@ -31,7 +29,6 @@ export default function ReferralsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
@@ -68,9 +65,6 @@ export default function ReferralsPage() {
         <ReferralPageShell info={info} />
       )}
 
-      <div className="mb-18 lg:mb-0">
-        <Footer />
-      </div>
     </div>
   );
 }

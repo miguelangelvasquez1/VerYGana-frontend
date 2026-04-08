@@ -5,8 +5,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { Star, Gamepad2 } from 'lucide-react';
-import Navbar from '@/components/bars/NavBar';
-import Footer from '@/components/Footer';
 import GameSection from '@/components/consumer/games/GameSection';
 import { GameCardResponseDTO } from '@/types/games/game.types';
 import Banner from '@/components/consumer/games/Banner';
@@ -77,7 +75,6 @@ const GamesPanelPage = () => {
 
   return (
     <>
-      <Navbar />
       <div className="bg-gradient-to-br from-green-500 via-cyan-600 to-purple-500 text-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
@@ -145,7 +142,6 @@ const GamesPanelPage = () => {
           onGameClick={(game) => handlePlay(game)}
         />
       </main>
-      <Footer />
     </>
   );
 };

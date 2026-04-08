@@ -12,7 +12,7 @@ import {
 import { formatDateTime } from '@/hooks/surveys/surveyUtils';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { SurveyResponseDetail } from '@/types/survey.types';
-import { PagedResponse } from '@/types/GenericTypes';
+import { PagedResponse } from '@/types/Generic.types';
 
 interface Props {
   query: UseQueryResult<PagedResponse<SurveyResponseDetail>>;

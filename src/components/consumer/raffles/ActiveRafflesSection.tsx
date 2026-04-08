@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { getActiveRaffles } from "@/services/raffleService";
 import { RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
-import { PagedResponse } from "@/types/GenericTypes";
-import RaffleCard from "./RaffleCard";
+import { PagedResponse } from "@/types/Generic.types";
+import RaffleUserCard from "./RaffleUserCard";
 
 type RaffleTypeFilter = "ALL" | "STANDARD" | "PREMIUM";
 
@@ -45,7 +45,7 @@ export default function ActiveRafflesSection() {
     return (
         <div>
             {/* Header + filtros */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
                     Rifas disponibles
                 </h2>
@@ -55,9 +55,9 @@ export default function ActiveRafflesSection() {
                         <button
                             key={type}
                             onClick={() => handleFilterChange(type as RaffleTypeFilter)}
-                            className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${filter === type
-                                    ? "bg-yellow-500 text-black"
-                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            className={`cursor-pointer px-4 py-2 rounded-xl text-sm font-semibold transition ${filter === type
+                                ? "bg-yellow-500 text-black"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                 }`}
                         >
                             {type === "ALL"
@@ -78,35 +78,44 @@ export default function ActiveRafflesSection() {
                     No hay rifas disponibles.
                 </p>
             ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                     {raffles.map((raffle) => (
-                        <RaffleCard key={raffle.id} raffle={raffle} />
+                        <RaffleUserCard key={raffle.id} raffle={raffle} />
                     ))}
                 </div>
             )}
 
             {/* Paginador */}
             {totalPages > 1 && (
-                <div className="flex justify-center items-center mt-10 gap-2">
+                <div className="flex justify-center items-center mt-10 gap-3">
+
                     <button
                         disabled={page === 0}
                         onClick={() => setPage((prev) => prev - 1)}
-                        className="px-4 py-2 rounded-lg bg-gray-200 disabled:opacity-50"
+                        className="px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                     >
-                        ← Anterior
+                        ←
                     </button>
 
-                    <span className="text-sm text-gray-600">
-                        Página {page + 1} de {totalPages}
-                    </span>
+                    {[...Array(totalPages)].slice(0, 5).map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setPage(i)}
+                            className={`w-9 h-9 rounded-lg ${page === i ? "bg-yellow-500 text-black" : "bg-gray-200"
+                                }`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
 
                     <button
                         disabled={page === totalPages - 1}
                         onClick={() => setPage((prev) => prev + 1)}
-                        className="px-4 py-2 rounded-lg bg-gray-200 disabled:opacity-50"
+                        className="px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                     >
-                        Siguiente →
+                        →
                     </button>
+
                 </div>
             )}
         </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 
 import * as transactionService from "@/services/TransactionService";
-import { PagedResponse } from "@/types/GenericTypes";
+import { PagedResponse } from "@/types/Generic.types";
 import { TransactionPayoutResponseDTO } from "@/types/transaction.types";
 
 

@@ -33,3 +33,13 @@ export interface FileUploadPermissionDTO {
   uploadUrl: string;
   expiresInSeconds: number;
 }
+
+export interface NotificationResponseDTO {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  dateSent: string;
+}

@@ -1,6 +1,6 @@
 import apiClient from "@/lib/api/client";
 import * as ProductTypes from "@/types/products/Product.types";
-import { EntityCreatedResponseDTO, EntityUpdatedResponseDTO, PagedResponse } from "@/types/GenericTypes";
+import { EntityCreatedResponseDTO, EntityUpdatedResponseDTO, PagedResponse } from "@/types/Generic.types";
 import { ProductStockParams, ProductStockRequestDTO, ProductStockResponseDTO } from "@/types/products/ProductStock.types";
 // ============================================
 // MÉTODOS DEL SERVICE

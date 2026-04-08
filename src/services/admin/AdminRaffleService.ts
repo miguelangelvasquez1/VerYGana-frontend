@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api/client";
-import { EntityCreatedResponseDTO, EntityUpdatedResponseDTO, PagedResponse } from "@/types/GenericTypes";
+import { EntityCreatedResponseDTO, EntityUpdatedResponseDTO, PagedResponse } from "@/types/Generic.types";
 import { ConfirmRaffleCreationRequestDTO, CreateRaffleRequestDTO, DrawResultResponseDTO, PrepareRaffleCreationRequestBodyDTO, PrepareRaffleCreationResponseDTO, RaffleResponseDTO, RaffleSummaryResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
 import { RaffleTicketResponseDTO } from "@/types/raffles/raffleTicket.types";
 import { CreateTicketEarningRuleRequestDTO, TicketEarningRuleResponseDTO, UpdateTicketEarningRuleRequestDTO } from "@/types/raffles/ticketEarningRule.types";
@@ -8,19 +8,6 @@ import { CreateTicketEarningRuleRequestDTO, TicketEarningRuleResponseDTO, Update
 
 export const getTicketsByRaffle = async (raffleId: number, status: string, source: string, issuedAt: string, size?: 20, page?: 0): Promise<RaffleTicketResponseDTO> => {
     const response = await apiClient.get(`/api/admin/tickets/raffle/${raffleId}`, {
-        params: {
-            status,
-            source,
-            issuedAt,
-            size,
-            page
-        }
-    });
-    return response.data;
-}
-
-export const getUserTickets = async (consumerId: number, status: string, source: string, issuedAt: string, size?: 20, page?: 0): Promise<RaffleTicketResponseDTO> => {
-    const response = await apiClient.get(`/api/admin/tickets/consumer/${consumerId}`, {
         params: {
             status,
             source,

@@ -13,33 +13,35 @@ import {
   DrawCompletedPayloadDTO,
   DrawingStartedPayloadDTO,
 } from '@/types/raffles/drawEvents.types'
-import { Console } from 'console'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
-const WS_URL  = process.env.NEXT_PUBLIC_WS_URL  ?? 'http://localhost:8080/ws'
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? 'http://localhost:8080/ws'
 
 interface UseRaffleDrawReturn {
-  currentPhase:    DrawEventType
-  isConnected:     boolean
-  waitingRoom:     WaitingRoomPayloadDTO | null
+  currentPhase: DrawEventType
+  isConnected: boolean
+  waitingRoom: WaitingRoomPayloadDTO | null
   revealedWinners: WinnerRevealPayloadDTO[]
-  totalWinners:    number
-  drawCompleted:   DrawCompletedPayloadDTO | null
-  errorMessage:    string | null
+  totalWinners: number
+  drawCompleted: DrawCompletedPayloadDTO | null
+  errorMessage: string | null
+  announcementLabel: string
 }
 
 export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
   const clientRef = useRef<Client | null>(null)
+  const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [currentPhase, setCurrentPhase] = useState<DrawEventType>(
     DrawEventType.WAITING_ROOM_UPDATE
   )
-  const [isConnected,     setIsConnected]     = useState(false)
-  const [waitingRoom,     setWaitingRoom]     = useState<WaitingRoomPayloadDTO | null>(null)
+  const [isConnected, setIsConnected] = useState(false)
+  const [waitingRoom, setWaitingRoom] = useState<WaitingRoomPayloadDTO | null>(null)
   const [revealedWinners, setRevealedWinners] = useState<WinnerRevealPayloadDTO[]>([])
-  const [totalWinners,    setTotalWinners]    = useState(0)
-  const [drawCompleted,   setDrawCompleted]   = useState<DrawCompletedPayloadDTO | null>(null)
-  const [errorMessage,    setErrorMessage]    = useState<string | null>(null)
+  const [totalWinners, setTotalWinners] = useState(0)
+  const [drawCompleted, setDrawCompleted] = useState<DrawCompletedPayloadDTO | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [announcementLabel, setAnnouncementLabel] = useState<string>('')
 
   // Hidrata el estado inicial desde el endpoint REST antes de conectar WS
   const hydrateInitialState = useCallback(async () => {
@@ -57,9 +59,9 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
 
       if (status.currentPhase === DrawEventType.WAITING_ROOM_UPDATE) {
         setWaitingRoom({
-          viewerCount:      status.viewerCount,
+          viewerCount: status.viewerCount,
           secondsUntilDraw: status.secondsUntilDraw,
-          totalTickets:     0,
+          totalTickets: 0,
         })
       }
     } catch (err) {
@@ -86,10 +88,30 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
 
       case DrawEventType.WINNER_REVEALED: {
         const winner = event.payload as WinnerRevealPayloadDTO
-        setRevealedWinners(prev => [...prev, winner])
+
+        // Limpiar timer anterior si existiera
+        if (revealTimerRef.current) clearTimeout(revealTimerRef.current)
+
+        // Guardar el label de anuncio para esta posición
+        const label = getAnnouncementLabel(winner.position)
+
+        // FASE 1: Ruleta girando — 8 segundos
+        setCurrentPhase(DrawEventType.REVEALING)
         setTotalWinners(winner.totalWinners)
-        setCurrentPhase(DrawEventType.WINNER_REVEALED)
-        console.log('[WS] EVENT:', event)
+
+        // FASE 2: Anuncio — después de 8s, mostrar "Y el primer ganador es..."
+        revealTimerRef.current = setTimeout(() => {
+          setAnnouncementLabel(label)
+          setCurrentPhase(DrawEventType.ANNOUNCING)
+
+          // FASE 3: Mostrar ganador — después de 5s más
+          revealTimerRef.current = setTimeout(() => {
+            setRevealedWinners(prev => [...prev, winner])
+            setCurrentPhase(DrawEventType.WINNER_REVEALED)
+          }, 5000)
+
+        }, 8000)
+
         break
       }
 
@@ -106,6 +128,17 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
         break
     }
   }, [])
+
+  const positionAnnouncementLabel: Record<number, string> = {
+    1: 'el primer ganador es',
+    2: 'el segundo ganador es',
+    3: 'el tercer ganador es',
+  }
+
+  function getAnnouncementLabel(position: number): string {
+    return positionAnnouncementLabel[position] ?? `el ganador ${position} es`
+  }
+
 
   useEffect(() => {
     hydrateInitialState()
@@ -148,6 +181,9 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
     clientRef.current = client
 
     return () => {
+
+      if (revealTimerRef.current) clearTimeout(revealTimerRef.current)
+
       // Avisar al servidor que el usuario salió antes de desconectar
       if (client.connected) {
         client.publish({
@@ -167,5 +203,6 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
     totalWinners,
     drawCompleted,
     errorMessage,
+    announcementLabel,
   }
 }

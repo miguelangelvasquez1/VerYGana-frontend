@@ -3,6 +3,7 @@ import { WinnerDetailResponseDTO } from "./raffleWinner.types";
 export interface RaffleResultResponseDTO {
     raffleId: number;
     raffleTitle: string;
+    raffleImageUrl: string;
     raffleType: 'PREMIUM' | 'STANDARD';
     drawnAt: string;
     drawProof: string;

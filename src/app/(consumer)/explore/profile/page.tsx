@@ -5,8 +5,6 @@ import { getConsumerProfile } from "@/services/ConsumerService";
 import type { ConsumerProfileResponseDTO } from "@/types/Consumer.types";
 import { Loader2, User, Edit } from "lucide-react";
 import Link from "next/link";
-import Navbar from "@/components/bars/NavBar";
-import Footer from "@/components/Footer";
 
 export default function ConsumerProfilePage() {
   const [profile, setProfile] = useState<ConsumerProfileResponseDTO | null>(null);
@@ -40,7 +38,6 @@ export default function ConsumerProfilePage() {
 
   return (
     <>
-      <Navbar />
       <div className="max-w-3xl mx-auto py-10 px-6">
         <div className="bg-white shadow-lg rounded-2xl p-6">
           <div className="flex items-center gap-4 mb-6">
@@ -77,7 +74,6 @@ export default function ConsumerProfilePage() {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

@@ -50,7 +50,7 @@ export default function LiveRafflesCarousel() {
 
   if (loading) {
     return (
-      <div className="w-full h-[320px] bg-gray-200 animate-pulse rounded-2xl" />
+      <div className="w-full h-[420px] bg-gray-200 animate-pulse rounded-2xl" />
     );
   }
 
@@ -59,7 +59,7 @@ export default function LiveRafflesCarousel() {
   const raffle = raffles[currentIndex];
 
   return (
-    <div className="relative w-full h-[320px] rounded-2xl overflow-hidden shadow-lg">
+    <div className="relative w-full h-[420px] rounded-2xl overflow-hidden shadow-lg">
       {/* Imagen fondo */}
       <img
         src={raffle.imageUrl}
@@ -72,11 +72,11 @@ export default function LiveRafflesCarousel() {
 
       {/* Contenido */}
       <div className="absolute inset-0 flex flex-col justify-center px-10 text-white">
-        <span className="text-sm bg-yellow-500 text-black px-3 py-1 rounded-full w-fit mb-3 font-semibold">
-          Rifa en vivo
+        <span className="text-2xl bg-red-500 text-white px-3 py-1 rounded-full w-fit mb-3 font-semibold">
+         en vivo
         </span>
 
-        <h2 className="text-3xl font-bold max-w-lg">
+        <h2 className="text-4xl md:text-5xl font-extrabold max-w-2xl leading-tight">
           {raffle.title}
         </h2>
 

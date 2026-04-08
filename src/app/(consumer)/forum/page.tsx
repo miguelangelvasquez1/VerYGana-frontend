@@ -3,8 +3,6 @@
 import React from 'react';
 import { Users, Gift, Award, Eye, Heart, Loader2, AlertCircle } from 'lucide-react';
 import CharityPost from '@/components/consumer/forum/CharityPost';
-import Navbar from '@/components/bars/NavBar';
-import Footer from '@/components/Footer';
 import { useImpactStoriesForConsumer } from '@/hooks/useImpactStory';
 
 export default function ForumPage() {
@@ -43,7 +41,6 @@ export default function ForumPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       {/* ── Hero header ── */}
       <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white">
@@ -143,8 +140,6 @@ export default function ForumPage() {
           </div>
         )}
       </div>
-
-      <Footer />
     </div>
   );
 }
