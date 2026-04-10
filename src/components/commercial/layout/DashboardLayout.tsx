@@ -59,7 +59,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
         console.error('Error cargando estado del plan:', err);
         // Fallback a BASIC sin presupuesto
         setPlanState({
-          effectivePlan: 'BASIC',
+          effectivePlan: '',
           commissionActive: true,
           commissionRate: 10,
           remainingBudget: 0,
@@ -69,6 +69,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           maxAds: 0,
           maxBrandedGames: 0,
           roiReached: false,
+          hasActivePlan: false,
         });
       } finally {
         setLoadingPlan(false);
@@ -100,7 +101,8 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
         >
           <Sidebar
             onClose={() => setSidebarOpen(false)}
-            effectivePlan={planState?.effectivePlan ?? 'BASIC'}
+            effectivePlan={planState?.effectivePlan ?? ''}
+            hasActivePlan={planState?.hasActivePlan ?? false}
             remainingBudget={planState?.remainingBudget ?? 0}
             commissionActive={planState?.commissionActive ?? false}
           />

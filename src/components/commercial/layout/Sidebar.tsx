@@ -30,6 +30,7 @@ interface SidebarProps {
   onClose?: () => void;
   /** Plan efectivo del anunciante (viene de EffectivePlanState) */
   effectivePlan?: Plan['code'];
+  hasActivePlan?: boolean;
   /** Saldo del presupuesto activo (solo STANDARD / PREMIUM) */
   remainingBudget?: number;
   /** true si hay comisión activa */
@@ -42,6 +43,7 @@ const menuItems: MenuItem[] = [
   { href: '/commercial', icon: Home, label: 'Dashboard' },
   {
     href: '/commercial/products', icon: Package, label: 'Mis productos',
+    requiredPlans: ['BASIC', 'STANDARD', 'PREMIUM'], lockIfUnavailable: true,
   },
   {
     href: '/commercial/ads', icon: FileImage, label: 'Mis Anuncios',
@@ -71,13 +73,15 @@ const menuItems: MenuItem[] = [
     href: '/commercial/pets', icon: PawPrint, label: 'Mascotas',
     requiredPlans: ['PREMIUM'], lockIfUnavailable: true,
   },
-  { href: '/commercial/analytics', icon: BarChart3, label: 'Estadísticas' },
-  { href: '/commercial/billing', icon: CreditCard, label: 'Facturación' },
-  {
-    href: '/commercial/balance', icon: Wallet, label: 'Mi Saldo',
-    requiredPlans: ['STANDARD', 'PREMIUM'],
+  { href: '/commercial/analytics', icon: BarChart3, label: 'Estadísticas',
+    requiredPlans: ['BASIC', 'STANDARD', 'PREMIUM'], lockIfUnavailable: true,
   },
-  { href: '/commercial/settings', icon: Settings, label: 'Configuración' },
+  { href: '/commercial/billing', icon: CreditCard, label: 'Facturación',
+    requiredPlans: ['BASIC', 'STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+  },
+  { href: '/commercial/settings', icon: Settings, label: 'Configuración',
+    requiredPlans: ['BASIC', 'STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+  },
   { href: '/commercial/plans', icon: Sparkles, label: 'Ver Planes' },
 ];
 
@@ -111,15 +115,28 @@ function PlanBadge({ plan }: { plan: Plan['code'] }) {
 
 export function Sidebar({
   onClose,
-  effectivePlan = 'BASIC',
+  effectivePlan = '',
+  hasActivePlan = false,
   remainingBudget,
   commissionActive = false,
 }: SidebarProps) {
   const pathname = usePathname();
 
+  // === DEBUG ===
+console.log({
+  effectivePlan,
+  hasActivePlan,
+  isStandard: effectivePlan === 'STANDARD',
+  isPremium: effectivePlan === 'PREMIUM'
+});
+// =============
+
   const canAccess = (item: MenuItem): boolean => {
-    if (!item.requiredPlans) return true;
-    return item.requiredPlans.includes(effectivePlan);
+    if (!hasActivePlan) return false;
+    if (!item.requiredPlans || item.requiredPlans.length === 0) return true;
+
+    // ← Aquí está el fix importante
+    return !!(effectivePlan && item.requiredPlans.includes(effectivePlan));
   };
 
   const isLocked = (item: MenuItem): boolean => {

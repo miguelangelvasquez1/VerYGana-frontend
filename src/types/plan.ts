@@ -2,7 +2,7 @@
 
 export interface Plan {
   id: number;
-  code: 'BASIC' | 'STANDARD' | 'PREMIUM';
+  code: '' | 'BASIC' | 'STANDARD' | 'PREMIUM';
   name: string;
   description: string;
   monthlySubscription: boolean;
@@ -16,6 +16,7 @@ export interface Plan {
  * Corresponde a EffectivePlanState.java
  */
 export interface EffectivePlanState {
+  hasActivePlan: boolean;
   effectivePlan: Plan['code'];
   commissionActive: boolean;
   commissionRate: number;

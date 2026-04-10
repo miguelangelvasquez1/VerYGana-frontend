@@ -23,12 +23,10 @@ export const processSale = async (saleAmount: number) => {
 
 /**
  * Registra una nueva inversión publicitaria.
- * POST /api/v1/plans/advertiser/me/invest
+ * POST /plans/advertiser/me/invest
  */
 export const createInvestment = async (params: {
   investmentAmount: number;
-  allocatedToAds?: number;
-  allocatedToGames?: number;
 }) => {
   const response = await apiClient.post('/plans/commercial/invest', params);
   return response.data;

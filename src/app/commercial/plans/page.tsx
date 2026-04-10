@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Check, X, Zap, Rocket, Star, ArrowRight, Sparkles,
   TrendingUp, Shield, Package, Megaphone, Gamepad2,
@@ -148,7 +149,15 @@ export default function PlansPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => { setMounted(true); }, []);
+
+  const onPlanSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    console.log('Plan submitted:', selected);
+    router.push('/commercial/plans/checkout');
+  };
 
   return (
     <div className="min-h-screen bg-[#0f1117] text-white font-sans">
@@ -290,7 +299,8 @@ export default function PlansPage() {
                       ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white shadow-lg shadow-blue-500/25'
                       : 'bg-white/8 hover:bg-white/15 text-white border border-white/10'
                     }
-                  `}>
+                  `}
+                  onClick={onPlanSubmit}>
                     {plan.cta}
                     <ArrowRight className="w-4 h-4" />
                   </button>
