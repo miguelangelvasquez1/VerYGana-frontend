@@ -14,13 +14,13 @@ import CreateProductForm from "@/components/commercial/products/CreateProductFor
 import { useAuth } from "@/hooks/useAuth";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { EarningsByMonthResponseDTO } from "@/types/transaction.types";
-import { DashboardStats } from "@/types/Seller.types";
+import { DashboardStats } from "@/types/Commercial.types";
 import ProductCard from "@/components/consumer/products/ProductCard";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import TopSellingProducts from "@/components/commercial/products/sellerStats/TopSellingProducts";
-import SellerEarningsBarChart from "@/components/commercial/products/sellerStats/SellerEarningsBarChart";
-import SellerEarningsCards from "@/components/commercial/products/sellerStats/SellerEarningsCards";
+import TopSellingProducts from "@/components/commercial/products/commercialStats/TopSellingProducts";
+import CommercialEarningsBarChart from "@/components/commercial/products/commercialStats/CommercialEarningsBarChart";
+import CommercialEarningsCards from "@/components/commercial/products/commercialStats/CommercialEarningsCards";
 
 // Servicios
 import * as productService from "@/services/ProductService";
@@ -28,10 +28,10 @@ import * as walletService from "@/services/WalletService";
 import * as productReviewService from "@/services/ProductReviewService";
 import * as purchaseItemService from "@/services/PurchaseItemService";
 import * as transactionService from "@/services/TransactionService";
-import SellerPayoutsList from "@/components/commercial/products/sellerStats/SellerPayoutsList";
+import CommercialPayoutsList from "@/components/commercial/products/commercialStats/CommercialPayoutsList";
 
 
-export default function SellerDashboard() {
+export default function ProductsDashboard() {
   // Estados UI
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -88,10 +88,10 @@ export default function SellerDashboard() {
         averageRatingData,
         myProductsData,
       ] = await Promise.all([
-        productService.getTotalSellerProducts(),
-        purchaseItemService.getTotalSellerSales(),
+        productService.getTotalCommercialProducts(),
+        purchaseItemService.getTotalCommercialSales(),
         walletService.getAvailableBalance(),
-        productReviewService.getSellerAvgRating(),
+        productReviewService.getCommercialAvgRating(),
         productService.getMyProducts(0),
       ]);
 
@@ -132,7 +132,7 @@ export default function SellerDashboard() {
     setEarningsLoading(true);
     try {
       const data =
-        await transactionService.getSellerEarningsByYearList(year);
+        await transactionService.getCommercialEarningsByYearList(year);
       setEarningsByMonth(data);
     } catch (error) {
       console.error("Error loading earnings", error);
@@ -144,7 +144,7 @@ export default function SellerDashboard() {
 
   // ========== EFFECT: Cargar datos al montar y cuando cambie la sección ==========
   useEffect(() => {
-    if (isAuthenticated && role === "SELLER") {
+    if (isAuthenticated && role === "COMMERCIAL") {
       loadDashboardData();
     }
   }, [isAuthenticated, role]);
@@ -166,32 +166,6 @@ export default function SellerDashboard() {
       alert("Producto eliminado correctamente");
     } catch (err: any) {
       alert(err.response?.data?.message || "Error al eliminar");
-    }
-  };
-
-  // ========== Retiros ==========
-  const handleWithdrawal = async () => {
-    const amount = prompt("¿Cuánto deseas retirar?");
-    const paymentMethod = prompt("Cuenta bancaria para recibir el pago:");
-
-    const value = Number(amount);
-
-    if (!value || isNaN(value) || value <= 0) {
-      alert("Cantidad inválida");
-      return;
-    }
-
-    if (!paymentMethod) {
-      alert("Selecciona un método de pago antes de continuar");
-      return;
-    }
-
-    try {
-      await walletService.doWithdrawal({ amount: value, paymentMethod });
-      alert("Solicitud realizada con éxito");
-      loadDashboardData();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Error en el retiro");
     }
   };
 
@@ -274,7 +248,7 @@ export default function SellerDashboard() {
 
   const renderProducts = () => (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-900">Mis Productos</h2>
+      <h2 className="text-3xl font-bold text-gray-900">Todos tus productos</h2>
 
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex gap-4">
@@ -318,10 +292,10 @@ export default function SellerDashboard() {
             <ProductCard
               key={product.id}
               product={product}
-              mode="seller"
+              mode="commercial"
               onDelete={() => handleDeleteProduct(product.id)}
-              onEdit={() => router.push(`/seller/products/edit/${product.id}`)}
-              onView={() => router.push(`/products/${product.id}?mode=seller`)}
+              onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
+              onView={() => router.push(`/products/${product.id}?mode=commercial`)}
             />
           ))}
         </div>
@@ -331,10 +305,10 @@ export default function SellerDashboard() {
             <ProductCard
               key={product.id}
               product={product}
-              mode="seller"
+              mode="commercial"
               onDelete={() => handleDeleteProduct(product.id)}
-              onEdit={() => router.push(`/seller/products/edit/${product.id}`)}
-              onView={() => router.push(`/products/${product.id}?mode=seller`)}
+              onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
+              onView={() => router.push(`/products/${product.id}?mode=commercial`)}
             />
           ))}
         </div>
@@ -378,7 +352,7 @@ export default function SellerDashboard() {
 
       {/* ===== Gráfico ===== */}
       <div className="bg-white rounded-xl shadow p-4">
-        <SellerEarningsBarChart
+        <CommercialEarningsBarChart
           data={earningsByMonth}
           year={selectedYear}
         />
@@ -388,7 +362,7 @@ export default function SellerDashboard() {
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Resumen de ganancias</h2>
       </div>
-      <SellerEarningsCards data={earningsByMonth} />
+      <CommercialEarningsCards data={earningsByMonth} />
 
       {/* ===== Pagos realizados ===== */}
       <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-4">
@@ -414,32 +388,13 @@ export default function SellerDashboard() {
         </div>
 
         {/* Lista de pagos */}
-        <SellerPayoutsList
+        <CommercialPayoutsList
           year={selectedYear}
           month={selectedPayoutMonth}
         />
       </div>
 
 
-    </div>
-  );
-
-  const renderWithdrawals = () => (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-900">Retiros</h2>
-      <div className="bg-white p-8 rounded-xl shadow text-center">
-        <Wallet className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <p className="text-gray-500">Saldo disponible</p>
-        <p className="text-5xl font-bold">
-          ${stats.totalRevenue.toLocaleString("es-CO")}
-        </p>
-        <button
-          onClick={handleWithdrawal}
-          className="w-full mt-6 py-4 bg-green-600 hover:bg-green-700 text-white rounded-lg"
-        >
-          Solicitar Retiro
-        </button>
-      </div>
     </div>
   );
 
@@ -451,8 +406,6 @@ export default function SellerDashboard() {
         return renderCreateProduct();
       case "analytics":
         return renderAnalytics();
-      case "withdrawals":
-        return renderWithdrawals();
       default:
         return renderDashboard();
     }

@@ -11,7 +11,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 
 interface ProductCardProps {
   product: ProductSummaryResponseDTO;
-  mode?: "consumer" | "seller"; // default: consumer
+  mode?: "consumer" | "commercial"; // default: consumer
   onView?: (id: number) => void;
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
@@ -31,7 +31,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   // ====== Click principal de la card ======
   const handleClick = () => {
-    if (mode === "seller") {
+    if (mode === "commercial") {
       onView?.(product.id);
     } else {
       router.push(`/products/${product.id}`);
@@ -118,8 +118,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
             : "Sin stock"}
         </p>
 
-        {/* ===== Seller actions ===== */}
-        {mode === "seller" && (
+        {/* ===== Commercial actions ===== */}
+        {mode === "commercial" && (
           <div
             className="flex items-center justify-between pt-3 border-t"
             onClick={(e) => e.stopPropagation()}

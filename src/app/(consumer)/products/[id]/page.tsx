@@ -6,7 +6,7 @@ interface ProductPageProps {
     id: string;
   };
   searchParams?: {
-    mode?: "consumer" | "seller";
+    mode?: "consumer" | "commercial";
   };
 }
 

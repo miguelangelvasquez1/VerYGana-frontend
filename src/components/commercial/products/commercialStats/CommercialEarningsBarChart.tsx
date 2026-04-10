@@ -28,15 +28,15 @@ const MONTHS_MAP: Record<number, string> = {
   12: "Diciembre",
 };
 
-interface SellerEarningsBarChartProps {
+interface CommercialEarningsBarChartProps {
   data: EarningsByMonthResponseDTO[];
   year: number;
 }
 
-export default function SellerEarningsBarChart({
+export default function CommercialEarningsBarChart({
   data,
   year,
-}: SellerEarningsBarChartProps) {
+}: CommercialEarningsBarChartProps) {
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [selectedMonthEarnings, setSelectedMonthEarnings] =
     useState<number | null>(null);

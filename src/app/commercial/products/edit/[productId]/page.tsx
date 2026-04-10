@@ -20,7 +20,7 @@ export default function EditProductPage() {
       <div className="space-y-10">
         <EditProductForm
           productId={productId}
-          onSuccess={() => router.push("/seller/products")}
+          onSuccess={() => router.push("/commercial/products")}
           onCancel={() => router.back()}
         />
 

@@ -13,7 +13,7 @@ interface Props {
   month: number;
 }
 
-export default function SellerPayoutsList({ year, month }: Props) {
+export default function CommercialPayoutsList({ year, month }: Props) {
   const [page, setPage] = useState(0);
   const [data, setData] =
     useState<PagedResponse<TransactionPayoutResponseDTO> | null>(null);
@@ -25,7 +25,7 @@ export default function SellerPayoutsList({ year, month }: Props) {
     const loadPayouts = async () => {
       try {
         setLoading(true);
-        const response = await transactionService.getSellerPayoutsPage(
+        const response = await transactionService.getCommercialPayoutsPage(
           year,
           month,
           PAGE_SIZE,

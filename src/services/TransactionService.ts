@@ -60,7 +60,7 @@ export const getByReferenceCode = async (
   return response.data;
 };
 
-export const getSellerEarningsByYearList = async (year: number): Promise<EarningsByMonthResponseDTO[]> => {
+export const getCommercialEarningsByYearList = async (year: number): Promise<EarningsByMonthResponseDTO[]> => {
   const response = await apiClient.get("/transactions/earnings/anually", {
     params: {
       year
@@ -79,7 +79,7 @@ export const getTotalEarningsByMonth = async (year: number, month: number): Prom
   return response.data;
 }
 
-export const getSellerPayoutsPage = async (year: number, month: number, size?: number, page?: number): Promise<PagedResponse<TransactionPayoutResponseDTO>> => {
+export const getCommercialPayoutsPage = async (year: number, month: number, size?: number, page?: number): Promise<PagedResponse<TransactionPayoutResponseDTO>> => {
   const response = await apiClient.get("/transactions/payouts", {
     params: {
       year,

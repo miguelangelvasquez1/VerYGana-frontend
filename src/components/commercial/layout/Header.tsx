@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { Menu, Bell, User, Search, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
-import { getCommercialInitialData } from '@/services/commercialService';
+import { getCommercialInitialData } from '@/services/CommercialService';
 
 interface HeaderProps {
   title?: string;

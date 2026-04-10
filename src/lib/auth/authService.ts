@@ -9,7 +9,7 @@ export interface LoginCredentials {
 
 export interface LoginResponse {
   accessToken: string;
-  role: 'ROLE_CONSUMER' | 'ROLE_COMMERCIAL' | 'ROLE_SELLER' | 'ROLE_ADMIN';
+  role: 'ROLE_CONSUMER' | 'ROLE_COMMERCIAL' | 'ROLE_ADMIN';
 }
 
 export interface RegisterConsumerData {

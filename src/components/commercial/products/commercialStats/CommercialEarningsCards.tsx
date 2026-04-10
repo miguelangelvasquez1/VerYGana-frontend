@@ -11,7 +11,7 @@ interface Props {
   data: EarningsByMonthResponseDTO[];
 }
 
-export default function SellerEarningsCards({ data }: Props) {
+export default function CommercialEarningsCards({ data }: Props) {
   const [selected, setSelected] =
     useState<EarningsByMonthResponseDTO | null>(null);
 

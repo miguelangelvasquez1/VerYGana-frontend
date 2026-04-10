@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 import * as purchaseItemService from "@/services/PurchaseItemService";
-import * as sellerService from "@/services/SellerService";
+import * as commercialService from "@/services/CommercialService";
 
-import { MonthlyReportResponseDTO } from "@/types/Seller.types";
+import { MonthlyReportResponseDTO } from "@/types/Commercial.types";
 
 const MONTHS_MAP: Record<number, string> = {
   1: "Enero",
@@ -42,8 +42,8 @@ export default function MonthlyEarningsModal({
     const loadData = async () => {
       try {
         const [sales, monthlyReport] = await Promise.all([
-          purchaseItemService.getTotalSellerSalesByMonth(year, month),
-          sellerService.getMonthlyReport(year, month),
+          purchaseItemService.getTotalCommercialSalesByMonth(year, month),
+          commercialService.getMonthlyReport(year, month),
         ]);
 
         setTotalSales(sales);

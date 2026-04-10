@@ -14,7 +14,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 
 interface Props {
   product: ProductResponseDTO;
-  mode?: "consumer" | "seller";
+  mode?: "consumer" | "commercial"; 
 }
 
 const ProductDetail: React.FC<Props> = ({

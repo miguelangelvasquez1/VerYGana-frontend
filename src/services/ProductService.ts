@@ -7,7 +7,7 @@ import { ProductStockParams, ProductStockRequestDTO, ProductStockResponseDTO } f
 // ============================================
 
 /**
- * Crear nuevo producto (SELLER)
+ * Crear nuevo producto (COMMERCIAL)
  */
 export const createProduct = async (
   product: ProductTypes.CreateProductRequestDTO,
@@ -31,7 +31,7 @@ export const createProduct = async (
 };
 
 /**
- * Eliminar producto (SELLER)
+ * Eliminar producto (COMMERCIAL)
  */
 export const deleteProduct = async (productId: number): Promise<void> => {
   await apiClient.delete(`/products/${productId}`);
@@ -45,7 +45,7 @@ export const deleteProductForAdmin = async (productId: number): Promise<void> =>
 };
 
 /**
- * obtener producto existente para editarlo (SELLER)
+ * obtener producto existente para editarlo (COMMERCIAL)
  */
 export const getProductEditInfo = async (productId: number): Promise<ProductTypes.ProductEditInfoResponseDTO> => {
   const response = await apiClient.get(`/products/edit/${productId}`);
@@ -53,7 +53,7 @@ export const getProductEditInfo = async (productId: number): Promise<ProductType
 };
 
 /**
- * Editar producto existente (SELLER)
+ * Editar producto existente (COMMERCIAL)
  */
 export const editProduct = async (
   productId: number,
@@ -171,18 +171,18 @@ export const getProductDetail = async (productId: number): Promise<ProductTypes.
 /**
  * Obtener productos de un vendedor específico (PÚBLICO)
  */
-export const getSellerProducts = async (
-  sellerId: number,
+export const getCommercialProducts = async (
+  commercialId: number,
   page: number = 0
 ): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
-  const response = await apiClient.get(`/products/seller/${sellerId}`, {
+  const response = await apiClient.get(`/products/commercial/${commercialId}`, {
     params: { page }
   });
   return response.data;
 };
 
 /**
- * Obtener mis productos como vendedor (SELLER)
+ * Obtener mis productos como vendedor (COMMERCIAL)
  */
 export const getMyProducts = async (
   page: number = 0
@@ -194,9 +194,9 @@ export const getMyProducts = async (
 };
 
 /**
- * Obtener la cantidad de productos (SELLER)
+ * Obtener la cantidad de productos (COMMERCIAL)
  */
-export const getTotalSellerProducts = async (): Promise<number> => {
+export const getTotalCommercialProducts = async (): Promise<number> => {
   const response = await apiClient.get('/products/totalProducts');
   return response.data;
 };

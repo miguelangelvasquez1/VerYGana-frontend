@@ -6,7 +6,7 @@ export interface DashboardStats {
 }
 
 export interface MonthlyReportResponseDTO {
-  sellerId : number;
+  commercialId : number;
   month: number;
   totalSalesAmount : number;
   earnings: number;

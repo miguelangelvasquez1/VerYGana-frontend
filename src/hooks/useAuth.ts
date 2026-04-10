@@ -29,7 +29,6 @@ export function useAuth(requireAuth = true) {
     isAuthenticated: !!session,
     isCommercial: role === 'COMMERCIAL',
     isConsumer: role === 'CONSUMER',
-    isSeller: role === 'SELLER',
     isAdmin: role === 'ADMIN',
   };
 }

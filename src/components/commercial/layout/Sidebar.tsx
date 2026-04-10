@@ -26,6 +26,7 @@ const menuItems = [
   { href: '/commercial/campaigns', icon: Target, label: 'Campañas' },
   { href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Crear campaña' },
   { href: '/commercial/products', icon: Package, label: 'Mis productos' },
+  { href: '/commercial/products/create', icon: PlusCircle, label: 'Crear producto' },
   { href: '/commercial/surveys', icon: ClipboardList, label: 'Mis encuestas' },
   { href: '/commercial/analytics', icon: BarChart3, label: 'Estadísticas' },
   { href: '/commercial/billing', icon: CreditCard, label: 'Facturación' },

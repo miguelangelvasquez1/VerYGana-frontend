@@ -21,7 +21,7 @@ export interface TransactionResponseDTO {
 }
 
 export interface EarningsByMonthResponseDTO {
-    sellerId: number;
+    commercialId: number;
     year: number;
     month: number;
     earnings: number;

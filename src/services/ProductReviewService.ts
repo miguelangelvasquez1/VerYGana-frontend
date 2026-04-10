@@ -8,8 +8,8 @@ export const gerProductAvgRating = async (productId: number): Promise<number> =>
     return response.data;
 };
 
-export const getSellerAvgRating = async (): Promise<number> => {
-    const response = await apiClient.get<number>("/productsReviews/seller/avg");
+export const getCommercialAvgRating = async (): Promise<number> => {
+    const response = await apiClient.get<number>("/productsReviews/commercial/avg");
     return response.data;
 };
 
