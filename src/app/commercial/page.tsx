@@ -5,14 +5,16 @@ import React from 'react';
 import { DashboardLayout } from '@/components/commercial/layout/DashboardLayout';
 import { StatsCards } from '@/components/commercial/dashboard/StatsCards';
 import { PerformanceChart } from '@/components/commercial/dashboard/PerformanceChart';
-import { useAuth } from '@/hooks/useAuth';
+import { PlanGuard } from '@/components/commercial/plans/PlanGuard';
 
 export default function DashboardPage() {
 
   // const { user, role, isAuthenticated } = useAuth();
 
   return (
+    
     <DashboardLayout title="Dashboard">
+      <PlanGuard requiredPlans={['BASIC', 'STANDARD', 'PREMIUM']} featureName="Dashboard">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <p className="text-gray-600">
@@ -57,6 +59,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      </PlanGuard>
     </DashboardLayout>
-  );
+   );
 }

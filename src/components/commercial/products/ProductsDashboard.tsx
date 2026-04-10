@@ -243,6 +243,12 @@ export default function ProductsDashboard() {
       <div>
         <TopSellingProducts />
       </div>
+
+      {/* 🔥 NUEVA SECCIÓN */}
+    <div className="pt-6 border-t">
+      {renderProducts()}
+    </div>
+
     </div>
   );
 
@@ -400,10 +406,6 @@ export default function ProductsDashboard() {
 
   const renderSection = () => {
     switch (section) {
-      case "products":
-        return renderProducts();
-      case "create":
-        return renderCreateProduct();
       case "analytics":
         return renderAnalytics();
       default:

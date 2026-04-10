@@ -13,6 +13,10 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-daysOne: var(--font-days-one);
+  --font-roboto: var(--font-roboto);
+  --font-poppins: var(--font-poppins);
+  --font-inter: var(--font-inter);
+  --font-nunito: var(--font-nunito);
   --bg-gradient: var(--gradient-bg);
   --primary-bg: var(--primary-bg);
 }
