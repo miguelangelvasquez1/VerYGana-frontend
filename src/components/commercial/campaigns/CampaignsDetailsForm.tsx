@@ -6,6 +6,7 @@ import { DollarSign, Info, AlertCircle, LinkIcon, Tag, MapPin, X, Coins, Calcula
 import { Campaign, CampaignDetails } from '@/types/games/campaigns';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
+import { StepNavigation } from './StepNavigation';
 
 interface CampaignDetailsFormProps {
   initialDetails: CampaignDetails;
@@ -654,34 +655,11 @@ export function CampaignDetailsForm({
       )}
 
       {/* Botones */}
-      <div className="flex justify-between pt-4 border-t">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center"
-        >
-          {existingCampaign ? 'Guardar Cambios' : 'Continuar'}
-          <svg
-            className="w-4 h-4 ml-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
-      </div>
+      <StepNavigation
+        isSubmit
+        onCancel={onCancel}
+        continueLabel={existingCampaign ? 'Guardar Cambios' : 'Continuar'}
+      />
     </form>
   );
 }

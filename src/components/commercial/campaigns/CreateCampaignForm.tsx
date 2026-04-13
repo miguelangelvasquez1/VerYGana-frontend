@@ -152,11 +152,11 @@ export function CreateCampaignForm({
     return {
       gameId,
       budget: details.budget,
-      coinValue: details.coinValue,
-      completionCoins: details.completionCoins,
-      budgetCoins: details.budgetCoins,
-      maxCoinsPerSession: details.maxCoinsPerSession,
-      maxSessionsPerUserPerDay: details.maxSessionsPerUserPerDay,
+      coinValue: details.coinValue ?? 0,
+      completionCoins: details.completionCoins ?? 0,
+      budgetCoins: details.budgetCoins ?? 0,
+      maxCoinsPerSession: details.maxCoinsPerSession ?? 0,
+      maxSessionsPerUserPerDay: details.maxSessionsPerUserPerDay ?? 0,
       targetUrl: details.targetUrl || undefined,
       categoryIds: details.categoryIds,
       targetAudience: details.targetAudience,
@@ -193,7 +193,7 @@ export function CreateCampaignForm({
               </div>
               <button
                 onClick={handleBack}
-                className="text-sm text-blue-600 hover:text-blue-700 flex items-center transition-colors"
+                className="text-sm text-blue-600 hover:text-blue-700 flex items-center transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 Cambiar juego

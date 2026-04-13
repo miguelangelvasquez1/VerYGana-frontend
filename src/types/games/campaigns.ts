@@ -124,11 +124,11 @@ export interface FileUploadRequest { //cambiar a import global
 export interface CampaignDetails {
 
   // Sistema de monedas y recompensas
-  coinValue: number; // Valor de cada moneda en dinero real
-  completionCoins: number; // Monedas ganadas por completar el juego
-  budgetCoins: number; // Presupuesto total en monedas
-  maxCoinsPerSession: number; // Máximo de monedas que se pueden ganar por sesión
-  maxSessionsPerUserPerDay: number; // Máximo de sesiones por usuario por día
+  coinValue?: number; // Valor de cada moneda en dinero real
+  completionCoins?: number; // Monedas ganadas por completar el juego
+  budgetCoins?: number; // Presupuesto total en monedas
+  maxCoinsPerSession?: number; // Máximo de monedas que se pueden ganar por sesión
+  maxSessionsPerUserPerDay?: number; // Máximo de sesiones por usuario por día
   
   // Presupuesto calculado (coinValue * budgetCoins)
   budget: number;
@@ -145,7 +145,7 @@ export interface CampaignDetails {
     municipalityCodes: string[];
   };
 
-  gameConfig: undefined;
+  gameConfig?: undefined;
 }
 
 // ==================== DTOs de Response ====================

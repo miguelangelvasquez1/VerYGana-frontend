@@ -2,7 +2,6 @@
 
 'use client';
 import React from 'react';
-import { DashboardLayout } from '@/components/commercial/layout/DashboardLayout';
 import { StatsCards } from '@/components/commercial/dashboard/StatsCards';
 import { PerformanceChart } from '@/components/commercial/dashboard/PerformanceChart';
 import { PlanGuard } from '@/components/commercial/plans/PlanGuard';
@@ -13,7 +12,6 @@ export default function DashboardPage() {
 
   return (
     
-    <DashboardLayout title="Dashboard">
       <PlanGuard requiredPlans={['BASIC', 'STANDARD', 'PREMIUM']} featureName="Dashboard">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
@@ -60,6 +58,5 @@ export default function DashboardPage() {
         </div>
       </div>
       </PlanGuard>
-    </DashboardLayout>
    );
 }

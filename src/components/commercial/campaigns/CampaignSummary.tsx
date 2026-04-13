@@ -18,6 +18,7 @@ import {
   Gamepad2
 } from 'lucide-react';
 import { CampaignDetails } from '@/types/games/campaigns';
+import { StepNavigation } from './StepNavigation';
 
 interface CampaignSummaryProps {
   gameTitle: string;
@@ -144,7 +145,7 @@ export function CampaignSummary({
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-700">Valor por Moneda</p>
                     <p className="text-lg font-bold text-gray-900">
-                      {formatCurrency(campaignDetails.coinValue)}
+                      {formatCurrency(campaignDetails.coinValue ?? 0)}
                     </p>
                   </div>
                 </div>
@@ -323,33 +324,13 @@ export function CampaignSummary({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-between pt-6 border-t">
-        <button
-          onClick={onBack}
-          disabled={loading}
-          className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center font-medium"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Volver
-        </button>
-        <button
-          onClick={onConfirm}
-          disabled={loading}
-          className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center font-semibold shadow-lg hover:shadow-xl"
-        >
-          {loading ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Creando campaña...
-            </>
-          ) : (
-            <>
-              <Check className="w-5 h-5 mr-2" />
-              Confirmar y Crear Campaña
-            </>
-          )}
-        </button>
-      </div>
+      <StepNavigation
+        onBack={onBack}
+        onContinue={onConfirm}
+        continueLabel="Confirmar y crear"
+        isFinalStep
+        loading={loading}
+      />
     </div>
   );
 }

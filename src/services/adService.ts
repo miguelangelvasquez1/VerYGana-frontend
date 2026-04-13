@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api/client';
-import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, CreateAdAssetRequest } from '@/types/ads/commercial';
+import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdLikeDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, CreateAdAssetRequest } from '@/types/ads/commercial';
 import { PagedResponse } from '@/types/Generic.types';
 
 export interface AdStats {
@@ -192,9 +192,22 @@ class AdService {
     return response.data;
   }
 
-  // Registrar un clic en el anuncio
+  // Registrar un clic en la url de un anuncio IMPLEMENTAR
   async clickAd(adId: number): Promise<void> {
     await apiClient.post(`/ads/${adId}/click`);
+  }
+
+  async getAdDetails(id: number): Promise<AdResponseDTO> {
+    const response = await apiClient.get<AdResponseDTO>(`/adLike/${id}/details`);
+    return response.data;
+  }
+
+  async getAdLikes(id: number, page: number, size = 10): Promise<PagedResponse<AdLikeDTO>> {
+    const response = await apiClient.get<PagedResponse<AdLikeDTO>>(
+      `/adLike/${id}/likes`,
+      { params: { page, size } }
+    );
+    return response.data;
   }
 
   /**

@@ -3,7 +3,6 @@
 import { useParams, useRouter } from "next/navigation";
 import EditProductForm from "@/components/commercial/products/EditProductForm";
 import ProductStockSection from "@/components/consumer/products/stock/ProductStockSection";
-import { DashboardLayout } from "@/components/commercial/layout/DashboardLayout";
 
 export default function EditProductPage() {
   const params = useParams();
@@ -16,7 +15,6 @@ export default function EditProductPage() {
   }
 
   return (
-    <DashboardLayout title="Editar Producto">
       <div className="space-y-10">
         <EditProductForm
           productId={productId}
@@ -26,6 +24,5 @@ export default function EditProductPage() {
 
         <ProductStockSection productId={productId} />
       </div>
-    </DashboardLayout>
   );
 }

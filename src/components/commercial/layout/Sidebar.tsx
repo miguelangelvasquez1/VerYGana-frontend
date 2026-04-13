@@ -3,9 +3,8 @@
 // components/layout/Sidebar.tsx
 // Versión con control de acceso por plan efectivo
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
   BarChart3, CreditCard, FileImage, Home, PlusCircle,
   Settings, Target, Package, ClipboardList, Wallet,
@@ -35,6 +34,7 @@ interface SidebarProps {
   remainingBudget?: number;
   /** true si hay comisión activa */
   commissionActive?: boolean;
+  pathname?: string;
 }
 
 // ─── Menu items con control de plan ──────────────────────────────────────────
@@ -58,15 +58,11 @@ const menuItems: MenuItem[] = [
     requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
   },
   {
-    href: '/commercial/campaigns', icon: Target, label: 'Campañas',
+    href: '/commercial/campaigns', icon: Gamepad2, label: 'Juegos Branded',
     requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
   },
   {
-    href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Crear Campaña',
-    requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
-  },
-  {
-    href: '/commercial/games', icon: Gamepad2, label: 'Juegos Branded',
+    href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Brandear Juego',
     requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
   },
   {
@@ -123,16 +119,14 @@ export function Sidebar({
   hasActivePlan = false,
   remainingBudget,
   commissionActive = false,
+  pathname = '',
 }: SidebarProps) {
-  const pathname = usePathname();
 
-  // === DEBUG ===
-console.log({
-  effectivePlan,
-  hasActivePlan,
-  isStandard: effectivePlan === 'STANDARD',
-  isPremium: effectivePlan === 'PREMIUM'
-});
+  // Usamos el pathname que viene del Layout (más estable)
+  const isActive = useMemo(() => {
+    return (href: string): boolean => pathname === href;
+  }, [pathname]);
+
 // =============
 
   const canAccess = (item: MenuItem): boolean => {
@@ -209,7 +203,7 @@ console.log({
         {menuItems.map((item) => {
           if (!showItem(item)) return null;
 
-          const active = pathname === item.href;
+          const active = isActive(item.href)
           const locked = isLocked(item);
           const Icon = item.icon;
 
@@ -227,10 +221,10 @@ console.log({
                   href={item.href}
                   onClick={onClose}
                   className={`
-                    flex items-center px-3 py-2.5 rounded-lg transition-all duration-150 group
+                    flex items-center px-3 py-2.5 rounded-lg transition-colors duration-100 group
                     ${active
                       ? 'bg-blue-600/20 text-white border border-blue-500/30'
-                      : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                      : 'text-slate-400 hover:bg-white/[0.06] hover:text-white border border-transparent'
                     }
                   `}
                 >

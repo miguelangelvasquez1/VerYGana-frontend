@@ -17,6 +17,7 @@ import {
   Maximize2
 } from 'lucide-react';
 import { AdResponseDTO } from '@/types/ads/commercial';
+import { AdDetailModal } from './AdDetailModal';
 
 interface AdCardProps {
   ad: AdResponseDTO;
@@ -27,11 +28,11 @@ interface AdCardProps {
 }
 
 export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps) {
-  const [showMenu, setShowMenu] = useState(false);
   const [showMediaModal, setShowMediaModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Determinar si el anuncio se puede editar (solo PENDING)
-  const canEdit = ad.status === 'PENDING';
+  const canEdit = ad.status === 'PENDING' || ad.status === 'PAUSED';
   
   // Determinar si se puede pausar/reanudar
   const canPause = ad.status === 'ACTIVE';
@@ -74,12 +75,6 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
       month: 'short',
       day: 'numeric'
     });
-  };
-
-  const handleMenuClick = (e: React.MouseEvent, action: () => void) => {
-    e.stopPropagation();
-    action();
-    setShowMenu(false);
   };
 
   const handleMediaClick = () => {
@@ -184,7 +179,7 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
               <p className="text-sm font-bold text-gray-900">
                 ${ad.spentBudget.toFixed(2)}
               </p>
-              <p className="text-xs text-gray-500">Gastado</p>
+              <p className="text-xs text-gray-500">Invertido</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
@@ -236,7 +231,7 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
             {canEdit && (
               <button
                 onClick={() => onEdit(ad)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm cursor-pointer"
               >
                 <Edit2 className="w-4 h-4" />
                 Editar
@@ -259,7 +254,7 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
             {canPause && (
               <button
                 onClick={() => onPause(ad.id)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-yellow-500 text-white text-sm font-semibold rounded-lg hover:bg-yellow-600 active:bg-yellow-700 transition-colors shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-yellow-500 text-white text-sm font-semibold rounded-lg hover:bg-yellow-600 active:bg-yellow-700 transition-colors shadow-sm cursor-pointer"
                 title="Pausar anuncio"
               >
                 <Pause className="w-4 h-4" />
@@ -271,7 +266,7 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
             {canResume && (
               <button
                 onClick={() => onResume(ad.id)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm cursor-pointer"
                 title="Reanudar anuncio"
               >
                 <PlayCircle className="w-4 h-4" />
@@ -282,33 +277,12 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
             {/* Menú de más opciones */}
             <div className="relative">
               <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="p-2.5 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 hover:border-gray-300 active:bg-gray-100 transition-colors"
-                title="Más opciones"
+                onClick={() => setShowDetailModal(true)}
+                className="p-2.5 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer"
+                title="Ver detalles"
               >
                 <MoreVertical className="w-5 h-5" />
               </button>
-
-              {/* Dropdown Menu */}
-              {showMenu && (
-                <>
-                  {/* Backdrop para cerrar el menú */}
-                  <div 
-                    className="fixed inset-0 z-10" 
-                    onClick={() => setShowMenu(false)}
-                  />
-                  
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-20">
-                    {/* <button
-                      onClick={(e) => handleMenuClick(e, () => onDelete(ad.id))}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Eliminar anuncios
-                    </button> */}
-                  </div>
-                </>
-              )}
             </div>
           </div>
 
@@ -375,6 +349,13 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
             </div>
           </div>
         </div>
+      )}
+
+      {showDetailModal && (
+        <AdDetailModal
+          adId={ad.id}
+          onClose={() => setShowDetailModal(false)}
+        />
       )}
     </>
   );
