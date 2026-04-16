@@ -16,7 +16,8 @@ import {
   ClipboardList,
   Wallet,
   X,
-  LogOut
+  LogOut,
+  PawPrint
 } from 'lucide-react';
 
 const menuItems = [
@@ -30,6 +31,8 @@ const menuItems = [
   { href: '/commercial/analytics', icon: BarChart3, label: 'Estadísticas' },
   { href: '/commercial/billing', icon: CreditCard, label: 'Facturación' },
   { href: '/commercial/balance', icon: Wallet, label: 'Mi Saldo' },
+  { href: '/commercial/pet-catalog', icon: PawPrint, label: 'Catálogo Mascota' },
+  { href: '/commercial/pet-scenes', icon: PawPrint, label: 'Escenas Mascota' },
   { href: '/commercial/settings', icon: Settings, label: 'Configuración' },
 ];
 
