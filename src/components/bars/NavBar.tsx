@@ -1,5 +1,7 @@
 'use client';
 
+// Agrega este import arriba junto a los demás de lucide-react
+import { PawPrint } from 'lucide-react';
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -141,6 +143,12 @@ export default function Navbar() {
                 Juegos
               </button>
             </Link>
+
+            <Link href={"/pet"}>
+              <button className={pathname === "/pet" ? activeButtonStyle : buttonsStyle}>
+                🐾 Mascota
+              </button>
+            </Link> 
 
             <Link href={"/ads"}>
               <button className={pathname === "/ads" ? activeButtonStyle : buttonsStyle}>
@@ -414,7 +422,16 @@ export default function Navbar() {
               <span className="text-xs mt-1 font-medium">Rifas</span>
             </div>
           </Link>
-
+          <Link href="/mascota" className="flex flex-col items-center justify-center">
+            <div className={`flex flex-col items-center justify-center transition-all ${
+              pathname === "/mascota" ? "text-blue-600" : "text-gray-500"
+            }`}>
+              <span className={`text-2xl ${pathname === "/mascota" ? "scale-110" : ""}`}>
+                🐾
+              </span>
+            <span className="text-xs mt-1 font-medium">Mascota</span>
+            </div>
+          </Link>
           {/* PRODUCTOS */}
           <Link href="/products" className="flex flex-col items-center justify-center">
             <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/products" ? "text-blue-600" : "text-gray-500"}`}>

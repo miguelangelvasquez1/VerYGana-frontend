@@ -6,10 +6,24 @@
 import React, { useMemo } from 'react';
 import Link from 'next/link';
 import {
-  BarChart3, CreditCard, FileImage, Home, PlusCircle,
-  Settings, Target, Package, ClipboardList, Wallet,
-  X, LogOut, Gamepad2, PawPrint, Lock, Sparkles,
-  TrendingUp, Megaphone
+  BarChart3,
+  CreditCard,
+  FileImage,
+  Home,
+  PlusCircle,
+  Settings,
+  Target,
+  Package,
+  ClipboardList,
+  Wallet,
+  X,
+  LogOut,
+  Gamepad2, 
+  PawPrint, 
+  Lock, 
+  Sparkles,
+  TrendingUp, 
+  Megaphone
 } from 'lucide-react';
 import { Plan } from '@/types/plan';
 
