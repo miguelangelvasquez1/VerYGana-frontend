@@ -6,7 +6,7 @@ export interface RegisterConsumerDTO {
   name: string;
   lastName: string;
   department: string;
-  municipality: string;
+  municipalityCode: string;
   categories?: CategoryResponseDTO[];
   avatarId: number;
   referredByCode?: string;
@@ -33,12 +33,12 @@ export interface ConsumerProfileResponseDTO {
     role : string;
     userState : string;
     department : string;
-    municipality : string;
+    municipalityName : string;
 }
 
 export interface ConsumerUpdateProfileRequestDTO {
     email ?: string;
     phoneNumber ?: string;
     department ?: string;
-    municipality ?: string;
+    municipalityName ?: string;
 }

@@ -1,8 +1,5 @@
 'use client';
 
-// components/layout/Sidebar.tsx
-// Versión con control de acceso por plan efectivo
-
 import React, { useMemo } from 'react';
 import Link from 'next/link';
 import {
@@ -25,7 +22,8 @@ import {
   TrendingUp, 
   Megaphone
 } from 'lucide-react';
-import { Plan } from '@/types/plan';
+import { Plan } from '@/types/plan';  
+import { useLogout } from '@/hooks/useLogout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -135,6 +133,8 @@ export function Sidebar({
   commissionActive = false,
   pathname = '',
 }: SidebarProps) {
+
+  const { logout } = useLogout();
 
   // Usamos el pathname que viene del Layout (más estable)
   const isActive = useMemo(() => {
@@ -261,7 +261,11 @@ export function Sidebar({
 
       {/* ── Footer ── */}
       <div className="p-3 border-t border-white/[0.07]">
-        <button className="w-full flex items-center px-3 py-2 text-slate-500 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors text-sm group">
+        <button className="w-full flex items-center px-3 py-2 text-slate-500 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors text-sm group cursor-pointer"
+          onClick={async () => {
+            await logout();
+          }}
+        >
           <LogOut className="w-4 h-4 mr-3 group-hover:text-red-400 transition-colors" />
           Cerrar Sesión
         </button>
