@@ -1,18 +1,17 @@
 'use client';
 
-// components/layout/Sidebar.tsx
-// Versión con control de acceso por plan efectivo
-
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BarChart3, CreditCard, FileImage, Home, PlusCircle,
-  Settings, Target, Package, ClipboardList, Wallet,
+  Settings, Target, Package, ClipboardList,
   X, LogOut, Gamepad2, PawPrint, Lock, Sparkles,
   TrendingUp, Megaphone
 } from 'lucide-react';
-import { Plan } from '@/types/plan';
+import { WalletStatus } from '@/types/finance/Wallet.types';
+import {PlanCode} from '@/types/finance/plans/Plan.types';
+import { formatBudget, formatCents } from '@/utils/currency';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,94 +19,111 @@ interface MenuItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  /** Si está definido, el item solo aparece para estos planes */
-  requiredPlans?: Plan['code'][];
-  /** Si true, aparece pero deshabilitado con lock en planes inferiores */
+  requiredPlans?: PlanCode[];
   lockIfUnavailable?: boolean;
 }
 
 interface SidebarProps {
   onClose?: () => void;
-  /** Plan efectivo del anunciante (viene de EffectivePlanState) */
-  effectivePlan?: Plan['code'];
+  effectivePlan?: PlanCode | null;
   hasActivePlan?: boolean;
-  /** Saldo del presupuesto activo (solo STANDARD / PREMIUM) */
   remainingBudget?: number;
-  /** true si hay comisión activa */
-  commissionActive?: boolean;
+  walletStatus?: WalletStatus;
 }
 
-// ─── Menu items con control de plan ──────────────────────────────────────────
+// ─── Menu items ───────────────────────────────────────────────────────────────
 
 const menuItems: MenuItem[] = [
   { href: '/commercial', icon: Home, label: 'Dashboard' },
   {
     href: '/commercial/products', icon: Package, label: 'Mis productos',
-    requiredPlans: ['BASIC', 'STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
-
-  { href: '/commercial/products/create', icon: PlusCircle, label: 'Crear producto',
-    requiredPlans: ['BASIC', 'STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+  {
+    href: '/commercial/products/create', icon: PlusCircle, label: 'Crear producto',
+    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
   {
     href: '/commercial/ads', icon: FileImage, label: 'Mis Anuncios',
-    requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
   {
     href: '/commercial/ads/create', icon: Megaphone, label: 'Crear Anuncio',
-    requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
   {
     href: '/commercial/campaigns', icon: Target, label: 'Campañas',
-    requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
   {
     href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Crear Campaña',
-    requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
   {
     href: '/commercial/games', icon: Gamepad2, label: 'Juegos Branded',
-    requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
   {
     href: '/commercial/surveys', icon: ClipboardList, label: 'Encuestas',
-    requiredPlans: ['STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
   {
     href: '/commercial/pets', icon: PawPrint, label: 'Mascotas',
-    requiredPlans: ['PREMIUM'], lockIfUnavailable: true,
+    requiredPlans: [PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
-  { href: '/commercial/analytics', icon: BarChart3, label: 'Estadísticas',
-    requiredPlans: ['BASIC', 'STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+  {
+    href: '/commercial/analytics', icon: BarChart3, label: 'Estadísticas',
+    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
-  { href: '/commercial/billing', icon: CreditCard, label: 'Facturación',
-    requiredPlans: ['BASIC', 'STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+  {
+    href: '/commercial/billing', icon: CreditCard, label: 'Facturación',
+    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
-  { href: '/commercial/settings', icon: Settings, label: 'Configuración',
-    requiredPlans: ['BASIC', 'STANDARD', 'PREMIUM'], lockIfUnavailable: true,
+  {
+    href: '/commercial/settings', icon: Settings, label: 'Configuración',
+    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
   },
   { href: '/commercial/plans', icon: Sparkles, label: 'Ver Planes' },
 ];
 
 // ─── Plan badge ───────────────────────────────────────────────────────────────
 
-const PLAN_STYLES: Record<string, { label: string; className: string }> = {
-  BASIC: {
+const PLAN_STYLES: Record<PlanCode, { label: string; className: string }> = {
+  [PlanCode.BASIC]: {
     label: 'Personal',
     className: 'bg-slate-600/40 text-slate-300 border border-slate-500/30',
   },
-  STANDARD: {
+  [PlanCode.STANDARD]: {
     label: 'Estándar',
     className: 'bg-blue-600/30 text-blue-300 border border-blue-500/40',
   },
-  PREMIUM: {
+  [PlanCode.PREMIUM]: {
     label: 'Premium',
     className: 'bg-purple-600/30 text-purple-300 border border-purple-500/40',
   },
 };
 
-function PlanBadge({ plan }: { plan: Plan['code'] }) {
-  const style = PLAN_STYLES[plan] ?? PLAN_STYLES['BASIC'];
+function PlanBadge({ plan }: { plan: PlanCode | null }) {
+  if (!plan) {
+    return (
+      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full tracking-widest bg-slate-700/40 text-slate-500 border border-slate-600/30">
+        SIN PLAN
+      </span>
+    );
+  }
+  const style = PLAN_STYLES[plan];
   return (
     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full tracking-widest ${style.className}`}>
       {style.label.toUpperCase()}
@@ -119,28 +135,17 @@ function PlanBadge({ plan }: { plan: Plan['code'] }) {
 
 export function Sidebar({
   onClose,
-  effectivePlan = '',
+  effectivePlan = null,
   hasActivePlan = false,
   remainingBudget,
-  commissionActive = false,
+  walletStatus = WalletStatus.INACTIVE,
 }: SidebarProps) {
   const pathname = usePathname();
-
-  // === DEBUG ===
-console.log({
-  effectivePlan,
-  hasActivePlan,
-  isStandard: effectivePlan === 'STANDARD',
-  isPremium: effectivePlan === 'PREMIUM'
-});
-// =============
 
   const canAccess = (item: MenuItem): boolean => {
     if (!hasActivePlan) return false;
     if (!item.requiredPlans || item.requiredPlans.length === 0) return true;
-
-    // ← Aquí está el fix importante
-    return !!(effectivePlan && item.requiredPlans.includes(effectivePlan));
+    return effectivePlan != null && item.requiredPlans.includes(effectivePlan);
   };
 
   const isLocked = (item: MenuItem): boolean => {
@@ -149,16 +154,13 @@ console.log({
   };
 
   const showItem = (item: MenuItem): boolean => {
-    // Items sin lockIfUnavailable y sin acceso → se ocultan directamente
     if (item.requiredPlans && !item.lockIfUnavailable && !canAccess(item)) return false;
     return true;
   };
 
-  const hasBudget = (effectivePlan === 'STANDARD' || effectivePlan === 'PREMIUM')
-    && typeof remainingBudget === 'number';
-
-  const formatBudget = (n: number) =>
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
+  const hasBudget =
+    (effectivePlan === PlanCode.STANDARD || effectivePlan === PlanCode.PREMIUM) &&
+    typeof remainingBudget === 'number';
 
   return (
     <div className="bg-[#0f1117] text-white w-64 h-screen flex flex-col border-r border-white/[0.06]">
@@ -185,20 +187,28 @@ console.log({
         </div>
       </div>
 
-      {/* ── Budget block (only STANDARD / PREMIUM) ── */}
+      {/* ── Budget block (STANDARD / PREMIUM only) ── */}
       {hasBudget && (
         <div className="mx-4 mt-4 rounded-xl bg-gradient-to-br from-blue-600/15 to-purple-600/10 border border-blue-500/20 p-3">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] text-slate-400 font-semibold tracking-widest">PRESUPUESTO ACTIVO</span>
+            <span className="text-[10px] text-slate-400 font-semibold tracking-widest">
+              PRESUPUESTO ACTIVO
+            </span>
             <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
           </div>
           <p className="text-lg font-black text-white leading-tight">
             {formatBudget(remainingBudget!)}
           </p>
-          {commissionActive && (
+          {walletStatus === WalletStatus.LOW_BALANCE && (
             <p className="text-[10px] text-amber-400 mt-1 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
-              Comisión activa (ROI 6x alcanzado)
+              Saldo bajo — recarga pronto
+            </p>
+          )}
+          {walletStatus === WalletStatus.EXHAUSTED && (
+            <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />
+              Presupuesto agotado
             </p>
           )}
         </div>
@@ -216,8 +226,7 @@ console.log({
           return (
             <div key={item.href}>
               {locked ? (
-                // Locked state — not clickable
-                <div className="flex items-center px-3 py-2.5 rounded-lg text-slate-600 cursor-not-allowed select-none group">
+                <div className="flex items-center px-3 py-2.5 rounded-lg text-slate-600 cursor-not-allowed select-none">
                   <Icon className="w-4 h-4 mr-3 text-slate-700 shrink-0" />
                   <span className="text-sm font-medium flex-1">{item.label}</span>
                   <Lock className="w-3 h-3 text-slate-700" />
@@ -238,7 +247,6 @@ console.log({
                     active ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'
                   }`} />
                   <span className="text-sm font-medium">{item.label}</span>
-                  {/* "Plans" pill highlight */}
                   {item.href === '/commercial/plans' && (
                     <span className="ml-auto text-[9px] font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1.5 py-0.5 rounded-full">
                       NEW

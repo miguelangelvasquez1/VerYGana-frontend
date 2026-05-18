@@ -21,7 +21,11 @@ export type Gender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
 export interface ConsumerInitialDataResponseDTO {
     id : number;
     name : string;
-    walletAvailableBalance : number;
+    totalAvailableKeys : number;
+    purchaseKeys : number;
+    connectivityKeys : number;
+    blockedPurchaseKeys : number;
+    blockedConnectivityKeys : number;
 }
 
 export interface ConsumerProfileResponseDTO {

@@ -1,7 +1,8 @@
 export interface DashboardStats {
-  totalProducts: number;
+  totalPendingProducts: number;
+  totalActiveProducts: number;
+  totalRejectedProducts: number;
   totalSales: number;
-  totalRevenue: number;
   averageRating: number;
 }
 

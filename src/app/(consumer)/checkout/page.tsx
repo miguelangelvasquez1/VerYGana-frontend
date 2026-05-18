@@ -16,8 +16,6 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { cart, cartSummary, clearCart } = useCart();
   const [contactEmail, setContactEmail] = useState('');
-  const [notes, setNotes] = useState('');
-  const [couponCode, setCouponCode] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,9 +44,7 @@ export default function CheckoutPage() {
       // Construir el DTO de compra
       const purchaseRequest: CreatePurchaseRequestDTO = {
         items: CartService.convertToCreatePurchaseDTO(cart),
-        contactEmail: contactEmail || undefined,
-        notes: notes || undefined,
-        couponCode: couponCode || undefined,
+        contactEmail: contactEmail || undefined
       };
 
       // Llamar a tu endpoint de compra
@@ -142,32 +138,6 @@ export default function CheckoutPage() {
                   <p className="text-xs text-gray-500 mt-1">
                     Para recibir las credenciales de tus productos
                   </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Código de cupón (opcional)
-                  </label>
-                  <input
-                    type="text"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="DESCUENTO10"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Notas adicionales (opcional)
-                  </label>
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Instrucciones especiales..."
-                  />
                 </div>
                 <button
                   type="submit"

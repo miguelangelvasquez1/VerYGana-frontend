@@ -5,13 +5,14 @@ import { Menu, Bell, User, TrendingUp, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
 import { getCommercialInitialData } from '@/services/CommercialService';
-import { EffectivePlanState } from '@/types/plan';
+import { EffectivePlanStateResponseDTO } from '@/types/finance/plans/Plan.types';
+import { formatBudget, formatCents } from '@/utils/currency';
 
 interface HeaderProps {
   title?: string;
   onMenuClick: () => void;
   showMenuButton: boolean;
-  planState?: EffectivePlanState | null;
+  planState?: EffectivePlanStateResponseDTO | null;
 }
 
 // Umbral desde variable de entorno (con fallback seguro)
@@ -47,7 +48,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
   }, []);
 
   const planCode = planState?.effectivePlan ?? 'BASIC';
-  const remainingBudget = planState?.remainingBudget ?? 0;
+  const remainingBudget = formatCents(planState?.remainingBudgetCents ?? 0);
 
   const isStandardOrPremium = 
     planState?.effectivePlan === 'STANDARD' || 
@@ -56,13 +57,6 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
   const hasBudget = isStandardOrPremium && remainingBudget > 0;
 
   const shouldShowRechargeButton = remainingBudget < BUDGET_LOW_THRESHOLD;
-
-  const formatBudget = (n: number) =>
-    new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0,
-    }).format(n);
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
@@ -94,13 +88,6 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
                     {formatBudget(remainingBudget)}
                   </span>
                 </div>
-
-                {planState?.commissionActive && (
-                  <div className="flex items-center gap-1 bg-amber-100 text-amber-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-amber-200">
-                    <TrendingUp className="w-2.5 h-2.5" />
-                    ROI 6×
-                  </div>
-                )}
 
                 {/* Botón Recargar - Solo aparece si está bajo el umbral */}
                 {shouldShowRechargeButton && (

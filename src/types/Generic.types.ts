@@ -34,6 +34,11 @@ export interface FileUploadPermissionDTO {
   expiresInSeconds: number;
 }
 
+export interface AssetUploadPermissionDTO {
+  assetId: number;
+  imagePermission: FileUploadPermissionDTO;
+}
+
 export interface NotificationResponseDTO {
   id: number;
   type: string;

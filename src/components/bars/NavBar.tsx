@@ -6,7 +6,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   User,
-  Wallet,
   Gift,
   Megaphone,
   Package,
@@ -15,12 +14,10 @@ import {
   ShoppingBag,
   Settings,
   LogOut,
-  Plus,
-  Bell,
   Heart,
   Home,
-  ClipboardList,
   Ticket,
+  KeyRound
 } from "lucide-react";
 
 import { getConsumerInitialData } from "@/services/ConsumerService";
@@ -34,7 +31,7 @@ export default function Navbar() {
 
   // UI state
   const [openMenu, setOpenMenu] = useState(false);
-  const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [isKeyWalletOpen, setIsKeyWalletOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const {
@@ -53,8 +50,8 @@ export default function Navbar() {
 
   // refs independientes
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
-  const walletMenuRefDesktop = useRef<HTMLDivElement | null>(null);
-  const walletMenuRefMobile = useRef<HTMLDivElement | null>(null);
+  const keyWalletMenuRefDesktop = useRef<HTMLDivElement | null>(null);
+  const keyWalletMenuRefMobile = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefDesktop = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefMobile = useRef<HTMLDivElement | null>(null);
 
@@ -81,10 +78,10 @@ export default function Navbar() {
       if (profileMenuRef.current && !profileMenuRef.current.contains(target))
         setOpenMenu(false);
       if (
-        walletMenuRefDesktop.current && !walletMenuRefDesktop.current.contains(target) &&
-        walletMenuRefMobile.current && !walletMenuRefMobile.current.contains(target)
+        keyWalletMenuRefDesktop.current && !keyWalletMenuRefDesktop.current.contains(target) &&
+        keyWalletMenuRefMobile.current && !keyWalletMenuRefMobile.current.contains(target)
       )
-        setIsWalletOpen(false);
+        setIsKeyWalletOpen(false);
       if (
         notificationsMenuRefDesktop.current && !notificationsMenuRefDesktop.current.contains(target) &&
         notificationsMenuRefMobile.current && !notificationsMenuRefMobile.current.contains(target)
@@ -178,55 +175,151 @@ export default function Navbar() {
             {/* CART BUTTON */}
             <CartButton />
 
-            {/* WALLET */}
-            <div className="relative" ref={walletMenuRefDesktop}>
+            {/* KEY WALLET */}
+            <div className="relative" ref={keyWalletMenuRefDesktop}>
               <button
-                onClick={() => setIsWalletOpen((v) => !v)}
-                className="group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-full hover:bg-white/20 hover:scale-105 transition-all"
+                onClick={() => setIsKeyWalletOpen((v) => !v)}
+                className="group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/10 hover:bg-white/20 hover:scale-105 transition-all"
               >
-                <Wallet className="w-5 h-5 text-yellow-400" />
-                <div className="flex flex-col items-start">
-                  <span className="text-yellow-400 font-bold text-sm">
-                    {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+                <Image
+                  src="/logos/llave.png"
+                  alt="Llaves"
+                  width={28}
+                  height={28}
+                  className="object-contain"
+                />
+
+                <div className="flex flex-col items-start leading-tight">
+                  <span className="text-yellow-300 font-extrabold text-sm">
+                    {loadingUser
+                      ? "..."
+                      : consumer?.totalAvailableKeys?.toLocaleString("es-CO")}
                   </span>
-                  <span className="text-xs text-gray-200">Saldo disponible</span>
+
+                  <span className="text-[11px] text-gray-200">
+                    Llaves disponibles
+                  </span>
                 </div>
               </button>
 
+              {/* DROPDOWN */}
               <div
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
+                className={`absolute right-0 mt-3 w-[380px] overflow-hidden rounded-3xl bg-white shadow-2xl border border-white/20 transition-all duration-300 ${isKeyWalletOpen
+                  ? "opacity-100 scale-100 pointer-events-auto"
+                  : "opacity-0 scale-95 pointer-events-none"
+                  }`}
               >
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-white/20 rounded-full mx-auto mb-2 flex items-center justify-center">
-                      <Wallet className="w-6 h-6" />
+                {/* HEADER */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-[#004b8d] via-[#116cc0] to-[#7c3aed] px-6 py-6 text-white">
+                  <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+
+                  <div className="absolute -left-8 bottom-0 w-24 h-24 bg-cyan-300/10 rounded-full blur-2xl"></div>
+
+                  <div className="relative flex flex-col items-center text-center">
+                    <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl">
+                      <Image
+                        src="/logos/llave.png"
+                        alt="Llaves"
+                        width={58}
+                        height={58}
+                        className="object-contain"
+                      />
                     </div>
-                    <div className="text-2xl font-bold">
-                      {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+
+                    <div className="mt-4 text-4xl font-black tracking-tight text-yellow-300 drop-shadow-md">
+                      {loadingUser
+                        ? "..."
+                        : consumer?.totalAvailableKeys?.toLocaleString("es-CO")}
                     </div>
-                    <div className="text-sm text-blue-100">Saldo actual</div>
+
+                    <div className="text-sm text-blue-100 font-medium mt-1">
+                      Llaves Totales Disponibles
+                    </div>
                   </div>
                 </div>
-                <div className="p-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-green-50 p-3 rounded-xl text-center">
-                      <div className="text-lg font-bold text-green-600">—</div>
-                      <div className="text-xs text-green-700">Créditos</div>
+
+                {/* BODY */}
+                <div className="p-5 bg-gradient-to-b from-[#f8fbff] to-white">
+                  <div className="space-y-3">
+
+                    {/* PURCHASE KEYS */}
+                    <div className="group flex items-center justify-between rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-4 hover:shadow-md transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-yellow-400/15 flex items-center justify-center border border-yellow-300/30">
+                          <ShoppingBag className="w-6 h-6 text-yellow-600" />
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">
+                            Llaves de Compra
+                          </p>
+
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Disponibles para productos y rifas
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-2xl font-black text-yellow-600">
+                          {loadingUser
+                            ? "..."
+                            : consumer?.purchaseKeys?.toLocaleString("es-CO")}
+                        </div>
+
+                        {!!consumer?.blockedPurchaseKeys && (
+                          <div className="text-[11px] text-red-500 font-medium mt-1">
+                            {consumer.blockedPurchaseKeys} bloqueadas
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="bg-blue-50 p-3 rounded-xl text-center">
-                      <div className="text-lg font-bold text-blue-600">—</div>
-                      <div className="text-xs text-blue-700">Transacciones</div>
+
+                    {/* CONNECTIVITY KEYS */}
+                    <div className="group flex items-center justify-between rounded-2xl border border-cyan-100 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-4 hover:shadow-md transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-cyan-400/15 flex items-center justify-center border border-cyan-300/30">
+                          <KeyRound className="w-6 h-6 text-cyan-600" />
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">
+                            Llaves de Conectividad
+                          </p>
+
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Recargas, datos y servicios
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-2xl font-black text-cyan-700">
+                          {loadingUser
+                            ? "..."
+                            : consumer?.connectivityKeys?.toLocaleString("es-CO")}
+                        </div>
+
+                        {!!consumer?.blockedConnectivityKeys && (
+                          <div className="text-[11px] text-red-500 font-medium mt-1">
+                            {consumer.blockedConnectivityKeys} bloqueadas
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    Depositar Fondos
-                  </button>
-                  <Link href="/explore/wallet" className="w-full bg-gray-50 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-100 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
-                    <History className="w-4 h-4" />
-                    Ver Historial Completo
-                  </Link>
+
+                  {/* BUTTON */}
+                  <div className="mt-5">
+                    <Link
+                      href="/explore/wallet"
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold hover:scale-[1.02] transition-all shadow-lg hover:shadow-blue-500/20"
+                    >
+                      <History className="w-5 h-5" />
+                      Historial de Transacciones
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -320,53 +413,142 @@ export default function Navbar() {
         <div className="flex items-center justify-between px-4 py-3">
           <Image src="/logos/logo.png" alt="Logo" width={45} height={45} />
           <div className="flex items-center gap-3">
-            {/* WALLET */}
-            <div className="relative" ref={walletMenuRefMobile}>
+            {/* KEY WALLET */}
+            <div className="relative" ref={keyWalletMenuRefMobile}>
               <button
-                onClick={() => setIsWalletOpen((v) => !v)}
-                className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full"
+                onClick={() => setIsKeyWalletOpen((v) => !v)}
+                className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-2xl border border-white/10"
               >
-                <Wallet className="w-4 h-4 text-yellow-400" />
-                <span className="text-yellow-400 font-bold text-sm">
-                  {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+                <Image
+                  src="/logos/llave.png"
+                  alt="Llaves"
+                  width={24}
+                  height={24}
+                  className="object-contain"
+                />
+
+                <span className="text-yellow-300 font-extrabold text-sm">
+                  {loadingUser
+                    ? "..."
+                    : consumer?.totalAvailableKeys?.toLocaleString("es-CO")}
                 </span>
               </button>
+
               <div
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`fixed inset-x-0 top-16 mx-4 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
+                className={`fixed inset-x-0 top-16 mx-4 overflow-hidden rounded-3xl bg-white shadow-2xl border border-white/20 transition-all duration-300 ${isKeyWalletOpen
+                    ? "opacity-100 scale-100 pointer-events-auto"
+                    : "opacity-0 scale-95 pointer-events-none"
+                  }`}
               >
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-white/20 rounded-full mx-auto mb-2 flex items-center justify-center">
-                      <Wallet className="w-6 h-6" />
+                {/* HEADER */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-[#004b8d] via-[#116cc0] to-[#7c3aed] px-5 py-6 text-white">
+                  <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+
+                  <div className="relative flex flex-col items-center text-center">
+                    <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl">
+                      <Image
+                        src="/logos/llave.png"
+                        alt="Llaves"
+                        width={56}
+                        height={56}
+                        className="object-contain"
+                      />
                     </div>
-                    <div className="text-2xl font-bold">
-                      {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+
+                    <div className="mt-4 text-4xl font-black text-yellow-300 tracking-tight">
+                      {loadingUser
+                        ? "..."
+                        : consumer?.totalAvailableKeys?.toLocaleString("es-CO")}
                     </div>
-                    <div className="text-sm text-blue-100">Saldo actual</div>
+
+                    <div className="text-sm text-blue-100 mt-1">
+                      Llaves Totales Disponibles
+                    </div>
                   </div>
                 </div>
-                <div className="p-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-green-50 p-3 rounded-xl text-center">
-                      <div className="text-lg font-bold text-green-600">—</div>
-                      <div className="text-xs text-green-700">Créditos</div>
+
+                {/* BODY */}
+                <div className="p-4 bg-gradient-to-b from-[#f8fbff] to-white">
+                  <div className="space-y-3">
+
+                    {/* COMPRA */}
+                    <div className="flex items-center justify-between rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-yellow-400/15 flex items-center justify-center border border-yellow-300/30">
+                          <ShoppingBag className="w-5 h-5 text-yellow-600" />
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">
+                            Llaves de Compra
+                          </p>
+
+                          <p className="text-[11px] text-gray-500">
+                            Productos y rifas
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-xl font-black text-yellow-600">
+                          {loadingUser
+                            ? "..."
+                            : consumer?.purchaseKeys?.toLocaleString("es-CO")}
+                        </div>
+
+                        {!!consumer?.blockedPurchaseKeys && (
+                          <div className="text-[10px] text-red-500 font-medium mt-1">
+                            {consumer.blockedPurchaseKeys} bloqueadas
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="bg-blue-50 p-3 rounded-xl text-center">
-                      <div className="text-lg font-bold text-blue-600">—</div>
-                      <div className="text-xs text-blue-700">Transacciones</div>
+
+                    {/* CONECTIVIDAD */}
+                    <div className="flex items-center justify-between rounded-2xl border border-cyan-100 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-cyan-400/15 flex items-center justify-center border border-cyan-300/30">
+                          <KeyRound className="w-5 h-5 text-cyan-600" />
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">
+                            Llaves de Conectividad
+                          </p>
+
+                          <p className="text-[11px] text-gray-500">
+                            Datos y servicios
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-xl font-black text-cyan-700">
+                          {loadingUser
+                            ? "..."
+                            : consumer?.connectivityKeys?.toLocaleString("es-CO")}
+                        </div>
+
+                        {!!consumer?.blockedConnectivityKeys && (
+                          <div className="text-[10px] text-red-500 font-medium mt-1">
+                            {consumer.blockedConnectivityKeys} bloqueadas
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    Depositar Fondos
-                  </button>
-                  <Link href="/explore/wallet">
-                    <button className="w-full bg-gray-50 text-gray-700 py-3 px-4 rounded-xl flex items-center justify-center gap-2">
-                      <History className="w-4 h-4" />
-                      Ver Historial Completo
-                    </button>
-                  </Link>
+
+                  {/* BUTTON */}
+                  <div className="mt-5">
+                    <Link
+                      href="/explore/wallet"
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold shadow-lg"
+                    >
+                      <History className="w-5 h-5" />
+                      Historial de Transacciones
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

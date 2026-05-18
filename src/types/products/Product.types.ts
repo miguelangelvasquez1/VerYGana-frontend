@@ -1,6 +1,18 @@
 import { ProductReviewResponseDTO } from "./ProductReview.types";
 import { ProductStockRequestDTO } from "./ProductStock.types";
 
+export enum ProductStatus {
+  ACTIVE = "ACTIVE",
+  PENDING = "PENDING",
+  REJECTED = "REJECTED",
+  INACTIVE = "INACTIVE"
+}
+
+export interface ConfirmProductCreationRequestDTO {
+  productAssetId: number;
+  productData: CreateProductRequestDTO;
+}
+
 export interface ProductSummaryResponseDTO {
   id: number;
   name: string;
@@ -9,6 +21,8 @@ export interface ProductSummaryResponseDTO {
   averageRate : number;
   categoryName : string;
   stock : number;
+  status : ProductStatus;
+  companyName : string;
 }
 
 export interface ProductEditInfoResponseDTO {
@@ -17,8 +31,6 @@ export interface ProductEditInfoResponseDTO {
   description: string;
   productCategoryId: number;
   price: number;
-  deliveryType: "AUTO" | "MANUAL" | "EXTERNAL_API"; 
-  digitalFormat: "LINK" | "CODE" | "FILE"; 
   imageUrl: string;
   totalStockItems: number;
   availableStockItems: number;
@@ -43,8 +55,6 @@ export interface CreateProductRequestDTO {
   description: string;
   productCategoryId: number;
   price: number;
-  deliveryType: "AUTO" | "MANUAL" | "EXTERNAL_API"; 
-  digitalFormat: "LINK" | "CODE" | "FILE"; 
   stockItems: ProductStockRequestDTO[];
 }
 
@@ -53,8 +63,10 @@ export interface UpdateProductRequestDTO {
   description : string;
   productCategoryId : number;
   price : number;
-  deliveryType : "AUTO" | "MANUAL" | "EXTERNAL_API"; 
-  digitalFormat: "LINK" | "CODE" | "FILE"; 
+}
+
+export interface ConfirmProductImageUploadRequestDTO {
+  newAssetId: number;
 }
 
 export interface FilterProductsParams {

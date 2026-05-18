@@ -4,8 +4,6 @@ import { PurchaseItemResponseDTO, CreatePurchaseItemRequestDTO } from "./purchas
 export interface CreatePurchaseRequestDTO {
     items: CreatePurchaseItemRequestDTO[];
     contactEmail?: string;
-    notes?: string;
-    couponCode?: string;
 }
 
 export interface PurchaseResponseDTO {

@@ -23,7 +23,7 @@ export enum DrawMethod {
     SYSTEM_RANDOM = 'SYSTEM_RANDOM'
 }
 
-export interface PrepareRaffleCreationResponseDTO {
+export interface RaffleAssetsUploadPermissionDTO {
     raffleAssetId: number;
     raffleImagePermission: FileUploadPermissionDTO;
     prizeUploadSlots: PrizeUploadSlotDTO[];

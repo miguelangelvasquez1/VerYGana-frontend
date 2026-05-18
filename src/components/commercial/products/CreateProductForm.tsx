@@ -1,74 +1,122 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createProduct } from "@/services/ProductService";
+import { useEffect, useRef, useState } from "react";
+import { useProductCreation } from "@/hooks/products/useProductCreation";
 import { getProductCategories } from "@/services/ProductCategoryService";
+import { CreateProductRequestDTO } from "@/types/products/Product.types";
+import { ProductStockRequestDTO } from "@/types/products/ProductStock.types";
+
+// ============================================================
+// TIPOS LOCALES
+// ============================================================
+
+interface StockItemForm {
+  code: string;
+  additionalInfo: string;
+  expirationDate_date: string;
+  expirationDate_time: string;
+}
+
+interface ProductFormState {
+  name: string;
+  description: string;
+  productCategoryId: string;
+  price: string;
+  stockItems: StockItemForm[];
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+const buildExpirationDate = (date: string, time: string): string | null => {
+  if (!date) return null;
+  return `${date}T${time || '00:00'}:00`;
+};
+
+const emptyStockItem = (): StockItemForm => ({
+  code: '',
+  additionalInfo: '',
+  expirationDate_date: '',
+  expirationDate_time: '',
+});
+
+const initialForm: ProductFormState = {
+  name: '',
+  description: '',
+  productCategoryId: '',
+  price: '',
+  stockItems: [emptyStockItem()],
+};
+
+// ============================================================
+// COMPONENTE
+// ============================================================
 
 export default function CreateProductForm() {
-  const [productImage, setProductImage] = useState<File | null>(null);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [form, setForm] = useState<ProductFormState>(initialForm);
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    productCategoryId: "",
-    price: "",
-    deliveryType: "AUTO" as "AUTO" | "MANUAL" | "EXTERNAL_API",
-    digitalFormat: "CODE" as "LINK" | "FILE" | "CODE",
-    stockItems: [
-      {
-        code: "",
-        additionalInfo: "",
-        expirationDate_date: "",
-        expirationDate_time: "",
-      },
-    ],
-  });
+  const { state, createProduct, reset } = useProductCreation();
 
+  const isSubmitting = ['preparing', 'uploading', 'creating'].includes(state.status);
+
+  // ── Cargar categorías ──────────────────────────────────────
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        setCategories(await getProductCategories());
-      } catch (err) {
-        console.error("Error cargando categorías", err);
-      }
-    };
-    loadCategories();
+    getProductCategories()
+      .then(setCategories)
+      .catch((err) => console.error('Error cargando categorías:', err));
   }, []);
 
-  const handleChange = (e: any) => {
-    const { name, value } = e.target;
+  // ── Limpiar URL de preview al desmontar ────────────────────
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // ── Handlers del formulario ────────────────────────────────
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  type StockField =
-    | "code"
-    | "additionalInfo"
-    | "expirationDate_date"
-    | "expirationDate_time";
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handleStockChange = (index: number, field: StockField, value: string) => {
-    const updated = [...form.stockItems];
-    updated[index][field] = value;
-    setForm((prev) => ({ ...prev, stockItems: updated }));
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleStockChange = (
+    index: number,
+    field: keyof StockItemForm,
+    value: string
+  ) => {
+    setForm((prev) => {
+      const updated = [...prev.stockItems];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, stockItems: updated };
+    });
   };
 
   const addStockItem = () => {
     setForm((prev) => ({
       ...prev,
-      stockItems: [
-        ...prev.stockItems,
-        {
-          code: "",
-          additionalInfo: "",
-          expirationDate_date: "",
-          expirationDate_time: "",
-        },
-      ],
+      stockItems: [...prev.stockItems, emptyStockItem()],
     }));
   };
 
@@ -79,51 +127,53 @@ export default function CreateProductForm() {
     }));
   };
 
-  /** Combinar fecha + hora en LocalDateTime */
-  const buildExpirationDate = (date: string, time: string): string | null => {
-    if (!date) return null;
-    if (!time) return `${date}T00:00:00`;
-    return `${date}T${time}:00`;
-  };
-
-  const handleSubmit = async (e: any) => {
+  // ── Submit ─────────────────────────────────────────────────
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!productImage) return alert("Selecciona una imagen");
-    if (!form.productCategoryId)
-      return alert("Debes seleccionar una categoría");
+    if (!image) return alert('Selecciona una imagen');
+    if (!form.productCategoryId) return alert('Debes seleccionar una categoría');
 
-    const priceValue = parseFloat(form.price);
-    if (!priceValue || priceValue <= 0)
-      return alert("El precio debe ser mayor a 0");
+    const price = parseFloat(form.price);
+    if (!price || price <= 0) return alert('El precio debe ser mayor a 0');
 
-    const mappedStock = form.stockItems.map((item) => ({
+    const stockItems: ProductStockRequestDTO[] = form.stockItems.map((item) => ({
       code: item.code,
-      additionalInfo: item.additionalInfo?.trim() || "",
-      expirationDate: buildExpirationDate(
-        item.expirationDate_date,
-        item.expirationDate_time
-      ),
+      additionalInfo: item.additionalInfo.trim(),
+      expirationDate: buildExpirationDate(item.expirationDate_date, item.expirationDate_time),
     }));
 
-    const dto = {
+    const productData: CreateProductRequestDTO = {
       name: form.name,
       description: form.description,
       productCategoryId: parseInt(form.productCategoryId),
-      price: priceValue,
-      deliveryType: form.deliveryType,
-      digitalFormat: form.digitalFormat,
-      stockItems: mappedStock,
+      price,
+      stockItems,
     };
 
-    try {
-      await createProduct(dto, productImage);
-      alert("Producto creado con éxito");
-    } catch (err) {
-      console.error(err);
-      alert("Error al crear producto");
+    const result = await createProduct(image, productData);
+
+    if (result.ok) {
+      alert(`Solicitud de creacion de producto enviada con éxito (ID: ${result.productId})`);
+      setForm(initialForm);
+      setImage(null);
+      setImagePreview(null);
+      reset();
+    } else {
+      alert(`Error: ${result.errorMsg}`);
     }
   };
+
+  // ── Label del estado de subida ─────────────────────────────
+  const statusLabel: Record<string, string> = {
+    preparing: 'Preparando...',
+    uploading: `Subiendo imagen... ${Math.round(state.progress)}%`,
+    creating: 'Creando producto...',
+  };
+
+  // ============================================================
+  // RENDER
+  // ============================================================
 
   return (
     <form
@@ -134,49 +184,59 @@ export default function CreateProductForm() {
         Crear nuevo producto
       </h2>
 
-      {/* Imagen */}
+      {/* ── Imagen ── */}
       <div>
         <label className="block text-sm font-medium mb-1">
-          Imagen del producto
+          Imagen del producto *
         </label>
 
-        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-          <p className="text-sm text-gray-600">
-            Haz clic para subir una imagen
-          </p>
-
+        <label
+          className="flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden"
+          style={{ minHeight: '10rem' }}
+        >
+          {imagePreview ? (
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="w-full h-48 object-cover rounded-xl"
+            />
+          ) : (
+            <p className="text-sm text-gray-500 py-10">
+              Haz clic para subir una imagen
+            </p>
+          )}
           <input
+            ref={fileInputRef}
             type="file"
             className="hidden"
-            accept="image/*"
-            onChange={(e) => setProductImage(e.target.files?.[0] || null)}
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleImageChange}
           />
         </label>
 
-        {productImage && (
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Archivo seleccionado: <strong>{productImage.name}</strong>
+        {image && (
+          <p className="mt-2 text-sm text-gray-500 text-center">
+            {image.name} ({(image.size / 1024 / 1024).toFixed(2)} MB)
           </p>
         )}
       </div>
 
-      {/* Grid */}
+      {/* ── Datos principales ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Nombre */}
         <div>
-          <label className="block text-sm">Nombre *</label>
+          <label className="block text-sm font-medium mb-1">Nombre *</label>
           <input
             name="name"
             value={form.name}
             onChange={handleChange}
             className="w-full border p-2 rounded-lg"
             required
+            disabled={isSubmitting}
           />
         </div>
 
-        {/* Precio */}
         <div>
-          <label className="block text-sm">Precio (COP) *</label>
+          <label className="block text-sm font-medium mb-1">Precio (COP) *</label>
           <input
             type="number"
             name="price"
@@ -185,18 +245,19 @@ export default function CreateProductForm() {
             className="w-full border p-2 rounded-lg"
             required
             min="1"
+            disabled={isSubmitting}
           />
         </div>
 
-        {/* Categoría */}
         <div>
-          <label className="block text-sm">Categoría *</label>
+          <label className="block text-sm font-medium mb-1">Categoría *</label>
           <select
             name="productCategoryId"
             value={form.productCategoryId}
             onChange={handleChange}
             className="w-full border p-2 rounded-lg"
             required
+            disabled={isSubmitting}
           >
             <option value="">Selecciona una categoría</option>
             {categories.map((c) => (
@@ -206,30 +267,11 @@ export default function CreateProductForm() {
             ))}
           </select>
         </div>
-
-        {/* Tipo de entrega */}
-        <div>
-          <label className="block text-sm">Tipo de entrega</label>
-          <div className="flex gap-4 mt-1">
-            {["AUTO", "MANUAL", "EXTERNAL_API"].map((t) => (
-              <label key={t} className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="deliveryType"
-                  value={t}
-                  checked={form.deliveryType === t}
-                  onChange={handleChange}
-                />
-                {t}
-              </label>
-            ))}
-          </div>
-        </div>
       </div>
 
-      {/* Descripción */}
+      {/* ── Descripción ── */}
       <div>
-        <label className="block text-sm">Descripción *</label>
+        <label className="block text-sm font-medium mb-1">Descripción *</label>
         <textarea
           name="description"
           value={form.description}
@@ -237,32 +279,19 @@ export default function CreateProductForm() {
           className="w-full border p-2 rounded-lg"
           rows={4}
           required
+          disabled={isSubmitting}
         />
       </div>
 
-      {/* Formato digital */}
-      <div>
-        <label className="block text-sm">Formato digital</label>
-        <select
-          name="digitalFormat"
-          value={form.digitalFormat}
-          onChange={handleChange}
-          className="w-full border p-2 rounded-lg"
-        >
-          <option value="LINK">Enlace</option>
-          <option value="FILE">Archivo</option>
-          <option value="CODE">Código</option>
-        </select>
-      </div>
-
-      {/* Stock */}
+      {/* ── Stock ── */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Stock digital</h3>
+          <h3 className="text-lg font-semibold">Códigos de stock</h3>
           <button
             type="button"
             onClick={addStockItem}
-            className="bg-blue-600 text-white px-3 py-1 rounded-lg"
+            disabled={isSubmitting}
+            className="bg-blue-600 text-white px-3 py-1 rounded-lg disabled:opacity-50"
           >
             + Agregar código
           </button>
@@ -274,51 +303,45 @@ export default function CreateProductForm() {
             className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border"
           >
             <div>
-              <label className="block text-sm">Código *</label>
+              <label className="block text-sm font-medium mb-1">Código *</label>
               <input
                 value={item.code}
-                onChange={(e) =>
-                  handleStockChange(index, "code", e.target.value)
-                }
+                onChange={(e) => handleStockChange(index, 'code', e.target.value)}
                 className="w-full border p-2 rounded-lg"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
             <div>
-              <label className="block text-sm">Info adicional</label>
+              <label className="block text-sm font-medium mb-1">Info adicional</label>
               <input
                 value={item.additionalInfo}
-                onChange={(e) =>
-                  handleStockChange(index, "additionalInfo", e.target.value)
-                }
+                onChange={(e) => handleStockChange(index, 'additionalInfo', e.target.value)}
                 className="w-full border p-2 rounded-lg"
+                disabled={isSubmitting}
               />
             </div>
 
-            {/* Fecha */}
             <div>
-              <label className="block text-sm">Fecha de expiración</label>
+              <label className="block text-sm font-medium mb-1">Fecha de expiración</label>
               <input
                 type="date"
                 value={item.expirationDate_date}
-                onChange={(e) =>
-                  handleStockChange(index, "expirationDate_date", e.target.value)
-                }
+                onChange={(e) => handleStockChange(index, 'expirationDate_date', e.target.value)}
                 className="w-full border p-2 rounded-lg"
+                disabled={isSubmitting}
               />
             </div>
 
-            {/* Hora */}
             <div>
-              <label className="block text-sm">Hora</label>
+              <label className="block text-sm font-medium mb-1">Hora</label>
               <input
                 type="time"
                 value={item.expirationDate_time}
-                onChange={(e) =>
-                  handleStockChange(index, "expirationDate_time", e.target.value)
-                }
+                onChange={(e) => handleStockChange(index, 'expirationDate_time', e.target.value)}
                 className="w-full border p-2 rounded-lg"
+                disabled={isSubmitting}
               />
             </div>
 
@@ -326,7 +349,8 @@ export default function CreateProductForm() {
               <button
                 type="button"
                 onClick={() => removeStockItem(index)}
-                className="text-red-600 text-sm hover:underline"
+                disabled={isSubmitting || form.stockItems.length === 1}
+                className="text-red-600 text-sm hover:underline disabled:opacity-40"
               >
                 Eliminar
               </button>
@@ -335,11 +359,33 @@ export default function CreateProductForm() {
         ))}
       </div>
 
+      {/* ── Barra de progreso ── */}
+      {isSubmitting && (
+        <div className="space-y-2">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${state.progress}%` }}
+            />
+          </div>
+          <p className="text-sm text-center text-gray-600">
+            {statusLabel[state.status]}
+          </p>
+        </div>
+      )}
+
+      {/* ── Error ── */}
+      {state.status === 'error' && (
+        <p className="text-sm text-red-600 text-center">{state.error}</p>
+      )}
+
+      {/* ── Submit ── */}
       <button
         type="submit"
-        className="w-full bg-green-600 text-white p-3 rounded-xl text-lg hover:bg-green-700 transition"
+        disabled={isSubmitting}
+        className="w-full bg-green-600 text-white p-3 rounded-xl text-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Crear producto
+        {isSubmitting ? statusLabel[state.status] : 'Crear producto'}
       </button>
     </form>
   );

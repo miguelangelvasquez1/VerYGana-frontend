@@ -4,7 +4,7 @@
 import React from 'react';
 import { DashboardLayout } from '@/components/commercial/layout/DashboardLayout';
 import { StatsCards } from '@/components/commercial/dashboard/StatsCards';
-import { PerformanceChart } from '@/components/commercial/dashboard/PerformanceChart';
+import { PerformanceChart } from '@/components/commercial/analytics/PerformanceChart';
 import { PlanGuard } from '@/components/commercial/plans/PlanGuard';
 
 export default function DashboardPage() {
