@@ -25,6 +25,7 @@ import type { ConsumerInitialDataResponseDTO } from "@/types/Consumer.types";
 import { CartButton } from "../consumer/cart/CartButton";
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationPanel } from "../notifications/NotificationsPanel";
+import { useLogout } from '@/hooks/useLogout';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -34,6 +35,7 @@ export default function Navbar() {
   const [isKeyWalletOpen, setIsKeyWalletOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const { logout } = useLogout();
   const {
     notifications,
     unreadCount,
@@ -402,7 +404,12 @@ export default function Navbar() {
                     <span>Configuración</span>
                   </Link>
                   <div className="border-t border-gray-100 mt-2 pt-2">
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all">
+                    <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
+                      onClick={async () => {
+                        setOpenMenu(false);
+                        await logout();
+                      }}
+                    >
                       <LogOut className="w-5 h-5" />
                       <span>Cerrar Sesión</span>
                     </button>
@@ -580,9 +587,9 @@ export default function Navbar() {
         <div className="grid grid-cols-5 h-16">
 
           {/* HOME — nuevo */}
-          <Link href="/" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/" ? "text-blue-600" : "text-gray-500"}`}>
-              <Home className={`w-6 h-6 ${pathname === "/" ? "scale-110" : ""}`} />
+          <Link href="/home" className="flex flex-col items-center justify-center">
+            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/home" ? "text-blue-600" : "text-gray-500"}`}>
+              <Home className={`w-6 h-6 ${pathname === "/home" ? "scale-110" : ""}`} />
               <span className="text-xs mt-1 font-medium">Inicio</span>
             </div>
           </Link>
@@ -671,7 +678,12 @@ export default function Navbar() {
               <span className="font-medium">Configuración</span>
             </Link>
             <div className="border-t border-gray-200 mt-2 pt-2">
-              <button className="w-full flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 transition-all">
+              <button className="w-full flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 transition-all cursor-pointer"
+                onClick={async () => {
+                  setOpenMenu(false);
+                  await logout();
+                }}
+              >
                 <LogOut className="w-6 h-6" />
                 <span className="font-medium">Cerrar Sesión</span>
               </button>

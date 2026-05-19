@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import { WalletStatus } from '@/types/finance/Wallet.types';
 import {PlanCode} from '@/types/finance/plans/Plan.types';
-import { formatBudget} from '@/utils/currency';
+import { formatBudget} from '@/utils/currency';  
+import { useLogout } from '@/hooks/useLogout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -141,6 +142,8 @@ export function Sidebar({
   walletStatus = WalletStatus.INACTIVE,
   pathname = '',
 }: SidebarProps) {
+
+  const { logout } = useLogout();
 
   // Usamos el pathname que viene del Layout (más estable)
   const isActive = useMemo(() => {
@@ -268,7 +271,11 @@ export function Sidebar({
 
       {/* ── Footer ── */}
       <div className="p-3 border-t border-white/[0.07]">
-        <button className="w-full flex items-center px-3 py-2 text-slate-500 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors text-sm group">
+        <button className="w-full flex items-center px-3 py-2 text-slate-500 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors text-sm group cursor-pointer"
+          onClick={async () => {
+            await logout();
+          }}
+        >
           <LogOut className="w-4 h-4 mr-3 group-hover:text-red-400 transition-colors" />
           Cerrar Sesión
         </button>

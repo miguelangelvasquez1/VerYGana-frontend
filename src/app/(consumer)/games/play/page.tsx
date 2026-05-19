@@ -70,11 +70,11 @@ export default function PlayGamePage() {
   return (
     <div className="w-full h-screen bg-black">
       <iframe
-        src={iframeUrl!}
-        className="w-full h-full border-0"
-        allow="fullscreen"
-        allowFullScreen
-      />
+  src={iframeUrl!}
+  className="w-screen h-screen border-0"
+  style={{ transform: 'scale(1)' }}
+  allowFullScreen
+/>
 
     {/* Cuando el juego se termina muestra: */}
     {gameFinished && (

@@ -72,55 +72,9 @@ export const authService = {
     return response.json();
   },
 
-  // Registro de Consumer
-  async registerConsumer(data: RegisterConsumerData) {
-    const response = await fetch(`${API_URL}/auth/register/consumer`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Error al registrar');
-    }
-
-    return response.json();
-  },
-
-  // Registro de Commercial
-  async registerCommercial(data: RegisterCommercialData) {
-    const response = await fetch(`${API_URL}/auth/register/commercial`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Error al registrar');
-    }
-
-    return response.json();
-  },
-
   // Verificar si hay sesión activa
   async checkSession() {
     // NextAuth maneja esto automáticamente con useSession
     return true;
-  },
-  
-  /**
-   * Logout: revoca token en backend y limpia cookie
-   */
-  async logout(): Promise<void> {
-    await fetch(`${API_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include', // ✅ Envía cookie para revocación
-    });
-    // En tu función de logout
-    // broadcastChannel?.postMessage({ type: 'logout' });
   },
 };
