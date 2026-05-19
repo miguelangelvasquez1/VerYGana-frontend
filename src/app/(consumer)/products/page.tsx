@@ -17,7 +17,7 @@ import InfiniteScroll from "@/components/consumer/products/InfiniteScroll";
 
 
 // SERVICES
-import { filterProducts, getAllProducts } from "@/services/ProductService";
+import { filterProducts} from "@/services/ProductService";
 import { getProductCategories } from "@/services/ProductCategoryService";
 
 // TYPES

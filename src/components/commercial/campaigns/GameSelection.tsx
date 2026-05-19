@@ -56,7 +56,7 @@ export function GameSelection({ games, loading, error, onSelect }: GameSelection
           <button
             key={game.id}
             onClick={() => onSelect(game)}
-            className="group text-left bg-white border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all overflow-hidden"
+            className="group text-left bg-white border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all overflow-hidden cursor-pointer"
           >
             {/* Portada */}
             {game.frontPageUrl ? (

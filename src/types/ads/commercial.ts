@@ -99,6 +99,12 @@ export interface AdResponseDTO {
   targetMunicipalities: MunicipalityDTO[];
 }
 
+export interface AdLikeDTO {
+  userId: number;
+  userName: string;
+  likedAt: string;
+}
+
 export interface EditAdFormData {
   title: string;
   description: string;
@@ -120,7 +126,6 @@ export interface AdUpdateDTO {
 
   title?: string;
   description?: string;
-  rewardPerLike?: number;
   maxLikes?: number;
   startDate?: string | null;
   endDate?: string | null;

@@ -18,11 +18,29 @@ export interface ProductSummaryResponseDTO {
   name: string;
   imageUrl: string;
   price: number;
+  maxKeysAllowed: number;
+  minCashCents: number;
   averageRate : number;
   categoryName : string;
   stock : number;
   status : ProductStatus;
   companyName : string;
+}
+
+export interface ProductResponseDTO {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  price: number;
+  maxKeysAllowed: number;
+  minCashCents: number;
+  averageRate : number;
+  categoryName : string;
+  companyName : string;
+  stock : number;
+  reviewCount : number;
+  reviews : ProductReviewResponseDTO[];
 }
 
 export interface ProductEditInfoResponseDTO {
@@ -34,20 +52,6 @@ export interface ProductEditInfoResponseDTO {
   imageUrl: string;
   totalStockItems: number;
   availableStockItems: number;
-}
-
-export interface ProductResponseDTO {
-  id: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  averageRate : number;
-  categoryName : string;
-  shopName : string;
-  stock : number;
-  reviewCount : number;
-  reviews : ProductReviewResponseDTO[];
 }
 
 export interface CreateProductRequestDTO {

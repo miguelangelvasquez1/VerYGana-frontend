@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, createContext, useContext } from 'react';
+// components/layout/DashboardLayout.tsx
+// Versión con carga de EffectivePlanState y propagación a Sidebar/Header
+
+import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { getEffectivePlanState } from '@/services/planService';
 import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
 import { WalletStatus } from '@/types/finance/Wallet.types';
 import { formatCents } from '@/utils/currency';
+import { usePathname } from 'next/navigation';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -50,11 +54,44 @@ interface DashboardLayoutProps {
   title?: string;
 }
 
-export function DashboardLayout({ children, title }: DashboardLayoutProps) {
+export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile]       = useState(false);
   const [planState, setPlanState]     = useState<EffectivePlanStateResponseDTO | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
+
+  const pathname = usePathname();
+  // Memoizamos el pathname actual para evitar renders inestables
+  const currentPath = useMemo(() => pathname, [pathname]);
+
+  const getPageTitle = (path: string): string => {
+    // 1️⃣ Exact match primero
+    if (PAGE_TITLES[path]) {
+      return PAGE_TITLES[path];
+    }
+
+    // 2️⃣ Partial match (ordenado por longitud)
+    const routes = [
+      { match: '/commercial/ads/create', title: 'Crear Anuncio' },
+      { match: '/commercial/ads', title: 'Mis Anuncios' },
+
+      { match: '/commercial/products/create', title: 'Crear Producto' },
+      { match: '/commercial/products', title: 'Mis Productos' },
+
+      { match: '/commercial/campaigns/create', title: 'Crear Campaña' },
+      { match: '/commercial/campaigns', title: 'Campañas' },
+    ];
+
+    const sortedRoutes = routes.sort((a, b) => b.match.length - a.match.length);
+
+    const found = sortedRoutes.find(r => path.startsWith(r.match));
+    if (found) return found.title;
+
+    // 3️⃣ fallback
+    return 'Panel';
+  };
+
+  const title = getPageTitle(pathname);
 
   useEffect(() => {
     const check = () => {
@@ -102,8 +139,9 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
             onClose={() => setSidebarOpen(false)}
             effectivePlan={planState?.effectivePlan as PlanCode | null ?? null}
             hasActivePlan={planState?.hasActivePlan ?? false}
-            remainingBudget={formatCents(planState?.remainingBudgetCents ?? 0)}
+            remainingBudget={planState?.remainingBudgetCents ?? 0}
             walletStatus={planState?.walletStatus ?? WalletStatus.INACTIVE}
+            pathname={currentPath}
           />
         </div>
 
@@ -120,3 +158,19 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
     </PlanContext.Provider>
   );
 }
+
+// config/pageTitles.ts
+export const PAGE_TITLES: Record<string, string> = {
+  '/commercial': 'Dashboard',
+  '/commercial/products': 'Mis Productos',
+  '/commercial/products/create': 'Crear Producto',
+  '/commercial/ads': 'Mis Anuncios',
+  '/commercial/ads/create': 'Crear Anuncio',
+  '/commercial/campaigns': 'Campañas',
+  '/commercial/campaigns/create': 'Crear Campaña',
+  '/commercial/surveys': 'Encuestas',
+  '/commercial/analytics': 'Estadísticas',
+  '/commercial/billing': 'Facturación',
+  '/commercial/settings': 'Configuración',
+  '/commercial/plans': 'Planes',
+};

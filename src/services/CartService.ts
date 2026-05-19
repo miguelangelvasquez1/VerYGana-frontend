@@ -3,7 +3,7 @@
 // Maneja la lógica de negocio y persistencia
 // ========================================
 
-import { CartItem, CartSummary, CreatePurchaseRequestDTO, CreatePurchaseItemRequestDTO } from '@/types/cart.types';
+import { CartItem, CartSummary } from '@/types/cart.types';
 
 const CART_STORAGE_KEY = 'shopping_cart';
 
@@ -44,60 +44,48 @@ export class CartService {
   // ====================================
 
   static addItem(
-    currentCart: CartItem[],
-    product: {
-      id: number;
-      name: string;
-      imageUrl: string;
-      price: number;
-      stock: number;
-      categoryName: string;
-    },
-    quantity: number = 1
-  ): CartItem[] {
-    const existingItemIndex = currentCart.findIndex(
-      item => item.productId === product.id
-    );
+  currentCart: CartItem[],
+  product: {
+    id: number;
+    name: string;
+    imageUrl: string;
+    price: number;
+    maxKeysAllowed: number;  // NUEVO
+    minCashCents: number;    // NUEVO
+    stock: number;
+    categoryName: string;
+  },
+  quantity = 1
+): CartItem[] {
+  const existingItemIndex = currentCart.findIndex(item => item.productId === product.id);
+  let newCart: CartItem[];
 
-    let newCart: CartItem[];
-
-    if (existingItemIndex >= 0) {
-      // El producto ya existe, actualizar cantidad
-      newCart = [...currentCart];
-      const newQuantity = newCart[existingItemIndex].quantity + quantity;
-      
-      // Validar que no exceda el stock
-      if (newQuantity > product.stock) {
-        throw new Error(`Solo hay ${product.stock} unidades disponibles`);
-      }
-
-      newCart[existingItemIndex] = {
-        ...newCart[existingItemIndex],
-        quantity: newQuantity,
-        stock: product.stock, // Actualizar stock disponible
-      };
-    } else {
-      // Producto nuevo
-      if (quantity > product.stock) {
-        throw new Error(`Solo hay ${product.stock} unidades disponibles`);
-      }
-
-      const newItem: CartItem = {
-        productId: product.id,
-        name: product.name,
-        imageUrl: product.imageUrl,
-        price: product.price,
-        quantity,
-        stock: product.stock,
-        categoryName: product.categoryName,
-      };
-
-      newCart = [...currentCart, newItem];
+  if (existingItemIndex >= 0) {
+    newCart = [...currentCart];
+    const newQuantity = newCart[existingItemIndex].quantity + quantity;
+    if (newQuantity > product.stock) {
+      throw new Error(`Solo hay ${product.stock} unidades disponibles`);
     }
-
-    this.saveCart(newCart);
-    return newCart;
+    newCart[existingItemIndex] = { ...newCart[existingItemIndex], quantity: newQuantity, stock: product.stock };
+  } else {
+    if (quantity > product.stock) throw new Error(`Solo hay ${product.stock} unidades disponibles`);
+    newCart = [...currentCart, {
+      productId: product.id,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      price: product.price,
+      maxKeysAllowed: product.maxKeysAllowed,  // NUEVO
+      minCashCents: product.minCashCents,      // NUEVO
+      quantity,
+      stock: product.stock,
+      categoryName: product.categoryName,
+    }];
   }
+
+  this.saveCart(newCart);
+  return newCart;
+}
+
 
   static removeItem(currentCart: CartItem[], productId: number): CartItem[] {
     const newCart = currentCart.filter(item => item.productId !== productId);

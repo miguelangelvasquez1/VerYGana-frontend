@@ -7,6 +7,8 @@ export interface CartItem {
   name: string;
   imageUrl: string;
   price: number;
+  maxKeysAllowed: number;  // llaves máximas por unidad
+  minCashCents: number;    // piso de efectivo en centavos por unidad
   quantity: number;
   stock: number; // Stock disponible al momento de agregar
   categoryName: string;
@@ -19,18 +21,3 @@ export interface CartSummary {
   total: number;
 }
 
-// ========================================
-// TIPOS PARA LA COMPRA (Backend DTOs)
-// ========================================
-
-export interface CreatePurchaseItemRequestDTO {
-  productId: number;
-  quantity: number;
-}
-
-export interface CreatePurchaseRequestDTO {
-  items: CreatePurchaseItemRequestDTO[];
-  contactEmail?: string;
-  notes?: string;
-  couponCode?: string;
-}

@@ -38,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
-  
+
   return (
     <div
       className="bg-white rounded-2xl shadow hover:shadow-lg transition cursor-pointer overflow-hidden border"
@@ -63,8 +63,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
           >
             <Heart
               className={`w-5 h-5 ${isFavorite(product.id)
-                  ? "fill-red-500 text-red-500"
-                  : "text-gray-400"
+                ? "fill-red-500 text-red-500"
+                : "text-gray-400"
                 }`}
             />
           </button>
@@ -94,8 +94,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <Star
               key={i}
               className={`w-4 h-4 ${i < Math.round(product.averageRate ?? 0)
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "text-gray-300"
+                ? "fill-yellow-400 text-yellow-400"
+                : "text-gray-300"
                 }`}
             />
           ))}
@@ -104,13 +104,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </span>
         </div>
 
+        {/* Keys badge */}
+        {product.maxKeysAllowed > 0 && (
+          <p className="text-xs text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+            🔑 Acepta hasta {product.maxKeysAllowed.toLocaleString('es-CO')} llaves
+          </p>
+        )}
+
         {/* Stock */}
         <p
           className={`text-sm font-medium px-3 py-1 rounded-full inline-block ${product.stock > 10
-              ? "bg-green-100 text-green-700"
-              : product.stock > 0
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-red-100 text-red-700"
+            ? "bg-green-100 text-green-700"
+            : product.stock > 0
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-red-100 text-red-700"
             }`}
         >
           {product.stock > 0

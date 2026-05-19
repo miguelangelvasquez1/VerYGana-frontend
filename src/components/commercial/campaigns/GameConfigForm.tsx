@@ -33,6 +33,7 @@ import { TextInputWidget } from './widgets/TextInputWidget';
 import { number } from 'zod';
 import { DecimalInputWidget } from './widgets/DecimalInputWidget';
 import { NumberInputWidget } from './widgets/NumberInputWidget';
+import { StepNavigation } from './StepNavigation';
 
 interface GameConfigFormProps {
   gameTitle: string;
@@ -237,23 +238,11 @@ export function GameConfigForm({
               }}
             >
               {/* Custom Submit Buttons */}
-              <div className="flex justify-between pt-6 mt-8 bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
-                <button
-                  type="button"
-                  onClick={onBack}
-                  className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 active:bg-gray-300 transition-all flex items-center font-medium text-sm shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Volver
-                </button>
-                <button
-                  type="submit"
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 active:from-blue-800 active:to-blue-900 transition-all flex items-center font-semibold text-sm shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  Continuar
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </button>
-              </div>
+              <StepNavigation
+                isSubmit
+                onBack={onBack}
+                continueLabel="Continuar"
+              />
             </Form>
           </div>
         </div>

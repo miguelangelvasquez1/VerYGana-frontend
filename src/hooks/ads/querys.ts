@@ -37,3 +37,19 @@ export function useActiveAds(page: number = 0, size: number = 10) {
     staleTime: 60 * 1000, // Los anuncios activos son más estables
   });
 }
+
+export function useAdDetails(adId: number | null) {
+  return useQuery({
+    queryKey: adKeys.detail(adId!),
+    queryFn: () => adService.getAdDetails(adId!),
+    enabled: !!adId,
+  });
+}
+
+export function useAdLikes(adId: number | null, page: number) {
+  return useQuery({
+    queryKey: adKeys.likes(adId!, page),
+    queryFn: () => adService.getAdLikes(adId!, page),
+    enabled: !!adId,
+  });
+}

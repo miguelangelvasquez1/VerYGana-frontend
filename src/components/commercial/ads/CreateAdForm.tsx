@@ -9,6 +9,7 @@ import { useAdUpload } from '@/hooks/ads/useAdUpload';
 import { useRouter } from 'next/navigation';
 import { AdDetails } from '@/types/ads/commercial';
 import toast from 'react-hot-toast';
+import { usePlanState } from '../layout/DashboardLayout';
 
 interface CreateAdFormData {
   title: string;
@@ -95,6 +96,8 @@ export function CreateAdForm() {
 
   // Hook de subida con el nuevo sistema
   const { uploadState, fileState, uploadAd, resetUpload } = useAdUpload({ adDetails });
+
+  const { refreshPlan } = usePlanState();
 
   // Cálculo de presupuesto
   const calculateBudget = (reward: number, maxLikes: number) => {
@@ -227,6 +230,7 @@ export function CreateAdForm() {
     const result = await uploadAd(formData.file);
 
     if (result.ok) {
+      await refreshPlan();
       toast.success(`¡Anuncio creado con éxito! ID: ${result.adId}`);
       router.push('/commercial/ads');
     } else {

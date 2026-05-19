@@ -9,6 +9,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { useUpdateAd } from '@/hooks/ads/mutations';
 import toast from 'react-hot-toast';
+import { usePlanState } from '../layout/DashboardLayout';
 
 interface EditAdModalProps {
   ad: AdResponseDTO;
@@ -52,18 +53,10 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
   const { departments, loading: loadingDepartments } = useDepartments();
   const { municipalities, loading: loadingMunicipalities } = useMunicipalities(selectedDepartment);
   const updateAdMutation = useUpdateAd();
+  const { refreshPlan } = usePlanState();
 
   const calculateBudget = (reward: number, maxLikes: number) => {
     return (reward * maxLikes).toFixed(2);
-  };
-
-  const handleRewardChange = (value: number) => {
-    const newBudget = Number(calculateBudget(value, formData.maxLikes));
-    setFormData(prev => ({
-      ...prev,
-      rewardPerLike: value,
-      totalBudget: newBudget
-    }));
   };
 
   const handleMaxLikesChange = (value: number) => {
@@ -136,7 +129,6 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
     const updateDto: AdUpdateDTO = {
       title: formData.title,
       description: formData.description,
-      rewardPerLike: formData.rewardPerLike,
       maxLikes: formData.maxLikes,
       targetUrl: formData.targetUrl || undefined,
       startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
@@ -150,6 +142,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
 
     try {
       await updateAdMutation.mutateAsync({ id: ad.id, updateDto });
+      await refreshPlan();
       toast.success('Anuncio actualizado con éxito');
       onSuccess();
       onClose();
@@ -272,32 +265,62 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Recompensa por Like ($)
                 </label>
-                <input
-                  type="number"
-                  value={formData.rewardPerLike}
-                  onChange={(e) => handleRewardChange(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  min="0.01"
-                  max="100"
-                  step="0.01"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={formData.rewardPerLike}
+                    disabled
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-100 
+                              text-gray-400 cursor-not-allowed pr-10"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">No editable una vez creado el anuncio</p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Máximo de Likes
-                </label>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-sm font-semibold text-gray-700">Máximo de Likes</label>
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 
+                                text-[11px] flex items-center justify-center hover:border-gray-400 
+                                hover:text-gray-600 transition-colors"
+                    >?</button>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 
+                                    bg-white border border-gray-200 rounded-lg p-3 text-xs 
+                                    text-gray-600 shadow-lg hidden group-hover:block z-10 
+                                    leading-relaxed pointer-events-none">
+                      <p className="font-semibold text-gray-800 mb-1">¿Qué implica cambiar esto?</p>
+                      <p className="mb-1">
+                        <strong className="text-gray-700">Bajar:</strong> se te devuelve el presupuesto 
+                        no consumido correspondiente a los likes liberados.
+                      </p>
+                      <p>
+                        <strong className="text-gray-700">Subir:</strong> se deduce el costo adicional 
+                        de tu saldo disponible.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <input
                   type="number"
                   value={formData.maxLikes}
                   onChange={(e) => handleMaxLikesChange(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  min="1"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
+                            focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min={ad.currentLikes + 1}
                   max="10000"
                   step="1"
                   required
                 />
+                <p className="text-xs text-gray-400 mt-1">
+                  Mínimo permitido:{' '}
+                  <strong className="text-gray-600">{ad.currentLikes + 1}</strong>
+                  {' '}(likes actuales + 1)
+                </p>
               </div>
             </div>
 
@@ -314,6 +337,43 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                 </p>
               </div>
             </div>
+
+            {(() => {
+              const originalReserved = ad.rewardPerLike * (ad.maxLikes - ad.currentLikes);
+              const newReserved = formData.rewardPerLike * (formData.maxLikes - ad.currentLikes);
+              const delta = newReserved - originalReserved;
+
+              if (formData.maxLikes <= ad.currentLikes) return (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  El mínimo permitido es {ad.currentLikes + 1} (likes actuales + 1).
+                </div>
+              );
+              if (delta > 0.001) return (
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
+                  Se deducirán <strong>${delta.toFixed(2)}</strong> adicionales de tu saldo disponible.
+                </div>
+              );
+              if (delta < -0.001) return (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+                  Se te devolverán <strong>${Math.abs(delta).toFixed(2)}</strong> a tu saldo disponible.
+                </div>
+              );
+              return null;
+            })()}
+
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg 
+                flex gap-4 text-xs text-blue-700">
+              <span>Likes consumidos: <strong>{ad.currentLikes}</strong></span>
+              <span className="w-px bg-blue-200" />
+              <span>Presupuesto consumido: 
+                <strong> ${(ad.currentLikes * ad.rewardPerLike).toFixed(2)}</strong>
+              </span>
+              <span className="w-px bg-blue-200" />
+              <span>Presupuesto restante: 
+                <strong> ${((ad.maxLikes - ad.currentLikes) * ad.rewardPerLike).toFixed(2)}</strong>
+              </span>
+            </div>
+
           </div>
 
           {/* Fechas */}
@@ -325,9 +385,18 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Fecha de Inicio
-                </label>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-sm font-semibold text-gray-700">Fecha de Inicio</label>
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 text-[11px] flex items-center justify-center hover:border-gray-400 hover:text-gray-600 transition-colors"
+                    >?</button>
+                    <div className="absolute left-0 bottom-full mb-2 w-56 bg-white border border-gray-200 rounded-lg p-2.5 text-xs text-gray-600 shadow-lg hidden group-hover:block z-10 leading-relaxed pointer-events-none">
+                      Fecha en que el anuncio comenzará a mostrarse. Si se deja vacío, inicia inmediatamente tras ser aprobado.
+                    </div>
+                  </div>
+                </div>
                 <input
                   type="datetime-local"
                   value={formData.startDate}
@@ -337,9 +406,18 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Fecha de Finalización
-                </label>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-sm font-semibold text-gray-700">Fecha de Finalización</label>
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 text-[11px] flex items-center justify-center hover:border-gray-400 hover:text-gray-600 transition-colors"
+                    >?</button>
+                    <div className="absolute left-0 bottom-full mb-2 w-56 bg-white border border-gray-200 rounded-lg p-2.5 text-xs text-gray-600 shadow-lg hidden group-hover:block z-10 leading-relaxed pointer-events-none">
+                      Fecha límite del anuncio. Si se deja vacío, corre indefinidamente hasta alcanzar el máximo de likes.
+                    </div>
+                  </div>
+                </div>
                 <input
                   type="datetime-local"
                   value={formData.endDate}

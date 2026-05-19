@@ -41,6 +41,8 @@ export function AddToCartButton({
           name: product.name,
           imageUrl: product.imageUrl,
           price: product.price,
+          maxKeysAllowed: product.maxKeysAllowed,
+          minCashCents: product.minCashCents,
           stock: product.stock,
           categoryName: product.categoryName,
         },

@@ -1,17 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
-  BarChart3, CreditCard, FileImage, Home, PlusCircle,
-  Settings, Target, Package, ClipboardList,
-  X, LogOut, Gamepad2, PawPrint, Lock, Sparkles,
-  TrendingUp, Megaphone
+  BarChart3,
+  CreditCard,
+  FileImage,
+  Home,
+  PlusCircle,
+  Settings,
+  Package,
+  ClipboardList,
+  X,
+  LogOut,
+  PawPrint, 
+  Lock, 
+  Sparkles,
+  TrendingUp, 
+  Megaphone
 } from 'lucide-react';
 import { WalletStatus } from '@/types/finance/Wallet.types';
 import {PlanCode} from '@/types/finance/plans/Plan.types';
-import { formatBudget, formatCents } from '@/utils/currency';
+import { formatBudget} from '@/utils/currency';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,6 +39,7 @@ interface SidebarProps {
   hasActivePlan?: boolean;
   remainingBudget?: number;
   walletStatus?: WalletStatus;
+  pathname?: string;
 }
 
 // ─── Menu items ───────────────────────────────────────────────────────────────
@@ -56,19 +67,8 @@ const menuItems: MenuItem[] = [
     lockIfUnavailable: true,
   },
   {
-    href: '/commercial/campaigns', icon: Target, label: 'Campañas',
-    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true,
-  },
-  {
-    href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Crear Campaña',
-    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true,
-  },
-  {
-    href: '/commercial/games', icon: Gamepad2, label: 'Juegos Branded',
-    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true,
+    href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Brandear Juego',
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM], lockIfUnavailable: true,
   },
   {
     href: '/commercial/surveys', icon: ClipboardList, label: 'Encuestas',
@@ -139,8 +139,15 @@ export function Sidebar({
   hasActivePlan = false,
   remainingBudget,
   walletStatus = WalletStatus.INACTIVE,
+  pathname = '',
 }: SidebarProps) {
-  const pathname = usePathname();
+
+  // Usamos el pathname que viene del Layout (más estable)
+  const isActive = useMemo(() => {
+    return (href: string): boolean => pathname === href;
+  }, [pathname]);
+
+// =============
 
   const canAccess = (item: MenuItem): boolean => {
     if (!hasActivePlan) return false;
@@ -219,7 +226,7 @@ export function Sidebar({
         {menuItems.map((item) => {
           if (!showItem(item)) return null;
 
-          const active = pathname === item.href;
+          const active = isActive(item.href)
           const locked = isLocked(item);
           const Icon = item.icon;
 
@@ -236,10 +243,10 @@ export function Sidebar({
                   href={item.href}
                   onClick={onClose}
                   className={`
-                    flex items-center px-3 py-2.5 rounded-lg transition-all duration-150 group
+                    flex items-center px-3 py-2.5 rounded-lg transition-colors duration-100 group
                     ${active
                       ? 'bg-blue-600/20 text-white border border-blue-500/30'
-                      : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                      : 'text-slate-400 hover:bg-white/[0.06] hover:text-white border border-transparent'
                     }
                   `}
                 >

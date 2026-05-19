@@ -29,7 +29,20 @@ const nextConfig: NextConfig = {
         hostname: 'freepnglogo.com',
       },
     ],
-  }
+  },
+  async headers() {
+    return [
+      {
+        source: '/pet',
+        headers: [
+          {
+            key: 'Permissions-Policy',
+            value: 'fullscreen=*',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
