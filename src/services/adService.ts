@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api/client';
-import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdLikeDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, CreateAdAssetRequest } from '@/types/ads/commercial';
+import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdLikeDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, AssetAnalysisResult, FileUploadRequestDTO } from '@/types/ads/commercial';
 import { PagedResponse } from '@/types/Generic.types';
 
 export interface AdStats {
@@ -30,25 +30,6 @@ class AdService {
     currentPage: number;
   }> {
     const response = await apiClient.get<PagedResponse<AdResponseDTO>>('/ads/my-ads/filter', {
-      params: { page, size }
-    });
-    
-    return {
-      content: response.data.data,
-      totalElements: response.data.meta.totalElements,
-      totalPages: response.data.meta.totalPages,
-      currentPage: response.data.meta.page
-    };
-  }
-
-  // Obtener anuncios pendientes (Admin)
-  async getPendingAds(page: number = 0, size: number = 20): Promise<{
-    content: AdResponseDTO[];
-    totalElements: number;
-    totalPages: number;
-    currentPage: number;
-  }> {
-    const response = await apiClient.get<PagedResponse<AdResponseDTO>>('/admin/ads/pending', {
       params: { page, size }
     });
     
@@ -121,12 +102,6 @@ class AdService {
     return response.data;
   }
 
-  // Bloquear un anuncio
-  async blockAd(id: number): Promise<AdResponseDTO> {
-    const response = await apiClient.post<AdResponseDTO>(`/ads/admin/${id}/block`);
-    return response.data;
-  }
-
   // Obtener estadísticas de un anuncio
   async getAdStats(id: number): Promise<AdStats> {
     const response = await apiClient.get<AdStats>(`/ads/${id}/stats`);
@@ -153,6 +128,30 @@ class AdService {
   // Obtener anuncios pendientes de aprobación (Admin)
   // async getPendingAds(page: number = 0, size: number = 10): Promise<{
   //   content: AdResponseDTO[];
+
+  // ==================== SERVICES FOR ADMIN ====================
+
+  async activateAdAsAdmin(id: number): Promise<AdResponseDTO> {
+    const response = await apiClient.post<AdResponseDTO>(
+      `/ads/admin/${id}/activate`
+    );
+
+    return response.data;
+  }
+
+  async pauseAdAsAdmin(id: number): Promise<AdResponseDTO> {
+    const response = await apiClient.post<AdResponseDTO>(
+      `/ads/admin/${id}/pause`
+    );
+
+    return response.data;
+  }
+
+  // Bloquear un anuncio
+  async blockAd(id: number): Promise<AdResponseDTO> {
+    const response = await apiClient.post<AdResponseDTO>(`/ads/admin/${id}/block`);
+    return response.data;
+  }
 
   // Aprobar anuncio (Admin)
   async approveAd(id: number): Promise<AdResponseDTO> {
@@ -210,12 +209,36 @@ class AdService {
     return response.data;
   }
 
+  async prepareAdAssetUpload2(request: FileUploadRequestDTO): Promise<AdUploadPermission> {
+    const { data } = await apiClient.post<AdUploadPermission>('/ads/assets/prepare', request);
+    return data;
+  }
+
+  async analyzeAsset(assetId: number): Promise<AssetAnalysisResult> {
+    const { data } = await apiClient.post<AssetAnalysisResult>(`/ads/assets/${assetId}/analyze`);
+    return data;
+  }
+
+  async orphanAsset(assetId: number): Promise<void> {
+    await apiClient.post(`/ads/assets/${assetId}/orphan`);
+  }
+
+  async orphanAssetBeacon(assetId: number): Promise<void> {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/ads/assets/${assetId}/orphan`;
+    navigator.sendBeacon(url);
+  }
+
+  async createAd2(assetId: number, details: AdDetails): Promise<{ id: number }> {
+    const { data } = await apiClient.post<{ id: number }>('/ads', { assetId, ...details });
+    return data;
+  }
+
   /**
    * PASO 1: Preparar la subida del asset (obtener pre-signed URL)
    * Este endpoint devuelve el assetId y la URL para subir a R2
    */
   async prepareAdAssetUpload(
-    request: CreateAdAssetRequest
+    request: FileUploadRequestDTO
   ): Promise<AdUploadPermission> {
     try {
       console.log('📤 [AdService] Preparando asset upload:', request);

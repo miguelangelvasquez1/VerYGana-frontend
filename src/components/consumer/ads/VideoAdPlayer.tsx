@@ -207,9 +207,19 @@ export default function VideoAdPlayer() {
   };
 
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!currentAd) return;
-    console.log('Compartir:', currentAd);
+
+    try {
+      await navigator.clipboard.writeText(currentAd.targetUrl);
+
+      console.log('Link copiado:', currentAd.targetUrl);
+
+      // opcional
+      alert('Link copiado al portapapeles');
+    } catch (error) {
+      console.error('Error copiando link', error);
+    }
   };
 
   const handleSave = () => {
@@ -270,7 +280,7 @@ export default function VideoAdPlayer() {
             src={currentAd.contentUrl}
             autoPlay
             loop={false}
-            muted
+            // muted
             playsInline
             preload="metadata"
             className="max-w-full h-[calc(80dvh-1rem)] w-auto object-contain cursor-pointer"

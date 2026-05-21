@@ -210,9 +210,8 @@ export type MunicipalityResponseDTO = {
 export interface AdDetails {
   title: string;
   description: string;
-  rewardPerLike: number;
+  pricePerLike: number;
   maxLikes: number;
-  mediaType: 'IMAGE' | 'VIDEO';
   targetUrl: string | null;
   startDate: string | null; // ISO string or null if immediate
   endDate: string | null; // ISO string or null if budget-exhausted
@@ -233,10 +232,11 @@ export interface FileWithProgress {
   assetId?: number;
 }
 
-export interface CreateAdAssetRequest {
+export interface FileUploadRequestDTO {
     originalFileName: string;
     contentType: string;
     sizeBytes: number;
+    imageDurationSeconds?: number; // Solo para imágenes con duración (si aplica)
 }
 
 export interface AdUploadPermission {
@@ -247,12 +247,19 @@ export interface AdUploadPermission {
   };
 }
 
-export interface PrepareAdAssetUploadResponse {
-  permissions: AdUploadPermission[];
+export interface AssetAnalysisResult {
+  /** Real duration in seconds (ceiling), resolved server-side. */
+  durationSeconds: number;
+  /**
+   * Minimum price per like in cents.
+   * Already rounded up to a multiple of 10.
+   * User may choose any value >= this that is also a multiple of 10.
+   */
+  minPricePerLike: number;
 }
 
 export interface UploadState {
-  status: 'idle' | 'preparing' | 'uploading' | 'creating' | 'success' | 'error';
+  status: 'idle' | 'preparing' | 'uploading' | 'creating' | 'success' | 'error' | 'analyzing';
   progress: number;
   currentFile?: string;
   error?: string;
@@ -261,4 +268,10 @@ export interface UploadState {
 export interface CreateAdRequest {
   adDetails: AdDetails;
   assetId: number;
+}
+
+export interface AssetPricingInfo {
+  assetId: number;
+  durationSeconds: number;
+  minPricePerLike: number;
 }

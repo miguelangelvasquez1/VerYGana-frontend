@@ -2,8 +2,11 @@
 
 import React from 'react';
 import { Bell, Search, User, LogOut } from 'lucide-react';
+import { useLogout } from '@/hooks/useLogout';
 
 const Header: React.FC = () => {
+  const { logout } = useLogout();
+
   return (
     <header className="bg-white shadow-sm border-b px-6 py-4 h-18">
       <div className="flex items-center justify-between">
@@ -36,7 +39,9 @@ const Header: React.FC = () => {
               <User size={16} className="text-white" />
             </div>
             <span className="text-sm font-medium text-gray-700">Admin</span>
-            <button className="p-2 text-gray-600 hover:text-gray-800">
+            <button className="p-2 text-gray-600 hover:text-gray-800 cursor-pointer"
+              onClick={logout}
+              >
               <LogOut size={16} />
             </button>
           </div>
