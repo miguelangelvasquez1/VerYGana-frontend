@@ -5,7 +5,7 @@ import VideoAdPlayer from "@/components/consumer/ads/VideoAdPlayer";
 
 export default function AdPage() {
   return (
-    <div className="flex flex-col h-screen bg-black text-white">
+    <div className="flex flex-col h-[calc(100dvh-69px)] lg:h-[calc(100dvh-76px)] overflow-hidden bg-black text-white">
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar (oculta en móvil) */}
@@ -14,7 +14,7 @@ export default function AdPage() {
         </aside>
 
         {/* Contenido principal */}
-        <main className="flex flex-1 justify-center items-center mb-16 md:mb-0">
+        <main className="flex flex-1 justify-center items-center pb-16 md:pb-0">
           <VideoAdPlayer />
         </main>
       </div>

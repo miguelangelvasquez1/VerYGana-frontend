@@ -17,7 +17,12 @@ import {
   Heart,
   Home,
   Ticket,
-  KeyRound
+  KeyRound,
+  Gamepad2,
+  PawPrint,
+  ClipboardList,
+  Smartphone,
+  MessageSquare,
 } from "lucide-react";
 
 import { getConsumerInitialData } from "@/services/ConsumerService";
@@ -26,6 +31,18 @@ import { CartButton } from "../consumer/cart/CartButton";
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationPanel } from "../notifications/NotificationsPanel";
 import { useLogout } from '@/hooks/useLogout';
+
+const navItems = [
+  { href: '/home',              label: 'Inicio',    Icon: Home,          variant: 'default' },
+  { href: '/raffles',           label: 'Rifas',     Icon: Gift,          variant: 'yellow'  },
+  { href: '/games',             label: 'Juegos',    Icon: Gamepad2,      variant: 'default' },
+  { href: '/pet',               label: '🐾 Mascota', Icon: PawPrint,     variant: 'default' },
+  { href: '/ads',               label: 'Anuncios',  Icon: Megaphone,     variant: 'default' },
+  { href: '/surveys',           label: 'Encuestas', Icon: ClipboardList, variant: 'default' },
+  { href: '/products',          label: 'Productos', Icon: Package,       variant: 'default' },
+  { href: '/plans/mobile-plans',label: 'Recargas',  Icon: Smartphone,    variant: 'default' },
+  { href: '/forum',             label: 'Foro',      Icon: MessageSquare, variant: 'default' },
+] as const;
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -99,11 +116,16 @@ export default function Navbar() {
     return `$${value.toLocaleString("es-CO")}`;
   };
 
-  const buttonsStyle =
-    "cursor-pointer bg-white text-blue-900 font-semibold px-4 py-2 rounded-full shadow-md hover:bg-blue-50 hover:scale-105 hover:shadow-lg transform transition-all duration-200";
+  const btnBase   = "cursor-pointer rounded-full shadow-md transform transition-all duration-200 p-2 2xl:px-4 2xl:py-2";
+  const btnNormal = `${btnBase} bg-white text-blue-900 font-semibold hover:bg-blue-50 hover:scale-105 hover:shadow-lg`;
+  const btnActive = `${btnBase} bg-blue-100 text-blue-800 font-semibold border-2 border-blue-300`;
+  const btnYellow = `${btnBase} bg-yellow-400 text-black font-bold hover:bg-amber-500 hover:scale-105 hover:shadow-lg`;
+  const btnYellowActive = `${btnBase} bg-amber-400 text-black font-bold border-2 border-amber-600`;
 
-  const activeButtonStyle =
-    "cursor-pointer bg-blue-100 text-blue-800 font-semibold px-4 py-2 rounded-full shadow-md border-2 border-blue-300";
+  const getNavClass = (isActive: boolean, variant: string) => {
+    if (variant === 'yellow') return isActive ? btnYellowActive : btnYellow;
+    return isActive ? btnActive : btnNormal;
+  };
 
   return (
     <>
@@ -116,66 +138,15 @@ export default function Navbar() {
           </div>
 
           {/* NAV BUTTONS */}
-          <div className="flex gap-3">
-            <Link href={"/home"}>
-              <button className={pathname === "/home" ? activeButtonStyle : buttonsStyle}>
-                Inicio
-              </button>
-            </Link>
-
-            <Link href={"/raffles"}>
-              <button
-                className={
-                  pathname === "/raffles"
-                    ? "cursor-pointer bg-amber-400 text-black font-bold px-4 py-2 rounded-full shadow-md border-2 border-amber-600 transform"
-                    : "cursor-pointer bg-yellow-400 text-black font-bold px-4 py-2 rounded-full shadow-sm hover:bg-amber-500 hover:scale-105 hover:shadow-lg transform transition-all duration-200"
-                }
-              >
-                Rifas
-              </button>
-            </Link>
-
-            <Link href={"/games"}>
-              <button className={pathname === "/games" ? activeButtonStyle : buttonsStyle}>
-                Juegos
-              </button>
-            </Link>
-
-            <Link href={"/pet"}>
-              <button className={pathname === "/pet" ? activeButtonStyle : buttonsStyle}>
-                🐾 Mascota
-              </button>
-            </Link> 
-
-            <Link href={"/ads"}>
-              <button className={pathname === "/ads" ? activeButtonStyle : buttonsStyle}>
-                Anuncios
-              </button>
-            </Link>
-
-            <Link href={"/surveys"}>
-              <button className={pathname === "/surveys" ? activeButtonStyle : buttonsStyle}>
-                Encuestas
-              </button>
-            </Link>
-
-            <Link href={"/products"}>
-              <button className={pathname === "/products" ? activeButtonStyle : buttonsStyle}>
-                Productos
-              </button>
-            </Link>
-
-            <Link href={"/plans/mobile-plans"}>
-              <button className={pathname === "/plans/mobile-plans" ? activeButtonStyle : buttonsStyle}>
-                Recargas
-              </button>
-            </Link>
-
-            <Link href={"/forum"}>
-              <button className={pathname === "/forum" ? activeButtonStyle : buttonsStyle}>
-                Foro
-              </button>
-            </Link>
+          <div className="flex gap-2 2xl:gap-3">
+            {navItems.map(({ href, label, Icon, variant }) => (
+              <Link href={href} key={href}>
+                <button title={label} className={getNavClass(pathname === href, variant)}>
+                  <Icon className="w-5 h-5 2xl:hidden" />
+                  <span className="hidden 2xl:inline">{label}</span>
+                </button>
+              </Link>
+            ))}
           </div>
 
           {/* -------- WALLET + CART + NOTIFS + USER -------- */}

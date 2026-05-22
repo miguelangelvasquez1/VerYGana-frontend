@@ -15,7 +15,7 @@ class CampaignService {
   
   async getGames(
     page: number = 0,
-    size: number = 10
+    size: number = 20
   ): Promise<{
     content: Game[];
     totalElements: number;
