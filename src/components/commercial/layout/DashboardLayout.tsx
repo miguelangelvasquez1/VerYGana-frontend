@@ -80,6 +80,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       { match: '/commercial/campaigns/create', title: 'Crear Campaña' },
       { match: '/commercial/campaigns', title: 'Campañas' },
+
+      { match: '/commercial/pets/create', title: 'Crear Mascotas' },
+      { match: '/commercial/pets', title: 'Mascotas' },
     ];
 
     const sortedRoutes = routes.sort((a, b) => b.match.length - a.match.length);

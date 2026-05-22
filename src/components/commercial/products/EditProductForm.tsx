@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { editProduct, getProductEditInfo } from "@/services/ProductService";
-import { getProductCategories } from "@/services/ProductCategoryService";
+import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { useProductImageUpdate } from "@/hooks/products/useProductImageUpdate";
 import {
   ProductEditInfoResponseDTO,
@@ -60,7 +60,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
       try {
         const [product, cats] = await Promise.all([
           getProductEditInfo(productId),
-          getProductCategories(),
+          getActiveProductCategories(),
         ]);
         setForm(product);
         setCategories(cats);

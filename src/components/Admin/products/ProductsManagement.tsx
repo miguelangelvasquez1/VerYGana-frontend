@@ -9,8 +9,10 @@ import {
   approveProduct,
   rejectProduct,
   deleteProduct,
+  recoverProductCategory,
+  getInactiveProductCategories,
 } from "@/services/admin/AdminProductsService";
-import { getProductCategories } from "@/services/ProductCategoryService";
+import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { getProductDetail } from "@/services/ProductService";
 import { fileUploadService } from "@/services/FileUploadService";
 import { ProductCategoryResponseDTO } from "@/types/products/ProductCategory.types";
@@ -90,6 +92,12 @@ export default function AdminProductsPage() {
   const [confirmDeleteCatId, setConfirmDeleteCatId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ── Estado categorías inactivas ────────────
+  const [inactiveCategories, setInactiveCategories] = useState<ProductCategoryResponseDTO[]>([]);
+  const [loadingInactiveCategories, setLoadingInactiveCategories] = useState(false);
+  const [showInactiveCategories, setShowInactiveCategories] = useState(false);
+  const [recoveringCatId, setRecoveringCatId] = useState<number | null>(null);
+
   // ── Estado productos ───────────────────────
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -140,7 +148,7 @@ export default function AdminProductsPage() {
   const loadCategories = async () => {
     setLoadingCategories(true);
     try {
-      setCategories(await getProductCategories());
+      setCategories(await getActiveProductCategories());
     } catch (e) {
       console.error("Error cargando categorías:", e);
     } finally {
@@ -220,6 +228,33 @@ export default function AdminProductsPage() {
     } finally {
       setDeletingCatId(null);
       setConfirmDeleteCatId(null);
+    }
+  };
+
+  const loadInactiveCategories = async () => {
+    setLoadingInactiveCategories(true);
+    try {
+      setInactiveCategories(await getInactiveProductCategories());
+    } catch (e) {
+      console.error("Error cargando categorías inactivas:", e);
+    } finally {
+      setLoadingInactiveCategories(false);
+    }
+  };
+
+  const handleToggleInactiveCategories = () => {
+    if (!showInactiveCategories) loadInactiveCategories();
+    setShowInactiveCategories((v) => !v);
+  };
+
+  const handleRecoverCategory = async (id: number) => {
+    setRecoveringCatId(id);
+    try {
+      await recoverProductCategory(id);
+      setInactiveCategories((prev) => prev.filter((c) => c.id !== id));
+      await loadCategories();
+    } finally {
+      setRecoveringCatId(null);
     }
   };
 
@@ -465,7 +500,17 @@ export default function AdminProductsPage() {
       ══════════════════════════════════════════ */}
       {activeTab === "categories" && (
         <div className="space-y-4">
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={handleToggleInactiveCategories}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition ${
+                showInactiveCategories
+                  ? "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+                  : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
+              }`}
+            >
+              {showInactiveCategories ? "Ocultar inactivas" : "Ver inactivas"}
+            </button>
             <button
               onClick={() => setShowCreateForm((v) => !v)}
               className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
@@ -635,6 +680,64 @@ export default function AdminProductsPage() {
               </table>
             )}
           </div>
+
+          {/* ── Categorías inactivas ── */}
+          {showInactiveCategories && (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h2 className="text-base font-semibold text-gray-700">Categorías inactivas</h2>
+                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                  {inactiveCategories.length} categorías
+                </span>
+              </div>
+
+              {loadingInactiveCategories ? (
+                <div className="py-16 text-center text-sm text-gray-400">Cargando categorías inactivas...</div>
+              ) : inactiveCategories.length === 0 ? (
+                <div className="py-16 text-center text-sm text-gray-400">No hay categorías inactivas.</div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                      <th className="px-6 py-3 text-left">Imagen</th>
+                      <th className="px-6 py-3 text-left">Nombre</th>
+                      <th className="px-6 py-3 text-left">Estado</th>
+                      <th className="px-6 py-3 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {inactiveCategories.map((cat) => (
+                      <tr key={cat.id} className="hover:bg-gray-50 transition">
+                        <td className="px-6 py-3">
+                          {cat.imageUrl ? (
+                            <img src={cat.imageUrl} alt={cat.name} className="h-10 w-10 rounded-lg object-cover border border-gray-200" />
+                          ) : (
+                            <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-lg">🖼</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-3 font-medium text-gray-500">{cat.name}</td>
+                        <td className="px-6 py-3">
+                          <span className="inline-flex items-center gap-1.5 text-xs bg-gray-100 text-gray-500 border border-gray-200 px-2 py-0.5 rounded-full">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                            Inactiva
+                          </span>
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          <button
+                            onClick={() => handleRecoverCategory(cat.id)}
+                            disabled={recoveringCatId === cat.id}
+                            className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg transition disabled:opacity-50"
+                          >
+                            {recoveringCatId === cat.id ? "Restableciendo..." : "Restablecer"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -678,7 +781,7 @@ export default function AdminProductsPage() {
                   </div>
                   <div>
                     <span className="text-gray-400 text-xs">Comerciante</span>
-                    <p className="font-medium text-gray-800">{detailState.product.shopName}</p>
+                    <p className="font-medium text-gray-800">{detailState.product.companyName}</p>
                   </div>
                   <div>
                     <span className="text-gray-400 text-xs">Stock disponible</span>

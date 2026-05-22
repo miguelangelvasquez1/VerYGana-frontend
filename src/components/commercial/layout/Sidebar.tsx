@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { WalletStatus } from '@/types/finance/Wallet.types';
 import {PlanCode} from '@/types/finance/plans/Plan.types';
-import { formatBudget} from '@/utils/currency';  
+import { formatBudget } from '@/utils/currency';  
 import { useLogout } from '@/hooks/useLogout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -196,33 +196,6 @@ export function Sidebar({
           )}
         </div>
       </div>
-
-      {/* ── Budget block (STANDARD / PREMIUM only) ── */}
-      {hasBudget && (
-        <div className="mx-4 mt-4 rounded-xl bg-gradient-to-br from-blue-600/15 to-purple-600/10 border border-blue-500/20 p-3">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] text-slate-400 font-semibold tracking-widest">
-              PRESUPUESTO ACTIVO
-            </span>
-            <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-          </div>
-          <p className="text-lg font-black text-white leading-tight">
-            {formatBudget(remainingBudget!)}
-          </p>
-          {walletStatus === WalletStatus.LOW_BALANCE && (
-            <p className="text-[10px] text-amber-400 mt-1 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
-              Saldo bajo — recarga pronto
-            </p>
-          )}
-          {walletStatus === WalletStatus.EXHAUSTED && (
-            <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />
-              Presupuesto agotado
-            </p>
-          )}
-        </div>
-      )}
 
       {/* ── Nav ── */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">

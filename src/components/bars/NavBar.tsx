@@ -33,7 +33,6 @@ export default function Navbar() {
   // UI state
   const [openMenu, setOpenMenu] = useState(false);
   const [isKeyWalletOpen, setIsKeyWalletOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { logout } = useLogout();
   const {
@@ -93,11 +92,6 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const formatCurrency = (value?: number) => {
-    if (value == null) return "$0";
-    return `$${value.toLocaleString("es-CO")}`;
-  };
 
   const buttonsStyle =
     "cursor-pointer bg-white text-blue-900 font-semibold px-4 py-2 rounded-full shadow-md hover:bg-blue-50 hover:scale-105 hover:shadow-lg transform transition-all duration-200";
@@ -192,16 +186,16 @@ export default function Navbar() {
                 <Image
                   src="/logos/llave.png"
                   alt="Llaves"
-                  width={28}
-                  height={28}
-                  className="object-contain"
+                  width={42}
+                  height={42}
+                  className="object-contain drop-shadow-md"
                 />
 
-                <div className="flex flex-col items-start leading-tight">
+                <div className="flex flex-col items-center leading-tight">
                   <span className="text-yellow-300 font-extrabold text-sm">
                     {loadingUser
                       ? "..."
-                      : consumer?.totalAvailableKeys?.toLocaleString("es-CO")}
+                      : (consumer?.totalAvailableKeys ?? 0).toLocaleString("es-CO")}
                   </span>
 
                   <span className="text-[11px] text-gray-200">
@@ -238,7 +232,7 @@ export default function Navbar() {
                     <div className="mt-4 text-4xl font-black tracking-tight text-yellow-300 drop-shadow-md">
                       {loadingUser
                         ? "..."
-                        : consumer?.totalAvailableKeys?.toLocaleString("es-CO")}
+                        : (consumer?.totalAvailableKeys ?? 0).toLocaleString("es-CO")}
                     </div>
 
                     <div className="text-sm text-blue-100 font-medium mt-1">
@@ -435,15 +429,15 @@ export default function Navbar() {
                 <Image
                   src="/logos/llave.png"
                   alt="Llaves"
-                  width={24}
-                  height={24}
-                  className="object-contain"
+                  width={44}
+                  height={44}
+                  className="object-contain drop-shadow-md"
                 />
 
                 <span className="text-yellow-300 font-extrabold text-sm">
                   {loadingUser
                     ? "..."
-                    : consumer?.totalAvailableKeys?.toLocaleString("es-CO")}
+                    : (consumer?.totalAvailableKeys ?? 0).toLocaleString("es-CO")}
                 </span>
               </button>
 
@@ -472,7 +466,7 @@ export default function Navbar() {
                     <div className="mt-4 text-4xl font-black text-yellow-300 tracking-tight">
                       {loadingUser
                         ? "..."
-                        : consumer?.totalAvailableKeys?.toLocaleString("es-CO")}
+                        : (consumer?.totalAvailableKeys ?? 0).toLocaleString("es-CO")}
                     </div>
 
                     <div className="text-sm text-blue-100 mt-1">

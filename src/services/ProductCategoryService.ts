@@ -19,7 +19,7 @@ export interface ProductCategory {
 /**
  * Obtener todas las categorías disponibles (PÚBLICO)
  */
-export const getProductCategories = async (): Promise<ProductCategory[]> => {
+export const getActiveProductCategories = async (): Promise<ProductCategory[]> => {
   const response = await apiClient.get('/productCategories');
   return response.data;
 };

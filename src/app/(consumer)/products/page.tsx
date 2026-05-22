@@ -18,7 +18,7 @@ import InfiniteScroll from "@/components/consumer/products/InfiniteScroll";
 
 // SERVICES
 import { filterProducts} from "@/services/ProductService";
-import { getProductCategories } from "@/services/ProductCategoryService";
+import { getActiveProductCategories } from "@/services/ProductCategoryService";
 
 // TYPES
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
@@ -51,7 +51,7 @@ export default function ProductsPage() {
   // ================================
   useEffect(() => {
     (async () => {
-      const res = await getProductCategories();
+      const res = await getActiveProductCategories();
       setCategories(res);
     })();
   }, []);
@@ -87,7 +87,7 @@ export default function ProductsPage() {
       setProducts((prev) => [...prev, ...res.data]);
     }
 
-    setHasMore(res.meta.hasNext); // ✅ CORRECTO
+    setHasMore(res.meta.hasNext);
     setLoading(false);
   };
 

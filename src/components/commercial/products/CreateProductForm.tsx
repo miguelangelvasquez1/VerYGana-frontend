@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useProductCreation } from "@/hooks/products/useProductCreation";
-import { getProductCategories } from "@/services/ProductCategoryService";
+import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { CreateProductRequestDTO } from "@/types/products/Product.types";
 import { ProductStockRequestDTO } from "@/types/products/ProductStock.types";
 
@@ -71,7 +71,7 @@ export default function CreateProductForm() {
 
   // ── Cargar categorías ──────────────────────────────────────
   useEffect(() => {
-    getProductCategories()
+    getActiveProductCategories()
       .then(setCategories)
       .catch((err) => console.error('Error cargando categorías:', err));
   }, []);
