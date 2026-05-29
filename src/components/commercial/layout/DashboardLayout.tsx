@@ -175,5 +175,5 @@ export const PAGE_TITLES: Record<string, string> = {
   '/commercial/analytics': 'Estadísticas',
   '/commercial/billing': 'Facturación',
   '/commercial/settings': 'Configuración',
-  '/commercial/plans': 'Planes',
+  '/plans': 'Planes',
 };

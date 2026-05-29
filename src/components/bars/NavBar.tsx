@@ -23,6 +23,7 @@ import {
   ClipboardList,
   Smartphone,
   MessageSquare,
+  Zap,
 } from "lucide-react";
 
 import { getConsumerInitialData } from "@/services/ConsumerService";
@@ -33,15 +34,15 @@ import { NotificationPanel } from "../notifications/NotificationsPanel";
 import { useLogout } from '@/hooks/useLogout';
 
 const navItems = [
-  { href: '/home',              label: 'Inicio',    Icon: Home,          variant: 'default' },
-  { href: '/raffles',           label: 'Rifas',     Icon: Gift,          variant: 'yellow'  },
-  { href: '/games',             label: 'Juegos',    Icon: Gamepad2,      variant: 'default' },
-  { href: '/pet',               label: '🐾 Mascota', Icon: PawPrint,     variant: 'default' },
-  { href: '/ads',               label: 'Anuncios',  Icon: Megaphone,     variant: 'default' },
-  { href: '/surveys',           label: 'Encuestas', Icon: ClipboardList, variant: 'default' },
-  { href: '/products',          label: 'Productos', Icon: Package,       variant: 'default' },
-  { href: '/plans/mobile-plans',label: 'Recargas',  Icon: Smartphone,    variant: 'default' },
-  { href: '/forum',             label: 'Foro',      Icon: MessageSquare, variant: 'default' },
+  { href: '/home',              label: 'Inicio',    Icon: Home          },
+  { href: '/raffles',           label: 'Rifas',     Icon: Gift          },
+  { href: '/games',             label: 'Juegos',    Icon: Gamepad2      },
+  { href: '/pet',               label: '🐾 Mascota', Icon: PawPrint     },
+  { href: '/ads',               label: 'Anuncios',  Icon: Megaphone     },
+  { href: '/surveys',           label: 'Encuestas', Icon: ClipboardList },
+  { href: '/products',          label: 'Productos', Icon: Package       },
+  { href: '/plans/mobile-plans',label: 'Recargas',  Icon: Smartphone    },
+  { href: '/forum',             label: 'Foro',      Icon: MessageSquare },
 ] as const;
 
 export default function Navbar() {
@@ -64,7 +65,6 @@ export default function Navbar() {
   // Data state
   const [consumer, setConsumer] = useState<ConsumerInitialDataResponseDTO | null>(null);
   const [loadingUser, setLoadingUser] = useState<boolean>(true);
-  const [errorUser, setErrorUser] = useState<string | null>(null);
 
   // refs independientes
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -81,7 +81,6 @@ export default function Navbar() {
         setConsumer(data);
       } catch (err: any) {
         console.error("Error cargando datos:", err);
-        setErrorUser("No se pudieron cargar los datos del usuario");
       } finally {
         setLoadingUser(false);
       }
@@ -115,16 +114,11 @@ export default function Navbar() {
     return `$${value.toLocaleString("es-CO")}`;
   };
 
-  const btnBase   = "cursor-pointer rounded-full shadow-md transform transition-all duration-200 p-2 2xl:px-4 2xl:py-2";
-  const btnNormal = `${btnBase} bg-white text-blue-900 font-semibold hover:bg-blue-50 hover:scale-105 hover:shadow-lg`;
-  const btnActive = `${btnBase} bg-blue-100 text-blue-800 font-semibold border-2 border-blue-300`;
-  const btnYellow = `${btnBase} bg-yellow-400 text-black font-bold hover:bg-amber-500 hover:scale-105 hover:shadow-lg`;
-  const btnYellowActive = `${btnBase} bg-amber-400 text-black font-bold border-2 border-amber-600`;
+  const btnBase   = "cursor-pointer rounded-full transform transition-all duration-200 p-2 2xl:px-4 2xl:py-2";
+  const btnNormal = `${btnBase} bg-white/15 text-white font-medium hover:bg-white/30 hover:scale-105 backdrop-blur-sm`;
+  const btnActive = `${btnBase} bg-white text-blue-700 font-bold shadow-lg scale-105`;
 
-  const getNavClass = (isActive: boolean, variant: string) => {
-    if (variant === 'yellow') return isActive ? btnYellowActive : btnYellow;
-    return isActive ? btnActive : btnNormal;
-  };
+  const getNavClass = (isActive: boolean) => isActive ? btnActive : btnNormal;
 
   return (
     <>
@@ -138,9 +132,9 @@ export default function Navbar() {
 
           {/* NAV BUTTONS */}
           <div className="flex gap-2 2xl:gap-3">
-            {navItems.map(({ href, label, Icon, variant }) => (
+            {navItems.map(({ href, label, Icon }) => (
               <Link href={href} key={href}>
-                <button title={label} className={getNavClass(pathname === href, variant)}>
+                <button title={label} className={getNavClass(pathname === href)}>
                   <Icon className="w-5 h-5 2xl:hidden" />
                   <span className="hidden 2xl:inline">{label}</span>
                 </button>
@@ -337,18 +331,22 @@ export default function Navbar() {
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                       <User className="w-6 h-6" />
                     </div>
-                    <div>
-                      <div className="font-semibold">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">
                         {loadingUser ? "..." : consumer?.name ?? "Usuario"}
                       </div>
-                      <div className="text-sm text-blue-100">Beneficiario</div>
+                      <div className="text-xs text-blue-100">Beneficiario</div>
                     </div>
                   </div>
                 </div>
                 <div className="py-2">
+                  <Link href="/explore/gamification" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 hover:text-purple-700 transition-all group">
+                    <Zap className="w-5 h-5 text-gray-400 group-hover:text-purple-600" />
+                    <span>Mi Nivel</span>
+                  </Link>
                   <Link href="/explore/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
                     <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                     <span>Mi Perfil</span>
@@ -556,52 +554,63 @@ export default function Navbar() {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg pb-safe">
         <div className="grid grid-cols-5 h-16">
 
-          {/* HOME — nuevo */}
+          {/* HOME */}
           <Link href="/home" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/home" ? "text-blue-600" : "text-gray-500"}`}>
-              <Home className={`w-6 h-6 ${pathname === "/home" ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Inicio</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/home" ? "bg-blue-100" : ""}`}>
+                <Home className={`w-5 h-5 transition-all duration-200 ${pathname === "/home" ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/home" ? "text-blue-600" : "text-gray-400"}`}>Inicio</span>
             </div>
           </Link>
 
           {/* ANUNCIOS */}
           <Link href="/ads" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/ads" ? "text-blue-600" : "text-gray-500"}`}>
-              <Megaphone className={`w-6 h-6 ${pathname === "/ads" ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Anuncios</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/ads" ? "bg-blue-100" : ""}`}>
+                <Megaphone className={`w-5 h-5 transition-all duration-200 ${pathname === "/ads" ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/ads" ? "text-blue-600" : "text-gray-400"}`}>Anuncios</span>
             </div>
           </Link>
 
           {/* RIFAS */}
           <Link href="/raffles" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/raffles" ? "text-blue-600" : "text-gray-500"}`}>
-              <Gift className={`w-6 h-6 ${pathname === "/raffles" ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Rifas</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/raffles" ? "bg-blue-100" : ""}`}>
+                <Gift className={`w-5 h-5 transition-all duration-200 ${pathname === "/raffles" ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/raffles" ? "text-blue-600" : "text-gray-400"}`}>Rifas</span>
             </div>
           </Link>
+
+          {/* MASCOTA */}
           <Link href="/mascota" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${
-              pathname === "/mascota" ? "text-blue-600" : "text-gray-500"
-            }`}>
-              <span className={`text-2xl ${pathname === "/mascota" ? "scale-110" : ""}`}>
-                🐾
-              </span>
-            <span className="text-xs mt-1 font-medium">Mascota</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/mascota" ? "bg-blue-100" : ""}`}>
+                <span className={`text-xl leading-none transition-all duration-200 ${pathname === "/mascota" ? "scale-110" : ""}`}>🐾</span>
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/mascota" ? "text-blue-600" : "text-gray-400"}`}>Mascota</span>
             </div>
           </Link>
+
           {/* PRODUCTOS */}
           <Link href="/products" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/products" ? "text-blue-600" : "text-gray-500"}`}>
-              <Package className={`w-6 h-6 ${pathname === "/products" ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Productos</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/products" ? "bg-blue-100" : ""}`}>
+                <Package className={`w-5 h-5 transition-all duration-200 ${pathname === "/products" ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/products" ? "text-blue-600" : "text-gray-400"}`}>Productos</span>
             </div>
           </Link>
 
           {/* PERFIL */}
           <button onClick={() => setOpenMenu((v) => !v)} className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${openMenu ? "text-blue-600" : "text-gray-500"}`}>
-              <User className={`w-6 h-6 ${openMenu ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Perfil</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${openMenu ? "bg-blue-100" : ""}`}>
+                <User className={`w-5 h-5 transition-all duration-200 ${openMenu ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${openMenu ? "text-blue-600" : "text-gray-400"}`}>Perfil</span>
             </div>
           </button>
 
@@ -619,11 +628,11 @@ export default function Navbar() {
         >
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-3xl text-white">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                 <User className="w-8 h-8" />
               </div>
-              <div>
-                <div className="font-bold text-lg">
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-lg truncate">
                   {loadingUser ? "Cargando..." : consumer?.name ?? "Usuario"}
                 </div>
                 <div className="text-sm text-blue-100">Beneficiario</div>
@@ -631,6 +640,10 @@ export default function Navbar() {
             </div>
           </div>
           <div className="py-2 pb-20">
+            <Link href="/explore/gamification" className="flex items-center gap-4 px-6 py-4 hover:bg-purple-50 active:bg-purple-100 transition-all" onClick={() => setOpenMenu(false)}>
+              <Zap className="w-6 h-6 text-purple-500" />
+              <span className="font-medium text-purple-700">Mi Nivel</span>
+            </Link>
             <Link href="/explore/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
               <UserCircle className="w-6 h-6 text-gray-600" />
               <span className="font-medium">Mi Perfil</span>

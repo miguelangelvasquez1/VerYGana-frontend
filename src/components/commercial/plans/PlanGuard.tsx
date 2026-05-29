@@ -8,16 +8,16 @@ import React from 'react';
 import Link from 'next/link';
 import { Lock, ArrowRight, Zap, Rocket } from 'lucide-react';
 import { usePlanState } from '../layout/DashboardLayout';
-import { Plan } from '@/types/plan';
+import { PlanCode } from '@/types/finance/plans/Plan.types';
 
 interface PlanGuardProps {
-  requiredPlans: Plan['code'][];
+  requiredPlans: PlanCode[];
   children: React.ReactNode;
   featureName?: string;
 }
 
 const UPGRADE_INFO: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
-    NO_PLAN: {
+  BASIC: {
     icon: <Zap className="w-8 h-8" />,
     label: 'Plan Básico, Estándar o Premium',
     color: 'from-blue-600/20 to-blue-900/10 border-blue-500/30 text-blue-400',
@@ -45,13 +45,17 @@ export function PlanGuard({ requiredPlans, children, featureName }: PlanGuardPro
     );
   }
 
-  const hasAccess = planState && requiredPlans.includes(planState.effectivePlan);
+  const hasAccess =
+    planState?.effectivePlan != null &&
+    requiredPlans.includes(planState.effectivePlan);
   if (hasAccess) return <>{children}</>;
 
   // Determinar qué plan se necesita (el menor de los requeridos)
-  const neededPlan = requiredPlans.includes('BASIC') ? 'NO_PLAN' : 
-    requiredPlans.includes('BASIC') ? 'BASIC' : 
-    requiredPlans.includes('STANDARD') ? 'STANDARD' : 'PREMIUM';
+  const neededPlan: PlanCode = requiredPlans.includes(PlanCode.BASIC)
+    ? PlanCode.BASIC
+    : requiredPlans.includes(PlanCode.STANDARD)
+    ? PlanCode.STANDARD
+    : PlanCode.PREMIUM;
   const info = UPGRADE_INFO[neededPlan];
 
   return (
@@ -76,7 +80,7 @@ export function PlanGuard({ requiredPlans, children, featureName }: PlanGuardPro
         </p>
 
         <Link
-          href="/commercial/plans"
+          href="/plans"
           className="inline-flex items-center gap-2 bg-white text-slate-900 font-bold text-sm px-6 py-3 rounded-xl hover:bg-slate-100 transition-colors"
         >
           Ver planes disponibles

@@ -105,7 +105,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
                 <Lock className="w-3.5 h-3.5 text-gray-400" />
                 <span className="text-xs text-gray-500">Sin presupuesto activo</span>
                 <Link
-                  href="/commercial/plans"
+                  href="/plans"
                   className="text-[10px] font-bold bg-gray-900 text-white px-2 py-1 rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   Ver planes

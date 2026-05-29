@@ -2,7 +2,7 @@
 
 /**
  * Página de resultado del pago.
- * Ruta: /commercial/plans/resultado
+ * Ruta: /plans/resultado
  *
  * Wompi redirige aquí después de que el usuario completa o cancela el pago.
  * Esta página hace polling al backend para saber el resultado real
@@ -100,7 +100,7 @@ export default function PaymentResultPage() {
       title="Pago rechazado"
       subtitle="Tu banco o Wompi rechazó el pago. No se realizó ningún cargo."
       detail="Puedes intentarlo de nuevo con otro método de pago."
-      cta={{ label: 'Intentar de nuevo', action: () => router.push('/commercial/plans') }}
+      cta={{ label: 'Intentar de nuevo', action: () => router.push('/plans') }}
       secondary={{ label: 'Ir al panel', action: () => router.push('/commercial/dashboard') }}
     />
   );

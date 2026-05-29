@@ -5,6 +5,7 @@ import React from 'react';
 import { StatsCards } from '@/components/commercial/dashboard/StatsCards';
 import { PerformanceChart } from '@/components/commercial/analytics/PerformanceChart';
 import { PlanGuard } from '@/components/commercial/plans/PlanGuard';
+import { PlanCode } from '@/types/finance/plans/Plan.types';
 
 export default function DashboardPage() {
 
@@ -12,7 +13,7 @@ export default function DashboardPage() {
 
   return (
     
-      <PlanGuard requiredPlans={['BASIC', 'STANDARD', 'PREMIUM']} featureName="Dashboard">
+      <PlanGuard requiredPlans={[PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM]} featureName="Dashboard">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <p className="text-gray-600">

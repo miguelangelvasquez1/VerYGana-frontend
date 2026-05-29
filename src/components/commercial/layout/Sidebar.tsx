@@ -96,7 +96,7 @@ const menuItems: MenuItem[] = [
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
   },
-  { href: '/commercial/plans', icon: Sparkles, label: 'Ver Planes' },
+  { href: '/plans', icon: Sparkles, label: 'Ver Planes' },
 ];
 
 // ─── Plan badge ───────────────────────────────────────────────────────────────
@@ -230,7 +230,7 @@ export function Sidebar({
                     active ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'
                   }`} />
                   <span className="text-sm font-medium">{item.label}</span>
-                  {item.href === '/commercial/plans' && (
+                  {item.href === '/plans' && (
                     <span className="ml-auto text-[9px] font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1.5 py-0.5 rounded-full">
                       NEW
                     </span>
