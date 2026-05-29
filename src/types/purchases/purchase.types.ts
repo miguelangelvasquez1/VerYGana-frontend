@@ -1,4 +1,11 @@
-import { PurchaseItemResponseDTO, CreatePurchaseItemRequestDTO } from "./purchaseItem.types";
+import { PurchaseItemResponseDTO, ConsumerPurchaseItemResponseDTO, CreatePurchaseItemRequestDTO } from "./purchaseItem.types";
+
+export enum PurchaseStatus {
+    PENDING = "PENDING",
+    PROCCESSING = "PROCESSING",
+    COMPLETED = "COMPLETED",
+    FAILED = "FAILED"
+}   
 
 export interface InitiatePurchaseResponseDTO {
     purchaseId: number;
@@ -23,8 +30,25 @@ export interface PurchaseResponseDTO {
     referenceId: string;
     items: PurchaseItemResponseDTO[];
     totalItems: number;
-    subtotal: number;
-    total: number;
+    totalCents: number;
+    keyValueCents: number;
+    cashCents: number;
+    commissionCents: number;
+    status: PurchaseStatus;
+    createdAt: string;
+    completedAt: string | null;
+}
+
+export interface ConsumerPurchaseResponseDTO {
+    id: number;
+    referenceId: string;
+    items: ConsumerPurchaseItemResponseDTO[];
+    totalItems: number;
+    totalCents: number;
+    keysValueCents: number;
+    cashCents: number;
+    status: PurchaseStatus;
+    deliveryEmail: string | null;
     createdAt: string;
     completedAt: string | null;
 }

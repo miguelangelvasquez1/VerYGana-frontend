@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { purchaseService } from "@/services/PurchaseService";
-import { PurchaseResponseDTO } from "@/types/purchases/purchase.types";
+import { ConsumerPurchaseResponseDTO } from "@/types/purchases/purchase.types";
 
 export const usePurchases = () => {
-  const [purchases, setPurchases] = useState<PurchaseResponseDTO[]>([]);
+  const [purchases, setPurchases] = useState<ConsumerPurchaseResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);

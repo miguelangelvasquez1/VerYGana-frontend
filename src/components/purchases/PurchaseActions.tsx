@@ -1,11 +1,11 @@
 'use client';
 
-import { PurchaseResponseDTO } from "@/types/purchases/purchase.types";
+import { ConsumerPurchaseResponseDTO } from "@/types/purchases/purchase.types";
 import { useState } from "react";
 import LeaveReviewModal from "../reviews/LeaveReviewModal";
 
 interface Props {
-  purchase: PurchaseResponseDTO;
+  purchase: ConsumerPurchaseResponseDTO;
 }
 
 const PurchaseActions = ({ purchase }: Props) => {
