@@ -60,7 +60,7 @@ export default function SurveyFormModal({ onClose }: Props) {
 
   // ── Remote data ──────────────────────────────────────────────────────────
   const { categories = [],    loading: loadingCats    } = useCategories();
-  const { data: departments = [], isLoading: loadingDepts } = useDepartments();
+  
   // costPerResponse is a single number returned by the backend
   const { data: costPerResponse,  isLoading: loadingCost  } = useSurveyConfigs();
 

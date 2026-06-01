@@ -8,65 +8,86 @@ import { Category } from "@/types/Category.types";
 import { useCategories } from "@/hooks/useCategories";
 import { getActiveAvatars, AvatarDTO } from "@/services/AvatarService";
 import AvatarSelector from "@/components/AvatarSelector";
+import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 
 type Role = "BENEFICIARIO" | "COMERCIANTE";
 
 interface Municipality {
-  id: number;
+  code: string;
   name: string;
 }
 
 interface Department {
-  id: number;
+  code: string;
   name: string;
-  municipalities: Municipality[];
 }
 
+// Field-level error map from API
+type FieldErrors = Record<string, string>;
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function FieldWrapper({
+  label,
+  required,
+  error,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-semibold text-gray-700">
+        {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
+      {children}
+      {error && (
+        <p className="text-xs text-red-500 flex items-center gap-1 mt-0.5">
+          <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0zm-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-1-9a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1z" clipRule="evenodd" />
+          </svg>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+const inputCls = (hasError?: boolean) =>
+  `w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:bg-white transition ${
+    hasError
+      ? "border-red-400 focus:ring-red-300"
+      : "border-gray-200 focus:ring-blue-400 focus:border-blue-400"
+  }`;
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function RegisterForm() {
   const [role, setRole] = useState<Role | null>(null);
   const [formData, setFormData] = useState<any>({});
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
-  const [loadingMunicipalities, setLoadingMunicipalities] = useState(false);
-  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [loadingDepartments, setLoadingDepartments] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatars, setAvatars] = useState<AvatarDTO[]>([]);
   const [loadingAvatars, setLoadingAvatars] = useState(false);
-  const { categories, loading, error, refetch } = useCategories();
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const { categories, loading: loadingCategories } = useCategories();
+  const { data: departments = [], isLoading: loadingDepts } = useDepartments();
+  const { municipalities, loading: loadingMunicipalities } = useMunicipalities(
+    formData.departmentCode || null
+  );
 
-  // const CategoryService cs;
-  // 🟢 Cargar departamentos desde el JSON local
+  // ── Load avatars ───────────────────────────────────────────────────────────
   useEffect(() => {
-    const loadDepartments = async () => {
-      try {
-        const response = await fetch("/data/colombia.min.json");
-        const data = await response.json();
-
-        const mappedData = data.map((dept: any) => ({
-          id: dept.id,
-          name: dept.departamento,
-          municipalities: dept.ciudades.map((city: string, index: number) => ({
-            id: index,
-            name: city,
-          })),
-        }));
-
-        setDepartments(mappedData);
-      } catch (error) {
-        console.error("Error cargando departamentos:", error);
-        toast.error("Error al cargar departamentos");
-      }
-    };
-    loadDepartments();
-  }, []);
-    useEffect(() => {
     const loadAvatars = async () => {
       setLoadingAvatars(true);
       try {
         const data = await getActiveAvatars();
         setAvatars(data);
-      } catch (error) {
+      } catch {
         toast.error("Error al cargar los avatares");
       } finally {
         setLoadingAvatars(false);
@@ -75,121 +96,107 @@ export default function RegisterForm() {
     loadAvatars();
   }, []);
 
-  // 🟢 Cargar municipios al seleccionar departamento
-  useEffect(() => {
-    if (formData.department) {
-      setLoadingMunicipalities(true);
-      const dept = departments.find((d) => d.name === formData.department);
-      if (dept) {
-        setMunicipalities(dept.municipalities);
-      } else {
-        setMunicipalities([]);
-      }
-      setLoadingMunicipalities(false);
-    }
-  }, [formData.department, departments]);
-
-  // 🟢 Leer código de referido desde la URL (?ref=XXXX)
+  // ── Read referral code from URL ────────────────────────────────────────────
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const ref = params.get('ref');
+    const ref = params.get("ref");
     if (ref) {
-      setRole('BENEFICIARIO');
+      setRole("BENEFICIARIO");
       setFormData((prev: any) => ({ ...prev, referredByCode: ref.toUpperCase() }));
     }
-}, []);
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  // ── Handlers ───────────────────────────────────────────────────────────────
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
+
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => { const n = { ...prev }; delete n[name]; return n; });
+    }
+
     setFormData((prev: any) => ({
       ...prev,
       [name]: value,
-      ...(name === "department" && { municipality: "" }),
+      // Resetear municipio al cambiar departamento
+      ...(name === "departmentCode" && {
+        municipalityCode: "",
+        municipalityName: "",
+      }),
     }));
   };
 
-   // 🔄 CAMBIO IMPORTANTE: Ahora maneja objetos Category completos
+  const handleMunicipalityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const code = e.target.value;
+    const selected = municipalities.find((m: Municipality) => m.code === code);
+
+    setFormData((prev: any) => ({
+      ...prev,
+      municipalityCode: code,
+      municipalityName: selected?.name || "",
+    }));
+
+    if (fieldErrors["municipalityName"]) {
+      setFieldErrors((prev) => { const n = { ...prev }; delete n["municipalityName"]; return n; });
+    }
+  };
+
   const handleCheckboxChange = (category: Category) => {
     setFormData((prev: any) => {
-      const currentCategories = prev.categories || [];
-      
-      // Verificar si la categoría ya está seleccionada (comparar por ID)
-      const isSelected = currentCategories.some((cat: Category) => cat.id === category.id);
-      
-      if (isSelected) {
-        // Remover la categoría
-        return {
-          ...prev,
-          categories: currentCategories.filter((cat: Category) => cat.id !== category.id)
-        };
-      } else {
-        // Agregar la categoría
-        return {
-          ...prev,
-          categories: [...currentCategories, category]
-        };
-      }
+      const current: Category[] = prev.categories || [];
+      const isSelected = current.some((c) => c.id === category.id);
+      return {
+        ...prev,
+        categories: isSelected
+          ? current.filter((c) => c.id !== category.id)
+          : [...current, category],
+      };
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldErrors({});
 
-    // Validación de contraseñas
     if (formData.password !== formData.confirmPassword) {
       toast.error("Las contraseñas no coinciden");
       return;
     }
-
-    // Prevenir envíos múltiples
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    // Validaciones específicas de BENEFICIARIO
-  if (role === "BENEFICIARIO") {
-    if (!formData.avatarId) {
-      toast.error("Debes seleccionar un avatar");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!formData.userName) {
-      toast.error("El nombre de usuario es requerido");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!formData.birthDay || !formData.birthMonth || !formData.birthYear) {
-      toast.error("La fecha de nacimiento es requerida");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!formData.gender) {
-      toast.error("El género es requerido");
-      setIsSubmitting(false);
-      return;
+    // Client-side validations for BENEFICIARIO
+    if (role === "BENEFICIARIO") {
+      const clientErrors: FieldErrors = {};
+      if (!formData.avatarId) clientErrors["avatarId"] = "Debes seleccionar un avatar";
+      if (!formData.userName) clientErrors["userName"] = "El nombre de usuario es requerido";
+      if (!formData.birthDay || !formData.birthMonth || !formData.birthYear)
+        clientErrors["birthDate"] = "La fecha de nacimiento es requerida";
+      if (!formData.gender) clientErrors["gender"] = "El género es requerido";
+
+      if (formData.birthYear && formData.birthMonth && formData.birthDay) {
+        const birth = new Date(
+          Number(formData.birthYear),
+          Number(formData.birthMonth) - 1,
+          Number(formData.birthDay)
+        );
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const md = today.getMonth() - birth.getMonth();
+        if (md < 0 || (md === 0 && today.getDate() < birth.getDate())) age--;
+        if (age < 13) clientErrors["birthDate"] = "Debes tener al menos 13 años para registrarte";
+      }
+
+      if (Object.keys(clientErrors).length > 0) {
+        setFieldErrors(clientErrors);
+        setIsSubmitting(false);
+        return;
+      }
     }
 
-    // Validar edad mínima (13 años)
-    const birth = new Date(
-      Number(formData.birthYear),
-      Number(formData.birthMonth) - 1,
-      Number(formData.birthDay)
-    );
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    if (age < 13) {
-      toast.error("Debes tener al menos 13 años para registrarte");
-      setIsSubmitting(false);
-      return;
-    }
-  }
     try {
       let response;
-
-      // 🔹 Registro según el rol seleccionado
       switch (role) {
         case "BENEFICIARIO":
           response = await registerConsumer({
@@ -198,94 +205,97 @@ export default function RegisterForm() {
             phoneNumber: formData.phoneNumber,
             name: formData.name,
             lastNames: formData.lastNames,
-            department: formData.department,
-            municipality: formData.municipality,
+            municipalityCode: formData.municipalityCode,
             categories: formData.categories || [],
-            avatarId: formData.avatarId,   
+            avatarId: formData.avatarId,
             referredByCode: formData.referredByCode?.trim() || undefined,
-            userName: formData.userName,                    
-            birthDate: `${formData.birthYear}-${String(formData.birthMonth).padStart(2, "0")}-${String(formData.birthDay).padStart(2, "0")}`, 
-            gender: formData.gender,   
+            userName: formData.userName,
+            birthDate: `${formData.birthYear}-${String(formData.birthMonth).padStart(2, "0")}-${String(formData.birthDay).padStart(2, "0")}`,
+            gender: formData.gender,
+            department: formData.departmentName,
           });
           break;
-
         case "COMERCIANTE":
           response = await registerCommercial({
             email: formData.email,
             password: formData.password,
             phoneNumber: formData.phoneNumber,
             name: formData.name,
-            nit: formData.nit
+            nit: formData.nit,
           });
           break;
-
         default:
           throw new Error("Rol no válido");
       }
 
-      console.log("✅ Usuario registrado exitosamente:", response);
       toast.success("¡Registro exitoso! Ahora puedes iniciar sesión");
-      
-      // Limpiar formulario y volver a la selección de rol
       setFormData({});
       setRole(null);
-      
-      // Redirigir al login después de 2 segundos
-      setTimeout(() => {
-      window.location.href = '/login';
-      }, 2000);
-
+      setTimeout(() => { window.location.href = "/login"; }, 2000);
     } catch (error: any) {
-      console.error("❌ Error en el registro:", error);
-      
-      // Manejo de errores más detallado
-      let errorMessage = "Error en el registro. Por favor, intenta de nuevo.";
-      
+      console.error("Error en el registro:", error);
+
+      // Parse API validation errors
       if (error.response) {
-        // El servidor respondió con un código de error
-        if (error.response.status === 400) {
-          errorMessage = error.response.data?.message || "Datos inválidos. Verifica la información.";
+        const data = error.response.data;
+
+        // Show field-level errors from `details`
+        if (data?.details && typeof data.details === "object") {
+          setFieldErrors(data.details);
+          toast.error(data.message || "Verifica los campos marcados en rojo");
         } else if (error.response.status === 409) {
-          errorMessage = "Este correo electrónico ya está registrado.";
-        } else if (error.response.status === 500) {
-          errorMessage = "Error del servidor. Intenta más tarde.";
+          toast.error("Este correo electrónico ya está registrado.");
         } else {
-          errorMessage = error.response.data?.message || errorMessage;
+          toast.error(data?.message || "Error en el registro. Por favor, intenta de nuevo.");
         }
       } else if (error.request) {
-        // La petición se hizo pero no hubo respuesta
-        errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión.";
+        toast.error("No se pudo conectar con el servidor. Verifica tu conexión.");
+      } else {
+        toast.error("Error en el registro. Por favor, intenta de nuevo.");
       }
-      
-      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // 🟣 PANTALLA 1 — Selección de rol
+  // ─── SCREEN 1: Role selection ──────────────────────────────────────────────
   if (!role) {
     return (
-      <div className="max-w-lg mx-auto mt-10 p-8 bg-white rounded-2xl shadow-lg text-center">
-        <h2 className="text-3xl font-bold mb-4">Crear cuenta</h2>
-        <p className="text-gray-600 mb-6">Selecciona tu tipo de usuario para comenzar</p>
+      <div className="flex flex-col gap-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">Crear cuenta</h2>
+          <p className="text-gray-500 text-sm">Selecciona tu tipo de usuario para comenzar</p>
+        </div>
 
         <div className="grid gap-4">
           <button
             onClick={() => setRole("BENEFICIARIO")}
-            className="p-3 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition cursor-pointer"
+            className="group flex items-center gap-4 p-5 border-2 border-blue-200 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
           >
-            🛍 Soy Beneficiario
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-blue-200 transition">
+              🛍
+            </div>
+            <div>
+              <p className="font-bold text-gray-800">Soy Beneficiario</p>
+              <p className="text-sm text-gray-500">Gana recompensas viendo anuncios</p>
+            </div>
           </button>
+
           <button
             onClick={() => setRole("COMERCIANTE")}
-            className="p-3 border-2 border-purple-500 rounded-lg hover:bg-purple-50 transition cursor-pointer"
+            className="group flex items-center gap-4 p-5 border-2 border-purple-200 rounded-2xl hover:border-purple-500 hover:bg-purple-50 transition-all text-left"
           >
-            📢 Soy Comerciante
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-purple-200 transition">
+              📢
+            </div>
+            <div>
+              <p className="font-bold text-gray-800">Soy Comerciante</p>
+              <p className="text-sm text-gray-500">Publica tus anuncios y llega a más clientes</p>
+            </div>
           </button>
         </div>
 
-        <p className="mt-6 text-sm text-gray-500">
+        <p className="text-center text-sm text-gray-500">
           ¿Ya tienes cuenta?{" "}
           <a href="/login" className="text-blue-600 font-semibold hover:underline">
             Inicia sesión aquí
@@ -295,354 +305,371 @@ export default function RegisterForm() {
     );
   }
 
-  // 🟢 PANTALLA 2 — Formulario por rol
-   return (
-    <div className="max-w-2xl w-full mx-auto my-8 sm:my-12 px-4 sm:px-8 py-8 bg-white rounded-2xl shadow-lg border border-gray-100">
-      <h2 className="text-2xl font-bold mb-2 text-center">Crear cuenta</h2>
-      <p className="text-center text-gray-600 mb-6">Completa la información para registrarte</p>
+  // ─── SCREEN 2: Form ────────────────────────────────────────────────────────
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Header */}
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-1">
+          {role === "BENEFICIARIO" ? "Registro de Beneficiario" : "Registro de Comerciante"}
+        </h2>
+        <p className="text-gray-500 text-sm">Completa todos los campos para crear tu cuenta</p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 🔹 BENEFICIARIO */}
+      {/* Global API error banner */}
+      {Object.keys(fieldErrors).length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p className="text-sm font-semibold text-red-700 mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0zm-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-1-9a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1z" clipRule="evenodd" />
+            </svg>
+            Por favor corrige los siguientes errores:
+          </p>
+          <ul className="list-disc list-inside space-y-1">
+            {Object.entries(fieldErrors).map(([field, msg]) => (
+              <li key={field} className="text-xs text-red-600">{msg}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+
+        {/* ── BENEFICIARIO ── */}
         {role === "BENEFICIARIO" && (
           <>
-            <div className="space-y-4">
-              {/* Nombre y Apellidos */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input
-                  name="name"
-                  placeholder="Nombre"
-                  onChange={handleChange}
-                  value={formData.name || ""}
-                  className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                  required
-                />
-                <input
-                  name="lastNames"
-                  placeholder="Apellidos"
-                  onChange={handleChange}
-                  value={formData.lastNames || ""}
-                  className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                  required
-                />
-              </div>
-              {/* Username */}
-              <input
-                name="userName"
-                placeholder="Nombre de usuario"
-                onChange={handleChange}
-                value={formData.userName || ""}
-                maxLength={20}
-                className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                required
-              />
-              <p className="text-xs text-gray-400 -mt-2 ml-1">
-                Solo letras, números, puntos y guion bajo. Entre 3 y 20 caracteres.
-              </p>
+            {/* Personal info */}
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Información personal</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FieldWrapper label="Nombre" required error={fieldErrors["name"]}>
+                    <input name="name" placeholder="Tu nombre" onChange={handleChange} value={formData.name || ""} className={inputCls(!!fieldErrors["name"])} required />
+                  </FieldWrapper>
+                  <FieldWrapper label="Apellidos" required error={fieldErrors["lastNames"]}>
+                    <input name="lastNames" placeholder="Tus apellidos" onChange={handleChange} value={formData.lastNames || ""} className={inputCls(!!fieldErrors["lastNames"])} required />
+                  </FieldWrapper>
+                </div>
 
-              {/* Fecha de nacimiento */}
-              <div>
-                <label className="block font-semibold text-gray-700 mb-2">
-                  Fecha de nacimiento <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                  <select
-                    name="birthDay"
+                <FieldWrapper label="Nombre de usuario" required error={fieldErrors["userName"]}>
+                  <input
+                    name="userName"
+                    placeholder="ej. juan_perez123"
                     onChange={handleChange}
-                    value={formData.birthDay || ""}
-                    className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                  >
-                    <option value="">Día</option>
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
+                    value={formData.userName || ""}
+                    maxLength={20}
+                    className={inputCls(!!fieldErrors["userName"])}
+                    required
+                  />
+                  <p className="text-xs text-gray-400">Solo letras, números, puntos y guion bajo. Entre 3 y 20 caracteres.</p>
+                </FieldWrapper>
 
-                  <select
-                    name="birthMonth"
-                    onChange={handleChange}
-                    value={formData.birthMonth || ""}
-                    className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                  >
-                    <option value="">Mes</option>
+                {/* Birth date */}
+                <FieldWrapper label="Fecha de nacimiento" required error={fieldErrors["birthDate"]}>
+                  <div className="grid grid-cols-3 gap-3">
+                    <select name="birthDay" onChange={handleChange} value={formData.birthDay || ""} className={inputCls(!!fieldErrors["birthDate"])}>
+                      <option value="">Día</option>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                    <select name="birthMonth" onChange={handleChange} value={formData.birthMonth || ""} className={inputCls(!!fieldErrors["birthDate"])}>
+                      <option value="">Mes</option>
+                      {["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].map((m, i) => (
+                        <option key={i + 1} value={i + 1}>{m}</option>
+                      ))}
+                    </select>
+                    <select name="birthYear" onChange={handleChange} value={formData.birthYear || ""} className={inputCls(!!fieldErrors["birthDate"])}>
+                      <option value="">Año</option>
+                      {Array.from({ length: new Date().getFullYear() - 1924 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </FieldWrapper>
+
+                {/* Gender */}
+                <FieldWrapper label="Género" required error={fieldErrors["gender"]}>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-                      "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
-                    ].map((m, i) => (
-                      <option key={i + 1} value={i + 1}>{m}</option>
+                      { value: "MALE", icon: "♂", label: "Masculino" },
+                      { value: "FEMALE", icon: "♀", label: "Femenino" },
+                      { value: "OTHER", icon: "⚧", label: "Otro" },
+                      { value: "PREFER_NOT_TO_SAY", icon: "🤐", label: "Prefiero no decir" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev: any) => ({ ...prev, gender: opt.value }));
+                          if (fieldErrors["gender"]) setFieldErrors((p) => { const n = { ...p }; delete n["gender"]; return n; });
+                        }}
+                        className={`py-2.5 px-2 rounded-xl border-2 text-xs font-semibold transition flex flex-col items-center gap-1
+                          ${formData.gender === opt.value
+                            ? "border-blue-500 bg-blue-50 text-blue-700"
+                            : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:bg-gray-100"
+                          }`}
+                      >
+                        <span className="text-lg">{opt.icon}</span>
+                        <span className="leading-tight text-center">{opt.label}</span>
+                      </button>
                     ))}
-                  </select>
+                  </div>
+                </FieldWrapper>
+              </div>
+            </section>
 
-                  <select
-                    name="birthYear"
+            <hr className="border-gray-100" />
+
+            {/* Contact */}
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Datos de contacto</h3>
+              <div className="space-y-4">
+                <FieldWrapper label="Correo electrónico" required error={fieldErrors["email"]}>
+                  <input type="email" name="email" placeholder="tu@correo.com" onChange={handleChange} value={formData.email || ""} className={inputCls(!!fieldErrors["email"])} required />
+                </FieldWrapper>
+
+                <FieldWrapper label="Teléfono" required error={fieldErrors["phoneNumber"]}>
+                  <input name="phoneNumber" placeholder="300 000 0000" onChange={handleChange} value={formData.phoneNumber || ""} className={inputCls(!!fieldErrors["phoneNumber"])} required />
+                </FieldWrapper>
+
+                <FieldWrapper label="Código de referido" error={fieldErrors["referredByCode"]}>
+                  <input
+                    name="referredByCode"
+                    placeholder="Opcional"
                     onChange={handleChange}
-                    value={formData.birthYear || ""}
-                    className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                  >
-                    <option value="">Año</option>
-                    {Array.from(
-                      { length: new Date().getFullYear() - 1924 },
-                      (_, i) => new Date().getFullYear() - 13 - i
-                    ).map((y) => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </select>
-                </div>
+                    value={formData.referredByCode || ""}
+                    maxLength={20}
+                    className={inputCls(!!fieldErrors["referredByCode"])}
+                  />
+                </FieldWrapper>
               </div>
+            </section>
 
-              {/* Género */}
-              <div>
-                <label className="block font-semibold text-gray-700 mb-2">
-                  Género <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {[
-                    { value: "MALE", label: "♂ Masculino" },
-                    { value: "FEMALE", label: "♀ Femenino" },
-                    { value: "OTHER", label: "⚧ Otro" },
-                    { value: "PREFER_NOT_TO_SAY", label: "🤐 Prefiero no decir" },
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setFormData((prev: any) => ({ ...prev, gender: option.value }))}
-                      className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition
-                        ${formData.gender === option.value
-                          ? "border-blue-500 bg-blue-50 text-blue-700"
-                          : "border-gray-200 bg-gray-100 text-gray-600 hover:border-gray-300 hover:bg-gray-200"
-                        }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>              
-              {/* Email */}
-              <input
-                type="email"
-                name="email"
-                placeholder="Correo electrónico"
-                onChange={handleChange}
-                value={formData.email || ""}
-                className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                required
-              />
+            <hr className="border-gray-100" />
 
-              {/* Teléfono */}
-              <input
-                name="phoneNumber"
-                placeholder="Teléfono"
-                onChange={handleChange}
-                value={formData.phoneNumber || ""}
-                className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                required
-              />
-              {/* Código de referido */}
-              <div className="relative">
-                <input
-                  name="referredByCode"
-                  placeholder="Código de referido (opcional)"
-                  onChange={handleChange}
-                  value={formData.referredByCode || ""}
-                  maxLength={20}
-                  className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition pr-24"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-1">
-                  Opcional
-                </span>
-              </div>
-              {/* Avatar */}
+            {/* Avatar */}
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Avatar</h3>
+              {fieldErrors["avatarId"] && (
+                <p className="text-xs text-red-500 mb-2 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0zm-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-1-9a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1z" clipRule="evenodd" /></svg>
+                  {fieldErrors["avatarId"]}
+                </p>
+              )}
               <AvatarSelector
                 avatars={avatars}
                 selectedId={formData.avatarId ?? null}
-                onSelect={(id) => setFormData((prev: any) => ({ ...prev, avatarId: id }))}
+                onSelect={(id) => {
+                  setFormData((prev: any) => ({ ...prev, avatarId: id }));
+                  if (fieldErrors["avatarId"]) setFieldErrors((p) => { const n = { ...p }; delete n["avatarId"]; return n; });
+                }}
                 loading={loadingAvatars}
               />
-              {/* Contraseñas */}
+            </section>
+
+            <hr className="border-gray-100" />
+
+            {/* Password */}
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Contraseña</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Contraseña"
-                  onChange={handleChange}
-                  value={formData.password || ""}
-                  className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                  required
-                />
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Confirmar contraseña"
-                  onChange={handleChange}
-                  value={formData.confirmPassword || ""}
-                  className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                  required
-                />
+                <FieldWrapper label="Contraseña" required error={fieldErrors["password"]}>
+                  <input type="password" name="password" placeholder="Mínimo 8 caracteres" onChange={handleChange} value={formData.password || ""} className={inputCls(!!fieldErrors["password"])} required />
+                </FieldWrapper>
+                <FieldWrapper label="Confirmar contraseña" required error={fieldErrors["confirmPassword"]}>
+                  <input type="password" name="confirmPassword" placeholder="Repite tu contraseña" onChange={handleChange} value={formData.confirmPassword || ""} className={inputCls(!!fieldErrors["confirmPassword"])} required />
+                </FieldWrapper>
               </div>
+            </section>
 
-              {/* Ubicación */}
-              <div>
-                <label className="block font-semibold text-gray-700 mb-2">Departamento</label>
-                <select
-                  name="department"
-                  onChange={handleChange}
-                  value={formData.department || ""}
-                  className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                  required
-                >
-                  <option value="">Selecciona tu departamento</option>
-                  {departments.map((d) => (
-                    <option key={d.id} value={d.name}>
-                      {d.name}
+            <hr className="border-gray-100" />
+
+            {/* Location */}
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Ubicación</h3>
+              <div className="space-y-4">
+                <FieldWrapper label="Departamento" required error={fieldErrors["departmentName"]}>
+                  <select
+                    name="departmentCode"
+                    onChange={handleChange}
+                    value={formData.departmentCode || ""}
+                    className={inputCls(!!fieldErrors["departmentName"])}
+                    required
+                    disabled={loadingDepartments}
+                  >
+                    <option value="">
+                      {loadingDepartments ? "Cargando departamentos..." : "Selecciona tu departamento"}
                     </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-2">Municipio</label>
-                <select
-                  name="municipality"
-                  onChange={handleChange}
-                  value={formData.municipality || ""}
-                  className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition disabled:opacity-50"
-                  required
-                  disabled={!formData.department || loadingMunicipalities}
-                >
-                  <option value="">
-                    {!formData.department
-                      ? "Selecciona primero el departamento"
-                      : loadingMunicipalities
-                        ? "Cargando municipios..."
-                        : "Selecciona tu municipio"}
-                  </option>
-                  {municipalities.map((m) => (
-                    <option key={m.id} value={m.name}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Intereses */}
-              <div>
-                <h3 className="font-semibold text-lg text-gray-700 mb-3">
-                  Intereses {loadingCategories && <span className="text-sm text-gray-500">(Cargando...)</span>}
-                </h3>
-                
-                {loadingCategories ? (
-                  <div className="p-4 bg-gray-100 border border-gray-200 rounded-lg text-center">
-                    <p className="text-gray-500">Cargando categorías...</p>
-                  </div>
-                ) : categories.length === 0 ? (
-                  <div className="p-4 bg-gray-100 border border-gray-200 rounded-lg text-center">
-                    <p className="text-red-500">No se pudieron cargar las categorías. Intenta recargar la página.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 p-4 bg-gray-100 border border-gray-200 rounded-lg max-h-64 overflow-y-auto">
-                    {categories.map((cat) => (
-                      <label 
-                        key={cat.id} 
-                        className="flex items-center space-x-2 cursor-pointer hover:bg-gray-200 p-2 rounded transition"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.categories?.some((c: Category) => c.id === cat.id) || false}
-                          onChange={() => handleCheckboxChange(cat)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded cursor-pointer"
-                        />
-                        <span className="text-sm text-gray-700">{cat.name}</span>
-                      </label>
+                    {departments.map((d) => (
+                      <option key={d.code} value={d.code}>{d.name}</option>
                     ))}
-                  </div>
-                )}
+                  </select>
+                </FieldWrapper>
+
+                <FieldWrapper label="Municipio" required error={fieldErrors["municipalityName"]}>
+                  <select
+                    name="municipalityCode"
+                    onChange={handleMunicipalityChange}
+                    value={formData.municipalityCode || ""}
+                    className={inputCls(!!fieldErrors["municipalityName"])}
+                    required
+                    disabled={!formData.departmentCode || loadingMunicipalities}
+                  >
+                    <option value="">
+                      {!formData.departmentCode
+                        ? "Selecciona primero el departamento"
+                        : loadingMunicipalities
+                          ? "Cargando municipios..."
+                          : "Selecciona tu municipio"}
+                    </option>
+                    
+                    {municipalities?.map((m: Municipality) => (
+                      <option key={m.code} value={m.code}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </select>
+                </FieldWrapper>
               </div>
-            </div>
+            </section>
+
+            <hr className="border-gray-100" />
+
+            {/* Interests */}
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Mis intereses</h3>
+              <p className="text-xs text-gray-500 mb-3">Selecciona al menos una categoría que te interese</p>
+              {fieldErrors["categories"] && (
+                <p className="text-xs text-red-500 mb-2 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0zm-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-1-9a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1z" clipRule="evenodd" /></svg>
+                  {fieldErrors["categories"]}
+                </p>
+              )}
+              {loadingCategories ? (
+                <div className="flex items-center justify-center py-8 text-gray-400 text-sm gap-2">
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Cargando categorías...
+                </div>
+              ) : categories.length === 0 ? (
+                <p className="text-sm text-red-500 py-4 text-center">No se pudieron cargar las categorías. Intenta recargar la página.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((cat) => {
+                    const selected = formData.categories?.some((c: Category) => c.id === cat.id);
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => handleCheckboxChange(cat)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all
+                          ${selected
+                            ? "bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-200"
+                            : "bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600"
+                          }`}
+                      >
+                        {selected && (
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                        {cat.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {(formData.categories?.length ?? 0) > 0 && (
+                <p className="text-xs text-blue-600 mt-2 font-medium">
+                  {formData.categories.length} categoría{formData.categories.length !== 1 ? "s" : ""} seleccionada{formData.categories.length !== 1 ? "s" : ""}
+                </p>
+              )}
+            </section>
           </>
         )}
 
-        {/* 🔹 COMERCIANTE */}
+        {/* ── COMERCIANTE ── */}
         {role === "COMERCIANTE" && (
-          <div className="space-y-4">
-            <input
-              name="name"
-              placeholder="Nombre o empresa"
-              onChange={handleChange}
-              value={formData.name || ""}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-              required
-            />
-            <input
-              name="nit"
-              placeholder="NIT"
-              onChange={handleChange}
-              value={formData.nit || ""}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-              required
-            />
+          <>
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Información del negocio</h3>
+              <div className="space-y-4">
+                <FieldWrapper label="Nombre o empresa" required error={fieldErrors["name"]}>
+                  <input name="name" placeholder="Nombre de tu empresa o negocio" onChange={handleChange} value={formData.name || ""} className={inputCls(!!fieldErrors["name"])} required />
+                </FieldWrapper>
+                <FieldWrapper label="NIT" required error={fieldErrors["nit"]}>
+                  <input name="nit" placeholder="900.000.000-0" onChange={handleChange} value={formData.nit || ""} className={inputCls(!!fieldErrors["nit"])} required />
+                </FieldWrapper>
+              </div>
+            </section>
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Correo electrónico"
-              onChange={handleChange}
-              value={formData.email || ""}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-              required
-            />
-            <input
-              name="phoneNumber"
-              placeholder="Teléfono"
-              onChange={handleChange}
-              value={formData.phoneNumber || ""}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-              required
-            />
+            <hr className="border-gray-100" />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input
-                type="password"
-                name="password"
-                placeholder="Contraseña"
-                onChange={handleChange}
-                value={formData.password || ""}
-                className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                required
-              />
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirmar contraseña"
-                onChange={handleChange}
-                value={formData.confirmPassword || ""}
-                className="px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                required
-              />
-            </div>
-          </div>
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Datos de contacto</h3>
+              <div className="space-y-4">
+                <FieldWrapper label="Correo electrónico" required error={fieldErrors["email"]}>
+                  <input type="email" name="email" placeholder="empresa@correo.com" onChange={handleChange} value={formData.email || ""} className={inputCls(!!fieldErrors["email"])} required />
+                </FieldWrapper>
+                <FieldWrapper label="Teléfono" required error={fieldErrors["phoneNumber"]}>
+                  <input name="phoneNumber" placeholder="300 000 0000" onChange={handleChange} value={formData.phoneNumber || ""} className={inputCls(!!fieldErrors["phoneNumber"])} required />
+                </FieldWrapper>
+              </div>
+            </section>
+
+            <hr className="border-gray-100" />
+
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Contraseña</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FieldWrapper label="Contraseña" required error={fieldErrors["password"]}>
+                  <input type="password" name="password" placeholder="Mínimo 8 caracteres" onChange={handleChange} value={formData.password || ""} className={inputCls(!!fieldErrors["password"])} required />
+                </FieldWrapper>
+                <FieldWrapper label="Confirmar contraseña" required error={fieldErrors["confirmPassword"]}>
+                  <input type="password" name="confirmPassword" placeholder="Repite tu contraseña" onChange={handleChange} value={formData.confirmPassword || ""} className={inputCls(!!fieldErrors["confirmPassword"])} required />
+                </FieldWrapper>
+              </div>
+            </section>
+          </>
         )}
 
-        {/* 🔘 BOTONES */}
-        <div className="space-y-3 pt-4">
+        {/* Submit buttons */}
+        <div className="space-y-3 pt-2">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`bg-blue-600 text-white w-full py-3 rounded-lg font-semibold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md ${
-              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`w-full py-3.5 rounded-xl font-bold text-white text-sm tracking-wide shadow-md transition-all
+              ${isSubmitting
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-blue-200"
+              }`}
           >
-            {isSubmitting ? 'Registrando...' : 'Registrarse'}
+            {isSubmitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Registrando...
+              </span>
+            ) : (
+              "Crear cuenta"
+            )}
           </button>
 
           <button
             type="button"
-            onClick={() => setRole(null)}
+            onClick={() => { setRole(null); setFieldErrors({}); }}
             disabled={isSubmitting}
-            className="text-gray-500 text-sm hover:text-gray-700 hover:underline w-full transition"
+            className="w-full text-sm text-gray-400 hover:text-gray-600 hover:underline transition py-1"
           >
             ← Volver a selección de rol
           </button>
         </div>
       </form>
-    </div>
-  );
+    </div>
+  );
 }

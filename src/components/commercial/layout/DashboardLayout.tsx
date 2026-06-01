@@ -7,24 +7,45 @@ import React, { useState, useEffect, createContext, useContext, useMemo } from '
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { getEffectivePlanState } from '@/services/planService';
-import { EffectivePlanState } from '@/types/plan';
+import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
+import { WalletStatus } from '@/types/finance/Wallet.types';
+import { formatCents } from '@/utils/currency';
 import { usePathname } from 'next/navigation';
 
-// ─── Context: plan state accesible en cualquier hijo ─────────────────────────
+// ─── Context ──────────────────────────────────────────────────────────────────
 
 interface PlanContextValue {
-  planState: EffectivePlanState | null;
+  planState: EffectivePlanStateResponseDTO | null;
   loadingPlan: boolean;
-  refreshPlan: () => Promise<void>;
+  refreshPlanState: () => void;
 }
 
 export const PlanContext = createContext<PlanContextValue>({
   planState: null,
   loadingPlan: true,
-  refreshPlan: async () => {},
+  refreshPlanState: () => {},
 });
 
 export const usePlanState = () => useContext(PlanContext);
+
+// ─── Fallback cuando no hay plan ──────────────────────────────────────────────
+
+const NO_PLAN_STATE: EffectivePlanStateResponseDTO = {
+  effectivePlan: null,
+  hasActivePlan: false,
+  remainingBudgetCents: 0,
+  commissionRate: 0,
+  canAdvertise: false,
+  canUseGames: false,
+  canUseSurveys: false,
+  maxProducts: 0,
+  maxAds: 0,
+  maxBrandedGames: 0,
+  maxSurveys: 0,
+  maxKeysPct: 0,
+  subscriptionDaysRemaining: null,
+  walletStatus: WalletStatus.INACTIVE,
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -35,10 +56,8 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Plan state
-  const [planState, setPlanState] = useState<EffectivePlanState | null>(null);
+  const [isMobile, setIsMobile]       = useState(false);
+  const [planState, setPlanState]     = useState<EffectivePlanStateResponseDTO | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
 
   const pathname = usePathname();
@@ -61,6 +80,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       { match: '/commercial/campaigns/create', title: 'Crear Campaña' },
       { match: '/commercial/campaigns', title: 'Campañas' },
+
+      { match: '/commercial/pets/create', title: 'Crear Mascotas' },
+      { match: '/commercial/pets', title: 'Mascotas' },
     ];
 
     const sortedRoutes = routes.sort((a, b) => b.match.length - a.match.length);
@@ -74,52 +96,34 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const title = getPageTitle(pathname);
 
-  // ── Screen size detection ──
   useEffect(() => {
-    const checkScreenSize = () => {
+    const check = () => {
       setIsMobile(window.innerWidth < 1024);
       if (window.innerWidth >= 1024) setSidebarOpen(false);
     };
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
   }, []);
 
-  // ── Load effective plan state ──
   const loadPlan = async () => {
-    setLoadingPlan(true);
     try {
       const state = await getEffectivePlanState();
       setPlanState(state);
     } catch (err) {
       console.error('Error cargando estado del plan:', err);
-      setPlanState({
-        effectivePlan: '',
-        commissionActive: true,
-        commissionRate: 10,
-        remainingBudget: 0,
-        canAdvertise: false,
-        canUseGames: false,
-        maxProducts: 10,
-        maxAds: 0,
-        maxBrandedGames: 0,
-        roiReached: false,
-        hasActivePlan: false,
-      });
+      setPlanState(NO_PLAN_STATE);
     } finally {
       setLoadingPlan(false);
     }
   };
 
-  useEffect(() => {
-    loadPlan();
-  }, []);
+  useEffect(() => { loadPlan(); }, []);
 
   return (
-    <PlanContext.Provider value={{ planState, loadingPlan, refreshPlan: loadPlan }}>
+    <PlanContext.Provider value={{ planState, loadingPlan, refreshPlanState: loadPlan }}>
       <div className="min-h-screen bg-gray-50">
 
-        {/* Overlay móvil */}
         {isMobile && sidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -127,9 +131,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           />
         )}
 
-        {/* ── Sidebar ── */}
         <div
-          id="sidebar"
           className={`
             fixed top-0 left-0 h-full w-64 z-50
             transition-transform duration-300 ease-in-out
@@ -138,15 +140,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         >
           <Sidebar
             onClose={() => setSidebarOpen(false)}
-            effectivePlan={planState?.effectivePlan ?? ''}
+            effectivePlan={planState?.effectivePlan as PlanCode | null ?? null}
             hasActivePlan={planState?.hasActivePlan ?? false}
-            remainingBudget={planState?.remainingBudget ?? 0}
-            commissionActive={planState?.commissionActive ?? false}
+            remainingBudget={planState?.remainingBudgetCents ?? 0}
+            walletStatus={planState?.walletStatus ?? WalletStatus.INACTIVE}
             pathname={currentPath}
           />
         </div>
 
-        {/* ── Main content ── */}
         <div className={`transition-all duration-300 ${isMobile ? 'ml-0' : 'ml-64'}`}>
           <Header
             title={title}
@@ -174,5 +175,5 @@ export const PAGE_TITLES: Record<string, string> = {
   '/commercial/analytics': 'Estadísticas',
   '/commercial/billing': 'Facturación',
   '/commercial/settings': 'Configuración',
-  '/commercial/plans': 'Planes',
+  '/plans': 'Planes',
 };

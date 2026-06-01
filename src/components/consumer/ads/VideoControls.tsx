@@ -1,5 +1,6 @@
 // components/VideoControls.tsx
-import { ExternalLink, Share2 } from "lucide-react";
+'use client';
+import { ExternalLink, Share2 } from 'lucide-react';
 
 interface VideoControlsProps {
   onVisit: () => void;
@@ -8,62 +9,53 @@ interface VideoControlsProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export default function VideoControls({ 
-  onVisit,
-  onShare,
-  size = "lg" 
-}: VideoControlsProps) {
-
+export default function VideoControls({ onVisit, onShare, size = 'lg' }: VideoControlsProps) {
   const iconSize =
-    size === "sm" ? "w-6 h-6" :
-    size === "md" ? "w-7 h-7" :
-    "w-8 h-8";
+    size === 'sm' ? 'w-6 h-6' :
+    size === 'md' ? 'w-6 h-6' :
+    'w-7 h-7';
 
-  const textSize =
-    size === "sm" ? "text-xs" :
-    size === "md" ? "text-sm" :
-    "text-base";
+  const btnSize =
+    size === 'sm' ? 'w-10 h-10' :
+    size === 'md' ? 'w-12 h-12' :
+    'w-14 h-14';
+
+  const labelSize =
+    size === 'sm' ? 'text-[10px]' :
+    size === 'md' ? 'text-xs' :
+    'text-xs';
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <div className="flex flex-col items-center gap-5">
 
-      {/* BOTÓN VISITAR */}
+      {/* Visit */}
       <button
         onClick={onVisit}
-        className="flex flex-col items-center group transition-transform hover:scale-110 cursor-pointer"
+        className="flex flex-col items-center gap-1.5 group"
+        aria-label="Visitar sitio del anunciante"
       >
-        <div className="relative">
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm rounded-full scale-150 -z-10"></div>
-
-          <ExternalLink
-            className={`${iconSize} text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]`}
-          />
+        <div className={`${btnSize} rounded-full bg-white/10 backdrop-blur-md
+          border border-white/20 flex items-center justify-center
+          group-hover:bg-white/20 group-active:scale-90
+          transition-all shadow-lg`}>
+          <ExternalLink className={`${iconSize} text-white`} />
         </div>
-
-        <span
-          className={`${textSize} font-semibold mt-1 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
-        >
-          Visitar
-        </span>
+        <span className={`${labelSize} font-semibold text-white drop-shadow`}>Visitar</span>
       </button>
 
-      {/* COMPARTIR */}
+      {/* Share */}
       <button
         onClick={onShare}
-        className="flex flex-col items-center group transition-transform hover:scale-110 cursor-pointer"
+        className="flex flex-col items-center gap-1.5 group"
+        aria-label="Compartir"
       >
-        <div className="relative">
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm rounded-full scale-150 -z-10"></div>
-          <Share2
-            className={`${iconSize} text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
-          />
+        <div className={`${btnSize} rounded-full bg-white/10 backdrop-blur-md
+          border border-white/20 flex items-center justify-center
+          group-hover:bg-white/20 group-active:scale-90
+          transition-all shadow-lg`}>
+          <Share2 className={`${iconSize} text-white`} />
         </div>
-
-        <span
-          className={`${textSize} font-semibold mt-1 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
-        >
-          Compartir
-        </span>
+        <span className={`${labelSize} font-semibold text-white drop-shadow`}>Compartir</span>
       </button>
 
     </div>

@@ -36,7 +36,6 @@ const LoginForm = () => {
       // Validación cliente rápida
       if (!identifier || !password) {
         setError('Por favor completa todos los campos');
-        setIsLoading(false);
         return;
       }
 
@@ -63,7 +62,7 @@ const LoginForm = () => {
       router.push("/admin");
       return;
     } else if (role === "ROLE_CONSUMER") {
-      router.push("/raffles");
+      router.push("/home");
       return;
     } else if (role === "ROLE_COMMERCIAL") {
       router.push("/commercial");
@@ -73,7 +72,6 @@ const LoginForm = () => {
     } catch (err: any) {
       console.error('❌ Login error:', err);
       setError(err.message || 'Error al iniciar sesión');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -167,7 +165,7 @@ const LoginForm = () => {
                          disabled:cursor-not-allowed disabled:transform-none
                          shadow-lg hover:shadow-xl
                          flex items-center justify-center gap-2
-                         text-sm sm:text-base"
+                         text-sm sm:text-base cursor-pointer"
             >
               {isLoading ? <LoadingSpinner label="Procesando..." /> : <span>Iniciar Sesión</span>}
             </button>

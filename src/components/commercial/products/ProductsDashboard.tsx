@@ -1,182 +1,151 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  Package,
-  Search,
-  Filter,
-  Grid,
-  List,
-  Wallet,
-} from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Package, Search, Filter, Grid, List } from "lucide-react";
 
-import CreateProductForm from "@/components/commercial/products/CreateProductForm";
 import { useAuth } from "@/hooks/useAuth";
-import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
-import { EarningsByMonthResponseDTO } from "@/types/transaction.types";
+import { ProductStatus, ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { DashboardStats } from "@/types/Commercial.types";
 import ProductCard from "@/components/consumer/products/ProductCard";
-import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import TopSellingProducts from "@/components/commercial/products/commercialStats/TopSellingProducts";
-import CommercialEarningsBarChart from "@/components/commercial/products/commercialStats/CommercialEarningsBarChart";
-import CommercialEarningsCards from "@/components/commercial/products/commercialStats/CommercialEarningsCards";
 
 // Servicios
 import * as productService from "@/services/ProductService";
 import * as walletService from "@/services/WalletService";
 import * as productReviewService from "@/services/ProductReviewService";
 import * as purchaseItemService from "@/services/PurchaseItemService";
-import * as transactionService from "@/services/TransactionService";
-import CommercialPayoutsList from "@/components/commercial/products/commercialStats/CommercialPayoutsList";
-
 
 export default function ProductsDashboard() {
-  // Estados UI
   const router = useRouter();
   const searchParams = useSearchParams();
   const section = searchParams.get("section") ?? "dashboard";
-  const { role, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [selectedPayoutMonth, setSelectedPayoutMonth] = useState<number>(new Date().getMonth() + 1);
+  const hasLoaded = useRef(false);
 
   // ================== Estados ==================
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
-    totalProducts: 0,
+    totalPendingProducts: 0,
+    totalActiveProducts: 0,
+    totalRejectedProducts: 0,
     totalSales: 0,
-    totalRevenue: 0,
     averageRating: 0,
   });
-
-  const [earningsByMonth, setEarningsByMonth] = useState<EarningsByMonthResponseDTO[]>([]);
-  const [earningsLoading, setEarningsLoading] = useState(false);
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
-  const MONTHS = [
-    { value: 1, label: "Enero" },
-    { value: 2, label: "Febrero" },
-    { value: 3, label: "Marzo" },
-    { value: 4, label: "Abril" },
-    { value: 5, label: "Mayo" },
-    { value: 6, label: "Junio" },
-    { value: 7, label: "Julio" },
-    { value: 8, label: "Agosto" },
-    { value: 9, label: "Septiembre" },
-    { value: 10, label: "Octubre" },
-    { value: 11, label: "Noviembre" },
-    { value: 12, label: "Diciembre" },
-  ];
-
-
-
-  // ========== Cargar datos ==========
-  const loadDashboardData = async () => {
+  // ================== Cargar datos ==================
+  const loadDashboardData = useCallback(async () => {
     setIsLoading(true);
     setError("");
+
     try {
-      const [
-        totalProductsData,
-        totalSalesData,
-        availableBalanceData,
-        averageRatingData,
-        myProductsData,
-      ] = await Promise.all([
-        productService.getTotalCommercialProducts(),
+      const results = await Promise.allSettled([
+        productService.getTotalCommercialProducts(ProductStatus.PENDING),
+        productService.getTotalCommercialProducts(ProductStatus.ACTIVE),
+        productService.getTotalCommercialProducts(ProductStatus.REJECTED),
         purchaseItemService.getTotalCommercialSales(),
-        walletService.getAvailableBalance(),
         productReviewService.getCommercialAvgRating(),
         productService.getMyProducts(0),
       ]);
 
-      console.log("📦 Backend response:", myProductsData);
+      const [
+        totalPendingProductsRes,
+        totalActiveProductsRes,
+        totalRejectedProductsRes,
+        totalSalesRes,
+        ratingRes,
+        productsRes,
+      ] = results;
 
+      // ===== Stats =====
       setStats({
-        totalProducts: totalProductsData,
-        totalSales: totalSalesData,
-        totalRevenue: availableBalanceData,
-        averageRating: averageRatingData,
+        totalActiveProducts:
+          totalActiveProductsRes.status === "fulfilled"
+            ? totalActiveProductsRes.value
+            : 0,
+        totalPendingProducts:
+          totalPendingProductsRes.status === "fulfilled"
+            ? totalPendingProductsRes.value
+            : 0,
+        totalRejectedProducts:
+          totalRejectedProductsRes.status === "fulfilled"
+            ? totalRejectedProductsRes.value
+            : 0,
+        totalSales:
+          totalSalesRes.status === "fulfilled"
+            ? totalSalesRes.value
+            : 0,
+        averageRating:
+          ratingRes.status === "fulfilled" ? ratingRes.value : 0,
       });
 
-      const content = myProductsData?.data ?? [];
-      console.log("📋 Content array:", content);
-      console.log("📋 Content length:", content.length);
+      // ===== Productos =====
+      if (productsRes.status === "fulfilled") {
+        const content = productsRes.value?.data ?? [];
 
-      setProducts(
-        content.map((p) => ({
-          id: p.id,
-          name: p.name,
-          price: p.price,
-          imageUrl: p.imageUrl,
-          stock: p.stock,
-          categoryName: p.categoryName,
-          averageRate: p.averageRate,
-        }))
-      );
+        if (process.env.NODE_ENV === "development") {
+          console.log("📦 Products:", content);
+        }
+
+        setProducts(
+          content.map((p) => ({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            imageUrl: p.imageUrl,
+            stock: p.stock,
+            categoryName: p.categoryName,
+            averageRate: p.averageRate,
+            status: p.status,
+            companyName: p.companyName,
+          }))
+        );
+      }
     } catch (err: any) {
       console.error("❌ Error loading dashboard:", err);
-      setError(err.response?.data?.message || "Error al cargar dashboard");
+      setError(err?.response?.data?.message || "Error al cargar dashboard");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  // ================== EARNINGS ==================
-  const loadEarningsByYear = async (year: number) => {
-    setEarningsLoading(true);
-    try {
-      const data =
-        await transactionService.getCommercialEarningsByYearList(year);
-      setEarningsByMonth(data);
-    } catch (error) {
-      console.error("Error loading earnings", error);
-    } finally {
-      setEarningsLoading(false);
-    }
-  };
-
-
-  // ========== EFFECT: Cargar datos al montar y cuando cambie la sección ==========
+  // ================== EFFECT ==================
   useEffect(() => {
-    if (isAuthenticated && role === "COMMERCIAL") {
-      loadDashboardData();
-    }
-  }, [isAuthenticated, role]);
+    if (!isAuthenticated || hasLoaded.current) return;
 
-  useEffect(() => {
-    if (section === "analytics") {
-      loadEarningsByYear(selectedYear);
-    }
-  }, [section, selectedYear]);
+    hasLoaded.current = true;
+    loadDashboardData();
+  }, [isAuthenticated, loadDashboardData]);
 
-
-  // ========== Eliminar producto ==========
+  // ================== Eliminar producto ==================
   const handleDeleteProduct = async (productId: number) => {
-    if (!confirm("¿Estás seguro de eliminar este producto?")) return;
+    const confirmed = window.confirm(
+      "¿Estás seguro de eliminar este producto?"
+    );
+    if (!confirmed) return;
 
     try {
       await productService.deleteProduct(productId);
       await loadDashboardData();
-      alert("Producto eliminado correctamente");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Error al eliminar");
+      alert(err?.response?.data?.message || "Error al eliminar");
     }
   };
 
-  // ========== Filtros ==========
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // ================== Filtros ==================
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [products, searchQuery]);
 
-  console.log("🔍 Filtered products count:", filteredProducts.length);
-
-  // ========== LOADING ==========
+  // ================== LOADING ==================
   if (isLoading && products.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -188,7 +157,7 @@ export default function ProductsDashboard() {
     );
   }
 
-  // ========== ERROR ==========
+  // ================== ERROR ==================
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -206,55 +175,13 @@ export default function ProductsDashboard() {
     );
   }
 
-  // ========== SECCIONES ==========
-  const renderDashboard = () => (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
-      <p className="text-gray-600">Vista general de tu negocio</p>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <p className="text-blue-100 text-sm">Productos activos</p>
-          <p className="text-3xl font-bold mt-2">{stats.totalProducts}</p>
-        </div>
-
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
-          <p className="text-green-100 text-sm">Ventas Totales</p>
-          <p className="text-3xl font-bold mt-2">{stats.totalSales}</p>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-          <p className="text-purple-100 text-sm">Balance Disponible</p>
-          <p className="text-3xl font-bold mt-2">
-            ${stats.totalRevenue.toLocaleString("es-CO")}
-          </p>
-        </div>
-
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white">
-          <p className="text-yellow-100 text-sm">Rating Promedio</p>
-          <p className="text-3xl font-bold mt-2">
-            {stats.averageRating > 0 ? `${stats.averageRating.toFixed(2)} ⭐` : "N/A"}
-          </p>
-
-        </div>
-      </div>
-      {/* Top Selling Products */}
-      <div>
-        <TopSellingProducts />
-      </div>
-
-      {/* 🔥 NUEVA SECCIÓN */}
-    <div className="pt-6 border-t">
-      {renderProducts()}
-    </div>
-
-    </div>
-  );
+  // ================== UI ==================
 
   const renderProducts = () => (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-900">Todos tus productos</h2>
+      <h2 className="text-3xl font-bold text-gray-900">
+        Todos tus productos
+      </h2>
 
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex gap-4">
@@ -275,7 +202,9 @@ export default function ProductsDashboard() {
           </button>
 
           <button
-            onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+            onClick={() =>
+              setViewMode(viewMode === "grid" ? "list" : "grid")
+            }
             className="border px-4 py-2 rounded-lg"
           >
             {viewMode === "grid" ? <List /> : <Grid />}
@@ -300,8 +229,12 @@ export default function ProductsDashboard() {
               product={product}
               mode="commercial"
               onDelete={() => handleDeleteProduct(product.id)}
-              onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
-              onView={() => router.push(`/products/${product.id}?mode=commercial`)}
+              onEdit={() =>
+                router.push(`/commercial/products/edit/${product.id}`)
+              }
+              onView={() =>
+                router.push(`/products/${product.id}?mode=commercial`)
+              }
             />
           ))}
         </div>
@@ -313,8 +246,12 @@ export default function ProductsDashboard() {
               product={product}
               mode="commercial"
               onDelete={() => handleDeleteProduct(product.id)}
-              onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
-              onView={() => router.push(`/products/${product.id}?mode=commercial`)}
+              onEdit={() =>
+                router.push(`/commercial/products/edit/${product.id}`)
+              }
+              onView={() =>
+                router.push(`/products/${product.id}?mode=commercial`)
+              }
             />
           ))}
         </div>
@@ -322,92 +259,59 @@ export default function ProductsDashboard() {
     </div>
   );
 
-  const renderCreateProduct = () => (
-    <div className="p-4">
-      <CreateProductForm />
-    </div>
-  );
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
+      <p className="text-gray-600">Vista general de tu negocio</p>
 
-  const renderAnalytics = () => (
-    <div className="flex flex-col gap-8">
-
-      {/* ===== Header ===== */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">
-            Análisis de Ventas
-          </h2>
-          <p className="text-gray-600">
-            Ganancias mensuales del {selectedYear}
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-yellow-500 rounded-xl p-6 text-white">
+          <p className="text-sm">Productos pendientes</p>
+          <p className="text-3xl font-bold mt-2">
+            {stats.totalPendingProducts}
           </p>
         </div>
 
-        {/* Selector de año */}
-        <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="border rounded-lg px-4 py-2 w-full sm:w-32"
-        >
-          {[currentYear, currentYear - 1, currentYear - 2].map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* ===== Gráfico ===== */}
-      <div className="bg-white rounded-xl shadow p-4">
-        <CommercialEarningsBarChart
-          data={earningsByMonth}
-          year={selectedYear}
-        />
-      </div>
-
-      {/* ===== Cards de resumen ===== */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Resumen de ganancias</h2>
-      </div>
-      <CommercialEarningsCards data={earningsByMonth} />
-
-      {/* ===== Pagos realizados ===== */}
-      <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-4">
-
-        {/* Header pagos + selector mes */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3">
-          <h3 className="text-2xl font-semibold text-gray-900">
-            Pagos realizados
-          </h3>
-
-          {/* Selector de mes */}
-          <select
-            value={selectedPayoutMonth}
-            onChange={(e) => setSelectedPayoutMonth(Number(e.target.value))}
-            className="border rounded-lg px-4 py-2 w-full sm:w-44 text-sm"
-          >
-            {MONTHS.map((month) => (
-              <option key={month.value} value={month.value}>
-                {month.label}
-              </option>
-            ))}
-          </select>
+        <div className="bg-blue-500 rounded-xl p-6 text-white">
+          <p className="text-sm">Productos activos</p>
+          <p className="text-3xl font-bold mt-2">
+            {stats.totalActiveProducts}
+          </p>
         </div>
 
-        {/* Lista de pagos */}
-        <CommercialPayoutsList
-          year={selectedYear}
-          month={selectedPayoutMonth}
-        />
+        <div className="bg-red-500 rounded-xl p-6 text-white">
+          <p className="text-sm">Productos rechazados</p>
+          <p className="text-3xl font-bold mt-2">
+            {stats.totalRejectedProducts}
+          </p>
+        </div>
+
+        <div className="bg-green-500 rounded-xl p-6 text-white">
+          <p className="text-sm">Ventas Totales</p>
+          <p className="text-3xl font-bold mt-2">
+            {stats.totalSales}
+          </p>
+        </div>
+
+        <div className="bg-purple-500 rounded-xl p-6 text-white">
+          <p className="text-sm">Rating Promedio</p>
+          <p className="text-3xl font-bold mt-2">
+            {stats.averageRating > 0
+              ? `${stats.averageRating.toFixed(2)} ⭐`
+              : "N/A"}
+          </p>
+        </div>
       </div>
 
+      <TopSellingProducts />
 
+      <div className="pt-6 border-t">{renderProducts()}</div>
     </div>
   );
 
   const renderSection = () => {
     switch (section) {
-      case "analytics":
-        return renderAnalytics();
       default:
         return renderDashboard();
     }

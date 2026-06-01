@@ -12,15 +12,6 @@ export const adminAdKeys = {
     [...adminAdKeys.all, 'pending', { page, size }] as const,
 };
 
-// Hook para obtener anuncios pendientes (Admin)
-export function usePendingAds(page: number = 0, size: number = 20) {
-  return useQuery({
-    queryKey: adminAdKeys.pending(page, size),
-    queryFn: () => adService.getPendingAds(page, size),
-    staleTime: 30 * 1000, // 30 segundos
-  });
-}
-
 // Hook para obtener todos los anuncios (Admin) con filtros
 export function useAllAdsAdmin(page: number = 0, size: number = 20, status?: string) {
   return useQuery({

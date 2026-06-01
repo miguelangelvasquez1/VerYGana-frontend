@@ -30,6 +30,20 @@ export default function VideoAdPlayer() {
     loadNextAd();
   }, []);
 
+  // Bloquear scroll de la página mientras el componente está montado
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+    };
+  }, []);
+
   const loadNextAd = () => {
     getNextAd(undefined, {
       onSuccess: (ad) => {
@@ -138,31 +152,6 @@ export default function VideoAdPlayer() {
     }
   }, [currentAd?.id, isPlaying, hasReachedEnd]);
 
-  const togglePlayPause = async () => {
-    if (!currentAd || hasReachedEnd) return;
-    
-    const isImage = currentAd.mediaType === 'IMAGE';
-    
-    if (isImage) {
-      setIsPlaying(prev => !prev);
-    } else {
-      const video = videoRef.current;
-      if (!video) return;
-      
-      if (isPlaying) {
-        video.pause();
-        setIsPlaying(false);
-      } else {
-        try {
-          await video.play();
-          setIsPlaying(true);
-        } catch {
-          setIsPlaying(false);
-        }
-      }
-    }
-  };
-
   const handleLike = () => {
     if (!currentAd || isLikingAd || isLiked || !hasReachedEnd) return;
     likeAd(
@@ -207,9 +196,19 @@ export default function VideoAdPlayer() {
   };
 
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!currentAd) return;
-    console.log('Compartir:', currentAd);
+
+    try {
+      await navigator.clipboard.writeText(currentAd.targetUrl);
+
+      console.log('Link copiado:', currentAd.targetUrl);
+
+      // opcional
+      alert('Link copiado al portapapeles');
+    } catch (error) {
+      console.error('Error copiando link', error);
+    }
   };
 
   const handleSave = () => {
@@ -219,7 +218,7 @@ export default function VideoAdPlayer() {
 
   if (isLoadingAd && !currentAd) {
     return (
-      <div className="flex justify-center items-center w-full h-[100dvh] bg-black">
+      <div className="flex justify-center items-center w-full h-full bg-black">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p className="text-white">Cargando anuncio...</p>
@@ -230,7 +229,7 @@ export default function VideoAdPlayer() {
 
   if (!currentAd) {
     return (
-      <div className="flex justify-center items-center w-full h-[100dvh] bg-black">
+      <div className="flex justify-center items-center w-full h-full bg-black">
         <div className="text-center text-white p-6">
           <p className="text-xl mb-4">No hay más anuncios disponibles</p>
         </div>
@@ -244,7 +243,7 @@ export default function VideoAdPlayer() {
   return (
     <div 
       ref={containerRef} 
-      className="relative flex justify-center items-center w-full h-[100dvh] overflow-hidden bg-black touch-none"
+      className="relative flex justify-center items-center w-full h-full overflow-hidden bg-black touch-none"
     >
       <div className="relative max-w-full max-h-[100dvh] overflow-hidden rounded-lg">
 
@@ -261,8 +260,7 @@ export default function VideoAdPlayer() {
           <img
             src={currentAd.contentUrl}
             alt={currentAd.title}
-            className="max-w-full max-h-[calc(80dvh-1rem)] w-auto h-auto object-contain cursor-pointer"
-            onClick={togglePlayPause}
+            className="max-w-full max-h-[calc(80dvh-1rem)] w-auto h-auto object-contain"
           />
         ) : (
           <video
@@ -270,26 +268,10 @@ export default function VideoAdPlayer() {
             src={currentAd.contentUrl}
             autoPlay
             loop={false}
-            muted
             playsInline
             preload="metadata"
-            className="max-w-full h-[calc(80dvh-1rem)] w-auto object-contain cursor-pointer"
-            onClick={togglePlayPause}
+            className="max-w-full h-[calc(80dvh-1rem)] w-auto object-contain"
           />
-        )}
-
-        {/* Play overlay */}
-        {!isPlaying && !hasReachedEnd && (
-          <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/30">
-            <button 
-              onClick={togglePlayPause} 
-              className="p-3 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all hover:scale-110"
-            >
-              <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </button>
-          </div>
         )}
 
         {/* End of ad overlay - Like prompt */}

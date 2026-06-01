@@ -1,34 +1,29 @@
 import apiClient from "@/lib/api/client";
 import * as ProductTypes from "@/types/products/Product.types";
-import { EntityCreatedResponseDTO, EntityUpdatedResponseDTO, PagedResponse } from "@/types/Generic.types";
+import { AssetUploadPermissionDTO, EntityCreatedResponseDTO, EntityUpdatedResponseDTO, FileUploadPermissionDTO, FileUploadRequestDTO, PagedResponse } from "@/types/Generic.types";
 import { ProductStockParams, ProductStockRequestDTO, ProductStockResponseDTO } from "@/types/products/ProductStock.types";
+
 // ============================================
 // MÉTODOS DEL SERVICE
 // ============================================
 
+
 /**
- * Crear nuevo producto (COMMERCIAL)
+ * Preparar la creacion de un producto (COMMERCIAL)
  */
-export const createProduct = async (
-  product: ProductTypes.CreateProductRequestDTO,
-  productImage: File
-): Promise<EntityCreatedResponseDTO> => {
-  const formData = new FormData();
-
-  // Backend espera product como STRING JSON
-  formData.append("product", JSON.stringify(product));
-
-  // Imagen
-  formData.append("productImage", productImage);
-
-  const response = await apiClient.post("/products/create", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
+export const prepareProductCreation = async (productImageMetaData: FileUploadRequestDTO): Promise<AssetUploadPermissionDTO> => {
+  const response = await apiClient.post("/products/prepare", productImageMetaData);
   return response.data;
 };
+
+/** 
+ * Crear producto (Luego de confirmar subida a R2)
+ */
+
+  export const confirmProductCreation = async (request : ProductTypes.ConfirmProductCreationRequestDTO): Promise<EntityCreatedResponseDTO> => {
+    const response = await apiClient.post("/products/confirm", request);
+    return response.data;
+  }
 
 /**
  * Eliminar producto (COMMERCIAL)
@@ -55,31 +50,28 @@ export const getProductEditInfo = async (productId: number): Promise<ProductType
 /**
  * Editar producto existente (COMMERCIAL)
  */
-export const editProduct = async (
-  productId: number,
-  product: ProductTypes.UpdateProductRequestDTO,
-  productImage?: File
-): Promise<EntityUpdatedResponseDTO> => {
+export const editProduct = async (productId: number, request: ProductTypes.UpdateProductRequestDTO): Promise<EntityUpdatedResponseDTO> => {
+  const response = await apiClient.patch(`/products/${productId}`, request);
+  return response.data;
+}
 
-  const formData = new FormData();
-  formData.append("product", JSON.stringify(product));
+/**
+  * Paso 1 - Preparar actualización de imagen
+  */
 
-  if (productImage) {
-    formData.append("productImage", productImage);
+  export const prepareProductImageUpdate = async (productId: number, imageMetaData: FileUploadRequestDTO): Promise<AssetUploadPermissionDTO> => {
+    const response = await apiClient.post(`/products/${productId}/image/prepare`, imageMetaData);
+    return response.data;
   }
 
-  const response = await apiClient.put(
-    `/products/edit/${productId}`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
+/**
+  * Paso 2 - Confirmar actualización de imagen (luego de subir a R2)
+  */
 
-  return response.data;
-};
+  export const confirmProductImageUpdate = async (productId: number, request: ProductTypes.ConfirmProductImageUploadRequestDTO): Promise<void> => {
+    const response = await apiClient.post(`/products/${productId}/image/confirm`, request);
+    return response.data;
+  }
 
 /**
   * Obtener el listado de codigos registrados de un producto
@@ -115,7 +107,7 @@ export const updateStockItem = async (productId: number, stockId: number, reques
 /**
   * Eliminar un código de stock específico
   */
-export const deleteStockItem = async (productId : number, stockId : number): Promise<void> => {
+export const deleteStockItem = async (productId: number, stockId: number): Promise<void> => {
   await apiClient.delete(`/products/${productId}/stock/${stockId}`)
 }
 
@@ -123,7 +115,7 @@ export const deleteStockItem = async (productId : number, stockId : number): Pro
   * Agregar múltiples códigos de stock de una vez
   */
 
-export const addBulkStockItems = async (productId : number, requests : ProductStockRequestDTO[]) => {
+export const addBulkStockItems = async (productId: number, requests: ProductStockRequestDTO[]) => {
   const response = await apiClient.post(`/products/${productId}/stock/bulk`, requests);
   return response.data;
 }
@@ -187,7 +179,7 @@ export const getCommercialProducts = async (
 export const getMyProducts = async (
   page: number = 0
 ): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
-  const response = await apiClient.get('/products/myProducts', {
+  const response = await apiClient.get('/products/my-products', {
     params: { page }
   });
   return response.data;
@@ -196,8 +188,10 @@ export const getMyProducts = async (
 /**
  * Obtener la cantidad de productos (COMMERCIAL)
  */
-export const getTotalCommercialProducts = async (): Promise<number> => {
-  const response = await apiClient.get('/products/totalProducts');
+export const getTotalCommercialProducts = async (status: ProductTypes.ProductStatus): Promise<number> => {
+  const response = await apiClient.get('/products/total-products', {
+    params: { status }
+  });
   return response.data;
 };
 

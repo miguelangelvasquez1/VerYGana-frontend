@@ -1,14 +1,11 @@
 'use client';
 
-// Agrega este import arriba junto a los demás de lucide-react
-import { PawPrint } from 'lucide-react';
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   User,
-  Wallet,
   Gift,
   Megaphone,
   Package,
@@ -17,12 +14,16 @@ import {
   ShoppingBag,
   Settings,
   LogOut,
-  Plus,
-  Bell,
   Heart,
   Home,
-  ClipboardList,
   Ticket,
+  KeyRound,
+  Gamepad2,
+  PawPrint,
+  ClipboardList,
+  Smartphone,
+  MessageSquare,
+  Zap,
 } from "lucide-react";
 
 import { getConsumerInitialData } from "@/services/ConsumerService";
@@ -30,15 +31,28 @@ import type { ConsumerInitialDataResponseDTO } from "@/types/Consumer.types";
 import { CartButton } from "../consumer/cart/CartButton";
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationPanel } from "../notifications/NotificationsPanel";
+import { useLogout } from '@/hooks/useLogout';
+
+const navItems = [
+  { href: '/home',              label: 'Inicio',    Icon: Home          },
+  { href: '/raffles',           label: 'Rifas',     Icon: Gift          },
+  { href: '/games',             label: 'Juegos',    Icon: Gamepad2      },
+  { href: '/pet',               label: '🐾 Mascota', Icon: PawPrint     },
+  { href: '/ads',               label: 'Anuncios',  Icon: Megaphone     },
+  { href: '/surveys',           label: 'Encuestas', Icon: ClipboardList },
+  { href: '/products',          label: 'Productos', Icon: Package       },
+  { href: '/plans/mobile-plans',label: 'Recargas',  Icon: Smartphone    },
+  { href: '/forum',             label: 'Foro',      Icon: MessageSquare },
+] as const;
 
 export default function Navbar() {
   const pathname = usePathname();
 
   // UI state
   const [openMenu, setOpenMenu] = useState(false);
-  const [isWalletOpen, setIsWalletOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isKeyWalletOpen, setIsKeyWalletOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const { logout } = useLogout();
   const {
     notifications,
     unreadCount,
@@ -51,12 +65,11 @@ export default function Navbar() {
   // Data state
   const [consumer, setConsumer] = useState<ConsumerInitialDataResponseDTO | null>(null);
   const [loadingUser, setLoadingUser] = useState<boolean>(true);
-  const [errorUser, setErrorUser] = useState<string | null>(null);
 
   // refs independientes
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
-  const walletMenuRefDesktop = useRef<HTMLDivElement | null>(null);
-  const walletMenuRefMobile = useRef<HTMLDivElement | null>(null);
+  const keyWalletMenuRefDesktop = useRef<HTMLDivElement | null>(null);
+  const keyWalletMenuRefMobile = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefDesktop = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefMobile = useRef<HTMLDivElement | null>(null);
 
@@ -68,7 +81,6 @@ export default function Navbar() {
         setConsumer(data);
       } catch (err: any) {
         console.error("Error cargando datos:", err);
-        setErrorUser("No se pudieron cargar los datos del usuario");
       } finally {
         setLoadingUser(false);
       }
@@ -83,10 +95,10 @@ export default function Navbar() {
       if (profileMenuRef.current && !profileMenuRef.current.contains(target))
         setOpenMenu(false);
       if (
-        walletMenuRefDesktop.current && !walletMenuRefDesktop.current.contains(target) &&
-        walletMenuRefMobile.current && !walletMenuRefMobile.current.contains(target)
+        keyWalletMenuRefDesktop.current && !keyWalletMenuRefDesktop.current.contains(target) &&
+        keyWalletMenuRefMobile.current && !keyWalletMenuRefMobile.current.contains(target)
       )
-        setIsWalletOpen(false);
+        setIsKeyWalletOpen(false);
       if (
         notificationsMenuRefDesktop.current && !notificationsMenuRefDesktop.current.contains(target) &&
         notificationsMenuRefMobile.current && !notificationsMenuRefMobile.current.contains(target)
@@ -102,11 +114,11 @@ export default function Navbar() {
     return `$${value.toLocaleString("es-CO")}`;
   };
 
-  const buttonsStyle =
-    "cursor-pointer bg-white text-blue-900 font-semibold px-4 py-2 rounded-full shadow-md hover:bg-blue-50 hover:scale-105 hover:shadow-lg transform transition-all duration-200";
+  const btnBase   = "cursor-pointer rounded-full transform transition-all duration-200 p-2 2xl:px-4 2xl:py-2";
+  const btnNormal = `${btnBase} bg-white/15 text-white font-medium hover:bg-white/30 hover:scale-105 backdrop-blur-sm`;
+  const btnActive = `${btnBase} bg-white text-blue-700 font-bold shadow-lg scale-105`;
 
-  const activeButtonStyle =
-    "cursor-pointer bg-blue-100 text-blue-800 font-semibold px-4 py-2 rounded-full shadow-md border-2 border-blue-300";
+  const getNavClass = (isActive: boolean) => isActive ? btnActive : btnNormal;
 
   return (
     <>
@@ -119,66 +131,15 @@ export default function Navbar() {
           </div>
 
           {/* NAV BUTTONS */}
-          <div className="flex gap-3">
-            <Link href={"/home"}>
-              <button className={pathname === "/home" ? activeButtonStyle : buttonsStyle}>
-                Inicio
-              </button>
-            </Link>
-
-            <Link href={"/raffles"}>
-              <button
-                className={
-                  pathname === "/raffles"
-                    ? "cursor-pointer bg-amber-400 text-black font-bold px-4 py-2 rounded-full shadow-md border-2 border-amber-600 transform"
-                    : "cursor-pointer bg-yellow-400 text-black font-bold px-4 py-2 rounded-full shadow-sm hover:bg-amber-500 hover:scale-105 hover:shadow-lg transform transition-all duration-200"
-                }
-              >
-                Rifas
-              </button>
-            </Link>
-
-            <Link href={"/games"}>
-              <button className={pathname === "/games" ? activeButtonStyle : buttonsStyle}>
-                Juegos
-              </button>
-            </Link>
-
-            <Link href={"/pet"}>
-              <button className={pathname === "/pet" ? activeButtonStyle : buttonsStyle}>
-                🐾 Mascota
-              </button>
-            </Link> 
-
-            <Link href={"/ads"}>
-              <button className={pathname === "/ads" ? activeButtonStyle : buttonsStyle}>
-                Anuncios
-              </button>
-            </Link>
-
-            <Link href={"/surveys"}>
-              <button className={pathname === "/surveys" ? activeButtonStyle : buttonsStyle}>
-                Encuestas
-              </button>
-            </Link>
-
-            <Link href={"/products"}>
-              <button className={pathname === "/products" ? activeButtonStyle : buttonsStyle}>
-                Productos
-              </button>
-            </Link>
-
-            <Link href={"/plans/mobile-plans"}>
-              <button className={pathname === "/plans/mobile-plans" ? activeButtonStyle : buttonsStyle}>
-                Recargas
-              </button>
-            </Link>
-
-            <Link href={"/forum"}>
-              <button className={pathname === "/forum" ? activeButtonStyle : buttonsStyle}>
-                Foro
-              </button>
-            </Link>
+          <div className="flex gap-2 2xl:gap-3">
+            {navItems.map(({ href, label, Icon }) => (
+              <Link href={href} key={href}>
+                <button title={label} className={getNavClass(pathname === href)}>
+                  <Icon className="w-5 h-5 2xl:hidden" />
+                  <span className="hidden 2xl:inline">{label}</span>
+                </button>
+              </Link>
+            ))}
           </div>
 
           {/* -------- WALLET + CART + NOTIFS + USER -------- */}
@@ -186,55 +147,151 @@ export default function Navbar() {
             {/* CART BUTTON */}
             <CartButton />
 
-            {/* WALLET */}
-            <div className="relative" ref={walletMenuRefDesktop}>
+            {/* KEY WALLET */}
+            <div className="relative" ref={keyWalletMenuRefDesktop}>
               <button
-                onClick={() => setIsWalletOpen((v) => !v)}
-                className="group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-full hover:bg-white/20 hover:scale-105 transition-all"
+                onClick={() => setIsKeyWalletOpen((v) => !v)}
+                className="group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/10 hover:bg-white/20 hover:scale-105 transition-all"
               >
-                <Wallet className="w-5 h-5 text-yellow-400" />
-                <div className="flex flex-col items-start">
-                  <span className="text-yellow-400 font-bold text-sm">
-                    {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+                <Image
+                  src="/logos/llave.png"
+                  alt="Llaves"
+                  width={42}
+                  height={42}
+                  className="object-contain drop-shadow-md"
+                />
+
+                <div className="flex flex-col items-center leading-tight">
+                  <span className="text-yellow-300 font-extrabold text-sm">
+                    {loadingUser
+                      ? "..."
+                      : (consumer?.totalAvailableKeys ?? 0).toLocaleString("es-CO")}
                   </span>
-                  <span className="text-xs text-gray-200">Saldo disponible</span>
+
+                  <span className="text-[11px] text-gray-200">
+                    Llaves disponibles
+                  </span>
                 </div>
               </button>
 
+              {/* DROPDOWN */}
               <div
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`absolute right-0 mt-2 w-80 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
+                className={`absolute right-0 mt-3 w-[380px] overflow-hidden rounded-3xl bg-white shadow-2xl border border-white/20 transition-all duration-300 ${isKeyWalletOpen
+                  ? "opacity-100 scale-100 pointer-events-auto"
+                  : "opacity-0 scale-95 pointer-events-none"
+                  }`}
               >
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-white/20 rounded-full mx-auto mb-2 flex items-center justify-center">
-                      <Wallet className="w-6 h-6" />
+                {/* HEADER */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-[#004b8d] via-[#116cc0] to-[#7c3aed] px-6 py-6 text-white">
+                  <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+
+                  <div className="absolute -left-8 bottom-0 w-24 h-24 bg-cyan-300/10 rounded-full blur-2xl"></div>
+
+                  <div className="relative flex flex-col items-center text-center">
+                    <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl">
+                      <Image
+                        src="/logos/llave.png"
+                        alt="Llaves"
+                        width={58}
+                        height={58}
+                        className="object-contain"
+                      />
                     </div>
-                    <div className="text-2xl font-bold">
-                      {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+
+                    <div className="mt-4 text-4xl font-black tracking-tight text-yellow-300 drop-shadow-md">
+                      {loadingUser
+                        ? "..."
+                        : (consumer?.totalAvailableKeys ?? 0).toLocaleString("es-CO")}
                     </div>
-                    <div className="text-sm text-blue-100">Saldo actual</div>
+
+                    <div className="text-sm text-blue-100 font-medium mt-1">
+                      Llaves Totales Disponibles
+                    </div>
                   </div>
                 </div>
-                <div className="p-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-green-50 p-3 rounded-xl text-center">
-                      <div className="text-lg font-bold text-green-600">—</div>
-                      <div className="text-xs text-green-700">Créditos</div>
+
+                {/* BODY */}
+                <div className="p-5 bg-gradient-to-b from-[#f8fbff] to-white">
+                  <div className="space-y-3">
+
+                    {/* PURCHASE KEYS */}
+                    <div className="group flex items-center justify-between rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-4 hover:shadow-md transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-yellow-400/15 flex items-center justify-center border border-yellow-300/30">
+                          <ShoppingBag className="w-6 h-6 text-yellow-600" />
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">
+                            Llaves de Compra
+                          </p>
+
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Disponibles para productos y rifas
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-2xl font-black text-yellow-600">
+                          {loadingUser
+                            ? "..."
+                            : consumer?.purchaseKeys?.toLocaleString("es-CO")}
+                        </div>
+
+                        {!!consumer?.blockedPurchaseKeys && (
+                          <div className="text-[11px] text-red-500 font-medium mt-1">
+                            {consumer.blockedPurchaseKeys} bloqueadas
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="bg-blue-50 p-3 rounded-xl text-center">
-                      <div className="text-lg font-bold text-blue-600">—</div>
-                      <div className="text-xs text-blue-700">Transacciones</div>
+
+                    {/* CONNECTIVITY KEYS */}
+                    <div className="group flex items-center justify-between rounded-2xl border border-cyan-100 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-4 hover:shadow-md transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-cyan-400/15 flex items-center justify-center border border-cyan-300/30">
+                          <KeyRound className="w-6 h-6 text-cyan-600" />
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">
+                            Llaves de Conectividad
+                          </p>
+
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Recargas, datos y servicios
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-2xl font-black text-cyan-700">
+                          {loadingUser
+                            ? "..."
+                            : consumer?.connectivityKeys?.toLocaleString("es-CO")}
+                        </div>
+
+                        {!!consumer?.blockedConnectivityKeys && (
+                          <div className="text-[11px] text-red-500 font-medium mt-1">
+                            {consumer.blockedConnectivityKeys} bloqueadas
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    Depositar Fondos
-                  </button>
-                  <Link href="/explore/wallet" className="w-full bg-gray-50 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-100 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
-                    <History className="w-4 h-4" />
-                    Ver Historial Completo
-                  </Link>
+
+                  {/* BUTTON */}
+                  <div className="mt-5">
+                    <Link
+                      href="/explore/wallet"
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold hover:scale-[1.02] transition-all shadow-lg hover:shadow-blue-500/20"
+                    >
+                      <History className="w-5 h-5" />
+                      Historial de Transacciones
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -274,18 +331,22 @@ export default function Navbar() {
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                       <User className="w-6 h-6" />
                     </div>
-                    <div>
-                      <div className="font-semibold">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">
                         {loadingUser ? "..." : consumer?.name ?? "Usuario"}
                       </div>
-                      <div className="text-sm text-blue-100">Beneficiario</div>
+                      <div className="text-xs text-blue-100">Beneficiario</div>
                     </div>
                   </div>
                 </div>
                 <div className="py-2">
+                  <Link href="/explore/gamification" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 hover:text-purple-700 transition-all group">
+                    <Zap className="w-5 h-5 text-gray-400 group-hover:text-purple-600" />
+                    <span>Mi Nivel</span>
+                  </Link>
                   <Link href="/explore/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
                     <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                     <span>Mi Perfil</span>
@@ -311,7 +372,12 @@ export default function Navbar() {
                     <span>Configuración</span>
                   </Link>
                   <div className="border-t border-gray-100 mt-2 pt-2">
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all">
+                    <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
+                      onClick={async () => {
+                        setOpenMenu(false);
+                        await logout();
+                      }}
+                    >
                       <LogOut className="w-5 h-5" />
                       <span>Cerrar Sesión</span>
                     </button>
@@ -328,53 +394,142 @@ export default function Navbar() {
         <div className="flex items-center justify-between px-4 py-3">
           <Image src="/logos/logo.png" alt="Logo" width={45} height={45} />
           <div className="flex items-center gap-3">
-            {/* WALLET */}
-            <div className="relative" ref={walletMenuRefMobile}>
+            {/* KEY WALLET */}
+            <div className="relative" ref={keyWalletMenuRefMobile}>
               <button
-                onClick={() => setIsWalletOpen((v) => !v)}
-                className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full"
+                onClick={() => setIsKeyWalletOpen((v) => !v)}
+                className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-2xl border border-white/10"
               >
-                <Wallet className="w-4 h-4 text-yellow-400" />
-                <span className="text-yellow-400 font-bold text-sm">
-                  {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+                <Image
+                  src="/logos/llave.png"
+                  alt="Llaves"
+                  width={44}
+                  height={44}
+                  className="object-contain drop-shadow-md"
+                />
+
+                <span className="text-yellow-300 font-extrabold text-sm">
+                  {loadingUser
+                    ? "..."
+                    : (consumer?.totalAvailableKeys ?? 0).toLocaleString("es-CO")}
                 </span>
               </button>
+
               <div
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`fixed inset-x-0 top-16 mx-4 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${isWalletOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
+                className={`fixed inset-x-0 top-16 mx-4 overflow-hidden rounded-3xl bg-white shadow-2xl border border-white/20 transition-all duration-300 ${isKeyWalletOpen
+                    ? "opacity-100 scale-100 pointer-events-auto"
+                    : "opacity-0 scale-95 pointer-events-none"
+                  }`}
               >
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-white/20 rounded-full mx-auto mb-2 flex items-center justify-center">
-                      <Wallet className="w-6 h-6" />
+                {/* HEADER */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-[#004b8d] via-[#116cc0] to-[#7c3aed] px-5 py-6 text-white">
+                  <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+
+                  <div className="relative flex flex-col items-center text-center">
+                    <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl">
+                      <Image
+                        src="/logos/llave.png"
+                        alt="Llaves"
+                        width={56}
+                        height={56}
+                        className="object-contain"
+                      />
                     </div>
-                    <div className="text-2xl font-bold">
-                      {loadingUser ? "..." : formatCurrency(consumer?.walletAvailableBalance)}
+
+                    <div className="mt-4 text-4xl font-black text-yellow-300 tracking-tight">
+                      {loadingUser
+                        ? "..."
+                        : (consumer?.totalAvailableKeys ?? 0).toLocaleString("es-CO")}
                     </div>
-                    <div className="text-sm text-blue-100">Saldo actual</div>
+
+                    <div className="text-sm text-blue-100 mt-1">
+                      Llaves Totales Disponibles
+                    </div>
                   </div>
                 </div>
-                <div className="p-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-green-50 p-3 rounded-xl text-center">
-                      <div className="text-lg font-bold text-green-600">—</div>
-                      <div className="text-xs text-green-700">Créditos</div>
+
+                {/* BODY */}
+                <div className="p-4 bg-gradient-to-b from-[#f8fbff] to-white">
+                  <div className="space-y-3">
+
+                    {/* COMPRA */}
+                    <div className="flex items-center justify-between rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-yellow-400/15 flex items-center justify-center border border-yellow-300/30">
+                          <ShoppingBag className="w-5 h-5 text-yellow-600" />
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">
+                            Llaves de Compra
+                          </p>
+
+                          <p className="text-[11px] text-gray-500">
+                            Productos y rifas
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-xl font-black text-yellow-600">
+                          {loadingUser
+                            ? "..."
+                            : consumer?.purchaseKeys?.toLocaleString("es-CO")}
+                        </div>
+
+                        {!!consumer?.blockedPurchaseKeys && (
+                          <div className="text-[10px] text-red-500 font-medium mt-1">
+                            {consumer.blockedPurchaseKeys} bloqueadas
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="bg-blue-50 p-3 rounded-xl text-center">
-                      <div className="text-lg font-bold text-blue-600">—</div>
-                      <div className="text-xs text-blue-700">Transacciones</div>
+
+                    {/* CONECTIVIDAD */}
+                    <div className="flex items-center justify-between rounded-2xl border border-cyan-100 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-cyan-400/15 flex items-center justify-center border border-cyan-300/30">
+                          <KeyRound className="w-5 h-5 text-cyan-600" />
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">
+                            Llaves de Conectividad
+                          </p>
+
+                          <p className="text-[11px] text-gray-500">
+                            Datos y servicios
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-xl font-black text-cyan-700">
+                          {loadingUser
+                            ? "..."
+                            : consumer?.connectivityKeys?.toLocaleString("es-CO")}
+                        </div>
+
+                        {!!consumer?.blockedConnectivityKeys && (
+                          <div className="text-[10px] text-red-500 font-medium mt-1">
+                            {consumer.blockedConnectivityKeys} bloqueadas
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    Depositar Fondos
-                  </button>
-                  <Link href="/explore/wallet">
-                    <button className="w-full bg-gray-50 text-gray-700 py-3 px-4 rounded-xl flex items-center justify-center gap-2">
-                      <History className="w-4 h-4" />
-                      Ver Historial Completo
-                    </button>
-                  </Link>
+
+                  {/* BUTTON */}
+                  <div className="mt-5">
+                    <Link
+                      href="/explore/wallet"
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold shadow-lg"
+                    >
+                      <History className="w-5 h-5" />
+                      Historial de Transacciones
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -399,52 +554,63 @@ export default function Navbar() {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg pb-safe">
         <div className="grid grid-cols-5 h-16">
 
-          {/* HOME — nuevo */}
-          <Link href="/" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/" ? "text-blue-600" : "text-gray-500"}`}>
-              <Home className={`w-6 h-6 ${pathname === "/" ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Inicio</span>
+          {/* HOME */}
+          <Link href="/home" className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/home" ? "bg-blue-100" : ""}`}>
+                <Home className={`w-5 h-5 transition-all duration-200 ${pathname === "/home" ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/home" ? "text-blue-600" : "text-gray-400"}`}>Inicio</span>
             </div>
           </Link>
 
           {/* ANUNCIOS */}
           <Link href="/ads" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/ads" ? "text-blue-600" : "text-gray-500"}`}>
-              <Megaphone className={`w-6 h-6 ${pathname === "/ads" ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Anuncios</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/ads" ? "bg-blue-100" : ""}`}>
+                <Megaphone className={`w-5 h-5 transition-all duration-200 ${pathname === "/ads" ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/ads" ? "text-blue-600" : "text-gray-400"}`}>Anuncios</span>
             </div>
           </Link>
 
           {/* RIFAS */}
           <Link href="/raffles" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/raffles" ? "text-blue-600" : "text-gray-500"}`}>
-              <Gift className={`w-6 h-6 ${pathname === "/raffles" ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Rifas</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/raffles" ? "bg-blue-100" : ""}`}>
+                <Gift className={`w-5 h-5 transition-all duration-200 ${pathname === "/raffles" ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/raffles" ? "text-blue-600" : "text-gray-400"}`}>Rifas</span>
             </div>
           </Link>
+
+          {/* MASCOTA */}
           <Link href="/mascota" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${
-              pathname === "/mascota" ? "text-blue-600" : "text-gray-500"
-            }`}>
-              <span className={`text-2xl ${pathname === "/mascota" ? "scale-110" : ""}`}>
-                🐾
-              </span>
-            <span className="text-xs mt-1 font-medium">Mascota</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/mascota" ? "bg-blue-100" : ""}`}>
+                <span className={`text-xl leading-none transition-all duration-200 ${pathname === "/mascota" ? "scale-110" : ""}`}>🐾</span>
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/mascota" ? "text-blue-600" : "text-gray-400"}`}>Mascota</span>
             </div>
           </Link>
+
           {/* PRODUCTOS */}
           <Link href="/products" className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${pathname === "/products" ? "text-blue-600" : "text-gray-500"}`}>
-              <Package className={`w-6 h-6 ${pathname === "/products" ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Productos</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/products" ? "bg-blue-100" : ""}`}>
+                <Package className={`w-5 h-5 transition-all duration-200 ${pathname === "/products" ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/products" ? "text-blue-600" : "text-gray-400"}`}>Productos</span>
             </div>
           </Link>
 
           {/* PERFIL */}
           <button onClick={() => setOpenMenu((v) => !v)} className="flex flex-col items-center justify-center">
-            <div className={`flex flex-col items-center justify-center transition-all ${openMenu ? "text-blue-600" : "text-gray-500"}`}>
-              <User className={`w-6 h-6 ${openMenu ? "scale-110" : ""}`} />
-              <span className="text-xs mt-1 font-medium">Perfil</span>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${openMenu ? "bg-blue-100" : ""}`}>
+                <User className={`w-5 h-5 transition-all duration-200 ${openMenu ? "text-blue-600" : "text-gray-400"}`} />
+              </div>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${openMenu ? "text-blue-600" : "text-gray-400"}`}>Perfil</span>
             </div>
           </button>
 
@@ -462,11 +628,11 @@ export default function Navbar() {
         >
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-3xl text-white">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                 <User className="w-8 h-8" />
               </div>
-              <div>
-                <div className="font-bold text-lg">
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-lg truncate">
                   {loadingUser ? "Cargando..." : consumer?.name ?? "Usuario"}
                 </div>
                 <div className="text-sm text-blue-100">Beneficiario</div>
@@ -474,6 +640,10 @@ export default function Navbar() {
             </div>
           </div>
           <div className="py-2 pb-20">
+            <Link href="/explore/gamification" className="flex items-center gap-4 px-6 py-4 hover:bg-purple-50 active:bg-purple-100 transition-all" onClick={() => setOpenMenu(false)}>
+              <Zap className="w-6 h-6 text-purple-500" />
+              <span className="font-medium text-purple-700">Mi Nivel</span>
+            </Link>
             <Link href="/explore/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
               <UserCircle className="w-6 h-6 text-gray-600" />
               <span className="font-medium">Mi Perfil</span>
@@ -491,7 +661,12 @@ export default function Navbar() {
               <span className="font-medium">Configuración</span>
             </Link>
             <div className="border-t border-gray-200 mt-2 pt-2">
-              <button className="w-full flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 transition-all">
+              <button className="w-full flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 transition-all cursor-pointer"
+                onClick={async () => {
+                  setOpenMenu(false);
+                  await logout();
+                }}
+              >
                 <LogOut className="w-6 h-6" />
                 <span className="font-medium">Cerrar Sesión</span>
               </button>

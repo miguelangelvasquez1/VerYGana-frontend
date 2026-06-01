@@ -1,6 +1,6 @@
 import apiClient from "@/lib/api/client";
 import { EntityCreatedResponseDTO, EntityUpdatedResponseDTO, PagedResponse } from "@/types/Generic.types";
-import { ConfirmRaffleCreationRequestDTO, CreateRaffleRequestDTO, DrawResultResponseDTO, PrepareRaffleCreationRequestBodyDTO, PrepareRaffleCreationResponseDTO, RaffleResponseDTO, RaffleSummaryResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
+import { ConfirmRaffleCreationRequestDTO, CreateRaffleRequestDTO, DrawResultResponseDTO, PrepareRaffleCreationRequestBodyDTO, RaffleAssetsUploadPermissionDTO, RaffleResponseDTO, RaffleSummaryResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
 import { RaffleTicketResponseDTO } from "@/types/raffles/raffleTicket.types";
 import { CreateTicketEarningRuleRequestDTO, TicketEarningRuleResponseDTO, UpdateTicketEarningRuleRequestDTO } from "@/types/raffles/ticketEarningRule.types";
 
@@ -31,7 +31,7 @@ export const expireTickets = async (raffleId: number): Promise<void> => {
 
 // RaffleAdminController
 
-export const prepareRaffleCreation = async (request: PrepareRaffleCreationRequestBodyDTO): Promise<PrepareRaffleCreationResponseDTO> => {
+export const prepareRaffleCreation = async (request: PrepareRaffleCreationRequestBodyDTO): Promise<RaffleAssetsUploadPermissionDTO> => {
     const response = await apiClient.post("/api/admin/raffles/prepare", request);
     return response.data;
 }

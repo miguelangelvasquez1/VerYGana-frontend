@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useAllAdsAdmin } from '@/hooks/ads/adminQuerys';
-import { useApproveAd, useRejectAd, usePauseAd, useResumeAd, useBlockAd } from '@/hooks/ads/mutations';
+import { useApproveAd, useRejectAd, usePauseAdAsAdmin, useActivateAdAsAdmin, useBlockAd } from '@/hooks/ads/mutations';
 import { AdForAdminDTO } from '@/types/ads/commercial';
 import { AdStats } from './AdStats';
 import { AdFilters } from './AdFilters';
@@ -10,44 +10,42 @@ import { AdCard } from './AdCard';
 import { AdPagination } from './AdPagination';
 import { RejectAdModal } from './modals/RejectAdModal';
 import { BlockAdModal } from './modals/BlockAdModal';
-import { PreviewModal } from './modals/PreviewModal';
+import { AdDetailModal} from './AdDetailModalAdmin';
 import { calculateStats, filterAds } from './utils/adHelper';
 
 const AdManagement: React.FC = () => {
-  // State
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedAd, setSelectedAd] = useState<AdForAdminDTO | null>(null);
+
+  // Modals
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [blockReason, setBlockReason] = useState('');
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: string } | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
-  // React Query hooks
   const { data, isLoading } = useAllAdsAdmin(currentPage, 20, statusFilter);
   const approveAdMutation = useApproveAd();
   const rejectAdMutation = useRejectAd();
-  const pauseAdMutation = usePauseAd();
-  const resumeAdMutation = useResumeAd();
+  const pauseAdMutation = usePauseAdAsAdmin();
+  const resumeAdMutation = useActivateAdAsAdmin();
   const blockAdMutation = useBlockAd();
 
-  // Computed values
   const ads = data?.content || [];
   const totalPages = data?.totalPages || 0;
   const filteredAds = useMemo(() => filterAds(ads, searchTerm, statusFilter), [ads, searchTerm, statusFilter]);
   const stats = useMemo(() => calculateStats(ads), [ads]);
 
-  // Handlers
+  // ── Handlers ────────────────────────────────────────────────────────────────
+
   const handleApprove = async (adId: number) => {
-    if (confirm('¿Estás seguro de aprobar este anuncio?')) {
-      try {
-        await approveAdMutation.mutateAsync(adId);
-      } catch (error) {
-        alert('Error al aprobar el anuncio');
-      }
+    if (!confirm('¿Estás seguro de aprobar este anuncio?')) return;
+    try {
+      await approveAdMutation.mutateAsync(adId);
+    } catch {
+      alert('Error al aprobar el anuncio');
     }
   };
 
@@ -61,11 +59,10 @@ const AdManagement: React.FC = () => {
       alert('Debes proporcionar una razón para el rechazo');
       return;
     }
-
     try {
       await rejectAdMutation.mutateAsync({ id: selectedAd.id, reason: rejectionReason });
       closeRejectModal();
-    } catch (error) {
+    } catch {
       alert('Error al rechazar el anuncio');
     }
   };
@@ -86,11 +83,10 @@ const AdManagement: React.FC = () => {
       alert('Debes proporcionar una razón para el bloqueo');
       return;
     }
-
     try {
       await blockAdMutation.mutateAsync(selectedAd.id);
       closeBlockModal();
-    } catch (error) {
+    } catch {
       alert('Error al bloquear el anuncio');
     }
   };
@@ -104,7 +100,7 @@ const AdManagement: React.FC = () => {
   const handlePause = async (adId: number) => {
     try {
       await pauseAdMutation.mutateAsync(adId);
-    } catch (error) {
+    } catch {
       alert('Error al pausar el anuncio');
     }
   };
@@ -112,68 +108,74 @@ const AdManagement: React.FC = () => {
   const handleResume = async (adId: number) => {
     try {
       await resumeAdMutation.mutateAsync(adId);
-    } catch (error) {
+    } catch {
       alert('Error al reanudar el anuncio');
     }
   };
 
-  const handlePreview = (ad: AdForAdminDTO) => {
-    if (!ad.contentUrl) return;
-    setSelectedMedia({ url: ad.contentUrl, type: ad.mediaType ?? 'IMAGE' });
-    setShowPreviewModal(true);
+  const handleViewDetail = (ad: AdForAdminDTO) => {
+    setSelectedAd(ad);
+    setShowDetailModal(true);
   };
+
+  // ── Loading ──────────────────────────────────────────────────────────────────
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
       </div>
     );
   }
+
+  // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h2 className="text-3xl font-bold text-gray-900">Gestión de Anuncios</h2>
-        <p className="text-gray-600 mt-1">Administra y modera los anuncios de la plataforma</p>
+        <p className="text-gray-500 mt-1 text-sm">Administra y modera los anuncios de la plataforma</p>
       </div>
 
-      {/* Stats */}
       <AdStats stats={stats} />
 
-      {/* Filters */}
       <AdFilters
         searchTerm={searchTerm}
         statusFilter={statusFilter}
         onSearchChange={setSearchTerm}
-        onStatusChange={setStatusFilter}
+        onStatusChange={(v) => { setStatusFilter(v); setCurrentPage(0); }}
       />
 
-      {/* Ads Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredAds.map((ad) => (
-          <AdCard
-            key={ad.id}
-            ad={ad}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            onPause={handlePause}
-            onResume={handleResume}
-            onBlock={handleBlock}
-            onPreview={handlePreview}
-            isLoading={{
-              approve: approveAdMutation.isPending,
-              reject: rejectAdMutation.isPending,
-              pause: pauseAdMutation.isPending,
-              resume: resumeAdMutation.isPending,
-              block: blockAdMutation.isPending,
-            }}
-          />
-        ))}
-      </div>
+      {/* Horizontal list */}
+      {filteredAds.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-100 py-16 text-center text-gray-400">
+          <p className="text-sm">No se encontraron anuncios con los filtros actuales.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {filteredAds.map((ad) => (
+            <AdCard
+              key={ad.id}
+              ad={ad}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onPause={handlePause}
+              onResume={handleResume}
+              onBlock={handleBlock}
+              onViewDetail={handleViewDetail}
+              isLoading={{
+                approve: approveAdMutation.isPending,
+                reject: rejectAdMutation.isPending,
+                pause: pauseAdMutation.isPending,
+                resume: resumeAdMutation.isPending,
+                block: blockAdMutation.isPending,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Pagination */}
       <AdPagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -203,11 +205,10 @@ const AdManagement: React.FC = () => {
         />
       )}
 
-      {showPreviewModal && selectedMedia && (
-        <PreviewModal
-          url={selectedMedia.url}
-          type={selectedMedia.type}
-          onClose={() => setShowPreviewModal(false)}
+      {showDetailModal && selectedAd && (
+        <AdDetailModal
+          ad={selectedAd}
+          onClose={() => { setShowDetailModal(false); setSelectedAd(null); }}
         />
       )}
     </div>

@@ -17,7 +17,7 @@ export const registerConsumer = async (data: {
   name: string;
   lastNames: string;
   department: string;
-  municipality: string;
+  municipalityCode: string;
   categories?: CategoryResponseDTO[];
   referredByCode?: string;
   avatarId: number;
@@ -33,7 +33,7 @@ export const registerConsumer = async (data: {
     name: data.name,
     lastName: data.lastNames,
     department: data.department,
-    municipality: data.municipality,
+    municipalityCode: data.municipalityCode,
     categories: data.categories || [],
     avatarId: data.avatarId,                              
     referredByCode: data.referredByCode || undefined,

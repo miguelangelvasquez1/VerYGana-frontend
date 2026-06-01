@@ -132,6 +132,48 @@ export function useResumeAd() {
   });
 }
 
+// ==================== HOOKS FOR ADMIN ====================
+
+export function useActivateAdAsAdmin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => adService.activateAdAsAdmin(id),
+
+    onSuccess: (updatedAd) => {
+      queryClient.setQueryData(
+        adKeys.detail(updatedAd.id),
+        updatedAd
+      );
+
+      updateAdInLists(queryClient, updatedAd, [
+        adKeys.lists(),
+        adminAdKeys.lists(),
+      ]);
+    },
+  });
+}
+
+export function usePauseAdAsAdmin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => adService.pauseAdAsAdmin(id),
+
+    onSuccess: (updatedAd) => {
+      queryClient.setQueryData(
+        adKeys.detail(updatedAd.id),
+        updatedAd
+      );
+
+      updateAdInLists(queryClient, updatedAd, [
+        adKeys.lists(),
+        adminAdKeys.lists(),
+      ]);
+    },
+  });
+}
+
 // Hook para bloqeuar anuncio
 export function useBlockAd() {
   const queryClient = useQueryClient();

@@ -6,7 +6,7 @@ export interface RegisterConsumerDTO {
   name: string;
   lastName: string;
   department: string;
-  municipality: string;
+  municipalityCode: string;
   categories?: CategoryResponseDTO[];
   avatarId: number;
   referredByCode?: string;
@@ -21,7 +21,11 @@ export type Gender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
 export interface ConsumerInitialDataResponseDTO {
     id : number;
     name : string;
-    walletAvailableBalance : number;
+    totalAvailableKeys : number;
+    purchaseKeys : number;
+    connectivityKeys : number;
+    blockedPurchaseKeys : number;
+    blockedConnectivityKeys : number;
 }
 
 export interface ConsumerProfileResponseDTO {
@@ -33,12 +37,12 @@ export interface ConsumerProfileResponseDTO {
     role : string;
     userState : string;
     department : string;
-    municipality : string;
+    municipalityName : string;
 }
 
 export interface ConsumerUpdateProfileRequestDTO {
     email ?: string;
     phoneNumber ?: string;
     department ?: string;
-    municipality ?: string;
+    municipalityName ?: string;
 }
