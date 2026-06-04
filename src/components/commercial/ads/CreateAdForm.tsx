@@ -25,11 +25,10 @@ interface CreateAdFormData {
   imageDurationSeconds: number; // 5–60, only for IMAGE
   pricePerLike: number;         // cents, multiple of 10, >= minPricePerLike
   maxViews: number;
+  maxViewsPerUserPerDay: number;
   categoryIds: number[];
   startImmediately: boolean;
   startDate: string;
-  endWhenBudgetExhausted: boolean;
-  endDate: string;
   targetUrl: string;
   targetAudience: {
     ageRange: [number, number];
@@ -43,7 +42,7 @@ type FormStep = 'file' | 'pricing' | 'details';
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatCents(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+  return `$${(cents / 100).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function getMultiplesOf10From(minValue: number, count = 8): number[] {
@@ -99,11 +98,10 @@ export function CreateAdForm() {
     imageDurationSeconds: 15,
     pricePerLike: 0,
     maxViews: 100,
+    maxViewsPerUserPerDay: 10,
     categoryIds: [],
     startImmediately: true,
     startDate: '',
-    endWhenBudgetExhausted: true,
-    endDate: '',
     targetUrl: '',
     targetAudience: { ageRange: [18, 65], gender: 'ALL', municipalityCodes: [] },
   });
@@ -124,8 +122,6 @@ export function CreateAdForm() {
     targetUrl: formData.targetUrl || null,
     startDate: formData.startImmediately ? null
       : formData.startDate ? new Date(formData.startDate).toISOString() : null,
-    endDate: formData.endWhenBudgetExhausted ? null
-      : formData.endDate ? new Date(formData.endDate).toISOString() : null,
     categoryIds: formData.categoryIds,
     targetMunicipalitiesCodes: formData.targetAudience.municipalityCodes,
     minAge: formData.targetAudience.ageRange[0],
@@ -133,6 +129,7 @@ export function CreateAdForm() {
     targetGender: formData.targetAudience.gender,
     pricePerLike: formData.pricePerLike,
     maxLikes: formData.maxViews,
+    maxLikesPerUserPerDay: formData.maxViewsPerUserPerDay,
   }), [formData]);
 
   const {
@@ -140,7 +137,7 @@ export function CreateAdForm() {
     prepareAndUpload, uploadAd, cancelAndOrphan,
   } = useAdUpload({ adDetails });
 
-  // When analysis completes, move to pricing step and seed pricePerView with the minimum
+  // When analysis completes, move to pricing step and seed pricePerLike with the minimum
   useEffect(() => {
     if (pricingInfo) {
       setFormData((prev) => ({ ...prev, pricePerLike: pricingInfo.minPricePerLike }));
@@ -149,6 +146,7 @@ export function CreateAdForm() {
   }, [pricingInfo]);
 
   const totalBudgetCents = formData.pricePerLike * formData.maxViews;
+  const ageRangeInvalid = formData.targetAudience.ageRange[0] > formData.targetAudience.ageRange[1];
   const isUploading = uploadState.status === 'preparing'
     || uploadState.status === 'uploading'
     || uploadState.status === 'analyzing';
@@ -235,7 +233,7 @@ export function CreateAdForm() {
     if (!pricingInfo) { toast.error('Debes subir un archivo primero'); return; }
     if (formData.categoryIds.length === 0) { toast.error('Selecciona al menos una categoría'); return; }
     if (!formData.startImmediately && !formData.startDate) { toast.error('Selecciona una fecha de inicio'); return; }
-    if (!formData.endWhenBudgetExhausted && !formData.endDate) { toast.error('Selecciona una fecha de finalización'); return; }
+    if (ageRangeInvalid) { toast.error('La edad mínima no puede ser mayor que la edad máxima'); return; }
 
     const result = await uploadAd();
     if (result.ok) {
@@ -244,6 +242,10 @@ export function CreateAdForm() {
       router.push('/commercial/ads');
     } else {
       toast.error(result.errorMsg);
+      if (result.assetOrphaned) {
+        setFormData((prev) => ({ ...prev, file: null, pricePerLike: 0 }));
+        setStep('file');
+      }
     }
   };
 
@@ -322,7 +324,7 @@ export function CreateAdForm() {
                 type="button"
                 onClick={handleChangeFile}
                 disabled={isSubmitting}
-                className="text-xs text-blue-600 font-semibold hover:underline"
+                className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer"
               >
                 Cambiar
               </button>
@@ -457,7 +459,7 @@ export function CreateAdForm() {
                   onClick={handleConfirmFile}
                   className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm
                     hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2
-                    shadow-md shadow-blue-100"
+                    shadow-md shadow-blue-100 cursor-pointer"
                 >
                   {uploadStatusLabel()}
                 </button>
@@ -517,7 +519,7 @@ export function CreateAdForm() {
                 Precio por visualización <span className="text-red-500">*</span>
               </label>
               <p className="text-xs text-gray-400 mb-3">
-                Solo múltiplos de 10¢. Mínimo: {formatCents(pricingInfo.minPricePerLike)}.
+                Mínimo: {formatCents(pricingInfo.minPricePerLike)}.
                 Un precio más alto puede priorizar tu anuncio en la plataforma.
               </p>
 
@@ -552,20 +554,13 @@ export function CreateAdForm() {
                   <ChevronDown className="w-4 h-4" />
                 </button>
                 <div className="flex-1 relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">¢</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">$</span>
                   <input
-                    type="number"
-                    value={formData.pricePerLike}
-                    onChange={(e) => {
-                      const v = Number(e.target.value);
-                      if (v % 10 === 0 && v >= pricingInfo.minPricePerLike) {
-                        setFormData((prev) => ({ ...prev, pricePerLike: v }));
-                      }
-                    }}
-                    step={10}
-                    min={pricingInfo.minPricePerLike}
+                    type="text"
+                    readOnly
+                    value={(formData.pricePerLike / 100).toFixed(2).replace('.', ',')}
                     className="w-full pl-8 pr-4 py-2.5 border-2 border-gray-200 rounded-xl text-center font-bold text-gray-900
-                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-gray-50 cursor-default"
                   />
                 </div>
                 <button
@@ -593,15 +588,36 @@ export function CreateAdForm() {
               </label>
               <input
                 type="number"
-                value={formData.maxViews}
-                onChange={(e) => setFormData((prev) => ({ ...prev, maxViews: Math.max(1, Number(e.target.value)) }))}
+                value={formData.maxViews || ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, maxViews: Number(e.target.value) }))}
+                onBlur={() => setFormData((prev) => ({ ...prev, maxViews: Math.max(1, prev.maxViews || 1) }))}
                 min={1} max={10000}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-semibold
                   focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
                 placeholder="Ej: 500"
                 required
               />
-              <p className="text-xs text-gray-400 mt-1">Mínimo 1 — máximo 10,000</p>
+              <p className="text-xs text-gray-400 mt-1">Mínimo 1 — máximo 10.000</p>
+            </div>
+
+            {/* Max views per user per day */}
+            <div className="mb-5">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <Eye className="inline w-4 h-4 mr-1.5 text-blue-500 -mt-0.5" />
+                Máximo de vistas por usuario al día <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                value={formData.maxViewsPerUserPerDay || ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, maxViewsPerUserPerDay: Number(e.target.value) }))}
+                onBlur={() => setFormData((prev) => ({ ...prev, maxViewsPerUserPerDay: Math.max(1, prev.maxViewsPerUserPerDay || 1) }))}
+                min={1} max={100}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-semibold
+                  focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                placeholder="Ej: 10"
+                required
+              />
+              <p className="text-xs text-gray-400 mt-1">Límite de veces que un mismo usuario puede ver este anuncio en un día. Mínimo 1 — máximo 100</p>
             </div>
 
             {/* Total budget */}
@@ -610,7 +626,7 @@ export function CreateAdForm() {
                 <div>
                   <p className="text-blue-200 text-xs font-bold uppercase tracking-wide">Presupuesto total</p>
                   <p className="text-blue-100 text-sm mt-0.5">
-                    {formatCents(formData.pricePerLike)} × {formData.maxViews.toLocaleString()} views
+                    {formatCents(formData.pricePerLike)} × {formData.maxViews.toLocaleString('es-CO')} views
                   </p>
                 </div>
                 <div className="text-right">
@@ -625,7 +641,7 @@ export function CreateAdForm() {
                 type="button"
                 onClick={() => setStep('details')}
                 disabled={formData.pricePerLike < pricingInfo.minPricePerLike || formData.maxViews < 1}
-                className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-sm
+                className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-sm cursor-pointer
                   hover:bg-blue-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Continuar con los detalles →
@@ -688,14 +704,14 @@ export function CreateAdForm() {
             <SectionCard>
               <SectionHeader icon={<Calendar className="w-5 h-5" />} title="Duración de campaña" />
               <div className="space-y-4">
-                <label className="flex items-center gap-3 cursor-pointer select-none">
+                <div className="flex items-center gap-3 select-none">
                   <input
                     type="checkbox" checked={formData.startImmediately}
                     onChange={(e) => setFormData((p) => ({ ...p, startImmediately: e.target.checked, startDate: '' }))}
-                    className="w-4 h-4 accent-blue-600" disabled={isSubmitting}
+                    className="w-4 h-4 accent-blue-600 cursor-pointer" disabled={isSubmitting}
                   />
                   <span className="text-sm text-gray-700">Iniciar cuando el administrador apruebe el anuncio</span>
-                </label>
+                </div>
                 {!formData.startImmediately && (
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">Fecha de inicio</label>
@@ -704,25 +720,6 @@ export function CreateAdForm() {
                       onChange={(e) => setFormData((p) => ({ ...p, startDate: e.target.value }))}
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                       min={new Date().toISOString().slice(0, 16)} disabled={isSubmitting}
-                    />
-                  </div>
-                )}
-                <label className="flex items-center gap-3 cursor-pointer select-none">
-                  <input
-                    type="checkbox" checked={formData.endWhenBudgetExhausted}
-                    onChange={(e) => setFormData((p) => ({ ...p, endWhenBudgetExhausted: e.target.checked, endDate: '' }))}
-                    className="w-4 h-4 accent-blue-600" disabled={isSubmitting}
-                  />
-                  <span className="text-sm text-gray-700">Finalizar cuando se agote el presupuesto</span>
-                </label>
-                {!formData.endWhenBudgetExhausted && (
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Fecha de finalización</label>
-                    <input
-                      type="datetime-local" value={formData.endDate}
-                      onChange={(e) => setFormData((p) => ({ ...p, endDate: e.target.value }))}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      min={formData.startDate || new Date().toISOString().slice(0, 16)} disabled={isSubmitting}
                     />
                   </div>
                 )}
@@ -802,6 +799,12 @@ export function CreateAdForm() {
                     />
                     <span className="text-gray-500 text-sm">años</span>
                   </div>
+                  {ageRangeInvalid && (
+                    <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                      La edad mínima no puede ser mayor que la máxima
+                    </p>
+                  )}
                 </div>
 
                 {/* Gender */}
@@ -885,9 +888,19 @@ export function CreateAdForm() {
               </div>
             )}
             {uploadState.status === 'error' && (
-              <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-5 py-4">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                <p className="text-sm font-semibold text-red-700">{uploadState.error}</p>
+              <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-5 py-4">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  {uploadState.errorDetails && Object.keys(uploadState.errorDetails).length > 0 ? (
+                    <ul className="space-y-1">
+                      {Object.values(uploadState.errorDetails).map((msg, i) => (
+                        <li key={i} className="text-sm font-semibold text-red-700">{msg}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm font-semibold text-red-700">{uploadState.error}</p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -895,19 +908,19 @@ export function CreateAdForm() {
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => router.back()}
+                onClick={() => setStep('file')}
                 disabled={isSubmitting}
                 className="flex-1 py-3.5 border-2 border-gray-200 text-gray-600 rounded-xl font-semibold text-sm
-                  hover:bg-gray-50 transition disabled:opacity-50"
+                  hover:bg-gray-50 transition disabled:opacity-50 hover:bg-gray-100 cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !pricingInfo || formData.pricePerLike < (pricingInfo?.minPricePerLike ?? 0)}
+                disabled={isSubmitting || !pricingInfo || formData.pricePerLike < (pricingInfo?.minPricePerLike ?? 0) || ageRangeInvalid}
                 className="flex-[2] py-3.5 bg-blue-600 text-white rounded-xl font-bold text-sm
                   hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed
-                  flex items-center justify-center gap-2 shadow-lg shadow-blue-100"
+                  flex items-center justify-center gap-2 shadow-lg shadow-blue-100 cursor-pointer"
               >
                 {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isSubmitting ? 'Creando anuncio...' : `Crear anuncio · ${formatCents(totalBudgetCents)}`}

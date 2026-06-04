@@ -34,7 +34,7 @@ export const AdFilters: React.FC<AdFiltersProps> = ({
           <select
             value={statusFilter}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="cursor-pointer px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             {STATUS_FILTER_OPTIONS.map(option => (
               <option key={option.value} value={option.value}>

@@ -189,17 +189,7 @@ export default function AdminRafflesDashboard() {
 
   return (
     <div className="space-y-8 relative">
-      {/* ===== Header ===== */}
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">
-            Gestión de Rifas
-          </h2>
-          <p className="text-gray-600">
-            Administra rifas, visualiza estadísticas y controla el ciclo de vida de cada una.
-          </p>
-        </div>
-
         <button
           onClick={() => setShowCreateRaffle(true)}
           className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2"

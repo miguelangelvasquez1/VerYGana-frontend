@@ -64,7 +64,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
         <div className="flex items-center justify-between">
 
           {/* Left */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
             {showMenuButton && (
               <button
                 onClick={onMenuClick}
@@ -73,7 +73,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
                 <Menu className="w-5 h-5" />
               </button>
             )}
-            {title && <h1 className="text-xl font-bold text-gray-900">{title}</h1>}
+            {title && <h1 className="text-xl font-bold text-gray-900 truncate">{title}</h1>}
           </div>
 
           {/* Right side */}

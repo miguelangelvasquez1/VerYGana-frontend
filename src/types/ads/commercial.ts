@@ -77,6 +77,7 @@ export interface AdResponseDTO {
   description: string;
   rewardPerLike: number;
   maxLikes: number;
+  maxLikesPerUserPerDay?: number;
   currentLikes: number;
   status: AdStatus;
   createdAt: string;
@@ -108,12 +109,8 @@ export interface AdLikeDTO {
 export interface EditAdFormData {
   title: string;
   description: string;
-  rewardPerLike: number;
-  maxLikes: number;
-  totalBudget: number;
   categoryIds: number[];
   startDate: string;
-  endDate: string;
   targetUrl: string;
   targetAudience: {
     ageRange: [number, number];
@@ -123,12 +120,9 @@ export interface EditAdFormData {
 }
 
 export interface AdUpdateDTO {
-
   title?: string;
   description?: string;
-  maxLikes?: number;
   startDate?: string | null;
-  endDate?: string | null;
   targetUrl?: string;
   categoryIds?: number[];
   targetMunicipalitiesCodes?: string[];
@@ -212,9 +206,9 @@ export interface AdDetails {
   description: string;
   pricePerLike: number;
   maxLikes: number;
+  maxLikesPerUserPerDay: number;
   targetUrl: string | null;
   startDate: string | null; // ISO string or null if immediate
-  endDate: string | null; // ISO string or null if budget-exhausted
   categoryIds: number[];
   targetMunicipalitiesCodes: string[];
   minAge: number;
@@ -263,6 +257,7 @@ export interface UploadState {
   progress: number;
   currentFile?: string;
   error?: string;
+  errorDetails?: Record<string, string>;
 }
 
 export interface CreateAdRequest {

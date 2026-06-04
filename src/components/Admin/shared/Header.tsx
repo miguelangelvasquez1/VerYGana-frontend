@@ -3,15 +3,38 @@
 import React from 'react';
 import { Bell, Search, User, LogOut } from 'lucide-react';
 import { useLogout } from '@/hooks/useLogout';
+import { usePathname } from 'next/navigation';
+
+const PAGE_TITLES: Record<string, string> = {
+  '/admin': 'Dashboard',
+  '/admin/users': 'Gestión de Usuarios',
+  '/admin/ads': 'Gestión de Anuncios',
+  '/admin/products': 'Gestión de Productos',
+  '/admin/raffles': 'Gestión de Rifas',
+  '/admin/surveys': 'Encuestas',
+  '/admin/forum': 'Historias de Impacto',
+  '/admin/system': 'Gestión del Sistema',
+  '/admin/ticket-rules': 'Reglas de boletos',
+  '/admin/config': 'Configuración',
+};
+
+function getPageTitle(pathname: string): string {
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+  const parent = Object.keys(PAGE_TITLES)
+    .filter((k) => k !== '/admin' && pathname.startsWith(k))
+    .sort((a, b) => b.length - a.length)[0];
+  return parent ? PAGE_TITLES[parent] : 'Dashboard';
+}
 
 const Header: React.FC = () => {
   const { logout } = useLogout();
+  const pathname = usePathname();
 
   return (
     <header className="bg-white shadow-sm border-b px-6 py-4 h-18">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">{getPageTitle(pathname)}</h1>
         </div>
         
         <div className="flex items-center space-x-4">

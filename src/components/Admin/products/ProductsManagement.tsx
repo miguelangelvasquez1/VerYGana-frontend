@@ -329,14 +329,6 @@ export default function AdminProductsPage() {
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
 
-      {/* ── Header ── */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Gestión de Productos</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          Administra productos y categorías del marketplace
-        </p>
-      </div>
-
       {/* ── Tabs ── */}
       <div className="flex gap-1 border-b border-gray-200">
         {(["products", "categories"] as AdminTab[]).map((tab) => (
