@@ -12,6 +12,13 @@ export interface AdStats {
 }
 
 class AdService {
+  private _token: string | null = null;
+
+  /** Called by useAdUpload to keep the token fresh for keepalive requests. */
+  setAuthToken(token: string | null): void {
+    this._token = token;
+  }
+
   // Crear un nuevo anuncio
   // async createAd(formData: FormData): Promise<AdResponseDTO> {
   //   const response = await apiClient.post<AdResponseDTO>('/ads', formData, {
@@ -209,28 +216,26 @@ class AdService {
     return response.data;
   }
 
-  async prepareAdAssetUpload2(request: FileUploadRequestDTO): Promise<AdUploadPermission> {
-    const { data } = await apiClient.post<AdUploadPermission>('/ads/assets/prepare', request);
-    return data;
-  }
-
   async analyzeAsset(assetId: number): Promise<AssetAnalysisResult> {
     const { data } = await apiClient.post<AssetAnalysisResult>(`/ads/assets/${assetId}/analyze`);
     return data;
   }
 
   async orphanAsset(assetId: number): Promise<void> {
-    await apiClient.post(`/ads/assets/${assetId}/orphan`);
+    await apiClient.post(`/ads/assets/orphan/${assetId}`);
   }
 
-  async orphanAssetBeacon(assetId: number): Promise<void> {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/ads/assets/${assetId}/orphan`;
-    navigator.sendBeacon(url);
-  }
-
-  async createAd2(assetId: number, details: AdDetails): Promise<{ id: number }> {
-    const { data } = await apiClient.post<{ id: number }>('/ads', { assetId, ...details });
-    return data;
+  orphanAssetKeepAlive(assetId: number): void {
+    console.log("Toekn:" + this._token);
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/ads/assets/orphan`, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this._token? { Authorization: `Bearer ${this._token}` } : {}),
+      },
+      body: JSON.stringify({assetId,}),
+    }).catch(() => {});
   }
 
   /**
@@ -240,22 +245,11 @@ class AdService {
   async prepareAdAssetUpload(
     request: FileUploadRequestDTO
   ): Promise<AdUploadPermission> {
-    try {
-      console.log('📤 [AdService] Preparando asset upload:', request);
-
-      const response = await apiClient.post<AdUploadPermission>(
-        '/ads/assets/prepare-upload',
-        request
-      );
-
-      console.log('✅ [AdService] Permiso recibido:', response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error('❌ [AdService] Error preparando upload:', error);
-      throw new Error(
-        error?.response?.data?.message || 'Error preparando la subida del archivo'
-      );
-    }
+    const response = await apiClient.post<AdUploadPermission>(
+      '/ads/assets/prepare-upload',
+      request
+    );
+    return response.data;
   }
 
   /**
@@ -263,22 +257,10 @@ class AdService {
    * Se llama después de que el archivo se haya subido exitosamente a R2
    */
   async createAd(assetId: number, adDetails: AdDetails): Promise<{ id: number }> {
-    try {
-      console.log('📤 [AdService] Creando anuncio:', { assetId, adDetails });
-
-      const response = await apiClient.post<{ id: number }>('/ads/assets', {
-        assetId,
-        ...adDetails,
-      });
-
-      console.log('✅ [AdService] Anuncio creado:', response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error('❌ [AdService] Error creando anuncio:', error);
-      throw new Error(
-        error?.response?.data?.message || 'Error creando el anuncio'
-      );
-    }
+    const response = await apiClient.post<{ id: number }>('/ads', {
+      assetId, ...adDetails,
+    });
+    return response.data;
   }
 }
 

@@ -81,14 +81,9 @@ export default function AdminImpactStoriesPage() {
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-              Historias de Impacto
-            </h1>
-            <p className="text-sm text-gray-400 mt-0.5">
-              {data?.totalElements ?? 0} historias en total
-            </p>
-          </div>
+          <p className="text-sm text-gray-400">
+            {data?.totalElements ?? 0} historias en total
+          </p>
           <button
             onClick={() => setView('create')}
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition-colors"

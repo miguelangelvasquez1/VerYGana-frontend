@@ -61,7 +61,7 @@ export default function EditConsumerProfilePage() {
         setValue("email", data.email);
         setValue("phoneNumber", data.phoneNumber);
         setValue("department", data.department);
-        setValue("municipality", data.municipality);
+        setValue("municipality", data.municipalityName);
       } catch (error) {
         console.error("Error cargando perfil:", error);
       } finally {
@@ -82,7 +82,7 @@ export default function EditConsumerProfilePage() {
       email: formData.email,
       phoneNumber: formData.phoneNumber,
       department: formData.department,
-      municipality: formData.municipality,
+      municipalityName: formData.municipality,
     };
 
     try {

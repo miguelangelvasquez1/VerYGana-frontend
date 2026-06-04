@@ -62,16 +62,6 @@ export default function AdminSurveyList() {
   return (
     <div className="space-y-5">
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl font-black tracking-tight text-gray-900">
-          Encuestas
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Revisa y gestiona el estado de todas las encuestas de la plataforma.
-        </p>
-      </div>
-
       {/* ── Filters ────────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap gap-2">
         <FilterPill

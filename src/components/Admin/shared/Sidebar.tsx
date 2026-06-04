@@ -11,7 +11,6 @@ import {
   Menu,
   X,
   Home,
-  Shield,
   DollarSign,
   Bell,
   MonitorSmartphone,
@@ -109,15 +108,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
       color: 'text-yellow-500'
     },
     {
-      title: 'Sistema',
-      icon: Shield,
-      href: '/admin/system',
-      color: 'text-red-500'
-    },
-    {
       title: 'Configuración',
       icon: Settings,
-      href: '/admin/settings',
+      href: '/admin/config',
       color: 'text-gray-500'
     }
       ]

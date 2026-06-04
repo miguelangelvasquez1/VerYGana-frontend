@@ -36,7 +36,7 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
   
   // Determinar si se puede pausar/reanudar
   const canPause = ad.status === 'ACTIVE';
-  const canResume = ad.status === 'PAUSED';
+  const canResume = ad.status === 'PAUSED' || ad.status === 'APPROVED';
 
   const getStatusBadge = (status: AdResponseDTO['status']) => {
     const styles: Record<AdResponseDTO['status'], string> = {
@@ -177,7 +177,7 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
                 <DollarSign className="w-4 h-4 text-green-500" />
               </div>
               <p className="text-sm font-bold text-gray-900">
-                ${ad.spentBudget.toFixed(2)}
+                ${ad.totalBudget.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
               <p className="text-xs text-gray-500">Invertido</p>
             </div>
@@ -186,7 +186,7 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
                 <TrendingUp className="w-4 h-4 text-blue-500" />
               </div>
               <p className="text-sm font-bold text-gray-900">
-                ${ad.remainingBudget.toFixed(2)}
+                ${ad.remainingBudget.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
               <p className="text-xs text-gray-500">Restante</p>
             </div>
@@ -211,10 +211,6 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
             <div className="flex items-center">
               <Calendar className="w-3.5 h-3.5 mr-2 text-gray-400" />
               <span>Inicio: <strong>{formatDate(ad.startDate)}</strong></span>
-            </div>
-            <div className="flex items-center">
-              <Calendar className="w-3.5 h-3.5 mr-2 text-gray-400" />
-              <span>Fin: <strong>{formatDate(ad.endDate)}</strong></span>
             </div>
             <div className="flex items-center">
               <Target className="w-3.5 h-3.5 mr-2 text-gray-400" />

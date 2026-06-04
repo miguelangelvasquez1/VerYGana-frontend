@@ -13,15 +13,14 @@ import {
   ClipboardList,
   X,
   LogOut,
-  PawPrint, 
-  Lock, 
+  PawPrint,
+  Lock,
   Sparkles,
-  TrendingUp, 
-  Megaphone
+  Megaphone,
+  Gamepad2
 } from 'lucide-react';
 import { WalletStatus } from '@/types/finance/Wallet.types';
 import {PlanCode} from '@/types/finance/plans/Plan.types';
-import { formatBudget } from '@/utils/currency';  
 import { useLogout } from '@/hooks/useLogout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -68,8 +67,14 @@ const menuItems: MenuItem[] = [
     lockIfUnavailable: true,
   },
   {
+    href: '/commercial/campaigns', icon: Gamepad2, label: 'Mis juegos',
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM], 
+    lockIfUnavailable: true,
+  },
+  {
     href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Brandear Juego',
-    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM], lockIfUnavailable: true,
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM], 
+    lockIfUnavailable: true,
   },
   {
     href: '/commercial/surveys', icon: ClipboardList, label: 'Encuestas',

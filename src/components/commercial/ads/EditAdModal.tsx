@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Calculator, Tag, Link as LinkIcon, Save, Loader2, MapPin, Calendar, Info } from 'lucide-react';
+import { X, Calculator, Tag, Link as LinkIcon, Save, Loader2, MapPin, Calendar, Info, AlertCircle } from 'lucide-react';
 import { AdResponseDTO, EditAdFormData, SelectedMunicipalityData } from '@/types/ads/commercial';
 import { AdUpdateDTO } from '@/types/ads/commercial';
 import { useCategories } from '@/hooks/useCategories';
@@ -31,12 +31,8 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
   const [formData, setFormData] = useState<EditAdFormData>({
     title: ad.title,
     description: ad.description,
-    rewardPerLike: ad.rewardPerLike,
-    maxLikes: ad.maxLikes,
-    totalBudget: ad.totalBudget,
     categoryIds: ad.categories.map(c => c.id),
     startDate: ad.startDate ? new Date(ad.startDate).toISOString().slice(0, 16) : '',
-    endDate: ad.endDate ? new Date(ad.endDate).toISOString().slice(0, 16) : '',
     targetUrl: ad.targetUrl || '',
     targetAudience: {
       ageRange: [ad.minAge, ad.maxAge],
@@ -44,6 +40,13 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
       municipalityCodes: (ad.targetMunicipalities ?? []).map(m => m.code)
     }
   });
+
+  const formatMoney = (value: number) =>
+    value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const minStartDate = new Date(
+    Date.now() - new Date().getTimezoneOffset() * 60000
+  ).toISOString().slice(0, 16);
 
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [selectedMunicipalitiesData, setSelectedMunicipalitiesData] = useState<SelectedMunicipalityData[]>(initialSelectedMunicipalities);
@@ -53,20 +56,12 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
   const { departments, loading: loadingDepartments } = useDepartments();
   const { municipalities, loading: loadingMunicipalities } = useMunicipalities(selectedDepartment);
   const updateAdMutation = useUpdateAd();
-  const { refreshPlan } = usePlanState();
+  const { refreshPlanState } = usePlanState();
 
-  const calculateBudget = (reward: number, maxLikes: number) => {
-    return (reward * maxLikes).toFixed(2);
-  };
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitErrorDetails, setSubmitErrorDetails] = useState<Record<string, string> | null>(null);
 
-  const handleMaxLikesChange = (value: number) => {
-    const newBudget = Number(calculateBudget(formData.rewardPerLike, value));
-    setFormData(prev => ({
-      ...prev,
-      maxLikes: value,
-      totalBudget: newBudget
-    }));
-  };
+  const ageRangeInvalid = formData.targetAudience.ageRange[0] > formData.targetAudience.ageRange[1];
 
   const toggleCategory = (categoryId: number) => {
     setFormData(prev => ({
@@ -122,17 +117,22 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
     e.preventDefault();
 
     if (formData.categoryIds.length === 0) {
-      alert('Debes seleccionar al menos una categoría');
+      toast.error('Debes seleccionar al menos una categoría');
       return;
     }
+    if (ageRangeInvalid) {
+      toast.error('La edad mínima no puede ser mayor que la edad máxima');
+      return;
+    }
+
+    setSubmitError(null);
+    setSubmitErrorDetails(null);
 
     const updateDto: AdUpdateDTO = {
       title: formData.title,
       description: formData.description,
-      maxLikes: formData.maxLikes,
       targetUrl: formData.targetUrl || undefined,
       startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
-      endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
       categoryIds: formData.categoryIds,
       targetMunicipalitiesCodes: formData.targetAudience.municipalityCodes,
       minAge: formData.targetAudience.ageRange[0],
@@ -142,12 +142,24 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
 
     try {
       await updateAdMutation.mutateAsync({ id: ad.id, updateDto });
-      await refreshPlan();
+      await refreshPlanState();
       toast.success('Anuncio actualizado con éxito');
       onSuccess();
       onClose();
     } catch (error: any) {
-      toast.error('Error al actualizar anuncio: ' + (error.response?.data?.message || 'Error desconocido'));
+      const responseData = error?.response?.data;
+      const details: Record<string, string> | undefined =
+        responseData?.details && typeof responseData.details === 'object'
+          ? (responseData.details as Record<string, string>)
+          : undefined;
+      const errorMsg =
+        details && Object.keys(details).length > 0
+          ? Object.values(details).join(' · ')
+          : (responseData?.message ?? error?.message ?? 'Error al actualizar el anuncio');
+
+      setSubmitErrorDetails(details ?? null);
+      setSubmitError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -166,7 +178,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/50 rounded-lg transition-colors cursor-pointer"
             disabled={submitting}
           >
             <X className="w-6 h-6 text-gray-600" />
@@ -260,67 +272,50 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
               <h3 className="text-lg font-bold text-gray-900">Presupuesto y Recompensas</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Recompensa por Like ($)
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
-                    value={formData.rewardPerLike}
+                    type="text"
+                    value={`$${formatMoney(ad.rewardPerLike)}`}
                     disabled
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-100 
-                              text-gray-400 cursor-not-allowed pr-10"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed pr-10"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">No editable una vez creado el anuncio</p>
               </div>
 
               <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Máximo de Likes</label>
-                  <div className="relative group">
-                    <button
-                      type="button"
-                      className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 
-                                text-[11px] flex items-center justify-center hover:border-gray-400 
-                                hover:text-gray-600 transition-colors"
-                    >?</button>
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 
-                                    bg-white border border-gray-200 rounded-lg p-3 text-xs 
-                                    text-gray-600 shadow-lg hidden group-hover:block z-10 
-                                    leading-relaxed pointer-events-none">
-                      <p className="font-semibold text-gray-800 mb-1">¿Qué implica cambiar esto?</p>
-                      <p className="mb-1">
-                        <strong className="text-gray-700">Bajar:</strong> se te devuelve el presupuesto 
-                        no consumido correspondiente a los likes liberados.
-                      </p>
-                      <p>
-                        <strong className="text-gray-700">Subir:</strong> se deduce el costo adicional 
-                        de tu saldo disponible.
-                      </p>
-                    </div>
-                  </div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Máximo de Likes
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={ad.maxLikes.toLocaleString('es-CO')}
+                    disabled
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed pr-10"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
                 </div>
+              </div>
 
-                <input
-                  type="number"
-                  value={formData.maxLikes}
-                  onChange={(e) => handleMaxLikesChange(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
-                            focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  min={ad.currentLikes + 1}
-                  max="10000"
-                  step="1"
-                  required
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  Mínimo permitido:{' '}
-                  <strong className="text-gray-600">{ad.currentLikes + 1}</strong>
-                  {' '}(likes actuales + 1)
-                </p>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Límite por Usuario / Día
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={ad.maxLikesPerUserPerDay ?? '—'}
+                    disabled
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed pr-10"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
+                </div>
               </div>
             </div>
 
@@ -329,51 +324,22 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                 <div>
                   <p className="text-sm text-gray-600 font-medium">Presupuesto Total</p>
                   <p className="text-xs text-gray-500 mt-1">
-                    ${formData.rewardPerLike.toFixed(2)} × {formData.maxLikes} likes
+                    ${formatMoney(ad.rewardPerLike)} × {ad.maxLikes.toLocaleString('es-CO')} likes
                   </p>
                 </div>
                 <p className="text-3xl font-bold text-blue-600">
-                  ${formData.totalBudget.toFixed(2)}
+                  ${formatMoney(ad.totalBudget)}
                 </p>
               </div>
             </div>
 
-            {(() => {
-              const originalReserved = ad.rewardPerLike * (ad.maxLikes - ad.currentLikes);
-              const newReserved = formData.rewardPerLike * (formData.maxLikes - ad.currentLikes);
-              const delta = newReserved - originalReserved;
-
-              if (formData.maxLikes <= ad.currentLikes) return (
-                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                  El mínimo permitido es {ad.currentLikes + 1} (likes actuales + 1).
-                </div>
-              );
-              if (delta > 0.001) return (
-                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
-                  Se deducirán <strong>${delta.toFixed(2)}</strong> adicionales de tu saldo disponible.
-                </div>
-              );
-              if (delta < -0.001) return (
-                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-                  Se te devolverán <strong>${Math.abs(delta).toFixed(2)}</strong> a tu saldo disponible.
-                </div>
-              );
-              return null;
-            })()}
-
-            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg 
-                flex gap-4 text-xs text-blue-700">
-              <span>Likes consumidos: <strong>{ad.currentLikes}</strong></span>
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-4 text-xs text-blue-700">
+              <span>Likes consumidos: <strong>{ad.currentLikes.toLocaleString('es-CO')}</strong></span>
               <span className="w-px bg-blue-200" />
-              <span>Presupuesto consumido: 
-                <strong> ${(ad.currentLikes * ad.rewardPerLike).toFixed(2)}</strong>
-              </span>
+              <span>Presupuesto consumido: <strong>${formatMoney(ad.currentLikes * ad.rewardPerLike)}</strong></span>
               <span className="w-px bg-blue-200" />
-              <span>Presupuesto restante: 
-                <strong> ${((ad.maxLikes - ad.currentLikes) * ad.rewardPerLike).toFixed(2)}</strong>
-              </span>
+              <span>Presupuesto restante: <strong>${formatMoney((ad.maxLikes - ad.currentLikes) * ad.rewardPerLike)}</strong></span>
             </div>
-
           </div>
 
           {/* Fechas */}
@@ -383,49 +349,27 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
               <h3 className="text-lg font-bold text-gray-900">Fechas de Campaña</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Fecha de Inicio</label>
-                  <div className="relative group">
-                    <button
-                      type="button"
-                      className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 text-[11px] flex items-center justify-center hover:border-gray-400 hover:text-gray-600 transition-colors"
-                    >?</button>
-                    <div className="absolute left-0 bottom-full mb-2 w-56 bg-white border border-gray-200 rounded-lg p-2.5 text-xs text-gray-600 shadow-lg hidden group-hover:block z-10 leading-relaxed pointer-events-none">
-                      Fecha en que el anuncio comenzará a mostrarse. Si se deja vacío, inicia inmediatamente tras ser aprobado.
-                    </div>
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <label className="text-sm font-semibold text-gray-700">Fecha de Inicio</label>
+                <div className="relative group">
+                  <button
+                    type="button"
+                    className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 text-[11px] flex items-center justify-center hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  >?</button>
+                  <div className="absolute left-0 bottom-full mb-2 w-56 bg-white border border-gray-200 rounded-lg p-2.5 text-xs text-gray-600 shadow-lg hidden group-hover:block z-10 leading-relaxed pointer-events-none">
+                    Fecha en que el anuncio comenzará a mostrarse. Si se deja vacío, inicia inmediatamente tras ser aprobado.
                   </div>
                 </div>
-                <input
-                  type="datetime-local"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
               </div>
-
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Fecha de Finalización</label>
-                  <div className="relative group">
-                    <button
-                      type="button"
-                      className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 text-[11px] flex items-center justify-center hover:border-gray-400 hover:text-gray-600 transition-colors"
-                    >?</button>
-                    <div className="absolute left-0 bottom-full mb-2 w-56 bg-white border border-gray-200 rounded-lg p-2.5 text-xs text-gray-600 shadow-lg hidden group-hover:block z-10 leading-relaxed pointer-events-none">
-                      Fecha límite del anuncio. Si se deja vacío, corre indefinidamente hasta alcanzar el máximo de likes.
-                    </div>
-                  </div>
-                </div>
-                <input
-                  type="datetime-local"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  min={formData.startDate}
-                />
-              </div>
+              <input
+                type="datetime-local"
+                value={formData.startDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                min={minStartDate}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <p className="text-xs text-gray-400 mt-1">Debe ser una fecha futura</p>
             </div>
           </div>
 
@@ -507,6 +451,12 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                   />
                   <span className="text-gray-600 font-medium">años</span>
                 </div>
+                {ageRangeInvalid && (
+                  <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    La edad mínima no puede ser mayor que la máxima
+                  </p>
+                )}
               </div>
 
               <div>
@@ -522,7 +472,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                       gender: e.target.value as 'all' | 'male' | 'female'
                     }
                   }))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                 >
                   <option value="all">Todos</option>
                   <option value="male">Masculino</option>
@@ -548,7 +498,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                 <select
                   value={selectedDepartment || ''}
                   onChange={(e) => setSelectedDepartment(e.target.value || null)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer disabled:cursor-not-allowed"
                   disabled={loadingDepartments}
                 >
                   <option value="">-- Selecciona un departamento --</option>
@@ -573,7 +523,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                         e.target.value = '';
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer disabled:cursor-not-allowed"
                     disabled={loadingMunicipalities}
                   >
                     <option value="">
@@ -605,7 +555,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                         <button
                           type="button"
                           onClick={() => removeMunicipality(municipality.code)}
-                          className="ml-2 text-green-600 hover:text-green-800"
+                          className="ml-2 text-green-600 hover:text-green-800 cursor-pointer"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -623,32 +573,52 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
         </form>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-            disabled={submitting}
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Guardando...
-              </>
-            ) : (
-              <>
-                <Save className="w-5 h-5" />
-                Guardar Cambios
-              </>
-            )}
-          </button>
+        <div className="border-t border-gray-200 bg-gray-50">
+          {(submitError || submitErrorDetails) && (
+            <div className="px-6 pt-4">
+              <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  {submitErrorDetails && Object.keys(submitErrorDetails).length > 0 ? (
+                    <ul className="space-y-1">
+                      {Object.values(submitErrorDetails).map((msg, i) => (
+                        <li key={i} className="text-sm font-semibold text-red-700">{msg}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm font-semibold text-red-700">{submitError}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-3 p-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              disabled={submitting}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2 cursor-pointer"
+              disabled={submitting || ageRangeInvalid}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5" />
+                  Guardar Cambios
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ import { AdCard } from './AdCard';
 import { AdPagination } from './AdPagination';
 import { RejectAdModal } from './modals/RejectAdModal';
 import { BlockAdModal } from './modals/BlockAdModal';
+import { ApproveAdModal } from './modals/ApproveAdModal';
 import { AdDetailModal} from './AdDetailModalAdmin';
 import { calculateStats, filterAds } from './utils/adHelper';
 
@@ -20,6 +21,7 @@ const AdManagement: React.FC = () => {
   const [selectedAd, setSelectedAd] = useState<AdForAdminDTO | null>(null);
 
   // Modals
+  const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showBlockModal, setShowBlockModal] = useState(false);
@@ -40,13 +42,24 @@ const AdManagement: React.FC = () => {
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
-  const handleApprove = async (adId: number) => {
-    if (!confirm('¿Estás seguro de aprobar este anuncio?')) return;
+  const handleApprove = (ad: AdForAdminDTO) => {
+    setSelectedAd(ad);
+    setShowApproveModal(true);
+  };
+
+  const confirmApprove = async () => {
+    if (!selectedAd) return;
     try {
-      await approveAdMutation.mutateAsync(adId);
+      await approveAdMutation.mutateAsync(selectedAd.id);
+      closeApproveModal();
     } catch {
       alert('Error al aprobar el anuncio');
     }
+  };
+
+  const closeApproveModal = () => {
+    setShowApproveModal(false);
+    setSelectedAd(null);
   };
 
   const handleReject = (ad: AdForAdminDTO) => {
@@ -132,12 +145,6 @@ const AdManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900">Gestión de Anuncios</h2>
-        <p className="text-gray-500 mt-1 text-sm">Administra y modera los anuncios de la plataforma</p>
-      </div>
-
       <AdStats stats={stats} />
 
       <AdFilters
@@ -183,6 +190,15 @@ const AdManagement: React.FC = () => {
       />
 
       {/* Modals */}
+      {showApproveModal && selectedAd && (
+        <ApproveAdModal
+          ad={selectedAd}
+          isSubmitting={approveAdMutation.isPending}
+          onConfirm={confirmApprove}
+          onCancel={closeApproveModal}
+        />
+      )}
+
       {showRejectModal && selectedAd && (
         <RejectAdModal
           ad={selectedAd}
