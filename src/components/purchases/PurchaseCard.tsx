@@ -1,7 +1,8 @@
+import Image from "next/image";
 import { ConsumerPurchaseResponseDTO, PurchaseStatus } from "@/types/purchases/purchase.types";
 import PurchaseItemsPreview from "./PurchaseItemsPreview";
 import PurchaseActions from "./PurchaseActions";
-import { formatCents } from "@/utils/currency";
+import { formatPesos } from "@/utils/currency";
 
 interface Props {
   purchase: ConsumerPurchaseResponseDTO;
@@ -25,12 +26,12 @@ const PurchaseCard = ({ purchase }: Props) => {
   const hasKeys = purchase.keysValueCents > 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border p-6 space-y-4">
+    <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 space-y-4">
 
       {/* Header */}
-      <div className="flex justify-between items-start">
-        <div className="space-y-1">
-          <p className="text-sm text-gray-500">
+      <div className="flex justify-between items-start gap-3">
+        <div className="space-y-1 min-w-0">
+          <p className="text-sm sm:text-base text-gray-500">
             Pedido realizado el{" "}
             <span className="font-medium text-gray-900">
               {new Date(purchase.createdAt).toLocaleDateString("es-CO", {
@@ -40,16 +41,16 @@ const PurchaseCard = ({ purchase }: Props) => {
               })}
             </span>
           </p>
-          <p className="text-xs text-gray-400">Ref: {purchase.referenceId}</p>
+          <p className="text-xs sm:text-sm text-gray-400 truncate">Ref: {purchase.referenceId}</p>
           {purchase.deliveryEmail && (
-            <p className="text-xs text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-400 truncate">
               Enviado a: <span className="text-gray-600">{purchase.deliveryEmail}</span>
             </p>
           )}
         </div>
 
         <span
-          className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColor[purchase.status]}`}
+          className={`text-xs sm:text-sm font-medium px-2.5 py-1 rounded-full shrink-0 ${statusColor[purchase.status]}`}
         >
           {statusLabel[purchase.status]}
         </span>
@@ -59,22 +60,28 @@ const PurchaseCard = ({ purchase }: Props) => {
       <PurchaseItemsPreview items={purchase.items} />
 
       {/* Resumen financiero */}
-      <div className="border-t pt-3 space-y-1 text-sm">
+      <div className="border-t pt-3 space-y-2 text-sm sm:text-base">
         {hasKeys && (
           <div className="flex justify-between text-gray-500">
-            <span>Pagado con llaves</span>
-            <span>${formatCents(purchase.keysValueCents)}</span>
-          </div>
-        )}
-        {hasKeys && (
-          <div className="flex justify-between text-gray-500">
-            <span>Pagado con tarjeta</span>
-            <span>${formatCents(purchase.cashCents)}</span>
+            <span className="flex items-center gap-2">
+              <Image
+                src="/logos/llave.png"
+                alt="llave"
+                width={24}
+                height={24}
+                className="w-5 h-5 sm:w-6 sm:h-6"
+              />
+              Llaves utilizadas
+            </span>
+            <span>{purchase.keysValueCents / 1000}</span>
           </div>
         )}
         <div className="flex justify-between font-semibold text-gray-900">
-          <span>Total</span>
-          <span>${formatCents(purchase.totalCents)}</span>
+          <span className="flex items-center gap-2">
+            <span className="text-lg sm:text-xl">💵</span>
+            Total pagado
+          </span>
+          <span>${formatPesos(purchase.cashCents)}</span>
         </div>
       </div>
 

@@ -22,8 +22,7 @@ import TicketRuleCard from "./TicketRuleCard";
 
 const RULE_TYPES = [
   "PURCHASE",
-  "ADS_WATCHED",
-  "GAME_ACHIEVEMENT",
+  "DAILY_LOGIN",
   "REFERRAL",
 ];
 

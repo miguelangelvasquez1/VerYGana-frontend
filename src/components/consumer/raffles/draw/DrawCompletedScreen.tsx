@@ -11,75 +11,142 @@ interface Props {
   onGoToRaffles: () => void
 }
 
-const REDIRECT_SECONDS = 15
+const REDIRECT_SECONDS = 20
 
-const positionColors: Record<number, string> = {
-  1: 'from-yellow-400 to-amber-500',
-  2: 'from-gray-300 to-gray-400',
-  3: 'from-amber-600 to-amber-800',
-}
-const positionLabel: Record<number, string> = {
-  1: '1er lugar', 2: '2do lugar', 3: '3er lugar'
+const podiumCfg: Record<number, {
+  blockH: string
+  blockHLg: string
+  blockBg: string
+  avatarRing: string
+  avatarBg: string
+  medal: string
+  valueColor: string
+}> = {
+  1: {
+    blockH:     'h-32',
+    blockHLg:   'lg:h-44',
+    blockBg:    'bg-linear-to-b from-yellow-400 via-amber-400 to-amber-500',
+    avatarRing: 'ring-yellow-400',
+    avatarBg:   'bg-linear-to-br from-yellow-400 to-amber-500',
+    medal:      '🥇',
+    valueColor: 'text-yellow-600',
+  },
+  2: {
+    blockH:     'h-24',
+    blockHLg:   'lg:h-32',
+    blockBg:    'bg-linear-to-b from-slate-400 to-slate-600',
+    avatarRing: 'ring-slate-300',
+    avatarBg:   'bg-linear-to-br from-slate-300 to-slate-500',
+    medal:      '🥈',
+    valueColor: 'text-slate-500',
+  },
+  3: {
+    blockH:     'h-16',
+    blockHLg:   'lg:h-24',
+    blockBg:    'bg-linear-to-b from-amber-600 to-amber-800',
+    avatarRing: 'ring-amber-500',
+    avatarBg:   'bg-linear-to-br from-amber-500 to-amber-700',
+    medal:      '🥉',
+    valueColor: 'text-amber-700',
+  },
 }
 
 function getInitials(name: string) {
   return name.slice(0, 2).toUpperCase()
 }
 
-function FinalWinnerCard({ winner, index }: { winner: WinnerRevealPayloadDTO; index: number }) {
+function PodiumSlot({ winner, delay = 0 }: { winner: WinnerRevealPayloadDTO; delay?: number }) {
+  const cfg = podiumCfg[winner.position]
+  if (!cfg) return null
+
   return (
     <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 30 },
-        show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 22 } }
-      }}
-      className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-4"
+      initial={{ opacity: 0, y: 80 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 180, damping: 22, delay }}
+      className="flex flex-col items-center"
     >
-      {/* Avatar */}
+      {/* Info encima del bloque */}
+      <div className="flex flex-col items-center gap-1 mb-3 w-28 lg:w-36">
+        <span className="text-2xl lg:text-3xl">{cfg.medal}</span>
+
+        {/* Avatar */}
+        <div className={`
+          relative w-16 h-16 lg:w-20 lg:h-20 rounded-full overflow-hidden shrink-0
+          ${cfg.avatarBg}
+          ring-4 ring-offset-2 ring-offset-gray-50 ${cfg.avatarRing}
+          shadow-lg
+        `}>
+          {winner.userAvatarUrl ? (
+            <Image
+              src={winner.userAvatarUrl}
+              alt={winner.userName}
+              fill
+              sizes="(max-width: 1024px) 64px, 80px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-xl lg:text-2xl font-black text-white">{getInitials(winner.userName)}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Nombre */}
+        <p className="text-gray-900 font-bold text-sm lg:text-base text-center leading-tight truncate w-full">
+          {winner.userName}
+        </p>
+
+        {/* Boleta */}
+        <p className="text-gray-400 text-xs font-mono">#{winner.ticketNumber}</p>
+
+        {/* Premio */}
+        <p className="text-gray-500 text-xs leading-tight truncate w-full text-center">
+          {winner.prizeTitle}
+        </p>
+      </div>
+
+      {/* Bloque del podio */}
       <div className={`
-        relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0
-        bg-gradient-to-br ${positionColors[winner.position] ?? 'from-violet-500 to-purple-600'}
-        ring-2 ring-offset-2 ring-offset-gray-950
-        ${winner.position === 1 ? 'ring-yellow-400' : winner.position === 2 ? 'ring-gray-300' : 'ring-amber-700'}
+        w-24 lg:w-32 ${cfg.blockH} ${cfg.blockHLg} rounded-t-2xl ${cfg.blockBg}
+        flex items-center justify-center shadow-md
       `}>
+        <span className="text-white font-black text-2xl lg:text-3xl leading-none">
+          {winner.position}°
+        </span>
+      </div>
+    </motion.div>
+  )
+}
+
+function ExtraWinnerRow({ winner, index }: { winner: WinnerRevealPayloadDTO; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.7 + index * 0.1 }}
+      className="flex items-center gap-3 bg-white border border-gray-200 shadow-sm rounded-xl p-3"
+    >
+      <span className="text-gray-400 font-bold text-sm w-6 text-center shrink-0">
+        {winner.position}°
+      </span>
+
+      <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 bg-linear-to-br from-blue-500 to-blue-700">
         {winner.userAvatarUrl ? (
-          <Image src={winner.userAvatarUrl} alt={winner.userName} fill className="object-cover" />
+          <Image src={winner.userAvatarUrl} alt={winner.userName} fill sizes="36px" className="object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-lg font-black text-white">{getInitials(winner.userName)}</span>
+            <span className="text-xs font-bold text-white">{getInitials(winner.userName)}</span>
           </div>
         )}
       </div>
 
-      {/* Info ganador */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <p className="text-white font-bold truncate">{winner.userName}</p>
-          <span className={`
-            text-xs font-bold px-2 py-0.5 rounded-full bg-gradient-to-r
-            ${positionColors[winner.position] ?? 'from-violet-500 to-purple-600'}
-            text-white flex-shrink-0
-          `}>
-            {positionLabel[winner.position] ?? `${winner.position}°`}
-          </span>
-        </div>
-        <p className="text-gray-500 text-xs font-mono">#{winner.ticketNumber}</p>
+        <p className="text-gray-900 text-sm font-semibold truncate">{winner.userName}</p>
+        <p className="text-gray-400 text-xs font-mono">Boleta #{winner.ticketNumber}</p>
       </div>
 
-      {/* Premio con imagen */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        {winner.prizeImageUrl && (
-          <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-white/5">
-            <Image src={winner.prizeImageUrl} alt={winner.prizeTitle} fill className="object-cover" />
-          </div>
-        )}
-        <div className="text-right hidden sm:block">
-          <p className="text-white text-sm font-semibold max-w-[120px] truncate">{winner.prizeTitle}</p>
-          <p className="text-emerald-400 text-xs font-mono">
-            ${winner.prizeValue.toLocaleString('es-CO')}
-          </p>
-        </div>
-      </div>
+      <p className="text-gray-700 text-xs font-medium truncate max-w-32 shrink-0">{winner.prizeTitle}</p>
     </motion.div>
   )
 }
@@ -88,13 +155,12 @@ export function DrawCompletedScreen({ payload, onGoToRaffles }: Props) {
   const { fireCompleted } = useConfetti()
   const [remaining, setRemaining] = useState(REDIRECT_SECONDS)
 
-  // Confeti al montar
   useEffect(() => {
     fireCompleted()
-    setTimeout(fireCompleted, 800)
+    setTimeout(fireCompleted, 700)
+    setTimeout(fireCompleted, 1800)
   }, [fireCompleted])
 
-  // Countdown de redirección
   useEffect(() => {
     const timer = setInterval(() => {
       setRemaining(prev => {
@@ -107,69 +173,93 @@ export function DrawCompletedScreen({ payload, onGoToRaffles }: Props) {
 
   const progress = ((REDIRECT_SECONDS - remaining) / REDIRECT_SECONDS) * 100
 
+  const podiumWinners = payload.allWinners.filter(w => w.position <= 3)
+  const extraWinners  = payload.allWinners.filter(w => w.position > 3)
+
+  const first  = podiumWinners.find(w => w.position === 1)
+  const second = podiumWinners.find(w => w.position === 2)
+  const third  = podiumWinners.find(w => w.position === 3)
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col items-center gap-8 w-full max-w-lg"
+      className="flex flex-col items-center gap-8 w-full max-w-lg lg:max-w-4xl"
     >
       {/* Header */}
       <motion.div
-        initial={{ y: -20, opacity: 0 }}
+        initial={{ y: -24, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
         className="text-center"
       >
-        <p className="text-gray-400 text-xs uppercase tracking-widest mb-2">Sorteo completado</p>
-        <h1 className="text-3xl font-black text-white mb-1">{payload.raffleTitle}</h1>
-        <p className="text-gray-500 text-sm">
-          {payload.totalParticipants.toLocaleString()} participantes · {payload.allWinners.length} ganadores
+        <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">¡Sorteo completado!</p>
+        <h1 className="text-3xl lg:text-5xl font-black text-gray-900 mb-1">{payload.raffleTitle}</h1>
+        <p className="text-gray-500 text-sm lg:text-base">
+          {payload.totalParticipants.toLocaleString()} participantes
+          {' · '}
+          {payload.allWinners.length} {payload.allWinners.length === 1 ? 'ganador' : 'ganadores'}
         </p>
       </motion.div>
 
-      {/* Lista de ganadores con stagger */}
-      <motion.div
-        className="w-full space-y-3"
-        variants={{ show: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } } }}
-        initial="hidden"
-        animate="show"
-      >
-        {payload.allWinners.map((winner, i) => (
-          <FinalWinnerCard key={winner.ticketNumber} winner={winner} index={i} />
-        ))}
-      </motion.div>
+      {/* Podio: 2° izquierda · 1° centro · 3° derecha */}
+      <div className="w-full flex flex-col items-center">
+        <div className="flex items-end justify-center gap-2 lg:gap-4">
+          {second && <PodiumSlot winner={second} delay={0.45} />}
+          {first  && <PodiumSlot winner={first}  delay={0.2}  />}
+          {third  && <PodiumSlot winner={third}  delay={0.65} />}
+        </div>
+        <div className="w-full h-2 bg-linear-to-r from-transparent via-gray-300 to-transparent rounded-full" />
+      </div>
+
+      {/* Ganadores 4°+ */}
+      {extraWinners.length > 0 && (
+        <div className="w-full space-y-2">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-gray-400 text-xs uppercase tracking-widest text-center"
+          >
+            Más ganadores
+          </motion.p>
+          {extraWinners.map((w, i) => (
+            <ExtraWinnerRow key={w.ticketNumber} winner={w} index={i} />
+          ))}
+        </div>
+      )}
 
       {/* Botones */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 + payload.allWinners.length * 0.12 }}
+        transition={{ delay: 0.5 }}
         className="flex flex-col sm:flex-row gap-3 w-full"
       >
         <button
           onClick={onGoToRaffles}
-          className="flex-1 bg-violet-600 hover:bg-violet-500 active:scale-95 text-white font-bold py-3.5 px-6 rounded-xl transition-all"
+          className="flex-1 bg-blue-700 hover:bg-blue-600 active:scale-95 text-white font-bold py-3.5 px-6 rounded-xl transition-all"
         >
           Ver más rifas
         </button>
-        
+        <a
           href={payload.drawProofUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 text-gray-300 font-semibold py-3.5 px-6 rounded-xl transition-all text-center"
-        <a>
+          className="flex-1 bg-gray-100 hover:bg-gray-200 active:scale-95 border border-gray-200 text-gray-700 font-semibold py-3.5 px-6 rounded-xl transition-all text-center"
+        >
           Ver prueba del sorteo
         </a>
       </motion.div>
 
       {/* Barra de redirección */}
       <div className="w-full">
-        <p className="text-gray-600 text-xs text-center mb-2">
+        <p className="text-gray-500 text-xs text-center mb-2">
           Volviendo a rifas en {remaining}s
         </p>
-        <div className="w-full bg-white/5 rounded-full h-1">
+        <div className="w-full bg-gray-200 rounded-full h-1">
           <motion.div
-            className="bg-violet-500/40 h-1 rounded-full"
+            className="bg-blue-600/40 h-1 rounded-full"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 1, ease: 'linear' }}
           />

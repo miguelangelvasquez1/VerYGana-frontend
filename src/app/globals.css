@@ -42,6 +42,11 @@ body {
   background: var(--primary-bg);
 }
 
+/* react-datepicker: ensure calendar popup renders above page icons */
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}
+
 /* RJSF overrides for Campaign Form*/
 /* CONTENEDOR GENERAL */
 .rjsf-form input,

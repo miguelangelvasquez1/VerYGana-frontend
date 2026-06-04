@@ -73,8 +73,9 @@ export function AddToCartButton({
             ? 'bg-green-600 text-white'
             : product.stock === 0
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-blue-600 text-white hover:bg-blue-700'
+            : 'text-white hover:opacity-90'
         } ${className}`}
+        style={!justAdded && product.stock > 0 ? { background: "#014C92" } : undefined}
         aria-label="Add to cart"
       >
         {justAdded ? (
@@ -97,8 +98,9 @@ export function AddToCartButton({
             ? 'border-green-600 text-green-600 bg-green-50'
             : product.stock === 0
             ? 'border-gray-300 text-gray-400 cursor-not-allowed'
-            : 'border-blue-600 text-blue-600 hover:bg-blue-50'
+            : 'hover:bg-blue-50'
         } ${className}`}
+        style={!justAdded && product.stock > 0 ? { borderColor: "#014C92", color: "#014C92" } : undefined}
       >
         {justAdded ? (
           <>
@@ -120,13 +122,14 @@ export function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={isAdding || product.stock === 0 || justAdded}
-      className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+      className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg cursor-pointer font-semibold transition-all ${
         justAdded
           ? 'bg-green-600 text-white'
           : product.stock === 0
           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          : 'bg-blue-600 text-white hover:bg-blue-700'
+          : 'text-white hover:opacity-90'
       } ${className}`}
+      style={!justAdded && product.stock > 0 ? { background: "#014C92" } : undefined}
     >
       {isAdding ? (
         <>

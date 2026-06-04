@@ -25,9 +25,3 @@ export const getProductReviewsByProductId = async (productId: number, page?: num
     return response.data;
 };
 
-export const getPendingReviews = async (purchaseId : number): Promise<ReviewableProductResponseDTO[]> => {
-    const response = await apiClient.get<ReviewableProductResponseDTO[]>("/productsReviews/pending", {
-        params: {purchaseId}
-    });
-    return response.data;
-};

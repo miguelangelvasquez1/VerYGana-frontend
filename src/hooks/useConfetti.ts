@@ -5,30 +5,23 @@ import confetti from 'canvas-confetti'
 export function useConfetti() {
 
   const fireWinner = useCallback(() => {
-    // Ráfaga desde los dos lados
-    const left = () => confetti({
-      particleCount: 60,
-      angle: 60,
-      spread: 70,
-      origin: { x: 0, y: 0.7 },
-      colors: ['#7C3AED', '#A78BFA', '#FFFFFF', '#FCD34D'],
+    const colors = ['#7C3AED', '#A78BFA', '#FFFFFF', '#FCD34D']
+
+    // Lluvia desde la parte superior
+    const shower = (x: number) => confetti({
+      particleCount: 80,
+      spread: 90,
+      origin: { x, y: 0 },
+      startVelocity: 55,
+      gravity: 1.3,
+      colors,
       zIndex: 9999,
     })
 
-    const right = () => confetti({
-      particleCount: 60,
-      angle: 120,
-      spread: 70,
-      origin: { x: 1, y: 0.7 },
-      colors: ['#7C3AED', '#A78BFA', '#FFFFFF', '#FCD34D'],
-      zIndex: 9999,
-    })
-
-    left()
-    right()
-
-    // Segunda ráfaga con delay para más dramatismo
-    setTimeout(() => { left(); right() }, 300)
+    shower(0.25)
+    shower(0.75)
+    setTimeout(() => { shower(0.1); shower(0.5); shower(0.9) }, 350)
+    setTimeout(() => { shower(0.4); shower(0.6) }, 700)
   }, [])
 
   const fireCompleted = useCallback(() => {

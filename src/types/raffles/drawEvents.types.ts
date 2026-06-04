@@ -14,6 +14,7 @@ export interface WaitingRoomPayloadDTO {
   viewerCount: number
   secondsUntilDraw: number
   totalTickets: number
+  totalParticipants: number
 }
 
 export interface WinnerRevealPayloadDTO {
@@ -26,7 +27,6 @@ export interface WinnerRevealPayloadDTO {
   prizeValue: number
   prizeType: PrizeType
   revealOrder: number
-  totalWinners: number
 }
 
 export interface DrawCompletedPayloadDTO {
@@ -52,6 +52,7 @@ export interface DrawStatusResponseDTO {
   currentPhase: DrawEventType
   secondsUntilDraw: number
   viewerCount: number
+  totalParticipants: number
   revealedWinners: WinnerRevealPayloadDTO[]
   totalWinners: number
   drawProofUrl: string | null
