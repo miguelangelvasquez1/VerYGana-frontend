@@ -1,4 +1,3 @@
-// app/raffles/[id]/live/RaffleLiveClient.tsx
 'use client'
 
 import { useEffect } from 'react'
@@ -49,7 +48,7 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
       </div>
 
       {/* Título de la rifa */}
-      <p className="text-gray-500 text-sm mb-8 tracking-wide uppercase text-center">
+      <p className="text-gray-500 text-base lg:text-xl mb-8 tracking-wide uppercase text-center">
         {raffle.title}
       </p>
 
@@ -74,7 +73,6 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }} transition={{ duration: 0.35 }}>
             <DrawingScreen
-              key={currentPhase === DrawEventType.REVEALING ? `r-${revealedWinners.length + 1}` : 'pre'}
               totalWinners={totalWinners}
               revealNumber={currentPhase === DrawEventType.REVEALING ? revealedWinners.length + 1 : 1}
               isRevealing={currentPhase === DrawEventType.REVEALING}

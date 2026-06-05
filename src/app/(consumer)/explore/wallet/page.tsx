@@ -1,55 +1,43 @@
 'use client';
 
-import { useTransactions } from '@/hooks/useTransactions';
-import TransactionStats from '@/components/transactions/TransactionStats';
-import TransactionFilters from '@/components/transactions/TransactionFilters';
-import TransactionList from '@/components/transactions/TransactionList';
+import { useKeyTransactions } from '@/hooks/useTransactions';
+import KeyTransactionStats from '@/components/transactions/KeyTransactionStats';
+import KeyTransactionFilters from '@/components/transactions/KeyTransactionFilters';
+import KeyTransactionList from '@/components/transactions/KeyTransactionList';
 
-const TransactionHistoryPage = () => {
-  const {
-    transactions,
-    walletBalance,
-    loading,
-    filters,
-    setFilters,
-  } = useTransactions();
+const WalletHistoryPage = () => {
+    const { transactions, stats, totalPages, loading, filters, setFilters } = useKeyTransactions();
 
-  return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    return (
+        <div className="flex flex-col min-h-screen bg-gray-50">
 
-      {/* ===== HEADER ===== */}
-      <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
-            Historial de Transacciones
-          </h1>
-          <p className="mt-4 text-white/80 max-w-2xl text-sm sm:text-base">
-            Revisa todos los movimientos de tu monedero: depósitos, recompensas,
-            compras, retiros y transferencias.
-          </p>
+            <header className="bg-linear-to-r from-blue-600 to-purple-600 text-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
+                        Historial de Llaves
+                    </h1>
+                    <p className="mt-4 text-white/80 max-w-2xl text-sm sm:text-base">
+                        Consulta todos los movimientos de llaves de tu cuenta: ganancias, usos y expiraciones.
+                    </p>
+                </div>
+            </header>
+
+            <main className="flex-1">
+                <KeyTransactionStats stats={stats} />
+
+                <KeyTransactionFilters filters={filters} onChange={setFilters} />
+
+                <KeyTransactionList
+                    transactions={transactions}
+                    loading={loading}
+                    filters={filters}
+                    totalPages={totalPages}
+                    onPageChange={page => setFilters(prev => ({ ...prev, page }))}
+                />
+            </main>
+
         </div>
-      </header>
-
-      {/* ===== CONTENIDO ===== */}
-      <main className="flex-1">
-        {/* Stats */}
-        <TransactionStats balance={walletBalance} />
-
-        {/* Filters */}
-        <TransactionFilters
-          filters={filters}
-          onChange={setFilters}
-        />
-
-        {/* List */}
-        <TransactionList
-          transactions={transactions}
-          loading={loading}
-        />
-      </main>
-
-    </div>
-  );
+    );
 };
 
-export default TransactionHistoryPage;
+export default WalletHistoryPage;

@@ -171,6 +171,10 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
         drawingStartedTimerRef.current = setTimeout(() => {
           setCurrentPhase(DrawEventType.DRAWING_STARTED)
           drawingStartedTimerRef.current = null
+
+          // Si WINNER_REVEALED llegó mientras esperábamos al countdown, procesarlo ahora
+          const queued = pendingWinnersRef.current.shift()
+          if (queued) startWinnerCycleRef.current?.(queued)
         }, delayMs)
         break
       }
@@ -178,13 +182,11 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
       case DrawEventType.WINNER_REVEALED: {
         const winner = event.payload as WinnerRevealPayloadDTO
 
-        // Cancelar el delay de DRAWING_STARTED si aún no disparó
         if (drawingStartedTimerRef.current) {
-          clearTimeout(drawingStartedTimerRef.current)
-          drawingStartedTimerRef.current = null
-        }
-
-        if (inWinnerCycleRef.current) {
+          // El delay del countdown sigue pendiente: encolar el ganador sin cancelar el delay.
+          // El delay procesará este ganador cuando el "¡Ya!" haya sido visible.
+          pendingWinnersRef.current.push(winner)
+        } else if (inWinnerCycleRef.current) {
           // Ciclo activo: encolar para procesar después del hold actual
           pendingWinnersRef.current.push(winner)
         } else {

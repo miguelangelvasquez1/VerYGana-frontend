@@ -93,15 +93,15 @@ function PodiumSlot({ winner, delay = 0 }: { winner: WinnerRevealPayloadDTO; del
         </div>
 
         {/* Nombre */}
-        <p className="text-gray-900 font-bold text-sm lg:text-base text-center leading-tight truncate w-full">
+        <p className="text-gray-900 font-bold text-base lg:text-xl text-center leading-tight truncate w-full">
           {winner.userName}
         </p>
 
         {/* Boleta */}
-        <p className="text-gray-400 text-xs font-mono">#{winner.ticketNumber}</p>
+        <p className="text-gray-400 text-sm lg:text-base font-mono">#{winner.ticketNumber}</p>
 
         {/* Premio */}
-        <p className="text-gray-500 text-xs leading-tight truncate w-full text-center">
+        <p className="text-gray-500 text-xs lg:text-sm leading-tight truncate w-full text-center">
           {winner.prizeTitle}
         </p>
       </div>
@@ -111,7 +111,7 @@ function PodiumSlot({ winner, delay = 0 }: { winner: WinnerRevealPayloadDTO; del
         w-24 lg:w-32 ${cfg.blockH} ${cfg.blockHLg} rounded-t-2xl ${cfg.blockBg}
         flex items-center justify-center shadow-md
       `}>
-        <span className="text-white font-black text-2xl lg:text-3xl leading-none">
+        <span className="text-white font-black text-3xl lg:text-5xl leading-none">
           {winner.position}°
         </span>
       </div>
@@ -142,11 +142,11 @@ function ExtraWinnerRow({ winner, index }: { winner: WinnerRevealPayloadDTO; ind
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-gray-900 text-sm font-semibold truncate">{winner.userName}</p>
-        <p className="text-gray-400 text-xs font-mono">Boleta #{winner.ticketNumber}</p>
+        <p className="text-gray-900 text-base lg:text-lg font-semibold truncate">{winner.userName}</p>
+        <p className="text-gray-400 text-sm font-mono">Boleta #{winner.ticketNumber}</p>
       </div>
 
-      <p className="text-gray-700 text-xs font-medium truncate max-w-32 shrink-0">{winner.prizeTitle}</p>
+      <p className="text-gray-700 text-sm lg:text-base font-medium truncate max-w-36 shrink-0">{winner.prizeTitle}</p>
     </motion.div>
   )
 }
@@ -184,7 +184,7 @@ export function DrawCompletedScreen({ payload, onGoToRaffles }: Props) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col items-center gap-8 w-full max-w-lg lg:max-w-4xl"
+      className="flex flex-col items-center gap-8 w-full max-w-2xl lg:max-w-6xl"
     >
       {/* Header */}
       <motion.div
@@ -193,9 +193,9 @@ export function DrawCompletedScreen({ payload, onGoToRaffles }: Props) {
         transition={{ delay: 0.1 }}
         className="text-center"
       >
-        <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">¡Sorteo completado!</p>
-        <h1 className="text-3xl lg:text-5xl font-black text-gray-900 mb-1">{payload.raffleTitle}</h1>
-        <p className="text-gray-500 text-sm lg:text-base">
+        <p className="text-gray-500 text-sm lg:text-lg uppercase tracking-widest mb-2">¡Sorteo completado!</p>
+        <h1 className="text-4xl lg:text-7xl font-black text-gray-900 mb-1">{payload.raffleTitle}</h1>
+        <p className="text-gray-500 text-base lg:text-xl">
           {payload.totalParticipants.toLocaleString()} participantes
           {' · '}
           {payload.allWinners.length} {payload.allWinners.length === 1 ? 'ganador' : 'ganadores'}

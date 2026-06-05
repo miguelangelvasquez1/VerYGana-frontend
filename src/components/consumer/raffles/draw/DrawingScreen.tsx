@@ -30,30 +30,43 @@ function getSuspenseMessages(isRevealing: boolean, revealNumber: number, totalWi
   ]
 }
 
+// Velocidades progresivas: arranque rápido → frenado suave → suspenso
+const SPEED_STEPS = [
+  { at: 1000, speed:  75 },
+  { at: 2000, speed: 120 },
+  { at: 3000, speed: 200 },  // también: fase visual → 'slowing'
+  { at: 4000, speed: 320 },
+  { at: 5000, speed: 480 },
+  { at: 6000, speed: 650 },  // también: fase visual → 'suspense'
+]
+
 type Phase = 'fast' | 'slowing' | 'suspense'
 
 export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = false }: Props) {
-  const [ticket, setTicket] = useState(randomTicket())
-  const [phase, setPhase]   = useState<Phase>('fast')
-  const [msgIndex, setMsgIndex] = useState(0)
+  const [ticket, setTicket]       = useState(randomTicket())
+  const [phase, setPhase]         = useState<Phase>('fast')
+  const [spinSpeed, setSpinSpeed] = useState(55)
+  const [msgIndex, setMsgIndex]   = useState(0)
   const elapsed = useRef(0)
 
-  // Progresión de fases: fast (0–3 s), slowing (3–6 s), suspense (6 s+)
+  // Progresión de fases + velocidad gradual cada 500 ms
   useEffect(() => {
     const timer = setInterval(() => {
       elapsed.current += 500
+      for (const step of SPEED_STEPS) {
+        if (elapsed.current === step.at) { setSpinSpeed(step.speed); break }
+      }
       if (elapsed.current === 3000) setPhase('slowing')
       if (elapsed.current === 6000) setPhase('suspense')
     }, 500)
     return () => clearInterval(timer)
   }, [])
 
-  // Velocidad de giro según fase
+  // Velocidad de giro según spinSpeed
   useEffect(() => {
-    const speed = phase === 'fast' ? 55 : phase === 'slowing' ? 280 : 650
-    const interval = setInterval(() => setTicket(randomTicket()), speed)
+    const interval = setInterval(() => setTicket(randomTicket()), spinSpeed)
     return () => clearInterval(interval)
-  }, [phase])
+  }, [spinSpeed])
 
   // Rotar mensajes de suspenso
   useEffect(() => {
@@ -69,26 +82,26 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
   const isSuspense = phase === 'suspense'
 
   return (
-    <div className="flex flex-col items-center gap-10 text-center w-full max-w-lg lg:max-w-2xl">
+    <div className="flex flex-col items-center gap-10 text-center w-full max-w-2xl lg:max-w-5xl">
 
       {/* Badge pulsante */}
       <motion.div
         animate={{ opacity: [1, 0.4, 1] }}
         transition={{ duration: isSuspense ? 0.7 : 1.2, repeat: Infinity }}
-        className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200"
+        className="flex items-center gap-2.5 px-6 py-2.5 lg:px-8 lg:py-3 rounded-full bg-blue-50 border border-blue-200"
       >
         <motion.span
           animate={{ scale: isSuspense ? [1, 1.4, 1] : 1 }}
           transition={{ duration: 0.7, repeat: Infinity }}
-          className="w-2 h-2 rounded-full bg-blue-500"
+          className="w-2.5 h-2.5 rounded-full bg-blue-500"
         />
-        <span className="text-blue-700 text-sm font-medium tracking-wide uppercase">
+        <span className="text-blue-700 text-base lg:text-xl font-medium tracking-wide uppercase">
           Sorteo en curso
         </span>
       </motion.div>
 
       {/* Ticker de boleta */}
-      <div className="relative">
+      <div className="relative w-full">
         <motion.div
           animate={{
             scale: isSuspense ? [1, 1.35, 1] : [1, 1.15, 1],
@@ -103,11 +116,11 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
         <motion.div
           animate={isSuspense ? { boxShadow: ['0 0 0px #3b82f6', '0 0 28px #3b82f6', '0 0 0px #3b82f6'] } : {}}
           transition={{ duration: 0.75, repeat: Infinity }}
-          className={`relative bg-white shadow-lg rounded-3xl px-12 py-8 lg:px-20 lg:py-12 transition-colors duration-500 ${
+          className={`relative bg-white shadow-lg rounded-3xl px-12 py-10 lg:px-24 lg:py-16 transition-colors duration-500 ${
             isSuspense ? 'border-2 border-blue-400' : 'border border-blue-200'
           }`}
         >
-          <p className="text-gray-400 text-xs uppercase tracking-widest mb-3">Boleta</p>
+          <p className="text-gray-400 text-sm lg:text-xl uppercase tracking-widest mb-4">Boleta</p>
           <AnimatePresence mode="popLayout">
             <motion.p
               key={ticket}
@@ -115,7 +128,7 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: phase === 'fast' ? 8 : 22, opacity: 0 }}
               transition={{ duration: isSuspense ? 0.45 : 0.06 }}
-              className={`text-7xl lg:text-9xl font-black font-mono tracking-widest transition-colors duration-300 ${
+              className={`text-8xl lg:text-[14rem] font-black font-mono tracking-widest transition-colors duration-300 leading-none ${
                 isSuspense ? 'text-blue-700' : 'text-gray-900'
               }`}
             >
@@ -126,7 +139,7 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
       </div>
 
       {/* Mensaje */}
-      <div className="h-8">
+      <div className="h-12 lg:h-16 flex items-center justify-center">
         <AnimatePresence mode="wait">
           {isSuspense ? (
             <motion.p
@@ -135,7 +148,7 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4 }}
-              className="text-blue-600 text-lg font-semibold"
+              className="text-blue-600 text-2xl lg:text-4xl font-semibold"
             >
               {suspenseMessages[msgIndex]}
             </motion.p>
@@ -144,7 +157,7 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
               key="selecting"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-gray-500 text-sm"
+              className="text-gray-500 text-lg lg:text-2xl"
             >
               Seleccionando entre {(10000).toLocaleString()} boletas...
             </motion.p>
@@ -152,7 +165,7 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
         </AnimatePresence>
       </div>
 
-      <p className="text-gray-400 text-xs">
+      <p className="text-gray-400 text-base lg:text-xl">
         {isRevealing
           ? `Ganador ${revealNumber} de ${totalWinners}`
           : `${totalWinners} ${totalWinners === 1 ? 'ganador' : 'ganadores'} por revelar`

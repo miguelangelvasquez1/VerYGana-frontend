@@ -59,7 +59,7 @@ function ImminentCountdown({ seconds, viewerCount }: { seconds: number; viewerCo
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
         </span>
-        <span className="text-sm text-gray-600">
+        <span className="text-base lg:text-xl text-gray-600">
           <span className="text-gray-900 font-semibold">{viewerCount}</span> viendo en vivo
         </span>
       </div>
@@ -67,7 +67,7 @@ function ImminentCountdown({ seconds, viewerCount }: { seconds: number; viewerCo
       <motion.p
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-gray-600 text-xl lg:text-2xl font-semibold uppercase tracking-widest"
+        className="text-gray-600 text-2xl lg:text-4xl font-semibold uppercase tracking-widest"
       >
         ¡Empieza en...
       </motion.p>
@@ -100,7 +100,7 @@ function ImminentCountdown({ seconds, viewerCount }: { seconds: number; viewerCo
       <motion.p
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 1.2, repeat: Infinity }}
-        className="text-blue-500 text-sm lg:text-base font-medium"
+        className="text-blue-500 text-base lg:text-xl font-medium"
       >
         ¡El sorteo está a punto de comenzar!
       </motion.p>
@@ -205,13 +205,13 @@ export function WaitingRoomScreen({ payload }: Props) {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
         </span>
-        <span className="text-sm text-gray-600">
+        <span className="text-base lg:text-xl text-gray-600">
           <span className="text-gray-900 font-semibold">{payload.viewerCount}</span> viendo en vivo
         </span>
       </div>
 
       <div>
-        <p className="text-gray-500 text-sm lg:text-base uppercase tracking-widest mb-2">El sorteo comienza en</p>
+        <p className="text-gray-500 text-base lg:text-xl uppercase tracking-widest mb-2">El sorteo comienza en</p>
       </div>
 
       <div className="flex items-end gap-3 lg:gap-5">
@@ -224,12 +224,12 @@ export function WaitingRoomScreen({ payload }: Props) {
 
       <div className="flex gap-6">
         <div className="text-center">
-          <p className="text-2xl lg:text-4xl font-bold text-gray-900">{payload.totalParticipants.toLocaleString()}</p>
-          <p className="text-gray-500 text-xs">Participantes</p>
+          <p className="text-3xl lg:text-5xl font-bold text-gray-900">{payload.totalParticipants.toLocaleString()}</p>
+          <p className="text-gray-500 text-sm lg:text-base">Participantes</p>
         </div>
       </div>
 
-      <p className="text-gray-400 text-xs max-w-xs">
+      <p className="text-gray-400 text-sm lg:text-base max-w-sm">
         Mantén esta pantalla abierta. El sorteo empezará automáticamente.
       </p>
     </div>

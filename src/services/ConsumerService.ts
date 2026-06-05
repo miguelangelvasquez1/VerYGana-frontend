@@ -46,6 +46,11 @@ export const registerConsumer = async (data: {
   return response.data;
 };
 
+export const getConsumerAvailableKeys = async (): Promise<number> => {
+  const response = await apiClient.get('/consumers/available-keys');
+  return response.data;
+}
+
 /**
  * Obtener datos iniciales del consumidor
  */
@@ -81,36 +86,7 @@ export const getConsumerPurchases = async (consumerId: number): Promise<any[]> =
 };
 
 /**
- * Obtener monedero del consumidor
- */
-export const getConsumerWallet = async (consumerId: number): Promise<any> => {
-  const response = await apiClient.get(`/consumers/${consumerId}/wallet`);
-  return response.data;
-};
-
-/**
- * Recargar saldo (ejemplo de método específico)
- */
-export const rechargeWallet = async (
-  consumerId: number, 
-  amount: number
-): Promise<any> => {
-  const response = await apiClient.post(`/consumers/${consumerId}/wallet/recharge`, {
-    amount
-  });
-  return response.data;
-};
-
-/**
- * Obtener productos recomendados basados en intereses
- */
-export const getRecommendedProducts = async (consumerId: number): Promise<any[]> => {
-  const response = await apiClient.get(`/consumers/${consumerId}/recommendations`);
-  return response.data;
-};
-
-/**
- * Eliminar cuenta de consumidor
+ * Eliminar cuenta de consumidor (pendiente)
  */
 export const deleteConsumerAccount = async (consumerId: number): Promise<void> => {
   await apiClient.delete(`/consumers/${consumerId}`);

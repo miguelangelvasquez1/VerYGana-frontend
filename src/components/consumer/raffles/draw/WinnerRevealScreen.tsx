@@ -46,7 +46,7 @@ function WinnerSpotlight({ winner }: { winner: WinnerRevealPayloadDTO }) {
       >
         <span className={`
           bg-linear-to-r ${positionColors[winner.position] ?? 'from-blue-500 to-blue-700'}
-          text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest
+          text-white text-sm lg:text-base font-bold px-5 py-2 lg:px-6 rounded-full uppercase tracking-widest
         `}>
           {positionLabel[winner.position] ?? `${winner.position}° lugar`}
         </span>
@@ -108,8 +108,8 @@ function WinnerSpotlight({ winner }: { winner: WinnerRevealPayloadDTO }) {
             transition={{ delay: 0.35 }}
             className="text-center"
           >
-            <p className="text-gray-900 text-2xl lg:text-4xl font-black mb-1">{winner.userName}</p>
-            <p className="text-gray-500 text-sm font-mono">
+            <p className="text-gray-900 text-3xl lg:text-5xl font-black mb-1">{winner.userName}</p>
+            <p className="text-gray-500 text-base lg:text-xl font-mono">
               Boleta <span className="text-blue-600">#{winner.ticketNumber}</span>
             </p>
           </motion.div>
@@ -142,11 +142,11 @@ function WinnerSpotlight({ winner }: { winner: WinnerRevealPayloadDTO }) {
             ) : null}
 
             <div className="flex-1 min-w-0">
-              <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">Premio</p>
-              <p className="text-gray-900 font-bold text-lg lg:text-xl leading-tight truncate">
+              <p className="text-gray-500 text-sm lg:text-base uppercase tracking-wider mb-0.5">Premio</p>
+              <p className="text-gray-900 font-bold text-xl lg:text-3xl leading-tight truncate">
                 {winner.prizeTitle}
               </p>
-              <p className="text-emerald-600 font-mono text-sm lg:text-base font-semibold">
+              <p className="text-emerald-600 font-mono text-base lg:text-xl font-semibold">
                 ${winner.prizeValue.toLocaleString('es-CO')}
               </p>
             </div>
@@ -162,8 +162,8 @@ function WinnerSpotlight({ winner }: { winner: WinnerRevealPayloadDTO }) {
         className="mt-4 flex justify-center"
       >
         <div className="bg-blue-50 border border-blue-200 rounded-xl px-6 py-2 text-center">
-          <p className="text-blue-600 text-xs mb-0.5 uppercase tracking-wider">Boleta ganadora</p>
-          <p className="text-gray-900 font-black text-2xl lg:text-3xl font-mono">#{winner.ticketNumber}</p>
+          <p className="text-blue-600 text-sm lg:text-base mb-0.5 uppercase tracking-wider">Boleta ganadora</p>
+          <p className="text-gray-900 font-black text-3xl lg:text-5xl font-mono">#{winner.ticketNumber}</p>
         </div>
       </motion.div>
     </motion.div>
@@ -229,10 +229,10 @@ function PrizePanel({ winner }: { winner: WinnerRevealPayloadDTO }) {
         </div>
       )}
 
-      <p className="text-gray-900 font-black text-2xl leading-tight mb-2">
+      <p className="text-gray-900 font-black text-3xl lg:text-4xl leading-tight mb-2">
         {winner.prizeTitle}
       </p>
-      <p className="text-emerald-600 font-mono text-xl font-bold">
+      <p className="text-emerald-600 font-mono text-2xl lg:text-3xl font-bold">
         ${winner.prizeValue.toLocaleString('es-CO')}
       </p>
     </motion.div>
@@ -331,8 +331,8 @@ function ProgressBar({ winners, totalWinners }: { winners: WinnerRevealPayloadDT
   return (
     <div className="w-full">
       <div className="flex justify-between text-xs text-gray-500 mb-2">
-        <span className="uppercase tracking-wider">Ganadores revelados</span>
-        <span className="font-mono text-gray-900">{winners.length} / {totalWinners}</span>
+        <span className="uppercase tracking-wider text-sm lg:text-base">Ganadores revelados</span>
+        <span className="font-mono text-gray-900 text-sm lg:text-base">{winners.length} / {totalWinners}</span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-1.5">
         <motion.div

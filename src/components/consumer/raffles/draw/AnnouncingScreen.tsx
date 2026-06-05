@@ -19,7 +19,7 @@ export function AnnouncingScreen({ label, position }: Props) {
     : 'from-blue-500 to-blue-700'
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6 text-center w-full max-w-lg lg:max-w-3xl min-h-80 lg:min-h-120">
+    <div className="flex flex-col items-center justify-center gap-6 text-center w-full max-w-2xl lg:max-w-5xl min-h-80 lg:min-h-120">
 
       {/* Halo de fondo */}
       <motion.div
@@ -43,9 +43,9 @@ export function AnnouncingScreen({ label, position }: Props) {
           animate={{ scale: 1, rotate: 0 }}
           transition={{ delay: 0.2, type: 'spring', stiffness: 400, damping: 20 }}
           className={`
-            inline-flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full
+            inline-flex items-center justify-center w-20 h-20 lg:w-32 lg:h-32 rounded-full
             bg-linear-to-br ${gradient}
-            shadow-lg text-white font-black text-3xl lg:text-4xl
+            shadow-lg text-white font-black text-4xl lg:text-6xl
           `}
         >
           {position}
@@ -57,7 +57,7 @@ export function AnnouncingScreen({ label, position }: Props) {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.45 }}
-        className="text-gray-400 text-base lg:text-xl uppercase tracking-[0.3em]"
+        className="text-gray-400 text-xl lg:text-3xl uppercase tracking-[0.3em]"
       >
         Y...
       </motion.p>
@@ -67,7 +67,7 @@ export function AnnouncingScreen({ label, position }: Props) {
         initial={{ opacity: 0, scale: 0.75, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ delay: 0.7, type: 'spring', stiffness: 220, damping: 18 }}
-        className="text-4xl sm:text-5xl lg:text-7xl font-black text-gray-900 leading-tight px-4"
+        className="text-5xl sm:text-6xl lg:text-9xl font-black text-gray-900 leading-tight px-4"
       >
         {label}...
       </motion.h1>
@@ -84,7 +84,7 @@ export function AnnouncingScreen({ label, position }: Props) {
             key={i}
             animate={{ y: [0, -12, 0], opacity: [0.4, 1, 0.4] }}
             transition={{ duration: 0.85, repeat: Infinity, delay: i * 0.22, ease: 'easeInOut' }}
-            className={`w-3 h-3 lg:w-4 lg:h-4 rounded-full inline-block bg-linear-to-br ${gradient}`}
+            className={`w-4 h-4 lg:w-6 lg:h-6 rounded-full inline-block bg-linear-to-br ${gradient}`}
           />
         ))}
       </motion.div>
