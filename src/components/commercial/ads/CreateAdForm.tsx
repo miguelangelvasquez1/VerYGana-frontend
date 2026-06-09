@@ -5,7 +5,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Upload, X, DollarSign, Eye, Calendar, MapPin, Tag,
   Link as LinkIcon, Loader2, Clock, Info, CheckCircle2,
-  AlertCircle, ChevronUp, ChevronDown, Film, Image as ImageIcon,
+  AlertCircle, ChevronUp, ChevronDown, Film, Image as ImageIcon, ArrowLeft,
 } from 'lucide-react';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
@@ -266,9 +266,18 @@ export function CreateAdForm() {
     <div className="max-w-3xl mx-auto space-y-5 pb-16">
 
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Crear nuevo anuncio</h2>
-        <p className="text-sm text-gray-500 mt-1">Sube tu contenido, configura el presupuesto y llega a tu audiencia.</p>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => router.push('/commercial/ads')}
+          className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0 cursor-pointer"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Crear nuevo anuncio</h2>
+          <p className="text-sm text-gray-500 mt-1">Sube tu contenido, configura el presupuesto y llega a tu audiencia.</p>
+        </div>
       </div>
 
       {/* Step indicator */}
@@ -591,13 +600,13 @@ export function CreateAdForm() {
                 value={formData.maxViews || ''}
                 onChange={(e) => setFormData((prev) => ({ ...prev, maxViews: Number(e.target.value) }))}
                 onBlur={() => setFormData((prev) => ({ ...prev, maxViews: Math.max(1, prev.maxViews || 1) }))}
-                min={1} max={10000}
+                min={1} max={10000000}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-semibold
                   focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
                 placeholder="Ej: 500"
                 required
               />
-              <p className="text-xs text-gray-400 mt-1">Mínimo 1 — máximo 10.000</p>
+              <p className="text-xs text-gray-400 mt-1">Mínimo 1 — máximo 10.000.000</p>
             </div>
 
             {/* Max views per user per day */}

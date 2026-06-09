@@ -193,18 +193,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           </div>
         ))}
       </nav>
-
-      {/* Footer */}
-      {!isCollapsed && (
-        <div className="p-4 mt-auto">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white">
-            <p className="text-sm font-medium">Panel de Administración</p>
-            <p className="text-xs opacity-90">
-              Gestiona tu sistema completo
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

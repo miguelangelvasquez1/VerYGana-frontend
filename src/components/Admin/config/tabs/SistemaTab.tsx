@@ -17,10 +17,9 @@ import {
   Wrench,
 } from 'lucide-react';
 import {
-  FeatureCategory,
   FeatureStatus,
   SystemFeature,
-  CATEGORY_LABELS,
+  formatCategoryLabel,
   STATUS_DESCRIPTIONS,
   STATUS_LABELS,
 } from '@/types/system/SystemFeature.types';
@@ -287,7 +286,7 @@ function FeatureCard({ feature, isUpdating, onStatusChange }: FeatureCardProps) 
 // ─── Category section (collapsible) ──────────────────────────────────────────
 
 interface CategorySectionProps {
-  category: FeatureCategory;
+  category: string;
   items: SystemFeature[];
   updatingId: number | null;
   onStatusChange: (feature: SystemFeature, newStatus: FeatureStatus) => void;
@@ -315,7 +314,7 @@ function CategorySection({ category, items, updatingId, onStatusChange, forceExp
             <span className="w-2 h-2 rounded-full bg-orange-400 shrink-0" />
           )}
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">
-            {CATEGORY_LABELS[category]}
+            {formatCategoryLabel(category)}
           </h3>
           <span className="text-xs font-semibold text-gray-500 bg-white px-2.5 py-0.5 rounded-full border border-gray-200">
             {activeCount} / {items.length} activos
@@ -392,7 +391,7 @@ export default function SistemaTab() {
   }, [features, searchTerm, statusFilter]);
 
   const grouped = useMemo(() => {
-    const map = new Map<FeatureCategory, SystemFeature[]>();
+    const map = new Map<string, SystemFeature[]>();
     filtered.forEach((f) => {
       const list = map.get(f.category) ?? [];
       list.push(f);

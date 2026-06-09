@@ -20,6 +20,9 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
   const { data: ad, isLoading: loadingAd } = useAdDetails(adId);
   const { data: likesData, isLoading: loadingLikes } = useAdLikes(adId, likesPage);
 
+  const formatMoney = (value: number) =>
+    value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
   const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString('es-CO', {
       year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -100,8 +103,8 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { icon: <Heart className="w-4 h-4 text-pink-500" />,   label: 'Likes',    value: `${ad.currentLikes}/${ad.maxLikes}` },
-                  { icon: <DollarSign className="w-4 h-4 text-red-400" />, label: 'Invertido', value: `$${ad.spentBudget.toFixed(2)}` },
-                  { icon: <TrendingUp className="w-4 h-4 text-blue-500" />, label: 'Restante',  value: `$${ad.remainingBudget.toFixed(2)}` },
+                  { icon: <DollarSign className="w-4 h-4 text-red-400" />, label: 'Invertido', value: `$${formatMoney(ad.spentBudget)}` },
+                  { icon: <TrendingUp className="w-4 h-4 text-blue-500" />, label: 'Restante',  value: `$${formatMoney(ad.remainingBudget)}` },
                 ].map(m => (
                   <div key={m.label} className="bg-gray-50 rounded-xl p-3 text-center">
                     <div className="flex justify-center mb-1">{m.icon}</div>
@@ -129,11 +132,11 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
               <div className="bg-blue-50 rounded-xl p-4 grid grid-cols-3 gap-3 text-sm text-center">
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Recompensa / like</p>
-                  <p className="font-bold text-gray-900">${ad.rewardPerLike.toFixed(2)}</p>
+                  <p className="font-bold text-gray-900">${formatMoney(ad.rewardPerLike)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Presupuesto total</p>
-                  <p className="font-bold text-gray-900">${ad.totalBudget.toFixed(2)}</p>
+                  <p className="font-bold text-gray-900">${formatMoney(ad.totalBudget)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Máx. likes</p>

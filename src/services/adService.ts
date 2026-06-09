@@ -204,7 +204,7 @@ class AdService {
   }
 
   async getAdDetails(id: number): Promise<AdResponseDTO> {
-    const response = await apiClient.get<AdResponseDTO>(`/adLike/${id}/details`);
+    const response = await apiClient.get<AdResponseDTO>(`/ads/${id}/details`);
     return response.data;
   }
 

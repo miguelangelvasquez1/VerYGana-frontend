@@ -1,33 +1,22 @@
 export type FeatureStatus = 'ENABLED' | 'READ_ONLY' | 'MAINTENANCE' | 'DISABLED';
 
-export type FeatureCategory =
-  | 'MONETIZATION'
-  | 'MARKETPLACE'
-  | 'FINANCIAL'
-  | 'USER_ACQUISITION'
-  | 'ENGAGEMENT'
-  | 'USER_PROFILES'
-  | 'ADMINISTRATION';
-
 export interface SystemFeature {
   id: number;
   featureKey: string;
   endpointPrefix: string;
   status: FeatureStatus;
-  category: FeatureCategory;
+  category: string;
   description: string;
   updatedAt: string;
 }
 
-export const CATEGORY_LABELS: Record<FeatureCategory, string> = {
-  MONETIZATION: 'Monetización',
-  MARKETPLACE: 'Marketplace',
-  FINANCIAL: 'Sistema Financiero',
-  USER_ACQUISITION: 'Adquisición de Usuarios',
-  ENGAGEMENT: 'Engagement',
-  USER_PROFILES: 'Perfiles de Usuario',
-  ADMINISTRATION: 'Administración',
-};
+/** Converts any SNAKE_CASE category string from the backend into a readable label. */
+export function formatCategoryLabel(category: string): string {
+  return category
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
 
 export const STATUS_LABELS: Record<FeatureStatus, string> = {
   ENABLED: 'Habilitado',

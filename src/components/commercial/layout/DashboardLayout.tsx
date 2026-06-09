@@ -4,6 +4,8 @@
 // Versión con carga de EffectivePlanState y propagación a Sidebar/Header
 
 import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
+import Link from 'next/link';
+import { Lock, Sparkles, Loader2 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { getEffectivePlanState } from '@/services/planService';
@@ -11,6 +13,69 @@ import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/P
 import { WalletStatus } from '@/types/finance/Wallet.types';
 import { formatCents } from '@/utils/currency';
 import { usePathname } from 'next/navigation';
+
+// ─── Route protection ─────────────────────────────────────────────────────────
+
+const PROTECTED_ROUTES: { path: string; requiredPlans: PlanCode[] }[] = [
+  { path: '/commercial/products',  requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
+  { path: '/commercial/ads',       requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
+  { path: '/commercial/campaigns', requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
+  { path: '/commercial/surveys',   requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
+  { path: '/commercial/pets',      requiredPlans: [PlanCode.PREMIUM] },
+  { path: '/commercial/analytics', requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
+  { path: '/commercial/billing',   requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
+  { path: '/commercial/settings',  requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
+];
+
+const PLAN_LABELS: Record<PlanCode, string> = {
+  [PlanCode.BASIC]:    'Personal',
+  [PlanCode.STANDARD]: 'Estándar',
+  [PlanCode.PREMIUM]:  'Premium',
+};
+
+function getRouteAccess(
+  path: string,
+  planState: EffectivePlanStateResponseDTO | null,
+): { ok: boolean; requiredPlans: PlanCode[] | null } {
+  const matched = PROTECTED_ROUTES
+    .filter(r => path === r.path || path.startsWith(r.path + '/'))
+    .sort((a, b) => b.path.length - a.path.length)[0];
+
+  if (!matched) return { ok: true, requiredPlans: null };
+  if (!planState?.hasActivePlan) return { ok: false, requiredPlans: matched.requiredPlans };
+
+  const ok = planState.effectivePlan != null
+    && matched.requiredPlans.includes(planState.effectivePlan as PlanCode);
+  return { ok, requiredPlans: matched.requiredPlans };
+}
+
+function LockedPage({ requiredPlans }: { requiredPlans: PlanCode[] }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+      <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+        <Lock className="w-8 h-8 text-gray-400" />
+      </div>
+      <h2 className="text-xl font-bold text-gray-900 mb-2">Sección no disponible</h2>
+      <p className="text-sm text-gray-500 mb-4 max-w-xs">
+        Esta funcionalidad requiere uno de los siguientes planes:
+      </p>
+      <div className="flex gap-2 mb-6">
+        {requiredPlans.map(p => (
+          <span key={p} className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200">
+            {PLAN_LABELS[p]}
+          </span>
+        ))}
+      </div>
+      <Link
+        href="/plans"
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+      >
+        <Sparkles className="w-4 h-4" />
+        Ver planes disponibles
+      </Link>
+    </div>
+  );
+}
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -155,7 +220,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             showMenuButton={isMobile}
             planState={planState}
           />
-          <main className="p-4 lg:p-6">{children}</main>
+          <main className="p-4 lg:p-6">
+            {(() => {
+              if (loadingPlan) {
+                return (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-300" />
+                  </div>
+                );
+              }
+              const access = getRouteAccess(currentPath, planState);
+              if (!access.ok) return <LockedPage requiredPlans={access.requiredPlans!} />;
+              return children;
+            })()}
+          </main>
         </div>
       </div>
     </PlanContext.Provider>

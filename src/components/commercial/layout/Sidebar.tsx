@@ -31,6 +31,8 @@ interface MenuItem {
   label: string;
   requiredPlans?: PlanCode[];
   lockIfUnavailable?: boolean;
+  /** Prevents this item from being highlighted even when the path matches (used for action/create pages). */
+  skipActive?: boolean;
 }
 
 interface SidebarProps {
@@ -54,15 +56,10 @@ const menuItems: MenuItem[] = [
   {
     href: '/commercial/products/create', icon: PlusCircle, label: 'Crear producto',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true,
+    lockIfUnavailable: true, skipActive: true,
   },
   {
     href: '/commercial/ads', icon: FileImage, label: 'Mis Anuncios',
-    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true,
-  },
-  {
-    href: '/commercial/ads/create', icon: Megaphone, label: 'Crear Anuncio',
     requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
   },
@@ -73,8 +70,8 @@ const menuItems: MenuItem[] = [
   },
   {
     href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Brandear Juego',
-    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM], 
-    lockIfUnavailable: true,
+    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true, skipActive: true,
   },
   {
     href: '/commercial/surveys', icon: ClipboardList, label: 'Encuestas',
@@ -152,7 +149,12 @@ export function Sidebar({
 
   // Usamos el pathname que viene del Layout (más estable)
   const isActive = useMemo(() => {
-    return (href: string): boolean => pathname === href;
+    return (item: MenuItem): boolean => {
+      if (item.skipActive) return false;
+      if (pathname === item.href) return true;
+      // List/section pages are active for any of their child paths
+      return pathname.startsWith(item.href + '/');
+    };
   }, [pathname]);
 
 // =============
@@ -207,7 +209,7 @@ export function Sidebar({
         {menuItems.map((item) => {
           if (!showItem(item)) return null;
 
-          const active = isActive(item.href)
+          const active = isActive(item)
           const locked = isLocked(item);
           const Icon = item.icon;
 
