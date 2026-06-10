@@ -37,8 +37,9 @@ export interface DrawCompletedPayloadDTO {
 }
 
 export interface DrawingStartedPayloadDTO {
-  totalTickets: number
   totalWinners: number
+  totalTickets: number
+  maxTickets: number
 }
 
 export interface RaffleDrawEventDTO {

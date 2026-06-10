@@ -98,10 +98,10 @@ function PodiumSlot({ winner, delay = 0 }: { winner: WinnerRevealPayloadDTO; del
         </p>
 
         {/* Boleta */}
-        <p className="text-gray-400 text-sm lg:text-base font-mono">#{winner.ticketNumber}</p>
+        <p className="text-gray-400 text-sm lg:text-base font-mono">Boleta #{winner.ticketNumber}</p>
 
         {/* Premio */}
-        <p className="text-gray-500 text-xs lg:text-sm leading-tight truncate w-full text-center">
+        <p className="text-gray-500 text-xs lg:text-sm leading-tight line-clamp-2 w-full text-center">
           {winner.prizeTitle}
         </p>
       </div>
@@ -146,7 +146,7 @@ function ExtraWinnerRow({ winner, index }: { winner: WinnerRevealPayloadDTO; ind
         <p className="text-gray-400 text-sm font-mono">Boleta #{winner.ticketNumber}</p>
       </div>
 
-      <p className="text-gray-700 text-sm lg:text-base font-medium truncate max-w-36 shrink-0">{winner.prizeTitle}</p>
+      <p className="text-gray-700 text-sm lg:text-base font-medium shrink-0">{winner.prizeTitle}</p>
     </motion.div>
   )
 }
@@ -228,29 +228,6 @@ export function DrawCompletedScreen({ payload, onGoToRaffles }: Props) {
           ))}
         </div>
       )}
-
-      {/* Botones */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="flex flex-col sm:flex-row gap-3 w-full"
-      >
-        <button
-          onClick={onGoToRaffles}
-          className="flex-1 bg-blue-700 hover:bg-blue-600 active:scale-95 text-white font-bold py-3.5 px-6 rounded-xl transition-all"
-        >
-          Ver más rifas
-        </button>
-        <a
-          href={payload.drawProofUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 bg-gray-100 hover:bg-gray-200 active:scale-95 border border-gray-200 text-gray-700 font-semibold py-3.5 px-6 rounded-xl transition-all text-center"
-        >
-          Ver prueba del sorteo
-        </a>
-      </motion.div>
 
       {/* Barra de redirección */}
       <div className="w-full">

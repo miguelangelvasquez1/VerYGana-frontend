@@ -5,12 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 interface Props {
   totalWinners: number
+  totalTickets: number
+  maxTickets: number
   revealNumber?: number
   isRevealing?: boolean
 }
 
-function randomTicket(): string {
-  return String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')
+function randomTicket(max: number): string {
+  const digits = String(max).length
+  return String(Math.floor(Math.random() * max) + 1).padStart(digits, '0')
 }
 
 const MESSAGES_INITIAL = [
@@ -42,8 +45,8 @@ const SPEED_STEPS = [
 
 type Phase = 'fast' | 'slowing' | 'suspense'
 
-export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = false }: Props) {
-  const [ticket, setTicket]       = useState(randomTicket())
+export function DrawingScreen({ totalWinners, totalTickets, maxTickets, revealNumber = 1, isRevealing = false }: Props) {
+  const [ticket, setTicket]       = useState(() => randomTicket(maxTickets || 9999))
   const [phase, setPhase]         = useState<Phase>('fast')
   const [spinSpeed, setSpinSpeed] = useState(55)
   const [msgIndex, setMsgIndex]   = useState(0)
@@ -64,9 +67,9 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
 
   // Velocidad de giro según spinSpeed
   useEffect(() => {
-    const interval = setInterval(() => setTicket(randomTicket()), spinSpeed)
+    const interval = setInterval(() => setTicket(randomTicket(maxTickets || 9999)), spinSpeed)
     return () => clearInterval(interval)
-  }, [spinSpeed])
+  }, [spinSpeed, maxTickets])
 
   // Rotar mensajes de suspenso
   useEffect(() => {
@@ -116,7 +119,7 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
         <motion.div
           animate={isSuspense ? { boxShadow: ['0 0 0px #3b82f6', '0 0 28px #3b82f6', '0 0 0px #3b82f6'] } : {}}
           transition={{ duration: 0.75, repeat: Infinity }}
-          className={`relative bg-white shadow-lg rounded-3xl px-12 py-10 lg:px-24 lg:py-16 transition-colors duration-500 ${
+          className={`relative bg-white shadow-lg rounded-3xl px-6 py-8 lg:px-14 lg:py-12 transition-colors duration-500 ${
             isSuspense ? 'border-2 border-blue-400' : 'border border-blue-200'
           }`}
         >
@@ -128,7 +131,7 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: phase === 'fast' ? 8 : 22, opacity: 0 }}
               transition={{ duration: isSuspense ? 0.45 : 0.06 }}
-              className={`text-8xl lg:text-[14rem] font-black font-mono tracking-widest transition-colors duration-300 leading-none ${
+              className={`text-[clamp(2.5rem,13vw,10rem)] font-black font-mono tracking-widest transition-colors duration-300 leading-none whitespace-nowrap ${
                 isSuspense ? 'text-blue-700' : 'text-gray-900'
               }`}
             >
@@ -159,7 +162,7 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
               animate={{ opacity: 1 }}
               className="text-gray-500 text-lg lg:text-2xl"
             >
-              Seleccionando entre {(10000).toLocaleString()} boletas...
+              Seleccionando entre {(totalTickets || maxTickets).toLocaleString()} boletas generadas...
             </motion.p>
           )}
         </AnimatePresence>

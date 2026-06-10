@@ -104,19 +104,143 @@ export default function RaffleResultPage() {
       </div>
 
       {/* PRUEBA DEL SORTEO */}
-      {result.drawProof && (
-        <div className="bg-white rounded-2xl shadow-md p-6">
-          <h2 className="text-lg font-bold mb-4">
-            Prueba del sorteo
-          </h2>
+      {result.drawProof && (() => {
+        interface DrawProofWinner {
+          position: number;
+          userName: string;
+          ticketNumber: string;
+          prizeTitle: string;
+          prizeType: string;
+          prizeValue: number;
+          prizeClaimed: boolean;
+          claimDeadline: string;
+        }
+        interface DrawProof {
+          drawMethod?: string;
+          drawDate?: string;
+          executedAt?: string;
+          totalParticipants?: number;
+          totalTickets?: number;
+          numberOfWinners?: number;
+          winners?: DrawProofWinner[];
+        }
+        let proof: DrawProof | null = null;
+        try { proof = JSON.parse(result.drawProof) as DrawProof; } catch { /* not JSON */ }
+        if (!proof) return null;
 
-          <img
-            src={result.drawProof}
-            alt="Proof"
-            className="w-full rounded-xl"
-          />
-        </div>
-      )}
+        const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+        const MEDAL_COLORS: Record<number, string> = {
+          1: "border-yellow-400 bg-yellow-50",
+          2: "border-gray-300 bg-gray-50",
+          3: "border-amber-600 bg-amber-50",
+        };
+
+        const methodLabel =
+          proof.drawMethod === "RANDOM_ORG"
+            ? "Sorteo aleatorio — Random.org"
+            : proof.drawMethod ?? "—";
+
+        return (
+          <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+
+            {/* Cabecera de la sección */}
+            <div className="bg-linear-to-r from-blue-600 to-blue-500 px-6 py-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white text-lg">
+                ✅
+              </div>
+              <div>
+                <h2 className="text-white font-bold text-base">Prueba del sorteo</h2>
+                <p className="text-blue-100 text-xs">Registro oficial e inmutable del resultado</p>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+
+              {/* Resumen del sorteo */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-gray-50 rounded-xl p-3 text-center">
+                  <p className="text-2xl font-bold text-gray-900">{proof.totalParticipants ?? "—"}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Participantes</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3 text-center">
+                  <p className="text-2xl font-bold text-gray-900">{proof.totalTickets ?? "—"}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Boletos en juego</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3 text-center">
+                  <p className="text-2xl font-bold text-gray-900">{proof.numberOfWinners ?? "—"}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Ganadores</p>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-3 text-center">
+                  <p className="text-xs font-semibold text-blue-700 leading-tight">{methodLabel}</p>
+                  <p className="text-xs text-blue-500 mt-0.5">Método de sorteo</p>
+                </div>
+              </div>
+
+              {/* Fechas */}
+              {(proof.drawDate ?? proof.executedAt) && (
+                <div className="flex flex-wrap gap-4 text-sm text-gray-600 border-t pt-4">
+                  {proof.drawDate && (
+                    <span>
+                      <span className="text-gray-400 text-xs">Fecha programada: </span>
+                      <span className="font-medium">{new Date(proof.drawDate).toLocaleString()}</span>
+                    </span>
+                  )}
+                  {proof.executedAt && (
+                    <span>
+                      <span className="text-gray-400 text-xs">Ejecutado: </span>
+                      <span className="font-medium">{new Date(proof.executedAt).toLocaleString()}</span>
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Boletas ganadoras */}
+              {proof.winners && proof.winners.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="font-bold text-gray-800 text-sm">Boletas ganadoras</h3>
+                  {proof.winners.map((w) => (
+                    <div
+                      key={w.position}
+                      className={`rounded-xl border-2 p-4 ${MEDAL_COLORS[w.position] ?? "border-gray-200 bg-gray-50"}`}
+                    >
+                      {/* Posición + usuario */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{MEDALS[w.position] ?? `#${w.position}`}</span>
+                          <div>
+                            <p className="text-xs text-gray-500">Ganador</p>
+                            <p className="font-bold text-gray-900 text-sm">{w.userName}</p>
+                          </div>
+                        </div>
+                        <span className="text-xs px-2 py-1 rounded-full bg-white border border-gray-200 font-medium text-gray-600">
+                          {w.prizeType === "DIGITAL" ? "Premio digital" : "Premio físico"}
+                        </span>
+                      </div>
+
+                      {/* Detalles del premio */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                        <div className="bg-white rounded-lg px-3 py-2">
+                          <p className="text-xs text-gray-400">Boleta ganadora</p>
+                          <p className="font-mono font-bold text-gray-800 text-sm">{w.ticketNumber}</p>
+                        </div>
+                        <div className="bg-white rounded-lg px-3 py-2 sm:col-span-1">
+                          <p className="text-xs text-gray-400">Premio</p>
+                          <p className="font-semibold text-gray-800 text-sm leading-tight">{w.prizeTitle}</p>
+                        </div>
+                        <div className="bg-white rounded-lg px-3 py-2">
+                          <p className="text-xs text-gray-400">Valor del premio</p>
+                          <p className="font-bold text-yellow-600 text-base">${w.prizeValue.toLocaleString("es-CO")}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            </div>
+          </div>
+        );
+      })()}
 
     </div>
   );

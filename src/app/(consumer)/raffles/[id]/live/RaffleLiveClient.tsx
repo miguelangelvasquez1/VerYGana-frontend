@@ -24,6 +24,8 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
     waitingRoom,
     revealedWinners,
     totalWinners,
+    totalTickets,
+    maxTickets,
     drawCompleted,
     errorMessage,
     announcementLabel,
@@ -74,6 +76,8 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
             exit={{ opacity: 0, scale: 1.05 }} transition={{ duration: 0.35 }}>
             <DrawingScreen
               totalWinners={totalWinners}
+              totalTickets={totalTickets}
+              maxTickets={maxTickets}
               revealNumber={currentPhase === DrawEventType.REVEALING ? revealedWinners.length + 1 : 1}
               isRevealing={currentPhase === DrawEventType.REVEALING}
             />

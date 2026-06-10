@@ -274,10 +274,8 @@ function RulesTab({ rules }: { rules: RaffleRuleResponseDTO[] }) {
     switch (type) {
       case "PURCHASE":
         return "Compra";
-      case "ADS_WATCHED":
-        return "Visualización de Anuncios";
-      case "GAME_ACHIEVEMENT":
-        return "Logro en Juego";
+      case "DAILY_LOGIN":
+        return "Inicio de sesión diario";
       case "REFERRAL":
         return "Referido";
       default:
@@ -289,10 +287,8 @@ function RulesTab({ rules }: { rules: RaffleRuleResponseDTO[] }) {
     switch (type) {
       case "PURCHASE":
         return "bg-blue-100 text-blue-700";
-      case "ADS_WATCHED":
+      case "DAILY_LOGIN":
         return "bg-yellow-100 text-yellow-700";
-      case "GAME_ACHIEVEMENT":
-        return "bg-purple-100 text-purple-700";
       case "REFERRAL":
         return "bg-green-100 text-green-700";
       default:
@@ -364,7 +360,7 @@ function RulesTab({ rules }: { rules: RaffleRuleResponseDTO[] }) {
 
               {/* Condicional según tipo */}
               {earning.ruleType === "PURCHASE" &&
-                earning.minPurchaseAmount !== null && (
+                earning.minPurchaseAmount != null && (
                   <div>
                     <p className="text-gray-500 text-xs">
                       Monto mínimo de compra
@@ -375,32 +371,20 @@ function RulesTab({ rules }: { rules: RaffleRuleResponseDTO[] }) {
                   </div>
                 )}
 
-              {earning.ruleType === "ADS_WATCHED" &&
-                earning.minAdsWatched !== null && (
+              {earning.ruleType === "DAILY_LOGIN" &&
+                earning.dailyLogin != null && (
                   <div>
                     <p className="text-gray-500 text-xs">
-                      Anuncios mínimos vistos
+                      Inicio de sesión diario
                     </p>
                     <p className="font-semibold text-gray-800 mt-1">
-                      {earning.minAdsWatched}
-                    </p>
-                  </div>
-                )}
-
-              {earning.ruleType === "GAME_ACHIEVEMENT" &&
-                earning.achievementType && (
-                  <div>
-                    <p className="text-gray-500 text-xs">
-                      Tipo de logro requerido
-                    </p>
-                    <p className="font-semibold text-gray-800 mt-1">
-                      {earning.achievementType}
+                      {String(earning.dailyLogin)}
                     </p>
                   </div>
                 )}
 
               {earning.ruleType === "REFERRAL" &&
-                earning.referralAddedQuantity !== null && (
+                earning.referralAddedQuantity != null && (
                   <div>
                     <p className="text-gray-500 text-xs">
                       Referidos requeridos
