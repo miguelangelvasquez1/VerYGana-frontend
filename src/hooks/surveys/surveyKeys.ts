@@ -51,7 +51,7 @@ export const surveyKeys = {
   adminDetailFull: (id: number) =>
     [...surveyKeys.admin(), 'detail-full', id] as const,
 
-  costPerResponse: () => [...surveyKeys.admin(), 'cost-per-response'] as const,
+  costPerQuestion: () => [...surveyKeys.admin(), 'cost-per-question'] as const,
 
   adminResponses: (surveyId: number, page: number, size: number) =>
     [...surveyKeys.admin(), 'responses', surveyId, { page, size }] as const,

@@ -26,8 +26,7 @@ import {
   Zap,
 } from "lucide-react";
 
-import { getConsumerInitialData } from "@/services/ConsumerService";
-import type { ConsumerInitialDataResponseDTO } from "@/types/Consumer.types";
+import { useConsumerData } from "@/hooks/consumer/useConsumerData";
 import { CartButton } from "../consumer/cart/CartButton";
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationPanel } from "../notifications/NotificationsPanel";
@@ -62,9 +61,7 @@ export default function Navbar() {
     loadMore,
   } = useNotifications();
 
-  // Data state
-  const [consumer, setConsumer] = useState<ConsumerInitialDataResponseDTO | null>(null);
-  const [loadingUser, setLoadingUser] = useState<boolean>(true);
+  const { data: consumer, isLoading: loadingUser } = useConsumerData();
 
   // refs independientes
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -73,20 +70,7 @@ export default function Navbar() {
   const notificationsMenuRefDesktop = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefMobile = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    async function loadUser() {
-      setLoadingUser(true);
-      try {
-        const data = await getConsumerInitialData();
-        setConsumer(data);
-      } catch (err: any) {
-        console.error("Error cargando datos:", err);
-      } finally {
-        setLoadingUser(false);
-      }
-    }
-    loadUser();
-  }, []);
+
 
   // click outside
   useEffect(() => {

@@ -154,6 +154,7 @@ export interface AdForConsumerDTO {
   commercialId: number;
   commercialName: string;
   mediaType: AdMediaType;
+  durationSeconds: number;
   sessionUUID: string;
 }
 

@@ -9,7 +9,7 @@ export default function PlayGamePage() {
 
   const [loading, setLoading] = useState(true);
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
-    const [gameFinished, setGameFinished] = useState(false);
+  const [gameFinished, setGameFinished] = useState(false);
 
   useEffect(() => {
     if (!encodedUrl) return;
@@ -70,11 +70,11 @@ export default function PlayGamePage() {
   return (
     <div className="w-full h-screen bg-black">
       <iframe
-  src={iframeUrl!}
-  className="w-screen h-screen border-0"
-  style={{ transform: 'scale(1)' }}
-  allowFullScreen
-/>
+        src={iframeUrl!}
+        className="w-screen h-screen border-0"
+        style={{ transform: 'scale(1)' }}
+        allowFullScreen
+      />
 
     {/* Cuando el juego se termina muestra: */}
     {gameFinished && (

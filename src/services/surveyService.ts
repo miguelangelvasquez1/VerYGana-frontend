@@ -54,13 +54,13 @@ export const surveyService = {
 
 export const surveyAdminService = {
 
-  getCostPerResponse: async (): Promise<number> => {
+  getCostPerQuestion: async (): Promise<number> => {
     try {
-      const { data } = await apiClient.get<{ costPerResponse: number }>(
-        '/surveys/cost-per-response',
-      );
-      return data.costPerResponse;
-    } catch (err) {
+      const { data } = await apiClient.get('/surveys/cost-per-question');
+      // backend may return { costPerQuestion: n }, { cost: n }, or a plain number
+      if (typeof data === 'number') return data;
+      return data?.costPerQuestion ?? data?.cost ?? 0;
+    } catch {
       return 0;
     }
   },

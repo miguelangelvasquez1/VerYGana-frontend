@@ -230,6 +230,7 @@ export function useNextAd() {
 
 // Hook para registrar like en anuncio
 export function useLikeAd() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
       adId,
@@ -237,6 +238,9 @@ export function useLikeAd() {
     }: {
       adId: number
       sessionUUID: string
-    }) => adService.likeAd(adId, sessionUUID)
+    }) => adService.likeAd(adId, sessionUUID),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['consumer', 'initialData'] });
+    },
   })
 }

@@ -176,7 +176,7 @@ class AdService {
 
   async getNextAd(): Promise<AdForConsumerDTO | null> {
     try {
-      const res = await apiClient.get('/ads/next');
+      const res = await apiClient.get('/adLike/next');
       return res.data;
     } catch (e: any) {
       if (e.response?.status === 204) {

@@ -123,7 +123,7 @@ export function useUpdateSurveyStatus() {
 export function useSurveyConfigs() {
   return useQuery({
     queryKey: ['survey-configs'],
-    queryFn: surveyAdminService.getCostPerResponse,
+    queryFn: surveyAdminService.getCostPerQuestion,
     staleTime: 10 * 60_000,
   });
 }

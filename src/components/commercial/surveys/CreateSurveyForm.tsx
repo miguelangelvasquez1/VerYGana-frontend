@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Plus,
@@ -11,14 +11,16 @@ import {
   HelpCircle,
   MapPin,
   Tag,
-  DollarSign,
+  ArrowLeft,
+  AlertCircle,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useCreateSurvey, useSurveyConfigs } from '@/hooks/surveys/useCommercialSurvey';
 import { useSurveyForm } from '@/hooks/surveys/useSurveyForm';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { QUESTION_TYPE_LABELS, GENDER_LABELS } from '@/hooks/surveys/surveyUtils';
-import type { QuestionType, TargetGender } from '@/types/survey.types';
+import type { QuestionType, TargetGender, CreateSurveyRequest } from '@/types/survey.types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -39,15 +41,15 @@ const COP = new Intl.NumberFormat('es-CO', {
   maximumFractionDigits: 0,
 });
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
-interface Props {
-  onClose: () => void;
+function getMultiplesFrom(min: number, count = 8, step = 10): number[] {
+  const start = min % step === 0 ? min : Math.ceil(min / step) * step;
+  return Array.from({ length: count }, (_, i) => start + i * step);
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function SurveyFormModal({ onClose }: Props) {
+export default function SurveyFormModal() {
+  const router = useRouter();
   const createMutation = useCreateSurvey();
 
   const {
@@ -55,31 +57,35 @@ export default function SurveyFormModal({ onClose }: Props) {
     setField, touchField,
     addQuestion, removeQuestion, updateQuestion,
     setQuestionType, addOption, removeOption, updateOption,
-    moveQuestion, validateAll, toPayload,
+    moveQuestion, validateAll,
   } = useSurveyForm();
 
   // ── Remote data ──────────────────────────────────────────────────────────
-  const { categories = [],    loading: loadingCats    } = useCategories();
-  
-  // costPerResponse is a single number returned by the backend
-  const { data: costPerResponse,  isLoading: loadingCost  } = useSurveyConfigs();
+  const { categories = [], loading: loadingCats } = useCategories();
+  const { data: costPerQuestion, isLoading: loadingCost } = useSurveyConfigs();
 
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
-  const { data: municipalities = [], isLoading: loadingMunis } = useMunicipalities(selectedDepartment);
+  const { departments, loading: loadingDepts } = useDepartments();
+  const { municipalities, loading: loadingMunis } = useMunicipalities(selectedDepartment);
   const [selectedMunicipalities, setSelectedMunicipalities] = useState<
     { code: string; name: string; departmentCode: string; departmentName: string }[]
   >([]);
 
+  const [pricePerQuestion, setPricePerQuestion] = useState(0);
   const [expandedStep, setExpandedStep] = useState<1 | 2 | 3>(1);
+
+  useEffect(() => { setField('maxResponses', '1'); }, []);
+  useEffect(() => {
+    if (costPerQuestion != null && costPerQuestion > 0) setPricePerQuestion(costPerQuestion);
+  }, [costPerQuestion]);
 
   // ── Municipality helpers ─────────────────────────────────────────────────
 
   const addMunicipality = (code: string) => {
     if (form.municipalityCodes.includes(code)) return;
-    const mun  = municipalities.find((m) => m.code === code);
+    const mun = municipalities.find((m) => m.code === code);
     const dept = departments.find((d) => d.code === selectedDepartment);
     if (!mun || !dept) return;
-
     setSelectedMunicipalities((prev) => [
       ...prev,
       { code: mun.code, name: mun.name, departmentCode: dept.code, departmentName: dept.name },
@@ -103,46 +109,31 @@ export default function SurveyFormModal({ onClose }: Props) {
   };
 
   // ── Error → step mapping ─────────────────────────────────────────────────
-  // Maps every possible error key to the step accordion that contains it,
-  // so handleSubmit can automatically open the first step with errors.
 
   const ERROR_STEP: Record<string, 1 | 2 | 3> = {
-    title:          1,
-    surveyConfigId: 1,
-    maxResponses:   1,
-    startsAt:       1,
-    endsAt:         1,
-    categoryIds:    2,
-    municipalityCodes: 2,
-    minAge:         2,
-    maxAge:         2,
-    targetGender:   2,
-    questions:      3,
+    title: 1, surveyConfigId: 1, maxResponses: 1, startsAt: 1,
+    categoryIds: 2, municipalityCodes: 2, minAge: 2, maxAge: 2, targetGender: 2,
+    questions: 3,
   };
 
-  // User-friendly label for each error key shown in the footer summary
   const ERROR_LABELS: Record<string, string> = {
-    title:          'Título',
-    surveyConfigId: 'Costo por respuesta',
-    categoryIds:    'Categorías',
-    minAge:         'Rango de edad',
-    questions:      'Preguntas',
+    title: 'Título',
+    surveyConfigId: 'Costo por pregunta',
+    categoryIds: 'Categorías',
+    minAge: 'Rango de edad',
+    questions: 'Preguntas',
   };
 
-  // Derive the errors that are currently active (touched + have a message)
   const activeErrors = Object.entries(errors).filter(
     ([key]) => touched.has(key) && errors[key],
   );
 
-  // Human-readable label for a given error key
   const errorLabel = (key: string): string => {
     if (key.startsWith('question_')) {
       const match = key.match(/question_(\d+)_(\w+)/);
       if (match) {
         const num = parseInt(match[1]) + 1;
-        return match[2] === 'options'
-          ? `Pregunta ${num}: opciones`
-          : `Pregunta ${num}`;
+        return match[2] === 'options' ? `Pregunta ${num}: opciones` : `Pregunta ${num}`;
       }
     }
     return ERROR_LABELS[key] ?? key;
@@ -153,20 +144,35 @@ export default function SurveyFormModal({ onClose }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const valid = validateAll();
-
     if (!valid) {
-      // Open the accordion of the first step that has errors
       const firstErrorKey = Object.keys(errors)[0] ?? '';
       const targetStep =
-        ERROR_STEP[firstErrorKey] ??
-        (firstErrorKey.startsWith('question_') ? 3 : 1);
+        ERROR_STEP[firstErrorKey] ?? (firstErrorKey.startsWith('question_') ? 3 : 1);
       setExpandedStep(targetStep);
       return;
     }
+    const payload: CreateSurveyRequest = {
+      title: form.title.trim(),
+      description: form.description.trim() || undefined,
+      pricePerQuestionCents: pricePerQuestion * 100,
+      maxResponses: form.maxResponses ? parseInt(form.maxResponses) : undefined,
+      startsAt: form.startsAt || undefined,
+      categoryIds: form.categoryIds,
+      municipalityCodes: form.municipalityCodes.length > 0 ? form.municipalityCodes : undefined,
+      minAge: form.minAge ? parseInt(form.minAge) : undefined,
+      maxAge: form.maxAge ? parseInt(form.maxAge) : undefined,
+      targetGender: (form.targetGender as TargetGender) || undefined,
+      questions: form.questions.map((q) => ({
+        text: q.text.trim(),
+        type: q.type,
+        required: q.required,
+        options: q.options.length > 0 ? q.options.filter((o) => o.trim()) : undefined,
+      })),
+    };
 
     try {
-      await createMutation.mutateAsync(toPayload());
-      onClose();
+      await createMutation.mutateAsync(payload);
+      router.push('/commercial/surveys');
     } catch {
       // error surfaced via createMutation.isError
     }
@@ -177,21 +183,19 @@ export default function SurveyFormModal({ onClose }: Props) {
       <p className="mt-1 text-xs text-red-500">{errors[key]}</p>
     ) : null;
 
-  // Estimated total spend when maxResponses is filled
-  const estimatedTotal =
-    costPerResponse && form.maxResponses
-      ? costPerResponse * parseInt(form.maxResponses)
-      : null;
+  // ── Computed values ──────────────────────────────────────────────────────
 
-  // Count active errors per step for the badge on each accordion header
-  const step1Keys = ['title', 'surveyConfigId', 'maxResponses', 'startsAt', 'endsAt'];
+  const minPrice = costPerQuestion ?? 0;
+  const maxResponsesNum = Math.max(1, form.maxResponses ? parseInt(form.maxResponses) : 1);
+  const totalCost = pricePerQuestion * form.questions.length * maxResponsesNum;
+
+  const step1Keys = ['title', 'surveyConfigId', 'maxResponses', 'startsAt'];
   const step2Keys = ['categoryIds', 'municipalityCodes', 'minAge', 'maxAge', 'targetGender'];
   const countStepErrors = (keys: string[]) =>
     keys.filter((k) => touched.has(k) && errors[k]).length;
   const questionErrors = Object.keys(errors).filter(
     (k) => k.startsWith('question_') && touched.has(k),
   ).length;
-
   const step1Errors = countStepErrors(step1Keys);
   const step2Errors = countStepErrors(step2Keys);
   const step3Errors = questionErrors + (touched.has('questions') && errors.questions ? 1 : 0);
@@ -199,34 +203,29 @@ export default function SurveyFormModal({ onClose }: Props) {
   // ─── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+    <div className="max-w-3xl mx-auto space-y-5 pb-16">
 
-      <form
-        onSubmit={handleSubmit}
-        className="relative z-10 flex max-h-[95vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-2xl"
-      >
-        {/* ── Header ──────────────────────────────────────────────────────── */}
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">Nueva encuesta</h2>
-            <p className="text-xs text-gray-400">
-              Se crea en borrador. Publícala cuando esté lista.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100"
-          >
-            <X className="h-5 w-5" />
-          </button>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => router.push('/commercial/surveys')}
+          className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0 cursor-pointer"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Nueva encuesta</h2>
+          <p className="text-sm text-gray-500 mt-1">Se crea en borrador. Publícala cuando esté lista.</p>
         </div>
+      </div>
 
-        {/* ── Body ────────────────────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto">
+      <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* ═══ STEP 1 — Información básica ══════════════════════════════ */}
+        {/* Accordion sections */}
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+
+          {/* ══ STEP 1 — Información básica ══════════════════════════════════ */}
           <StepAccordion
             step={1}
             title="Información básica"
@@ -260,95 +259,113 @@ export default function SurveyFormModal({ onClose }: Props) {
                 />
               </Field>
 
-              {/* ── Costo por respuesta — read-only display ──────────────── */}
-              <Field
-                label="Costo por respuesta"
-                tooltip="Precio fijo del sistema cobrado por cada respuesta completada. Este valor es definido por la plataforma y no puede modificarse."
-              >
-                <div className={`flex items-center gap-2.5 rounded-lg border px-3 py-2.5 ${
-                  loadingCost ? 'border-gray-100 bg-gray-50' : 'border-gray-200 bg-gray-50'
-                }`}>
-                  <DollarSign className="h-4 w-4 shrink-0 text-indigo-400" />
-
-                  {loadingCost ? (
-                    <span className="flex items-center gap-2 text-sm text-gray-400">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Cargando precio…
-                    </span>
-                  ) : costPerResponse != null ? (
-                    <>
-                      <span className="text-base font-bold text-indigo-700">
-                        {COP.format(costPerResponse)}
-                      </span>
-                      <span className="text-xs text-gray-400">por respuesta</span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-gray-400">No disponible</span>
-                  )}
+              {/* Cost per question — interactive */}
+              <div>
+                <div className="mb-1 flex items-center gap-1.5">
+                  <label className="text-xs font-medium text-gray-600">Precio por pregunta</label>
                 </div>
+                <p className="text-xs text-gray-400 mb-3">
+                  Mínimo del sistema: <span className="font-semibold text-indigo-600">
+                    {loadingCost ? '…' : COP.format(minPrice)}
+                  </span>. Un precio más alto puede priorizar tu encuesta.
+                </p>
 
-                {/* Estimated total — shown once maxResponses is filled */}
-                {estimatedTotal != null && (
-                  <div className="mt-2 flex items-center justify-between rounded-lg bg-indigo-50 px-3 py-2">
-                    <span className="text-xs text-indigo-600">
-                      Presupuesto estimado
-                      {form.maxResponses && (
-                        <span className="ml-1 text-indigo-400">
-                          ({parseInt(form.maxResponses).toLocaleString('es-CO')} resp.
-                          × {COP.format(costPerResponse!)})
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-sm font-bold text-indigo-700">
-                      {COP.format(estimatedTotal)}
-                    </span>
+                {/* Quick chips */}
+                {!loadingCost && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {getMultiplesFrom(minPrice, 8, 5).map((val) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setPricePerQuestion(val)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${
+                          pricePerQuestion === val
+                            ? 'border-indigo-500 bg-indigo-600 text-white shadow-sm'
+                            : 'border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600'
+                        }`}
+                      >
+                        {COP.format(val)}
+                      </button>
+                    ))}
                   </div>
                 )}
-              </Field>
+
+                {/* Stepper */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPricePerQuestion((p) => Math.max(minPrice, p - 5))}
+                    disabled={loadingCost || pricePerQuestion <= minPrice}
+                    className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      readOnly
+                      value={loadingCost ? 'Cargando…' : COP.format(pricePerQuestion)}
+                      className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-center font-bold text-gray-900 bg-gray-50 cursor-default focus:outline-none"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPricePerQuestion((p) => p + 5)}
+                    disabled={loadingCost}
+                    className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
+                  >
+                    <ChevronUp className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {pricePerQuestion < minPrice && !loadingCost && (
+                  <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    El precio mínimo es {COP.format(minPrice)}
+                  </p>
+                )}
+              </div>
 
               {/* Max responses */}
-              <Field label="Máximo de respuestas">
+              <Field
+                label="Máximo de respuestas"
+                tooltip="Número máximo de respuestas que la encuesta aceptará. Una vez alcanzado este límite, la encuesta se cerrará automáticamente."
+              >
                 <input
                   type="number"
                   min={1}
+                  max={10000000}
                   value={form.maxResponses}
-                  onChange={(e) => setField('maxResponses', e.target.value)}
-                  placeholder="Sin límite"
+                  onChange={(e) => setField('maxResponses', e.target.value.replace(/[^0-9]/g, ''))}
+                  onKeyDown={(e) => ['e', 'E', '-', '+', '.'].includes(e.key) && e.preventDefault()}
+                  onBlur={() => {
+                    if (!form.maxResponses || parseInt(form.maxResponses) < 1) setField('maxResponses', '1');
+                    touchField('maxResponses');
+                  }}
+                  className={inputCls(!!errors.maxResponses && touched.has('maxResponses'))}
+                />
+                {err('maxResponses')}
+                <p className="mt-1 text-xs text-gray-400">Mínimo 1 — máximo 10.000.000</p>
+              </Field>
+
+              {/* Start date (future only) */}
+              <Field
+                label="Fecha de inicio"
+                tooltip="La encuesta se activará automáticamente en esta fecha y hora. Si no se define, quedará en borrador hasta que la publiques manualmente."
+              >
+                <input
+                  type="datetime-local"
+                  value={form.startsAt}
+                  onChange={(e) => setField('startsAt', e.target.value)}
+                  min={new Date().toISOString().slice(0, 16)}
                   className={inputCls(false)}
                 />
               </Field>
 
-              {/* Dates */}
-              <div className="grid grid-cols-2 gap-4">
-                <Field
-                  label="Fecha de inicio"
-                  tooltip="La encuesta se activará automáticamente en esta fecha y hora. Si no se define, quedará en borrador hasta que la publiques manualmente."
-                >
-                  <input
-                    type="datetime-local"
-                    value={form.startsAt}
-                    onChange={(e) => setField('startsAt', e.target.value)}
-                    className={inputCls(false)}
-                  />
-                </Field>
-
-                <Field
-                  label="Fecha de fin"
-                  tooltip="La encuesta se cerrará automáticamente en esta fecha, incluso si no se alcanzó el máximo de respuestas configurado."
-                >
-                  <input
-                    type="datetime-local"
-                    value={form.endsAt}
-                    onChange={(e) => setField('endsAt', e.target.value)}
-                    className={inputCls(false)}
-                  />
-                </Field>
-              </div>
-
             </div>
           </StepAccordion>
 
-          {/* ═══ STEP 2 — Segmentación ════════════════════════════════════ */}
+          {/* ══ STEP 2 — Segmentación ════════════════════════════════════════ */}
           <StepAccordion
             step={2}
             title="Segmentación de audiencia"
@@ -358,7 +375,7 @@ export default function SurveyFormModal({ onClose }: Props) {
           >
             <div className="space-y-5">
 
-              {/* ── Categories ────────────────────────────────────────────── */}
+              {/* Categories */}
               <div>
                 <div className="mb-2.5 flex items-center gap-1.5">
                   <Tag className="h-4 w-4 text-gray-400" />
@@ -366,7 +383,6 @@ export default function SurveyFormModal({ onClose }: Props) {
                     Categorías / Intereses *
                   </span>
                 </div>
-
                 {loadingCats ? (
                   <div className="flex items-center gap-2 py-2 text-xs text-gray-400">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" /> Cargando categorías…
@@ -390,11 +406,9 @@ export default function SurveyFormModal({ onClose }: Props) {
                             onChange={() => toggleCategory(cat.id)}
                             className="sr-only"
                           />
-                          <span
-                            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ${
-                              active ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300 bg-white'
-                            }`}
-                          >
+                          <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+                            active ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300 bg-white'
+                          }`}>
                             {active && (
                               <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 10 10" fill="none">
                                 <path d="M2 5l2.5 2.5L8 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -412,7 +426,7 @@ export default function SurveyFormModal({ onClose }: Props) {
                 {err('categoryIds')}
               </div>
 
-              {/* ── Locations ─────────────────────────────────────────────── */}
+              {/* Locations */}
               <div>
                 <div className="mb-2.5 flex items-center gap-1.5">
                   <MapPin className="h-4 w-4 text-gray-400" />
@@ -420,12 +434,9 @@ export default function SurveyFormModal({ onClose }: Props) {
                     Ubicaciones geográficas
                   </span>
                 </div>
-
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-600">
-                      Departamento
-                    </label>
+                    <label className="mb-1 block text-xs font-medium text-gray-600">Departamento</label>
                     <select
                       value={selectedDepartment ?? ''}
                       onChange={(e) => setSelectedDepartment(e.target.value || null)}
@@ -438,11 +449,8 @@ export default function SurveyFormModal({ onClose }: Props) {
                       ))}
                     </select>
                   </div>
-
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-600">
-                      Municipio
-                    </label>
+                    <label className="mb-1 block text-xs font-medium text-gray-600">Municipio</label>
                     <select
                       disabled={!selectedDepartment || loadingMunis}
                       onChange={(e) => {
@@ -466,7 +474,6 @@ export default function SurveyFormModal({ onClose }: Props) {
                     </select>
                   </div>
                 </div>
-
                 {selectedMunicipalities.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {selectedMunicipalities.map((m) => (
@@ -493,7 +500,7 @@ export default function SurveyFormModal({ onClose }: Props) {
                 )}
               </div>
 
-              {/* ── Age range ─────────────────────────────────────────────── */}
+              {/* Age range */}
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Edad mínima (≥ 13)">
                   <input
@@ -517,13 +524,11 @@ export default function SurveyFormModal({ onClose }: Props) {
                 </Field>
               </div>
 
-              {/* ── Gender ────────────────────────────────────────────────── */}
+              {/* Gender */}
               <Field label="Género objetivo">
                 <select
                   value={form.targetGender}
-                  onChange={(e) =>
-                    setField('targetGender', (e.target.value as TargetGender) || '')
-                  }
+                  onChange={(e) => setField('targetGender', (e.target.value as TargetGender) || '')}
                   className={inputCls(false)}
                 >
                   <option value="">Todos los géneros</option>
@@ -536,7 +541,7 @@ export default function SurveyFormModal({ onClose }: Props) {
             </div>
           </StepAccordion>
 
-          {/* ═══ STEP 3 — Preguntas ═══════════════════════════════════════ */}
+          {/* ══ STEP 3 — Preguntas ═══════════════════════════════════════════ */}
           <StepAccordion
             step={3}
             title={`Preguntas (${form.questions.length})`}
@@ -634,13 +639,11 @@ export default function SurveyFormModal({ onClose }: Props) {
 
                   {NEEDS_OPTIONS.includes(q.type) && (
                     <div className="ml-14 space-y-2">
-                      {errors[`question_${idx}_options`] &&
-                        touched.has(`question_${idx}_options`) && (
-                          <p className="text-xs text-red-500">
-                            {errors[`question_${idx}_options`]}
-                          </p>
-                        )}
-
+                      {errors[`question_${idx}_options`] && touched.has(`question_${idx}_options`) && (
+                        <p className="text-xs text-red-500">
+                          {errors[`question_${idx}_options`]}
+                        </p>
+                      )}
                       {q.options.map((opt, oi) => (
                         <div key={oi} className="flex items-center gap-2">
                           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gray-300 text-[10px] font-bold text-gray-400">
@@ -664,7 +667,6 @@ export default function SurveyFormModal({ onClose }: Props) {
                           )}
                         </div>
                       ))}
-
                       <button
                         type="button"
                         onClick={() => addOption(q.id)}
@@ -687,76 +689,93 @@ export default function SurveyFormModal({ onClose }: Props) {
               </button>
             </div>
           </StepAccordion>
-
         </div>
 
-        {/* ── Footer ──────────────────────────────────────────────────────── */}
-        <div className="shrink-0 border-t border-gray-100">
-
-          {/* Validation error summary — shown after a failed submit attempt */}
-          {activeErrors.length > 0 && (
-            <div className="flex items-start gap-2.5 border-b border-red-100 bg-red-50 px-6 py-3">
-              <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500">
-                <span className="text-[9px] font-bold text-white">!</span>
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-red-700">
-                  Corrige {activeErrors.length === 1 ? 'este error' : `estos ${activeErrors.length} errores`} antes de continuar:
+        {/* Total cost — always visible */}
+        <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl p-5 text-white">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-indigo-200 text-xs font-bold uppercase tracking-wide">Costo total de la encuesta</p>
+              {loadingCost ? (
+                <p className="text-indigo-100 text-sm mt-0.5 flex items-center gap-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Calculando…
                 </p>
-                <ul className="mt-1 space-y-0.5">
-                  {activeErrors.map(([key, message]) => (
-                    <li key={key} className="flex items-baseline gap-1.5 text-xs text-red-600">
-                      <span className="shrink-0 font-medium">{errorLabel(key)}:</span>
-                      <span className="opacity-80">{message}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              ) : (
+                <p className="text-indigo-100 text-sm mt-0.5">
+                  {COP.format(pricePerQuestion)} × {form.questions.length} pregunta(s) × {maxResponsesNum.toLocaleString('es-CO')} respuesta(s).
+                </p>
+              )}
             </div>
-          )}
-
-          {/* Action buttons row */}
-          <div className="flex items-center justify-between px-6 py-4">
-            {createMutation.isError && (
-              <div className="flex items-start gap-2 text-xs text-red-600 max-w-xs">
-                <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500">
-                  <span className="text-[9px] font-bold text-white">!</span>
-                </div>
-                <div>
-                  <p className="font-semibold">
-
-                    {createMutation.error
-                      ? createMutation.error.message
-                      : 'Error al crear la encuesta'}
-                  </p>
-                  {createMutation.error &&
-                    createMutation.error.message && (
-                      <p className="mt-0.5 opacity-75">
-                        {createMutation.error.message}
-                      </p>
-                    )}
-                </div>
-              </div>
-            )}
-            <div className="ml-auto flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={createMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60 transition-all"
-              >
-                {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                Crear encuesta
-              </button>
+            <div className="text-right">
+              {loadingCost ? (
+                <Loader2 className="h-6 w-6 animate-spin text-indigo-300" />
+              ) : (
+                <>
+                  <p className="text-3xl font-extrabold">{COP.format(totalCost ?? 0)}</p>
+                  <p className="text-indigo-300 text-xs">se descontará de tu saldo</p>
+                </>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Validation error summary */}
+        {activeErrors.length > 0 && (
+          <div className="flex items-start gap-2.5 rounded-2xl border border-red-100 bg-red-50 px-5 py-4">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-500 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-red-700">
+                Corrige {activeErrors.length === 1 ? 'este error' : `estos ${activeErrors.length} errores`} antes de continuar:
+              </p>
+              <ul className="mt-1 space-y-0.5">
+                {activeErrors.map(([key, message]) => (
+                  <li key={key} className="flex items-baseline gap-1.5 text-xs text-red-600">
+                    <span className="shrink-0 font-medium">{errorLabel(key)}:</span>
+                    <span className="opacity-80">{message}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* Mutation error */}
+        {createMutation.isError && (
+          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm font-semibold text-red-700">
+              {createMutation.error?.message ?? 'Error al crear la encuesta'}
+            </p>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => router.push('/commercial/surveys')}
+            disabled={createMutation.isPending}
+            className="flex-1 py-3.5 border-2 border-gray-200 text-gray-600 rounded-xl font-semibold text-sm
+              hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={createMutation.isPending}
+            className="flex-[2] py-3.5 bg-indigo-600 text-white rounded-xl font-bold text-sm
+              hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed
+              flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 cursor-pointer"
+          >
+            {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {createMutation.isPending
+              ? 'Creando encuesta...'
+              : loadingCost
+                ? 'Crear encuesta'
+                : `Crear encuesta · ${COP.format(totalCost ?? 0)}`}
+          </button>
+        </div>
+
       </form>
     </div>
   );
@@ -779,7 +798,6 @@ function Field({
     <div className="relative">
       <div className="mb-1 flex items-center gap-1.5">
         <label className="text-xs font-medium text-gray-600">{label}</label>
-
         {tooltip && (
           <div className="relative">
             <button
@@ -793,7 +811,6 @@ function Field({
             >
               <HelpCircle className="h-3.5 w-3.5" />
             </button>
-
             {showTip && (
               <div
                 role="tooltip"
@@ -830,15 +847,12 @@ function StepAccordion({
         onClick={onToggle}
         className="flex w-full items-center gap-3 px-6 py-4 text-left hover:bg-gray-50 transition-colors"
       >
-        {/* Step number — turns red when that step has errors */}
         <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white transition-colors ${
           errorCount > 0 ? 'bg-red-500' : 'bg-indigo-600'
         }`}>
           {errorCount > 0 ? errorCount : step}
         </span>
-
         <span className="flex-1 text-sm font-semibold text-gray-800">{title}</span>
-
         {open
           ? <ChevronUp className="h-4 w-4 text-gray-400" />
           : <ChevronDown className="h-4 w-4 text-gray-400" />}

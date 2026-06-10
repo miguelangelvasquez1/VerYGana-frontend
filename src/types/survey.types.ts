@@ -108,12 +108,9 @@ export interface CreateQuestionRequest {
 export interface CreateSurveyRequest {
   title: string;
   description?: string;
-  /** ID of the SurveyConfig that defines the fixed cost per response */
-  surveyConfigId: number;
-  rewardAmount: number;
+  pricePerQuestionCents: number;
   maxResponses?: number;
   startsAt?: string;
-  endsAt?: string;
   categoryIds: number[];
   municipalityCodes?: string[];
   minAge?: number;
