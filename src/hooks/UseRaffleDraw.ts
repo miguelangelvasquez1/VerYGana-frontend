@@ -28,6 +28,8 @@ interface UseRaffleDrawReturn {
   waitingRoom: WaitingRoomPayloadDTO | null
   revealedWinners: WinnerRevealPayloadDTO[]
   totalWinners: number
+  totalTickets: number
+  maxTickets: number
   drawCompleted: DrawCompletedPayloadDTO | null
   errorMessage: string | null
   announcementLabel: string
@@ -67,6 +69,8 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
   const [waitingRoom,          setWaitingRoom]          = useState<WaitingRoomPayloadDTO | null>(null)
   const [revealedWinners,      setRevealedWinners]      = useState<WinnerRevealPayloadDTO[]>([])
   const [totalWinners,         setTotalWinners]         = useState(0)
+  const [totalTickets,         setTotalTickets]         = useState(0)
+  const [maxTickets,           setMaxTickets]           = useState(0)
   const [drawCompleted,        setDrawCompleted]        = useState<DrawCompletedPayloadDTO | null>(null)
   const [errorMessage,         setErrorMessage]         = useState<string | null>(null)
   const [announcementLabel,    setAnnouncementLabel]    = useState('')
@@ -158,6 +162,8 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
       case DrawEventType.DRAWING_STARTED: {
         const data = event.payload as DrawingStartedPayloadDTO
         setTotalWinners(data.totalWinners)
+        setTotalTickets(data.totalTickets)
+        setMaxTickets(data.maxTickets)
 
         // Detener el espejo del countdown
         if (localCountdownTimerRef.current) {
@@ -167,7 +173,8 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
 
         // Retrasar la transición visual hasta que el countdown local llegue a 0.
         // Esto permite que WaitingRoomScreen muestre "¡Ya!" antes de que empiece el sorteo.
-        const delayMs = Math.max(0, localCountdownRef.current * 1000)
+        // +1 s de buffer para que "¡Ya!" sea visible 1 segundo completo antes de la transición
+        const delayMs = Math.max(1000, (localCountdownRef.current + 1) * 1000)
         drawingStartedTimerRef.current = setTimeout(() => {
           setCurrentPhase(DrawEventType.DRAWING_STARTED)
           drawingStartedTimerRef.current = null
@@ -273,6 +280,8 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
     waitingRoom,
     revealedWinners,
     totalWinners,
+    totalTickets,
+    maxTickets,
     drawCompleted,
     errorMessage,
     announcementLabel,

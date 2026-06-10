@@ -59,3 +59,19 @@ export interface EndSessionDTO {
   finalScore: number;
   finalMetrics: GameMetricDTO[];
 }
+
+export interface RewardCardResponseDTO {
+  id: number;
+  name: string;
+  imageUrl: string;
+  imageMessage: string;
+  commercial: string;
+  regularPrice: number;
+  keysMessage: string;
+  rating: number;
+  cartUrl: string;
+  // maxKeysAllowed: number;
+  // minCashCents: number;
+  // stock: number;
+  // categoryName: string;
+}

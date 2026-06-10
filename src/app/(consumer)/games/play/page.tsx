@@ -1,63 +1,96 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { getGameRewards } from '@/services/GameService';
+import { RewardCardResponseDTO } from '@/types/games/game.types';
+import { useCart } from '@/context/CartContext';
 
 export default function PlayGamePage() {
   const searchParams = useSearchParams();
   const encodedUrl = searchParams.get('url');
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const { addItem, openCart } = useCart();
 
   const [loading, setLoading] = useState(true);
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
-  const [gameFinished, setGameFinished] = useState(false);
 
   useEffect(() => {
     if (!encodedUrl) return;
-
-    const decodedUrl = decodeURIComponent(encodedUrl);
-    setIframeUrl(decodedUrl);
+    setIframeUrl(decodeURIComponent(encodedUrl));
     setLoading(false);
   }, [encodedUrl]);
 
-  //Para el mensaje de finished
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-    // 1. Validar origen (MUY importante en producción)
-    // if (event.origin !== "https://tudominio.com") return; <-- HACER
+    const handleMessage = async (event: MessageEvent) => {
+      let data = event.data;
 
-    let data = event.data;
-
-    // 2. Si llega como string, parsearlo
-    if (typeof data === "string") {
-      try {
-        data = JSON.parse(data);
-      } catch (err) {
-        console.warn("Mensaje no es JSON válido");
-        return;
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          return;
+        }
       }
-    }
 
-    // 3. Validar estructura
-    if (!data || typeof data !== "object") return;
+      if (!data || typeof data !== 'object') return;
 
-    if (data.type === "GAME_FINISHED") {
-      console.log("¿Victoria?", data.isVictory);
-      setGameFinished(true); //true
+      if (data.type === 'GAME_LOADED') {
+        const sessionToken: string = data.sessionToken;
+        if (!sessionToken || !iframeRef.current?.contentWindow) return;
 
-      if (data.isVictory) {
-        // lógica de victoria
-      } else {
-        // lógica de derrota
+        try {
+          const rewards: RewardCardResponseDTO[] = await getGameRewards(sessionToken);
+
+          const products = rewards.map((r) => ({
+            id: String(r.id),
+            name: r.name,
+            imageUrl: r.imageUrl,
+            imageMessage: r.imageMessage,
+            commercial: r.commercial,
+            regularPrice: r.regularPrice,
+            keysMessage: r.keysMessage,
+            rating: r.rating,
+          }));
+
+          iframeRef.current.contentWindow.postMessage(
+            {
+              type: 'PRODUCTS_DATA',
+              popupTitle: '¡Canjea tus llaves por estos combos exclusivos!',
+              products,
+            },
+            '*'
+          );
+        } catch (err) {
+          console.error('Error fetching game rewards', err);
+          iframeRef.current.contentWindow.postMessage(
+            { type: 'PRODUCTS_DATA', popupTitle: '', products: [] },
+            '*'
+          );
+        }
       }
-    }
-  };
 
-    window.addEventListener("message", handleMessage);
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
+      // TODO: descomentar cuando el nuevo build del juego entregue el DTO completo
+      // if (data.type === 'PRODUCT_CLICKED') {
+      //   const p = data.product;
+      //   if (!p) return;
+      //   addItem({
+      //     id: Number(p.id),
+      //     name: p.name,
+      //     imageUrl: p.imageUrl,
+      //     price: p.regularPrice,
+      //     maxKeysAllowed: p.maxKeysAllowed,
+      //     minCashCents: p.minCashCents,
+      //     stock: p.stock,
+      //     categoryName: p.categoryName,
+      //   });
+      //   openCart();
+      // }
     };
-  }, []);
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [addItem, openCart]);
 
   if (loading) {
     return (
@@ -70,30 +103,11 @@ export default function PlayGamePage() {
   return (
     <div className="w-full h-screen bg-black">
       <iframe
+        ref={iframeRef}
         src={iframeUrl!}
         className="w-screen h-screen border-0"
-        style={{ transform: 'scale(1)' }}
         allowFullScreen
       />
-
-    {/* Cuando el juego se termina muestra: */}
-    {gameFinished && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-50">
-          <div className="bg-white p-8 rounded-xl text-center shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">
-              🎉 Juego terminado
-            </h2>
-            <p className="mb-6">El evento GAME_FINISHED fue recibido correctamente.</p>
-            <button
-              onClick={() => window.location.href = '/games'}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg"
-            >
-              Volver al inicio
-            </button>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

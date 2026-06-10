@@ -32,6 +32,7 @@ export default function AdminRafflesDashboard() {
   const [stats, setStats] = useState({
     draftRaffles: 0,
     activeRaffles: 0,
+    liveRaffles: 0,
     closedRaffles: 0,
     completedRaffles: 0,
   });
@@ -42,11 +43,13 @@ export default function AdminRafflesDashboard() {
     const [
       draftRaffles,
       activeRaffles,
+      liveRaffles,
       closedRaffles,
       completedRaffles,
     ] = await Promise.all([
       countRafflesByStatus("DRAFT"),
       countRafflesByStatus("ACTIVE"),
+      countRafflesByStatus("LIVE"),
       countRafflesByStatus("CLOSED"),
       countRafflesByStatus("COMPLETED"),
     ]);
@@ -54,6 +57,7 @@ export default function AdminRafflesDashboard() {
     setStats({
       draftRaffles,
       activeRaffles,
+      liveRaffles,
       closedRaffles,
       completedRaffles,
     });
@@ -212,6 +216,11 @@ export default function AdminRafflesDashboard() {
           color="green"
         />
         <StatCard
+          label="Rifas en vivo"
+          value={stats.liveRaffles}
+          color="red"
+        />
+        <StatCard
           label="Rifas cerradas"
           value={stats.closedRaffles}
           color="blue"
@@ -299,11 +308,12 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  color: "blue" | "green" | "yellow" | "gray";
+  color: "blue" | "green" | "red" | "yellow" | "gray";
 }) {
   const colors = {
     blue: "from-blue-500 to-blue-600",
     green: "from-green-500 to-green-600",
+    red: "from-red-500 to-red-600",
     yellow: "from-yellow-500 to-yellow-600",
     gray: "from-gray-600 to-gray-700",
   };
