@@ -104,9 +104,8 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
       prizeType: PrizeType.PHYSICAL,
       position: formData.prizes.length + 1,
       quantity: 1,
-      requiresShipping: false,
-      estimatedDeliveryDays: "" as any,
-      redemptionInstructions: "",
+      claimCode: "",
+      claimInstructions: "",
       imageFile: null,
     };
     setFormData((prev) => ({ ...prev, prizes: [...prev.prizes, newPrize] }));
@@ -209,8 +208,6 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
           value: Number(rest.value),
           quantity: Number(rest.quantity),
           position: Number(rest.position),
-          estimatedDeliveryDays:
-            rest.estimatedDeliveryDays === null ? null : Number(rest.estimatedDeliveryDays),
         })),
         rules: formData.rules.map((r) => ({
           ticketEarningRuleId: Number(r.ticketEarningRuleId),
@@ -672,53 +669,6 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                   </div>
                 </div>
 
-                {/* Toggle: Requiere envío */}
-                <label className="flex items-center gap-3 cursor-pointer w-fit">
-                  <div className="relative shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={prize.requiresShipping}
-                      onChange={(e) =>
-                        handlePrizeChange(index, "requiresShipping", e.target.checked)
-                      }
-                      className="sr-only"
-                    />
-                    <div
-                      className={`w-9 h-5 rounded-full transition-colors duration-200 ${
-                        prize.requiresShipping ? "bg-purple-600" : "bg-gray-300"
-                      }`}
-                    />
-                    <div
-                      className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                        prize.requiresShipping ? "translate-x-4" : "translate-x-0.5"
-                      }`}
-                    />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 select-none">
-                    Requiere envío físico
-                  </span>
-                </label>
-
-                {prize.requiresShipping && (
-                  <div>
-                    <label className={labelCls}>Días estimados de entrega</label>
-                    <input
-                      type="number"
-                      value={prize.estimatedDeliveryDays ?? 0}
-                      onChange={(e) =>
-                        handlePrizeChange(
-                          index,
-                          "estimatedDeliveryDays",
-                          Number(e.target.value)
-                        )
-                      }
-                      placeholder="Ej: 5"
-                      min={0}
-                      className={inputCls()}
-                    />
-                  </div>
-                )}
-
                 <div>
                   <label className={`${labelCls} mb-2`}>Imagen del Premio</label>
                   <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all group">
@@ -752,11 +702,21 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                 </div>
 
                 <div>
-                  <label className={labelCls}>Instrucciones para reclamar el premio</label>
+                  <label className={labelCls}>Código de Reclamo</label>
+                  <input
+                    value={prize.claimCode}
+                    onChange={(e) => handlePrizeChange(index, "claimCode", e.target.value)}
+                    placeholder="Código para reclamar el premio"
+                    className={inputCls()}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelCls}>Instrucciones de Reclamo</label>
                   <textarea
-                    value={prize.redemptionInstructions}
+                    value={prize.claimInstructions}
                     onChange={(e) =>
-                      handlePrizeChange(index, "redemptionInstructions", e.target.value)
+                      handlePrizeChange(index, "claimInstructions", e.target.value)
                     }
                     rows={2}
                     placeholder="¿Cómo puede reclamar el ganador este premio?"

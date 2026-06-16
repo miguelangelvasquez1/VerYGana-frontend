@@ -1,3 +1,4 @@
+
 export interface WinnerSummaryResponseDTO {
     userName: string;
     raffleTitle: string;
@@ -31,4 +32,17 @@ export interface PrizeWonResponseDTO {
     drawnAt: string;
     isClaimed: boolean;
     claimedAt: string | null;
+}
+
+export enum ClaimPreferenceDeliveryMethod {
+  EMAIL = 'EMAIL',
+  SMS = 'SMS'
+}
+
+export interface ClaimPrizeRequestDTO {
+    prizeId: number;
+    deliveryMethod: ClaimPreferenceDeliveryMethod;
+    newEmail?: string;
+    newPhoneNumber?: string;
+    smsOtpCode?: string;
 }

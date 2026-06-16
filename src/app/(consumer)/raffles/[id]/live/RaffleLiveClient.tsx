@@ -20,7 +20,6 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
   const router = useRouter()
   const {
     currentPhase,
-    isConnected,
     waitingRoom,
     revealedWinners,
     totalWinners,
@@ -40,14 +39,6 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center p-4 lg:p-10">
-
-      {/* Badge de conexión */}
-      <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
-        <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-400'}`} />
-        <span className="text-xs text-gray-500">
-          {isConnected ? 'En vivo' : 'Reconectando...'}
-        </span>
-      </div>
 
       {/* Título de la rifa */}
       <p className="text-gray-500 text-base lg:text-xl mb-8 tracking-wide uppercase text-center">
