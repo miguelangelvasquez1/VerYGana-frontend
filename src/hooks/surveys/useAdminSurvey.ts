@@ -51,7 +51,7 @@ export function useAdminSurveyList(
 export function useAdminSurveyDetail(surveyId: number) {
   return useQuery({
     queryKey: adminSurveyKeys.detail(surveyId),
-    queryFn:  () => surveyAdminService.getSurveyDetail(surveyId),
+    queryFn:  () => surveyAdminService.getSurveyAdminDetail(surveyId),
     enabled:  surveyId > 0,
     staleTime: 60_000,
   });

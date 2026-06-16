@@ -26,7 +26,7 @@ async function requestUploadUrl(
 ): Promise<AssetUploadPermissionDTO> {
   try {
     const response = await apiClient.post<AssetUploadPermissionDTO>(
-      "/campaigns/assets/upload-url",
+      "/game-designers/me/assets/upload-url",
       request
     );
 
@@ -48,7 +48,7 @@ async function confirmUpload(
   request: AssetConfirmRequest
 ): Promise<void> {
   try {
-    await apiClient.post("/campaigns/assets/confirm", request);
+    await apiClient.post("/game-designers/me/assets/confirm", request);
   } catch (error: any) {
     const message =
       error.response?.data?.message ||

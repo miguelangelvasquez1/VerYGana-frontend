@@ -15,6 +15,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/forum': 'Historias de Impacto',
   '/admin/system': 'Gestión del Sistema',
   '/admin/ticket-rules': 'Reglas de boletos',
+  '/admin/branding': 'Solicitudes de Branding',
   '/admin/config': 'Configuración',
 };
 

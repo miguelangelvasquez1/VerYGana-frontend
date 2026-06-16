@@ -19,7 +19,6 @@ import { usePathname } from 'next/navigation';
 const PROTECTED_ROUTES: { path: string; requiredPlans: PlanCode[] }[] = [
   { path: '/commercial/products',  requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/ads',       requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
-  { path: '/commercial/campaigns', requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/surveys',   requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/pets',      requiredPlans: [PlanCode.PREMIUM] },
   { path: '/commercial/analytics', requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
@@ -143,11 +142,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       { match: '/commercial/products/create', title: 'Crear Producto' },
       { match: '/commercial/products', title: 'Mis Productos' },
 
-      { match: '/commercial/campaigns/create', title: 'Crear Campaña' },
-      { match: '/commercial/campaigns', title: 'Campañas' },
-
       { match: '/commercial/pets/create', title: 'Crear Mascotas' },
       { match: '/commercial/pets', title: 'Mascotas' },
+
+      { match: '/commercial/branding', title: 'Solicitudes de Marca' },
     ];
 
     const sortedRoutes = routes.sort((a, b) => b.match.length - a.match.length);
@@ -247,8 +245,6 @@ export const PAGE_TITLES: Record<string, string> = {
   '/commercial/products/create': 'Crear Producto',
   '/commercial/ads': 'Mis Anuncios',
   '/commercial/ads/create': 'Crear Anuncio',
-  '/commercial/campaigns': 'Campañas',
-  '/commercial/campaigns/create': 'Crear Campaña',
   '/commercial/surveys': 'Encuestas',
   '/commercial/analytics': 'Estadísticas',
   '/commercial/billing': 'Facturación',

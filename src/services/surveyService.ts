@@ -3,7 +3,11 @@ import type {
   Page,
   SurveyResponse,
   SurveySummary,
+  AvailableSurveyDTO,
+  SurveyDetailDTO,
+  StartSurveyResponse,
   CreateSurveyRequest,
+  UpdateSurveyRequest,
   SubmitSurveyRequest,
   SubmissionResult,
   UserRewardsSummary,
@@ -11,6 +15,7 @@ import type {
   SurveyResponseDetail,
   SurveyAnalytics,
   AdminSurveySummary,
+  SurveyCommercialDetailDTO,
 } from '@/types/survey.types';
 import { PagedResponse } from '@/types/Generic.types';
 import apiClient from '@/lib/api/client';
@@ -22,16 +27,22 @@ export const surveyService = {
   getAvailableSurveys: async (
     page = 0,
     size = 10,
-  ): Promise<Page<SurveySummary>> => {
+  ): Promise<PagedResponse<AvailableSurveyDTO>> => {
     const { data } = await apiClient.get('/surveys', {
       params: { page, size },
     });
     return data;
   },
 
-  /** Full survey detail with questions (validates eligibility server-side) */
-  getSurveyDetail: async (surveyId: number): Promise<SurveyResponse> => {
+  /** Survey detail for preview (no questions) */
+  getSurveyDetail: async (surveyId: number): Promise<SurveyDetailDTO> => {
     const { data } = await apiClient.get(`/surveys/${surveyId}`);
+    return data;
+  },
+
+  /** Creates or resumes an active session for a survey */
+  startSurvey: async (surveyId: number): Promise<StartSurveyResponse> => {
+    const { data } = await apiClient.post(`/surveys/${surveyId}/start`);
     return data;
   },
 
@@ -65,11 +76,28 @@ export const surveyAdminService = {
     }
   },
 
+  /** Full detail for a survey owned by the current commercial user */
+  getCommercialSurveyDetail: async (
+    surveyId: number,
+  ): Promise<SurveyCommercialDetailDTO> => {
+    const { data } = await apiClient.get(`/surveys/commercial/${surveyId}`);
+    return data;
+  },
+
   /** Create a survey in DRAFT status */
   createSurvey: async (
     payload: CreateSurveyRequest,
   ): Promise<SurveyResponse> => {
     const { data } = await apiClient.post('/surveys', payload);
+    return data;
+  },
+
+  /** Partial update — only sent fields are changed */
+  updateSurvey: async (
+    surveyId: number,
+    payload: UpdateSurveyRequest,
+  ): Promise<SurveyCommercialDetailDTO> => {
+    const { data } = await apiClient.put(`/surveys/${surveyId}`, payload);
     return data;
   },
 
@@ -98,17 +126,6 @@ export const surveyAdminService = {
     return data;
   },
 
-  /** Get single survey full detail */
-  getSurveyById: async (surveyId: number): Promise<SurveyResponse> => {
-    const { data } = await apiClient.get(`/surveys/admin/${surveyId}`);
-    return data;
-  },
-
-  fetchSurveyConfigs: async (): Promise<number[]> => {
-    const { data } = await apiClient.get('/surveys/configs');
-    return data;
-  },  
-
   // ── Responses ─────────────────────────────────────────────────────────────
  
   /**
@@ -122,7 +139,7 @@ export const surveyAdminService = {
   ): Promise<PagedResponse<SurveyResponseDetail>> => {
     try {
       const { data } = await apiClient.get<PagedResponse<SurveyResponseDetail>>(
-        `/surveys/admin/${surveyId}/responses`,
+        `/surveys/${surveyId}/responses`,
         { params: { page, size } },
       );
       return data;
@@ -140,7 +157,7 @@ export const surveyAdminService = {
   getSurveyAnalytics: async (surveyId: number): Promise<SurveyAnalytics> => {
     try {
       const { data } = await apiClient.get<SurveyAnalytics>(
-        `/surveys/admin/${surveyId}/analytics`,
+        `/surveys/${surveyId}/analytics`,
       );
       return data;
     } catch (err) {
@@ -161,7 +178,7 @@ export const surveyAdminService = {
   ): Promise<void> => {
     try {
       const response = await apiClient.get(
-        `/surveys/admin/${surveyId}/responses/export`,
+        `/surveys/${surveyId}/responses/export`,
         { params: { format }, responseType: 'blob' },
       );
  
@@ -211,7 +228,7 @@ export const surveyAdminService = {
    * GET /api/v1/admin/surveys/:id
    * Full survey detail (metadata + targeting + questions).
    */
-  getSurveyDetail: async (surveyId: number): Promise<SurveyResponse> => {
+  getSurveyAdminDetail: async (surveyId: number): Promise<SurveyResponse> => {
     try {
       const { data } = await apiClient.get<SurveyResponse>(
         `/surveys/admin/${surveyId}`,

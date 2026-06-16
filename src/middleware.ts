@@ -23,6 +23,10 @@ export const config = {
     '/commercial',
     // '/admin/:path*',
     // '/admin',
+
+    // game designer (reset-password is public and excluded in middleware logic)
+    '/game-designer',
+    '/game-designer/:path*',
   ],
 };
 
@@ -107,6 +111,20 @@ export default withAuth(function middleware(req: NextRequest) {
       }
       return NextResponse.next();
     }
+  }
+
+  // 2.5) Rutas de game-designer (reset-password es pública)
+  if (pathname === '/game-designer' || pathname.startsWith('/game-designer/')) {
+    if (pathname === '/game-designer/reset-password') return NextResponse.next();
+    if (!token) {
+      const loginUrl = new URL('/login', req.url);
+      loginUrl.searchParams.set('from', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    if (normalizedRole !== 'GAME_DESIGNER') {
+      return NextResponse.redirect(new URL('/unauthorized', req.url));
+    }
+    return NextResponse.next();
   }
 
   // 3) Rutas no manejadas por este middleware -> permitir

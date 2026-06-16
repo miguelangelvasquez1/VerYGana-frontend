@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useAvailableSurveys } from '@/hooks/surveys/useSurvey';
 import SurveyCard from './SurveyCard';
 import SurveyPlayerModal from './SurveyPlayerModal';
-import RewardsBanner from './RewardsBanner';
 import { ChevronLeft, ChevronRight, Loader2, Inbox } from 'lucide-react';
 
 export default function SurveyList() {
@@ -15,9 +14,6 @@ export default function SurveyList() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 space-y-8">
-      {/* Rewards summary banner */}
-      <RewardsBanner />
-
       {/* Section header */}
       <div>
         <h2 className="text-xl font-bold text-gray-900">
@@ -41,7 +37,7 @@ export default function SurveyList() {
         </div>
       )}
 
-      {!isLoading && !isError && data?.content.length === 0 && (
+      {!isLoading && !isError && data?.meta.totalElements === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-gray-200 py-20 text-center">
           <Inbox className="h-10 w-10 text-gray-300" />
           <p className="text-sm font-medium text-gray-500">
@@ -54,10 +50,10 @@ export default function SurveyList() {
       )}
 
       {/* Survey cards */}
-      {!isLoading && data && data.content.length > 0 && (
+      {!isLoading && data && data.meta.totalElements > 0 && (
         <>
           <div className="grid gap-4 sm:grid-cols-2">
-            {data.content.map((survey, index) => (
+            {data.data.map((survey, index) => (
               <SurveyCard
                 key={survey.id}
                 survey={survey}
@@ -68,7 +64,7 @@ export default function SurveyList() {
           </div>
 
           {/* Pagination */}
-          {data.totalPages > 1 && (
+          {data.meta.totalPages > 1 && (
             <div className="flex items-center justify-center gap-2">
               <button
                 disabled={page === 0}
@@ -78,10 +74,10 @@ export default function SurveyList() {
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <span className="text-xs text-gray-500">
-                {page + 1} / {data.totalPages}
+                {page + 1} / {data.meta.totalPages}
               </span>
               <button
-                disabled={page >= data.totalPages - 1}
+                disabled={page >= data.meta.totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}
                 className="rounded-xl border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 disabled:opacity-40"
               >

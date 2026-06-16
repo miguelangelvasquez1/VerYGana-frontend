@@ -67,6 +67,9 @@ const LoginForm = () => {
     } else if (role === "ROLE_COMMERCIAL") {
       router.push("/commercial");
       return;
+    } else if (role === "ROLE_GAME_DESIGNER") {
+      router.push("/game-designer");
+      return;
     } 
 
     } catch (err: any) {

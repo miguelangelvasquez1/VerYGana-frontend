@@ -51,6 +51,9 @@ export const surveyKeys = {
   adminDetailFull: (id: number) =>
     [...surveyKeys.admin(), 'detail-full', id] as const,
 
+  commercialDetail: (id: number) =>
+    [...surveyKeys.all, 'commercial', 'detail', id] as const,
+
   costPerQuestion: () => [...surveyKeys.admin(), 'cost-per-question'] as const,
 
   adminResponses: (surveyId: number, page: number, size: number) =>

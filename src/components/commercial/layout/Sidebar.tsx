@@ -17,7 +17,7 @@ import {
   Lock,
   Sparkles,
   Megaphone,
-  Gamepad2
+  Palette,
 } from 'lucide-react';
 import { WalletStatus } from '@/types/finance/Wallet.types';
 import {PlanCode} from '@/types/finance/plans/Plan.types';
@@ -64,14 +64,9 @@ const menuItems: MenuItem[] = [
     lockIfUnavailable: true,
   },
   {
-    href: '/commercial/campaigns', icon: Gamepad2, label: 'Mis juegos',
-    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM], 
-    lockIfUnavailable: true,
-  },
-  {
-    href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Brandear Juego',
+    href: '/commercial/branding', icon: Palette, label: 'Branding en Juegos',
     requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true, skipActive: true,
+    lockIfUnavailable: true,
   },
   {
     href: '/commercial/surveys', icon: ClipboardList, label: 'Encuestas',

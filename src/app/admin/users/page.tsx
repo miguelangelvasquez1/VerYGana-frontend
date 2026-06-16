@@ -2,7 +2,7 @@
 
 import React from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import UserManagement from '@/components/admin/UserManagement';
+import UserManagement from '@/components/admin/users/UserManagement';
 
 export default function UsersPage() {
   return (

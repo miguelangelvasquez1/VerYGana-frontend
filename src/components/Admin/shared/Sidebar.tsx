@@ -16,7 +16,8 @@ import {
   MonitorSmartphone,
   MessageSquare,
   TargetIcon,
-  TicketIcon
+  TicketIcon,
+  Palette,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -64,6 +65,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           icon: MonitorSmartphone,
           href: '/admin/ads',
           color: 'text-emerald-500'
+        },
+        {
+          title: 'Branding',
+          icon: Palette,
+          href: '/admin/branding',
+          color: 'text-violet-500'
         },
         {
           title: 'Productos',

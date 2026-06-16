@@ -120,7 +120,8 @@ export default function SurveyFormModal() {
     title: 'Título',
     surveyConfigId: 'Costo por pregunta',
     categoryIds: 'Categorías',
-    minAge: 'Rango de edad',
+    minAge: 'Edad mínima',
+    maxAge: 'Edad máxima',
     questions: 'Preguntas',
   };
 
@@ -502,7 +503,7 @@ export default function SurveyFormModal() {
 
               {/* Age range */}
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Edad mínima (≥ 13)">
+                <Field label="Edad mínima *">
                   <input
                     type="number" min={13} max={100}
                     value={form.minAge}
@@ -513,14 +514,16 @@ export default function SurveyFormModal() {
                   />
                   {err('minAge')}
                 </Field>
-                <Field label="Edad máxima (≤ 100)">
+                <Field label="Edad máxima *">
                   <input
                     type="number" min={13} max={100}
                     value={form.maxAge}
                     onChange={(e) => setField('maxAge', e.target.value)}
+                    onBlur={() => touchField('maxAge')}
                     placeholder="100"
-                    className={inputCls(false)}
+                    className={inputCls(!!errors.maxAge && touched.has('maxAge'))}
                   />
+                  {err('maxAge')}
                 </Field>
               </div>
 

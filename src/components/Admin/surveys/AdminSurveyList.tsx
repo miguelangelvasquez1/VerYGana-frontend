@@ -247,7 +247,7 @@ function SurveyRow({
       {/* Reward */}
       <td className="px-5 py-4">
         <p className="text-sm font-semibold text-indigo-600">
-          {formatReward(survey.rewardAmount)}
+          {formatReward(survey.rewardAmountPerQuestionCents / 100)}
         </p>
       </td>
 

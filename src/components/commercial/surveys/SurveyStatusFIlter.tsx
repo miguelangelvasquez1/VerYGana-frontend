@@ -43,7 +43,7 @@ function FilterPill({
   return (
     <button
       onClick={onClick}
-      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
+      className={`cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
         active
           ? 'bg-indigo-600 text-white shadow-sm'
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'

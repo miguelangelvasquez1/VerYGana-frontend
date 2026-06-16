@@ -6,7 +6,12 @@ import {
 } from '@tanstack/react-query';
 import { surveyAdminService } from '@/services/surveyService';
 import { surveyKeys } from './surveyKeys';
-import type { CreateSurveyRequest, SurveyResponse, SurveyStatus } from '@/types/survey.types';
+import type {
+  CreateSurveyRequest,
+  UpdateSurveyRequest,
+  SurveyCommercialDetailDTO,
+  SurveyStatus,
+} from '@/types/survey.types';
 
 // ─── List all surveys (admin) ─────────────────────────────────────────────────
 
@@ -25,21 +30,6 @@ export function useCommercialSurveys(
     queryFn: () => surveyAdminService.getAllSurveys(page, size, status),
     placeholderData: keepPreviousData,
     staleTime: 20_000,
-  });
-}
-
-// ─── Single survey detail (admin) ─────────────────────────────────────────────
-
-/**
- * Full survey detail including all questions, targeting config, and response stats.
- * Only fetches when surveyId is a positive number.
- */
-export function useAdminSurveyDetail(surveyId: number) {
-  return useQuery<SurveyResponse>({
-    queryKey: surveyKeys.adminDetail(surveyId),
-    queryFn: () => surveyAdminService.getSurveyById(surveyId),
-    enabled: surveyId > 0,
-    staleTime: 30_000,
   });
 }
 
@@ -115,6 +105,33 @@ export function useUpdateSurveyStatus() {
         surveyKeys.adminDetail(updatedSurvey.id),
         updatedSurvey,
       );
+      queryClient.invalidateQueries({ queryKey: surveyKeys.adminLists() });
+    },
+  });
+}
+
+// ─── Commercial survey detail ─────────────────────────────────────────────────
+
+export function useCommercialSurveyDetail(surveyId: number) {
+  return useQuery<SurveyCommercialDetailDTO>({
+    queryKey: surveyKeys.commercialDetail(surveyId),
+    queryFn: () => surveyAdminService.getCommercialSurveyDetail(surveyId),
+    enabled: surveyId > 0,
+    staleTime: 20_000,
+  });
+}
+
+// ─── Update survey ────────────────────────────────────────────────────────────
+
+export function useUpdateSurvey(surveyId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdateSurveyRequest) =>
+      surveyAdminService.updateSurvey(surveyId, payload),
+
+    onSuccess: (updated) => {
+      queryClient.setQueryData(surveyKeys.commercialDetail(surveyId), updated);
       queryClient.invalidateQueries({ queryKey: surveyKeys.adminLists() });
     },
   });
