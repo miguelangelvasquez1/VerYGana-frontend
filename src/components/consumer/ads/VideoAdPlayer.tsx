@@ -1,12 +1,20 @@
 // components/VideoAdPlayer.tsx
 'use client'
 import { useEffect, useRef, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import VideoControls from './VideoControls';
 import { useNextAd, useLikeAd } from '@/hooks/ads/mutations';
 import { AdForConsumerDTO } from '@/types/ads/commercial';
+import { levelService } from '@/services/LevelService';
+import type { XpRewardData } from '@/components/levels/XpRewardToast';
 import toast from 'react-hot-toast';
 
-export default function VideoAdPlayer() {
+interface Props {
+  onXpReward?: (data: XpRewardData) => void;
+}
+
+export default function VideoAdPlayer({ onXpReward }: Props) {
+  const { data: session } = useSession();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -164,20 +172,39 @@ export default function VideoAdPlayer() {
           setIsLiked(true);
 
           if (res.rewardAmount > 0) {
-            // Mostrar notificación de recompensa
             setRewardAmount(res.rewardAmount);
             setShowReward(true);
             setTimeout(() => {
               setShowReward(false);
               setRewardAmount(null);
-              // Cargar el siguiente anuncio después de mostrar la recompensa
               loadNextAd();
             }, 3000);
           } else {
-            // Si no hay recompensa, cargar el siguiente inmediatamente
-            setTimeout(() => {
-              loadNextAd();
-            }, 500);
+            setTimeout(() => loadNextAd(), 500);
+          }
+
+          if (onXpReward) {
+            const token = (session as any)?.accessToken as string | undefined;
+            if (token) {
+              Promise.all([
+                levelService.getProfile(token),
+                levelService.getHistory(token, 0, 1),
+              ])
+                .then(([profile, history]) => {
+                  const lastTx = history.content[0];
+                  if (lastTx?.activityType === 'VIDEO_WATCHED') {
+                    onXpReward({
+                      activityType: 'VIDEO_WATCHED',
+                      xpEarned: lastTx.xpEarned,
+                      multiplier: lastTx.multiplierApplied,
+                      currentLevel: profile.currentLevel,
+                      xpTotal: profile.xpTotal,
+                      xpToNextLevel: profile.xpToNextLevel,
+                    });
+                  }
+                })
+                .catch(() => {});
+            }
           }
         },
         onError: (error) => {

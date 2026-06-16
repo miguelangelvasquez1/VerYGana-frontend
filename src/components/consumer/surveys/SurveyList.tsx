@@ -6,10 +6,13 @@ import SurveyCard from './SurveyCard';
 import SurveyPlayerModal from './SurveyPlayerModal';
 import RewardsBanner from './RewardsBanner';
 import { ChevronLeft, ChevronRight, Loader2, Inbox } from 'lucide-react';
+import { useXpReward } from '@/hooks/useXpReward';
+import { XpRewardToast } from '@/components/levels/XpRewardToast';
 
 export default function SurveyList() {
   const [page, setPage] = useState(0);
   const [activeSurveyId, setActiveSurveyId] = useState<number | null>(null);
+  const { rewardData, showReward, dismiss } = useXpReward();
 
   const { data, isLoading, isError } = useAvailableSurveys(page, 8);
 
@@ -97,8 +100,11 @@ export default function SurveyList() {
         <SurveyPlayerModal
           surveyId={activeSurveyId}
           onClose={() => setActiveSurveyId(null)}
+          showReward={showReward}
         />
       )}
+
+      <XpRewardToast data={rewardData} onDismiss={dismiss} />
     </div>
   );
 }

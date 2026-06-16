@@ -32,6 +32,9 @@ import { CartButton } from "../consumer/cart/CartButton";
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationPanel } from "../notifications/NotificationsPanel";
 import { useLogout } from '@/hooks/useLogout';
+import { useLevelProfile } from '@/hooks/useLevelProfile'
+import { XpRewardToast } from '@/components/levels/XpRewardToast'
+import { useXpReward } from '@/hooks/useXpReward'
 
 const navItems = [
   { href: '/home',              label: 'Inicio',    Icon: Home          },
@@ -45,9 +48,11 @@ const navItems = [
   { href: '/forum',             label: 'Foro',      Icon: MessageSquare },
 ] as const;
 
+
 export default function Navbar() {
   const pathname = usePathname();
 
+  const { profile: levelProfile, colors: lvColors, pct: lvPct, label: lvLabel } = useLevelProfile()
   // UI state
   const [openMenu, setOpenMenu] = useState(false);
   const [isKeyWalletOpen, setIsKeyWalletOpen] = useState(false);
@@ -72,6 +77,7 @@ export default function Navbar() {
   const keyWalletMenuRefMobile = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefDesktop = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefMobile = useRef<HTMLDivElement | null>(null);
+  const { rewardData, showReward, dismiss } = useXpReward()
 
   useEffect(() => {
     async function loadUser() {
@@ -314,15 +320,30 @@ export default function Navbar() {
                 onClick={() => setOpenMenu((v) => !v)}
                 className="flex items-center gap-3 hover:bg-white/10 px-3 py-2 rounded-full transition-all"
               >
-                <div className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center">
-                  <User className="text-white w-5 h-5" />
+                <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden flex items-center justify-center">
+                  {consumer?.avatarUrl ? (
+                    <Image src={consumer.avatarUrl} alt="Avatar" width={40} height={40} className="object-cover w-full h-full" />
+                  ) : (
+                    <User className="text-white w-5 h-5" />
+                  )}
+              </div>
+                <div className="min-w-0">
+                <div className="font-semibold leading-tight">
+                  {loadingUser ? "Cargando..." : consumer?.name ?? "Usuario"}
                 </div>
-                <div>
-                  <div className="font-semibold">
-                    {loadingUser ? "Cargando..." : consumer?.name ?? "Usuario"}
+                {/* Mini barra de XP */}
+                {levelProfile && (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <div className="w-20 h-1.5 rounded-full bg-white/20 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${lvPct}%`, background: lvColors.bar }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-white/70 font-medium">{lvLabel}</span>
                   </div>
-                  <div className="text-xs text-gray-200">Beneficiario</div>
-                </div>
+                )}
+              </div>
               </button>
 
               <div
@@ -331,9 +352,13 @@ export default function Navbar() {
               >
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
-                      <User className="w-6 h-6" />
-                    </div>
+                    <div className="w-12 h-12 bg-white/20 rounded-full overflow-hidden flex items-center justify-center shrink-0">
+                      {consumer?.avatarUrl ? (
+                        <Image src={consumer.avatarUrl} alt="Avatar" width={48} height={48} className="object-cover w-full h-full" />
+                      ) : (
+                        <User className="w-6 h-6" />
+                      )}
+                  </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold truncate">
                         {loadingUser ? "..." : consumer?.name ?? "Usuario"}
@@ -341,6 +366,33 @@ export default function Navbar() {
                       <div className="text-xs text-blue-100">Beneficiario</div>
                     </div>
                   </div>
+                  {/* Barra de nivel */}
+                  {levelProfile && (
+                    <div className="mt-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <span
+                          className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: lvColors.badge, color: lvColors.text }}
+                        >
+                          {lvLabel}
+                        </span>
+                        <span className="text-[11px] text-white/60">
+                          {levelProfile.xpTotal.toLocaleString('es-CO')} XP
+                        </span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-700"
+                          style={{ width: `${lvPct}%`, background: lvColors.bar }}
+                        />
+                      </div>
+                      {levelProfile.currentLevel !== 'DIAMANTE' && (
+                        <p className="text-[10px] text-white/50 mt-1 text-right">
+                          {levelProfile.xpToNextLevel.toLocaleString('es-CO')} XP para el siguiente nivel
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="py-2">
                   <Link href="/explore/gamification" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 hover:text-purple-700 transition-all group">
@@ -628,8 +680,12 @@ export default function Navbar() {
         >
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-3xl text-white">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center shrink-0">
-                <User className="w-8 h-8" />
+              <div className="w-16 h-16 bg-white/20 rounded-full overflow-hidden flex items-center justify-center shrink-0">
+                {consumer?.avatarUrl ? (
+                  <Image src={consumer.avatarUrl} alt="Avatar" width={64} height={64} className="object-cover w-full h-full" />
+                ) : (
+                  <User className="w-8 h-8" />
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-lg truncate">
@@ -638,6 +694,33 @@ export default function Navbar() {
                 <div className="text-sm text-blue-100">Beneficiario</div>
               </div>
             </div>
+            {/* Barra de nivel mobile */}
+            {levelProfile && (
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span
+                    className="text-xs font-bold px-2.5 py-1 rounded-full"
+                    style={{ background: lvColors.badge, color: lvColors.text }}
+                  >
+                    {lvLabel}
+                  </span>
+                  <span className="text-xs text-white/60">
+                    {levelProfile.xpTotal.toLocaleString('es-CO')} XP
+                  </span>
+                </div>
+                <div className="h-2 rounded-full bg-white/20 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${lvPct}%`, background: lvColors.bar }}
+                  />
+                </div>
+                {levelProfile.currentLevel !== 'DIAMANTE' && (
+                  <p className="text-[11px] text-white/50 mt-1.5 text-right">
+                    {levelProfile.xpToNextLevel.toLocaleString('es-CO')} XP para el siguiente nivel
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           <div className="py-2 pb-20">
             <Link href="/explore/gamification" className="flex items-center gap-4 px-6 py-4 hover:bg-purple-50 active:bg-purple-100 transition-all" onClick={() => setOpenMenu(false)}>
@@ -674,6 +757,7 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      <XpRewardToast data={rewardData} onDismiss={dismiss} />
     </>
   );
 }

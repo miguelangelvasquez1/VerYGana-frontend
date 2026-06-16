@@ -2,17 +2,22 @@
 
 import React, { useState, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Loader2, Trophy } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import { useSurveyDetail, useSubmitSurvey } from '@/hooks/surveys/useSurvey';
 import QuestionRenderer from './QuestionRenderer';
 import SurveyCompletionScreen from './SurveyCompletionScreen';
 import type { AnswerRequest, SubmissionResult } from '@/types/survey.types';
+import type { XpRewardData } from '@/components/levels/XpRewardToast';
+import { levelService } from '@/services/LevelService';
 
 interface Props {
   surveyId: number;
   onClose: () => void;
+  showReward?: (data: XpRewardData) => void;
 }
 
-export default function SurveyPlayerModal({ surveyId, onClose }: Props) {
+export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Props) {
+  const { data: session } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Map<number, AnswerRequest>>(new Map());
   const [result, setResult] = useState<SubmissionResult | null>(null);
@@ -114,6 +119,28 @@ export default function SurveyPlayerModal({ surveyId, onClose }: Props) {
         answers: Array.from(answers.values()),
       });
       setResult(res);
+
+      if (showReward) {
+        const token = (session as any)?.accessToken as string | undefined;
+        if (token) {
+          Promise.all([
+            levelService.getProfile(token),
+            levelService.getHistory(token, 0, 1),
+          ])
+            .then(([profile, history]) => {
+              const lastTx = history.content[0];
+              showReward({
+                activityType: 'SURVEY_COMPLETED',
+                xpEarned: lastTx?.xpEarned ?? 0,
+                multiplier: lastTx?.multiplierApplied ?? profile.multiplier,
+                currentLevel: profile.currentLevel,
+                xpTotal: profile.xpTotal,
+                xpToNextLevel: profile.xpToNextLevel,
+              });
+            })
+            .catch(() => {});
+        }
+      }
     } catch {
       /* handled by mutation.isError */
     }

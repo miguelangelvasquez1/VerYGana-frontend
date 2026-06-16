@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Users, Gift, Trophy, Star, TrendingUp, UserPlus,
+  Users, Gift, Trophy, TrendingUp, UserPlus,
   Share2, CheckCircle, Clock, Loader2, MapPin, Ticket
 } from 'lucide-react';
 
@@ -10,15 +10,17 @@ import ReferralCodeBox      from '@/components/referrals/ReferralCodeBox';
 import ReferralQR           from '@/components/referrals/ReferralQR';
 import ReferralStatCard     from '@/components/referrals/ReferralStatCard';
 import ReferralShareButtons from '@/components/referrals/ReferralShareButtons';
-import ReferralTierCard     from '@/components/referrals/ReferralTierCard';
+import ReferralTierCard, { TIER_CONFIG } from '@/components/referrals/ReferralTierCard';
 import { type ReferralInfoDTO, type ReferralItemDTO, getMyReferrals } from '@/services/ReferralService';
 
 // ─── constantes ───────────────────────────────────────────────────────────────
 const TIERS = [
-  { level: 'Bronze',   minReferrals:  0, ticketsPerReferral: 1, color: 'from-amber-600 to-amber-800'   },
-  { level: 'Silver',   minReferrals:  5, ticketsPerReferral: 2, color: 'from-gray-400 to-gray-600'     },
-  { level: 'Gold',     minReferrals: 10, ticketsPerReferral: 3, color: 'from-yellow-400 to-yellow-600' },
-  { level: 'Platinum', minReferrals: 20, ticketsPerReferral: 4, color: 'from-purple-400 to-purple-600' },
+  { level: 'Bronce',    minReferrals:  0, ticketsPerReferral: 1, color: '' },
+  { level: 'Plata',     minReferrals:  5, ticketsPerReferral: 2, color: '' },
+  { level: 'Oro',       minReferrals: 10, ticketsPerReferral: 3, color: '' },
+  { level: 'Rubí',      minReferrals: 20, ticketsPerReferral: 4, color: '' },
+  { level: 'Esmeralda', minReferrals: 35, ticketsPerReferral: 5, color: '' },
+  { level: 'Diamante',  minReferrals: 50, ticketsPerReferral: 6, color: '' },
 ];
 
 const TABS = [
@@ -147,33 +149,43 @@ export default function ReferralPageShell({ info }: Props) {
           </div>
 
           {/* Progreso */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
-            <h3 className="text-xl font-semibold mb-6">Progreso al siguiente nivel</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Nivel actual: <span className="font-medium">{currentTier?.level}</span></span>
-                <span className="text-blue-600 font-medium">{info.totalReferrals} referidos</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500"
-                  style={{
-                    width: nextTier && currentTier
-                      ? `${((info.totalReferrals - currentTier.minReferrals) / (nextTier.minReferrals - currentTier.minReferrals)) * 100}%`
-                      : '100%',
-                  }}
-                />
-              </div>
-              {nextTier ? (
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>Siguiente: {nextTier.level} (+{nextTier.ticketsPerReferral} tickets/referido)</span>
-                  <span>{nextTier.minReferrals} referidos</span>
+          {(() => {
+            const cfg = currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce;
+            const { Icon: CurIcon } = cfg;
+            return (
+              <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: 'var(--border-radius-lg, 16px)', padding: '1.5rem' }}>
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                  <div>
+                    <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                      Nivel de referidos
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 20, fontWeight: 600 }}>{currentTier?.level ?? '—'}</span>
+                      <span style={{ fontSize: 12, fontWeight: 500, background: cfg.bg, color: cfg.text, padding: '2px 9px', borderRadius: 8 }}>
+                        ×{currentTier?.ticketsPerReferral ?? 1} tickets
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CurIcon style={{ width: 22, height: 22, color: cfg.bar }} />
+                  </div>
                 </div>
-              ) : (
-                <p className="text-sm text-purple-600 font-medium text-center">🎉 ¡Nivel máximo alcanzado!</p>
-              )}
-            </div>
-          </div>
+
+                {/* Métricas */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: '1rem' }}>
+                  <div style={{ background: 'var(--color-background-secondary)', borderRadius: 8, padding: 12 }}>
+                    <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>Referidos totales</p>
+                    <p style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{info.totalReferrals}</p>
+                  </div>
+                  <div style={{ background: 'var(--color-background-secondary)', borderRadius: 8, padding: 12 }}>
+                    <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>Tickets ganados</p>
+                    <p style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{totalTickets}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -346,39 +358,43 @@ export default function ReferralPageShell({ info }: Props) {
           </div>
 
           {/* Próximo nivel */}
-          <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl p-6 text-white">
-            <h3 className="text-xl font-semibold mb-4">
-              {nextTier ? `¡Próximo a alcanzar ${nextTier.level}!` : '¡Nivel máximo alcanzado!'}
-            </h3>
-            {nextTier ? (
-              <>
-                <p className="mb-6">
-                  Solo necesitas {nextTier.minReferrals - info.totalReferrals} referidos más para ganar{' '}
-                  <strong>{nextTier.ticketsPerReferral} tickets</strong> por cada referido.
-                </p>
-                <div className="bg-white/20 rounded-lg p-4 mb-6">
-                  <p className="text-sm mb-2">Progreso: {info.totalReferrals} / {nextTier.minReferrals}</p>
-                  <div className="w-full bg-white/20 rounded-full h-2">
-                    <div
-                      className="bg-white h-2 rounded-full transition-all duration-500"
-                      style={{ width: `${(info.totalReferrals / nextTier.minReferrals) * 100}%` }}
-                    />
-                  </div>
+          {(() => {
+            const nextCfg = nextTier ? (TIER_CONFIG[nextTier.level] ?? TIER_CONFIG.Diamante) : null;
+            const curCfg  = currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce;
+            const accentBar = nextCfg?.bar ?? curCfg.bar;
+            const accentBg  = nextCfg?.bg  ?? curCfg.bg;
+            const accentText = nextCfg?.text ?? curCfg.text;
+            const NextIcon = nextCfg?.Icon ?? Trophy;
+
+            return (
+              <div style={{ background: accentBg, border: `1.5px solid ${accentBar}44`, borderRadius: 'var(--border-radius-lg, 16px)', padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: accentText, margin: 0 }}>
+                    {nextTier ? `Próximo: ${nextTier.level}` : '¡Nivel máximo!'}
+                  </h3>
+                  <NextIcon style={{ width: 22, height: 22, color: accentBar }} />
                 </div>
-                <button
-                  onClick={() => setActiveTab('invite')}
-                  className="bg-white text-purple-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  Invitar más amigos
-                </button>
-              </>
-            ) : (
-              <div className="flex items-center gap-2 mt-2">
-                <Trophy className="w-6 h-6" />
-                <span className="font-bold">Nivel Platinum — 4 tickets por referido</span>
+
+                {nextTier ? (
+                  <>
+                    <p style={{ fontSize: 13, color: accentText, opacity: 0.85, marginBottom: 14 }}>
+                      Gana <strong>{nextTier.ticketsPerReferral} tickets</strong> por cada referido al alcanzar este nivel.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('invite')}
+                      style={{ background: accentBar, color: 'white', fontWeight: 600, fontSize: 14, padding: '10px 20px', borderRadius: 10, border: 'none', cursor: 'pointer' }}
+                    >
+                      Invitar más amigos
+                    </button>
+                  </>
+                ) : (
+                  <p style={{ fontSize: 13, color: accentText, opacity: 0.85, margin: 0 }}>
+                    Platinum — {currentTier?.ticketsPerReferral} tickets por referido. ¡Felicitaciones!
+                  </p>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })()}
 
           {/* Términos */}
           <div className="bg-white rounded-xl p-6 shadow-sm border">

@@ -26,6 +26,7 @@ export interface ConsumerInitialDataResponseDTO {
     connectivityKeys : number;
     blockedPurchaseKeys : number;
     blockedConnectivityKeys : number;
+    avatarUrl: string | null
 }
 
 export interface ConsumerProfileResponseDTO {

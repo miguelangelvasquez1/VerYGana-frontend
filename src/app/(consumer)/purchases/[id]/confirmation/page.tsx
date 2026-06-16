@@ -2,16 +2,22 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 
 import { purchaseService } from '@/services/PurchaseService';
 import { PurchaseResponseDTO } from '@/types/purchases/purchase.types';
+import { useXpReward } from '@/hooks/useXpReward';
+import { XpRewardToast } from '@/components/levels/XpRewardToast';
+import { levelService } from '@/services/LevelService';
 
 type Status = 'loading' | 'success' | 'error';
 
 export default function PurchaseConfirmationPage() {
   const { purchaseId } = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
+  const { rewardData, showReward, dismiss } = useXpReward();
 
   const [status, setStatus] = useState<Status>('loading');
   const [errorMessage, setErrorMessage] = useState('');
@@ -42,6 +48,35 @@ export default function PurchaseConfirmationPage() {
 
     fetchPurchase();
   }, [purchaseId]);
+
+  // Mostrar XP animation al confirmar la compra (una vez por purchaseId)
+  useEffect(() => {
+    if (status !== 'success' || !purchase) return;
+    const token = (session as any)?.accessToken as string | undefined;
+    if (!token) return;
+
+    const seenKey = `xp_seen_purchase_${purchase.id}`;
+    if (sessionStorage.getItem(seenKey)) return;
+
+    Promise.all([
+      levelService.getProfile(token),
+      levelService.getHistory(token, 0, 5),
+    ])
+      .then(([profile, history]) => {
+        const tx = history.content.find(t => t.activityType === 'PURCHASE');
+        if (!tx) return;
+        sessionStorage.setItem(seenKey, '1');
+        showReward({
+          activityType: 'PURCHASE',
+          xpEarned: tx.xpEarned,
+          multiplier: tx.multiplierApplied,
+          currentLevel: profile.currentLevel,
+          xpTotal: profile.xpTotal,
+          xpToNextLevel: profile.xpToNextLevel,
+        });
+      })
+      .catch(() => {});
+  }, [status, purchase, session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -83,7 +118,7 @@ export default function PurchaseConfirmationPage() {
               </p>
               <p>
                 <strong>Total pagado:</strong>{' '}
-                ${purchase.total.toLocaleString()}
+                ${(purchase.totalCents / 100).toLocaleString()}
               </p>
             </div>
 
@@ -143,6 +178,7 @@ export default function PurchaseConfirmationPage() {
         )}
       </main>
 
+      <XpRewardToast data={rewardData} onDismiss={dismiss} />
     </div>
   );
 }
