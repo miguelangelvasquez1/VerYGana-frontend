@@ -7,7 +7,7 @@ export default function ConsumerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen">
       <Navbar />
 
       <main className="flex-1 bg-gray-100">

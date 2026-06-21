@@ -19,6 +19,8 @@ interface CartContextType {
     name: string;
     imageUrl: string;
     price: number;
+    maxKeysAllowed: number;
+    minCashCents: number;
     stock: number;
     categoryName: string;
   }, quantity?: number) => void;
@@ -55,6 +57,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       name: string;
       imageUrl: string;
       price: number;
+      maxKeysAllowed: number;
+      minCashCents: number;
       stock: number;
       categoryName: string;
     },

@@ -54,28 +54,34 @@ export function useSurveyDetail(surveyId: number, submitted = false) {
   });
 }
 
+// ─── Start survey session ─────────────────────────────────────────────────────
+
+/**
+ * Creates (or resumes) an active session for a survey.
+ * Returns sessionId, expiresAt, and the full survey with questions.
+ */
+export function useStartSurvey() {
+  return useMutation({
+    mutationFn: (surveyId: number) => surveyService.startSurvey(surveyId),
+  });
+}
+
 // ─── Submit survey ────────────────────────────────────────────────────────────
 
 /**
  * Submits all answers in one request and collects the reward.
- *
- * On success:
- *  - Invalidates the available surveys list (completed survey disappears).
- *  - Removes the detail from cache (prevents re-entry).
- *  - Invalidates rewards summary (new total earned).
+ * surveyId is passed separately for cache invalidation only (not sent to API).
  */
-export function useSubmitSurvey() {
+export function useSubmitSurvey(surveyId: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: SubmitSurveyRequest) =>
       surveyService.submitSurvey(payload),
 
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: surveyKeys.lists() });
-      queryClient.removeQueries({
-        queryKey: surveyKeys.detail(variables.surveyId),
-      });
+      queryClient.removeQueries({ queryKey: surveyKeys.detail(surveyId) });
       queryClient.invalidateQueries({ queryKey: surveyKeys.rewards() });
     },
   });

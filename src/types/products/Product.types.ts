@@ -19,8 +19,10 @@ export interface ProductSummaryResponseDTO {
   imageUrl: string;
   price: number;
   maxKeysAllowed: number;
+  maxKeysPct: number;
   minCashCents: number;
   averageRate : number;
+  reviewCount : number;
   categoryName : string;
   stock : number;
   status : ProductStatus;

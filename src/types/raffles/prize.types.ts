@@ -13,9 +13,8 @@ export interface CreatePrizeRequestDTO {
     prizeType: PrizeType;
     position: number;
     quantity: number;
-    requiresShipping: boolean;
-    estimatedDeliveryDays?: number | null;
-    redemptionInstructions?: string;
+    claimCode: string;
+    claimInstructions: string;
 }
 
 export interface PrizeUploadSlotDTO {

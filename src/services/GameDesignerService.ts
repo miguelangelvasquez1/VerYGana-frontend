@@ -1,0 +1,126 @@
+import apiClient from '@/lib/api/client';
+import type {
+  BrandingCategory,
+  BrandingCorporateResource,
+  BrandingMunicipality,
+  BrandingStatus,
+} from './BrandingRequestService';
+
+export interface DesignerProfile {
+  id: number;
+  userId: number;
+  name: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  bio: string | null;
+  designerCode: string;
+  campaignsDesigned: number;
+  canPublishDirectly: boolean;
+  joinedAt: string;
+}
+
+export interface DesignerBrandingSummary {
+  id: number;
+  status: BrandingStatus;
+  commercialName: string;
+  brandName: string;
+  gameName: string;
+  estimatedSessions: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GameSchema {
+  jsonSchema: Record<string, unknown>;
+  uiSchema: Record<string, unknown>;
+}
+
+export interface DesignerBrandingDetail {
+  id: number;
+  status: BrandingStatus;
+  commercialName: string;
+  brandName: string;
+  brandDescription: string;
+  targetUrl: string | null;
+  campaignGoal: string | null;
+  minAge: number | null;
+  maxAge: number | null;
+  targetGender: 'ALL' | 'MALE' | 'FEMALE' | null;
+  categories: BrandingCategory[];
+  targetMunicipalities: BrandingMunicipality[];
+  completionRewardCents: number | null;
+  maxRewardPerSessionCents: number | null;
+  adminNotes: string | null;
+  designerNotes: string | null;
+  corporateResources: BrandingCorporateResource[];
+  gameSchema: GameSchema | null;
+  gameConfig: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Public ───────────────────────────────────────────────────────────────────
+
+export const resetDesignerPassword = async (
+  email: string,
+  designerCode: string,
+  newPassword: string
+): Promise<void> => {
+  await apiClient.post('/game-designers/password/reset', { email, designerCode, newPassword });
+};
+
+// ─── Profile ──────────────────────────────────────────────────────────────────
+
+export const getDesignerProfile = async (): Promise<DesignerProfile> => {
+  const { data } = await apiClient.get('/game-designers/me');
+  return data;
+};
+
+export const updateDesignerProfile = async (dto: {
+  name?: string;
+  lastName?: string;
+  bio?: string;
+}): Promise<DesignerProfile> => {
+  const { data } = await apiClient.patch('/game-designers/me', dto);
+  return data;
+};
+
+export const changeDesignerPassword = async (dto: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<void> => {
+  await apiClient.patch('/game-designers/me/password', dto);
+};
+
+// ─── Requests ─────────────────────────────────────────────────────────────────
+
+export const getDesignerRequests = async (
+  signal?: AbortSignal
+): Promise<DesignerBrandingSummary[]> => {
+  const { data } = await apiClient.get('/game-designers/me/branding-requests', { signal });
+  return data;
+};
+
+export const getDesignerRequestDetail = async (
+  id: number,
+  signal?: AbortSignal
+): Promise<DesignerBrandingDetail> => {
+  const { data } = await apiClient.get(`/game-designers/me/branding-requests/${id}`, { signal });
+  return data;
+};
+
+export const saveGameConfig = async (
+  id: number,
+  config: Record<string, unknown>
+): Promise<void> => {
+  await apiClient.patch(`/game-designers/me/branding-requests/${id}/config`, { config });
+};
+
+export const saveDesignerNotes = async (id: number, notes: string): Promise<void> => {
+  await apiClient.patch(`/game-designers/me/branding-requests/${id}/notes`, { notes });
+};
+
+export const submitDesign = async (id: number): Promise<void> => {
+  await apiClient.post(`/game-designers/me/branding-requests/${id}/submit-design`);
+};

@@ -5,119 +5,153 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 interface Props {
   totalWinners: number
-  revealNumber?: number   // qué número de ganador se está revelando
-  isRevealing?: boolean   // true cuando es entre ganadores, false al inicio
+  totalTickets: number
+  maxTickets: number
+  revealNumber?: number
+  isRevealing?: boolean
 }
 
-function randomTicket(): string {
-  return String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')
+function randomTicket(max: number): string {
+  const digits = String(max).length
+  return String(Math.floor(Math.random() * max) + 1).padStart(digits, '0')
 }
 
-export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = false }: Props) {
-  const [ticket, setTicket] = useState(randomTicket())
-  const [speed, setSpeed] = useState(60)
-  const [phase, setPhase] = useState<'fast' | 'slowing' | 'suspense'>('fast')
+const MESSAGES_INITIAL = [
+  'Girando todos los boletos...',
+  'El destino decide...',
+  'Un boleto va a cambiar todo...',
+  '¡Cualquiera puede ser el ganador!',
+]
+
+function getSuspenseMessages(isRevealing: boolean, revealNumber: number, totalWinners: number) {
+  if (!isRevealing) return MESSAGES_INITIAL
+  return [
+    `Premio ${revealNumber} de ${totalWinners}...`,
+    'Girando los números...',
+    'El siguiente boleto está por salir...',
+    '¡El destino tiene la palabra!',
+  ]
+}
+
+// Velocidades progresivas: arranque rápido → frenado suave → suspenso
+const SPEED_STEPS = [
+  { at: 1000, speed:  75 },
+  { at: 2000, speed: 120 },
+  { at: 3000, speed: 200 },  // también: fase visual → 'slowing'
+  { at: 4000, speed: 320 },
+  { at: 5000, speed: 480 },
+  { at: 6000, speed: 650 },  // también: fase visual → 'suspense'
+]
+
+type Phase = 'fast' | 'slowing' | 'suspense'
+
+export function DrawingScreen({ totalWinners, totalTickets, maxTickets, revealNumber = 1, isRevealing = false }: Props) {
+  const [ticket, setTicket]       = useState(() => randomTicket(maxTickets || 9999))
+  const [phase, setPhase]         = useState<Phase>('fast')
+  const [spinSpeed, setSpinSpeed] = useState(55)
+  const [msgIndex, setMsgIndex]   = useState(0)
   const elapsed = useRef(0)
 
+  // Progresión de fases + velocidad gradual cada 500 ms
   useEffect(() => {
-    // Máquina de estados de la animación
-    const phaseTimer = setInterval(() => {
+    const timer = setInterval(() => {
       elapsed.current += 500
-
+      for (const step of SPEED_STEPS) {
+        if (elapsed.current === step.at) { setSpinSpeed(step.speed); break }
+      }
       if (elapsed.current === 3000) setPhase('slowing')
       if (elapsed.current === 6000) setPhase('suspense')
     }, 500)
-
-    return () => clearInterval(phaseTimer)
+    return () => clearInterval(timer)
   }, [])
 
-  // Velocidad según fase
+  // Velocidad de giro según spinSpeed
   useEffect(() => {
-    if (phase === 'fast') setSpeed(60)
-    if (phase === 'slowing') setSpeed(prev => Math.min(prev + 25, 350))
-    if (phase === 'suspense') setSpeed(600)
-  }, [phase])
-
-  // Ticker central
-  useEffect(() => {
-    const interval = setInterval(() => setTicket(randomTicket()), speed)
+    const interval = setInterval(() => setTicket(randomTicket(maxTickets || 9999)), spinSpeed)
     return () => clearInterval(interval)
-  }, [speed])
+  }, [spinSpeed, maxTickets])
 
-  const suspenseMessages = isRevealing
-    ? [
-      `Premio ${revealNumber} de ${totalWinners}...`,
-      'Girando los números...',
-      'El siguiente boleto está por salir...'
-    ]
-    : [
-      'Girando todos los boletos...',
-      'El destino decide...',
-      'Un boleto va a cambiar todo...'
-    ]
-  const [msgIndex, setMsgIndex] = useState(0)
-
+  // Rotar mensajes de suspenso
   useEffect(() => {
-    const phaseTimer = setInterval(() => {
-      elapsed.current += 500
+    if (phase !== 'suspense') return
+    const messages = getSuspenseMessages(isRevealing, revealNumber, totalWinners)
+    const timer = setInterval(() => {
+      setMsgIndex(i => (i + 1) % messages.length)
+    }, 2200)
+    return () => clearInterval(timer)
+  }, [phase, isRevealing, revealNumber, totalWinners])
 
-      if (elapsed.current === 4000) setPhase('slowing')  // empieza a desacelerar a los 4s
-      if (elapsed.current === 7000) setPhase('suspense') // suspense en los últimos 1s
-    }, 500)
-
-    return () => clearInterval(phaseTimer)
-  }, [])
+  const suspenseMessages = getSuspenseMessages(isRevealing, revealNumber, totalWinners)
+  const isSuspense = phase === 'suspense'
 
   return (
-    <div className="flex flex-col items-center gap-12 text-center w-full max-w-lg">
+    <div className="flex flex-col items-center gap-10 text-center w-full max-w-2xl lg:max-w-5xl">
 
       {/* Badge pulsante */}
       <motion.div
         animate={{ opacity: [1, 0.4, 1] }}
-        transition={{ duration: 1.2, repeat: Infinity }}
-        className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/30"
+        transition={{ duration: isSuspense ? 0.7 : 1.2, repeat: Infinity }}
+        className="flex items-center gap-2.5 px-6 py-2.5 lg:px-8 lg:py-3 rounded-full bg-blue-50 border border-blue-200"
       >
-        <span className="w-2 h-2 rounded-full bg-violet-400 animate-ping" />
-        <span className="text-violet-300 text-sm font-medium tracking-wide uppercase">
+        <motion.span
+          animate={{ scale: isSuspense ? [1, 1.4, 1] : 1 }}
+          transition={{ duration: 0.7, repeat: Infinity }}
+          className="w-2.5 h-2.5 rounded-full bg-blue-500"
+        />
+        <span className="text-blue-700 text-base lg:text-xl font-medium tracking-wide uppercase">
           Sorteo en curso
         </span>
       </motion.div>
 
-      {/* Ticker de boleta GRANDE — el foco principal */}
-      <div className="relative">
-        {/* Halo animado detrás */}
+      {/* Ticker de boleta */}
+      <div className="relative w-full">
         <motion.div
-          animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute inset-0 rounded-3xl bg-violet-600/20 blur-xl"
+          animate={{
+            scale: isSuspense ? [1, 1.35, 1] : [1, 1.15, 1],
+            opacity: isSuspense ? [0.5, 0.9, 0.5] : [0.3, 0.6, 0.3],
+          }}
+          transition={{ duration: isSuspense ? 0.75 : 1.5, repeat: Infinity }}
+          className={`absolute inset-0 rounded-3xl blur-xl transition-colors duration-700 ${
+            isSuspense ? 'bg-blue-500/25' : 'bg-blue-500/10'
+          }`}
         />
-        <div className="relative bg-white/5 border border-violet-500/40 rounded-3xl px-16 py-10">
-          <p className="text-gray-500 text-xs uppercase tracking-widest mb-3">Boleta</p>
+
+        <motion.div
+          animate={isSuspense ? { boxShadow: ['0 0 0px #3b82f6', '0 0 28px #3b82f6', '0 0 0px #3b82f6'] } : {}}
+          transition={{ duration: 0.75, repeat: Infinity }}
+          className={`relative bg-white shadow-lg rounded-3xl px-6 py-8 lg:px-14 lg:py-12 transition-colors duration-500 ${
+            isSuspense ? 'border-2 border-blue-400' : 'border border-blue-200'
+          }`}
+        >
+          <p className="text-gray-400 text-sm lg:text-xl uppercase tracking-widest mb-4">Boleta</p>
           <AnimatePresence mode="popLayout">
             <motion.p
               key={ticket}
-              initial={{ y: phase === 'fast' ? -8 : -20, opacity: 0 }}
+              initial={{ y: phase === 'fast' ? -8 : -22, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: phase === 'fast' ? 8 : 20, opacity: 0 }}
-              transition={{ duration: phase === 'suspense' ? 0.4 : 0.06 }}
-              className="text-7xl font-black text-white font-mono tracking-widest"
+              exit={{ y: phase === 'fast' ? 8 : 22, opacity: 0 }}
+              transition={{ duration: isSuspense ? 0.45 : 0.06 }}
+              className={`text-[clamp(2.5rem,13vw,10rem)] font-black font-mono tracking-widest transition-colors duration-300 leading-none whitespace-nowrap ${
+                isSuspense ? 'text-blue-700' : 'text-gray-900'
+              }`}
             >
               #{ticket}
             </motion.p>
           </AnimatePresence>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Mensaje de suspenso */}
-      <div className="h-8">
+      {/* Mensaje */}
+      <div className="h-12 lg:h-16 flex items-center justify-center">
         <AnimatePresence mode="wait">
-          {phase === 'suspense' ? (
+          {isSuspense ? (
             <motion.p
-              key={msgIndex}
+              key={`msg-${msgIndex}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-violet-300 text-lg font-semibold"
+              transition={{ duration: 0.4 }}
+              className="text-blue-600 text-2xl lg:text-4xl font-semibold"
             >
               {suspenseMessages[msgIndex]}
             </motion.p>
@@ -126,16 +160,15 @@ export function DrawingScreen({ totalWinners, revealNumber = 1, isRevealing = fa
               key="selecting"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-gray-500 text-sm"
+              className="text-gray-500 text-lg lg:text-2xl"
             >
-              Seleccionando entre {(10000).toLocaleString()} boletas...
+              Seleccionando entre {(totalTickets || maxTickets).toLocaleString()} boletas generadas...
             </motion.p>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Info */}
-      <p className="text-gray-600 text-xs">
+      <p className="text-gray-400 text-base lg:text-xl">
         {isRevealing
           ? `Ganador ${revealNumber} de ${totalWinners}`
           : `${totalWinners} ${totalWinners === 1 ? 'ganador' : 'ganadores'} por revelar`

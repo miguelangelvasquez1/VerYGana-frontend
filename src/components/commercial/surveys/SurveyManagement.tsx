@@ -2,16 +2,16 @@
 
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useCommercialSurveys } from '@/hooks/surveys/useCommercialSurvey';
 import SurveyTable from './SurveyTable';
-import SurveyFormModal from './SurveyFormModal';
 import SurveyStatusFilter from './SurveyStatusFIlter';
 import type { SurveyStatus } from '@/types/survey.types';
 
 export default function SurveyManagement() {
+  const router = useRouter();
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<SurveyStatus | undefined>();
-  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const { data, isLoading, isError } = useCommercialSurveys(page, 10, statusFilter);
 
@@ -29,8 +29,8 @@ export default function SurveyManagement() {
         </div>
 
         <button
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 active:scale-95 transition-all"
+          onClick={() => router.push('/commercial/surveys/new')}
+          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 active:scale-95 transition-all cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Nueva encuesta
@@ -59,11 +59,6 @@ export default function SurveyManagement() {
           totalPages={data?.meta.totalPages ?? 0}
           onPageChange={setPage}
         />
-      )}
-
-      {/* ── Create Modal ────────────────────────────────────────────────────── */}
-      {showCreateModal && (
-        <SurveyFormModal onClose={() => setShowCreateModal(false)} />
       )}
     </div>
   );

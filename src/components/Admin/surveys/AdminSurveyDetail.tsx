@@ -233,7 +233,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
             <StatCard
               icon={<Award className="h-4 w-4 text-indigo-400" />}
               label="Recompensa"
-              value={formatReward(survey.rewardAmount)}
+              value={formatReward(survey.rewardAmountPerQuestionCents / 100)}
             />
             <StatCard
               icon={<FileEdit className="h-4 w-4 text-indigo-400" />}

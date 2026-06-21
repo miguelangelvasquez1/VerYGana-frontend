@@ -1,12 +1,16 @@
+export enum TicketEarningRuleType {
+    PURCHASE = "PURCHASE",
+    DAILY_LOGIN = "DAILY_LOGIN",
+    REFERRAL = "REFERRAL"
+}   
 
 export interface CreateTicketEarningRuleRequestDTO {
     ruleName: string;
     description: string;
-    ruleType : 'PURCHASE' | 'ADS_WATCHED'| 'GAME_ACHIEVEMENT' | 'REFERRAL';
+    ruleType: TicketEarningRuleType;
     priority: number;
     minPurchaseAmount?: number;
-    minAdsWatched?: number;
-    achievementType?: string;
+    dailyLogin?: boolean;
     referralAddedQuantity?: number;
     ticketsToAward: number;
 }
@@ -14,12 +18,11 @@ export interface CreateTicketEarningRuleRequestDTO {
 export interface UpdateTicketEarningRuleRequestDTO {
     ruleName: string;
     description: string;
-    ruleType : 'PURCHASE' | 'ADS_WATCHED'| 'GAME_ACHIEVEMENT' | 'REFERRAL';
+    ruleType: TicketEarningRuleType;
     priority: number;
     ticketsToAward: number;
     minPurchaseAmount?: number;
-    minAdsWatched?: number;
-    achievementType?: string;
+    dailyLogin?: boolean;
     referralAddedQuantity?: number;
 }
 
@@ -27,13 +30,12 @@ export interface TicketEarningRuleResponseDTO {
     id: number;
     ruleName: string;
     description: string;
-    ruleType : 'PURCHASE' | 'ADS_WATCHED'| 'GAME_ACHIEVEMENT' | 'REFERRAL';
+    ruleType : TicketEarningRuleType;
     isActive: boolean;
     priority: number;
     ticketsToAward: number;
     minPurchaseAmount: number | null;
-    minAdsWatched: number | null;
-    achievementType: string | null;
+    dailyLogin: boolean | null;
     referralAddedQuantity: number | null;
     createdAt: string;
     updatedAt: string;

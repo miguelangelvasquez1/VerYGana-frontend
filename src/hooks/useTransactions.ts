@@ -1,70 +1,53 @@
 import { useEffect, useState } from "react";
 import {
-  getTransactionsByFilter,
-  getByReferenceCode,
-} from "@/services/TransactionService";
-import { getMyWallet } from "@/services/WalletService";
-import { TransactionResponseDTO } from "@/types/transaction.types";
+    getMyKeyTransactions,
+    getTotalEarnedKeys,
+    getTotalUsedKeys,
+    getTotalExpiredKeys,
+    KeyTxParams,
+} from "@/services/KeyTransactionService";
+import { getConsumerAvailableKeys } from "@/services/ConsumerService";
+import { KeyTransactionResponseDTO } from "@/types/KeyTransaction.types";
 
-interface Filters {
-  type?: string;
-  state?: string;
-  reference?: string;
-  page?: number;
-  size?: number;
+export type KeyTxFilters = KeyTxParams;
+
+export interface KeyStats {
+    availableKeys: number;
+    totalEarned: number;
+    totalUsed: number;
+    totalExpired: number;
 }
 
-export const useTransactions = () => {
-  const [transactions, setTransactions] = useState<TransactionResponseDTO[]>([]);
-  const [walletBalance, setWalletBalance] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
+export const useKeyTransactions = () => {
+    const [transactions, setTransactions] = useState<KeyTransactionResponseDTO[]>([]);
+    const [stats, setStats] = useState<KeyStats>({ availableKeys: 0, totalEarned: 0, totalUsed: 0, totalExpired: 0 });
+    const [totalPages, setTotalPages] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [filters, setFilters] = useState<KeyTxFilters>({ page: 0, size: 20 });
 
-  const [filters, setFilters] = useState<Filters>({
-    page: 0,
-    size: 10,
-  });
+    useEffect(() => {
+        Promise.all([
+            getConsumerAvailableKeys(),
+            getTotalEarnedKeys(),
+            getTotalUsedKeys(),
+            getTotalExpiredKeys(),
+        ])
+            .then(([available, earned, used, expired]) =>
+                setStats({ availableKeys: available, totalEarned: earned, totalUsed: used, totalExpired: expired })
+            )
+            .catch(console.error);
+    }, []);
 
-  const fetchTransactions = async () => {
-    setLoading(true);
-    try {
-      const walletPromise = getMyWallet();
+    useEffect(() => {
+        setLoading(true);
+        getMyKeyTransactions(filters)
+            .then(res => {
+                setTransactions(res.data);
+                setTotalPages(res.meta.totalPages);
+            })
+            .catch(() => setTransactions([]))
+            .finally(() => setLoading(false));
+    }, [filters]);
 
-      let txResponse;
-
-      // 🔍 BÚSQUEDA POR REFERENCIA
-      if (filters.reference && filters.reference.trim() !== "") {
-        txResponse = await getByReferenceCode(
-          filters.reference,
-          filters.page,
-          filters.size
-        );
-      }
-      // 📄 LISTADO NORMAL
-      else {
-        txResponse = await getTransactionsByFilter(filters);
-      }
-
-      const wallet = await walletPromise;
-
-      setTransactions(txResponse.data);
-      setWalletBalance(wallet.balance);
-    } catch (error) {
-      console.error("Error cargando transacciones:", error);
-      setTransactions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTransactions();
-  }, [filters]);
-
-  return {
-    transactions,
-    walletBalance,
-    loading,
-    filters,
-    setFilters,
-  };
+    return { transactions, stats, totalPages, loading, filters, setFilters };
 };

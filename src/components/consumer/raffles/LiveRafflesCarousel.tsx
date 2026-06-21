@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getLiveRaffles } from "@/services/raffleService";
-import { RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
+import { RaffleSummaryResponseDTO, RaffleStatus } from "@/types/raffles/raffle.types";
 import Link from "next/link";
 
 const AUTO_PLAY_INTERVAL = 5000;
@@ -50,68 +50,209 @@ export default function LiveRafflesCarousel() {
 
   if (loading) {
     return (
-      <div className="w-full h-[420px] bg-gray-200 animate-pulse rounded-2xl" />
+      <div
+        className="w-full h-64 sm:h-80 md:h-105 rounded-2xl animate-pulse"
+        style={{ background: "linear-gradient(135deg, #014C92 0%, #1EA5BD 60%, #7c3aed 100%)" }}
+      />
     );
   }
 
-  if (raffles.length === 0) return null;
+  if (raffles.length === 0) {
+    return (
+      <div
+        className="relative w-full h-64 sm:h-80 md:h-105 rounded-2xl overflow-hidden shadow-xl flex flex-col items-center justify-center text-white"
+        style={{ background: "linear-gradient(135deg, #014C92 0%, #1EA5BD 50%, #7c3aed 100%)" }}
+      >
+        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-yellow-400/10 blur-3xl" />
+
+        <div className="relative z-10 text-center px-8">
+          <div className="text-5xl md:text-7xl mb-5">🎯</div>
+
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-5">
+            <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+            <span className="text-sm font-semibold tracking-widest">EN VIVO</span>
+          </div>
+
+          <h2 className="text-2xl md:text-3xl font-extrabold mb-3">No hay sorteos en vivo</h2>
+          <p className="text-white/70 text-sm md:text-base max-w-sm mx-auto leading-relaxed">
+            Los sorteos en tiempo real aparecerán aquí cuando estén activos. ¡Vuelve pronto!
+          </p>
+
+          <div className="mt-7 flex gap-2.5 justify-center">
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce [animation-delay:0ms]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce [animation-delay:150ms]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce [animation-delay:300ms]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const raffle = raffles[currentIndex];
+  const isLive = raffle.raffleStatus === RaffleStatus.LIVE;
 
   return (
-    <div className="relative w-full h-[420px] rounded-2xl overflow-hidden shadow-lg">
-      {/* Imagen fondo */}
+    <div className="relative w-full h-64 sm:h-80 md:h-105 rounded-2xl overflow-hidden shadow-xl">
+      {/* Background image */}
       <img
         src={raffle.imageUrl}
         alt={raffle.title}
         className="w-full h-full object-cover"
       />
 
-      {/* Overlay oscuro */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+      {/* Gradient overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: isLive
+            ? "linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)"
+            : "linear-gradient(to right, rgba(1,76,146,0.92) 0%, rgba(30,165,189,0.55) 55%, transparent 100%)",
+        }}
+      />
 
-      {/* Contenido */}
-      <div className="absolute inset-0 flex flex-col justify-center px-10 text-white">
-        <span className="text-2xl bg-red-500 text-white px-3 py-1 rounded-full w-fit mb-3 font-semibold">
-         en vivo
-        </span>
+      {/* Mobile: bottom frosted card */}
+      <div className="absolute inset-x-0 bottom-0 md:hidden">
+        <div className="px-4 pt-3 pb-4 text-white">
+          <div className="mb-2">
+            <span className="inline-flex items-center gap-1.5 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg shadow-red-500/40">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              EN VIVO
+            </span>
+          </div>
 
-        <h2 className="text-4xl md:text-5xl font-extrabold max-w-2xl leading-tight">
-          {raffle.title}
-        </h2>
+          <h2 className="text-base font-extrabold leading-tight mb-2 line-clamp-1">
+            {raffle.title}
+          </h2>
 
-        <div className="mt-4 space-y-1 text-sm text-gray-200">
-          <p>👥 {raffle.totalParticipants} participantes</p>
-          <p>🎟️ {raffle.totalTicketsIssued} boletos generados</p>
-          <p>🏆 {raffle.prizeCount} premios</p>
+          <div className="flex flex-wrap gap-1.5 text-xs mb-3">
+            <span className="inline-flex items-center gap-1 bg-white/15 px-2 py-1 rounded-lg border border-white/20">
+              👥 {raffle.totalParticipants} participantes
+            </span>
+            <span className="inline-flex items-center gap-1 bg-white/15 px-2 py-1 rounded-lg border border-white/20">
+              🎟️ {raffle.totalTicketsIssued} boletos
+            </span>
+            <span className="inline-flex items-center gap-1 bg-white/15 px-2 py-1 rounded-lg border border-white/20">
+              🏆 {raffle.prizeCount} premios
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-white/70 text-xs shrink-0">⏳ Inicia en:</span>
+              <span className="text-yellow-400 text-sm font-bold truncate">
+                {getTimeRemaining(raffle.drawDate)}
+              </span>
+            </div>
+
+            <Link
+              href={`/raffles/${raffle.id}/live`}
+              className="shrink-0 inline-flex items-center gap-1.5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2 rounded-xl transition-all shadow-lg shadow-yellow-400/30 text-sm"
+            >
+              Ver sorteo →
+            </Link>
+          </div>
         </div>
-
-        {/* Countdown */}
-        <div className="mt-6 text-lg font-semibold">
-          ⏳ Inicia en:{" "}
-          <span className="text-yellow-400">
-            {getTimeRemaining(raffle.drawDate)}
-          </span>
-        </div>
-
-        {/* CTA */}
-        <Link
-          href={`/raffles/${raffle.id}/live`}
-          className="mt-6 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-2 rounded-xl w-fit transition">
-          Ver sorteo
-        </Link>
       </div>
 
-      {/* Indicadores */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-        {raffles.map((_, index) => (
-          <div
-            key={index}
-            className={`w-2 h-2 rounded-full ${index === currentIndex ? "bg-yellow-400" : "bg-white/50"
+      {/* Desktop: left side content */}
+      <div className="absolute inset-0 hidden md:flex flex-col justify-center px-10 lg:px-12 text-white">
+        {isLive ? (
+          /* LIVE: text directly over image, drop-shadow for readability */
+          <div className="max-w-sm lg:max-w-md">
+            <div className="mb-4">
+              <span className="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg shadow-red-500/40">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                EN VIVO
+              </span>
+            </div>
+
+            <h2 className="text-3xl lg:text-4xl font-extrabold leading-tight">
+              {raffle.title}
+            </h2>
+
+            <div className="mt-4 flex flex-wrap gap-2 text-sm">
+              <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1.5 rounded-lg border border-white/20">
+                👥 {raffle.totalParticipants} participantes
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1.5 rounded-lg border border-white/20">
+                🎟️ {raffle.totalTicketsIssued} boletos
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1.5 rounded-lg border border-white/20">
+                🏆 {raffle.prizeCount} premios
+              </span>
+            </div>
+
+            <div className="mt-4 flex items-center gap-3">
+              <span className="text-white/70 text-sm">⏳ Inicia en:</span>
+              <span className="text-yellow-400 text-xl font-bold">
+                {getTimeRemaining(raffle.drawDate)}
+              </span>
+            </div>
+
+            <Link
+              href={`/raffles/${raffle.id}/live`}
+              className="mt-5 inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-7 py-3 rounded-xl w-fit transition-all shadow-lg shadow-yellow-400/30 text-base"
+            >
+              Ver sorteo →
+            </Link>
+          </div>
+        ) : (
+          /* Non-LIVE: text over the gradient overlay */
+          <div className="max-w-lg">
+            <div className="mb-4">
+              <span className="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg shadow-red-500/40">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                EN VIVO
+              </span>
+            </div>
+
+            <h2 className="text-4xl lg:text-5xl font-extrabold leading-tight drop-shadow-lg">
+              {raffle.title}
+            </h2>
+
+            <div className="mt-5 flex flex-wrap gap-3 text-sm">
+              <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1.5 rounded-lg border border-white/20">
+                👥 {raffle.totalParticipants} participantes
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1.5 rounded-lg border border-white/20">
+                🎟️ {raffle.totalTicketsIssued} boletos
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-white/15 px-3 py-1.5 rounded-lg border border-white/20">
+                🏆 {raffle.prizeCount} premios
+              </span>
+            </div>
+
+            <div className="mt-5 flex items-center gap-3">
+              <span className="text-white/70 text-sm">⏳ Inicia en:</span>
+              <span className="text-yellow-400 text-xl font-bold">
+                {getTimeRemaining(raffle.drawDate)}
+              </span>
+            </div>
+
+            <Link
+              href={`/raffles/${raffle.id}/live`}
+              className="mt-6 inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-8 py-3 rounded-xl w-fit transition-all shadow-lg shadow-yellow-400/30 text-base"
+            >
+              Ver sorteo →
+            </Link>
+          </div>
+        )}
+      </div>
+
+      {/* Indicators — desktop only to avoid overlap with mobile bottom card */}
+      {raffles.length > 1 && (
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 hidden md:flex gap-2">
+          {raffles.map((_, index) => (
+            <div
+              key={index}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex ? "w-7 bg-yellow-400" : "w-2 bg-white/40"
               }`}
-          />
-        ))}
-      </div>
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

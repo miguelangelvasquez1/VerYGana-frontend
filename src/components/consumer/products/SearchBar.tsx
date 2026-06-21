@@ -27,11 +27,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Buscar por nombre, descripción..."
-        className="text-black flex-1 px-4 py-2 rounded-md"
+        className="text-black flex-1 px-4 py-2 rounded-md outline-none focus:outline-none"
       />
       <button
         onClick={handleSearch}
-        className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md "
+        className="cursor-pointer px-4 py-2 text-white rounded-md" style={{ background: "#014C92" }}
       >
         Buscar
       </button>

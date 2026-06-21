@@ -1,4 +1,3 @@
-// app/raffles/[id]/live/RaffleLiveClient.tsx
 'use client'
 
 import { useEffect } from 'react'
@@ -21,97 +20,82 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
   const router = useRouter()
   const {
     currentPhase,
-    isConnected,
     waitingRoom,
     revealedWinners,
     totalWinners,
+    totalTickets,
+    maxTickets,
     drawCompleted,
     errorMessage,
     announcementLabel,
+    announcementPosition,
   } = useRaffleDraw(raffleId)
 
-  // Redirección automática 15 segundos después de que termine el sorteo
   useEffect(() => {
     if (currentPhase !== DrawEventType.DRAW_COMPLETED) return
-    const timer = setTimeout(() => router.push('/raffles'), 15_000)
+    const timer = setTimeout(() => router.push('/raffles'), 20_000)
     return () => clearTimeout(timer)
   }, [currentPhase, router])
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center p-4">
-
-      {/* Badge de conexión */}
-      <div className="fixed top-4 right-4 flex items-center gap-2">
-        <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
-        <span className="text-xs text-gray-400">
-          {isConnected ? 'En vivo' : 'Reconectando...'}
-        </span>
-      </div>
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center p-4 lg:p-10">
 
       {/* Título de la rifa */}
-      <p className="text-gray-400 text-sm mb-8 tracking-wide uppercase">
+      <p className="text-gray-500 text-base lg:text-xl mb-8 tracking-wide uppercase text-center">
         {raffle.title}
       </p>
 
-      {/* Pantalla activa según la fase — AnimatePresence maneja las transiciones */}
+      {/* Pantalla activa — AnimatePresence maneja transiciones */}
       <AnimatePresence mode="wait">
+
+        {/* WaitingRoom: solo mientras el countdown no ha llegado a 0 */}
         {currentPhase === DrawEventType.WAITING_ROOM_UPDATE && waitingRoom && (
-          <motion.div key="waiting"
+          <motion.div key="waiting" className="w-full flex justify-center"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
             <WaitingRoomScreen payload={waitingRoom} />
           </motion.div>
         )}
 
-        {currentPhase === DrawEventType.DRAWING_STARTED && (
-          <motion.div key="drawing"
+        {/* DrawingScreen: DRAWING_STARTED (inmediato tras "¡Ya!") y REVEALING (por ganador)
+            comparten key="drawing" → no hay exit/enter entre fases, animación continua.
+            DrawingScreen recibe una key interna para resetear el timer por cada ganador. */}
+        {(currentPhase === DrawEventType.DRAWING_STARTED ||
+          currentPhase === DrawEventType.REVEALING) && (
+          <motion.div key="drawing" className="w-full flex justify-center"
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }} transition={{ duration: 0.3 }}>
-            <DrawingScreen totalWinners={totalWinners} />
-          </motion.div>
-        )}
-
-        {currentPhase === DrawEventType.ANNOUNCING && (
-          <motion.div key="announcing"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.4 }}
-          >
-            <AnnouncingScreen label={announcementLabel} />
-          </motion.div>
-        )}
-
-        {currentPhase === DrawEventType.REVEALING && (
-          <motion.div key="revealing"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.3 }}
-          >
+            exit={{ opacity: 0, scale: 1.05 }} transition={{ duration: 0.35 }}>
             <DrawingScreen
               totalWinners={totalWinners}
-              revealNumber={revealedWinners.length + 1}  // "Revelando ganador 2 de 3"
-              isRevealing={true}
+              totalTickets={totalTickets}
+              maxTickets={maxTickets}
+              revealNumber={currentPhase === DrawEventType.REVEALING ? revealedWinners.length + 1 : 1}
+              isRevealing={currentPhase === DrawEventType.REVEALING}
             />
           </motion.div>
         )}
 
-        {(currentPhase === DrawEventType.WINNER_REVEALED ||
-          currentPhase === DrawEventType.DRAWING_STARTED) &&
-          revealedWinners.length > 0 && (
-            <motion.div key="reveal"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-              <WinnerRevealScreen
-                winners={revealedWinners}
-                totalWinners={totalWinners}
-              />
-            </motion.div>
-          )}
+        {currentPhase === DrawEventType.ANNOUNCING && (
+          <motion.div key="announcing" className="w-full flex justify-center"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }} transition={{ duration: 0.4 }}>
+            <AnnouncingScreen label={announcementLabel} position={announcementPosition} />
+          </motion.div>
+        )}
+
+        {currentPhase === DrawEventType.WINNER_REVEALED && revealedWinners.length > 0 && (
+          <motion.div key="reveal" className="w-full flex justify-center"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+            <WinnerRevealScreen
+              winners={revealedWinners}
+              totalWinners={totalWinners}
+            />
+          </motion.div>
+        )}
 
         {currentPhase === DrawEventType.DRAW_COMPLETED && drawCompleted && (
-          <motion.div key="completed"
+          <motion.div key="completed" className="w-full flex justify-center"
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
             <DrawCompletedScreen
@@ -124,9 +108,10 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
         {currentPhase === DrawEventType.DRAW_ERROR && (
           <motion.div key="error"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <p className="text-red-400 text-center">{errorMessage}</p>
+            <p className="text-red-500 text-center">{errorMessage}</p>
           </motion.div>
         )}
+
       </AnimatePresence>
     </div>
   )

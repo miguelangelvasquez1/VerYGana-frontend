@@ -48,6 +48,16 @@ function validate(state: SurveyFormState): FormErrors {
   if (state.categoryIds.length === 0)
     errors.categoryIds = 'Selecciona al menos una categoría';
 
+  if (!state.minAge)
+    errors.minAge = 'La edad mínima es obligatoria';
+  else if (parseInt(state.minAge) < 13 || parseInt(state.minAge) > 100)
+    errors.minAge = 'Debe estar entre 13 y 100';
+
+  if (!state.maxAge)
+    errors.maxAge = 'La edad máxima es obligatoria';
+  else if (parseInt(state.maxAge) < 13 || parseInt(state.maxAge) > 100)
+    errors.maxAge = 'Debe estar entre 13 y 100';
+
   if (state.minAge && state.maxAge) {
     if (parseInt(state.minAge) > parseInt(state.maxAge))
       errors.minAge = 'La edad mínima no puede superar la máxima';

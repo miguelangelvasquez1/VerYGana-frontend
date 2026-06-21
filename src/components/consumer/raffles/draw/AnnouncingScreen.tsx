@@ -3,74 +3,98 @@
 import { motion } from 'framer-motion'
 
 interface Props {
-  label: string  // "el primer ganador es"
+  label: string
+  position?: number
 }
 
-export function AnnouncingScreen({ label }: Props) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-8 text-center w-full max-w-lg min-h-[300px]">
+const positionColors: Record<number, string> = {
+  1: 'from-yellow-400 to-amber-500',
+  2: 'from-slate-300 to-slate-500',
+  3: 'from-amber-600 to-amber-800',
+}
 
-      {/* Línea decorativa superior */}
+export function AnnouncingScreen({ label, position }: Props) {
+  const gradient = position
+    ? (positionColors[position] ?? 'from-blue-500 to-blue-700')
+    : 'from-blue-500 to-blue-700'
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-6 text-center w-full max-w-2xl lg:max-w-5xl min-h-80 lg:min-h-120">
+
+      {/* Halo de fondo */}
+      <motion.div
+        animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.5, 0.2] }}
+        transition={{ duration: 1.4, repeat: Infinity }}
+        className={`absolute w-72 h-72 lg:w-96 lg:h-96 rounded-full blur-3xl bg-linear-to-br ${gradient} opacity-20 pointer-events-none`}
+      />
+
+      {/* Línea superior */}
       <motion.div
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="w-24 h-px bg-violet-500/60"
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className={`w-20 lg:w-32 h-0.5 rounded-full bg-linear-to-r ${gradient}`}
       />
 
-      {/* Texto "Y..." */}
+      {/* Badge de posición */}
+      {position && (
+        <motion.div
+          initial={{ scale: 0, rotate: -15 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 400, damping: 20 }}
+          className={`
+            inline-flex items-center justify-center w-20 h-20 lg:w-32 lg:h-32 rounded-full
+            bg-linear-to-br ${gradient}
+            shadow-lg text-white font-black text-4xl lg:text-6xl
+          `}
+        >
+          {position}
+        </motion.div>
+      )}
+
+      {/* "Y..." */}
       <motion.p
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-        className="text-gray-400 text-lg uppercase tracking-widest"
+        transition={{ delay: 0.3, duration: 0.45 }}
+        className="text-gray-400 text-xl lg:text-3xl uppercase tracking-[0.3em]"
       >
         Y...
       </motion.p>
 
-      {/* Label principal — entra con spring */}
+      {/* Label principal */}
       <motion.h1
-        initial={{ opacity: 0, scale: 0.8, y: 30 }}
+        initial={{ opacity: 0, scale: 0.75, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{
-          delay: 0.8,
-          type: 'spring',
-          stiffness: 200,
-          damping: 18,
-        }}
-        className="text-4xl sm:text-5xl font-black text-white leading-tight"
+        transition={{ delay: 0.7, type: 'spring', stiffness: 220, damping: 18 }}
+        className="text-5xl sm:text-6xl lg:text-9xl font-black text-gray-900 leading-tight px-4"
       >
         {label}...
       </motion.h1>
 
-      {/* Puntos suspensivos animados */}
+      {/* Puntos animados */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.4 }}
-        className="flex gap-2"
+        transition={{ delay: 1.3 }}
+        className="flex gap-2.5"
       >
         {[0, 1, 2].map(i => (
           <motion.span
             key={i}
-            animate={{ y: [0, -8, 0], opacity: [0.4, 1, 0.4] }}
-            transition={{
-              duration: 0.8,
-              repeat: Infinity,
-              delay: i * 0.2,
-              ease: 'easeInOut',
-            }}
-            className="w-2.5 h-2.5 rounded-full bg-violet-500 inline-block"
+            animate={{ y: [0, -12, 0], opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 0.85, repeat: Infinity, delay: i * 0.22, ease: 'easeInOut' }}
+            className={`w-4 h-4 lg:w-6 lg:h-6 rounded-full inline-block bg-linear-to-br ${gradient}`}
           />
         ))}
       </motion.div>
 
-      {/* Línea decorativa inferior */}
+      {/* Línea inferior */}
       <motion.div
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-        className="w-24 h-px bg-violet-500/60"
+        transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
+        className={`w-20 lg:w-32 h-0.5 rounded-full bg-linear-to-r ${gradient}`}
       />
     </div>
   )

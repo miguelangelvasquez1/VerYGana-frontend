@@ -1,14 +1,24 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight, Loader2, Trophy } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+  X, ChevronLeft, ChevronRight, Loader2, Trophy,
+  Tag, HelpCircle, AlertCircle,
+} from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { useSurveyDetail, useSubmitSurvey } from '@/hooks/surveys/useSurvey';
+import { useSurveyDetail, useStartSurvey, useSubmitSurvey } from '@/hooks/surveys/useSurvey';
+import { formatReward } from '@/hooks/surveys/surveyUtils';
+import { levelService } from '@/services/LevelService';
 import QuestionRenderer from './QuestionRenderer';
 import SurveyCompletionScreen from './SurveyCompletionScreen';
-import type { AnswerRequest, SubmissionResult } from '@/types/survey.types';
 import type { XpRewardData } from '@/components/levels/XpRewardToast';
-import { levelService } from '@/services/LevelService';
+
+import type {
+  AnswerRequest,
+  SubmissionResult,
+  SurveyDetailDTO,
+  SurveySessionDTO,
+} from '@/types/survey.types';
 
 interface Props {
   surveyId: number;
@@ -16,175 +26,172 @@ interface Props {
   showReward?: (data: XpRewardData) => void;
 }
 
+type Phase = 'preview' | 'questions' | 'done';
+
+// ─── Main modal ───────────────────────────────────────────────────────────────
+
 export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Props) {
-  const { data: session } = useSession();
+  const { data: session } = useSession()
+  const [phase, setPhase]             = useState<Phase>('preview');
+  const [sessionId, setSessionId]     = useState<number | null>(null);
+  const [sessionSurvey, setSessionSurvey] = useState<SurveySessionDTO | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Map<number, AnswerRequest>>(new Map());
-  const [result, setResult] = useState<SubmissionResult | null>(null);
+  const [answers, setAnswers]         = useState<Map<number, AnswerRequest>>(new Map());
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [result, setResult]           = useState<SubmissionResult | null>(null);
 
-  // Disable the detail query as soon as the survey is submitted so
-  // TanStack Query doesn't refetch /surveys/:id while the completion
-  // screen is still mounted.
-  const { data: survey, isLoading } = useSurveyDetail(surveyId, result !== null);
-  const submitMutation = useSubmitSurvey();
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
 
-  const totalQuestions = survey?.questions.length ?? 0;
-  const currentQuestion = survey?.questions[currentStep];
+  const detailQuery    = useSurveyDetail(surveyId, phase !== 'preview');
+  const startMutation  = useStartSurvey();
+  const submitMutation = useSubmitSurvey(surveyId);
 
-  // ── Answer management ────────────────────────────────────────────────────
+  const questions = sessionSurvey?.questions ?? [];
+  const totalQ    = questions.length;
+  const currentQ  = questions[currentStep];
 
-  const setAnswer = useCallback(
-    (questionId: number, answer: Partial<AnswerRequest>) => {
-      setAnswers((prev) => {
-        const next = new Map(prev);
-        next.set(questionId, { questionId, ...answer });
-        return next;
-      });
-      setValidationError(null);
-    },
-    [],
-  );
+  // ── Answers ──────────────────────────────────────────────────────────────
 
-  const currentAnswer = currentQuestion
-    ? answers.get(currentQuestion.id)
-    : undefined;
+  const setAnswer = useCallback((questionId: number, answer: Partial<AnswerRequest>) => {
+    setAnswers((prev) => {
+      const next = new Map(prev);
+      next.set(questionId, { questionId, ...answer });
+      return next;
+    });
+    setValidationError(null);
+  }, []);
 
-  // ── Navigation ────────────────────────────────────────────────────────────
+  const currentAnswer = currentQ ? answers.get(currentQ.id) : undefined;
 
-  const validateCurrentStep = (): boolean => {
-    if (!currentQuestion) return true;
-    if (!currentQuestion.required) return true;
+  // ── Validation ───────────────────────────────────────────────────────────
 
-    const ans = answers.get(currentQuestion.id);
-    if (!ans) {
-      setValidationError('Esta pregunta es obligatoria');
-      return false;
-    }
+  function validateStep(): boolean {
+    if (!currentQ || !currentQ.required) return true;
+    const ans = answers.get(currentQ.id);
+    if (!ans) { setValidationError('Esta pregunta es obligatoria'); return false; }
 
-    switch (currentQuestion.type) {
+    switch (currentQ.type) {
       case 'TEXT':
-        if (!ans.textAnswer?.trim()) {
-          setValidationError('Por favor escribe tu respuesta');
-          return false;
-        }
+        if (!ans.textAnswer?.trim()) { setValidationError('Por favor escribe tu respuesta'); return false; }
         break;
       case 'RATING':
-        if (!ans.textAnswer) {
-          setValidationError('Por favor selecciona una calificación');
-          return false;
-        }
+        if (!ans.textAnswer) { setValidationError('Por favor selecciona una calificación'); return false; }
         break;
       case 'SINGLE_CHOICE':
-        if (!ans.selectedOptionId) {
-          setValidationError('Por favor selecciona una opción');
-          return false;
-        }
+        if (!ans.selectedOptionId) { setValidationError('Por favor selecciona una opción'); return false; }
         break;
       case 'YES_NO':
-        if (!ans.textAnswer) {
-          setValidationError('Por favor selecciona una opción');
-          return false;
-        }
+        if (!ans.textAnswer) { setValidationError('Por favor selecciona una opción'); return false; }
         break;
       case 'MULTIPLE_CHOICE':
-        if (!ans.selectedOptionIds?.length) {
-          setValidationError('Por favor selecciona al menos una opción');
-          return false;
-        }
+        if (!ans.selectedOptionIds?.length) { setValidationError('Por favor selecciona al menos una opción'); return false; }
         break;
     }
     return true;
-  };
+  }
 
-  const goNext = () => {
-    if (!validateCurrentStep()) return;
-    if (currentStep < totalQuestions - 1) {
-      setCurrentStep((s) => s + 1);
-    }
-  };
+  // ── Navigation ───────────────────────────────────────────────────────────
 
-  const goPrev = () => {
-    if (currentStep > 0) setCurrentStep((s) => s - 1);
-  };
+  const goNext = () => { if (validateStep() && currentStep < totalQ - 1) setCurrentStep((s) => s + 1); };
+  const goPrev = () => { if (currentStep > 0) setCurrentStep((s) => s - 1); };
 
-  // ── Submission ────────────────────────────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────────────────────
 
-  const handleSubmit = async () => {
-    if (!validateCurrentStep()) return;
+  function handleStart() {
+    startMutation.mutate(surveyId, {
+      onSuccess: (data: { sessionId: number; survey: SurveySessionDTO }) => {
+        setSessionId(data.sessionId);
+        setSessionSurvey(data.survey);
+        setPhase('questions');
+      },
+    });
+  }
 
+  async function handleSubmit() {
+    if (!validateStep() || !sessionId) return;
     try {
       const res = await submitMutation.mutateAsync({
-        surveyId,
+        sessionId,
         answers: Array.from(answers.values()),
       });
       setResult(res);
+      setPhase('done');
 
-      if (showReward) {
-        const token = (session as any)?.accessToken as string | undefined;
-        if (token) {
-          Promise.all([
-            levelService.getProfile(token),
-            levelService.getHistory(token, 0, 1),
-          ])
-            .then(([profile, history]) => {
-              const lastTx = history.content[0];
-              showReward({
-                activityType: 'SURVEY_COMPLETED',
-                xpEarned: lastTx?.xpEarned ?? 0,
-                multiplier: lastTx?.multiplierApplied ?? profile.multiplier,
-                currentLevel: profile.currentLevel,
-                xpTotal: profile.xpTotal,
-                xpToNextLevel: profile.xpToNextLevel,
-              });
-            })
-            .catch(() => {});
-        }
+      const token = session?.accessToken as string | undefined;
+      if (token && showReward) {
+        Promise.all([
+          levelService.getProfile(token),
+          levelService.getHistory(token, 0, 1),
+        ]).then(([profile, history]) => {
+          const latest = history.content[0];
+          if (!latest) return;
+          showReward({
+            activityType: 'SURVEY_COMPLETED',
+            xpEarned:     latest.xpEarned,
+            multiplier:   latest.multiplierApplied,
+            currentLevel: profile.currentLevel,
+            xpTotal:      profile.xpTotal,
+            xpToNextLevel: profile.xpToNextLevel,
+          });
+        }).catch(() => {/* non-critical */});
       }
-    } catch {
-      /* handled by mutation.isError */
-    }
-  };
+    } catch { /* handled by mutation.isError */ }
+  }
 
-  const isLastStep = currentStep === totalQuestions - 1;
-  const progress = totalQuestions > 0 ? ((currentStep + 1) / totalQuestions) * 100 : 0;
+  const isLastStep = currentStep === totalQ - 1;
+  const progress   = totalQ > 0 ? ((currentStep + 1) / totalQ) * 100 : 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={result ? onClose : undefined}
+        onClick={phase === 'done' ? onClose : undefined}
       />
 
       <div className="relative z-10 flex max-h-[95vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
-        {/* Completion screen */}
-        {result ? (
+
+        {/* ── Done ─────────────────────────────────────────────────────── */}
+        {phase === 'done' && result && (
           <SurveyCompletionScreen result={result} onClose={onClose} />
-        ) : (
+        )}
+
+        {/* ── Preview ──────────────────────────────────────────────────── */}
+        {phase === 'preview' && (
+          <PreviewScreen
+            survey={detailQuery.data ?? null}
+            isLoading={detailQuery.isLoading}
+            isStarting={startMutation.isPending}
+            startError={startMutation.isError ? startMutation.error : null}
+            onStart={handleStart}
+            onClose={onClose}
+          />
+        )}
+
+        {/* ── Questions ────────────────────────────────────────────────── */}
+        {phase === 'questions' && (
           <>
-            {/* Progress header */}
-            <div className="shrink-0 px-6 pt-6 pb-0">
+            {/* Header */}
+            <div className="shrink-0 px-6 pt-5 pb-0">
               <div className="flex items-center justify-between mb-3">
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-gray-400">
-                    Pregunta {currentStep + 1} de {totalQuestions}
+                    Pregunta {currentStep + 1} de {totalQ}
                   </p>
-                  {survey && (
-                    <h2 className="text-base font-bold text-gray-900 line-clamp-1">
-                      {survey.title}
-                    </h2>
-                  )}
+                  <h2 className="text-base font-bold text-gray-900 truncate">
+                    {sessionSurvey?.title}
+                  </h2>
                 </div>
                 <button
                   onClick={onClose}
-                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100"
+                  className="cursor-pointer ml-3 shrink-0 rounded-xl p-2 text-gray-400 hover:bg-gray-100"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
-
-              {/* Progress bar */}
               <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
                 <div
                   className="h-full rounded-full bg-indigo-500 transition-all duration-300"
@@ -193,15 +200,11 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
               </div>
             </div>
 
-            {/* Question area */}
+            {/* Question */}
             <div className="flex-1 overflow-y-auto px-6 py-6">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
-                </div>
-              ) : currentQuestion ? (
+              {currentQ ? (
                 <QuestionRenderer
-                  question={currentQuestion}
+                  question={currentQ}
                   answer={currentAnswer}
                   onChange={setAnswer}
                   error={validationError}
@@ -209,7 +212,7 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
               ) : null}
             </div>
 
-            {/* Footer navigation */}
+            {/* Footer */}
             <div className="shrink-0 border-t border-gray-100 px-6 py-4">
               {submitMutation.isError && (
                 <p className="mb-3 text-center text-xs text-red-500">
@@ -220,41 +223,178 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
                 <button
                   onClick={goPrev}
                   disabled={currentStep === 0}
-                  className="flex items-center gap-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-all"
+                  className="cursor-pointer flex items-center gap-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-all"
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                  Anterior
+                  <ChevronLeft className="h-4 w-4" /> Anterior
                 </button>
-
                 <div className="flex-1" />
-
                 {isLastStep ? (
                   <button
                     onClick={handleSubmit}
                     disabled={submitMutation.isPending}
-                    className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 active:scale-95 transition-all"
+                    className="cursor-pointer flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 active:scale-95 transition-all"
                   >
-                    {submitMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trophy className="h-4 w-4" />
-                    )}
+                    {submitMutation.isPending
+                      ? <Loader2 className="h-4 w-4 animate-spin" />
+                      : <Trophy className="h-4 w-4" />}
                     {submitMutation.isPending ? 'Enviando…' : 'Enviar y ganar'}
                   </button>
                 ) : (
                   <button
                     onClick={goNext}
-                    className="flex items-center gap-1 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 active:scale-95 transition-all"
+                    className="cursor-pointer flex items-center gap-1 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 active:scale-95 transition-all"
                   >
-                    Siguiente
-                    <ChevronRight className="h-4 w-4" />
+                    Siguiente <ChevronRight className="h-4 w-4" />
                   </button>
                 )}
               </div>
             </div>
           </>
         )}
+
       </div>
     </div>
   );
+}
+
+// ─── Preview screen ───────────────────────────────────────────────────────────
+
+function PreviewScreen({
+  survey,
+  isLoading,
+  isStarting,
+  startError,
+  onStart,
+  onClose,
+}: {
+  survey: SurveyDetailDTO | null;
+  isLoading: boolean;
+  isStarting: boolean;
+  startError: Error | null;
+  onStart: () => void;
+  onClose: () => void;
+}) {
+  const rewardTotal = survey
+    ? formatReward((survey.rewardAmountPerQuestionCents * survey.totalQuestions) / 100)
+    : null;
+
+  const errorMessage = startError ? getStartErrorMessage(startError) : null;
+
+  return (
+    <>
+      {/* Header */}
+      <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
+        <div className="min-w-0 flex-1">
+          {isLoading ? (
+            <div className="h-5 w-40 animate-pulse rounded-lg bg-gray-100" />
+          ) : (
+            <h2 className="text-lg font-bold text-gray-900 leading-snug">
+              {survey?.title}
+            </h2>
+          )}
+        </div>
+        <button
+          onClick={onClose}
+          className="cursor-pointer ml-3 shrink-0 rounded-xl p-2 text-gray-400 hover:bg-gray-100"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+          </div>
+        ) : survey ? (
+          <>
+            {/* Reward highlight */}
+            <div className="rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 p-5 text-white">
+              <p className="text-xs font-medium text-indigo-200 uppercase tracking-wider">
+                Recompensa total
+              </p>
+              <p className="mt-1 text-3xl font-black">{rewardTotal}</p>
+              <p className="mt-1 text-xs text-indigo-200">
+                {survey.totalQuestions} preguntas
+              </p>
+            </div>
+
+            {/* Description */}
+            {survey.description && (
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {survey.description}
+              </p>
+            )}
+
+            {/* Meta grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <MetaCard
+                icon={<HelpCircle className="h-4 w-4" />}
+                label="Preguntas"
+                value={String(survey.totalQuestions)}
+              />
+              {survey.categoryNames.length > 0 && (
+                <MetaCard
+                  icon={<Tag className="h-4 w-4" />}
+                  label="Categorías"
+                  value={survey.categoryNames.join(', ')}
+                />
+              )}
+            </div>
+
+            {/* Start error */}
+            {errorMessage && (
+              <div className="flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-xs text-red-600">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+          </>
+        ) : null}
+      </div>
+
+      {/* Footer */}
+      {!isLoading && survey && (
+        <div className="shrink-0 flex items-center gap-3 border-t border-gray-100 px-6 py-4">
+          <button
+            onClick={onClose}
+            className="cursor-pointer rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onStart}
+            disabled={isStarting}
+            className="cursor-pointer flex flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 active:scale-95 transition-all"
+          >
+            {isStarting
+              ? <><Loader2 className="h-4 w-4 animate-spin" /> Iniciando…</>
+              : <><Trophy className="h-4 w-4" /> Iniciar encuesta</>}
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function MetaCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+      <div className="flex items-center gap-1.5 text-gray-400 mb-1">
+        {icon}
+        <span className="text-xs">{label}</span>
+      </div>
+      <p className="text-sm font-semibold text-gray-800 truncate">{value}</p>
+    </div>
+  );
+}
+
+function getStartErrorMessage(error: Error): string {
+  const status = (error as unknown as { status?: number }).status;
+  if (status === 409) return 'Ya completaste esta encuesta anteriormente.';
+  if (status === 400) return 'Esta encuesta no está disponible en este momento.';
+  return 'No se pudo iniciar la encuesta. Intenta de nuevo.';
 }

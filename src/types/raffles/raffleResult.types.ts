@@ -1,4 +1,5 @@
 import { WinnerDetailResponseDTO } from "./raffleWinner.types";
+import { PrizeType } from "./prize.types"
 
 export interface RaffleResultResponseDTO {
     raffleId: number;
@@ -6,10 +7,9 @@ export interface RaffleResultResponseDTO {
     raffleImageUrl: string;
     raffleType: 'PREMIUM' | 'STANDARD';
     drawnAt: string;
-    drawProof: string;
     totalParticipants: number;
     totalTicketsIssued: number;
-    winners: WinnerDetailResponseDTO[]; 
+    winners: WinnerDetailResponseDTO[];
 }
 
 export interface RaffleSummaryResultResponseDTO {
@@ -17,4 +17,43 @@ export interface RaffleSummaryResultResponseDTO {
     raffleTitle: string;
     raffleType: 'PREMIUM' | 'STANDARD';
     drawnAt: string;
+}
+
+export interface RandomOrgDrawMetadata {
+  serialNumber: number
+  completionTime: string
+  bitsUsed: number
+  bitsLeft: number
+  signature: string
+  hashedApiKey: string
+  license: object
+}
+
+export interface WinnerProofResponseDTO {
+  userName: string
+  ticketNumber: string
+  position: number
+  prizeTitle: string
+  prizeType: PrizeType
+  prizeValue: number
+  prizeClaimed: boolean
+  claimDeadline: string
+  prizeClaimedAt: string | null
+  prizeTrackingInfo: string | null
+}
+
+export interface DrawProofResponseDTO {
+  raffleId: number
+  raffleTitle: string
+  configuredDrawMethod: string
+  actualDrawMethod: string
+  drawMethodNote: string
+  randomOrgDrawMetadata: RandomOrgDrawMetadata
+  drawDate: string
+  executedAt: string
+  totalParticipants: number
+  totalTickets: number
+  ticketPoolHash: string
+  numberOfWinners: number
+  winners: WinnerProofResponseDTO[]
 }

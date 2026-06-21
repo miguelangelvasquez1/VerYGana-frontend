@@ -13,15 +13,14 @@ import {
   ClipboardList,
   X,
   LogOut,
-  PawPrint, 
-  Lock, 
+  PawPrint,
+  Lock,
   Sparkles,
-  TrendingUp, 
-  Megaphone
+  Megaphone,
+  Palette,
 } from 'lucide-react';
 import { WalletStatus } from '@/types/finance/Wallet.types';
 import {PlanCode} from '@/types/finance/plans/Plan.types';
-import { formatBudget } from '@/utils/currency';  
 import { useLogout } from '@/hooks/useLogout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -32,6 +31,8 @@ interface MenuItem {
   label: string;
   requiredPlans?: PlanCode[];
   lockIfUnavailable?: boolean;
+  /** Prevents this item from being highlighted even when the path matches (used for action/create pages). */
+  skipActive?: boolean;
 }
 
 interface SidebarProps {
@@ -55,7 +56,7 @@ const menuItems: MenuItem[] = [
   {
     href: '/commercial/products/create', icon: PlusCircle, label: 'Crear producto',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true,
+    lockIfUnavailable: true, skipActive: true,
   },
   {
     href: '/commercial/ads', icon: FileImage, label: 'Mis Anuncios',
@@ -63,13 +64,9 @@ const menuItems: MenuItem[] = [
     lockIfUnavailable: true,
   },
   {
-    href: '/commercial/ads/create', icon: Megaphone, label: 'Crear Anuncio',
+    href: '/commercial/branding', icon: Palette, label: 'Branding en Juegos',
     requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
-  },
-  {
-    href: '/commercial/campaigns/create', icon: PlusCircle, label: 'Brandear Juego',
-    requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM], lockIfUnavailable: true,
   },
   {
     href: '/commercial/surveys', icon: ClipboardList, label: 'Encuestas',
@@ -147,7 +144,12 @@ export function Sidebar({
 
   // Usamos el pathname que viene del Layout (más estable)
   const isActive = useMemo(() => {
-    return (href: string): boolean => pathname === href;
+    return (item: MenuItem): boolean => {
+      if (item.skipActive) return false;
+      if (pathname === item.href) return true;
+      // List/section pages are active for any of their child paths
+      return pathname.startsWith(item.href + '/');
+    };
   }, [pathname]);
 
 // =============
@@ -202,7 +204,7 @@ export function Sidebar({
         {menuItems.map((item) => {
           if (!showItem(item)) return null;
 
-          const active = isActive(item.href)
+          const active = isActive(item)
           const locked = isLocked(item);
           const Icon = item.icon;
 

@@ -1,6 +1,6 @@
 import apiClient from "@/lib/api/client"
 import { PagedResponse } from "@/types/Generic.types"
-import { EndSessionDTO, GameCardResponseDTO, GameEventDTO, GameMetricDTO, InitGameRequestDTO, InitGameResponseDTO } from "@/types/games/game.types"
+import { EndSessionDTO, GameCardResponseDTO, GameEventDTO, GameMetricDTO, InitGameRequestDTO, InitGameResponseDTO, RewardCardResponseDTO } from "@/types/games/game.types"
 
 export const init = async (request: InitGameRequestDTO): Promise<InitGameResponseDTO> => {
     const response = await apiClient.post('/games/init', request);
@@ -19,5 +19,10 @@ export const endSession = async (event: GameEventDTO<EndSessionDTO>): Promise<vo
 
 export const getAvailableGamesPage = async(page = 0, size = 10): Promise<PagedResponse<GameCardResponseDTO>> => {
     const response = await apiClient.get('/games', {params: {page, size}});
+    return response.data;
+}
+
+export const getGameRewards = async(gameSessionToken: string): Promise<RewardCardResponseDTO[]> => {
+    const response = await apiClient.get('/games/rewards', {params: {gameSessionToken}});
     return response.data;
 }

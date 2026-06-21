@@ -23,7 +23,7 @@ const PurchaseActions = ({ purchase }: Props) => {
       <LeaveReviewModal
         open={reviewOpen}
         onClose={() => setReviewOpen(false)}
-        purchaseId={purchase.id}
+        items={purchase.items}
       />
     </div>
   );

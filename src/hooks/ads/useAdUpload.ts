@@ -1,5 +1,6 @@
 // hooks/ads/useAdUpload.ts
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { adService } from '@/services/adService';
 import { fileUploadService } from '@/services/FileUploadService';
 import {
@@ -16,7 +17,7 @@ interface UseAdUploadProps {
 
 type UploadAdResult =
   | { ok: true; adId: number }
-  | { ok: false; errorMsg: string };
+  | { ok: false; errorMsg: string; assetOrphaned: boolean };
 
 type PrepareAndUploadResult =
   | { ok: true; pricing: AssetPricingInfo }
@@ -37,25 +38,33 @@ type PrepareAndUploadResult =
  * Orphan logic (asset marked ORPHANED in DB → cleanup job removes from R2):
  *   - User changes file  → orphanCurrentAsset() before new prepareAndUpload
  *   - User cancels form  → cancelAndOrphan()
- *   - Page unload        → sendBeacon (beforeunload + unmount)
+ *   - Page unload        → keepalive fetch (pagehide + unmount, deduped via cleanupSentRef)
  *   - analyze fails      → backend already orphans; hook resets state
  *   - createAd fails     → backend already orphans; hook returns error
  */
 export function useAdUpload({ adDetails }: UseAdUploadProps) {
+  const { data: session } = useSession();
   const [uploadState, setUploadState] = useState<UploadState>({ status: 'idle', progress: 0 });
   const [fileState, setFileState] = useState<FileWithProgress | null>(null);
   const [pricingInfo, setPricingInfo] = useState<AssetPricingInfo | null>(null);
+
+  useEffect(() => {
+    adService.setAuthToken((session as any)?.accessToken ?? null);
+  }, [session]);
 
   // Always-fresh ref to the current assetId for use in effects/cleanup
   const currentAssetIdRef = useRef<number | null>(null);
   // Flipped to true only when createAd succeeds — prevents cleanup from orphaning a committed asset
   const committedRef = useRef(false);
+  // Prevents duplicate orphan requests (pagehide + unmount can both fire)
+  const cleanupSentRef = useRef(false);
 
   // ── Orphan helpers ─────────────────────────────────────────────────────────
 
   const orphanCurrentAsset = useCallback(async () => {
     const id = currentAssetIdRef.current;
     if (id == null || committedRef.current) return;
+    cleanupSentRef.current = true;
     currentAssetIdRef.current = null;
     try {
       await adService.orphanAsset(id);
@@ -66,24 +75,28 @@ export function useAdUpload({ adDetails }: UseAdUploadProps) {
     }
   }, []);
 
-  // Register beforeunload beacon once — always sends if there's a pending asset
+  // pagehide is more reliable than beforeunload for modern browsers and mobile
   useEffect(() => {
     const handleUnload = () => {
       const id = currentAssetIdRef.current;
-      if (id != null && !committedRef.current) {
-        adService.orphanAssetBeacon(id);
+      const canCleanup = id != null && !committedRef.current && !cleanupSentRef.current;
+      if (canCleanup) {
+        cleanupSentRef.current = true;
+        adService.orphanAssetKeepAlive(id);
       }
     };
-    window.addEventListener('beforeunload', handleUnload);
-    return () => window.removeEventListener('beforeunload', handleUnload);
+    window.addEventListener('pagehide', handleUnload);
+    return () => window.removeEventListener('pagehide', handleUnload);
   }, []);
 
-  // Orphan via beacon on component unmount (e.g. user navigates away)
+  // Orphan via keepalive on component unmount (e.g. user navigates away)
   useEffect(() => {
     return () => {
       const id = currentAssetIdRef.current;
-      if (id != null && !committedRef.current) {
-        adService.orphanAssetBeacon(id);
+      const canCleanup = id != null && !committedRef.current && !cleanupSentRef.current;
+      if (canCleanup) {
+        cleanupSentRef.current = true;
+        adService.orphanAssetKeepAlive(id);
       }
     };
   }, []);
@@ -101,6 +114,7 @@ export function useAdUpload({ adDetails }: UseAdUploadProps) {
       // Orphan any previous pending asset before starting fresh
       await orphanCurrentAsset();
       committedRef.current = false;
+      cleanupSentRef.current = false;
       setPricingInfo(null);
 
       setFileState({ file, uploading: false, uploaded: false, progress: 0 });
@@ -180,7 +194,7 @@ export function useAdUpload({ adDetails }: UseAdUploadProps) {
   const uploadAd = useCallback(async (): Promise<UploadAdResult> => {
     const assetId = currentAssetIdRef.current;
     if (assetId == null) {
-      return { ok: false, errorMsg: 'No hay archivo analizado. Sube un archivo primero.' };
+      return { ok: false, errorMsg: 'No hay archivo analizado. Sube un archivo primero.', assetOrphaned: true };
     }
 
     try {
@@ -198,14 +212,34 @@ export function useAdUpload({ adDetails }: UseAdUploadProps) {
       return { ok: true, adId: result.id };
 
     } catch (error: any) {
-      const errorMsg = error?.response?.data?.message ?? error?.message ?? 'Error creando el anuncio';
+      const status = error?.response?.status;
+      const responseData = error?.response?.data;
+
+      // details: { fieldName: "message", ... } — present on DTO validation errors
+      const errorDetails: Record<string, string> | undefined =
+        responseData?.details && typeof responseData.details === 'object'
+          ? (responseData.details as Record<string, string>)
+          : undefined;
+
+      // Prefer the specific field messages; fall back to the top-level message
+      const errorMsg =
+        errorDetails && Object.keys(errorDetails).length > 0
+          ? Object.values(errorDetails).join(' · ')
+          : (responseData?.message ?? error?.message ?? 'Error creando el anuncio');
+
       console.error('[useAdUpload] STEP 4 error:', errorMsg);
+      setUploadState({ status: 'error', progress: 0, error: errorMsg, errorDetails });
 
-      setUploadState({ status: 'error', progress: 0, error: errorMsg });
-      // Backend already orphaned in catch block — reset our ref too
-      currentAssetIdRef.current = null;
+      // For 4xx validation errors the backend rejected the request before touching the
+      // asset, so it is still valid — keep the ref so the user can fix the form and retry.
+      // For 5xx / network errors the backend orphaned the asset, so clear everything.
+      const isClientError = status != null && status >= 400 && status < 500;
+      if (!isClientError) {
+        currentAssetIdRef.current = null;
+        setPricingInfo(null);
+      }
 
-      return { ok: false, errorMsg };
+      return { ok: false, errorMsg, assetOrphaned: !isClientError };
     }
   }, [adDetails]);
 

@@ -2,18 +2,19 @@ import { PrizeType } from "./prize.types"
 
 export enum DrawEventType {
   WAITING_ROOM_UPDATE = 'WAITING_ROOM_UPDATE',
-  DRAWING_STARTED     = 'DRAWING_STARTED',
-  REVEALING           = 'REVEALING', 
-  ANNOUNCING          = 'ANNOUNCING',
-  WINNER_REVEALED     = 'WINNER_REVEALED',
-  DRAW_COMPLETED      = 'DRAW_COMPLETED',
-  DRAW_ERROR          = 'DRAW_ERROR',
+  DRAWING_STARTED = 'DRAWING_STARTED',
+  REVEALING = 'REVEALING',
+  ANNOUNCING = 'ANNOUNCING',
+  WINNER_REVEALED = 'WINNER_REVEALED',
+  DRAW_COMPLETED = 'DRAW_COMPLETED',
+  DRAW_ERROR = 'DRAW_ERROR',
 }
 
 export interface WaitingRoomPayloadDTO {
   viewerCount: number
   secondsUntilDraw: number
   totalTickets: number
+  totalParticipants: number
 }
 
 export interface WinnerRevealPayloadDTO {
@@ -26,19 +27,18 @@ export interface WinnerRevealPayloadDTO {
   prizeValue: number
   prizeType: PrizeType
   revealOrder: number
-  totalWinners: number
 }
 
 export interface DrawCompletedPayloadDTO {
   raffleTitle: string
   allWinners: WinnerRevealPayloadDTO[]
-  drawProofUrl: string
   totalParticipants: number
 }
 
 export interface DrawingStartedPayloadDTO {
-  totalTickets: number
   totalWinners: number
+  totalTickets: number
+  maxTickets: number
 }
 
 export interface RaffleDrawEventDTO {
@@ -52,9 +52,9 @@ export interface DrawStatusResponseDTO {
   currentPhase: DrawEventType
   secondsUntilDraw: number
   viewerCount: number
+  totalParticipants: number
   revealedWinners: WinnerRevealPayloadDTO[]
   totalWinners: number
-  drawProofUrl: string | null
   asOf: string
 }
 

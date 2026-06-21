@@ -13,10 +13,10 @@ import {
 import { getRafflesByStatusAndType } from "@/services/raffleService";
 import { fileUploadService } from "@/services/FileUploadService";
 
-import RaffleCard from "@/components/admin/raffles/RaffleCardAdmin";
+import RaffleCard from "@/components/Admin/raffles/RaffleCardAdmin";
 import CreateRaffleForm, {
   CreateRaffleFormSubmitPayload,
-} from "@/components/admin/raffles/CreateRaffleForm";
+} from "@/components/Admin/raffles/CreateRaffleForm";
 
 export default function AdminRafflesDashboard() {
   /* ================== STATE ================== */
@@ -32,6 +32,7 @@ export default function AdminRafflesDashboard() {
   const [stats, setStats] = useState({
     draftRaffles: 0,
     activeRaffles: 0,
+    liveRaffles: 0,
     closedRaffles: 0,
     completedRaffles: 0,
   });
@@ -42,11 +43,13 @@ export default function AdminRafflesDashboard() {
     const [
       draftRaffles,
       activeRaffles,
+      liveRaffles,
       closedRaffles,
       completedRaffles,
     ] = await Promise.all([
       countRafflesByStatus("DRAFT"),
       countRafflesByStatus("ACTIVE"),
+      countRafflesByStatus("LIVE"),
       countRafflesByStatus("CLOSED"),
       countRafflesByStatus("COMPLETED"),
     ]);
@@ -54,6 +57,7 @@ export default function AdminRafflesDashboard() {
     setStats({
       draftRaffles,
       activeRaffles,
+      liveRaffles,
       closedRaffles,
       completedRaffles,
     });
@@ -189,17 +193,7 @@ export default function AdminRafflesDashboard() {
 
   return (
     <div className="space-y-8 relative">
-      {/* ===== Header ===== */}
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">
-            Gestión de Rifas
-          </h2>
-          <p className="text-gray-600">
-            Administra rifas, visualiza estadísticas y controla el ciclo de vida de cada una.
-          </p>
-        </div>
-
         <button
           onClick={() => setShowCreateRaffle(true)}
           className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2"
@@ -220,6 +214,11 @@ export default function AdminRafflesDashboard() {
           label="Rifas activas"
           value={stats.activeRaffles}
           color="green"
+        />
+        <StatCard
+          label="Rifas en vivo"
+          value={stats.liveRaffles}
+          color="red"
         />
         <StatCard
           label="Rifas cerradas"
@@ -309,11 +308,12 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  color: "blue" | "green" | "yellow" | "gray";
+  color: "blue" | "green" | "red" | "yellow" | "gray";
 }) {
   const colors = {
     blue: "from-blue-500 to-blue-600",
     green: "from-green-500 to-green-600",
+    red: "from-red-500 to-red-600",
     yellow: "from-yellow-500 to-yellow-600",
     gray: "from-gray-600 to-gray-700",
   };

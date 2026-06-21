@@ -22,8 +22,7 @@ import TicketRuleCard from "./TicketRuleCard";
 
 const RULE_TYPES = [
   "PURCHASE",
-  "ADS_WATCHED",
-  "GAME_ACHIEVEMENT",
+  "DAILY_LOGIN",
   "REFERRAL",
 ];
 
@@ -146,17 +145,7 @@ export default function TicketRulesManagement() {
 
   return (
     <div className="space-y-8">
-      {/* HEADER */}
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold">
-            Gestión de Reglas de Tickets
-          </h2>
-          <p className="text-gray-600">
-            Administra las reglas de obtención de tickets
-          </p>
-        </div>
-
         <button
           onClick={() => setShowCreate(true)}
           className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700"

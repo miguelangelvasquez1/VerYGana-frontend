@@ -43,25 +43,40 @@ const LEVEL_CONFIG: Record<string, { bar: string; label: string; Icon: React.Com
   DIAMANTE:  { bar: '#60a5fa', label: 'Diamante',  Icon: Crown   },
 }
 
+// ─── Hook: detectar reduced-motion (dispositivos de pocos recursos) ───────────
+
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReduced(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return reduced
+}
+
 // ─── Hook: contador animado ───────────────────────────────────────────────────
 
-function useCountUp(target: number, duration: number, trigger: number) {
+function useCountUp(target: number, duration: number, trigger: number, skip = false) {
   const [count, setCount] = useState(0)
   useEffect(() => {
     if (trigger === 0) return
+    if (skip) { setCount(target); return }
     setCount(0)
     let startTime: number | null = null
     let rafId: number
     const step = (ts: number) => {
       if (!startTime) startTime = ts
       const progress = Math.min((ts - startTime) / duration, 1)
-      const eased = 1 - (1 - progress) ** 3 // ease-out cúbico
+      const eased = 1 - (1 - progress) ** 3
       setCount(Math.round(eased * target))
       if (progress < 1) rafId = requestAnimationFrame(step)
     }
     rafId = requestAnimationFrame(step)
     return () => cancelAnimationFrame(rafId)
-  }, [trigger, target, duration])
+  }, [trigger, target, duration, skip])
   return count
 }
 
@@ -145,13 +160,14 @@ const ANIMATIONS_CSS = `
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export function XpRewardToast({ data, onDismiss }: Props) {
+  const reduceMotion = useReducedMotion()
   const [visible, setVisible]       = useState(false)
   const [barTarget, setBarTarget]   = useState(0)
   const [showLevelUp, setShowLevelUp] = useState(false)
   const [animKey, setAnimKey]       = useState(0)
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const xpDisplayed = useCountUp(data?.xpEarned ?? 0, 700, animKey)
+  const xpDisplayed = useCountUp(data?.xpEarned ?? 0, 700, animKey, reduceMotion)
 
   useEffect(() => {
     if (!data) return
@@ -166,8 +182,10 @@ export function XpRewardToast({ data, onDismiss }: Props) {
     setShowLevelUp(false)
     setVisible(true)
 
-    const barTimer = setTimeout(() => setBarTarget(toPct), 300)
-    const lvlTimer = data.leveledUp ? setTimeout(() => setShowLevelUp(true), 800) : null
+    const barTimer = reduceMotion ? null : setTimeout(() => setBarTarget(toPct), 300)
+    if (reduceMotion) setBarTarget(toPct)
+    const lvlTimer = (data.leveledUp && !reduceMotion) ? setTimeout(() => setShowLevelUp(true), 800) : null
+    if (data.leveledUp && reduceMotion) setShowLevelUp(true)
 
     if (dismissTimer.current) clearTimeout(dismissTimer.current)
     dismissTimer.current = setTimeout(() => {
@@ -176,7 +194,7 @@ export function XpRewardToast({ data, onDismiss }: Props) {
     }, 5000)
 
     return () => {
-      clearTimeout(barTimer)
+      if (barTimer) clearTimeout(barTimer)
       if (lvlTimer) clearTimeout(lvlTimer)
     }
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -224,7 +242,7 @@ export function XpRewardToast({ data, onDismiss }: Props) {
             alignItems:   'center',
             gap:          12,
             boxShadow:    '0 8px 40px rgba(0,0,0,0.13)',
-            animation:    'xp-toast-in 0.45s cubic-bezier(0.34,1.56,0.64,1) both',
+            animation:    reduceMotion ? undefined : 'xp-toast-in 0.45s cubic-bezier(0.34,1.56,0.64,1) both',
           }}
         >
           {/* Ícono de actividad */}
@@ -237,38 +255,42 @@ export function XpRewardToast({ data, onDismiss }: Props) {
               display:     'flex',
               alignItems:  'center',
               justifyContent: 'center',
-              animation:   'xp-icon-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) 0.08s both',
+              animation:   reduceMotion ? undefined : 'xp-icon-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) 0.08s both',
             }}>
               <ActIcon style={{ width: 20, height: 20, color: act.color }} />
             </div>
 
-            {/* Anillo de pulso */}
-            <div style={{
-              position:  'absolute',
-              inset:     0,
-              borderRadius: '50%',
-              border:    `2px solid ${act.color}`,
-              animation: 'xp-pulse-ring 0.7s ease-out 0.12s both',
-              opacity:   0,
-            }} />
+            {/* Anillo de pulso — omitido en reduced-motion */}
+            {!reduceMotion && (
+              <div style={{
+                position:  'absolute',
+                inset:     0,
+                borderRadius: '50%',
+                border:    `2px solid ${act.color}`,
+                animation: 'xp-pulse-ring 0.7s ease-out 0.12s both',
+                opacity:   0,
+              }} />
+            )}
 
-            {/* Etiqueta flotante "+XP" */}
-            <span style={{
-              position:   'absolute',
-              bottom:     '100%',
-              left:       '50%',
-              fontSize:   10,
-              fontWeight: 700,
-              color:      act.color,
-              background: act.bg,
-              padding:    '1px 5px',
-              borderRadius: 6,
-              whiteSpace: 'nowrap',
-              animation:  'xp-float-label 0.9s ease-out 0.15s both',
-              pointerEvents: 'none',
-            }}>
-              +XP
-            </span>
+            {/* Etiqueta flotante "+XP" — omitida en reduced-motion */}
+            {!reduceMotion && (
+              <span style={{
+                position:   'absolute',
+                bottom:     '100%',
+                left:       '50%',
+                fontSize:   10,
+                fontWeight: 700,
+                color:      act.color,
+                background: act.bg,
+                padding:    '1px 5px',
+                borderRadius: 6,
+                whiteSpace: 'nowrap',
+                animation:  'xp-float-label 0.9s ease-out 0.15s both',
+                pointerEvents: 'none',
+              }}>
+                +XP
+              </span>
+            )}
           </div>
 
           {/* Contenido */}
@@ -284,7 +306,7 @@ export function XpRewardToast({ data, onDismiss }: Props) {
                 marginLeft: 8,
                 flexShrink: 0,
                 display:   'inline-block',
-                animation: 'xp-amount-in 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.18s both',
+                animation: reduceMotion ? undefined : 'xp-amount-in 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.18s both',
               }}>
                 +{xpDisplayed} XP
               </span>
@@ -301,7 +323,7 @@ export function XpRewardToast({ data, onDismiss }: Props) {
                 width:      `${barTarget}%`,
                 background: lv.bar,
                 borderRadius: 99,
-                transition: 'width 0.9s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: reduceMotion ? undefined : 'width 0.9s cubic-bezier(0.4, 0, 0.2, 1)',
               }} />
             </div>
 
@@ -334,23 +356,25 @@ export function XpRewardToast({ data, onDismiss }: Props) {
               gap:          12,
               boxShadow:    `0 8px 40px ${newLv.bar}44`,
               overflow:     'hidden',
-              animation:    'xp-levelup-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
+              animation:    reduceMotion ? undefined : 'xp-levelup-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
             }}
           >
-            {/* Shimmer sweep */}
-            <div style={{
-              position:   'absolute',
-              top:        0,
-              left:       0,
-              width:      '60%',
-              height:     '100%',
-              background: `linear-gradient(90deg, transparent 0%, ${newLv.bar}30 50%, transparent 100%)`,
-              animation:  'xp-shimmer 1.2s ease-in-out 0.1s both',
-              pointerEvents: 'none',
-            }} />
+            {/* Shimmer sweep — omitido en reduced-motion */}
+            {!reduceMotion && (
+              <div style={{
+                position:   'absolute',
+                top:        0,
+                left:       0,
+                width:      '60%',
+                height:     '100%',
+                background: `linear-gradient(90deg, transparent 0%, ${newLv.bar}30 50%, transparent 100%)`,
+                animation:  'xp-shimmer 1.2s ease-in-out 0.1s both',
+                pointerEvents: 'none',
+              }} />
+            )}
 
-            {/* Partículas */}
-            <LevelUpParticles color={newLv.bar} />
+            {/* Partículas — omitidas en reduced-motion */}
+            {!reduceMotion && <LevelUpParticles color={newLv.bar} />}
 
             <TrendingUp style={{ width: 18, height: 18, color: newLv.bar, flexShrink: 0 }} />
 

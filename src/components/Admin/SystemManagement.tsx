@@ -64,9 +64,7 @@ const SystemManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold text-gray-900">Gestión del Sistema</h2>
         <div className="flex space-x-2">
           <button className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 flex items-center space-x-2">
             <AlertTriangle size={20} />

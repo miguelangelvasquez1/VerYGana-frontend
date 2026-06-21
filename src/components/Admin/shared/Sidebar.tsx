@@ -11,13 +11,13 @@ import {
   Menu,
   X,
   Home,
-  Shield,
   DollarSign,
   Bell,
   MonitorSmartphone,
   MessageSquare,
   TargetIcon,
-  TicketIcon
+  TicketIcon,
+  Palette,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -67,6 +67,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           color: 'text-emerald-500'
         },
         {
+          title: 'Branding',
+          icon: Palette,
+          href: '/admin/branding',
+          color: 'text-violet-500'
+        },
+        {
           title: 'Productos',
           icon: TargetIcon,
           href: '/admin/products',
@@ -109,15 +115,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
       color: 'text-yellow-500'
     },
     {
-      title: 'Sistema',
-      icon: Shield,
-      href: '/admin/system',
-      color: 'text-red-500'
-    },
-    {
       title: 'Configuración',
       icon: Settings,
-      href: '/admin/settings',
+      href: '/admin/config',
       color: 'text-gray-500'
     }
       ]
@@ -200,18 +200,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           </div>
         ))}
       </nav>
-
-      {/* Footer */}
-      {!isCollapsed && (
-        <div className="p-4 mt-auto">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white">
-            <p className="text-sm font-medium">Panel de Administración</p>
-            <p className="text-xs opacity-90">
-              Gestiona tu sistema completo
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

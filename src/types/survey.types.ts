@@ -36,7 +36,7 @@ export interface SurveyResponse {
   id: number;
   title: string;
   description: string | null;
-  rewardAmount: number;
+  rewardAmountPerQuestionCents: number;
   responseCount: number;
   maxResponses: number | null;
   status: SurveyStatus;
@@ -55,18 +55,28 @@ export interface SurveySummary {
   id: number;
   title: string;
   description: string | null;
-  rewardAmount: number;
+  rewardAmountPerQuestionCents: number;
+  maxResponses: number | null;
+  totalQuestions: number;
   status: SurveyStatus;
   alreadyCompleted: boolean;
   totalResponses: number;
   createdAt: string;
 }
 
+export interface AvailableSurveyDTO {
+  id: number;
+  title: string;
+  description: string | null;
+  rewardAmountPerQuestionCents: number;
+  totalQuestions: number;
+}
+
 // ─── Reward ───────────────────────────────────────────────────────────────────
 
 export interface RewardInfo {
   rewardId: number;
-  amount: number;
+  amountCents: number;
   status: RewardStatus;
   grantedAt: string;
 }
@@ -78,7 +88,7 @@ export interface UserRewardsSummary {
 }
 
 export interface SubmissionResult {
-  responseId: number;
+  sessionId: number;
   status: ResponseStatus;
   reward: RewardInfo;
   message: string;
@@ -94,8 +104,35 @@ export interface AnswerRequest {
 }
 
 export interface SubmitSurveyRequest {
-  surveyId: number;
+  sessionId: number;
   answers: AnswerRequest[];
+}
+
+export interface SurveyDetailDTO {
+  id: number;
+  title: string;
+  description: string | null;
+  rewardAmountPerQuestionCents: number;
+  maxResponses: number | null;
+  status: SurveyStatus;
+  startsAt: string | null;
+  endsAt: string | null;
+  categoryNames: string[];
+  totalQuestions: number;
+}
+
+export interface SurveySessionDTO {
+  id: number;
+  title: string;
+  description: string | null;
+  rewardAmountPerQuestionCents: number;
+  questions: QuestionResponse[];
+}
+
+export interface StartSurveyResponse {
+  sessionId: number;
+  expiresAt: string;
+  survey: SurveySessionDTO;
 }
 
 export interface CreateQuestionRequest {
@@ -108,12 +145,9 @@ export interface CreateQuestionRequest {
 export interface CreateSurveyRequest {
   title: string;
   description?: string;
-  /** ID of the SurveyConfig that defines the fixed cost per response */
-  surveyConfigId: number;
-  rewardAmount: number;
+  pricePerQuestionCents: number;
   maxResponses?: number;
   startsAt?: string;
-  endsAt?: string;
   categoryIds: number[];
   municipalityCodes?: string[];
   minAge?: number;
@@ -214,7 +248,7 @@ export interface AdminSurveySummary {
   id: number;
   title: string;
   description: string | null;
-  rewardAmount: number;
+  rewardAmountPerQuestionCents: number;
   totalResponses: number;
   maxResponses: number | null;
   status: SurveyStatus;
@@ -222,4 +256,41 @@ export interface AdminSurveySummary {
   startsAt: string | null;
   endsAt: string | null;
   categoryNames: string[];
+}
+
+// ─── Commercial Detail ────────────────────────────────────────────────────────
+
+export interface SurveyCommercialDetailDTO {
+  id: number;
+  title: string;
+  description: string | null;
+  status: SurveyStatus;
+  rewardAmountPerQuestionCents: number;
+  maxResponses: number | null;
+  responseCount: number;
+  startsAt: string | null;
+  createdAt: string;
+  categories: { id: number; name: string }[] | null;
+  targetMunicipalities: { code: string; name: string; departmentCode: string; departmentName: string }[] | null;
+  minAge: number | null;
+  maxAge: number | null;
+  targetGender: TargetGender | null;
+  questions: QuestionResponse[];
+  // Live progress
+  completedSessions: number;
+  // Budget
+  totalBudgetCents: number | null;
+}
+
+// ─── Update Request ───────────────────────────────────────────────────────────
+
+export interface UpdateSurveyRequest {
+  title?: string | null;
+  description?: string | null;
+  categoryIds?: number[] | null;
+  municipalityCodes?: string[] | null;
+  minAge?: number | null;
+  maxAge?: number | null;
+  targetGender?: TargetGender | null;
+  startsAt?: string | null;
 }

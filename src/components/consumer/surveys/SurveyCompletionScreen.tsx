@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Trophy, Star, X } from 'lucide-react';
+import Image from 'next/image';
+import { Star } from 'lucide-react';
 import { formatReward, formatDateTime } from '@/hooks/surveys/surveyUtils';
 import type { SubmissionResult } from '@/types/survey.types';
 
@@ -16,8 +17,8 @@ export default function SurveyCompletionScreen({ result, onClose }: Props) {
   return (
     <div className="flex flex-col items-center justify-center gap-6 px-8 py-12 text-center">
       {/* Celebration icon */}
-      <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-xl shadow-amber-200">
-        <Trophy className="h-12 w-12 text-white" />
+      <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-amber-50 shadow-xl shadow-amber-100">
+        <Image src="/logos/llave.png" alt="Recompensa" width={64} height={64} />
 
         {/* Orbiting stars */}
         {[0, 60, 120, 180, 240, 300].map((deg) => (
@@ -46,7 +47,7 @@ export default function SurveyCompletionScreen({ result, onClose }: Props) {
           Tu recompensa
         </p>
         <p className="text-3xl font-black">
-          {formatReward(reward.amount)}
+          {formatReward(reward.amountCents / 1000)}
         </p>
         <p className="mt-2 text-xs text-indigo-200">
           {reward.status === 'PROCESSED'
@@ -85,7 +86,7 @@ export default function SurveyCompletionScreen({ result, onClose }: Props) {
       {/* Close */}
       <button
         onClick={onClose}
-        className="mt-2 rounded-xl bg-gray-900 px-8 py-3 text-sm font-semibold text-white hover:bg-gray-800 active:scale-95 transition-all"
+        className="mt-2 rounded-xl bg-gray-900 px-8 py-3 text-sm font-semibold text-white hover:bg-gray-800 active:scale-95 transition-all cursor-pointer"
       >
         Continuar
       </button>

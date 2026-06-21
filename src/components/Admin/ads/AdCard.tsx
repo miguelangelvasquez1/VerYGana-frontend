@@ -9,7 +9,7 @@ import { formatCurrency, formatDate } from './utils/adHelper';
 
 interface AdCardProps {
   ad: AdForAdminDTO;
-  onApprove: (id: number) => void;
+  onApprove: (ad: AdForAdminDTO) => void;
   onReject: (ad: AdForAdminDTO) => void;
   onPause: (id: number) => void;
   onResume: (id: number) => void;
@@ -104,7 +104,7 @@ export const AdCard: React.FC<AdCardProps> = ({
         <button
           onClick={() => onViewDetail(ad)}
           title="Ver detalle completo"
-          className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
+          className="cursor-pointer p-2 rounded-lg border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
         >
           <Info className="w-4 h-4" />
         </button>
@@ -127,7 +127,7 @@ export const AdCard: React.FC<AdCardProps> = ({
 
 interface AdCardActionsProps {
   ad: AdForAdminDTO;
-  onApprove: (id: number) => void;
+  onApprove: (ad: AdForAdminDTO) => void;
   onReject: (ad: AdForAdminDTO) => void;
   onPause: (id: number) => void;
   onResume: (id: number) => void;
@@ -142,9 +142,9 @@ interface AdCardActionsProps {
 }
 
 const btn = {
-  green: 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
-  red:   'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
-  amber: 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+  green: 'cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+  red:   'cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+  amber: 'cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
 };
 
 const AdCardActions: React.FC<AdCardActionsProps> = ({
@@ -154,7 +154,7 @@ const AdCardActions: React.FC<AdCardActionsProps> = ({
     case 'PENDING':
       return (
         <>
-          <button onClick={() => onApprove(ad.id)} disabled={isLoading.approve} className={btn.green}>
+          <button onClick={() => onApprove(ad)} disabled={isLoading.approve} className={btn.green}>
             <CheckCircle className="w-3.5 h-3.5" /> Aprobar
           </button>
           <button onClick={() => onReject(ad)} disabled={isLoading.reject} className={btn.red}>
