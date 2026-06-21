@@ -1,23 +1,14 @@
-// Panel de Juegos inicial (Next.js + React + TypeScript + Tailwind)
-// Estructura base pensada para conectar con API más adelante
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Star, Gamepad2 } from 'lucide-react';
+import { Star, Gamepad2, Zap, Sparkles } from 'lucide-react';
 import GameSection from '@/components/consumer/games/GameSection';
 import { GameCardResponseDTO } from '@/types/games/game.types';
-import Banner from '@/components/consumer/games/Banner';
-import GameSearchBar from '@/components/consumer/games/GameSearchBar';
 import { getAvailableGamesPage, init } from '@/services/GameService';
 import { useRouter } from 'next/navigation';
 
-/* =========================
-   PANEL PRINCIPAL
-========================= */
 const GamesPanelPage = () => {
   const router = useRouter();
-
   const [sponsoredGames, setSponsoredGames] = useState<GameCardResponseDTO[]>([]);
   const [freeGames, setFreeGames] = useState<GameCardResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,42 +17,26 @@ const GamesPanelPage = () => {
     const loadGames = async () => {
       try {
         const page = await getAvailableGamesPage(0, 20);
-
-        const sponsored = page.data.filter((g: { sponsored: any; }) => g.sponsored);
-        const free = page.data.filter((g: { sponsored: any; }) => !g.sponsored);
-
-        setSponsoredGames(sponsored);
-        setFreeGames(free);
+        setSponsoredGames(page.data.filter((g: { sponsored: any }) => g.sponsored));
+        setFreeGames(page.data.filter((g: { sponsored: any }) => !g.sponsored));
       } catch (error) {
         console.error('Error loading games', error);
-      }
-      finally {
+      } finally {
         setLoading(false);
       }
     };
-
     loadGames();
   }, []);
 
   const handleSponsoredPlay = async () => {
     if (!sponsoredGames.length) return;
-
-    const response = await init({
-      gameId: sponsoredGames[0].id,
-      sponsored: true
-    });
-
+    const response = await init({ gameId: sponsoredGames[0].id, sponsored: true });
     router.push(`/games/play?url=${encodeURIComponent(response.url)}`);
   };
 
   const handlePlay = async (game: GameCardResponseDTO) => {
     if (!freeGames.length) return;
-
-    const response = await init({
-      gameId: game.id,
-      sponsored: true
-    });
-
+    const response = await init({ gameId: game.id, sponsored: true });
     router.push(`/games/play?url=${encodeURIComponent(response.url)}`);
   };
 
@@ -74,75 +49,79 @@ const GamesPanelPage = () => {
   }
 
   return (
-    <>
-      <div className="bg-gradient-to-br from-green-500 via-cyan-600 to-purple-500 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Gana dinero jugando nuestros juegos patrocinados
-          </h1>
-        </div>
-        <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
-          Disfruta de una variedad de juegos diseñados para entretenerte y ofrecerte la oportunidad de ganar premios reales. ¡Empieza a jugar ahora y convierte tu diversión en ganancias!
-        </p>
-      </div>
-      <main className="p-4 md:p-8 max-w-7xl mx-auto">
+    <main className="min-h-screen bg-[#f4f7fb] pb-24 lg:pb-0">
 
-        {/* Banner subliminal */}
-        <Banner
-          title="Juega, gana y vuelve a intentarlo"
-          subtitle="Cada partida puede acercarte a tu próxima recompensa"
-          color='from-indigo-700 to-blue-600'
-        />
+      {/* HERO */}
+      <section className="relative overflow-hidden text-white"
+        style={{ background: 'linear-gradient(135deg, #2d0060 0%, #5b21b6 50%, #7c3aed 100%)' }}
+      >
+        <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute top-1/2 left-1/4 w-48 h-48 rounded-full bg-purple-400/10" />
 
-        {/* Buscador */}
-        <div className="mt-6">
-          <GameSearchBar />
-        </div>
-
-        {/* Juegos patrocinados */}
-        {/* Juegos patrocinados (no seleccionables) */}
-        <div className="mt-10 mb-10 rounded-2xl border border-dashed p-6 bg-gradient-to-br from-yellow-50 to-white">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-yellow-500" />
-              <h2 className="text-lg font-bold">Juegos Patrocinados</h2>
-            </div>
-
-            <button
-              onClick={handleSponsoredPlay}
-              className="rounded-xl bg-yellow-400 px-6 py-2 text-sm font-bold text-black hover:bg-yellow-300 transition"
-            >
-              Jugar ahora 🎲
-            </button>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
+            <Zap className="w-3.5 h-3.5 text-yellow-300" />
+            Juega, compite y gana premios reales
           </div>
 
-          <p className="text-sm text-gray-600 mb-6">
-            Un juego se selecciona de forma aleatoria para garantizar igualdad entre comerciantes.
+          <h1 className="text-4xl lg:text-5xl font-extrabold mb-4 leading-tight">
+            Juega y Gana
+          </h1>
+          <p className="text-purple-100 text-base lg:text-lg mb-0 max-w-lg mx-auto">
+            Convierte cada partida en ganancias reales.
           </p>
+        </div>
 
+        {/* Wave bottom */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f4f7fb" />
+          </svg>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Sponsored Games */}
+        <div className="mt-8 mb-8 rounded-2xl border border-dashed border-yellow-200 p-6 bg-gradient-to-br from-yellow-50 to-white">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              <div>
+                <h2 className="text-lg font-bold">Juegos Patrocinados</h2>
+                <p className="text-xs text-gray-500">Selección aleatoria para igualdad entre participantes</p>
+              </div>
+            </div>
+
+            <div className="relative self-start md:self-auto">
+              <div className="absolute inset-0 rounded-xl bg-yellow-400 blur-md opacity-40 animate-pulse" />
+              <button
+                onClick={handleSponsoredPlay}
+                className="relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 px-8 py-3 text-sm font-bold text-black shadow-lg hover:shadow-yellow-400/50 hover:scale-105 transition-all"
+              >
+                <Gamepad2 className="h-4 w-4" />
+                ¡Jugar ahora!
+                <Sparkles className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <GameSection title="" games={sponsoredGames} selectable={false} />
+        </div>
+
+        {/* Free Games */}
+        <div className="pb-10">
           <GameSection
-            title=""
-            games={sponsoredGames}
-            selectable={false}
+            title="Juegos para divertirse"
+            icon={<Gamepad2 className="h-5 w-5 text-purple-500" />}
+            games={freeGames}
+            onGameClick={(game) => handlePlay(game)}
           />
         </div>
 
-        <Banner
-          title="Juega y diviertete sin límites"
-          subtitle="Diviértete con nuestros increibles juegos gratuitos"
-          color='from-green-500 to-green-700'
-        />
-
-        {/* Juegos solo diversión */}
-        {/* Juegos solo diversión (seleccionables) */}
-        <GameSection
-          title="Juegos para divertirse"
-          icon={<Gamepad2 className="h-5 w-5 text-blue-500" />}
-          games={freeGames}
-          onGameClick={(game) => handlePlay(game)}
-        />
-      </main>
-    </>
+      </div>
+    </main>
   );
 };
 
