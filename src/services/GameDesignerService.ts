@@ -39,23 +39,41 @@ export interface GameSchema {
 export interface DesignerBrandingDetail {
   id: number;
   status: BrandingStatus;
+
+  // Marca
   commercialName: string;
   brandName: string;
   brandDescription: string;
   targetUrl: string | null;
   campaignGoal: string | null;
+
+  // Juego
+  gameId: number;
+  gameName: string;
+  gameFrontPageUrl: string | null;
+
+  // Segmentación
   minAge: number | null;
   maxAge: number | null;
   targetGender: 'ALL' | 'MALE' | 'FEMALE' | null;
   categories: BrandingCategory[];
   targetMunicipalities: BrandingMunicipality[];
+
+  // Recompensas
   completionRewardCents: number | null;
   maxRewardPerSessionCents: number | null;
+  maxSessionsPerUserPerDay: number | null;
+
+  // Comunicación
   adminNotes: string | null;
   designerNotes: string | null;
+
+  // Recursos y configuración
   corporateResources: BrandingCorporateResource[];
   gameSchema: GameSchema | null;
   gameConfig: Record<string, unknown> | null;
+  draftFormData: Record<string, unknown> | null;
+
   createdAt: string;
   updatedAt: string;
 }
@@ -110,11 +128,11 @@ export const getDesignerRequestDetail = async (
   return data;
 };
 
-export const saveGameConfig = async (
+export const saveDraft = async (
   id: number,
-  config: Record<string, unknown>
+  formData: Record<string, unknown>
 ): Promise<void> => {
-  await apiClient.patch(`/game-designers/me/branding-requests/${id}/config`, { config });
+  await apiClient.patch(`/game-designers/me/branding-requests/${id}/draft`, formData);
 };
 
 export const saveDesignerNotes = async (id: number, notes: string): Promise<void> => {
