@@ -13,10 +13,10 @@ import {
 import { getRafflesByStatusAndType } from "@/services/raffleService";
 import { fileUploadService } from "@/services/FileUploadService";
 
-import RaffleCard from "@/components/Admin/raffles/RaffleCardAdmin";
+import RaffleCard from "@/components/admin/raffles/RaffleCardAdmin";
 import CreateRaffleForm, {
   CreateRaffleFormSubmitPayload,
-} from "@/components/Admin/raffles/CreateRaffleForm";
+} from "@/components/admin/raffles/CreateRaffleForm";
 
 export default function AdminRafflesDashboard() {
   /* ================== STATE ================== */

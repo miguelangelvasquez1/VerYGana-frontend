@@ -2,7 +2,7 @@
 
 import React from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import TicketRulesManagement from "@/components/Admin/ticket-rules/TicketRulesManagement";
+import TicketRulesManagement from "@/components/admin/ticket-rules/TicketRulesManagement";
 
 export default function TicketRulesPage() {
   return (
