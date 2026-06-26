@@ -23,6 +23,7 @@ export interface RegisterCommercialDTO {
   legalRepDocumentNumber: string;
   legalRepPepDeclaration: boolean;
   annualIncomeRange?: AnnualIncomeRange;
+  municipalityCode?: string;
 }
 
 export interface CommercialProfile {
@@ -72,6 +73,7 @@ export const registerCommercial = async (data: {
   legalRepDocumentNumber: string;
   legalRepPepDeclaration: boolean;
   annualIncomeRange?: AnnualIncomeRange;
+  municipalityCode?: string;
 }): Promise<any> => {
   const payload: RegisterCommercialDTO = {
     email: data.email,
@@ -85,6 +87,7 @@ export const registerCommercial = async (data: {
     legalRepDocumentNumber: data.legalRepDocumentNumber,
     legalRepPepDeclaration: data.legalRepPepDeclaration,
     annualIncomeRange: data.annualIncomeRange || undefined,
+    municipalityCode: data.municipalityCode || undefined,
   };
 
   const response = await apiClient.post('/auth/register/commercial', payload);

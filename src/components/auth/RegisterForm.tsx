@@ -248,6 +248,7 @@ export default function RegisterForm() {
             legalRepDocumentNumber: formData.legalRepDocumentNumber,
             legalRepPepDeclaration: formData.legalRepPepDeclaration ?? false,
             annualIncomeRange: formData.annualIncomeRange || undefined,
+            municipalityCode: formData.municipalityCode || undefined,
           });
           if (res?.underReview === true || res?.status === "PENDING_REVIEW") {
             setRegistrationResult("pep_review");
@@ -775,6 +776,51 @@ export default function RegisterForm() {
                 <p className="text-xs text-gray-400 ml-7">
                   Marcar esta casilla si el representante es PEP puede requerir una revisión adicional.
                 </p>
+              </div>
+            </section>
+
+            <hr className="border-gray-100" />
+
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Ubicación <span className="normal-case font-normal text-gray-300">(opcional)</span></h3>
+              <div className="space-y-4">
+                <FieldWrapper label="Departamento" error={fieldErrors["departmentName"]}>
+                  <select
+                    name="departmentCode"
+                    onChange={handleChange}
+                    value={formData.departmentCode || ""}
+                    className={inputCls(!!fieldErrors["departmentName"])}
+                    disabled={loadingDepartments}
+                  >
+                    <option value="">
+                      {loadingDepartments ? "Cargando departamentos..." : "Selecciona tu departamento"}
+                    </option>
+                    {departments.map((d) => (
+                      <option key={d.code} value={d.code}>{d.name}</option>
+                    ))}
+                  </select>
+                </FieldWrapper>
+
+                <FieldWrapper label="Municipio" error={fieldErrors["municipalityName"]}>
+                  <select
+                    name="municipalityCode"
+                    onChange={handleMunicipalityChange}
+                    value={formData.municipalityCode || ""}
+                    className={inputCls(!!fieldErrors["municipalityName"])}
+                    disabled={!formData.departmentCode || loadingMunicipalities}
+                  >
+                    <option value="">
+                      {!formData.departmentCode
+                        ? "Selecciona primero el departamento"
+                        : loadingMunicipalities
+                          ? "Cargando municipios..."
+                          : "Selecciona tu municipio"}
+                    </option>
+                    {municipalities?.map((m: Municipality) => (
+                      <option key={m.code} value={m.code}>{m.name}</option>
+                    ))}
+                  </select>
+                </FieldWrapper>
               </div>
             </section>
 
