@@ -113,7 +113,20 @@ export default withAuth(function middleware(req: NextRequest) {
     }
   }
 
-  // 2.5) Rutas de game-designer (reset-password es pública)
+  // 2.5) Rutas del oficial de cumplimiento
+  if (pathname === '/compliance' || pathname.startsWith('/compliance/')) {
+    if (!token) {
+      const loginUrl = new URL('/login', req.url);
+      loginUrl.searchParams.set('from', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    if (normalizedRole !== 'COMPLIANCE_OFFICER') {
+      return NextResponse.redirect(new URL('/unauthorized', req.url));
+    }
+    return NextResponse.next();
+  }
+
+  // 2.6) Rutas de game-designer (reset-password es pública)
   if (pathname === '/game-designer' || pathname.startsWith('/game-designer/')) {
     if (pathname === '/game-designer/reset-password') return NextResponse.next();
     if (!token) {

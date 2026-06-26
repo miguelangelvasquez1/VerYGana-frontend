@@ -1,4 +1,13 @@
 import { CategoryResponseDTO } from "@/types/Category.types";
+
+export type DocumentType = "CC" | "CE" | "PP";
+
+export type IncomeRange =
+  | "LESS_THAN_1_SMMLV"
+  | "FROM_1_TO_3_SMMLV"
+  | "FROM_3_TO_10_SMMLV"
+  | "MORE_THAN_10_SMMLV";
+
 export interface RegisterConsumerDTO {
   email: string;
   password: string;
@@ -10,10 +19,14 @@ export interface RegisterConsumerDTO {
   categories?: CategoryResponseDTO[];
   avatarId: number;
   referredByCode?: string;
-  birthDate: string; 
+  birthDate: string;
   gender: "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
-  userName:string;
-  
+  userName: string;
+  documentType: DocumentType;
+  documentNumber: string;
+  occupation?: string;
+  incomeRange?: IncomeRange;
+  pepDeclaration: boolean;
 }
 
 export type Gender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";

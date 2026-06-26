@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authService } from "@/lib/auth/authService";
+import { authService, AccountPendingReviewError } from "@/lib/auth/authService";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { AlertCircle } from "lucide-react";
 import { signIn } from "next-auth/react";
@@ -70,11 +70,18 @@ const LoginForm = () => {
     } else if (role === "ROLE_GAME_DESIGNER") {
       router.push("/game-designer");
       return;
-    } 
+    } else if (role === "ROLE_COMPLIANCE_OFFICER") {
+      router.push("/compliance");
+      return;
+    }
 
     } catch (err: any) {
       console.error('❌ Login error:', err);
-      setError(err.message || 'Error al iniciar sesión');
+      if (err instanceof AccountPendingReviewError) {
+        setError('Tu cuenta está en revisión por el equipo de cumplimiento. Te notificaremos cuando sea aprobada.');
+      } else {
+        setError(err.message || 'Error al iniciar sesión');
+      }
       setIsLoading(false);
     }
   };

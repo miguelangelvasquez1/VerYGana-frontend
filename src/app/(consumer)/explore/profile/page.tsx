@@ -101,9 +101,19 @@ export default function ConsumerProfilePage() {
       <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            {/* Avatar con iniciales */}
-            <div className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-extrabold border-4 border-white/30 bg-white/20 backdrop-blur-sm shadow-lg shrink-0 select-none">
-              {getInitials(profile.name, profile.lastName)}
+            {/* Avatar */}
+            <div className="w-24 h-24 rounded-full border-4 border-white/30 shadow-lg shrink-0 overflow-hidden bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              {initialData?.avatarUrl ? (
+                <img
+                  src={initialData.avatarUrl}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-3xl font-extrabold select-none">
+                  {getInitials(profile.name, profile.lastName)}
+                </span>
+              )}
             </div>
 
             <div className="text-center sm:text-left flex-1">
