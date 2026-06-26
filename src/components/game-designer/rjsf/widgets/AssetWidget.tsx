@@ -34,9 +34,7 @@ export const AssetWidget: React.FC<WidgetProps> = (props) => {
         setProgress(progressPercent);
       });
 
-      await uploadAsset.confirmUpload({
-        assetId: uploadData.assetId
-      });
+      await uploadAsset.confirmUpload({ assetId: uploadData.assetId });
 
       onChange(uploadData.publicUrl);
       setPreview(uploadData.temporalUrl);
