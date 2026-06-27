@@ -1,8 +1,8 @@
 import apiClient from "@/lib/api/client";
 import { CategoryResponseDTO } from "@/types/Category.types";
-import { RegisterConsumerDTO, ConsumerInitialDataResponseDTO, ConsumerProfileResponseDTO, ConsumerUpdateProfileRequestDTO} from "@/types/Consumer.types";
+import { RegisterConsumerDTO, ConsumerInitialDataResponseDTO, ConsumerProfileResponseDTO, ConsumerUpdateProfileRequestDTO } from "@/types/Consumer.types";
+import type { DocumentType, IncomeRange, Gender } from "@/types/Consumer.types";
 import { EntityUpdatedResponseDTO } from "@/types/Generic.types";
-import { Gender } from "@/types/Consumer.types";
 // ============================================
 // MÉTODOS DEL SERVICE
 // ============================================
@@ -21,10 +21,14 @@ export const registerConsumer = async (data: {
   categories?: CategoryResponseDTO[];
   referredByCode?: string;
   avatarId: number;
-  userName: string;      
-  birthDate: string;       
-  gender: Gender;  
-
+  userName: string;
+  birthDate: string;
+  gender: Gender;
+  documentType: DocumentType;
+  documentNumber: string;
+  occupation?: string;
+  incomeRange?: IncomeRange;
+  pepDeclaration: boolean;
 }): Promise<any> => {
   const payload: RegisterConsumerDTO = {
     email: data.email,
@@ -35,11 +39,16 @@ export const registerConsumer = async (data: {
     department: data.department,
     municipalityCode: data.municipalityCode,
     categories: data.categories || [],
-    avatarId: data.avatarId,                              
+    avatarId: data.avatarId,
     referredByCode: data.referredByCode || undefined,
     userName: data.userName,
-    birthDate: data.birthDate,    
-    gender: data.gender,    
+    birthDate: data.birthDate,
+    gender: data.gender,
+    documentType: data.documentType,
+    documentNumber: data.documentNumber,
+    occupation: data.occupation || undefined,
+    incomeRange: data.incomeRange || undefined,
+    pepDeclaration: data.pepDeclaration,
   };
 
   const response = await apiClient.post('/auth/register/consumer', payload);
@@ -93,5 +102,5 @@ export const deleteConsumerAccount = async (consumerId: number): Promise<void> =
 };
 
 export const updateConsumerAvatar = async (avatarId: number): Promise<void> => {
-  await apiClient.patch('/consumers/profile/avatar', { avatarId });
+  await apiClient.patch('/avatars/me', { avatarId });
 };

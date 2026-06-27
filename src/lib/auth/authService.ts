@@ -36,6 +36,13 @@ export interface RegisterCommercialData {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
+export class AccountPendingReviewError extends Error {
+  constructor() {
+    super('ACCOUNT_PENDING_REVIEW');
+    this.name = 'AccountPendingReviewError';
+  }
+}
+
 export const authService = {
 
   // Login directo para guardar refresh token en cookie HttpOnly cliente
@@ -49,9 +56,14 @@ export const authService = {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      const customError = new Error(error.message || 'Error al iniciar sesión');
-      (customError as any).status = response.status;
-      throw customError;
+      const isDisabled =
+        response.status === 401 &&
+        (error.type === 'DisabledException' ||
+          error.exception?.includes('DisabledException') ||
+          error.errorCode === 'ACCOUNT_DISABLED' ||
+          error.message?.toLowerCase().includes('disabled'));
+      if (isDisabled) throw new AccountPendingReviewError();
+      throw new Error(error.message || 'Error al iniciar sesión');
     }
 
     return response.json();

@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LoginForm from "../../../components/auth/LoginForm";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Login() {
+function CallbackUrlCleaner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -15,14 +15,20 @@ export default function Login() {
     if (searchParams?.has('callbackUrl')) {
       const url = new URL(window.location.href);
       url.searchParams.delete('callbackUrl');
-      const newPath = url.pathname + url.search;
-      router.replace(newPath, { scroll: false });
+      router.replace(url.pathname + url.search, { scroll: false });
     }
   }, [searchParams, router]);
 
+  return null;
+}
+
+export default function Login() {
   return (
     <>
       <div className="min-h-screen flex flex-col bg-linear-to-b from-[#E6F2FF] to-[#F4F8FB] relative">
+        <Suspense fallback={null}>
+          <CallbackUrlCleaner />
+        </Suspense>
 
         {/* Logo arriba a la izquierda */}
         <div className="absolute top-6 left-6">

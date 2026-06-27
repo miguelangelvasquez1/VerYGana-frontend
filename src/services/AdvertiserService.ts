@@ -3,12 +3,27 @@ import apiClient from "@/lib/api/client";
 // ============================================
 // INTERFACES
 // ============================================
+export type CommercialDocumentType = "CC" | "CE" | "PP";
+
+export type AnnualIncomeRange =
+  | "LESS_THAN_500_SMMLV"
+  | "FROM_500_TO_5000_SMMLV"
+  | "FROM_5000_TO_50000_SMMLV"
+  | "MORE_THAN_50000_SMMLV";
+
 export interface RegisterCommercialDTO {
   email: string;
   password: string;
   phoneNumber: string;
   companyName: string;
   nit: string;
+  ciiuCode: string;
+  mercantileRegistration?: string;
+  legalRepDocumentType: CommercialDocumentType;
+  legalRepDocumentNumber: string;
+  legalRepPepDeclaration: boolean;
+  annualIncomeRange?: AnnualIncomeRange;
+  municipalityCode?: string;
 }
 
 export interface CommercialProfile {
@@ -52,13 +67,27 @@ export const registerCommercial = async (data: {
   phoneNumber: string;
   name: string;
   nit: string;
+  ciiuCode: string;
+  mercantileRegistration?: string;
+  legalRepDocumentType: CommercialDocumentType;
+  legalRepDocumentNumber: string;
+  legalRepPepDeclaration: boolean;
+  annualIncomeRange?: AnnualIncomeRange;
+  municipalityCode?: string;
 }): Promise<any> => {
   const payload: RegisterCommercialDTO = {
     email: data.email,
     password: data.password,
     phoneNumber: data.phoneNumber,
     companyName: data.name,
-    nit: data.nit
+    nit: data.nit,
+    ciiuCode: data.ciiuCode,
+    mercantileRegistration: data.mercantileRegistration || undefined,
+    legalRepDocumentType: data.legalRepDocumentType,
+    legalRepDocumentNumber: data.legalRepDocumentNumber,
+    legalRepPepDeclaration: data.legalRepPepDeclaration,
+    annualIncomeRange: data.annualIncomeRange || undefined,
+    municipalityCode: data.municipalityCode || undefined,
   };
 
   const response = await apiClient.post('/auth/register/commercial', payload);
