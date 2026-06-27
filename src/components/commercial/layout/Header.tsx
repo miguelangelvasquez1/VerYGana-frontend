@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Menu, Bell, User, TrendingUp, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
-import { getCommercialInitialData } from '@/services/CommercialService';
+import { getCommercialInitialData } from '@/services/commercialService';
 import { EffectivePlanStateResponseDTO } from '@/types/finance/plans/Plan.types';
 import { formatBudget, formatCents } from '@/utils/currency';
 
@@ -81,7 +81,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
 
             {/* Budget Section */}
             {hasBudget ? (
-              <div className="hidden sm:flex items-center bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200/60 rounded-xl px-3 py-1.5 gap-2">
+              <div className="hidden sm:flex items-center bg-linear-to-r from-blue-50 to-purple-50 border border-blue-200/60 rounded-xl px-3 py-1.5 gap-2">
                 <div className="flex flex-col items-end leading-none">
                   <span className="text-[10px] text-slate-500 font-semibold tracking-widest">PRESUPUESTO</span>
                   <span className="text-sm font-bold text-slate-800 mt-0.5">
@@ -129,7 +129,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
                 <p className="text-sm font-semibold text-gray-900">{commercial?.companyName}</p>
                 <p className="text-xs text-gray-500">{commercial?.email}</p>
               </div>
-              <button className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+              <button className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center">
                 <User className="w-4 h-4 text-white" />
               </button>
             </div>

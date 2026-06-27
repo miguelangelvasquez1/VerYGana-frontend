@@ -73,8 +73,11 @@ const LoginForm = () => {
     } 
 
     } catch (err: any) {
-      console.error('❌ Login error:', err);
-      setError(err.message || 'Error al iniciar sesión');
+      if (err?.status === 403) {
+        setError('Tu cuenta aún no está activada. Revisa tu correo electrónico para encontrar el enlace de configuración de contraseña.');
+      } else {
+        setError(err.message || 'Error al iniciar sesión');
+      }
       setIsLoading(false);
     }
   };
@@ -84,13 +87,13 @@ const LoginForm = () => {
       <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 p-6 sm:p-8 border border-gray-100">
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-start">
-            <AlertCircle className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-red-600 mr-2 shrink-0 mt-0.5" />
             <p className="text-sm text-red-800">{error}</p>
           </div>
         )}
 
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-linear-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
@@ -159,7 +162,7 @@ const LoginForm = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 
+              className="w-full bg-linear-to-r from-blue-600 to-blue-700 
                          hover:from-blue-700 hover:to-blue-800
                          disabled:from-gray-400 disabled:to-gray-500
                          text-white font-semibold py-3 px-6 rounded-lg

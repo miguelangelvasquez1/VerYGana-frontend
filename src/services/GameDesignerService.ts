@@ -8,7 +8,6 @@ import type {
 
 export interface DesignerProfile {
   id: number;
-  userId: number;
   name: string;
   lastName: string;
   email: string;
@@ -16,8 +15,6 @@ export interface DesignerProfile {
   bio: string | null;
   designerCode: string;
   campaignsDesigned: number;
-  canPublishDirectly: boolean;
-  joinedAt: string;
 }
 
 export interface DesignerBrandingSummary {
@@ -90,14 +87,12 @@ export const resetDesignerPassword = async (
 
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
-export const getDesignerProfile = async (): Promise<DesignerProfile> => {
-  const { data } = await apiClient.get('/game-designers/me');
+export const getDesignerProfile = async (signal?: AbortSignal): Promise<DesignerProfile> => {
+  const { data } = await apiClient.get('/game-designers/me', { signal });
   return data;
 };
 
 export const updateDesignerProfile = async (dto: {
-  name?: string;
-  lastName?: string;
   bio?: string;
 }): Promise<DesignerProfile> => {
   const { data } = await apiClient.patch('/game-designers/me', dto);
@@ -134,6 +129,7 @@ export const saveDraft = async (
 ): Promise<void> => {
   await apiClient.patch(`/game-designers/me/branding-requests/${id}/draft`, formData);
 };
+
 
 export const saveDesignerNotes = async (id: number, notes: string): Promise<void> => {
   await apiClient.patch(`/game-designers/me/branding-requests/${id}/notes`, { notes });

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, Save, Key, User, BadgeCheck } from 'lucide-react';
+import { Loader2, Save, Key, BadgeCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   getDesignerProfile,
@@ -25,8 +25,6 @@ export const DesignerProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   // Edit form
-  const [name, setName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [bio, setBio] = useState('');
   const [profileSaving, setProfileSaving] = useState(false);
 
@@ -36,31 +34,23 @@ export const DesignerProfile: React.FC = () => {
   const [passwordSaving, setPasswordSaving] = useState(false);
 
   useEffect(() => {
-    getDesignerProfile()
+    const ctrl = new AbortController();
+    getDesignerProfile(ctrl.signal)
       .then(p => {
         setProfile(p);
-        setName(p.name);
-        setLastName(p.lastName);
         setBio(p.bio ?? '');
       })
-      .catch(() => toast.error('No se pudo cargar el perfil'))
+      .catch(err => { if (err?.code !== 'ERR_CANCELED') toast.error('No se pudo cargar el perfil'); })
       .finally(() => setLoading(false));
+    return () => ctrl.abort();
   }, []);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setProfileSaving(true);
     try {
-      await updateDesignerProfile({
-        name: name.trim() || undefined,
-        lastName: lastName.trim() || undefined,
-        bio: bio.trim() || undefined,
-      });
-      setProfile(prev =>
-        prev
-          ? { ...prev, name: name.trim() || prev.name, lastName: lastName.trim() || prev.lastName, bio: bio.trim() || null }
-          : prev
-      );
+      await updateDesignerProfile({ bio: bio.trim() || undefined });
+      setProfile(prev => prev ? { ...prev, bio: bio.trim() || null } : prev);
       toast.success('Perfil actualizado');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Error al actualizar el perfil');
@@ -98,16 +88,11 @@ export const DesignerProfile: React.FC = () => {
 
   if (!profile) return null;
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
-
   return (
-    <div className="space-y-5 max-w-2xl">
+    <div className="space-y-5 max-w-2xl mx-auto">
       <div>
         <h2 className="text-xl font-semibold text-gray-900">Mi perfil</h2>
-        <p className="text-sm text-gray-500 mt-0.5">
-          {profile.name} {profile.lastName} · Miembro desde {formatDate(profile.joinedAt)}
-        </p>
+        <p className="text-sm text-gray-500 mt-0.5">{profile.name} {profile.lastName}</p>
       </div>
 
       {/* Readonly info */}
@@ -135,12 +120,6 @@ export const DesignerProfile: React.FC = () => {
                 <p className="font-medium text-gray-800">{profile.phone}</p>
               </div>
             )}
-            <div>
-              <p className="text-gray-500 text-xs mb-0.5">Puede publicar directamente</p>
-              <p className={`font-medium ${profile.canPublishDirectly ? 'text-green-700' : 'text-gray-500'}`}>
-                {profile.canPublishDirectly ? 'Sí' : 'No'}
-              </p>
-            </div>
           </div>
         </div>
       </SectionCard>
@@ -151,21 +130,11 @@ export const DesignerProfile: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className={fieldCls}
-              />
+              <input type="text" value={profile.name} readOnly className={fieldCls + ' bg-gray-50 text-gray-500 cursor-default focus:ring-0 focus:border-gray-300 pointer-events-none'} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
-                className={fieldCls}
-              />
+              <input type="text" value={profile.lastName} readOnly className={fieldCls + ' bg-gray-50 text-gray-500 cursor-default focus:ring-0 focus:border-gray-300 pointer-events-none'} />
             </div>
           </div>
           <div>

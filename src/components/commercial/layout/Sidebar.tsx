@@ -175,7 +175,7 @@ export function Sidebar({
     typeof remainingBudget === 'number';
 
   return (
-    <div className="bg-[#0f1117] text-white w-64 h-screen flex flex-col border-r border-white/[0.06]">
+    <div className="bg-[#0f1117] text-white w-64 h-screen flex flex-col border-r border-white/6">
 
       {/* ── Header ── */}
       <div className="p-5 border-b border-white/[0.07]">
@@ -224,7 +224,7 @@ export function Sidebar({
                     flex items-center px-3 py-2.5 rounded-lg transition-colors duration-100 group
                     ${active
                       ? 'bg-blue-600/20 text-white border border-blue-500/30'
-                      : 'text-slate-400 hover:bg-white/[0.06] hover:text-white border border-transparent'
+                      : 'text-slate-400 hover:bg-white/6 hover:text-white border border-transparent'
                     }
                   `}
                 >
@@ -233,7 +233,7 @@ export function Sidebar({
                   }`} />
                   <span className="text-sm font-medium">{item.label}</span>
                   {item.href === '/plans' && (
-                    <span className="ml-auto text-[9px] font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1.5 py-0.5 rounded-full">
+                    <span className="ml-auto text-[9px] font-bold bg-linear-to-r from-blue-500 to-purple-500 text-white px-1.5 py-0.5 rounded-full">
                       NEW
                     </span>
                   )}
@@ -246,7 +246,7 @@ export function Sidebar({
 
       {/* ── Footer ── */}
       <div className="p-3 border-t border-white/[0.07]">
-        <button className="w-full flex items-center px-3 py-2 text-slate-500 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors text-sm group cursor-pointer"
+        <button className="w-full flex items-center px-3 py-2 text-slate-500 hover:text-white hover:bg-white/6 rounded-lg transition-colors text-sm group cursor-pointer"
           onClick={async () => {
             await logout();
           }}

@@ -22,7 +22,7 @@ export default function Login() {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#E6F2FF] to-[#F4F8FB] relative">
+      <div className="min-h-screen flex flex-col bg-linear-to-b from-[#E6F2FF] to-[#F4F8FB] relative">
 
         {/* Logo arriba a la izquierda */}
         <div className="absolute top-6 left-6">

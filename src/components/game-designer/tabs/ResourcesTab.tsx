@@ -33,7 +33,7 @@ export const ResourcesTab: React.FC<Props> = ({ detail }) => {
       const folder = zip.folder('recursos') ?? zip;
       await Promise.all(
         toDownload.map(async (res) => {
-          const response = await fetch(res.temporalUrl!);
+          const response = await fetch(`/api/proxy-download?url=${encodeURIComponent(res.temporalUrl!)}`);
           if (!response.ok) throw new Error(`Error descargando ${res.originalFileName}`);
           folder.file(res.originalFileName, await response.blob());
         })

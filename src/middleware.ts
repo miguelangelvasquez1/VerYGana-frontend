@@ -116,6 +116,7 @@ export default withAuth(function middleware(req: NextRequest) {
   // 2.5) Rutas de game-designer (reset-password es pública)
   if (pathname === '/game-designer' || pathname.startsWith('/game-designer/')) {
     if (pathname === '/game-designer/reset-password') return NextResponse.next();
+    if (pathname === '/game-designer/setup-password') return NextResponse.next();
     if (!token) {
       const loginUrl = new URL('/login', req.url);
       loginUrl.searchParams.set('from', pathname);

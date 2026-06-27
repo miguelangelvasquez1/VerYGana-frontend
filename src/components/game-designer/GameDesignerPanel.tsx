@@ -11,11 +11,11 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { signOut } from 'next-auth/react';
 import {
   getDesignerRequests,
   type DesignerBrandingSummary,
 } from '@/services/GameDesignerService';
+import { useLogout } from '@/hooks/useLogout';
 import type { BrandingStatus } from '@/services/BrandingRequestService';
 import { DesignerRequestDetail } from './DesignerRequestDetail';
 import { DesignerProfile } from './DesignerProfile';
@@ -43,7 +43,8 @@ type View = 'requests' | 'detail' | 'profile';
 export const GameDesignerPanel: React.FC = () => {
   const [view, setView] = useState<View>('requests');
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { logout } = useLogout();
 
   const [requests, setRequests] = useState<DesignerBrandingSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,7 +126,7 @@ export const GameDesignerPanel: React.FC = () => {
       {/* Sign out */}
       <div className="p-2 border-t border-gray-100 shrink-0">
         <button
-          onClick={() => signOut({ callbackUrl: '/login' })}
+          onClick={logout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
         >
           <LogOut size={18} />

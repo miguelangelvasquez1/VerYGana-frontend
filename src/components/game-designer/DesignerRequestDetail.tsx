@@ -49,7 +49,6 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
   const [error, setError]                 = useState<string | null>(null);
   const [activeTab, setActiveTab]         = useState<Tab>('brief');
   const [gameConfig, setGameConfig]       = useState<Record<string, unknown>>({});
-  const [configSaving, setConfigSaving]   = useState(false);
   const [submitting, setSubmitting]       = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
@@ -97,24 +96,14 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     }, 1500);
   };
 
-  const handleConfigSubmit = async ({ formData }: { formData?: Record<string, unknown> }) => {
+  const handleFormValidated = async ({ formData }: { formData?: Record<string, unknown> }) => {
     if (!detail || !formData) return;
     if (saveDraftTimerRef.current) {
       clearTimeout(saveDraftTimerRef.current);
       saveDraftTimerRef.current = null;
     }
-    setConfigSaving(true);
-    try {
-      await saveDraft(detail.id, formData);
-      toast.success('Borrador guardado');
-      setGameConfig(formData);
-      const updated = await getDesignerRequestDetail(detail.id);
-      setDetail(updated);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Error al guardar el borrador');
-    } finally {
-      setConfigSaving(false);
-    }
+    try { await saveDraft(detail.id, formData); } catch {}
+    setShowSubmitConfirm(true);
   };
 
   const handleSubmitDesign = async () => {
@@ -163,7 +152,6 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
 
   const statusMeta          = STATUS_LABEL[detail.status];
   const canSubmit           = ['DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED'].includes(detail.status);
-  const hasConfig           = Object.keys(gameConfig).length > 0;
   const isChangesRequested  = detail.status === 'CHANGES_REQUESTED';
   const validatedCount      = detail.corporateResources.filter(r => r.status === 'VALIDATED').length;
 
@@ -206,7 +194,7 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
 
         {/* Tab bar */}
-        <div className="flex border-b border-gray-100 overflow-x-auto">
+        <div className="flex border-b border-gray-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TABS.map(tab => {
             const Icon   = tab.icon;
             const active = activeTab === tab.id;
@@ -239,14 +227,12 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
           <ConfigTab
             detail={detail}
             gameConfig={gameConfig}
-            configSaving={configSaving}
             onFormChange={handleFormChange}
-            onSubmit={handleConfigSubmit}
+            onValidated={handleFormValidated}
             submitting={submitting}
             showSubmitConfirm={showSubmitConfirm}
             setShowSubmitConfirm={setShowSubmitConfirm}
             onSubmitDesign={handleSubmitDesign}
-            hasConfig={hasConfig}
             canSubmit={canSubmit}
             isChangesRequested={isChangesRequested}
           />

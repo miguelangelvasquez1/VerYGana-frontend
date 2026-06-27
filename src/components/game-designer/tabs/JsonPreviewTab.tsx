@@ -28,9 +28,20 @@ interface Props {
   gameConfig: Record<string, unknown>;
 }
 
+function stripAssetIds(data: unknown): unknown {
+  if (Array.isArray(data)) return data.map(stripAssetIds);
+  if (data !== null && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    if ('assetId' in obj && 'url' in obj) return obj.url;
+    return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, stripAssetIds(v)]));
+  }
+  return data;
+}
+
 export const JsonPreviewTab: React.FC<Props> = ({ gameConfig }) => {
   const isEmpty = Object.keys(gameConfig).length === 0;
-  const json = useMemo(() => JSON.stringify(gameConfig, null, 2), [gameConfig]);
+  const stripped = useMemo(() => stripAssetIds(gameConfig) as Record<string, unknown>, [gameConfig]);
+  const json = useMemo(() => JSON.stringify(stripped, null, 2), [stripped]);
   const highlighted = useMemo(() => syntaxHighlight(json), [json]);
 
   const handleCopy = () => {
@@ -58,7 +69,7 @@ export const JsonPreviewTab: React.FC<Props> = ({ gameConfig }) => {
       <div className="flex items-center justify-between">
         <p className="text-xs text-gray-500">
           Vista en tiempo real ·{' '}
-          <code className="bg-gray-100 px-1 rounded text-violet-700 font-mono">draftFormData</code>
+          <code className="bg-gray-100 px-1 rounded text-violet-700 font-mono">gameConfig</code>
         </p>
         <button
           onClick={handleCopy}

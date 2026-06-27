@@ -49,7 +49,9 @@ export const authService = {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || 'Error al iniciar sesión');
+      const customError = new Error(error.message || 'Error al iniciar sesión');
+      (customError as any).status = response.status;
+      throw customError;
     }
 
     return response.json();
