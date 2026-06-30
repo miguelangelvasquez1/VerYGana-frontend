@@ -102,42 +102,6 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
               year={selectedYear}
             />
           </div>
-
-          {/* RESUMEN */}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Resumen de ganancias
-            </h2>
-          </div>
-          <CommercialEarningsCards data={earningsByMonth} />
-
-          {/* PAGOS */}
-          <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3">
-              <h3 className="text-2xl font-semibold text-gray-900">
-                Pagos realizados
-              </h3>
-
-              <select
-                value={selectedPayoutMonth}
-                onChange={(e) =>
-                  setSelectedPayoutMonth(Number(e.target.value))
-                }
-                className="border rounded-lg px-4 py-2 w-full sm:w-44 text-sm"
-              >
-                {MONTHS.map((month) => (
-                  <option key={month.value} value={month.value}>
-                    {month.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <CommercialPayoutsList
-              year={selectedYear}
-              month={selectedPayoutMonth}
-            />
-          </div>
         </>
       )}
     </div>

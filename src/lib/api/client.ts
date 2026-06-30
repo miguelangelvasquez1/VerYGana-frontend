@@ -18,26 +18,26 @@ apiClient.interceptors.request.use(async (config) => {
 // RESPONSE INTERCEPTOR
 apiClient.interceptors.response.use((response) => response, async (error) => {
 
-    const status = error?.response?.status;
-    const message = error?.response?.data?.message;
+  const status = error?.response?.status;
+  const message = error?.response?.data?.message;
 
-    /*
-     * FEATURE FLAGS / MANTENIMIENTO
-     */
-    if (status === 503 && canShow503Toast()) {
+  /*
+   * FEATURE FLAGS / MANTENIMIENTO
+   */
+  if (status === 503 && canShow503Toast()) {
 
-      toast(message || "El servicio no está disponible temporalmente. Por favor, inténtalo de nuevo más tarde.");
-    }
-
-    /*
-     * TOKEN EXPIRADO / SESIÓN INVÁLIDA
-     */
-    if (status === 401) {
-      await handleUnauthorized();
-    }
-
-    return Promise.reject(error);
+    toast(message || "El servicio no está disponible temporalmente. Por favor, inténtalo de nuevo más tarde.");
   }
+
+  /*
+   * TOKEN EXPIRADO / SESIÓN INVÁLIDA
+   */
+  if (status === 401) {
+    await handleUnauthorized();
+  }
+
+  return Promise.reject(error);
+}
 );
 
 export default apiClient;
@@ -68,6 +68,15 @@ function canShow503Toast(): boolean {
   }
 
   last503Toast = now;
-
   return true;
+}
+
+export async function privateImageSrc(url: string | null | undefined): Promise<string | undefined> {
+  if (!url) return undefined;
+  if (url.includes('/private-image')) {
+    const session = await getSession();
+    const token = (session as any)?.accessToken;
+    return token ? `${url}?token=${encodeURIComponent(token)}` : undefined;
+  }
+  return url;
 }

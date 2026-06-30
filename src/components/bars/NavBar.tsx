@@ -588,7 +588,7 @@ export default function Navbar() {
 
       {/* ---------- MOBILE BOTTOM NAVIGATION ---------- */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg pb-safe">
-        <div className="grid grid-cols-5 h-16">
+        <div className="grid grid-cols-6 h-16">
 
           {/* HOME */}
           <Link href="/home" className="flex flex-col items-center justify-center">

@@ -1,6 +1,6 @@
 import apiClient from "@/lib/api/client";
 import { CommercialInitialDataResponseDTO } from "@/types/ads/commercial";
-import { MonthlyReportResponseDTO } from "@/types/Commercial.types";
+import { CommercialProfileResponseDTO, MonthlyReportResponseDTO } from "@/types/Commercial.types";
 
 // ============================================
 // INTERFACES
@@ -58,8 +58,8 @@ export const getCommercialInitialData = async (): Promise<CommercialInitialDataR
 /**
  * Obtener perfil del vendedor
  */
-export const getCommercialProfile = async (commercialId: number): Promise<CommercialProfile> => {
-  const response = await apiClient.get(`/commercials/${commercialId}`);
+export const getCommercialProfile = async (commercialId: number): Promise<CommercialProfileResponseDTO> => {
+  const response = await apiClient.get(`/commercials/${commercialId}/profile`);
   return response.data;
 };
 

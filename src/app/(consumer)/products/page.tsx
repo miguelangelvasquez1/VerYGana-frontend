@@ -1,24 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Filter,
-  Grid3X3,
-  List,
-  ChevronDown,
-  Star,
-  ShoppingCart,
-  Package,
-} from "lucide-react";
+import { Star, ShoppingCart, Package, X, SlidersHorizontal, ChevronRight } from "lucide-react";
 
-import CategoryCard from "@/components/consumer/products/ProductCategoryCard";
 import ProductCard from "@/components/consumer/products/ProductCard";
 import SearchBar from "@/components/consumer/products/SearchBar";
 import InfiniteScroll from "@/components/consumer/products/InfiniteScroll";
-
 import { filterProducts } from "@/services/ProductService";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
-
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { ProductCategoryResponseDTO } from "@/types/products/ProductCategory.types";
 
@@ -26,15 +15,23 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
   const [categories, setCategories] = useState<ProductCategoryResponseDTO[]>([]);
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [sortDirection, setSortDirection] = useState("DESC");
+  // Reactive – trigger fetch immediately on change
   const [searchTerm, setSearchTerm] = useState("");
-  const [maxPrice, setMaxPrice] = useState<number | undefined>();
-  const [minRating, setMinRating] = useState<number | undefined>();
-  const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState("grid");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
+  // Draft – staged in sidebar/drawer, applied on button click or search
+  const [draftSortBy, setDraftSortBy] = useState("createdAt");
+  const [draftSortDirection, setDraftSortDirection] = useState("DESC");
+  const [draftMaxPrice, setDraftMaxPrice] = useState<number | undefined>();
+  const [draftMinRating, setDraftMinRating] = useState<number | undefined>();
+
+  // Applied – these actually drive the fetch
+  const [appliedSortBy, setAppliedSortBy] = useState("createdAt");
+  const [appliedSortDirection, setAppliedSortDirection] = useState("DESC");
+  const [appliedMaxPrice, setAppliedMaxPrice] = useState<number | undefined>();
+  const [appliedMinRating, setAppliedMinRating] = useState<number | undefined>();
+
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -50,289 +47,464 @@ export default function ProductsPage() {
     setCurrentPage(0);
     setHasMore(true);
     loadProducts(0, true);
-  }, [searchTerm, selectedCategoryId, sortBy, sortDirection, maxPrice, minRating]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, selectedCategoryId, appliedSortBy, appliedSortDirection, appliedMaxPrice, appliedMinRating]);
 
   const loadProducts = async (pageToLoad: number, reset = false) => {
     if (loading) return;
-
     setLoading(true);
-
     const res = await filterProducts({
       searchQuery: searchTerm || undefined,
       categoryId: selectedCategoryId || undefined,
-      minRating,
-      maxPrice,
-      sortBy,
-      sortDirection,
+      minRating: appliedMinRating,
+      maxPrice: appliedMaxPrice,
+      sortBy: appliedSortBy,
+      sortDirection: appliedSortDirection,
       page: pageToLoad,
     });
-
-    if (reset) {
-      setProducts(res.data);
-    } else {
-      setProducts((prev) => [...prev, ...res.data]);
-    }
-
+    if (reset) setProducts(res.data);
+    else setProducts((prev) => [...prev, ...res.data]);
     setHasMore(res.meta.hasNext);
     setLoading(false);
   };
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-    }).format(price);
+  const handleDraftSortChange = (value: string) => {
+    const [by, dir] = value.split(":");
+    setDraftSortBy(by);
+    setDraftSortDirection(dir);
+  };
+
+  const applyAllDrafts = () => {
+    setAppliedSortBy(draftSortBy);
+    setAppliedSortDirection(draftSortDirection);
+    setAppliedMaxPrice(draftMaxPrice);
+    setAppliedMinRating(draftMinRating);
+  };
+
+  const applyFilters = () => {
+    applyAllDrafts();
+    setShowMobileFilters(false);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchTerm(query);
+    applyAllDrafts();
+  };
+
+  const clearFilters = () => {
+    setDraftSortBy("createdAt");
+    setDraftSortDirection("DESC");
+    setDraftMaxPrice(undefined);
+    setDraftMinRating(undefined);
+    setAppliedSortBy("createdAt");
+    setAppliedSortDirection("DESC");
+    setAppliedMaxPrice(undefined);
+    setAppliedMinRating(undefined);
+    setShowMobileFilters(false);
+  };
+
+  const hasPendingChanges =
+    draftSortBy !== appliedSortBy ||
+    draftSortDirection !== appliedSortDirection ||
+    draftMaxPrice !== appliedMaxPrice ||
+    draftMinRating !== appliedMinRating;
+
+  const appliedFiltersCount = [
+    appliedMaxPrice !== undefined,
+    appliedMinRating !== undefined,
+    `${appliedSortBy}:${appliedSortDirection}` !== "createdAt:DESC",
+  ].filter(Boolean).length;
+
+  const hasAnyFilters =
+    draftSortBy !== "createdAt" ||
+    draftSortDirection !== "DESC" ||
+    draftMaxPrice !== undefined ||
+    draftMinRating !== undefined ||
+    appliedSortBy !== "createdAt" ||
+    appliedSortDirection !== "DESC" ||
+    appliedMaxPrice !== undefined ||
+    appliedMinRating !== undefined;
+
+  const renderPriceRatingFilters = (compact = false) => (
+    <div className="space-y-5">
+      <div>
+        <label className={`block mb-2 font-bold text-gray-500 uppercase tracking-wider ${compact ? "text-xs" : "text-sm"}`}>
+          Precio máximo
+        </label>
+        <input
+          type="number"
+          step={1000}
+          value={draftMaxPrice ?? ""}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (!raw) { setDraftMaxPrice(undefined); return; }
+            const val = Number(raw);
+            if (!isNaN(val) && val > 0) setDraftMaxPrice(val);
+          }}
+          onBlur={() => {
+            if (draftMaxPrice !== undefined) {
+              if (draftMaxPrice < 1000) setDraftMaxPrice(1000);
+              else if (draftMaxPrice >= 500000) setDraftMaxPrice(undefined);
+            }
+          }}
+          placeholder="Sin límite"
+          className={`w-full px-2.5 py-1.5 border-2 border-gray-200 rounded-xl font-semibold focus:outline-none focus:border-[#014C92] transition mb-2.5 ${compact ? "text-xs" : "text-sm"}`}
+          style={{ color: "#014C92" }}
+        />
+        <input
+          type="range"
+          min={1000}
+          max={500000}
+          step={1000}
+          value={draftMaxPrice ?? 500000}
+          onChange={(e) => {
+            const val = Number(e.target.value);
+            setDraftMaxPrice(val === 500000 ? undefined : val);
+          }}
+          className="w-full accent-[#014C92]"
+        />
+        <div className={`flex justify-between mt-1 text-gray-400 ${compact ? "text-xs" : "text-sm"}`}>
+          <span>$1.000</span>
+          <span>$500.000</span>
+        </div>
+      </div>
+
+      <div>
+        <label className={`block mb-2 font-bold text-gray-500 uppercase tracking-wider ${compact ? "text-xs" : "text-sm"}`}>
+          Valoración mínima
+        </label>
+        <div className="flex gap-1.5">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <Star
+              key={n}
+              onClick={() => setDraftMinRating(draftMinRating === n ? undefined : n)}
+              className={`cursor-pointer transition ${compact ? "w-6 h-6" : "w-7 h-7"} ${
+                draftMinRating && draftMinRating >= n
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "text-gray-300 hover:text-yellow-300"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
       {/* ══════════════ HERO ══════════════ */}
       <section
         className="relative overflow-hidden text-white"
-        style={{
-          background:
-            "linear-gradient(135deg, #003d80 0%, #0060b8 50%, #0089d6 100%)",
-        }}
+        style={{ background: "linear-gradient(135deg, #003d80 0%, #0060b8 50%, #0089d6 100%)" }}
       >
-        {/* Decorative circles */}
         <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute top-1/2 left-1/4 w-48 h-48 rounded-full bg-cyan-400/10" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
+        <div className="relative w-full px-4 sm:px-6 lg:px-10 pt-10 pb-16 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
             <Package className="w-3.5 h-3.5 text-yellow-300" />
             Usa tus llaves para comprar productos exclusivos
           </div>
-
-          <h1 className="text-4xl lg:text-5xl font-extrabold mb-4 leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">
             Descubre Productos
           </h1>
-          <p className="text-blue-100 text-base lg:text-lg mb-8 max-w-lg mx-auto">
+          <p className="text-blue-100 text-sm sm:text-base mb-7 max-w-lg mx-auto">
             Encuentra miles de productos al mejor precio.
           </p>
-
           <div className="max-w-2xl mx-auto">
-            <SearchBar onSearch={setSearchTerm} />
+            <SearchBar onSearch={handleSearch} />
           </div>
         </div>
 
-        {/* Wave bottom */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="white" />
+            <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f9fafb" />
           </svg>
         </div>
       </section>
 
       {/* ══════════════ CONTENT ══════════════ */}
-      <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 py-10">
+      <div>
+        <div className="px-4 sm:px-6 lg:pl-0 lg:pr-8 py-5">
 
-          {/* ── Categorías ── */}
-          <div className="flex items-center gap-3 mb-6">
-            <div
-              className="w-1 h-8 rounded-full shrink-0"
-              style={{ background: "linear-gradient(to bottom, #014C92, #1EA5BD)" }}
-            />
-            <h2 className="text-2xl font-bold text-gray-900">Categorías</h2>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-12">
-            {categories.map((cat) => (
-              <div
-                key={cat.id}
-                onClick={() =>
-                  setSelectedCategoryId(
-                    selectedCategoryId === cat.id ? null : cat.id
-                  )
-                }
-                className={`cursor-pointer transition-all rounded-xl p-2 ${
-                  selectedCategoryId === cat.id
-                    ? "ring-2 ring-[#014C92] scale-105 bg-blue-50/50"
-                    : "hover:scale-105 hover:bg-gray-50"
-                }`}
-              >
-                <CategoryCard category={cat} />
-              </div>
-            ))}
-          </div>
-
-          {/* ── Filtros ── */}
-          <div className="bg-white border border-gray-100 shadow-sm p-4 rounded-2xl mb-8">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-
-              {/* Filter toggle button */}
+          {/* Mobile: category chips */}
+          <div className="lg:hidden -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-x-auto mb-3">
+            <div className="flex gap-2 w-max pb-2">
               <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 py-2 border-2 rounded-xl font-semibold text-sm transition ${
-                  showFilters
-                    ? "border-[#014C92] text-[#014C92] bg-blue-50"
-                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                onClick={() => setSelectedCategoryId(null)}
+                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap ${
+                  selectedCategoryId === null
+                    ? "text-white border-[#014C92]"
+                    : "border-gray-200 text-gray-600 bg-white hover:border-gray-300"
                 }`}
+                style={selectedCategoryId === null ? { background: "#014C92" } : undefined}
               >
-                <Filter className="w-4 h-4" />
-                Filtros
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`}
-                />
+                Todas
               </button>
-
-              {/* Sort + view mode */}
-              <div className="flex items-center gap-3">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-2 border-2 border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#014C92] transition"
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() =>
+                    setSelectedCategoryId(selectedCategoryId === cat.id ? null : cat.id)
+                  }
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap bg-white ${
+                    selectedCategoryId === cat.id
+                      ? "border-[#014C92] text-[#014C92] bg-blue-50"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                  }`}
                 >
-                  <option value="createdAt">Más nuevos</option>
-                  <option value="price">Precio</option>
-                  <option value="averageRate">Mejor valorados</option>
-                </select>
-
-                {/* View toggle */}
-                <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
-                  <button
-                    className={`p-2 rounded-lg transition ${
-                      viewMode === "grid"
-                        ? "text-white shadow-sm"
-                        : "text-gray-400 hover:text-gray-600"
-                    }`}
-                    style={
-                      viewMode === "grid"
-                        ? { background: "linear-gradient(135deg, #014C92, #1EA5BD)" }
-                        : {}
-                    }
-                    onClick={() => setViewMode("grid")}
-                  >
-                    <Grid3X3 className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    className={`p-2 rounded-lg transition ${
-                      viewMode === "list"
-                        ? "text-white shadow-sm"
-                        : "text-gray-400 hover:text-gray-600"
-                    }`}
-                    style={
-                      viewMode === "list"
-                        ? { background: "linear-gradient(135deg, #014C92, #1EA5BD)" }
-                        : {}
-                    }
-                    onClick={() => setViewMode("list")}
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Expandable filter panel */}
-            {showFilters && (
-              <div className="mt-5 pt-5 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block mb-2 text-sm font-semibold text-gray-700">
-                    Precio máximo:{" "}
-                    <span style={{ color: "#014C92" }}>
-                      {maxPrice ? formatPrice(maxPrice) : "—"}
-                    </span>
-                  </label>
-                  <input
-                    type="range"
-                    min={1000}
-                    max={500000}
-                    step={1000}
-                    value={maxPrice ?? 500000}
-                    onChange={(e) => setMaxPrice(Number(e.target.value))}
-                    className="w-full accent-[#014C92]"
+                  <img
+                    src={cat.imageUrl}
+                    alt={cat.name}
+                    className="w-5 h-5 rounded-full object-cover"
                   />
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile: sort + filter button */}
+          <div className="lg:hidden flex items-center gap-2 mb-4">
+            <button
+              onClick={() => setShowMobileFilters(true)}
+              className="relative flex items-center gap-1.5 px-3 py-2 border-2 rounded-xl text-sm font-semibold border-gray-200 bg-white text-gray-600 hover:border-gray-300 transition shrink-0"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              Filtrar
+              {appliedFiltersCount > 0 && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 w-4 h-4 text-[10px] text-white rounded-full flex items-center justify-center font-bold"
+                  style={{ background: "#014C92" }}
+                >
+                  {appliedFiltersCount}
+                </span>
+              )}
+            </button>
+
+            <select
+              value={`${draftSortBy}:${draftSortDirection}`}
+              onChange={(e) => handleDraftSortChange(e.target.value)}
+              className="flex-1 px-3 py-2 border-2 border-gray-200 bg-white rounded-xl text-sm font-medium focus:outline-none focus:border-[#014C92] transition"
+            >
+              <option value="createdAt:DESC">Más recientes</option>
+              <option value="priceCents:ASC">Precio: menor a mayor</option>
+              <option value="priceCents:DESC">Precio: mayor a menor</option>
+              <option value="averageRate:DESC">Mejor valorados</option>
+            </select>
+          </div>
+
+          <div className="flex gap-5">
+
+            {/* ══ DESKTOP SIDEBAR ══ */}
+            <aside className="hidden lg:block w-64 shrink-0">
+              <div className="sticky top-4 space-y-4">
+
+                {/* Categories */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-5 py-4 border-b border-gray-100">
+                    <h3 className="font-bold text-gray-900 text-base">Categorías</h3>
+                  </div>
+                  <ul className="py-2 max-h-[calc(100vh-20rem)] overflow-y-auto">
+                    <li>
+                      <button
+                        onClick={() => setSelectedCategoryId(null)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 transition hover:bg-gray-50 ${
+                          selectedCategoryId === null
+                            ? "text-[#014C92] font-semibold bg-blue-50/70"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        <span className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-base shrink-0">
+                          🛒
+                        </span>
+                        <span className="flex-1 text-left text-sm">Todas</span>
+                        {selectedCategoryId === null && (
+                          <ChevronRight className="w-4 h-4 shrink-0" />
+                        )}
+                      </button>
+                    </li>
+                    {categories.map((cat) => (
+                      <li key={cat.id}>
+                        <button
+                          onClick={() =>
+                            setSelectedCategoryId(
+                              selectedCategoryId === cat.id ? null : cat.id
+                            )
+                          }
+                          className={`w-full flex items-center gap-3 px-4 py-3 transition hover:bg-gray-50 ${
+                            selectedCategoryId === cat.id
+                              ? "text-[#014C92] font-semibold bg-blue-50/70"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          <img
+                            src={cat.imageUrl}
+                            alt={cat.name}
+                            className="w-8 h-8 rounded-full object-cover shrink-0"
+                          />
+                          <span className="flex-1 text-left text-sm line-clamp-1">
+                            {cat.name}
+                          </span>
+                          {selectedCategoryId === cat.id && (
+                            <ChevronRight className="w-4 h-4 shrink-0" />
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
-                <div>
-                  <label className="block mb-2 text-sm font-semibold text-gray-700">
-                    Valoración mínima
-                  </label>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <Star
-                        key={n}
-                        onClick={() => setMinRating(n)}
-                        className={`w-6 h-6 cursor-pointer transition ${
-                          minRating && minRating >= n
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300 hover:text-yellow-300"
-                        }`}
-                      />
-                    ))}
+                {/* Sort + Filters + Apply */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="font-bold text-gray-900 text-base">Ordenar y filtrar</h3>
+                    {appliedFiltersCount > 0 && (
+                      <span
+                        className="text-[10px] text-white rounded-full w-5 h-5 flex items-center justify-center font-bold shrink-0"
+                        style={{ background: "#014C92" }}
+                      >
+                        {appliedFiltersCount}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Sort */}
+                  <div className="mb-5">
+                    <label className="block mb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Ordenar por
+                    </label>
+                    <select
+                      value={`${draftSortBy}:${draftSortDirection}`}
+                      onChange={(e) => handleDraftSortChange(e.target.value)}
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#014C92] transition bg-white"
+                    >
+                      <option value="createdAt:DESC">Más recientes</option>
+                      <option value="priceCents:ASC">Precio: menor → mayor</option>
+                      <option value="priceCents:DESC">Precio: mayor → menor</option>
+                      <option value="averageRate:DESC">Mejor valorados</option>
+                    </select>
+                  </div>
+
+                  <div className="border-t border-gray-100 mb-5" />
+
+                  {renderPriceRatingFilters()}
+
+                  {/* Action buttons */}
+                  <div className="mt-6 space-y-2.5">
+                    <button
+                      onClick={applyFilters}
+                      disabled={!hasPendingChanges}
+                      className="w-full py-3 rounded-xl text-white text-sm font-bold transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ background: "linear-gradient(135deg, #014C92, #1EA5BD)" }}
+                    >
+                      Aplicar filtros
+                    </button>
+                    {hasAnyFilters && (
+                      <button
+                        onClick={clearFilters}
+                        className="w-full py-2.5 rounded-xl text-sm font-semibold text-red-600 border-2 border-red-200 hover:bg-red-50 transition"
+                      >
+                        Limpiar filtros
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <div className="flex items-end">
-                  <button
-                    onClick={() => {
-                      setSelectedCategoryId(null);
-                      setSearchTerm("");
-                      setMaxPrice(undefined);
-                      setMinRating(undefined);
-                    }}
-                    className="px-4 py-2 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-red-300 hover:text-red-600 transition"
-                  >
-                    Limpiar filtros
-                  </button>
-                </div>
               </div>
-            )}
-          </div>
+            </aside>
 
-          {/* ── Productos ── */}
-          <InfiniteScroll
-            loading={loading}
-            hasMore={hasMore}
-            onLoadMore={() => {
-              const nextPage = currentPage + 1;
-              setCurrentPage(nextPage);
-              loadProducts(nextPage);
-            }}
-            threshold={300}
-          >
-            {products.length === 0 ? (
-              <div
-                className="relative rounded-2xl overflow-hidden py-20 flex flex-col items-center justify-center text-center"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #014C92 0%, #1EA5BD 60%, #7c3aed 100%)",
+            {/* ══ MAIN CONTENT ══ */}
+            <main className="flex-1 min-w-0">
+              <p className="text-xs text-gray-400 mb-3">
+                {products.length} productos encontrados
+              </p>
+
+              <InfiniteScroll
+                loading={loading}
+                hasMore={hasMore}
+                onLoadMore={() => {
+                  const nextPage = currentPage + 1;
+                  setCurrentPage(nextPage);
+                  loadProducts(nextPage);
                 }}
+                threshold={300}
               >
-                <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-white/5 blur-2xl" />
-                <ShoppingCart className="w-16 h-16 text-white/50 mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">
-                  No hay productos disponibles
-                </h3>
-                <p className="text-white/70 text-sm">
-                  Intenta con otros filtros o busca en otra categoría.
-                </p>
-              </div>
-            ) : (
-              <div
-                className={`grid gap-5 ${
-                  viewMode === "grid"
-                    ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-                    : "grid-cols-1"
-                }`}
-              >
-                {products.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    mode="consumer"
-                  />
-                ))}
-              </div>
-            )}
-          </InfiniteScroll>
-
+                {products.length === 0 && !loading ? (
+                  <div
+                    className="relative rounded-2xl overflow-hidden py-20 flex flex-col items-center justify-center text-center"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #014C92 0%, #1EA5BD 60%, #7c3aed 100%)",
+                    }}
+                  >
+                    <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-white/5 blur-2xl" />
+                    <ShoppingCart className="w-14 h-14 text-white/50 mb-4" />
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      No hay productos disponibles
+                    </h3>
+                    <p className="text-white/70 text-sm">
+                      Intenta con otros filtros o busca en otra categoría.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                    {products.map((product) => (
+                      <ProductCard key={product.id} product={product} mode="consumer" />
+                    ))}
+                  </div>
+                )}
+              </InfiniteScroll>
+            </main>
+          </div>
         </div>
       </div>
+
+      {/* ══ MOBILE FILTER BOTTOM DRAWER ══ */}
+      {showMobileFilters && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowMobileFilters(false)}
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl">
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-gray-200" />
+            </div>
+
+            <div className="flex items-center justify-between px-5 pt-2 pb-4 border-b border-gray-100">
+              <h3 className="font-bold text-gray-900">Filtros</h3>
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="p-2 rounded-full hover:bg-gray-100 transition"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="px-5 pt-5 pb-6 overflow-y-auto max-h-[65vh]">
+              {renderPriceRatingFilters(true)}
+
+              <button
+                onClick={applyFilters}
+                className="mt-6 w-full py-3 rounded-xl text-white font-bold text-sm transition"
+                style={{ background: "linear-gradient(135deg, #014C92, #1EA5BD)" }}
+              >
+                Aplicar filtros
+              </button>
+
+              {hasAnyFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="mt-2 w-full py-2.5 rounded-xl text-sm font-semibold text-red-600 border-2 border-red-200 hover:bg-red-50 transition"
+                >
+                  Limpiar filtros
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -14,6 +14,7 @@ import {
 } from "@/services/admin/AdminProductsService";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { getProductDetail } from "@/services/ProductService";
+import { useSession } from "next-auth/react";
 import { fileUploadService } from "@/services/FileUploadService";
 import { ProductCategoryResponseDTO } from "@/types/products/ProductCategory.types";
 import {
@@ -78,6 +79,7 @@ const STATUS_DOT: Record<ProductStatus, string> = {
 // ─────────────────────────────────────────────
 
 export default function AdminProductsPage() {
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<AdminTab>("products");
 
   // ── Estado categorías ──────────────────────
@@ -140,6 +142,7 @@ export default function AdminProductsPage() {
       if (imagePreview) URL.revokeObjectURL(imagePreview);
     };
   }, [imagePreview]);
+
 
   // ─────────────────────────────────────────────
   // LOADERS
@@ -317,10 +320,24 @@ export default function AdminProductsPage() {
   };
 
   const actionMeta: Record<string, { title: string; confirm: string; btnStyle: string }> = {
-    approve: { title: "Aprobar producto", confirm: "Aprobar", btnStyle: "bg-green-600 hover:bg-green-700" },
-    reject:  { title: "Rechazar producto", confirm: "Rechazar", btnStyle: "bg-red-600 hover:bg-red-700" },
-    delete:  { title: "Eliminar producto", confirm: "Eliminar", btnStyle: "bg-red-700 hover:bg-red-800" },
+    approve: { title: "Aprobar producto", confirm: "Aprobar", btnStyle: "bg-green-600 hover:bg-green-700 cursor-pointer" },
+    reject: { title: "Rechazar producto", confirm: "Rechazar", btnStyle: "bg-red-600 hover:bg-red-700 cursor-pointer" },
+    delete: { title: "Eliminar producto", confirm: "Eliminar", btnStyle: "bg-red-700 hover:bg-red-800 cursor-pointer" },
   };
+
+  const token: string | undefined = (session as any)?.accessToken;
+
+  // Para URLs proxy (/private-image) añade ?token=JWT para que el backend
+  // valide via JwtBearerFilter y redirija 302 a R2. El <img> tag (no-cors)
+  // sigue el redirect sin activar CORS. Para URLs públicas de CDN, no cambia nada.
+  function privateImageSrc(url: string | null | undefined): string | undefined {
+    if (!url) return undefined;
+    if (url.includes('/private-image')) {
+      if (!token) return undefined;
+      return `${url}?token=${encodeURIComponent(token)}`;
+    }
+    return url;
+  }
 
   // ─────────────────────────────────────────────
   // RENDER
@@ -335,11 +352,10 @@ export default function AdminProductsPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium transition border-b-2 -mb-px ${
-              activeTab === tab
+            className={`px-4 py-2 text-sm font-medium transition border-b-2 -mb-px cursor-pointer ${activeTab === tab
                 ? "border-violet-600 text-violet-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             {tab === "products" ? "Productos" : "Categorías"}
           </button>
@@ -358,11 +374,10 @@ export default function AdminProductsPage() {
               <button
                 key={status}
                 onClick={() => handleStatusFilterChange(status)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
-                  statusFilter === status
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer ${statusFilter === status
                     ? "bg-violet-600 text-white border-violet-600"
                     : "bg-white text-gray-600 border-gray-300 hover:border-violet-400"
-                }`}
+                  }`}
               >
                 {STATUS_LABELS[status]}
               </button>
@@ -381,63 +396,62 @@ export default function AdminProductsPage() {
                 No hay productos con estado {STATUS_LABELS[statusFilter].toLowerCase()}
               </div>
             ) : (
-              <table className="w-full text-sm">
+              <table className="w-full text-base">
                 <thead>
                   <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                    <th className="px-4 py-3 text-left">Producto</th>
-                    <th className="px-4 py-3 text-left">Comerciante</th>
-                    <th className="px-4 py-3 text-left">Categoría</th>
-                    <th className="px-4 py-3 text-right">Precio</th>
-                    <th className="px-4 py-3 text-left">Estado</th>
-                    <th className="px-4 py-3 text-right">Acciones</th>
+                    <th className="px-4 py-4 text-left">Producto</th>
+                    <th className="px-4 py-4 text-left">Comerciante</th>
+                    <th className="px-4 py-4 text-left">Categoría</th>
+                    <th className="px-4 py-4 text-right">Precio</th>
+                    <th className="px-4 py-4 text-left">Estado</th>
+                    <th className="px-4 py-4 text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {products.map((p) => (
                     <tr key={p.id} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          {p.imageUrl ? (
-                            <img
-                              src={p.imageUrl}
-                              alt={p.name}
-                              className="h-9 w-9 rounded-lg object-cover border border-gray-200 shrink-0"
+                          {privateImageSrc(p.imageUrl) ? (
+                            <img src={privateImageSrc(p.imageUrl)}
+                            alt={p.name}
+                            className="h-9 w-9 rounded-lg object-cover border border-gray-200 shrink-0 cursor-pointer"
                             />
                           ) : (
-                            <div className="h-9 w-9 rounded-lg bg-gray-100 shrink-0" />
+                            <div className="h-9 w-9 rounded-lg bg-gray-100 shrink-0 cursor-pointer" />
                           )}
                           <button
                             onClick={() => openDetail(p.id)}
-                            className="font-medium text-gray-800 hover:text-violet-600 text-left transition"
+                            className="font-medium text-gray-800 hover:text-violet-600 text-left transition cursor-pointer"
                           >
                             {p.name}
                           </button>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{p.companyName}</td>
-                      <td className="px-4 py-3 text-gray-500">{p.categoryName}</td>
-                      <td className="px-4 py-3 text-right font-medium text-gray-700">
+                      <td className="px-4 py-4 text-gray-600">{p.companyName}</td>
+                      <td className="px-4 py-4 text-gray-500">{p.categoryName}</td>
+                      <td className="px-4 py-4 text-right font-medium text-gray-700">
                         ${p.price.toLocaleString("es-CO")}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-4">
                         <span className={`inline-flex items-center gap-1.5 text-xs border px-2 py-0.5 rounded-full ${STATUS_STYLES[p.status]}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[p.status]}`} />
                           {STATUS_LABELS[p.status]}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-4">
                         <div className="flex items-center justify-end gap-2">
                           {p.status === ProductStatus.PENDING && (
                             <>
                               <button
                                 onClick={() => openAction(p.id, "approve")}
-                                className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg transition"
+                                className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg transition cursor-pointer"
                               >
                                 Aprobar
                               </button>
                               <button
                                 onClick={() => openAction(p.id, "reject")}
-                                className="text-xs border border-red-300 text-red-600 hover:bg-red-50 px-3 py-1 rounded-lg transition"
+                                className="text-xs border border-red-300 text-red-600 hover:bg-red-50 px-3 py-1 rounded-lg transition cursor-pointer"
                               >
                                 Rechazar
                               </button>
@@ -446,7 +460,7 @@ export default function AdminProductsPage() {
                           {p.status !== ProductStatus.INACTIVE && p.status !== ProductStatus.PENDING && (
                             <button
                               onClick={() => openAction(p.id, "delete")}
-                              className="text-xs border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 px-3 py-1 rounded-lg transition"
+                              className="text-xs border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 px-3 py-1 rounded-lg transition cursor-pointer"
                             >
                               Eliminar
                             </button>
@@ -469,14 +483,14 @@ export default function AdminProductsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => p - 1)}
                     disabled={currentPage === 0}
-                    className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+                    className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
                   >
                     Anterior
                   </button>
                   <button
                     onClick={() => setCurrentPage((p) => p + 1)}
                     disabled={currentPage >= totalPages - 1}
-                    className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+                    className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
                   >
                     Siguiente
                   </button>
@@ -495,17 +509,16 @@ export default function AdminProductsPage() {
           <div className="flex items-center justify-between gap-2">
             <button
               onClick={handleToggleInactiveCategories}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition ${
-                showInactiveCategories
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition cursor-pointer ${showInactiveCategories
                   ? "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                   : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
-              }`}
+                }`}
             >
               {showInactiveCategories ? "Ocultar inactivas" : "Ver inactivas"}
             </button>
             <button
               onClick={() => setShowCreateForm((v) => !v)}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
             >
               <span className="text-lg leading-none">+</span>
               Nueva categoría
@@ -579,14 +592,14 @@ export default function AdminProductsPage() {
                     type="button"
                     onClick={resetCatForm}
                     disabled={isCreatingCat}
-                    className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-40"
+                    className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-40 cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={isCreatingCat || !catName || !image}
-                    className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {isCreatingCat ? catStatusLabel[createCatState.status] : "Crear categoría"}
                   </button>
@@ -608,51 +621,51 @@ export default function AdminProductsPage() {
             ) : categories.length === 0 ? (
               <div className="py-16 text-center">
                 <p className="text-gray-400 text-sm">No hay categorías registradas aún.</p>
-                <button onClick={() => setShowCreateForm(true)} className="mt-3 text-violet-600 text-sm hover:underline">
+                <button onClick={() => setShowCreateForm(true)} className="mt-3 text-violet-600 text-sm hover:underline cursor-pointer">
                   Crear la primera
                 </button>
               </div>
             ) : (
-              <table className="w-full text-sm">
+              <table className="w-full text-base">
                 <thead>
                   <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                    <th className="px-6 py-3 text-left">Imagen</th>
-                    <th className="px-6 py-3 text-left">Nombre</th>
-                    <th className="px-6 py-3 text-left">Estado</th>
-                    <th className="px-6 py-3 text-right">Acciones</th>
+                    <th className="px-6 py-4 text-left">Imagen</th>
+                    <th className="px-6 py-4 text-left">Nombre</th>
+                    <th className="px-6 py-4 text-left">Estado</th>
+                    <th className="px-6 py-4 text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {categories.map((cat) => (
                     <tr key={cat.id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-3">
+                      <td className="px-6 py-4">
                         {cat.imageUrl ? (
                           <img src={cat.imageUrl} alt={cat.name} className="h-10 w-10 rounded-lg object-cover border border-gray-200" />
                         ) : (
                           <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-lg">🖼</div>
                         )}
                       </td>
-                      <td className="px-6 py-3 font-medium text-gray-800">{cat.name}</td>
-                      <td className="px-6 py-3">
+                      <td className="px-6 py-4 font-medium text-gray-800">{cat.name}</td>
+                      <td className="px-6 py-4">
                         <span className="inline-flex items-center gap-1.5 text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                           Activa
                         </span>
                       </td>
-                      <td className="px-6 py-3 text-right">
+                      <td className="px-6 py-4 text-right">
                         {confirmDeleteCatId === cat.id ? (
                           <div className="flex items-center justify-end gap-2">
                             <span className="text-xs text-gray-500">¿Confirmar?</span>
                             <button
                               onClick={() => handleDeleteCategory(cat.id)}
                               disabled={deletingCatId === cat.id}
-                              className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg transition disabled:opacity-50"
+                              className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg transition disabled:opacity-50 cursor-pointer"
                             >
                               {deletingCatId === cat.id ? "Eliminando..." : "Sí, eliminar"}
                             </button>
                             <button
                               onClick={() => setConfirmDeleteCatId(null)}
-                              className="text-xs border border-gray-300 px-3 py-1 rounded-lg hover:bg-gray-50 transition"
+                              className="text-xs border border-gray-300 px-3 py-1 rounded-lg hover:bg-gray-50 transition cursor-pointer"
                             >
                               Cancelar
                             </button>
@@ -660,7 +673,7 @@ export default function AdminProductsPage() {
                         ) : (
                           <button
                             onClick={() => setConfirmDeleteCatId(cat.id)}
-                            className="text-xs text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-3 py-1 rounded-lg transition"
+                            className="text-xs text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-3 py-1 rounded-lg transition cursor-pointer"
                           >
                             Eliminar
                           </button>
@@ -691,34 +704,34 @@ export default function AdminProductsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                      <th className="px-6 py-3 text-left">Imagen</th>
-                      <th className="px-6 py-3 text-left">Nombre</th>
-                      <th className="px-6 py-3 text-left">Estado</th>
-                      <th className="px-6 py-3 text-right">Acciones</th>
+                      <th className="px-6 py-4 text-left">Imagen</th>
+                      <th className="px-6 py-4 text-left">Nombre</th>
+                      <th className="px-6 py-4 text-left">Estado</th>
+                      <th className="px-6 py-4 text-right">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {inactiveCategories.map((cat) => (
                       <tr key={cat.id} className="hover:bg-gray-50 transition">
-                        <td className="px-6 py-3">
+                        <td className="px-6 py-4">
                           {cat.imageUrl ? (
                             <img src={cat.imageUrl} alt={cat.name} className="h-10 w-10 rounded-lg object-cover border border-gray-200" />
                           ) : (
                             <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-lg">🖼</div>
                           )}
                         </td>
-                        <td className="px-6 py-3 font-medium text-gray-500">{cat.name}</td>
-                        <td className="px-6 py-3">
+                        <td className="px-6 py-4 font-medium text-gray-500">{cat.name}</td>
+                        <td className="px-6 py-4">
                           <span className="inline-flex items-center gap-1.5 text-xs bg-gray-100 text-gray-500 border border-gray-200 px-2 py-0.5 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
                             Inactiva
                           </span>
                         </td>
-                        <td className="px-6 py-3 text-right">
+                        <td className="px-6 py-4 text-right">
                           <button
                             onClick={() => handleRecoverCategory(cat.id)}
                             disabled={recoveringCatId === cat.id}
-                            className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg transition disabled:opacity-50"
+                            className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg transition disabled:opacity-50 cursor-pointer"
                           >
                             {recoveringCatId === cat.id ? "Restableciendo..." : "Restablecer"}
                           </button>
@@ -751,14 +764,14 @@ export default function AdminProductsPage() {
               <div className="p-6 space-y-4">
                 <div className="flex items-start justify-between gap-4">
                   <h2 className="text-lg font-semibold text-gray-800">{detailState.product.name}</h2>
-                  <button onClick={closeDetail} className="text-gray-400 hover:text-gray-600 text-2xl leading-none shrink-0">×</button>
+                  <button onClick={closeDetail} className="text-gray-400 hover:text-gray-600 text-2xl leading-none shrink-0  cursor-pointer">×</button>
                 </div>
 
-                {detailState.product.imageUrl && (
+                {privateImageSrc(detailState.product.imageUrl) && (
                   <img
-                    src={detailState.product.imageUrl}
+                    src={privateImageSrc(detailState.product.imageUrl)}
                     alt={detailState.product.name}
-                    className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                    className="w-full h-64 object-contain rounded-lg border border-gray-200"
                   />
                 )}
 
@@ -788,26 +801,34 @@ export default function AdminProductsPage() {
                   </div>
                 )}
 
-                <div className="flex gap-2 pt-2 border-t border-gray-100">
-                  <button
-                    onClick={() => { closeDetail(); openAction(detailState.product!.id, "approve"); }}
-                    className="flex-1 text-sm bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition"
-                  >
-                    Aprobar
-                  </button>
-                  <button
-                    onClick={() => { closeDetail(); openAction(detailState.product!.id, "reject"); }}
-                    className="flex-1 text-sm border border-red-300 text-red-600 hover:bg-red-50 py-2 rounded-lg transition"
-                  >
-                    Rechazar
-                  </button>
-                  <button
-                    onClick={() => { closeDetail(); openAction(detailState.product!.id, "delete"); }}
-                    className="flex-1 text-sm border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 py-2 rounded-lg transition"
-                  >
-                    Eliminar
-                  </button>
-                </div>
+                {statusFilter !== ProductStatus.INACTIVE && (
+                  <div className="flex gap-2 pt-2 border-t border-gray-100">
+                    {statusFilter === ProductStatus.PENDING && (
+                      <>
+                        <button
+                          onClick={() => { closeDetail(); openAction(detailState.product!.id, "approve"); }}
+                          className="flex-1 text-sm bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition cursor-pointer"
+                        >
+                          Aprobar
+                        </button>
+                        <button
+                          onClick={() => { closeDetail(); openAction(detailState.product!.id, "reject"); }}
+                          className="flex-1 text-sm border border-red-300 text-red-600 hover:bg-red-50 py-2 rounded-lg transition cursor-pointer"
+                        >
+                          Rechazar
+                        </button>
+                      </>
+                    )}
+                    {(statusFilter === ProductStatus.ACTIVE || statusFilter === ProductStatus.REJECTED) && (
+                      <button
+                        onClick={() => { closeDetail(); openAction(detailState.product!.id, "delete"); }}
+                        className="flex-1 text-sm border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 py-2 rounded-lg transition cursor-pointer"
+                      >
+                        Eliminar
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             ) : null}
           </div>
@@ -830,7 +851,7 @@ export default function AdminProductsPage() {
               <h3 className="text-base font-semibold text-gray-800">
                 {actionMeta[actionState.action].title}
               </h3>
-              <button onClick={closeAction} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+              <button onClick={closeAction} className="text-gray-400 hover:text-gray-600 text-2xl leading-none cursor-pointer">×</button>
             </div>
 
             {actionState.action === "approve" ? (
@@ -860,7 +881,7 @@ export default function AdminProductsPage() {
               <button
                 onClick={closeAction}
                 disabled={actionState.loading}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-40"
+                className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-40 cursor-pointer"
               >
                 Cancelar
               </button>

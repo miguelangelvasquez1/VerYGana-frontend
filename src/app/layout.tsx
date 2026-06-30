@@ -33,10 +33,7 @@ export default function RootLayout({
         <SessionProvider>
           <AuthProvider>
             <CartProvider>
-              
               {children}
-
-              {/* 👉 Drawer GLOBAL del carrito */}
               <CartDrawer />
             </CartProvider>
           </AuthProvider>

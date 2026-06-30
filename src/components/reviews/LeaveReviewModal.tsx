@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ConsumerPurchaseItemResponseDTO } from "@/types/purchases/purchaseItem.types";
 import { createProductReview } from "@/services/ProductReviewService";
+import toast from "react-hot-toast";
 
 interface Props {
   open: boolean;
@@ -62,8 +63,8 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
       });
       setReviewed((prev) => new Set(prev).add(selected.id));
       handleBack();
-    } catch (e) {
-      console.error("Error al enviar reseña", e);
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || "Error al enviar la reseña");
     } finally {
       setSubmitting(false);
     }

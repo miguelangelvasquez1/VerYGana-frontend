@@ -30,9 +30,11 @@
     "react-dom": "19.1.0",
     "react-hook-form": "^7.71.2",
     "react-hot-toast": "^2.5.2",
+    "react-is": "^19.2.7",
     "react-syntax-highlighter": "^16.1.0",
     "recharts": "^3.6.0",
     "sockjs-client": "^1.6.1",
+    "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {

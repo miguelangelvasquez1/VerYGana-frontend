@@ -1,65 +1,18 @@
 import apiClient from "@/lib/api/client";
+import { BillingSummaryResponseDTO, DepositResponseDTO, PayoutSummaryResponseDTO } from "@/types/finance/Wallet.types";
+import { PagedResponse } from "@/types/Generic.types";
 
-export interface DepositRequest {
-    amount : number;
-    paymentMethod : string;
+export const getBillingSummary = async (): Promise<BillingSummaryResponseDTO> => {
+    const response = await apiClient.get<BillingSummaryResponseDTO>("/commercial/wallet/me/billing-summary");
+    return response.data;
 }
 
-export interface WithdrawalRequest {
-    amount : number;
-    paymentMethod: string;
+export const getDeposits = async (year: number, month: number, size?: number, page?: number): Promise<PagedResponse<DepositResponseDTO>> => {
+    const response = await apiClient.get<PagedResponse<DepositResponseDTO>>("/commercial/wallet/me/deposits", {params: {year, month, size, page}});
+    return response.data;
 }
 
-export interface TransferRequest {
-    amount : number;
-    receiverId : number;
+export const getPayouts = async (year: number, month: number, size?: number, page?: number): Promise<PagedResponse<PayoutSummaryResponseDTO>> => {
+    const response = await apiClient.get<PagedResponse<PayoutSummaryResponseDTO>>("/commercial/wallet/me/payouts", {params: {year, month, size, page}});
+    return response.data;
 }
-
-export interface TransactionResponse {
-    message : string;
-    amount : number;
-    referenceId : string;
-    timeStamp : string;
-}
-
-export interface WalletResponse {
-    balance : number;
-    blockedBalance : number;
-    lastUpDateTime : string;
-}
-
-export const getMyWallet = async (): Promise<WalletResponse> => {
-    const response = await apiClient.get('/wallets/myWallet');
-    return response.data
-};
-
-export const getAvailableBalance = async (): Promise<number> => {
-    const response = await apiClient.get('/wallets/balance');
-    return response.data;
-};
-
-export const getBlockedBalance = async (): Promise<number> => {
-    const response = await apiClient.get('/wallets/balance/blocked');
-    return response.data;
-};
-
-export const doDeposit = async (
-    request: DepositRequest
-): Promise<TransactionResponse> => {
-    const response = await apiClient.post('/wallets/deposit', request);
-    return response.data;
-};
-
-export const doWithdrawal = async (
-    request: WithdrawalRequest
-): Promise<TransactionResponse> => {
-    const response = await apiClient.post('/wallets/withdraw', request);
-    return response.data;
-};
-
-export const transferToUser = async (
-    request: TransferRequest
-): Promise<TransactionResponse> => {
-    const response = await apiClient.post('/wallets/transfer', request);
-    return response.data;
-};
