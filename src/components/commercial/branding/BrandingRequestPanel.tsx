@@ -114,7 +114,7 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
         </div>
 
         {/* Optional footer */}
-        {(req.assignedDesignerName || req.adminNotes || req.designerNotes) && (
+        {(req.assignedDesignerName || req.adminNotes) && (
           <div className="border-t border-gray-100 pt-3 space-y-1.5">
             {req.assignedDesignerName && (
               <p className="text-xs text-gray-500 flex items-center gap-1.5 truncate">
@@ -122,10 +122,10 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
                 {req.assignedDesignerName}
               </p>
             )}
-            {(req.adminNotes || req.designerNotes) && (
+            {req.adminNotes && (
               <p className="text-xs text-amber-600 flex items-center gap-1.5 truncate">
                 <AlertCircle size={11} className="shrink-0" />
-                {req.adminNotes ?? req.designerNotes}
+                {req.adminNotes}
               </p>
             )}
           </div>

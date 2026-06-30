@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Gamepad2, Info, Loader2, Save, Send } from 'lucide-react';
+import React, { useCallback, useRef } from 'react';
+import { Gamepad2, Info, Loader2, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
-import { saveDesignerNotes, type DesignerBrandingDetail } from '@/services/GameDesignerService';
+import { type DesignerBrandingDetail } from '@/services/GameDesignerService';
 
 import TextInputWidget from '../rjsf/widgets/TextInputWidget';
 import NumberInputWidget from '../rjsf/widgets/NumberInputWidget';
@@ -48,7 +48,6 @@ interface Props {
   setShowSubmitConfirm: (v: boolean) => void;
   onSubmitDesign: () => void;
   canSubmit: boolean;
-  isChangesRequested: boolean;
 }
 
 export const ConfigTab: React.FC<Props> = ({
@@ -61,16 +60,10 @@ export const ConfigTab: React.FC<Props> = ({
   setShowSubmitConfirm,
   onSubmitDesign,
   canSubmit,
-  isChangesRequested,
 }) => {
   const formRef = useRef<any>(null);
-  const [notes, setNotes] = useState(detail.designerNotes ?? '');
-  const [notesSaving, setNotesSaving] = useState(false);
 
-  // Sync notes if we switch to a different request
-  useEffect(() => {
-    setNotes(detail.designerNotes ?? '');
-  }, [detail.id]);
+  const canEdit = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED'].includes(detail.status);
 
   const transformErrors = useCallback((errors: any[]) => {
     const uiSchema = detail.gameSchema?.uiSchema as Record<string, any> | undefined;
@@ -96,18 +89,6 @@ export const ConfigTab: React.FC<Props> = ({
     });
   }, [detail.gameSchema?.uiSchema, gameConfig]);
 
-  const handleSaveNotes = async () => {
-    setNotesSaving(true);
-    try {
-      await saveDesignerNotes(detail.id, notes);
-      toast.success('Notas guardadas');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Error al guardar las notas');
-    } finally {
-      setNotesSaving(false);
-    }
-  };
-
   return (
     <div className="p-5 space-y-5">
 
@@ -120,21 +101,26 @@ export const ConfigTab: React.FC<Props> = ({
       ) : (
         <div className="rjsf-wrapper">
           <div className="flex justify-end mb-2">
-            <div className="relative group">
-              <button type="button" className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 cursor-pointer">
-                <Info size={13} />
-                Guardado automático
-              </button>
-              <div className="absolute right-0 top-full mt-1.5 w-56 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
-                Los cambios se guardan automáticamente mientras editas. No necesitas hacer nada extra.
+            {canEdit ? (
+              <div className="relative group">
+                <button type="button" className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 cursor-pointer">
+                  <Info size={13} />
+                  Guardado automático
+                </button>
+                <div className="absolute right-0 top-full mt-1.5 w-56 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+                  Los cambios se guardan automáticamente mientras editas. No necesitas hacer nada extra.
+                </div>
               </div>
-            </div>
+            ) : (
+              <span className="text-xs text-gray-400 italic">Solo lectura en el estado actual</span>
+            )}
           </div>
           <Form
             ref={formRef}
             schema={detail.gameSchema.jsonSchema as any}
             uiSchema={detail.gameSchema.uiSchema as any}
             formData={gameConfig}
+            disabled={!canEdit}
             validator={validator}
             widgets={rjsfWidgets}
             templates={rjsfTemplates}
@@ -148,35 +134,6 @@ export const ConfigTab: React.FC<Props> = ({
           </Form>
         </div>
       )}
-
-      {/* Notas para el anunciante */}
-      <div className="pt-5 border-t border-gray-100 space-y-2">
-        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Notas para el anunciante</p>
-        {isChangesRequested && (
-          <p className="text-xs text-orange-700 bg-orange-50 border border-orange-100 rounded-lg px-3 py-2">
-            El feedback del anunciante aparece en el banner de arriba. Usa este campo para responder o dejar notas adicionales.
-          </p>
-        )}
-        <textarea
-          value={notes}
-          onChange={e => setNotes(e.target.value)}
-          rows={4}
-          maxLength={1000}
-          placeholder="Instrucciones para el anunciante, comentarios sobre la integración..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-        />
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">{notes.length}/1000</span>
-          <button
-            onClick={handleSaveNotes}
-            disabled={notesSaving}
-            className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-gray-700 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60 cursor-pointer"
-          >
-            {notesSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-            Guardar notas
-          </button>
-        </div>
-      </div>
 
       {/* Enviar para revisión */}
       {canSubmit && (

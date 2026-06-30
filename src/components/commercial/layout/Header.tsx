@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Menu, Bell, User, TrendingUp, Lock } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Menu, User, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
 import { getCommercialInitialData } from '@/services/commercialService';
 import { EffectivePlanStateResponseDTO } from '@/types/finance/plans/Plan.types';
 import { formatBudget, formatCents } from '@/utils/currency';
+import { NotificationPanel } from '@/components/notifications/NotificationsPanel';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface HeaderProps {
   title?: string;
@@ -34,6 +36,9 @@ const PLAN_LABELS: Record<string, string> = {
 
 export function Header({ title, onMenuClick, showMenuButton, planState }: HeaderProps) {
   const [commercial, setCommercial] = useState<CommercialInitialDataResponseDTO | null>(null);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notificationsMenuRef = useRef<HTMLDivElement | null>(null);
+  const { notifications, unreadCount, loading: notifLoading, hasMore, markAllAsRead, loadMore } = useNotifications();
 
   useEffect(() => {
     async function loadUser() {
@@ -45,6 +50,17 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
       }
     }
     loadUser();
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node | null;
+      if (notificationsMenuRef.current && !notificationsMenuRef.current.contains(target)) {
+        setIsNotificationsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const planCode = planState?.effectivePlan ?? 'BASIC';
@@ -118,11 +134,19 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
               {PLAN_LABELS[planCode] ?? 'Personal'}
             </span>
 
-            {/* Notifications y User */}
-            <button className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full" />
-            </button>
+            {/* Notifications */}
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              loading={notifLoading}
+              hasMore={hasMore}
+              isOpen={isNotificationsOpen}
+              onToggle={() => setIsNotificationsOpen(v => !v)}
+              onMarkAllAsRead={markAllAsRead}
+              onLoadMore={loadMore}
+              menuRef={notificationsMenuRef}
+              variant="light"
+            />
 
             <div className="flex items-center gap-2.5">
               <div className="hidden lg:block text-right leading-tight">

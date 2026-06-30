@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Palette,
   User,
@@ -19,6 +19,8 @@ import { useLogout } from '@/hooks/useLogout';
 import type { BrandingStatus } from '@/services/BrandingRequestService';
 import { DesignerRequestDetail } from './DesignerRequestDetail';
 import { DesignerProfile } from './DesignerProfile';
+import { NotificationPanel } from '@/components/notifications/NotificationsPanel';
+import { useNotifications } from '@/hooks/useNotifications';
 
 // ─── Status labels for the list ──────────────────────────────────────────────
 
@@ -44,7 +46,34 @@ export const GameDesignerPanel: React.FC = () => {
   const [view, setView] = useState<View>('requests');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Restore selected request from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id) {
+      const numId = Number(id);
+      if (!isNaN(numId) && numId > 0) {
+        setSelectedId(numId);
+        setView('detail');
+      }
+    }
+  }, []);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notificationsMenuRef = useRef<HTMLDivElement | null>(null);
   const { logout } = useLogout();
+  const { notifications, unreadCount, loading: notifLoading, hasMore, markAllAsRead, loadMore } = useNotifications();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node | null;
+      if (notificationsMenuRef.current && !notificationsMenuRef.current.contains(target)) {
+        setIsNotificationsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const [requests, setRequests] = useState<DesignerBrandingSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,11 +96,17 @@ export const GameDesignerPanel: React.FC = () => {
   const handleRowClick = (id: number) => {
     setSelectedId(id);
     setView('detail');
+    const url = new URL(window.location.href);
+    url.searchParams.set('id', String(id));
+    window.history.pushState({}, '', url.toString());
   };
 
   const handleBack = () => {
     setSelectedId(null);
     setView('requests');
+    const url = new URL(window.location.href);
+    url.searchParams.delete('id');
+    window.history.pushState({}, '', url.toString());
     load();
   };
 
@@ -257,9 +292,25 @@ export const GameDesignerPanel: React.FC = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       {sidebar}
-      <main className="flex-1 overflow-y-auto p-6">
-        {content}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="bg-white border-b border-gray-100 h-14 px-6 flex items-center justify-end shrink-0">
+          <NotificationPanel
+            notifications={notifications}
+            unreadCount={unreadCount}
+            loading={notifLoading}
+            hasMore={hasMore}
+            isOpen={isNotificationsOpen}
+            onToggle={() => setIsNotificationsOpen(v => !v)}
+            onMarkAllAsRead={markAllAsRead}
+            onLoadMore={loadMore}
+            menuRef={notificationsMenuRef}
+            variant="light"
+          />
+        </div>
+        <main className="flex-1 overflow-y-auto p-6">
+          {content}
+        </main>
+      </div>
     </div>
   );
 };
