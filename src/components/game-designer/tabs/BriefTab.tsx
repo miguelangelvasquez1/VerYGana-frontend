@@ -135,6 +135,7 @@ export const BriefTab: React.FC<Props> = ({ detail }) => (
         </p>
       </div>
     )}
+
   </div>
 );
 

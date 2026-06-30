@@ -1,11 +1,5 @@
 import apiClient from '@/lib/api/client';
-import { FileUploadRequest } from '@/types/games/campaigns';
 import { FileUploadPermissionDTO } from '@/types/Generic.types';
-
-/**
- * Asset API Client
- * Handles presigned URL generation and upload confirmation
- */
 
 export interface AssetUploadPermissionDTO {
   assetId: number;
@@ -14,15 +8,20 @@ export interface AssetUploadPermissionDTO {
   permission: FileUploadPermissionDTO;
 }
 
-export interface AssetConfirmRequest {
-  assetId: number;
+export interface DesignerAssetUploadRequest {
+  originalFileName: string;
+  contentType: string;
+  sizeBytes: number;
+  brandingRequestId: number;
 }
 
-/**
- * Request presigned upload URL from backend
- */
+export interface AssetConfirmRequest {
+  assetId: number;
+  previousAssetId?: number;
+}
+
 async function requestUploadUrl(
-  request: FileUploadRequest
+  request: DesignerAssetUploadRequest
 ): Promise<AssetUploadPermissionDTO> {
   try {
     const response = await apiClient.post<AssetUploadPermissionDTO>(
@@ -59,7 +58,20 @@ async function confirmUpload(
   }
 }
 
+async function deleteAsset(assetId: number): Promise<void> {
+  try {
+    await apiClient.delete(`/game-designers/me/assets/${assetId}`);
+  } catch (error: any) {
+    const status = error.response?.status;
+    if (status === 403) throw new Error('No tienes permiso para eliminar este asset');
+    if (status === 404) throw new Error('El asset no existe');
+    if (status === 400) throw new Error('El asset ya fue eliminado');
+    throw new Error(error.response?.data?.message || 'Error al eliminar el asset');
+  }
+}
+
 export const uploadAsset = {
   requestUploadUrl,
-  confirmUpload
+  confirmUpload,
+  deleteAsset,
 };

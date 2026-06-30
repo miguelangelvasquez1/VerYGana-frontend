@@ -3,8 +3,9 @@
 
 import React, { useState } from 'react';
 import { User } from '../../../types/User';
-import { Search, Edit, Trash2, UserCheck, UserX, Gamepad2 } from 'lucide-react';
+import { Search, Edit, Trash2, UserCheck, UserX, Gamepad2, ShieldCheck } from 'lucide-react';
 import RegisterGameDesignerModal from './RegisterGameDesignerModal';
+import RegisterComplianceOfficerModal from './RegisterComplianceOfficerModal';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([
@@ -30,6 +31,7 @@ const UserManagement: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showDesignerModal, setShowDesignerModal] = useState(false);
+  const [showComplianceModal, setShowComplianceModal] = useState(false);
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -51,13 +53,22 @@ const UserManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <button
-          onClick={() => setShowDesignerModal(true)}
-          className="bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 flex items-center space-x-2 cursor-pointer"
-        >
-          <Gamepad2 size={20} />
-          <span>Registrar Game Designer</span>
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowDesignerModal(true)}
+            className="bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 flex items-center space-x-2 cursor-pointer"
+          >
+            <Gamepad2 size={20} />
+            <span>Registrar Game Designer</span>
+          </button>
+          <button
+            onClick={() => setShowComplianceModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2 cursor-pointer"
+          >
+            <ShieldCheck size={20} />
+            <span>Registrar Oficial de Cumplimiento</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -222,6 +233,10 @@ const UserManagement: React.FC = () => {
       <RegisterGameDesignerModal
         isOpen={showDesignerModal}
         onClose={() => setShowDesignerModal(false)}
+      />
+      <RegisterComplianceOfficerModal
+        isOpen={showComplianceModal}
+        onClose={() => setShowComplianceModal(false)}
       />
     </div>
   );

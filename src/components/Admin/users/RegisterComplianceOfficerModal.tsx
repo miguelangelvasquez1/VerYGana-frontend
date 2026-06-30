@@ -1,26 +1,24 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Gamepad2 } from 'lucide-react';
+import { X, ShieldCheck } from 'lucide-react';
 import apiClient from '@/lib/api/client';
 import toast from 'react-hot-toast';
 
-interface GameDesignerForm {
+interface ComplianceOfficerForm {
   name: string;
   lastName: string;
   email: string;
   phoneNumber: string;
-  bio: string;
-  canPublishDirectly: boolean;
+  password: string;
 }
 
-const emptyForm: GameDesignerForm = {
+const emptyForm: ComplianceOfficerForm = {
   name: '',
   lastName: '',
   email: '',
   phoneNumber: '',
-  bio: '',
-  canPublishDirectly: false,
+  password: '',
 };
 
 interface Props {
@@ -28,22 +26,22 @@ interface Props {
   onClose: () => void;
 }
 
-const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
-  const [form, setForm] = useState<GameDesignerForm>(emptyForm);
-  const [errors, setErrors] = useState<Partial<GameDesignerForm>>({});
+const RegisterComplianceOfficerModal: React.FC<Props> = ({ isOpen, onClose }) => {
+  const [form, setForm] = useState<ComplianceOfficerForm>(emptyForm);
+  const [errors, setErrors] = useState<Partial<ComplianceOfficerForm>>({});
   const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
   const validate = (): boolean => {
-    const e: Partial<GameDesignerForm> = {};
+    const e: Partial<ComplianceOfficerForm> = {};
     if (!form.name.trim()) e.name = 'El nombre es requerido';
     if (!form.lastName.trim()) e.lastName = 'El apellido es requerido';
     if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       e.email = 'Ingresa un email válido';
     if (!form.phoneNumber.trim()) e.phoneNumber = 'El teléfono es requerido';
-    if (form.bio && form.bio.length > 500)
-      e.bio = 'La bio no puede superar los 500 caracteres';
+    if (!form.password || form.password.length < 6)
+      e.password = 'La contraseña debe tener al menos 6 caracteres';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -53,16 +51,14 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const response = await apiClient.post('/api/admin/game-designers', {
+      await apiClient.post('/auth/register/compliance-officer', {
         name: form.name.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim(),
         phoneNumber: form.phoneNumber.trim(),
-        bio: form.bio.trim() || undefined,
-        canPublishDirectly: form.canPublishDirectly,
+        password: form.password,
       });
-      const backendMsg = typeof response.data === 'string' ? response.data : '';
-      toast.success(backendMsg || `Se envió el enlace de activación a ${form.email.trim()}`);
+      toast.success('Oficial de cumplimiento registrado exitosamente');
       handleClose();
     } catch (err: any) {
       const msg = err?.response?.data?.message;
@@ -71,7 +67,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
       } else if (err?.response?.status === 400) {
         toast.error(msg || 'Datos inválidos, revisa el formulario');
       } else {
-        toast.error(msg || 'Error al registrar el game designer');
+        toast.error(msg || 'Error al registrar el oficial de cumplimiento');
       }
     } finally {
       setSubmitting(false);
@@ -84,18 +80,23 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  const handleField = (field: keyof GameDesignerForm, value: string | boolean) => {
+  const handleField = (field: keyof ComplianceOfficerForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
   };
+
+  const inputCls = (hasError?: boolean) =>
+    `w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+      hasError ? 'border-red-400' : 'border-gray-300'
+    }`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-2">
-            <Gamepad2 className="text-violet-600" size={22} />
-            <h2 className="text-lg font-semibold text-gray-900">Registrar Game Designer</h2>
+            <ShieldCheck className="text-blue-600" size={22} />
+            <h2 className="text-lg font-semibold text-gray-900">Registrar Oficial de Cumplimiento</h2>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
             <X size={22} />
@@ -113,9 +114,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 value={form.name}
                 onChange={e => handleField('name', e.target.value)}
                 placeholder="Juan"
-                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
-                  errors.name ? 'border-red-400' : 'border-gray-300'
-                }`}
+                className={inputCls(!!errors.name)}
               />
               {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
             </div>
@@ -129,9 +128,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 value={form.lastName}
                 onChange={e => handleField('lastName', e.target.value)}
                 placeholder="Pérez"
-                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
-                  errors.lastName ? 'border-red-400' : 'border-gray-300'
-                }`}
+                className={inputCls(!!errors.lastName)}
               />
               {errors.lastName && <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>}
             </div>
@@ -145,10 +142,8 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
               type="email"
               value={form.email}
               onChange={e => handleField('email', e.target.value)}
-              placeholder="juan.perez@verygana.com"
-              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
-                errors.email ? 'border-red-400' : 'border-gray-300'
-              }`}
+              placeholder="oficial@verygana.com"
+              className={inputCls(!!errors.email)}
             />
             {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
           </div>
@@ -162,51 +157,23 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
               value={form.phoneNumber}
               onChange={e => handleField('phoneNumber', e.target.value)}
               placeholder="3001234567"
-              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
-                errors.phoneNumber ? 'border-red-400' : 'border-gray-300'
-              }`}
+              className={inputCls(!!errors.phoneNumber)}
             />
             {errors.phoneNumber && <p className="text-xs text-red-500 mt-1">{errors.phoneNumber}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Bio <span className="text-gray-400 font-normal">(opcional)</span>
+              Contraseña <span className="text-red-500">*</span>
             </label>
-            <textarea
-              value={form.bio}
-              onChange={e => handleField('bio', e.target.value)}
-              rows={3}
-              placeholder="Descripción breve del diseñador..."
-              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none ${
-                errors.bio ? 'border-red-400' : 'border-gray-300'
-              }`}
+            <input
+              type="password"
+              value={form.password}
+              onChange={e => handleField('password', e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+              className={inputCls(!!errors.password)}
             />
-            <div className="flex justify-between mt-1">
-              {errors.bio ? <p className="text-xs text-red-500">{errors.bio}</p> : <span />}
-              <span className={`text-xs ${form.bio.length > 500 ? 'text-red-500' : 'text-gray-400'}`}>
-                {form.bio.length}/500
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 py-1">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={form.canPublishDirectly}
-              onClick={() => handleField('canPublishDirectly', !form.canPublishDirectly)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 cursor-pointer ${
-                form.canPublishDirectly ? 'bg-violet-600' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  form.canPublishDirectly ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <span className="text-sm text-gray-700">Puede publicar directamente</span>
+            {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -220,9 +187,9 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Registrando...' : 'Registrar Designer'}
+              {submitting ? 'Registrando...' : 'Registrar Oficial'}
             </button>
           </div>
         </form>
@@ -231,4 +198,4 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
   );
 };
 
-export default RegisterGameDesignerModal;
+export default RegisterComplianceOfficerModal;

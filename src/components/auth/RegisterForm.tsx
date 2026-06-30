@@ -17,11 +17,6 @@ interface Municipality {
   name: string;
 }
 
-interface Department {
-  code: string;
-  name: string;
-}
-
 // Field-level error map from API
 type FieldErrors = Record<string, string>;
 
@@ -68,14 +63,14 @@ const inputCls = (hasError?: boolean) =>
 
 export default function RegisterForm() {
   const [role, setRole] = useState<Role | null>(null);
-  const [formData, setFormData] = useState<any>({});
-  const [loadingDepartments, setLoadingDepartments] = useState(false);
+  const [formData, setFormData] = useState<any>({ pepDeclaration: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatars, setAvatars] = useState<AvatarDTO[]>([]);
   const [loadingAvatars, setLoadingAvatars] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [registrationResult, setRegistrationResult] = useState<"pep_review" | null>(null);
   const { categories, loading: loadingCategories } = useCategories();
-  const { data: departments = [], isLoading: loadingDepts } = useDepartments();
+  const { data: departments = [], isLoading: loadingDepartments } = useDepartments();
   const { municipalities, loading: loadingMunicipalities } = useMunicipalities(
     formData.departmentCode || null
   );
@@ -155,7 +150,7 @@ export default function RegisterForm() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFieldErrors({});
 
@@ -169,6 +164,8 @@ export default function RegisterForm() {
     // Client-side validations for BENEFICIARIO
     if (role === "BENEFICIARIO") {
       const clientErrors: FieldErrors = {};
+      if (!formData.documentType) clientErrors["documentType"] = "El tipo de documento es requerido";
+      if (!formData.documentNumber) clientErrors["documentNumber"] = "El número de documento es requerido";
       if (!formData.avatarId) clientErrors["avatarId"] = "Debes seleccionar un avatar";
       if (!formData.userName) clientErrors["userName"] = "El nombre de usuario es requerido";
       if (!formData.birthDay || !formData.birthMonth || !formData.birthYear)
@@ -195,11 +192,22 @@ export default function RegisterForm() {
       }
     }
 
+    if (role === "COMERCIANTE") {
+      const clientErrors: FieldErrors = {};
+      if (!formData.ciiuCode) clientErrors["ciiuCode"] = "El código CIIU es requerido";
+      if (!formData.legalRepDocumentType) clientErrors["legalRepDocumentType"] = "El tipo de documento es requerido";
+      if (!formData.legalRepDocumentNumber) clientErrors["legalRepDocumentNumber"] = "El número de documento es requerido";
+      if (Object.keys(clientErrors).length > 0) {
+        setFieldErrors(clientErrors);
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     try {
-      let response;
       switch (role) {
-        case "BENEFICIARIO":
-          response = await registerConsumer({
+        case "BENEFICIARIO": {
+          const res = await registerConsumer({
             email: formData.email,
             password: formData.password,
             phoneNumber: formData.phoneNumber,
@@ -213,34 +221,56 @@ export default function RegisterForm() {
             birthDate: `${formData.birthYear}-${String(formData.birthMonth).padStart(2, "0")}-${String(formData.birthDay).padStart(2, "0")}`,
             gender: formData.gender,
             department: formData.departmentName,
+            documentType: formData.documentType,
+            documentNumber: formData.documentNumber,
+            occupation: formData.occupation?.trim() || undefined,
+            incomeRange: formData.incomeRange || undefined,
+            pepDeclaration: formData.pepDeclaration ?? false,
           });
+          if (res?.underReview === true || res?.status === "PENDING_REVIEW") {
+            setRegistrationResult("pep_review");
+          } else {
+            toast.success("¡Registro exitoso! Ahora puedes iniciar sesión");
+            setTimeout(() => { window.location.href = "/login"; }, 2000);
+          }
           break;
-        case "COMERCIANTE":
-          response = await registerCommercial({
+        }
+        case "COMERCIANTE": {
+          const res = await registerCommercial({
             email: formData.email,
             password: formData.password,
             phoneNumber: formData.phoneNumber,
             name: formData.name,
             nit: formData.nit,
+            ciiuCode: formData.ciiuCode,
+            mercantileRegistration: formData.mercantileRegistration?.trim() || undefined,
+            legalRepDocumentType: formData.legalRepDocumentType,
+            legalRepDocumentNumber: formData.legalRepDocumentNumber,
+            legalRepPepDeclaration: formData.legalRepPepDeclaration ?? false,
+            annualIncomeRange: formData.annualIncomeRange || undefined,
+            municipalityCode: formData.municipalityCode || undefined,
           });
+          if (res?.underReview === true || res?.status === "PENDING_REVIEW") {
+            setRegistrationResult("pep_review");
+          } else {
+            toast.success("¡Registro exitoso! Ahora puedes iniciar sesión");
+            setTimeout(() => { window.location.href = "/login"; }, 2000);
+          }
           break;
+        }
         default:
           throw new Error("Rol no válido");
       }
-
-      toast.success("¡Registro exitoso! Ahora puedes iniciar sesión");
-      setFormData({});
-      setRole(null);
-      setTimeout(() => { window.location.href = "/login"; }, 2000);
     } catch (error: any) {
       console.error("Error en el registro:", error);
 
-      // Parse API validation errors
       if (error.response) {
         const data = error.response.data;
+        const errorCode = data?.errorCode ?? data?.code;
 
-        // Show field-level errors from `details`
-        if (data?.details && typeof data.details === "object") {
+        if (errorCode === "SCREENING_HIT" || errorCode === "COMPLIANCE_REJECT") {
+          toast.error("No es posible completar el registro en este momento. Comunícate con soporte.");
+        } else if (data?.details && typeof data.details === "object") {
           setFieldErrors(data.details);
           toast.error(data.message || "Verifica los campos marcados en rojo");
         } else if (error.response.status === 409) {
@@ -257,6 +287,29 @@ export default function RegisterForm() {
       setIsSubmitting(false);
     }
   };
+
+  // ─── SCREEN 0: PEP review ─────────────────────────────────────────────────
+  if (registrationResult === "pep_review") {
+    return (
+      <div className="flex flex-col items-center gap-6 text-center py-4">
+        <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+          <svg className="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Cuenta en revisión</h2>
+          <p className="text-gray-600 text-sm leading-relaxed max-w-xs">
+            Hemos recibido tu solicitud. Nuestro equipo revisará tu información y te notificaremos cuando tu cuenta esté activa.
+          </p>
+          <p className="text-gray-400 text-xs mt-3">Este proceso puede tardar algunos días hábiles.</p>
+        </div>
+        <a href="/login" className="text-blue-600 text-sm hover:underline font-medium">
+          Ir al inicio de sesión
+        </a>
+      </div>
+    );
+  }
 
   // ─── SCREEN 1: Role selection ──────────────────────────────────────────────
   if (!role) {
@@ -348,6 +401,20 @@ export default function RegisterForm() {
                   </FieldWrapper>
                   <FieldWrapper label="Apellidos" required error={fieldErrors["lastNames"]}>
                     <input name="lastNames" placeholder="Tus apellidos" onChange={handleChange} value={formData.lastNames || ""} className={inputCls(!!fieldErrors["lastNames"])} required />
+                  </FieldWrapper>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FieldWrapper label="Tipo de documento" required error={fieldErrors["documentType"]}>
+                    <select name="documentType" onChange={handleChange} value={formData.documentType || ""} className={inputCls(!!fieldErrors["documentType"])} required>
+                      <option value="">Selecciona</option>
+                      <option value="CC">Cédula de Ciudadanía (CC)</option>
+                      <option value="CE">Cédula de Extranjería (CE)</option>
+                      <option value="PP">Pasaporte (PP)</option>
+                    </select>
+                  </FieldWrapper>
+                  <FieldWrapper label="Número de documento" required error={fieldErrors["documentNumber"]}>
+                    <input name="documentNumber" placeholder="Ej. 1234567890" onChange={handleChange} value={formData.documentNumber || ""} className={inputCls(!!fieldErrors["documentNumber"])} required />
                   </FieldWrapper>
                 </div>
 
@@ -588,6 +655,46 @@ export default function RegisterForm() {
                 </p>
               )}
             </section>
+            <hr className="border-gray-100" />
+
+            {/* Información adicional */}
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Información adicional <span className="normal-case font-normal text-gray-300">(opcional)</span></h3>
+              <div className="space-y-4">
+                <FieldWrapper label="Ocupación" error={fieldErrors["occupation"]}>
+                  <input name="occupation" placeholder="Ej. Estudiante, Empleado, Independiente" onChange={handleChange} value={formData.occupation || ""} className={inputCls(!!fieldErrors["occupation"])} />
+                </FieldWrapper>
+                <FieldWrapper label="Rango de ingresos mensuales" error={fieldErrors["incomeRange"]}>
+                  <select name="incomeRange" onChange={handleChange} value={formData.incomeRange || ""} className={inputCls(!!fieldErrors["incomeRange"])}>
+                    <option value="">Selecciona (opcional)</option>
+                    <option value="LESS_THAN_1_SMMLV">Menos de 1 SMMLV</option>
+                    <option value="FROM_1_TO_3_SMMLV">1 a 3 SMMLV</option>
+                    <option value="FROM_3_TO_10_SMMLV">3 a 10 SMMLV</option>
+                    <option value="MORE_THAN_10_SMMLV">Más de 10 SMMLV</option>
+                  </select>
+                </FieldWrapper>
+              </div>
+            </section>
+
+            <hr className="border-gray-100" />
+
+            {/* Declaración PEP */}
+            <section>
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={formData.pepDeclaration ?? false}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, pepDeclaration: e.target.checked }))}
+                  className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-400 shrink-0"
+                />
+                <span className="text-sm text-gray-700 leading-snug">
+                  Declaro que <span className="font-semibold">soy</span> o <span className="font-semibold">no soy</span> una Persona Expuesta Políticamente (PEP), conforme a la normativa de prevención de lavado de activos y financiación del terrorismo.
+                </span>
+              </label>
+              <p className="text-xs text-gray-400 mt-2 ml-7">
+                Marcar esta casilla si eres PEP puede requerir una revisión adicional de tu cuenta.
+              </p>
+            </section>
           </>
         )}
 
@@ -603,6 +710,14 @@ export default function RegisterForm() {
                 <FieldWrapper label="NIT" required error={fieldErrors["nit"]}>
                   <input name="nit" placeholder="900.000.000-0" onChange={handleChange} value={formData.nit || ""} className={inputCls(!!fieldErrors["nit"])} required />
                 </FieldWrapper>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FieldWrapper label="Código CIIU" required error={fieldErrors["ciiuCode"]}>
+                    <input name="ciiuCode" placeholder="Ej. 4711" maxLength={10} onChange={handleChange} value={formData.ciiuCode || ""} className={inputCls(!!fieldErrors["ciiuCode"])} required />
+                  </FieldWrapper>
+                  <FieldWrapper label="Matrícula mercantil" error={fieldErrors["mercantileRegistration"]}>
+                    <input name="mercantileRegistration" placeholder="Opcional" maxLength={20} onChange={handleChange} value={formData.mercantileRegistration || ""} className={inputCls(!!fieldErrors["mercantileRegistration"])} />
+                  </FieldWrapper>
+                </div>
               </div>
             </section>
 
@@ -616,6 +731,95 @@ export default function RegisterForm() {
                 </FieldWrapper>
                 <FieldWrapper label="Teléfono" required error={fieldErrors["phoneNumber"]}>
                   <input name="phoneNumber" placeholder="300 000 0000" onChange={handleChange} value={formData.phoneNumber || ""} className={inputCls(!!fieldErrors["phoneNumber"])} required />
+                </FieldWrapper>
+              </div>
+            </section>
+
+            <hr className="border-gray-100" />
+
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Representante legal</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FieldWrapper label="Tipo de documento" required error={fieldErrors["legalRepDocumentType"]}>
+                    <select name="legalRepDocumentType" onChange={handleChange} value={formData.legalRepDocumentType || ""} className={inputCls(!!fieldErrors["legalRepDocumentType"])} required>
+                      <option value="">Selecciona</option>
+                      <option value="CC">Cédula de Ciudadanía (CC)</option>
+                      <option value="CE">Cédula de Extranjería (CE)</option>
+                      <option value="PP">Pasaporte (PP)</option>
+                    </select>
+                  </FieldWrapper>
+                  <FieldWrapper label="Número de documento" required error={fieldErrors["legalRepDocumentNumber"]}>
+                    <input name="legalRepDocumentNumber" placeholder="Ej. 1234567890" onChange={handleChange} value={formData.legalRepDocumentNumber || ""} className={inputCls(!!fieldErrors["legalRepDocumentNumber"])} required />
+                  </FieldWrapper>
+                </div>
+                <FieldWrapper label="Rango de ingresos anuales del negocio" error={fieldErrors["annualIncomeRange"]}>
+                  <select name="annualIncomeRange" onChange={handleChange} value={formData.annualIncomeRange || ""} className={inputCls(!!fieldErrors["annualIncomeRange"])}>
+                    <option value="">Selecciona (opcional)</option>
+                    <option value="LESS_THAN_500_SMMLV">Menos de 500 SMMLV</option>
+                    <option value="FROM_500_TO_5000_SMMLV">500 a 5.000 SMMLV</option>
+                    <option value="FROM_5000_TO_50000_SMMLV">5.000 a 50.000 SMMLV</option>
+                    <option value="MORE_THAN_50000_SMMLV">Más de 50.000 SMMLV</option>
+                  </select>
+                </FieldWrapper>
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={formData.legalRepPepDeclaration ?? false}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, legalRepPepDeclaration: e.target.checked }))}
+                    className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-400 shrink-0"
+                  />
+                  <span className="text-sm text-gray-700 leading-snug">
+                    El representante legal declara que <span className="font-semibold">es</span> o <span className="font-semibold">no es</span> una Persona Expuesta Políticamente (PEP), conforme a la normativa de prevención de lavado de activos y financiación del terrorismo.
+                  </span>
+                </label>
+                <p className="text-xs text-gray-400 ml-7">
+                  Marcar esta casilla si el representante es PEP puede requerir una revisión adicional.
+                </p>
+              </div>
+            </section>
+
+            <hr className="border-gray-100" />
+
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Ubicación <span className="normal-case font-normal text-gray-300">(opcional)</span></h3>
+              <div className="space-y-4">
+                <FieldWrapper label="Departamento" error={fieldErrors["departmentName"]}>
+                  <select
+                    name="departmentCode"
+                    onChange={handleChange}
+                    value={formData.departmentCode || ""}
+                    className={inputCls(!!fieldErrors["departmentName"])}
+                    disabled={loadingDepartments}
+                  >
+                    <option value="">
+                      {loadingDepartments ? "Cargando departamentos..." : "Selecciona tu departamento"}
+                    </option>
+                    {departments.map((d) => (
+                      <option key={d.code} value={d.code}>{d.name}</option>
+                    ))}
+                  </select>
+                </FieldWrapper>
+
+                <FieldWrapper label="Municipio" error={fieldErrors["municipalityName"]}>
+                  <select
+                    name="municipalityCode"
+                    onChange={handleMunicipalityChange}
+                    value={formData.municipalityCode || ""}
+                    className={inputCls(!!fieldErrors["municipalityName"])}
+                    disabled={!formData.departmentCode || loadingMunicipalities}
+                  >
+                    <option value="">
+                      {!formData.departmentCode
+                        ? "Selecciona primero el departamento"
+                        : loadingMunicipalities
+                          ? "Cargando municipios..."
+                          : "Selecciona tu municipio"}
+                    </option>
+                    {municipalities?.map((m: Municipality) => (
+                      <option key={m.code} value={m.code}>{m.name}</option>
+                    ))}
+                  </select>
                 </FieldWrapper>
               </div>
             </section>

@@ -1,14 +1,16 @@
 import apiClient from '@/lib/api/client';
 import type {
   BrandingCategory,
+  BrandingComment,
   BrandingCorporateResource,
   BrandingMunicipality,
   BrandingStatus,
 } from './BrandingRequestService';
 
+export type { BrandingComment };
+
 export interface DesignerProfile {
   id: number;
-  userId: number;
   name: string;
   lastName: string;
   email: string;
@@ -16,8 +18,6 @@ export interface DesignerProfile {
   bio: string | null;
   designerCode: string;
   campaignsDesigned: number;
-  canPublishDirectly: boolean;
-  joinedAt: string;
 }
 
 export interface DesignerBrandingSummary {
@@ -66,7 +66,6 @@ export interface DesignerBrandingDetail {
 
   // Comunicación
   adminNotes: string | null;
-  designerNotes: string | null;
 
   // Recursos y configuración
   corporateResources: BrandingCorporateResource[];
@@ -90,14 +89,12 @@ export const resetDesignerPassword = async (
 
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
-export const getDesignerProfile = async (): Promise<DesignerProfile> => {
-  const { data } = await apiClient.get('/game-designers/me');
+export const getDesignerProfile = async (signal?: AbortSignal): Promise<DesignerProfile> => {
+  const { data } = await apiClient.get('/game-designers/me', { signal });
   return data;
 };
 
 export const updateDesignerProfile = async (dto: {
-  name?: string;
-  lastName?: string;
   bio?: string;
 }): Promise<DesignerProfile> => {
   const { data } = await apiClient.patch('/game-designers/me', dto);
@@ -135,10 +132,23 @@ export const saveDraft = async (
   await apiClient.patch(`/game-designers/me/branding-requests/${id}/draft`, formData);
 };
 
-export const saveDesignerNotes = async (id: number, notes: string): Promise<void> => {
-  await apiClient.patch(`/game-designers/me/branding-requests/${id}/notes`, { notes });
-};
-
 export const submitDesign = async (id: number): Promise<void> => {
   await apiClient.post(`/game-designers/me/branding-requests/${id}/submit-design`);
+};
+
+export const getDesignerPreviewUrl = async (id: number): Promise<string> => {
+  const { data } = await apiClient.get(`/game-designers/me/branding-requests/${id}/preview-url`);
+  return data.url;
+};
+
+// ─── Comments ─────────────────────────────────────────────────────────────────
+
+export const getDesignerComments = async (id: number, signal?: AbortSignal): Promise<BrandingComment[]> => {
+  const { data } = await apiClient.get(`/game-designers/me/branding-requests/${id}/comments`, { signal });
+  return data;
+};
+
+export const postDesignerComment = async (id: number, content: string): Promise<BrandingComment> => {
+  const { data } = await apiClient.post(`/game-designers/me/branding-requests/${id}/comments`, { content });
+  return data;
 };
