@@ -56,7 +56,7 @@ const inputCls = (hasError?: boolean) =>
   `w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:bg-white transition ${
     hasError
       ? "border-red-400 focus:ring-red-300"
-      : "border-gray-200 focus:ring-blue-400 focus:border-blue-400"
+      : "border-gray-200 focus:ring-[#03548C]/40 focus:border-[#03548C]"
   }`;
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -304,7 +304,7 @@ export default function RegisterForm() {
           </p>
           <p className="text-gray-400 text-xs mt-3">Este proceso puede tardar algunos días hábiles.</p>
         </div>
-        <a href="/login" className="text-blue-600 text-sm hover:underline font-medium">
+        <a href="/login" className="text-[#03548C] text-sm hover:underline font-medium">
           Ir al inicio de sesión
         </a>
       </div>
@@ -336,9 +336,9 @@ export default function RegisterForm() {
 
           <button
             onClick={() => setRole("COMERCIANTE")}
-            className="group flex items-center gap-4 p-5 border-2 border-purple-200 rounded-2xl hover:border-purple-500 hover:bg-purple-50 transition-all text-left"
+            className="group flex items-center gap-4 p-5 border-2 border-[#03548C]/30 rounded-2xl hover:border-[#03548C] hover:bg-blue-50 transition-all text-left"
           >
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-purple-200 transition">
+            <div className="w-12 h-12 bg-[#03548C]/10 rounded-xl flex items-center justify-center text-2xl group-hover:bg-[#03548C]/20 transition">
               📢
             </div>
             <div>
@@ -350,7 +350,7 @@ export default function RegisterForm() {
 
         <p className="text-center text-sm text-gray-500">
           ¿Ya tienes cuenta?{" "}
-          <a href="/login" className="text-blue-600 font-semibold hover:underline">
+          <a href="/login" className="text-[#03548C] font-semibold hover:underline">
             Inicia sesión aquí
           </a>
         </p>
@@ -634,8 +634,8 @@ export default function RegisterForm() {
                         onClick={() => handleCheckboxChange(cat)}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all
                           ${selected
-                            ? "bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-200"
-                            : "bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600"
+                            ? "bg-[#03548C] border-[#03548C] text-white shadow-sm shadow-blue-200"
+                            : "bg-white border-gray-200 text-gray-600 hover:border-[#03548C]/50 hover:text-[#03548C]"
                           }`}
                       >
                         {selected && (
@@ -650,7 +650,7 @@ export default function RegisterForm() {
                 </div>
               )}
               {(formData.categories?.length ?? 0) > 0 && (
-                <p className="text-xs text-blue-600 mt-2 font-medium">
+                <p className="text-xs text-[#03548C] mt-2 font-medium">
                   {formData.categories.length} categoría{formData.categories.length !== 1 ? "s" : ""} seleccionada{formData.categories.length !== 1 ? "s" : ""}
                 </p>
               )}
@@ -685,7 +685,7 @@ export default function RegisterForm() {
                   type="checkbox"
                   checked={formData.pepDeclaration ?? false}
                   onChange={(e) => setFormData((prev: any) => ({ ...prev, pepDeclaration: e.target.checked }))}
-                  className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-400 shrink-0"
+                  className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#03548C] focus:ring-[#03548C]/40 shrink-0"
                 />
                 <span className="text-sm text-gray-700 leading-snug">
                   Declaro que <span className="font-semibold">soy</span> o <span className="font-semibold">no soy</span> una Persona Expuesta Políticamente (PEP), conforme a la normativa de prevención de lavado de activos y financiación del terrorismo.
@@ -767,7 +767,7 @@ export default function RegisterForm() {
                     type="checkbox"
                     checked={formData.legalRepPepDeclaration ?? false}
                     onChange={(e) => setFormData((prev: any) => ({ ...prev, legalRepPepDeclaration: e.target.checked }))}
-                    className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-400 shrink-0"
+                    className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#03548C] focus:ring-[#03548C]/40 shrink-0"
                   />
                   <span className="text-sm text-gray-700 leading-snug">
                     El representante legal declara que <span className="font-semibold">es</span> o <span className="font-semibold">no es</span> una Persona Expuesta Políticamente (PEP), conforme a la normativa de prevención de lavado de activos y financiación del terrorismo.
@@ -845,10 +845,10 @@ export default function RegisterForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full py-3.5 rounded-xl font-bold text-white text-sm tracking-wide shadow-md transition-all
+            className={`w-full py-3.5 rounded-xl font-bold text-sm tracking-wide shadow-md transition-all
               ${isSubmitting
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-blue-200"
+                ? "bg-[#c9a227]/60 text-gray-700 cursor-not-allowed"
+                : "bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 active:scale-[0.98] text-gray-900 shadow-yellow-200"
               }`}
           >
             {isSubmitting ? (

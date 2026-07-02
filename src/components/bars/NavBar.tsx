@@ -117,7 +117,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between px-6 py-2">
           {/* LOGO */}
           <div className="flex items-center gap-4">
-            <Image src="/logos/logo.png" alt="Logo" width={60} height={60} />
+            <Image src="/logos/logoDorado.png" alt="Logo" width={60} height={60} />
           </div>
 
           {/* NAV BUTTONS */}

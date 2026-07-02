@@ -48,7 +48,7 @@ const FEATURES: FeatureCardProps[] = [
     title: 'Anuncios',
     description: 'Ve anuncios de marcas locales y gana recompensas reales por tu atención.',
     href: '/ads',
-    gradient: 'from-blue-500 to-cyan-500',
+    gradient: 'from-[#00a4ff] to-[#0089d6]',
     badge: 'Gana ahora',
   },
   {
@@ -56,7 +56,7 @@ const FEATURES: FeatureCardProps[] = [
     title: 'Rifas',
     description: 'Participa en rifas increíbles con premios en efectivo y productos exclusivos.',
     href: '/raffles',
-    gradient: 'from-amber-400 to-orange-500',
+    gradient: 'from-[#00a4ff] to-[#0089d6]',
     badge: 'En vivo',
   },
   {
@@ -64,28 +64,28 @@ const FEATURES: FeatureCardProps[] = [
     title: 'Juegos',
     description: 'Juega, compite y acumula puntos canjeables por premios reales.',
     href: '/games',
-    gradient: 'from-violet-500 to-purple-600',
+    gradient: 'from-[#00a4ff] to-[#0089d6]',
   },
   {
     icon: <Package className="w-7 h-7" />,
     title: 'Productos',
     description: 'Descubre productos locales y paga con tu saldo ganado en la plataforma.',
     href: '/products',
-    gradient: 'from-emerald-500 to-teal-600',
+    gradient: 'from-[#00a4ff] to-[#0089d6]',
   },
   {
     icon: <Smartphone className="w-7 h-7" />,
     title: 'Recargas',
     description: 'Recarga tu celular usando el saldo que has ganado. Rápido y seguro.',
     href: '/plans/mobile-plans',
-    gradient: 'from-pink-500 to-rose-600',
+    gradient: 'from-[#00a4ff] to-[#0089d6]',
   },
   {
     icon: <Heart className="w-7 h-7" />,
     title: 'Favoritos',
     description: 'Guarda tus productos, rifas y anuncios favoritos en un solo lugar.',
     href: '/explore/favorites',
-    gradient: 'from-red-400 to-rose-500',
+    gradient: 'from-[#00a4ff] to-[#0089d6]',
   },
 ];
 
@@ -101,7 +101,7 @@ const HOW_IT_WORKS = [
     step: '01',
     title: 'Regístrate gratis',
     desc: 'Crea tu cuenta en minutos y obtén un bono de bienvenida.',
-    color: 'text-blue-600 bg-blue-50',
+    color: 'text-[#0c5785] bg-blue-50',
   },
   {
     step: '02',
@@ -133,11 +133,11 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════════════════════════
           HERO
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#003d80] via-[#0060b8] to-[#0089d6]">
+      <section className="relative overflow-hidden bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440]">
         {/* Decorative circles */}
         <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5" />
-        <div className="pointer-events-none absolute top-1/2 right-1/4 w-48 h-48 rounded-full bg-cyan-400/10" />
+        <div className="pointer-events-none absolute top-1/2 right-1/4 w-48 h-48 rounded-full bg-[#0c5785]/20" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 lg:pt-20 lg:pb-24">
           <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
@@ -149,25 +149,25 @@ export default function HomePage() {
               }`}
             >
               <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
-                <Zap className="w-3.5 h-3.5 text-yellow-300" />
+                <Zap className="w-3.5 h-3.5 text-[#FFD700]" />
                 La plataforma que te paga por tu tiempo
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight mb-5">
-                Gana dinero real<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-400">
+                Gana llaves<br />
+                <span className="text-[#FFD700]">
                   haciendo lo que ya haces
                 </span>
               </h1>
 
               <p className="text-blue-100 text-base lg:text-lg leading-relaxed max-w-xl mb-8">
                 Ve anuncios, responde encuestas, juega y participa en rifas.
-                Acumula saldo real y canjéalo cuando quieras.
+                Acumula llaves y canjéalas cuando quieras.
               </p>
 
               <div className="flex flex-wrap gap-3">
                 <Link href="/ads">
-                  <button className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all">
+                  <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all">
                     Empezar a ganar
                     <ArrowRight className="w-4 h-4" />
                   </button>
@@ -206,11 +206,12 @@ export default function HomePage() {
         </div>
 
         {/* Wave bottom */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div className="absolute -bottom-px left-0 right-0 leading-0">
+          <svg className="block" viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f4f7fb" />
           </svg>
         </div>
+
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -237,7 +238,7 @@ export default function HomePage() {
             ENCUESTAS — highlight banner
         ══════════════════════════════════════════════════════════════════ */}
         <section className="py-6">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 p-6 lg:p-10">
+          <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] p-6 lg:p-10">
             {/* bg decoration */}
             <div className="pointer-events-none absolute -top-8 -right-8 w-48 h-48 rounded-full bg-white/10" />
             <div className="pointer-events-none absolute bottom-0 left-1/3 w-32 h-32 rounded-full bg-white/5" />
@@ -252,16 +253,16 @@ export default function HomePage() {
                   <Award className="w-3 h-3" /> Recompensas garantizadas
                 </div>
                 <h2 className="text-xl lg:text-3xl font-extrabold mb-2">
-                  Responde encuestas y <span className="text-yellow-300">gana saldo real</span>
+                  Responde encuestas y <span className="text-[#FFD700]">gana llaves</span>
                 </h2>
-                <p className="text-indigo-100 text-sm lg:text-base max-w-xl">
+                <p className="text-blue-100 text-sm lg:text-base max-w-xl">
                   Comparte tu opinión sobre productos y servicios. Cada encuesta completada
-                  acredita puntos directamente en tu billetera. Sin condiciones, sin esperas.
+                  acredita llaves directamente en tu billetera. Sin condiciones, sin esperas.
                 </p>
               </div>
 
               <Link href="/surveys" className="shrink-0">
-                <button className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer">
+                <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer">
                   Ver encuestas
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -301,7 +302,7 @@ export default function HomePage() {
             FORO — highlight banner
         ══════════════════════════════════════════════════════════════════ */}
         <section className="py-6">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-teal-500 to-emerald-600 p-6 lg:p-10">
+          <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] p-6 lg:p-10">
             <div className="pointer-events-none absolute -bottom-8 -right-8 w-48 h-48 rounded-full bg-white/10" />
 
             <div className="relative flex flex-col lg:flex-row items-start lg:items-center gap-6 lg:gap-10">
@@ -314,16 +315,16 @@ export default function HomePage() {
                   <Globe className="w-3 h-3" /> Comunidad activa
                 </div>
                 <h2 className="text-xl lg:text-3xl font-extrabold mb-2">
-                  Únete a la <span className="text-yellow-300">conversación</span>
+                  Únete a la <span className="text-[#FFD700]">conversación</span>
                 </h2>
-                <p className="text-teal-50 text-sm lg:text-base max-w-xl">
+                <p className="text-blue-100 text-sm lg:text-base max-w-xl">
                   Comparte experiencias, haz preguntas, descubre trucos para ganar más
                   y conecta con miles de usuarios como tú en nuestro foro comunitario.
                 </p>
               </div>
 
               <Link href="/forum" className="shrink-0">
-                <button className="flex items-center gap-2 bg-white text-teal-700 hover:bg-teal-50 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer">
+                <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer">
                   Ir al foro
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -343,7 +344,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 {
-                  icon: <ShieldCheck className="w-6 h-6 text-blue-600" />,
+                  icon: <ShieldCheck className="w-6 h-6 text-[#0c5785]" />,
                   title: '100% seguro',
                   desc: 'Tus datos y ganancias están protegidos con los más altos estándares de seguridad.',
                   bg: 'bg-blue-50',
@@ -355,10 +356,10 @@ export default function HomePage() {
                   bg: 'bg-emerald-50',
                 },
                 {
-                  icon: <Users className="w-6 h-6 text-violet-600" />,
+                  icon: <Users className="w-6 h-6 text-[#0e3958]" />,
                   title: 'Comunidad real',
                   desc: 'Más de 50,000 colombianos ya ganan dinero extra con nosotros cada mes.',
-                  bg: 'bg-violet-50',
+                  bg: 'bg-slate-50',
                 },
               ].map(({ icon, title, desc, bg }) => (
                 <div key={title} className={`${bg} rounded-2xl p-5 text-center`}>
@@ -395,9 +396,9 @@ function FeatureCard({ icon, title, description, href, gradient, badge }: Featur
         </div>
 
         <h3 className="font-bold text-gray-900 text-sm mb-1">{title}</h3>
-        <p className="text-xs text-gray-400 leading-relaxed flex-1 hidden sm:block">{description}</p>
+        <p className="text-xs text-gray-500 leading-relaxed flex-1 hidden sm:block">{description}</p>
 
-        <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-[#0c5785] opacity-0 group-hover:opacity-100 transition-opacity">
           Ir <ChevronRight className="w-3 h-3" />
         </div>
       </div>

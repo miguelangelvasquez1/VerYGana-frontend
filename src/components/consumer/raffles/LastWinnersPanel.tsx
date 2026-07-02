@@ -11,7 +11,7 @@ const getPositionStyle = (position: number) => {
   if (position === 1) return { background: "linear-gradient(to right, #f59e0b, #fbbf24)", color: "#000" };
   if (position === 2) return { background: "linear-gradient(to right, #9ca3af, #d1d5db)", color: "#000" };
   if (position === 3) return { background: "linear-gradient(to right, #f97316, #fb923c)", color: "#fff" };
-  return { background: "linear-gradient(to right, #7c3aed, #a855f7)", color: "#fff" };
+  return { background: "linear-gradient(to right, #0b1440, #03548C)", color: "#fff" };
 };
 
 export default function LastWinnersPanel() {
@@ -51,7 +51,7 @@ export default function LastWinnersPanel() {
       {/* Header con gradiente de marca */}
       <div
         className="px-5 py-4 flex items-center gap-2"
-        style={{ background: "linear-gradient(135deg, #7c3aed, #014C92)" }}
+        style={{ background: "linear-gradient(135deg, #0b1440, #03548C)" }}
       >
         <span className="text-lg">🥇</span>
         <h3 className="text-base font-bold text-white">Últimos Ganadores</h3>
@@ -68,8 +68,8 @@ export default function LastWinnersPanel() {
           visibleWinners.map((winner, index) => (
             <div
               key={index}
-              className="flex flex-col bg-gray-50 rounded-xl px-3 py-2.5 transition-all duration-500 hover:bg-purple-50 border-l-4"
-              style={{ borderLeftColor: "#7c3aed" }}
+              className="flex flex-col bg-gray-50 rounded-xl px-3 py-2.5 transition-all duration-500 hover:bg-blue-50 border-l-4"
+              style={{ borderLeftColor: "#03548C" }}
             >
               {/* Usuario + posición */}
               <div className="flex items-center justify-between">
@@ -96,7 +96,7 @@ export default function LastWinnersPanel() {
                   {winner.prizeTitle}
                 </p>
 
-                <span className="text-xs font-bold" style={{ color: "#014C92" }}>
+                <span className="text-xs font-bold" style={{ color: "#03548C" }}>
                   ${winner.prizeValue.toLocaleString()}
                 </span>
               </div>

@@ -194,8 +194,8 @@ export default function ProductsPage() {
     <>
       {/* ══════════════ HERO ══════════════ */}
       <section
-        className="relative overflow-hidden text-white"
-        style={{ background: "linear-gradient(135deg, #003d80 0%, #0060b8 50%, #0089d6 100%)" }}
+        className="relative overflow-hidden text-white bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440]"
+        style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
       >
         <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5" />
@@ -209,7 +209,7 @@ export default function ProductsPage() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">
             Descubre Productos
           </h1>
-          <p className="text-blue-100 text-sm sm:text-base mb-7 max-w-lg mx-auto">
+          <p className="text-emerald-100 text-sm sm:text-base mb-7 max-w-lg mx-auto">
             Encuentra miles de productos al mejor precio.
           </p>
           <div className="max-w-2xl mx-auto">
@@ -233,7 +233,7 @@ export default function ProductsPage() {
             <div className="flex gap-2 w-max pb-2">
               <button
                 onClick={() => setSelectedCategoryId(null)}
-                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap ${
+                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap cursor-pointer ${
                   selectedCategoryId === null
                     ? "text-white border-[#014C92]"
                     : "border-gray-200 text-gray-600 bg-white hover:border-gray-300"
@@ -248,7 +248,7 @@ export default function ProductsPage() {
                   onClick={() =>
                     setSelectedCategoryId(selectedCategoryId === cat.id ? null : cat.id)
                   }
-                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap bg-white ${
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap bg-white cursor-pointer ${
                     selectedCategoryId === cat.id
                       ? "border-[#014C92] text-[#014C92] bg-blue-50"
                       : "border-gray-200 text-gray-600 hover:border-gray-300"
