@@ -6,12 +6,21 @@ import {
   getScreeningHits,
   reviewScreening,
   type ScreeningHit,
+  type ScreeningList,
   type PageResponse,
 } from '@/services/ComplianceService';
 
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   HIT: { label: 'HIT', cls: 'bg-red-100 text-red-700' },
   FUZZY_HIT: { label: 'FUZZY HIT', cls: 'bg-amber-100 text-amber-700' },
+};
+
+const LIST_LABELS: Record<ScreeningList, string> = {
+  OFAC_SDN: 'OFAC SDN',
+  UN: 'UN',
+  ATTORNEY_GENERAL: 'Attorney General',
+  COMPTROLLER: 'Comptroller',
+  NATIONAL_POLICE: 'National Police',
 };
 
 function ReviewModal({
@@ -166,7 +175,7 @@ export default function ScreeningsPanel() {
                           <td className="px-4 py-3">
                             <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{hit.documentNumber}</span>
                           </td>
-                          <td className="px-4 py-3 text-gray-700">{hit.listName}</td>
+                          <td className="px-4 py-3 text-gray-700">{LIST_LABELS[hit.listName] ?? hit.listName}</td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${badge.cls}`}>
                               {badge.label}

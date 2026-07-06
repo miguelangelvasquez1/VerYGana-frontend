@@ -2,22 +2,38 @@ import apiClient from "@/lib/api/client";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
+export type ScreeningList =
+  | 'OFAC_SDN'
+  | 'UN'
+  | 'ATTORNEY_GENERAL'
+  | 'COMPTROLLER'
+  | 'NATIONAL_POLICE';
+
 export interface KycPendingEntry {
   id: number;
-  name: string;
-  lastName: string;
   email: string;
-  documentType: string;
-  documentNumber: string;
-  isPep: boolean;
-  registeredAt: string;
+  phoneNumber: string;
+  role: string;
+  registeredDate: string;
+  // personal KYC fields
+  name?: string;
+  lastName?: string;
+  documentType?: string;
+  documentNumber?: string;
+  isPep?: boolean;
+  // commercial only
+  companyName?: string;
+  nit?: string;
+  ciiuCode?: string;
+  legalRepDocType?: string;
+  legalRepDocNumber?: string;
 }
 
 export interface ScreeningHit {
   id: number;
   queriedName: string;
   documentNumber: string;
-  listName: string;
+  listName: ScreeningList;
   status: "HIT" | "FUZZY_HIT";
   reviewed: boolean;
   createdAt: string;
