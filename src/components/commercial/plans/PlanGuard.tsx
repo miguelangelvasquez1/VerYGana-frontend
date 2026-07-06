@@ -59,32 +59,32 @@ export function PlanGuard({ requiredPlans, children, featureName }: PlanGuardPro
   const info = UPGRADE_INFO[neededPlan];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[320px] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] px-6">
       <div className={`
-        max-w-md w-full rounded-2xl border bg-gradient-to-br p-8 text-center
+        max-w-5xl w-full rounded-3xl border-2 bg-linear-to-br px-20 py-16 text-center
         ${info.color}
       `}>
-        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-white/5 ${info.color.split(' ').find(c => c.startsWith('text-'))}`}>
-          {info.icon}
+        <div className={`w-44 h-44 rounded-2xl flex items-center justify-center mx-auto mb-6 bg-white/10 ${info.color.split(' ').find(c => c.startsWith('text-'))}`}>
+          <span className="scale-[2.5]">{info.icon}</span>
         </div>
 
-        <Lock className="w-5 h-5 text-slate-400 mx-auto mb-3" />
+        <Lock className="w-12 h-12 text-slate-900 mx-auto mb-6" />
 
-        <h3 className="text-xl font-bold text-white mb-2">
+        <h3 className="text-6xl font-extrabold from-blue-600/20 to-blue-900/10 border-blue-500/30 text-blue-400 mb-6 drop-shadow">
           {featureName ? `${featureName} no disponible` : 'Funcionalidad bloqueada'}
         </h3>
-        <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+        <p className="text-slate-900 text-2xl mb-10 leading-relaxed font-medium">
           Esta funcionalidad requiere el{' '}
-          <span className="font-semibold text-white">{info.label}</span>.
+          <span className="font-extrabold text-slate-900">{info.label}</span>.
           Activa tu plan con una inversión y desbloquea anuncios, juegos, encuestas y más.
         </p>
 
         <Link
           href="/plans"
-          className="inline-flex items-center gap-2 bg-white text-slate-900 font-bold text-sm px-6 py-3 rounded-xl hover:bg-slate-100 transition-colors"
+          className="inline-flex items-center gap-3 bg-white text-slate-900 font-extrabold text-xl px-12 py-5 rounded-2xl hover:bg-slate-100 transition-colors shadow-lg"
         >
           Ver planes disponibles
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-6 h-6" />
         </Link>
       </div>
     </div>

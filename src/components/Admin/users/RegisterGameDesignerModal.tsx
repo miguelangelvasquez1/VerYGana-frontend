@@ -10,7 +10,6 @@ interface GameDesignerForm {
   lastName: string;
   email: string;
   phoneNumber: string;
-  password: string;
   bio: string;
   canPublishDirectly: boolean;
 }
@@ -20,7 +19,6 @@ const emptyForm: GameDesignerForm = {
   lastName: '',
   email: '',
   phoneNumber: '',
-  password: '',
   bio: '',
   canPublishDirectly: false,
 };
@@ -44,8 +42,6 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       e.email = 'Ingresa un email válido';
     if (!form.phoneNumber.trim()) e.phoneNumber = 'El teléfono es requerido';
-    if (!form.password || form.password.length < 6)
-      e.password = 'La contraseña debe tener al menos 6 caracteres';
     if (form.bio && form.bio.length > 500)
       e.bio = 'La bio no puede superar los 500 caracteres';
     setErrors(e);
@@ -57,16 +53,16 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      await apiClient.post('/api/admin/game-designers', {
+      const response = await apiClient.post('/api/admin/game-designers', {
         name: form.name.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim(),
         phoneNumber: form.phoneNumber.trim(),
-        password: form.password,
         bio: form.bio.trim() || undefined,
         canPublishDirectly: form.canPublishDirectly,
       });
-      toast.success('Game designer registrado exitosamente');
+      const backendMsg = typeof response.data === 'string' ? response.data : '';
+      toast.success(backendMsg || `Se envió el enlace de activación a ${form.email.trim()}`);
       handleClose();
     } catch (err: any) {
       const msg = err?.response?.data?.message;
@@ -171,22 +167,6 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
               }`}
             />
             {errors.phoneNumber && <p className="text-xs text-red-500 mt-1">{errors.phoneNumber}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={e => handleField('password', e.target.value)}
-              placeholder="Mínimo 6 caracteres"
-              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
-                errors.password ? 'border-red-400' : 'border-gray-300'
-              }`}
-            />
-            {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
           </div>
 
           <div>

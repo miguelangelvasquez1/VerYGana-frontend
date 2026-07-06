@@ -1,18 +1,20 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, Loader2, RefreshCw, BookOpen, Package, Gamepad2, Braces } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronLeft, Loader2, RefreshCw, BookOpen, Package, Gamepad2, Braces, Eye, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   getDesignerRequestDetail,
   saveDraft,
   submitDesign,
+  getDesignerPreviewUrl,
   type DesignerBrandingDetail,
 } from '@/services/GameDesignerService';
 import type { BrandingStatus } from '@/services/BrandingRequestService';
 
 import { BriefTab }        from './tabs/BriefTab';
 import { ResourcesTab }    from './tabs/ResourcesTab';
+import { CommentsTab }     from './tabs/CommentsTab';
 import { ConfigTab }       from './tabs/ConfigTab';
 import { JsonPreviewTab }  from './tabs/JsonPreviewTab';
 
@@ -27,13 +29,14 @@ const STATUS_LABEL: Partial<Record<BrandingStatus, { label: string; cls: string 
   LAUNCHED:                   { label: 'Activa',                      cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
 };
 
-type Tab = 'brief' | 'resources' | 'config' | 'json';
+type Tab = 'brief' | 'resources' | 'comments' | 'config' | 'json';
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: 'brief',     label: 'Brief de marca',        icon: BookOpen  },
-  { id: 'resources', label: 'Recursos corporativos', icon: Package   },
-  { id: 'config',    label: 'Configuración del juego', icon: Gamepad2 },
-  { id: 'json',      label: 'Vista JSON',            icon: Braces    },
+  { id: 'brief',     label: 'Brief de marca',         icon: BookOpen      },
+  { id: 'resources', label: 'Recursos corporativos',  icon: Package       },
+  { id: 'comments',  label: 'Comentarios',            icon: MessageSquare },
+  { id: 'config',    label: 'Configuración del juego', icon: Gamepad2     },
+  { id: 'json',      label: 'Vista JSON',             icon: Braces        },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -48,10 +51,12 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState<string | null>(null);
   const [activeTab, setActiveTab]         = useState<Tab>('brief');
+  const [sliderStyle, setSliderStyle]     = useState({ left: 0, width: 0 });
+  const tabBarRef                         = useRef<HTMLDivElement>(null);
   const [gameConfig, setGameConfig]       = useState<Record<string, unknown>>({});
-  const [configSaving, setConfigSaving]   = useState(false);
   const [submitting, setSubmitting]       = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const saveDraftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -84,6 +89,22 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     if (saveDraftTimerRef.current) clearTimeout(saveDraftTimerRef.current);
   }, []);
 
+  const updateSlider = useCallback(() => {
+    const bar = tabBarRef.current;
+    if (!bar) return;
+    const activeBtn = bar.querySelector<HTMLElement>('[data-active]');
+    if (activeBtn) setSliderStyle({ left: activeBtn.offsetLeft - bar.scrollLeft, width: activeBtn.offsetWidth });
+  }, []);
+
+  useEffect(() => { updateSlider(); }, [activeTab, detail, updateSlider]);
+
+  useEffect(() => {
+    const bar = tabBarRef.current;
+    if (!bar || !detail) return;
+    bar.addEventListener('scroll', updateSlider, { passive: true });
+    return () => bar.removeEventListener('scroll', updateSlider);
+  }, [detail, updateSlider]);
+
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleFormChange = ({ formData }: { formData?: Record<string, unknown> }) => {
@@ -93,27 +114,32 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     if (!['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED'].includes(detail.status)) return;
     if (saveDraftTimerRef.current) clearTimeout(saveDraftTimerRef.current);
     saveDraftTimerRef.current = setTimeout(async () => {
-      try { await saveDraft(detail.id, data); } catch {}
+      try { await saveDraft(detail.id, data); } catch (err) {
+        console.error('[saveDraft]', err);
+      }
     }, 1500);
   };
 
-  const handleConfigSubmit = async ({ formData }: { formData?: Record<string, unknown> }) => {
+  const handleFormValidated = async ({ formData }: { formData?: Record<string, unknown> }) => {
     if (!detail || !formData) return;
     if (saveDraftTimerRef.current) {
       clearTimeout(saveDraftTimerRef.current);
       saveDraftTimerRef.current = null;
     }
-    setConfigSaving(true);
+    try { await saveDraft(detail.id, formData); } catch {}
+    setShowSubmitConfirm(true);
+  };
+
+  const handlePreview = async () => {
+    if (!detail) return;
+    setPreviewLoading(true);
     try {
-      await saveDraft(detail.id, formData);
-      toast.success('Borrador guardado');
-      setGameConfig(formData);
-      const updated = await getDesignerRequestDetail(detail.id);
-      setDetail(updated);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Error al guardar el borrador');
+      const url = await getDesignerPreviewUrl(detail.id);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch {
+      toast.error('No se pudo obtener la URL de preview');
     } finally {
-      setConfigSaving(false);
+      setPreviewLoading(false);
     }
   };
 
@@ -163,8 +189,9 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
 
   const statusMeta          = STATUS_LABEL[detail.status];
   const canSubmit           = ['DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED'].includes(detail.status);
-  const hasConfig           = Object.keys(gameConfig).length > 0;
-  const isChangesRequested  = detail.status === 'CHANGES_REQUESTED';
+  const canPreview          = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED', 'PENDING_ADVERTISER_APPROVAL'].includes(detail.status);
+  const canComment          = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED', 'PENDING_ADVERTISER_APPROVAL', 'READY_TO_LAUNCH'].includes(detail.status);
+  const visibleTabs         = canComment ? TABS : TABS.filter(t => t.id !== 'comments');
   const validatedCount      = detail.corporateResources.filter(r => r.status === 'VALIDATED').length;
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -189,35 +216,47 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
           </div>
           <p className="text-sm text-gray-500">{detail.commercialName}</p>
         </div>
+        {canPreview && (
+          <button
+            onClick={handlePreview}
+            disabled={previewLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition-colors disabled:opacity-60 cursor-pointer shrink-0"
+          >
+            {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+            Ver juego
+          </button>
+        )}
         <button onClick={() => loadDetail()} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0" title="Actualizar">
           <RefreshCw size={16} className="text-gray-500" />
         </button>
       </div>
 
-      {/* Changes-requested feedback banner */}
-      {isChangesRequested && detail.designerNotes && (
-        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-          <p className="text-sm font-semibold text-orange-900 mb-1">Feedback del anunciante</p>
-          <p className="text-sm text-orange-800 whitespace-pre-wrap">{detail.designerNotes}</p>
-        </div>
-      )}
-
       {/* Tab card */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
 
         {/* Tab bar */}
-        <div className="flex border-b border-gray-100 overflow-x-auto">
-          {TABS.map(tab => {
+        <div className="relative border-b border-gray-100">
+          {/* Slider lives here — outside the scroll container so it's never clipped */}
+          <div
+            className="absolute bottom-0 h-0.5 bg-violet-600 transition-[left,width] duration-200 ease-out pointer-events-none z-10"
+            style={{ left: sliderStyle.left, width: sliderStyle.width }}
+          />
+          <div
+            ref={tabBarRef}
+            className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+          {visibleTabs.map(tab => {
             const Icon   = tab.icon;
             const active = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                data-active={active || undefined}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors cursor-pointer border-b-2 -mb-px whitespace-nowrap ${
+                className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
                   active
-                    ? 'border-violet-600 text-violet-700 bg-violet-50/50'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'text-violet-700 bg-violet-50/50'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <Icon size={15} />
@@ -230,25 +269,24 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
               </button>
             );
           })}
-        </div>
+          </div>{/* end inner scrollable */}
+        </div>{/* end tab bar wrapper */}
 
         {/* Tab content */}
         {activeTab === 'brief'     && <BriefTab detail={detail} />}
         {activeTab === 'resources' && <ResourcesTab detail={detail} />}
+        {activeTab === 'comments'  && <CommentsTab requestId={requestId} />}
         {activeTab === 'config'    && (
           <ConfigTab
             detail={detail}
             gameConfig={gameConfig}
-            configSaving={configSaving}
             onFormChange={handleFormChange}
-            onSubmit={handleConfigSubmit}
+            onValidated={handleFormValidated}
             submitting={submitting}
             showSubmitConfirm={showSubmitConfirm}
             setShowSubmitConfirm={setShowSubmitConfirm}
             onSubmitDesign={handleSubmitDesign}
-            hasConfig={hasConfig}
             canSubmit={canSubmit}
-            isChangesRequested={isChangesRequested}
           />
         )}
         {activeTab === 'json'      && <JsonPreviewTab gameConfig={gameConfig} />}

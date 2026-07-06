@@ -122,29 +122,36 @@ export function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={isAdding || product.stock === 0 || justAdded}
-      className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg cursor-pointer font-semibold transition-all ${
+      className={`flex w-full items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 min-h-9.5 sm:min-h-10.5 rounded-lg cursor-pointer font-semibold text-sm transition-all ${
         justAdded
           ? 'bg-green-600 text-white'
           : product.stock === 0
-          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
           : 'text-white hover:opacity-90'
       } ${className}`}
       style={!justAdded && product.stock > 0 ? { background: "#014C92" } : undefined}
     >
       {isAdding ? (
         <>
-          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          <span>Agregando...</span>
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          <span className="hidden sm:inline">Agregando...</span>
         </>
       ) : justAdded ? (
         <>
-          <Check className="w-5 h-5" />
+          <Check className="w-4 h-4" />
           <span>¡Agregado!</span>
         </>
       ) : (
         <>
-          <ShoppingCart className="w-5 h-5" />
-          <span>{product.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}</span>
+          <ShoppingCart className="w-4 h-4 shrink-0" />
+          {product.stock === 0 ? (
+            <span>Agotado</span>
+          ) : (
+            <>
+              <span className="sm:hidden">Agregar</span>
+              <span className="hidden sm:inline">Agregar al Carrito</span>
+            </>
+          )}
         </>
       )}
     </button>

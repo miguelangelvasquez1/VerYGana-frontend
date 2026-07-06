@@ -15,6 +15,7 @@ import {
   Save,
   FileImage,
   BarChart2,
+  Eye,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -23,11 +24,14 @@ import {
   configureBranding,
   approveDesign,
   requestDesignChanges,
+  postCommercialComment,
+  getCommercialPreviewUrl,
   type BrandingRequestDetail as BrandingDetailData,
   type BrandingStatus,
   type BrandingConfigDto,
 } from '@/services/BrandingRequestService';
 import { CampaignTargetingSelector } from './CampaignTargetingSelector';
+import { CommentsSection } from './CommentsSection';
 
 const GOAL_LABELS: Record<string, string> = {
   BRAND_AWARENESS: 'Reconocimiento de marca',
@@ -248,6 +252,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
   const [showChangesModal, setShowChangesModal] = useState(false);
   const [changesNote, setChangesNote] = useState('');
   const [sendingChanges, setSendingChanges] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
     getCampaignGoals()
@@ -332,7 +337,8 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     if (!detail || !changesNote.trim()) return;
     setSendingChanges(true);
     try {
-      await requestDesignChanges(detail.id, changesNote.trim());
+      await requestDesignChanges(detail.id);
+      await postCommercialComment(detail.id, changesNote.trim());
       toast.success('Cambios solicitados. El diseñador recibirá tu feedback.');
       setShowChangesModal(false);
       setChangesNote('');
@@ -378,6 +384,30 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     );
   }
 
+  const handlePreview = async () => {
+    setPreviewLoading(true);
+    try {
+      const url = await getCommercialPreviewUrl(detail.id);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err: any) {
+      if (err?.response?.status === 400) {
+        toast.error('El diseñador aún no ha entregado el diseño');
+      } else {
+        toast.error('No se pudo obtener la URL de preview');
+      }
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const PREVIEW_STATUSES: BrandingStatus[] = [
+    'PENDING_ADVERTISER_APPROVAL',
+    'CHANGES_REQUESTED',
+    'READY_TO_LAUNCH',
+    'LAUNCHED',
+  ];
+  const canPreview = PREVIEW_STATUSES.includes(detail.status);
+
   const meta = STATUS_META[detail.status];
   const canEditConfig = CONFIG_EDITABLE_STATUSES.includes(detail.status);
 
@@ -401,6 +431,16 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
         <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border shrink-0 ${meta.badge}`}>
           {meta.label}
         </span>
+        {canPreview && detail.status !== 'PENDING_ADVERTISER_APPROVAL' && (
+          <button
+            onClick={handlePreview}
+            disabled={previewLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-60 cursor-pointer shrink-0"
+          >
+            {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+            Ver diseño
+          </button>
+        )}
         <button
           onClick={() => loadDetail()}
           className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0"
@@ -419,11 +459,6 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
             Motivo: {detail.adminNotes}
           </p>
         )}
-        {detail.status === 'CHANGES_REQUESTED' && detail.designerNotes && (
-          <p className={`text-sm mt-2 font-medium ${meta.bannerTitle}`}>
-            Nota del diseñador: {detail.designerNotes}
-          </p>
-        )}
       </div>
 
       {/* ── Design Review Actions ── */}
@@ -432,10 +467,18 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
           <div>
             <p className="font-semibold text-purple-900 text-sm">El diseñador ha completado la integración de tu marca</p>
             <p className="text-xs text-purple-700 mt-0.5">
-              Revisa el resultado y aprueba el diseño o solicita cambios al diseñador.
+              Prueba el juego antes de aprobar el diseño o solicitar cambios.
             </p>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <button
+              onClick={handlePreview}
+              disabled={previewLoading}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-700 bg-white border border-purple-300 rounded-lg hover:bg-purple-100 transition-colors disabled:opacity-60 cursor-pointer"
+            >
+              {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+              Ver diseño del juego
+            </button>
             <button
               onClick={() => setShowChangesModal(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-orange-700 bg-orange-50 border border-orange-300 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer"
@@ -818,16 +861,13 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                 </p>
               </div>
             )}
-            {detail.designerNotes && detail.status !== 'CHANGES_REQUESTED' && (
-              <div className="mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
-                <p className="text-xs text-blue-800">
-                  <strong className="block mb-0.5">Nota del diseñador</strong>
-                  {detail.designerNotes}
-                </p>
-              </div>
-            )}
           </div>
         </SectionCard>
+      )}
+
+      {/* ── Comentarios ── */}
+      {detail.status !== 'DRAFT' && detail.status !== 'PENDING_REVIEW' && detail.status !== 'REJECTED' && detail.status !== 'CANCELLED' && (
+        <CommentsSection requestId={detail.id} />
       )}
 
       {/* ── Request Design Changes Modal ── */}

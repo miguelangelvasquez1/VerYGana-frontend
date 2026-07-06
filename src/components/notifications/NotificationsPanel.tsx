@@ -13,10 +13,11 @@ interface Props {
     loading: boolean;
     hasMore: boolean;
     isOpen: boolean;
-    onToggle: () => void;        // abre/cierra el panel
-    onMarkAllAsRead: () => void; // se llama al abrir
+    onToggle: () => void;
+    onMarkAllAsRead: () => void;
     onLoadMore: () => void;
     menuRef: React.RefObject<HTMLDivElement | null>;
+    variant?: 'dark' | 'light';
 }
 
 // ── Item individual ──────────────────────────────────────────
@@ -44,7 +45,7 @@ function NotificationItem({ notification }: { notification: NotificationResponse
             ${notification.isRead ? "bg-white hover:bg-gray-50" : "bg-blue-50"}`}
         >
             {/* Dot */}
-            <div className="mt-1.5 flex-shrink-0">
+            <div className="mt-1.5 shrink-0">
                 {notification.isRead
                     ? <div className="w-2 h-2 rounded-full bg-gray-200" />
                     : <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
@@ -58,7 +59,7 @@ function NotificationItem({ notification }: { notification: NotificationResponse
                     {notification.title}
                 </p>
 
-                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed whitespace-pre-wrap break-words">
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed whitespace-pre-wrap wrap-break-word">
                     {displayMessage}
                 </p>
 
@@ -88,6 +89,7 @@ function NotificationItem({ notification }: { notification: NotificationResponse
 export function NotificationPanel({
     notifications, unreadCount, loading, hasMore,
     isOpen, onToggle, onMarkAllAsRead, onLoadMore, menuRef,
+    variant = 'dark',
 }: Props) {
 
     const listRef = useRef<HTMLDivElement>(null);
@@ -113,11 +115,15 @@ export function NotificationPanel({
             {/* Campanita */}
             <button
                 onClick={handleToggle}
-                className="relative flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full hover:bg-white/20 transition-all"
+                className={`relative flex items-center gap-2 px-3 py-2 transition-all ${
+                    variant === 'light'
+                        ? 'rounded-lg hover:bg-gray-100'
+                        : 'rounded-full bg-white/10 hover:bg-white/20'
+                }`}
             >
-                <Bell className="w-5 h-5 text-white" />
+                <Bell className={`w-5 h-5 ${variant === 'light' ? 'text-gray-500' : 'text-white'}`} />
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center font-bold">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-4.5 h-4.5 px-1 rounded-full flex items-center justify-center font-bold">
                         {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}
@@ -130,7 +136,7 @@ export function NotificationPanel({
                     ${isOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
             >
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
+                <div className="bg-linear-to-r from-blue-600 to-purple-600 p-4 text-white">
                     <div className="text-lg font-semibold">Notificaciones</div>
                     {unreadCount > 0 && (
                         <div className="text-xs text-blue-100 mt-0.5">{unreadCount} sin leer</div>
@@ -141,7 +147,7 @@ export function NotificationPanel({
                 <div
                     ref={listRef}
                     onScroll={handleScroll}
-                    className="max-h-[420px] overflow-y-auto divide-y divide-gray-50"
+                    className="max-h-105 overflow-y-auto divide-y divide-gray-50"
                 >
                     {notifications.length === 0 && !loading && (
                         <div className="flex flex-col items-center justify-center py-12 text-gray-400">

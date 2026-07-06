@@ -19,19 +19,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="flex items-center space-x-2 p-4 bg-white rounded-xl shadow">
-      <SearchIcon className="text-gray-400" />
+    <div className="flex items-center gap-1.5 sm:gap-2 px-3 py-2.5 sm:p-4 bg-white rounded-xl shadow">
+      <SearchIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Buscar por nombre, descripción..."
-        className="text-black flex-1 px-4 py-2 rounded-md outline-none focus:outline-none"
+        placeholder="Buscar productos..."
+        className="flex-1 min-w-0 text-sm sm:text-base text-black px-1 sm:px-3 py-1 outline-none focus:outline-none"
       />
       <button
         onClick={handleSearch}
-        className="cursor-pointer px-4 py-2 text-white rounded-md" style={{ background: "#014C92" }}
+        className="shrink-0 cursor-pointer px-3 sm:px-5 py-1.5 sm:py-2 text-white rounded-lg text-sm font-semibold whitespace-nowrap transition hover:opacity-90"
+        style={{ background: "#014C92" }}
       >
         Buscar
       </button>

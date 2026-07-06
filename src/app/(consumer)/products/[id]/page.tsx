@@ -1,26 +1,20 @@
-import ProductDetail from "@/components/consumer/products/ProductDetail";
+import ProductDetailConsumer from "@/components/consumer/products/ProductDetailConsumer";
 import { getProductDetail } from "@/services/ProductService";
 
 interface ProductPageProps {
   params: {
     id: string;
   };
-  searchParams?: {
-    mode?: "consumer" | "commercial";
-  };
 }
 
-export default async function ProductPage({ params, searchParams }: ProductPageProps) {
+export default async function ProductPage({ params }: ProductPageProps) {
   const product = await getProductDetail(Number(params.id));
-  const mode = searchParams?.mode ?? "consumer";
 
   return (
-    <>
-      <main className="bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <ProductDetail product={product} mode={mode} />
-        </div>
-      </main>
-    </>
+    <main className="bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <ProductDetailConsumer product={product} />
+      </div>
+    </main>
   );
 }

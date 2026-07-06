@@ -12,9 +12,9 @@ import TopSellingProducts from "@/components/commercial/products/commercialStats
 
 // Servicios
 import * as productService from "@/services/ProductService";
-import * as walletService from "@/services/WalletService";
 import * as productReviewService from "@/services/ProductReviewService";
 import * as purchaseItemService from "@/services/PurchaseItemService";
+import toast from "react-hot-toast";
 
 export default function ProductsDashboard() {
   const router = useRouter();
@@ -93,19 +93,24 @@ export default function ProductsDashboard() {
           console.log("📦 Products:", content);
         }
 
-        setProducts(
-          content.map((p) => ({
-            id: p.id,
-            name: p.name,
-            price: p.price,
-            imageUrl: p.imageUrl,
-            stock: p.stock,
-            categoryName: p.categoryName,
-            averageRate: p.averageRate,
-            status: p.status,
-            companyName: p.companyName,
-          }))
-        );
+        const mapped = content.map((p) => ({
+          id: p.id,
+          name: p.name,
+          imageUrl: p.imageUrl,
+          price: p.price,
+          maxKeysAllowed: p.maxKeysAllowed,
+          maxKeysPct: p.maxKeysPct,
+          minCashCents: p.minCashCents,
+          averageRate: p.averageRate,
+          reviewCount: p.reviewCount,
+          stock: p.stock,
+          categoryName: p.categoryName,
+          status: p.status,
+          commercialId: p.commercialId,
+          companyName: p.companyName,
+          gameReward: p.gameReward,
+        }));
+        setProducts(mapped);
       }
     } catch (err: any) {
       console.error("❌ Error loading dashboard:", err);
@@ -123,18 +128,44 @@ export default function ProductsDashboard() {
     loadDashboardData();
   }, [isAuthenticated, loadDashboardData]);
 
+  // ================== Toggle recompensa (máx. 3) ==================
+  const handleToggleReward = async (productId: number) => {
+    const target = products.find((p) => p.id === productId);
+    const isCurrentlyReward = target?.gameReward ?? false;
+    const rewardCount = products.filter((p) => p.gameReward).length;
+
+    if (!isCurrentlyReward && rewardCount >= 3) {
+      toast.error("Solo puedes tener máximo 3 productos como recompensa de juego.");
+      return;
+    }
+
+    try {
+      await productService.markProductAsReward(productId);
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, gameReward: !p.gameReward } : p
+        )
+      );
+      toast.success(
+        isCurrentlyReward
+          ? "Recompensa desactivada correctamente."
+          : "Producto marcado como recompensa de juego."
+      );
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Error al actualizar la recompensa.");
+    }
+  };
+
   // ================== Eliminar producto ==================
   const handleDeleteProduct = async (productId: number) => {
-    const confirmed = window.confirm(
-      "¿Estás seguro de eliminar este producto?"
-    );
+    const confirmed = window.confirm("¿Estás seguro de eliminar este producto?");
     if (!confirmed) return;
 
     try {
       await productService.deleteProduct(productId);
       await loadDashboardData();
     } catch (err: any) {
-      alert(err?.response?.data?.message || "Error al eliminar");
+      toast.error(err?.response?.data?.message || "Error al eliminar el producto.");
     }
   };
 
@@ -228,13 +259,11 @@ export default function ProductsDashboard() {
               key={product.id}
               product={product}
               mode="commercial"
+              isGameReward={product.gameReward}
               onDelete={() => handleDeleteProduct(product.id)}
-              onEdit={() =>
-                router.push(`/commercial/products/edit/${product.id}`)
-              }
-              onView={() =>
-                router.push(`/products/${product.id}?mode=commercial`)
-              }
+              onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
+              onMarkAsReward={() => handleToggleReward(product.id)}
+              onView={() => router.push(`/commercial/products/${product.id}`)}
             />
           ))}
         </div>
@@ -245,13 +274,11 @@ export default function ProductsDashboard() {
               key={product.id}
               product={product}
               mode="commercial"
+              isGameReward={product.gameReward}
               onDelete={() => handleDeleteProduct(product.id)}
-              onEdit={() =>
-                router.push(`/commercial/products/edit/${product.id}`)
-              }
-              onView={() =>
-                router.push(`/products/${product.id}?mode=commercial`)
-              }
+              onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
+              onMarkAsReward={() => handleToggleReward(product.id)}
+              onView={() => router.push(`/products/${product.id}?mode=commercial`)}
             />
           ))}
         </div>

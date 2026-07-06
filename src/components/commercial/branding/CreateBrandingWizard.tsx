@@ -165,11 +165,11 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
 
   // ── Step 4 ────────────────────────────────────────────────────────────────
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (designerNote: string) => {
     if (!requestId) return;
     setSubmitting(true);
     try {
-      await submitBrandingRequest(requestId);
+      await submitBrandingRequest(requestId, designerNote.trim() || undefined);
       toast.success('¡Solicitud enviada!');
       onComplete();
     } catch (err: any) {

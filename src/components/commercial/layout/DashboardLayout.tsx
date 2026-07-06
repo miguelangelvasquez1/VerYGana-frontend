@@ -11,7 +11,6 @@ import { Header } from './Header';
 import { getEffectivePlanState } from '@/services/planService';
 import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
 import { WalletStatus } from '@/types/finance/Wallet.types';
-import { formatCents } from '@/utils/currency';
 import { usePathname } from 'next/navigation';
 
 // ─── Route protection ─────────────────────────────────────────────────────────

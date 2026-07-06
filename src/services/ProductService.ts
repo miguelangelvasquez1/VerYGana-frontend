@@ -121,6 +121,15 @@ export const addBulkStockItems = async (productId: number, requests: ProductStoc
 }
 
 /**
+ * Construye la URL del endpoint de imagen privada para productos PENDING/REJECTED.
+ * El backend genera un presigned URL fresco (60s) y responde con un redirect 302.
+ */
+export const buildPrivateImageUrl = (productId: number, token: string | undefined): string | undefined => {
+  if (!token) return undefined;
+  return `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}/private-image?token=${encodeURIComponent(token)}`;
+};
+
+/**
  * Obtener todos los productos con paginación (PÚBLICO)
  */
 export const getAllProducts = async (
@@ -230,3 +239,11 @@ export const countFavorites = async (): Promise<number> => {
   const response = await apiClient.get('/products/favorites/count');
   return response.data;
 };
+
+/**
+ * Marcar un producto como recompensa de juego (COMMERCIAL)
+ */
+export const markProductAsReward = async (productId: number): Promise<void> => {
+  const response = await apiClient.patch(`/products/${productId}/gameReward`);
+  return response.data;
+}

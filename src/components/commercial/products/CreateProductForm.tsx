@@ -5,17 +5,12 @@ import { useProductCreation } from "@/hooks/products/useProductCreation";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { CreateProductRequestDTO } from "@/types/products/Product.types";
 import { ProductStockRequestDTO } from "@/types/products/ProductStock.types";
+import StockInputSection, { StockItemForm } from "./stock/StockInputSection";
+import toast from "react-hot-toast";
 
 // ============================================================
 // TIPOS LOCALES
 // ============================================================
-
-interface StockItemForm {
-  code: string;
-  additionalInfo: string;
-  expirationDate_date: string;
-  expirationDate_time: string;
-}
 
 interface ProductFormState {
   name: string;
@@ -39,20 +34,14 @@ const buildExpirationDate = (date: string, time: string): string | null => {
   return `${date}T${time || '00:00'}:00`;
 };
 
-const emptyStockItem = (): StockItemForm => ({
-  code: '',
-  additionalInfo: '',
-  expirationDate_date: '',
-  expirationDate_time: '',
-});
-
 const initialForm: ProductFormState = {
   name: '',
   description: '',
   productCategoryId: '',
   price: '',
-  stockItems: [emptyStockItem()],
+  stockItems: [],
 };
+
 
 // ============================================================
 // COMPONENTE
@@ -94,48 +83,23 @@ export default function CreateProductForm() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (imagePreview) URL.revokeObjectURL(imagePreview);
-
     setImage(file);
     setImagePreview(URL.createObjectURL(file));
   };
 
-  const handleStockChange = (
-    index: number,
-    field: keyof StockItemForm,
-    value: string
-  ) => {
-    setForm((prev) => {
-      const updated = [...prev.stockItems];
-      updated[index] = { ...updated[index], [field]: value };
-      return { ...prev, stockItems: updated };
-    });
-  };
-
-  const addStockItem = () => {
-    setForm((prev) => ({
-      ...prev,
-      stockItems: [...prev.stockItems, emptyStockItem()],
-    }));
-  };
-
-  const removeStockItem = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      stockItems: prev.stockItems.filter((_, i) => i !== index),
-    }));
-  };
-
   // ── Submit ─────────────────────────────────────────────────
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!image) return alert('Selecciona una imagen');
-    if (!form.productCategoryId) return alert('Debes seleccionar una categoría');
+    if (!image) return toast.error('Selecciona una imagen');
+    if (!form.productCategoryId) return toast.error('Debes seleccionar una categoría');
 
     const price = parseFloat(form.price);
-    if (!price || price <= 0) return alert('El precio debe ser mayor a 0');
+    if (!price || price <= 0) return toast.error('El precio debe ser mayor a 0');
+
+    if (form.stockItems.length === 0) return toast.error('Debes agregar al menos un código de stock');
+    if (form.stockItems.some((item) => !item.code.trim())) return toast.error('Todos los códigos deben tener un valor');
 
     const stockItems: ProductStockRequestDTO[] = form.stockItems.map((item) => ({
       code: item.code,
@@ -154,13 +118,15 @@ export default function CreateProductForm() {
     const result = await createProduct(image, productData);
 
     if (result.ok) {
-      alert(`Solicitud de creacion de producto enviada con éxito (ID: ${result.productId})`);
+      toast.success(
+        "Solicitud enviada con éxito. La revisaremos pronto."
+      );
       setForm(initialForm);
       setImage(null);
       setImagePreview(null);
       reset();
     } else {
-      alert(`Error: ${result.errorMsg}`);
+      toast.error(result.errorMsg ?? 'No se pudo crear el producto');
     }
   };
 
@@ -189,7 +155,6 @@ export default function CreateProductForm() {
         <label className="block text-sm font-medium mb-1">
           Imagen del producto *
         </label>
-
         <label
           className="flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden"
           style={{ minHeight: '10rem' }}
@@ -213,7 +178,6 @@ export default function CreateProductForm() {
             onChange={handleImageChange}
           />
         </label>
-
         {image && (
           <p className="mt-2 text-sm text-gray-500 text-center">
             {image.name} ({(image.size / 1024 / 1024).toFixed(2)} MB)
@@ -284,80 +248,11 @@ export default function CreateProductForm() {
       </div>
 
       {/* ── Stock ── */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Códigos de stock</h3>
-          <button
-            type="button"
-            onClick={addStockItem}
-            disabled={isSubmitting}
-            className="bg-blue-600 text-white px-3 py-1 rounded-lg disabled:opacity-50"
-          >
-            + Agregar código
-          </button>
-        </div>
-
-        {form.stockItems.map((item, index) => (
-          <div
-            key={index}
-            className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border"
-          >
-            <div>
-              <label className="block text-sm font-medium mb-1">Código *</label>
-              <input
-                value={item.code}
-                onChange={(e) => handleStockChange(index, 'code', e.target.value)}
-                className="w-full border p-2 rounded-lg"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Info adicional</label>
-              <input
-                value={item.additionalInfo}
-                onChange={(e) => handleStockChange(index, 'additionalInfo', e.target.value)}
-                className="w-full border p-2 rounded-lg"
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Fecha de expiración</label>
-              <input
-                type="date"
-                value={item.expirationDate_date}
-                onChange={(e) => handleStockChange(index, 'expirationDate_date', e.target.value)}
-                className="w-full border p-2 rounded-lg"
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Hora</label>
-              <input
-                type="time"
-                value={item.expirationDate_time}
-                onChange={(e) => handleStockChange(index, 'expirationDate_time', e.target.value)}
-                className="w-full border p-2 rounded-lg"
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className="md:col-span-4 text-right">
-              <button
-                type="button"
-                onClick={() => removeStockItem(index)}
-                disabled={isSubmitting || form.stockItems.length === 1}
-                className="text-red-600 text-sm hover:underline disabled:opacity-40"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <StockInputSection
+        value={form.stockItems}
+        onChange={(items) => setForm((prev) => ({ ...prev, stockItems: items }))}
+        disabled={isSubmitting}
+      />
 
       {/* ── Barra de progreso ── */}
       {isSubmitting && (
@@ -383,7 +278,7 @@ export default function CreateProductForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-green-600 text-white p-3 rounded-xl text-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-green-600 text-white p-3 rounded-xl text-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
         {isSubmitting ? statusLabel[state.status] : 'Crear producto'}
       </button>

@@ -45,7 +45,7 @@ export default function LastRafflesResultsPanel() {
       {/* Header con gradiente de marca */}
       <div
         className="px-5 py-4 flex items-center gap-2"
-        style={{ background: "linear-gradient(135deg, #014C92, #1EA5BD)" }}
+        style={{ background: "linear-gradient(135deg, #0b1440, #03548C)" }}
       >
         <span className="text-lg">🏆</span>
         <h3 className="text-base font-bold text-white">Resultados de Rifas</h3>
@@ -63,7 +63,7 @@ export default function LastRafflesResultsPanel() {
             <div
               key={result.raffleId}
               className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-blue-50 transition border-l-4 bg-gray-50"
-              style={{ borderLeftColor: "#014C92" }}
+              style={{ borderLeftColor: "#03548C" }}
             >
               {/* Info */}
               <div className="flex flex-col gap-0.5 flex-1 min-w-0">
@@ -79,8 +79,8 @@ export default function LastRafflesResultsPanel() {
                     style={{
                       background:
                         result.raffleType === "PREMIUM"
-                          ? "linear-gradient(to right, #7c3aed, #a855f7)"
-                          : "linear-gradient(to right, #014C92, #1EA5BD)",
+                          ? "linear-gradient(to right, #03548C, #006FB8)"
+                          : "linear-gradient(to right, #0b1440, #03548C)",
                     }}
                   >
                     {result.raffleType}
@@ -92,7 +92,7 @@ export default function LastRafflesResultsPanel() {
               <Link
                 href={`/raffles/${result.raffleId}/results`}
                 className="ml-3 px-3 py-1.5 text-xs font-semibold text-white rounded-lg transition hover:opacity-80"
-                style={{ background: "linear-gradient(to right, #014C92, #1EA5BD)" }}
+                style={{ background: "linear-gradient(to right, #0b1440, #03548C)" }}
               >
                 Ver
               </Link>

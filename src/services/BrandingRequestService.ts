@@ -22,7 +22,6 @@ export interface BrandingRequest {
   averageRewardPerSessionCents: number | null;
   estimatedSessions: number | null;
   adminNotes: string | null;
-  designerNotes: string | null;
   assignedDesignerName: string | null;
   corporateResourceCount: number;
   createdAt: string;
@@ -129,8 +128,8 @@ export const configureBranding = async (requestId: number, dto: BrandingConfigDt
   await apiClient.patch(`/branding-requests/${requestId}/config`, dto);
 };
 
-export const submitBrandingRequest = async (requestId: number): Promise<void> => {
-  await apiClient.post(`/branding-requests/${requestId}/submit`);
+export const submitBrandingRequest = async (requestId: number, notes?: string): Promise<void> => {
+  await apiClient.post(`/branding-requests/${requestId}/submit`, notes ? { notes } : undefined);
 };
 
 export interface BrandingCategory {
@@ -180,7 +179,6 @@ export interface BrandingRequestDetail {
   targetGender: 'ALL' | 'MALE' | 'FEMALE' | null;
   adminNotes: string | null;
   reviewedByAdminName: string | null;
-  designerNotes: string | null;
   assignedDesignerName: string | null;
   assignedDesignerCode: string | null;
   corporateResources: BrandingCorporateResource[];
@@ -236,7 +234,6 @@ export interface AdminBrandingRequestSummary {
   budgetCents: number;
   estimatedSessions: number | null;
   adminNotes: string | null;
-  designerNotes: string | null;
   assignedDesignerName: string | null;
   corporateResourceCount: number;
   createdAt: string;
@@ -269,7 +266,6 @@ export interface AdminBrandingRequestDetail {
   targetGender: 'ALL' | 'MALE' | 'FEMALE' | null;
   adminNotes: string | null;
   reviewedByAdminName: string | null;
-  designerNotes: string | null;
   assignedDesignerName: string | null;
   assignedDesignerCode: string | null;
   corporateResources: BrandingCorporateResource[];
@@ -330,6 +326,32 @@ export const approveDesign = async (requestId: number): Promise<void> => {
   await apiClient.post(`/branding-requests/${requestId}/approve-design`);
 };
 
-export const requestDesignChanges = async (requestId: number, designerNotes: string): Promise<void> => {
-  await apiClient.post(`/branding-requests/${requestId}/request-design-changes`, { designerNotes });
+export const requestDesignChanges = async (requestId: number): Promise<void> => {
+  await apiClient.post(`/branding-requests/${requestId}/request-design-changes`);
+};
+
+export const getCommercialPreviewUrl = async (id: number): Promise<string> => {
+  const { data } = await apiClient.get(`/branding-requests/${id}/preview-url`);
+  return data.url;
+};
+
+// ─── Comments ─────────────────────────────────────────────────────────────────
+
+export interface BrandingComment {
+  id: number;
+  content: string;
+  authorName: string;
+  authorRole: 'COMMERCIAL' | 'DESIGNER';
+  relatedStatus: string;
+  createdAt: string;
+}
+
+export const getCommercialComments = async (id: number, signal?: AbortSignal): Promise<BrandingComment[]> => {
+  const { data } = await apiClient.get(`/branding-requests/${id}/comments`, { signal });
+  return data;
+};
+
+export const postCommercialComment = async (id: number, content: string): Promise<BrandingComment> => {
+  const { data } = await apiClient.post(`/branding-requests/${id}/comments`, { content });
+  return data;
 };

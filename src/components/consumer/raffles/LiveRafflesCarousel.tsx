@@ -52,7 +52,7 @@ export default function LiveRafflesCarousel() {
     return (
       <div
         className="w-full h-64 sm:h-80 md:h-105 rounded-2xl animate-pulse"
-        style={{ background: "linear-gradient(135deg, #014C92 0%, #1EA5BD 60%, #7c3aed 100%)" }}
+        style={{ background: "linear-gradient(135deg, #0b1440 0%, #03548C 50%, #0b1440 100%)" }}
       />
     );
   }
@@ -61,7 +61,7 @@ export default function LiveRafflesCarousel() {
     return (
       <div
         className="relative w-full h-64 sm:h-80 md:h-105 rounded-2xl overflow-hidden shadow-xl flex flex-col items-center justify-center text-white"
-        style={{ background: "linear-gradient(135deg, #014C92 0%, #1EA5BD 50%, #7c3aed 100%)" }}
+        style={{ background: "linear-gradient(135deg, #0b1440 0%, #03548C 50%, #0b1440 100%)" }}
       >
         <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
         <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-yellow-400/10 blur-3xl" />

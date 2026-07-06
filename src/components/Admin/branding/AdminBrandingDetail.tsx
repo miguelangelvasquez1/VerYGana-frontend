@@ -537,9 +537,6 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
         {detail.status === 'REJECTED' && detail.adminNotes && (
           <p className={`text-sm mt-1 ${meta.bannerText}`}>Motivo: {detail.adminNotes}</p>
         )}
-        {detail.status === 'CHANGES_REQUESTED' && detail.designerNotes && (
-          <p className={`text-sm mt-1 ${meta.bannerText}`}>Nota del diseñador: {detail.designerNotes}</p>
-        )}
       </div>
 
       {/* ── Anunciante ── */}
@@ -746,7 +743,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
       </SectionCard>
 
       {/* ── Equipo y notas ── */}
-      {(detail.assignedDesignerName || detail.reviewedByAdminName || detail.adminNotes || detail.designerNotes) && (
+      {(detail.assignedDesignerName || detail.reviewedByAdminName || detail.adminNotes) && (
         <SectionCard title="Equipo y notas">
           <div className="space-y-2.5">
             {detail.assignedDesignerName && (
@@ -779,14 +776,6 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
                 <p className="text-xs text-amber-800">
                   <strong className="block mb-0.5">Nota del administrador</strong>
                   {detail.adminNotes}
-                </p>
-              </div>
-            )}
-            {detail.designerNotes && detail.status !== 'CHANGES_REQUESTED' && (
-              <div className="mt-3 p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
-                <p className="text-xs text-blue-800">
-                  <strong className="block mb-0.5">Nota del diseñador</strong>
-                  {detail.designerNotes}
                 </p>
               </div>
             )}

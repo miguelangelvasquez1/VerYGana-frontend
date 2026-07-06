@@ -10,9 +10,9 @@ type RaffleTypeFilter = "ALL" | "STANDARD" | "PREMIUM";
 
 const filterButtonClass = (filter: RaffleTypeFilter, type: string) => {
   if (filter !== type) return "bg-gray-100 text-gray-600 hover:bg-gray-200";
-  if (type === "STANDARD") return "bg-[#014C92] text-white shadow-md shadow-blue-200";
-  if (type === "PREMIUM") return "bg-purple-600 text-white shadow-md shadow-purple-200";
-  return "bg-yellow-400 text-black shadow-md shadow-yellow-200";
+  if (type === "STANDARD") return "bg-[#03548C] text-white shadow-md shadow-blue-200";
+  if (type === "PREMIUM") return "bg-[#0b1440] text-white shadow-md shadow-slate-200";
+  return "bg-[#FFD700] text-gray-900 shadow-md shadow-yellow-200";
 };
 
 export default function ActiveRafflesSection() {
@@ -56,7 +56,7 @@ export default function ActiveRafflesSection() {
         <div className="flex items-center gap-3">
           <div
             className="w-1 h-8 rounded-full"
-            style={{ background: "linear-gradient(to bottom, #014C92, #1EA5BD)" }}
+            style={{ background: "linear-gradient(to bottom, #0b1440, #03548C)" }}
           />
           <h2 className="text-2xl font-bold text-gray-900">
             Rifas disponibles
@@ -90,7 +90,7 @@ export default function ActiveRafflesSection() {
       ) : raffles.length === 0 ? (
         <div
           className="relative rounded-2xl overflow-hidden py-20 flex flex-col items-center justify-center text-center px-6"
-          style={{ background: "linear-gradient(135deg, #014C92 0%, #1EA5BD 60%, #7c3aed 100%)" }}
+          style={{ background: "linear-gradient(135deg, #0b1440 0%, #03548C 50%, #0b1440 100%)" }}
         >
           {/* Decorative */}
           <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-white/5 blur-2xl" />
@@ -133,7 +133,7 @@ export default function ActiveRafflesSection() {
               onClick={() => setPage(i)}
               className={`w-9 h-9 rounded-lg font-semibold text-sm transition ${
                 page === i
-                  ? "text-black shadow-md shadow-yellow-200 bg-yellow-400"
+                  ? "text-gray-900 shadow-md shadow-yellow-200 bg-[#FFD700]"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
