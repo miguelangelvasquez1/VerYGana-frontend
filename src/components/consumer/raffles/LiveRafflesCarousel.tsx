@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getLiveRaffles } from "@/services/raffleService";
 import { RaffleSummaryResponseDTO, RaffleStatus } from "@/types/raffles/raffle.types";
 import Link from "next/link";
+import { Maximize2, X } from "lucide-react";
 
 const AUTO_PLAY_INTERVAL = 5000;
 
@@ -11,6 +12,7 @@ export default function LiveRafflesCarousel() {
   const [raffles, setRaffles] = useState<RaffleSummaryResponseDTO[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showFullImage, setShowFullImage] = useState(false);
 
   useEffect(() => {
     loadRaffles();
@@ -100,6 +102,14 @@ export default function LiveRafflesCarousel() {
         alt={raffle.title}
         className="w-full h-full object-cover"
       />
+
+      {/* Fullscreen button */}
+      <button
+        onClick={() => setShowFullImage(true)}
+        className="absolute top-3 right-3 z-20 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-lg transition"
+      >
+        <Maximize2 className="w-3.5 h-3.5" />
+      </button>
 
       {/* Gradient overlay */}
       <div
@@ -251,6 +261,30 @@ export default function LiveRafflesCarousel() {
               }`}
             />
           ))}
+        </div>
+      )}
+      {showFullImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85"
+          onClick={() => setShowFullImage(false)}
+        >
+          <div
+            className="relative max-w-4xl w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowFullImage(false)}
+              className="absolute -top-10 right-0 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition"
+            >
+              <X className="w-5 h-5" />
+              Cerrar
+            </button>
+            <img
+              src={raffle.imageUrl}
+              alt={raffle.title}
+              className="w-full max-h-[85vh] object-contain rounded-xl"
+            />
+          </div>
         </div>
       )}
     </div>

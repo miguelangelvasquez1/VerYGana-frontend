@@ -204,8 +204,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             onClose={() => setSidebarOpen(false)}
             effectivePlan={planState?.effectivePlan as PlanCode | null ?? null}
             hasActivePlan={planState?.hasActivePlan ?? false}
-            remainingBudget={planState?.remainingBudgetCents ?? 0}
-            walletStatus={planState?.walletStatus ?? WalletStatus.INACTIVE}
             pathname={currentPath}
           />
         </div>

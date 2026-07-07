@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { WaitingRoomPayloadDTO } from '@/types/raffles/drawEvents.types'
+import { PrizeResponseDTO } from '@/types/raffles/prize.types'
 
 interface Props {
   payload: WaitingRoomPayloadDTO
+  initialPrizes?: PrizeResponseDTO[]
 }
 
 function formatTime(seconds: number): { h: string; m: string; s: string } {
@@ -46,6 +48,89 @@ function TimeUnit({ value, label }: { value: string; label: string }) {
         </div>
       </div>
       <span className="text-gray-400 text-xs uppercase tracking-widest">{label}</span>
+    </div>
+  )
+}
+
+function PrizesCarousel({ prizes }: { prizes: PrizeResponseDTO[] }) {
+  const [current, setCurrent] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (prizes.length <= 1) return
+    timerRef.current = setInterval(() => {
+      setCurrent(prev => (prev + 1) % prizes.length)
+    }, 5000)
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [prizes.length])
+
+  if (prizes.length === 0) return null
+
+  const prize = prizes[current]
+
+  return (
+    <div className="w-full max-w-xs sm:max-w-sm lg:max-w-md">
+      <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+        Premios que podrás ganar
+      </p>
+
+      <div className="relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={current}
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.35 }}
+            className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col items-center"
+          >
+            {/* Imagen completa sin recorte */}
+            {prize.imageUrl ? (
+              <div className="w-full bg-gray-50 flex items-center justify-center p-3">
+                <img
+                  src={prize.imageUrl}
+                  alt={prize.title}
+                  className="max-h-44 sm:max-h-52 w-auto max-w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="w-full h-44 sm:h-52 bg-gray-100 flex items-center justify-center text-5xl">
+                🎁
+              </div>
+            )}
+
+            {/* Info debajo */}
+            <div className="w-full px-4 py-3 flex items-center justify-between gap-3 border-t border-gray-100">
+              <div className="flex-1 min-w-0 text-left">
+                <p className="font-bold text-gray-900 text-sm sm:text-base leading-tight">{prize.title}</p>
+                {prize.brand && (
+                  <p className="text-xs text-gray-400 mt-0.5">{prize.brand}</p>
+                )}
+                <p className="text-sm font-bold mt-1" style={{ color: '#03548C' }}>
+                  ${prize.value.toLocaleString('es-CO')}
+                </p>
+              </div>
+              <span className="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-[#03548C]/10 text-[#03548C]">
+                #{prize.position}
+              </span>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {prizes.length > 1 && (
+        <div className="flex justify-center gap-1.5 mt-3">
+          {prizes.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === current ? 'w-5 bg-[#03548C]' : 'w-2 bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -173,7 +258,7 @@ function BigCountdown({ seconds }: { seconds: number }) {
   )
 }
 
-export function WaitingRoomScreen({ payload }: Props) {
+export function WaitingRoomScreen({ payload, initialPrizes = [] }: Props) {
   const [seconds, setSeconds] = useState(payload.secondsUntilDraw)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -190,14 +275,15 @@ export function WaitingRoomScreen({ payload }: Props) {
     }
   }, [])
 
-  const time     = formatTime(Math.max(0, seconds))
+  const time      = formatTime(Math.max(0, seconds))
   const showHours = seconds >= 3600
+  const prizes    = payload.prizes?.length > 0 ? payload.prizes : initialPrizes
 
   if (seconds <= 10) return <BigCountdown seconds={seconds} />
   if (seconds <= 13) return <ImminentCountdown seconds={seconds} viewerCount={payload.viewerCount} />
 
   return (
-    <div className="flex flex-col items-center gap-10 text-center">
+    <div className="flex flex-col items-center gap-10 text-center pb-28 lg:pb-0">
 
       {/* Badge en vivo */}
       <div className="flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-1.5">
@@ -209,6 +295,8 @@ export function WaitingRoomScreen({ payload }: Props) {
           <span className="text-gray-900 font-semibold">{payload.viewerCount}</span> viendo en vivo
         </span>
       </div>
+
+      {prizes.length > 0 && <PrizesCarousel prizes={prizes} />}
 
       <div>
         <p className="text-gray-500 text-base lg:text-xl uppercase tracking-widest mb-2">El sorteo comienza en</p>

@@ -74,7 +74,7 @@ export default function Navbar() {
   const keyWalletMenuRefMobile = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefDesktop = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefMobile = useRef<HTMLDivElement | null>(null);
-  const { rewardData, showReward, dismiss } = useXpReward()
+  const { rewardData, dismiss } = useXpReward()
 
 
 
@@ -99,21 +99,16 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const formatCurrency = (value?: number) => {
-    if (value == null) return "$0";
-    return `$${value.toLocaleString("es-CO")}`;
-  };
-
   const btnBase   = "cursor-pointer rounded-full transform transition-all duration-200 p-2 2xl:px-4 2xl:py-2";
   const btnNormal = `${btnBase} bg-white/15 text-white font-medium hover:bg-white/30 hover:scale-105 backdrop-blur-sm`;
-  const btnActive = `${btnBase} bg-white text-blue-700 font-bold shadow-lg scale-105`;
+  const btnActive = `${btnBase} bg-white text-[#00a4ff] font-bold shadow-lg scale-105`;
 
   const getNavClass = (isActive: boolean) => isActive ? btnActive : btnNormal;
 
   return (
     <>
       {/* ---------- DESKTOP NAV (top) ---------- */}
-      <nav className="hidden lg:block sticky top-0 z-50 w-full bg-gradient-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
+      <nav className="hidden lg:block sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-6 py-2">
           {/* LOGO */}
           <div className="flex items-center gap-4">
@@ -167,13 +162,13 @@ export default function Navbar() {
               {/* DROPDOWN */}
               <div
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`absolute right-0 mt-3 w-[380px] overflow-hidden rounded-3xl bg-white shadow-2xl border border-white/20 transition-all duration-300 ${isKeyWalletOpen
+                className={`absolute right-0 mt-3 w-95 overflow-hidden rounded-3xl bg-white shadow-2xl border border-white/20 transition-all duration-300 ${isKeyWalletOpen
                   ? "opacity-100 scale-100 pointer-events-auto"
                   : "opacity-0 scale-95 pointer-events-none"
                   }`}
               >
                 {/* HEADER */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-[#004b8d] via-[#116cc0] to-[#7c3aed] px-6 py-6 text-white">
+                <div className="relative overflow-hidden bg-linear-to-br from-[#004b8d] via-[#116cc0] to-[#7c3aed] px-6 py-6 text-white">
                   <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
 
                   <div className="absolute -left-8 bottom-0 w-24 h-24 bg-cyan-300/10 rounded-full blur-2xl"></div>
@@ -202,11 +197,11 @@ export default function Navbar() {
                 </div>
 
                 {/* BODY */}
-                <div className="p-5 bg-gradient-to-b from-[#f8fbff] to-white">
+                <div className="p-5 bg-linear-to-b from-[#f8fbff] to-white">
                   <div className="space-y-3">
 
                     {/* PURCHASE KEYS */}
-                    <div className="group flex items-center justify-between rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-4 hover:shadow-md transition-all">
+                    <div className="group flex items-center justify-between rounded-2xl border border-amber-100 bg-linear-to-r from-amber-50 to-yellow-50 px-4 py-4 hover:shadow-md transition-all">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-2xl bg-yellow-400/15 flex items-center justify-center border border-yellow-300/30">
                           <ShoppingBag className="w-6 h-6 text-yellow-600" />
@@ -239,7 +234,7 @@ export default function Navbar() {
                     </div>
 
                     {/* CONNECTIVITY KEYS */}
-                    <div className="group flex items-center justify-between rounded-2xl border border-cyan-100 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-4 hover:shadow-md transition-all">
+                    <div className="group flex items-center justify-between rounded-2xl border border-cyan-100 bg-linear-to-r from-cyan-50 to-blue-50 px-4 py-4 hover:shadow-md transition-all">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-2xl bg-cyan-400/15 flex items-center justify-center border border-cyan-300/30">
                           <KeyRound className="w-6 h-6 text-cyan-600" />
@@ -276,7 +271,7 @@ export default function Navbar() {
                   <div className="mt-5">
                     <Link
                       href="/explore/wallet"
-                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold hover:scale-[1.02] transition-all shadow-lg hover:shadow-blue-500/20"
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold hover:scale-[1.02] transition-all shadow-lg hover:shadow-blue-500/20"
                     >
                       <History className="w-5 h-5" />
                       Historial de Transacciones
@@ -334,7 +329,7 @@ export default function Navbar() {
                 onMouseDown={(e) => e.stopPropagation()}
                 className={`absolute right-0 mt-2 w-64 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300 ${openMenu ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
               >
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-2xl text-white">
+                <div className="bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] p-4 rounded-t-2xl text-white">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-white/20 rounded-full overflow-hidden flex items-center justify-center shrink-0">
                       {consumer?.avatarUrl ? (
@@ -347,7 +342,7 @@ export default function Navbar() {
                       <div className="font-semibold truncate">
                         {loadingUser ? "..." : consumer?.name ?? "Usuario"}
                       </div>
-                      <div className="text-xs text-blue-100">Beneficiario</div>
+                      <div className="text-xs text-white/70">Beneficiario</div>
                     </div>
                   </div>
                   {/* Barra de nivel */}
@@ -379,32 +374,32 @@ export default function Navbar() {
                   )}
                 </div>
                 <div className="py-2">
-                  <Link href="/explore/gamification" className="flex items-center gap-3 px-4 py-3 hover:bg-purple-50 hover:text-purple-700 transition-all group">
-                    <Zap className="w-5 h-5 text-gray-400 group-hover:text-purple-600" />
+                  <Link href="/explore/gamification" className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
+                    <Zap className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Mi Nivel</span>
                   </Link>
-                  <Link href="/explore/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
-                    <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
+                  <Link href="/explore/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
+                    <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Mi Perfil</span>
                   </Link>
-                  <Link href="/explore/purchases" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
-                    <ShoppingBag className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
+                  <Link href="/explore/purchases" className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
+                    <ShoppingBag className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Mis compras</span>
                   </Link>
-                  <Link href={"/explore/favorites"} className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
-                    <Heart className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
+                  <Link href={"/explore/favorites"} className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
+                    <Heart className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Mis favoritos</span>
                   </Link>
-                  <Link href="/explore/participations" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
-                    <Ticket className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
+                  <Link href="/explore/participations" className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
+                    <Ticket className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Mis participaciones</span>
                   </Link>
-                  <Link href="/explore/referrals" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
-                    <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
+                  <Link href="/explore/referrals" className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
+                    <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Mis Referidos</span>
                   </Link>
-                  <Link href="/settings" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:text-blue-600 transition-all group">
-                    <Settings className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
+                  <Link href="/settings" className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
+                    <Settings className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Configuración</span>
                   </Link>
                   <div className="border-t border-gray-100 mt-2 pt-2">
@@ -426,10 +421,12 @@ export default function Navbar() {
       </nav>
 
       {/* ---------- MOBILE TOP BAR ---------- */}
-      <div className="lg:hidden sticky top-0 z-50 w-full bg-gradient-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
+      <div className="lg:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-3">
-          <Image src="/logos/logo.png" alt="Logo" width={45} height={45} />
+          <Image src="/logos/logoDorado.png" alt="Logo" width={50} height={50} />
           <div className="flex items-center gap-3">
+            {/* CART */}
+            <CartButton />
             {/* KEY WALLET */}
             <div className="relative" ref={keyWalletMenuRefMobile}>
               <button
@@ -459,7 +456,7 @@ export default function Navbar() {
                   }`}
               >
                 {/* HEADER */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-[#004b8d] via-[#116cc0] to-[#7c3aed] px-5 py-6 text-white">
+                <div className="relative overflow-hidden bg-linear-to-br from-[#004b8d] via-[#116cc0] to-[#7c3aed] px-5 py-6 text-white">
                   <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
 
                   <div className="relative flex flex-col items-center text-center">
@@ -486,11 +483,11 @@ export default function Navbar() {
                 </div>
 
                 {/* BODY */}
-                <div className="p-4 bg-gradient-to-b from-[#f8fbff] to-white">
+                <div className="p-4 bg-linear-to-b from-[#f8fbff] to-white">
                   <div className="space-y-3">
 
                     {/* COMPRA */}
-                    <div className="flex items-center justify-between rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-4">
+                    <div className="flex items-center justify-between rounded-2xl border border-amber-100 bg-linear-to-r from-amber-50 to-yellow-50 px-4 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 rounded-2xl bg-yellow-400/15 flex items-center justify-center border border-yellow-300/30">
                           <ShoppingBag className="w-5 h-5 text-yellow-600" />
@@ -523,7 +520,7 @@ export default function Navbar() {
                     </div>
 
                     {/* CONECTIVIDAD */}
-                    <div className="flex items-center justify-between rounded-2xl border border-cyan-100 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-4">
+                    <div className="flex items-center justify-between rounded-2xl border border-cyan-100 bg-linear-to-r from-cyan-50 to-blue-50 px-4 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 rounded-2xl bg-cyan-400/15 flex items-center justify-center border border-cyan-300/30">
                           <KeyRound className="w-5 h-5 text-cyan-600" />
@@ -560,7 +557,7 @@ export default function Navbar() {
                   <div className="mt-5">
                     <Link
                       href="/explore/wallet"
-                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold shadow-lg"
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold shadow-lg"
                     >
                       <History className="w-5 h-5" />
                       Historial de Transacciones
@@ -587,66 +584,66 @@ export default function Navbar() {
       </div>
 
       {/* ---------- MOBILE BOTTOM NAVIGATION ---------- */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] shadow-lg pb-safe">
         <div className="grid grid-cols-6 h-16">
 
           {/* HOME */}
           <Link href="/home" className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/home" ? "bg-blue-100" : ""}`}>
-                <Home className={`w-5 h-5 transition-all duration-200 ${pathname === "/home" ? "text-blue-600" : "text-gray-400"}`} />
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/home" ? "bg-white/20" : ""}`}>
+                <Home className={`w-5 h-5 transition-all duration-200 ${pathname === "/home" ? "text-[#00a4ff]" : "text-white/70"}`} />
               </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/home" ? "text-blue-600" : "text-gray-400"}`}>Inicio</span>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/home" ? "text-[#00a4ff]" : "text-white/70"}`}>Inicio</span>
             </div>
           </Link>
 
           {/* ANUNCIOS */}
           <Link href="/ads" className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/ads" ? "bg-blue-100" : ""}`}>
-                <Megaphone className={`w-5 h-5 transition-all duration-200 ${pathname === "/ads" ? "text-blue-600" : "text-gray-400"}`} />
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/ads" ? "bg-white/20" : ""}`}>
+                <Megaphone className={`w-5 h-5 transition-all duration-200 ${pathname === "/ads" ? "text-[#00a4ff]" : "text-white/70"}`} />
               </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/ads" ? "text-blue-600" : "text-gray-400"}`}>Anuncios</span>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/ads" ? "text-[#00a4ff]" : "text-white/70"}`}>Anuncios</span>
             </div>
           </Link>
 
           {/* RIFAS */}
           <Link href="/raffles" className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/raffles" ? "bg-blue-100" : ""}`}>
-                <Gift className={`w-5 h-5 transition-all duration-200 ${pathname === "/raffles" ? "text-blue-600" : "text-gray-400"}`} />
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/raffles" ? "bg-white/20" : ""}`}>
+                <Gift className={`w-5 h-5 transition-all duration-200 ${pathname === "/raffles" ? "text-[#00a4ff]" : "text-white/70"}`} />
               </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/raffles" ? "text-blue-600" : "text-gray-400"}`}>Rifas</span>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/raffles" ? "text-[#00a4ff]" : "text-white/70"}`}>Rifas</span>
             </div>
           </Link>
 
           {/* MASCOTA */}
           <Link href="/mascota" className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/mascota" ? "bg-blue-100" : ""}`}>
-                <span className={`text-xl leading-none transition-all duration-200 ${pathname === "/mascota" ? "scale-110" : ""}`}>🐾</span>
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/mascota" ? "bg-white/20" : ""}`}>
+                <span className={`text-xl leading-none transition-all duration-200 ${pathname === "/mascota" ? "scale-110" : "opacity-70"}`}>🐾</span>
               </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/mascota" ? "text-blue-600" : "text-gray-400"}`}>Mascota</span>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/mascota" ? "text-[#00a4ff]" : "text-white/70"}`}>Mascota</span>
             </div>
           </Link>
 
           {/* PRODUCTOS */}
           <Link href="/products" className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/products" ? "bg-blue-100" : ""}`}>
-                <Package className={`w-5 h-5 transition-all duration-200 ${pathname === "/products" ? "text-blue-600" : "text-gray-400"}`} />
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/products" ? "bg-white/20" : ""}`}>
+                <Package className={`w-5 h-5 transition-all duration-200 ${pathname === "/products" ? "text-[#00a4ff]" : "text-white/70"}`} />
               </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/products" ? "text-blue-600" : "text-gray-400"}`}>Productos</span>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/products" ? "text-[#00a4ff]" : "text-white/70"}`}>Productos</span>
             </div>
           </Link>
 
           {/* PERFIL */}
           <button onClick={() => setOpenMenu((v) => !v)} className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${openMenu ? "bg-blue-100" : ""}`}>
-                <User className={`w-5 h-5 transition-all duration-200 ${openMenu ? "text-blue-600" : "text-gray-400"}`} />
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${openMenu ? "bg-white/20" : ""}`}>
+                <User className={`w-5 h-5 transition-all duration-200 ${openMenu ? "text-[#00a4ff]" : "text-white/70"}`} />
               </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${openMenu ? "text-blue-600" : "text-gray-400"}`}>Perfil</span>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${openMenu ? "text-[#00a4ff]" : "text-white/70"}`}>Perfil</span>
             </div>
           </button>
 
@@ -655,14 +652,14 @@ export default function Navbar() {
 
       {/* MOBILE PROFILE MENU (FULL SCREEN) */}
       <div
-        className={`lg:hidden fixed inset-0 z-[60] bg-black/50 transition-opacity duration-300 ${openMenu ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        className={`lg:hidden fixed inset-0 z-60 bg-black/50 transition-opacity duration-300 ${openMenu ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         onClick={() => setOpenMenu(false)}
       >
         <div
           className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl transition-transform duration-300 ${openMenu ? "translate-y-0" : "translate-y-full"}`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-3xl text-white">
+          <div className="bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] p-6 rounded-t-3xl text-white">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white/20 rounded-full overflow-hidden flex items-center justify-center shrink-0">
                 {consumer?.avatarUrl ? (
@@ -675,7 +672,7 @@ export default function Navbar() {
                 <div className="font-bold text-lg truncate">
                   {loadingUser ? "Cargando..." : consumer?.name ?? "Usuario"}
                 </div>
-                <div className="text-sm text-blue-100">Beneficiario</div>
+                <div className="text-sm text-white/70">Beneficiario</div>
               </div>
             </div>
             {/* Barra de nivel mobile */}
@@ -707,25 +704,25 @@ export default function Navbar() {
             )}
           </div>
           <div className="py-2 pb-20">
-            <Link href="/explore/gamification" className="flex items-center gap-4 px-6 py-4 hover:bg-purple-50 active:bg-purple-100 transition-all" onClick={() => setOpenMenu(false)}>
-              <Zap className="w-6 h-6 text-purple-500" />
-              <span className="font-medium text-purple-700">Mi Nivel</span>
+            <Link href="/explore/gamification" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
+              <Zap className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
+              <span className="font-medium group-hover:text-[#00a4ff]">Mi Nivel</span>
             </Link>
-            <Link href="/explore/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
-              <UserCircle className="w-6 h-6 text-gray-600" />
-              <span className="font-medium">Mi Perfil</span>
+            <Link href="/explore/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
+              <UserCircle className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
+              <span className="font-medium group-hover:text-[#00a4ff]">Mi Perfil</span>
             </Link>
-            <Link href="/purchases" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
-              <ShoppingBag className="w-6 h-6 text-gray-600" />
-              <span className="font-medium">Mis compras</span>
+            <Link href="/purchases" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
+              <ShoppingBag className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
+              <span className="font-medium group-hover:text-[#00a4ff]">Mis compras</span>
             </Link>
-            <Link href="/explore/referrals" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
-              <UserCircle className="w-6 h-6 text-gray-600" />
-              <span className="font-medium">Mis Referidos</span>
+            <Link href="/explore/referrals" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
+              <UserCircle className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
+              <span className="font-medium group-hover:text-[#00a4ff]">Mis Referidos</span>
             </Link>
-            <Link href="/settings" className="flex items-center gap-4 px-6 py-4 hover:bg-blue-50 active:bg-blue-100 transition-all" onClick={() => setOpenMenu(false)}>
-              <Settings className="w-6 h-6 text-gray-600" />
-              <span className="font-medium">Configuración</span>
+            <Link href="/settings" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
+              <Settings className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
+              <span className="font-medium group-hover:text-[#00a4ff]">Configuración</span>
             </Link>
             <div className="border-t border-gray-200 mt-2 pt-2">
               <button className="w-full flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 transition-all cursor-pointer"

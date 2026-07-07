@@ -3,21 +3,18 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Star, Eye, Pencil, Trash, Heart, Tag, Trophy, HelpCircle, X, Building2 } from "lucide-react";
+import { Star, Eye, Pencil, Trash, Tag, Trophy, HelpCircle, X, Building2 } from "lucide-react";
 
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
-import { AddToCartButton } from "./AddToCartButton";
-import { useAuth } from "@/hooks/useAuth";
-import { useFavorites } from "@/hooks/useFavorites";
+import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
+import { PlanCode } from "@/types/finance/plans/Plan.types";
 
-interface ProductCardProps {
+interface CommercialProductCardProps {
   product: ProductSummaryResponseDTO;
-  mode?: "consumer" | "commercial";
   onView?: (id: number) => void;
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
   onMarkAsReward?: (id: number) => void;
-  isGameReward?: boolean;
 }
 
 const helpItems = [
@@ -47,33 +44,29 @@ const helpItems = [
   },
 ];
 
-const ProductCard: React.FC<ProductCardProps> = ({
+const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
   product,
-  mode = "consumer",
   onView,
   onEdit,
   onDelete,
   onMarkAsReward,
-  isGameReward = false,
 }) => {
   const router = useRouter();
-  const { role } = useAuth();
-  const { isFavorite, toggleFavorite } = useFavorites();
   const [showHelp, setShowHelp] = useState(false);
+  const { planState } = usePlanState();
 
-  const handleClick = () => {
-    if (mode === "commercial") {
-      onView?.(product.id);
-    } else {
-      router.push(`/products/${product.id}`);
-    }
-  };
+  // Lee el estado directamente del DTO — no depende de prop externo
+  const isGameReward = product.isGameReward;
+
+  const canUseGameRewards =
+    planState?.effectivePlan === PlanCode.STANDARD ||
+    planState?.effectivePlan === PlanCode.PREMIUM;
 
   return (
     <>
       <div
         className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer overflow-hidden flex flex-col"
-        onClick={handleClick}
+        onClick={() => onView?.(product.id)}
       >
         {/* Image */}
         <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
@@ -96,41 +89,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 className="w-2.5 h-2.5 sm:w-4 sm:h-4 text-white/80 mb-0.5"
                 style={{ transform: "rotate(-45deg)" }}
               />
-              <span className="text-white font-semibold leading-none uppercase tracking-wide text-[6px] sm:text-[9px]">
-                Paga con
-              </span>
-              <span className="text-white font-semibold leading-none uppercase tracking-wide text-[6px] sm:text-[9px]">
-                llaves y
-              </span>
-              <span className="text-white font-bold leading-none uppercase tracking-wide text-[7px] sm:text-[10px]">
-                ahorra
-              </span>
+              <span className="text-white font-semibold leading-none uppercase tracking-wide text-[6px] sm:text-[9px]">Paga con</span>
+              <span className="text-white font-semibold leading-none uppercase tracking-wide text-[6px] sm:text-[9px]">llaves y</span>
+              <span className="text-white font-bold leading-none uppercase tracking-wide text-[7px] sm:text-[10px]">ahorra</span>
               <span className="text-white font-extrabold leading-none text-[17px] sm:text-[26px]" style={{ lineHeight: 1.1 }}>
                 {product.maxKeysPct}%
               </span>
             </div>
           )}
 
-          {mode === "consumer" && role === "CONSUMER" && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorite(product.id);
-              }}
-              className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md hover:scale-110 transition-transform cursor-pointer"
-            >
-              <Heart
-                className={`w-5 h-5 ${
-                  isFavorite(product.id)
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-400"
-                }`}
-              />
-            </button>
-          )}
-
-          {/* Game reward badge */}
-          {mode === "commercial" && isGameReward && (
+          {canUseGameRewards && isGameReward && (
             <div className="absolute top-3 right-3 bg-purple-600 text-white rounded-full px-2 py-1 flex items-center gap-1 shadow-md text-xs font-semibold">
               <Trophy className="w-3 h-3" />
               Recompensa activa
@@ -144,7 +112,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {product.name}
           </h3>
 
-          <p className="text-base sm:text-xl font-bold" style={{ color: "#000000" }}>
+          <p className="text-base sm:text-xl font-bold text-gray-900">
             {new Intl.NumberFormat("es-CO", {
               style: "currency",
               currency: "COP",
@@ -178,7 +146,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  router.push(`/commercial/${product.commercialId}`);
+                  router.push(`/commercial/profile`);
                 }}
                 className="text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition cursor-pointer text-left"
               >
@@ -201,32 +169,32 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
 
           {/* Commercial actions */}
-          {mode === "commercial" && (
-            <div
-              className="flex flex-wrap items-center gap-1 pt-3 border-t mt-auto"
-              onClick={(e) => e.stopPropagation()}
+          <div
+            className="flex flex-wrap items-center gap-1 pt-3 border-t mt-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => onView?.(product.id)}
+              className="flex items-center gap-1 px-2 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition cursor-pointer"
             >
-              <button
-                onClick={() => onView?.(product.id)}
-                className="flex items-center gap-1 px-2 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition cursor-pointer"
-              >
-                <Eye className="w-4 h-4 cursor-pointer" /> Ver
-              </button>
+              <Eye className="w-4 h-4" /> Ver
+            </button>
 
-              <button
-                onClick={() => onEdit?.(product.id)}
-                className="flex items-center gap-1 px-2 py-1 text-sm bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition cursor-pointer"
-              >
-                <Pencil className="w-4 h-4 cursor-pointer" /> Editar
-              </button>
+            <button
+              onClick={() => onEdit?.(product.id)}
+              className="flex items-center gap-1 px-2 py-1 text-sm bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition cursor-pointer"
+            >
+              <Pencil className="w-4 h-4" /> Editar
+            </button>
 
-              <button
-                onClick={() => onDelete?.(product.id)}
-                className="flex items-center gap-1 px-2 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition cursor-pointer"
-              >
-                <Trash className="w-4 h-4" /> Eliminar
-              </button>
+            <button
+              onClick={() => onDelete?.(product.id)}
+              className="flex items-center gap-1 px-2 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition cursor-pointer"
+            >
+              <Trash className="w-4 h-4" /> Eliminar
+            </button>
 
+            {canUseGameRewards && (
               <button
                 onClick={() => onMarkAsReward?.(product.id)}
                 className={`flex items-center gap-1 px-2 py-1 text-sm rounded-lg transition cursor-pointer ${
@@ -238,23 +206,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 <Trophy className="w-4 h-4" />
                 {isGameReward ? "Desmarcar como recompensa" : "Marcar como recompensa"}
               </button>
+            )}
 
-              <button
-                onClick={() => setShowHelp(true)}
-                className="flex items-center gap-1 px-2 py-1 text-sm bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 transition ml-auto"
-                title="Ayuda"
-              >
-                <HelpCircle className="w-4 h-4 cursor-pointer" />
-              </button>
-            </div>
-          )}
-
-          {/* Consumer actions */}
-          {mode === "consumer" && (
-            <div className="mt-auto pt-2" onClick={(e) => e.stopPropagation()}>
-              <AddToCartButton product={product} variant="primary" />
-            </div>
-          )}
+            <button
+              onClick={() => setShowHelp(true)}
+              className="flex items-center gap-1 px-2 py-1 text-sm bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 transition ml-auto"
+              title="Ayuda"
+            >
+              <HelpCircle className="w-4 h-4 cursor-pointer" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -269,27 +230,24 @@ const ProductCard: React.FC<ProductCardProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-gray-900">
-                Acciones del producto
-              </h3>
-              <button
-                onClick={() => setShowHelp(false)}
-                className="text-gray-400 hover:text-gray-600 transition"
-              >
+              <h3 className="text-base font-bold text-gray-900">Acciones del producto</h3>
+              <button onClick={() => setShowHelp(false)} className="text-gray-400 hover:text-gray-600 transition">
                 <X className="w-5 h-5 cursor-pointer" />
               </button>
             </div>
 
             <ul className="space-y-4">
-              {helpItems.map((item) => (
-                <li key={item.label} className="flex gap-3">
-                  <span className="shrink-0 mt-0.5">{item.icon}</span>
-                  <div>
-                    <p className="font-semibold text-gray-800 text-sm">{item.label}</p>
-                    <p className="text-xs text-gray-500 leading-relaxed">{item.description}</p>
-                  </div>
-                </li>
-              ))}
+              {helpItems
+                .filter((item) => item.label !== "Marcar como recompensa" || canUseGameRewards)
+                .map((item) => (
+                  <li key={item.label} className="flex gap-3">
+                    <span className="shrink-0 mt-0.5">{item.icon}</span>
+                    <div>
+                      <p className="font-semibold text-gray-800 text-sm">{item.label}</p>
+                      <p className="text-xs text-gray-500 leading-relaxed">{item.description}</p>
+                    </div>
+                  </li>
+                ))}
             </ul>
           </div>
         </div>
@@ -298,4 +256,4 @@ const ProductCard: React.FC<ProductCardProps> = ({
   );
 };
 
-export default ProductCard;
+export default CommercialProductCard;

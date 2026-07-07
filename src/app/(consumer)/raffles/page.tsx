@@ -47,9 +47,16 @@ export default function RafflesPage() {
           <main className="flex-1 min-w-0 space-y-10">
             <LiveRafflesCarousel />
             <ActiveRafflesSection />
+
+            {/* Paneles de resultados y ganadores — solo en móvil/tablet */}
+            <div className="xl:hidden space-y-4">
+              <h2 className="text-lg font-bold text-gray-800">Resultados y ganadores</h2>
+              <LastRafflesResultsPanel />
+              <LastWinnersPanel />
+            </div>
           </main>
 
-          {/* Sidebar */}
+          {/* Sidebar — solo en desktop xl+ */}
           <aside className="hidden xl:block w-[320px] shrink-0">
             <div className="sticky top-24 space-y-4">
               <LastRafflesResultsPanel />

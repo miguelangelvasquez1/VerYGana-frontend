@@ -20,7 +20,7 @@ import { getCommercialProfile } from "@/services/CommercialService";
 import { getCommercialProducts } from "@/services/ProductService";
 import { CommercialProfileResponseDTO } from "@/types/Commercial.types";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
-import ProductCard from "@/components/consumer/products/ProductCard";
+import ConsumerProductCard from "@/components/consumer/products/ConsumerProductCard";
 import InfiniteScroll from "@/components/consumer/products/InfiniteScroll";
 
 function formatDate(iso: string) {
@@ -280,7 +280,7 @@ export default function CommercialProfilePage() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {products.map((product) => (
-                <ProductCard key={product.id} product={product} mode="consumer" />
+                <ConsumerProductCard key={product.id} product={product} />
               ))}
             </div>
           )}

@@ -24,6 +24,6 @@ export interface BulkStockResponseDTO {
 export interface ProductStockParams {
   page?: number;
   size?: number;
-  search?: string;
   status?: 'AVAILABLE' | 'RESERVED' | 'SOLD' | 'EXPIRED' | 'INVALID';
+  soldDate?: string; // formato YYYY-MM-DD — requiere soporte en el backend
 }

@@ -1,4 +1,4 @@
-import { PrizeType } from "./prize.types"
+import { PrizeResponseDTO, PrizeType } from "./prize.types"
 
 export enum DrawEventType {
   WAITING_ROOM_UPDATE = 'WAITING_ROOM_UPDATE',
@@ -15,6 +15,7 @@ export interface WaitingRoomPayloadDTO {
   secondsUntilDraw: number
   totalTickets: number
   totalParticipants: number
+  prizes: PrizeResponseDTO[];
 }
 
 export interface WinnerRevealPayloadDTO {

@@ -5,6 +5,12 @@ export enum PrizeType {
     DIGITAL = 'DIGITAL'
 }
 
+export enum PrizeStatus {
+    PENDING = 'PENDING',
+    DELIVERED = 'DELIVERED',
+    EXPIRED = 'EXPIRED'
+}
+
 export interface CreatePrizeRequestDTO {
     title: string;
     description: string;

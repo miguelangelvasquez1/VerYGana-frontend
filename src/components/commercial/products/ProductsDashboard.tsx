@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Package, Search, Filter, Grid, List } from "lucide-react";
+import { Package, Search, Filter, Grid, List, PlusCircle, X } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { ProductStatus, ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { DashboardStats } from "@/types/Commercial.types";
-import ProductCard from "@/components/consumer/products/ProductCard";
+import CommercialProductCard from "@/components/commercial/products/CommercialProductCard";
+import CreateProductForm from "@/components/commercial/products/CreateProductForm";
 import { useRouter, useSearchParams } from "next/navigation";
 import TopSellingProducts from "@/components/commercial/products/commercialStats/TopSellingProducts";
 
@@ -38,6 +39,7 @@ export default function ProductsDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   // ================== Cargar datos ==================
   const loadDashboardData = useCallback(async () => {
@@ -108,7 +110,7 @@ export default function ProductsDashboard() {
           status: p.status,
           commercialId: p.commercialId,
           companyName: p.companyName,
-          gameReward: p.gameReward,
+          isGameReward: p.isGameReward,
         }));
         setProducts(mapped);
       }
@@ -131,8 +133,8 @@ export default function ProductsDashboard() {
   // ================== Toggle recompensa (máx. 3) ==================
   const handleToggleReward = async (productId: number) => {
     const target = products.find((p) => p.id === productId);
-    const isCurrentlyReward = target?.gameReward ?? false;
-    const rewardCount = products.filter((p) => p.gameReward).length;
+    const isCurrentlyReward = target?.isGameReward ?? false;
+    const rewardCount = products.filter((p) => p.isGameReward).length;
 
     if (!isCurrentlyReward && rewardCount >= 3) {
       toast.error("Solo puedes tener máximo 3 productos como recompensa de juego.");
@@ -143,7 +145,7 @@ export default function ProductsDashboard() {
       await productService.markProductAsReward(productId);
       setProducts((prev) =>
         prev.map((p) =>
-          p.id === productId ? { ...p, gameReward: !p.gameReward } : p
+          p.id === productId ? { ...p, isGameReward: !p.isGameReward } : p
         )
       );
       toast.success(
@@ -208,11 +210,21 @@ export default function ProductsDashboard() {
 
   // ================== UI ==================
 
-  const renderProducts = () => (
+  const renderProducts = () => {
+    return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
       <h2 className="text-3xl font-bold text-gray-900">
         Todos tus productos
       </h2>
+      <button
+        onClick={() => setShowCreateForm(true)}
+        className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition"
+      >
+        <PlusCircle className="w-4 h-4" />
+        Crear producto
+      </button>
+      </div>
 
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex gap-4">
@@ -255,11 +267,9 @@ export default function ProductsDashboard() {
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
-            <ProductCard
+            <CommercialProductCard
               key={product.id}
               product={product}
-              mode="commercial"
-              isGameReward={product.gameReward}
               onDelete={() => handleDeleteProduct(product.id)}
               onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
               onMarkAsReward={() => handleToggleReward(product.id)}
@@ -270,11 +280,9 @@ export default function ProductsDashboard() {
       ) : (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           {filteredProducts.map((product) => (
-            <ProductCard
+            <CommercialProductCard
               key={product.id}
               product={product}
-              mode="commercial"
-              isGameReward={product.gameReward}
               onDelete={() => handleDeleteProduct(product.id)}
               onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
               onMarkAsReward={() => handleToggleReward(product.id)}
@@ -285,6 +293,7 @@ export default function ProductsDashboard() {
       )}
     </div>
   );
+  };
 
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -344,5 +353,34 @@ export default function ProductsDashboard() {
     }
   };
 
-  return <>{renderSection()}</>;
+  return (
+    <>
+      {renderSection()}
+
+      {showCreateForm && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto py-8 px-4"
+          onClick={() => setShowCreateForm(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <h2 className="text-lg font-bold text-gray-900">Crear producto</h2>
+              <button
+                onClick={() => setShowCreateForm(false)}
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <CreateProductForm />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }

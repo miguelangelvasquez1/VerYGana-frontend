@@ -28,7 +28,7 @@ export interface ProductSummaryResponseDTO {
   status : ProductStatus;
   commercialId: number;
   companyName : string;
-  gameReward : boolean;
+  isGameReward : boolean;
 }
 
 export interface ProductResponseDTO {
@@ -46,7 +46,7 @@ export interface ProductResponseDTO {
   stock : number;
   reviewCount : number;
   reviews : ProductReviewResponseDTO[];
-  gameReward : boolean;
+  isGameReward : boolean;
 }
 
 export interface ProductEditInfoResponseDTO {
