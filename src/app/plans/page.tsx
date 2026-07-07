@@ -170,7 +170,7 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
           )}
         </div>
 
-        <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 mb-4">
+        <div className="bg-white/3 border border-white/6 rounded-xl p-3 mb-4">
           <p className="text-slate-400 text-sm leading-relaxed">
             Este monto se acreditará en tu presupuesto publicitario. La comisión por venta es del{' '}
             <strong className="text-white">{plan.key === PlanCode.STANDARD ? '10%' : '5%'}</strong>.
@@ -183,8 +183,8 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
           className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2
             transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed
             ${plan.key === PlanCode.PREMIUM
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white'
-              : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white'
+              ? 'bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white'
+              : 'bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white'
             }`}
         >
           {loading
@@ -247,8 +247,8 @@ export default function PlansPage() {
     <div className="h-screen overflow-hidden bg-[#111318] text-white font-sans flex flex-col">
       {/* Ambient */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-15%] left-[15%] w-[500px] h-[500px] rounded-full bg-blue-700/8 blur-[140px]" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full bg-purple-700/8 blur-[120px]" />
+        <div className="absolute top-[-15%] left-[15%] w-125 h-125 rounded-full bg-blue-700/8 blur-[140px]" />
+        <div className="absolute bottom-[-10%] right-[10%] w-100 h-100 rounded-full bg-purple-700/8 blur-[120px]" />
       </div>
 
       {/* Back button — fixed top left */}
@@ -263,26 +263,26 @@ export default function PlansPage() {
       </div>
 
       <div
-        className="relative flex-1 flex flex-col justify-center max-w-5xl w-full mx-auto px-6"
+        className="relative flex-1 flex flex-col justify-center max-w-4xl w-full mx-auto px-6"
         style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease' }}
       >
         {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs text-slate-400 mb-3 backdrop-blur-sm">
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1 text-xs text-slate-400 mb-2 backdrop-blur-sm">
             <Sparkles className="w-3 h-3 text-yellow-400" />
             Escoge el plan que impulse tu negocio
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-none">
             <span className="text-white">Planes y </span>
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">Precios</span>
+            <span className="bg-linear-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">Precios</span>
           </h1>
-          <p className="text-slate-400 text-sm max-w-md mx-auto mt-2">
+          <p className="text-slate-400 text-xs max-w-md mx-auto mt-1.5">
             Desde tu primera venta hasta escalar con anuncios y experiencias gamificadas.
           </p>
         </div>
 
         {/* Tab toggle */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-4">
           <div className="bg-white/5 border border-white/10 rounded-xl p-1 flex gap-1">
             {(['cards', 'table'] as const).map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
@@ -297,7 +297,7 @@ export default function PlansPage() {
 
         {/* ── Cards view ── */}
         {activeTab === 'cards' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
             {plans.map((plan, i) => {
               const planFeatures = features.filter(f => {
                 const val = f[plan.key.toLowerCase() as keyof typeof f];
@@ -307,51 +307,46 @@ export default function PlansPage() {
               return (
                 <div
                   key={plan.key}
-                  className={`relative rounded-2xl border overflow-hidden transition-all duration-300
+                  className={`relative rounded-xl border overflow-hidden transition-all duration-300
                     ${plan.highlight
-                      ? 'border-blue-500/40 shadow-[0_0_40px_rgba(59,130,246,0.12)]'
+                      ? 'border-blue-500/40 shadow-[0_0_30px_rgba(59,130,246,0.10)]'
                       : 'border-white/10 hover:border-white/20'
                     }`}
                   style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'none' : 'translateY(16px)', transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s` }}
                 >
                   {plan.highlight && (
-                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500" />
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-blue-500 via-purple-500 to-blue-500" />
                   )}
 
                   {/* Top section */}
-                  <div className={`p-6 ${plan.highlight ? 'bg-[#161a2e]' : 'bg-[#16181f]'}`}>
+                  <div className={`p-4 ${plan.highlight ? 'bg-[#161a2e]' : 'bg-[#16181f]'}`}>
                     {plan.highlight && (
-                      <div className="inline-flex items-center gap-1.5 bg-blue-500/15 border border-blue-500/30 text-blue-400 text-xs font-semibold px-2.5 py-1 rounded-full mb-4">
+                      <div className="inline-flex items-center bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[10px] font-semibold px-2 py-0.5 rounded-full mb-2">
                         MÁS POPULAR
                       </div>
                     )}
 
-                    {/* Icon */}
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${
                       plan.highlight ? 'bg-blue-500/15 text-blue-400' : 'bg-white/5 text-slate-300'
                     }`}>
                       {plan.icon}
                     </div>
 
-                    {/* Name + description */}
-                    <h2 className="text-xl font-bold text-white mb-1">{plan.name}</h2>
-                    <p className="text-slate-400 text-sm mb-5">{plan.description}</p>
+                    <h2 className="text-sm font-bold text-white leading-tight">{plan.name}</h2>
+                    <p className="text-slate-400 text-xs mb-3">{plan.description}</p>
 
                     {/* Price */}
-                    <div className="mb-5">
-                      <span className="text-4xl font-black text-white">${plan.price}</span>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span className="text-slate-400 text-sm font-medium">{plan.unit}</span>
-                        <span className="text-slate-600">·</span>
-                        <span className="text-slate-500 text-xs">{plan.billing}</span>
-                      </div>
+                    <div className="mb-3">
+                      <span className="text-2xl font-black text-white">${plan.price}</span>
+                      <span className="text-slate-400 text-xs font-medium ml-1.5">{plan.unit}</span>
+                      <span className="text-slate-600 text-xs ml-1">· {plan.billing}</span>
                     </div>
 
                     {/* CTA */}
                     <button
                       onClick={() => handlePlanClick(plan)}
                       disabled={loading === plan.key}
-                      className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2
+                      className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2
                         transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed
                         ${plan.highlight
                           ? 'bg-white text-slate-900 hover:bg-slate-100'
@@ -359,23 +354,23 @@ export default function PlansPage() {
                         }`}
                     >
                       {loading === plan.key
-                        ? <><Loader2 className="w-4 h-4 animate-spin" /> Procesando...</>
-                        : <>{plan.cta} <ArrowRight className="w-4 h-4" /></>
+                        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Procesando...</>
+                        : <>{plan.cta} <ArrowRight className="w-3.5 h-3.5" /></>
                       }
                     </button>
                   </div>
 
                   {/* Features section */}
-                  <div className="px-6 py-5 bg-[#13151b] border-t border-white/[0.06]">
-                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-3">
+                  <div className="px-4 py-3 bg-[#13151b] border-t border-white/6">
+                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide mb-2">
                       {plan.featuresLabel}
                     </p>
-                    <ul className="space-y-2.5">
+                    <ul className="space-y-1.5">
                       {planFeatures.map(f => {
                         const val = f[plan.key.toLowerCase() as keyof typeof f] as string | boolean;
                         return (
-                          <li key={f.label} className="flex items-center gap-2.5 text-sm text-slate-300">
-                            <Check className="w-4 h-4 text-emerald-400 shrink-0" strokeWidth={2.5} />
+                          <li key={f.label} className="flex items-center gap-2 text-xs text-slate-300">
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" strokeWidth={2.5} />
                             <span>
                               {f.label}
                               {typeof val === 'string' && (
@@ -398,7 +393,7 @@ export default function PlansPage() {
           <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.4s' }}>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.02]">
+                <tr className="border-b border-white/10 bg-white/2">
                   <th className="text-left px-5 py-4 text-slate-400 font-medium text-sm w-[38%]">Funcionalidad</th>
                   {plans.map(p => (
                     <th key={p.key} className={`px-5 py-4 text-center ${p.highlight ? 'bg-blue-600/8' : ''}`}>
@@ -414,7 +409,7 @@ export default function PlansPage() {
               <tbody>
                 {features.map((row, i) => (
                   <tr key={row.label}
-                    className={`border-b border-white/[0.06] transition-colors hover:bg-white/[0.02] ${i % 2 === 0 ? '' : 'bg-white/[0.01]'}`}>
+                    className={`border-b border-white/6 transition-colors hover:bg-white/2 ${i % 2 === 0 ? '' : 'bg-white/1'}`}>
                     <td className="px-5 py-3 text-slate-300">
                       <div className="flex items-center gap-2.5 text-sm">
                         <span className="text-slate-500">{row.icon}</span>
@@ -436,7 +431,7 @@ export default function PlansPage() {
                     })}
                   </tr>
                 ))}
-                <tr className="bg-white/[0.02]">
+                <tr className="bg-white/2">
                   <td className="px-5 py-4" />
                   {plans.map((p, ci) => (
                     <td key={p.key} className={`px-5 py-4 text-center ${ci === 1 ? 'bg-blue-600/5' : ''}`}>
@@ -460,7 +455,7 @@ export default function PlansPage() {
           </div>
         )}
 
-        <p className="text-center text-slate-600 text-xs mt-5">
+        <p className="text-center text-slate-600 text-xs mt-3">
           Los planes Estándar y Premium se activan por inversión, no son suscripciones recurrentes.
         </p>
       </div>

@@ -1,15 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Loader2, X } from 'lucide-react';
-import {
-  getCategories,
-  getDepartments,
-  getDepartmentMunicipalities,
-  type BrandingCategory,
-  type BrandingMunicipality,
-  type Department,
-} from '@/services/BrandingRequestService';
+import { useCategories } from '@/hooks/useCategories';
+import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
+import type { BrandingMunicipality } from '@/services/BrandingRequestService';
 
 interface Props {
   selectedCategoryIds: number[];
@@ -26,49 +21,19 @@ export const CampaignTargetingSelector: React.FC<Props> = ({
   onChangeMunicipalityCodes,
   preloadedMunicipalities,
 }) => {
-  const [categories, setCategories] = useState<BrandingCategory[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedDept, setSelectedDept] = useState('');
-  const [deptMunicipalities, setDeptMunicipalities] = useState<BrandingMunicipality[]>([]);
-  const [loadingCats, setLoadingCats] = useState(true);
-  const [loadingDepts, setLoadingDepts] = useState(true);
-  const [loadingMunis, setLoadingMunis] = useState(false);
 
-  // Mapa code → name para chips de municipios pre-seleccionados
-  const [municipalityNames, setMunicipalityNames] = useState<Map<string, string>>(
-    () => new Map(preloadedMunicipalities?.map(m => [m.code, m.name]) ?? [])
+  const { categories, loading: loadingCats } = useCategories();
+  const { departments, loading: loadingDepts } = useDepartments();
+  const { municipalities: deptMunicipalities, loading: loadingMunis } = useMunicipalities(
+    selectedDept || null
   );
 
-  useEffect(() => {
-    getCategories()
-      .then(setCategories)
-      .catch(() => {})
-      .finally(() => setLoadingCats(false));
-
-    getDepartments()
-      .then(setDepartments)
-      .catch(() => {})
-      .finally(() => setLoadingDepts(false));
-  }, []);
-
-  useEffect(() => {
-    if (!selectedDept) {
-      setDeptMunicipalities([]);
-      return;
-    }
-    setLoadingMunis(true);
-    getDepartmentMunicipalities(selectedDept)
-      .then(munis => {
-        setDeptMunicipalities(munis);
-        setMunicipalityNames(prev => {
-          const next = new Map(prev);
-          munis.forEach(m => next.set(m.code, m.name));
-          return next;
-        });
-      })
-      .catch(() => setDeptMunicipalities([]))
-      .finally(() => setLoadingMunis(false));
-  }, [selectedDept]);
+  // Mapa code → name para chips (preloaded + los del departamento activo)
+  const municipalityNames = new Map<string, string>([
+    ...(preloadedMunicipalities?.map(m => [m.code, m.name] as [string, string]) ?? []),
+    ...deptMunicipalities.map(m => [m.code, m.name] as [string, string]),
+  ]);
 
   const toggleCategory = (id: number) => {
     onChangeCategoryIds(
@@ -122,7 +87,12 @@ export const CampaignTargetingSelector: React.FC<Props> = ({
 
       {/* ── Municipios ── */}
       <div>
-        <p className="text-sm font-medium text-gray-700 mb-2">Municipios objetivo</p>
+        <div className="flex items-baseline gap-2 mb-2">
+          <p className="text-sm font-medium text-gray-700">Municipios objetivo</p>
+          {selectedMunicipalityCodes.length === 0 && (
+            <span className="text-xs text-gray-400">Sin selección = todo Colombia</span>
+          )}
+        </div>
 
         {/* Chips de seleccionados */}
         {selectedMunicipalityCodes.length > 0 && (

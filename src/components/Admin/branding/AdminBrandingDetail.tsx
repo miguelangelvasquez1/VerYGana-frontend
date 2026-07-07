@@ -47,8 +47,7 @@ const STATUS_META: Record<
   DESIGN_IN_PROGRESS: { label: 'En diseño', badge: 'bg-blue-100 text-blue-800 border-blue-200', bannerBg: 'bg-blue-50', bannerBorder: 'border-blue-200', bannerTitle: 'text-blue-900', bannerText: 'text-blue-700' },
   PENDING_ADVERTISER_APPROVAL: { label: 'Pend. aprobación anunciante', badge: 'bg-purple-100 text-purple-800 border-purple-200', bannerBg: 'bg-purple-50', bannerBorder: 'border-purple-200', bannerTitle: 'text-purple-900', bannerText: 'text-purple-700' },
   CHANGES_REQUESTED: { label: 'Cambios solicitados', badge: 'bg-orange-100 text-orange-800 border-orange-200', bannerBg: 'bg-orange-50', bannerBorder: 'border-orange-200', bannerTitle: 'text-orange-900', bannerText: 'text-orange-700' },
-  READY_TO_LAUNCH: { label: 'Listo para lanzar', badge: 'bg-teal-100 text-teal-800 border-teal-200', bannerBg: 'bg-teal-50', bannerBorder: 'border-teal-200', bannerTitle: 'text-teal-900', bannerText: 'text-teal-700' },
-  LAUNCHED: { label: 'Activa', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bannerBg: 'bg-emerald-50', bannerBorder: 'border-emerald-200', bannerTitle: 'text-emerald-900', bannerText: 'text-emerald-700' },
+  LAUNCHED: { label: 'Campaña activa', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bannerBg: 'bg-emerald-50', bannerBorder: 'border-emerald-200', bannerTitle: 'text-emerald-900', bannerText: 'text-emerald-700' },
   CANCELLED: { label: 'Cancelada', badge: 'bg-gray-100 text-gray-500 border-gray-200', bannerBg: 'bg-gray-50', bannerBorder: 'border-gray-200', bannerTitle: 'text-gray-700', bannerText: 'text-gray-500' },
 };
 

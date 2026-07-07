@@ -19,8 +19,7 @@ const STATUS_CONFIG: Record<BrandingStatus, { label: string; className: string }
   DESIGN_IN_PROGRESS: { label: 'En diseño', className: 'bg-blue-100 text-blue-800' },
   PENDING_ADVERTISER_APPROVAL: { label: 'Pend. aprobación', className: 'bg-purple-100 text-purple-800' },
   CHANGES_REQUESTED: { label: 'Cambios solicitados', className: 'bg-orange-100 text-orange-800' },
-  READY_TO_LAUNCH: { label: 'Listo para lanzar', className: 'bg-teal-100 text-teal-800' },
-  LAUNCHED: { label: 'Activo', className: 'bg-emerald-100 text-emerald-800' },
+  LAUNCHED: { label: 'Campaña activa', className: 'bg-emerald-100 text-emerald-800' },
   CANCELLED: { label: 'Cancelado', className: 'bg-gray-100 text-gray-500' },
 };
 

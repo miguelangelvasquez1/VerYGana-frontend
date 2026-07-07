@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Plus,
   RefreshCw,
@@ -15,7 +16,6 @@ import {
 } from 'lucide-react';
 import { getMyBrandingRequests, type BrandingRequest, type BrandingStatus } from '@/services/BrandingRequestService';
 import { CreateBrandingWizard } from './CreateBrandingWizard';
-import { BrandingRequestDetail } from './BrandingRequestDetail';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -27,8 +27,7 @@ const STATUS_CONFIG: Record<BrandingStatus, { label: string; badge: string; grad
   DESIGN_IN_PROGRESS:         { label: 'En diseño',              badge: 'bg-blue-100 text-blue-800 border-blue-200',       gradient: 'from-blue-400 to-indigo-500' },
   PENDING_ADVERTISER_APPROVAL:{ label: 'Pendiente tu aprobación',badge: 'bg-purple-100 text-purple-800 border-purple-200', gradient: 'from-purple-400 to-violet-500' },
   CHANGES_REQUESTED:          { label: 'Cambios solicitados',    badge: 'bg-orange-100 text-orange-800 border-orange-200', gradient: 'from-orange-400 to-amber-500' },
-  READY_TO_LAUNCH:            { label: 'Listo para lanzar',      badge: 'bg-teal-100 text-teal-800 border-teal-200',       gradient: 'from-teal-400 to-cyan-500' },
-  LAUNCHED:                   { label: 'Activo',                 badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', gradient: 'from-emerald-400 to-green-600' },
+  LAUNCHED:                   { label: 'Campaña activa',         badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', gradient: 'from-emerald-400 to-green-600' },
   CANCELLED:                  { label: 'Cancelado',              badge: 'bg-gray-100 text-gray-500 border-gray-200',       gradient: 'from-gray-300 to-gray-400' },
 };
 
@@ -40,8 +39,7 @@ const STATUS_FILTER_OPTIONS: { label: string; value: BrandingStatus | 'all' }[] 
   { label: 'En diseño',         value: 'DESIGN_IN_PROGRESS' },
   { label: 'Pend. aprobación',  value: 'PENDING_ADVERTISER_APPROVAL' },
   { label: 'Cambios solicitados', value: 'CHANGES_REQUESTED' },
-  { label: 'Listo para lanzar', value: 'READY_TO_LAUNCH' },
-  { label: 'Activo',            value: 'LAUNCHED' },
+  { label: 'Campaña activa',     value: 'LAUNCHED' },
   { label: 'Rechazado',         value: 'REJECTED' },
   { label: 'Cancelado',         value: 'CANCELLED' },
 ];
@@ -63,7 +61,7 @@ const formatDate = (iso: string) =>
 // ─── Request Card ─────────────────────────────────────────────────────────────
 
 const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({ req, onClick }) => {
-  const cfg = STATUS_CONFIG[req.status];
+  const cfg = STATUS_CONFIG[req.status] ?? { label: req.status, badge: 'bg-gray-100 text-gray-700 border-gray-200', gradient: 'from-gray-300 to-gray-400' };
 
   return (
     <div
@@ -71,7 +69,7 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
       className="group relative bg-white rounded-2xl border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer"
     >
       {/* Left status bar */}
-      <div className={`absolute left-0 inset-y-0 w-1 bg-gradient-to-b ${cfg.gradient}`} />
+      <div className={`absolute left-0 inset-y-0 w-1 bg-linear-to-b ${cfg.gradient}`} />
 
       <div className="pl-6 pr-5 pt-5 pb-4 flex flex-col gap-4">
         {/* Brand + status */}
@@ -143,8 +141,9 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
 // ─── Main Panel ───────────────────────────────────────────────────────────────
 
 export const BrandingRequestPanel: React.FC = () => {
-  const [view, setView] = useState<'list' | 'create' | 'detail'>('list');
-  const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
+  const router = useRouter();
+
+  const [view, setView] = useState<'list' | 'create'>('list');
   const [requests, setRequests] = useState<BrandingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -173,6 +172,7 @@ export const BrandingRequestPanel: React.FC = () => {
     return () => controller.abort();
   }, []);
 
+
   if (view === 'create') {
     return (
       <CreateBrandingWizard
@@ -182,16 +182,7 @@ export const BrandingRequestPanel: React.FC = () => {
     );
   }
 
-  if (view === 'detail' && selectedRequestId !== null) {
-    return (
-      <BrandingRequestDetail
-        requestId={selectedRequestId}
-        onBack={() => { setView('list'); load(); }}
-      />
-    );
-  }
-
-  const filtered = requests.filter(r => {
+const filtered = requests.filter(r => {
     const matchesSearch =
       r.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.gameName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -316,7 +307,7 @@ export const BrandingRequestPanel: React.FC = () => {
             <BrandingCard
               key={req.id}
               req={req}
-              onClick={() => { setSelectedRequestId(req.id); setView('detail'); }}
+              onClick={() => router.push(`/commercial/branding/${req.id}`)}
             />
           ))}
         </div>

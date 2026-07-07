@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Loader2 } from 'lucide-react';
-import { getCampaignGoals } from '@/services/BrandingRequestService';
+import { useCampaignGoals } from '@/hooks/useCampaignGoals';
 import { CampaignTargetingSelector } from '../CampaignTargetingSelector';
 import type { Step3Form } from '../branding.types';
 
@@ -37,15 +37,7 @@ export const Step3Config: React.FC<Props> = ({
   onSkip,
   onNext,
 }) => {
-  const [goals, setGoals] = useState<string[]>([]);
-  const [goalsLoading, setGoalsLoading] = useState(true);
-
-  useEffect(() => {
-    getCampaignGoals()
-      .then(setGoals)
-      .catch(() => {})
-      .finally(() => setGoalsLoading(false));
-  }, []);
+  const { goals, loading: goalsLoading } = useCampaignGoals();
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
