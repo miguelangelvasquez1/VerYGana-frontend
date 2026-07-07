@@ -132,7 +132,7 @@ export function NotificationPanel({
             {/* Dropdown */}
             <div
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`absolute right-0 mt-2 w-96 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transition-all duration-300
+                className={`absolute right-0 mt-2 w-96 bg-white text-black rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transition-all duration-300 z-50
                     ${isOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
             >
                 {/* Header */}

@@ -49,7 +49,7 @@ export const Step2Resources: React.FC<Props> = ({
       <div>
         <h3 className="font-medium text-gray-900">Recursos corporativos</h3>
         <p className="text-sm text-gray-500 mt-0.5">
-          Logos, guías de marca, imágenes. Mínimo 1 requerido · PNG, JPEG, WEBP · Máx 20 MB
+          Logos, guías de marca, imágenes · PNG, JPEG, WEBP · Máx 20 MB
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export const Step2Resources: React.FC<Props> = ({
               {f.status === 'error' && (
                 <div className="flex items-center gap-1 shrink-0">
                   <AlertCircle size={18} className="text-red-500" />
-                  <span className="text-xs text-red-500 max-w-[120px] truncate">{f.error}</span>
+                  <span className="text-xs text-red-500 max-w-30 truncate">{f.error}</span>
                 </div>
               )}
               {f.status !== 'uploading' && (
@@ -114,6 +114,10 @@ export const Step2Resources: React.FC<Props> = ({
         </p>
       )}
 
+      <p className="text-xs text-gray-400 text-center">
+        También podrás subir y gestionar recursos desde el detalle de la solicitud una vez creada.
+      </p>
+
       <div className="flex justify-between pt-2">
         <button
           onClick={onBack}
@@ -123,7 +127,7 @@ export const Step2Resources: React.FC<Props> = ({
         </button>
         <button
           onClick={onNext}
-          disabled={confirmedCount === 0 || hasUploading}
+          disabled={hasUploading}
           className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
           Siguiente

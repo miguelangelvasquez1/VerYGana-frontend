@@ -23,21 +23,23 @@ export const GameCatalog: React.FC<Props> = ({ onBack, onSelect }) => {
   const [previewGame, setPreviewGame] = useState<BrandingGame | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const load = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await getBrandingGames(page, GAMES_PER_PAGE);
+        const res = await getBrandingGames(page, GAMES_PER_PAGE, controller.signal);
         setGames(res.content);
         setTotalPages(res.totalPages);
         setTotalElements(res.totalElements);
-      } catch {
-        setError('No se pudo cargar el catálogo de juegos');
+      } catch (err: any) {
+        if (err?.name !== 'CanceledError') setError('No se pudo cargar el catálogo de juegos');
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
     load();
+    return () => controller.abort();
   }, [page]);
 
   return (

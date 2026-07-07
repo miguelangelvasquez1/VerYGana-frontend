@@ -8,7 +8,6 @@ export type BrandingStatus =
   | 'DESIGN_IN_PROGRESS'
   | 'PENDING_ADVERTISER_APPROVAL'
   | 'CHANGES_REQUESTED'
-  | 'READY_TO_LAUNCH'
   | 'LAUNCHED'
   | 'CANCELLED';
 
@@ -89,9 +88,10 @@ export interface BrandingGamesPage {
   last: boolean;
 }
 
-export const getBrandingGames = async (page = 0, size = 12): Promise<BrandingGamesPage> => {
+export const getBrandingGames = async (page = 0, size = 12, signal?: AbortSignal): Promise<BrandingGamesPage> => {
   const { data } = await apiClient.get('/branding-requests/games', {
     params: { page, size, sort: 'title,asc' },
+    signal,
   });
   return data;
 };
@@ -183,7 +183,6 @@ export interface BrandingRequestDetail {
   assignedDesignerCode: string | null;
   corporateResources: BrandingCorporateResource[];
   campaignGoal: string | null;
-  hasCompleteRewardConfig: boolean;
   hasCompleteTargeting: boolean;
   createdAt: string;
   updatedAt: string;
@@ -199,18 +198,18 @@ export const getBrandingRequestDetail = async (id: number, signal?: AbortSignal)
   return data;
 };
 
-export const getCampaignGoals = async (): Promise<string[]> => {
-  const { data } = await apiClient.get('/branding-requests/campaign-goals');
+export const getCampaignGoals = async (signal?: AbortSignal): Promise<string[]> => {
+  const { data } = await apiClient.get('/branding-requests/campaign-goals', { signal });
   return data;
 };
 
-export const getCategories = async (): Promise<BrandingCategory[]> => {
-  const { data } = await apiClient.get('/categories/all');
+export const getCategories = async (signal?: AbortSignal): Promise<BrandingCategory[]> => {
+  const { data } = await apiClient.get('/categories/all', { signal });
   return data;
 };
 
-export const getDepartments = async (): Promise<Department[]> => {
-  const { data } = await apiClient.get('/locations/departments');
+export const getDepartments = async (signal?: AbortSignal): Promise<Department[]> => {
+  const { data } = await apiClient.get('/locations/departments', { signal });
   return data;
 };
 
@@ -269,7 +268,6 @@ export interface AdminBrandingRequestDetail {
   assignedDesignerName: string | null;
   assignedDesignerCode: string | null;
   corporateResources: BrandingCorporateResource[];
-  hasCompleteRewardConfig: boolean;
   hasCompleteTargeting: boolean;
   createdAt: string;
   updatedAt: string;

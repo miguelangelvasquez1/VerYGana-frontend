@@ -6,7 +6,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Lock, ArrowRight, Zap, Rocket } from 'lucide-react';
+import { Lock, ArrowRight } from 'lucide-react';
 import { usePlanState } from '../layout/DashboardLayout';
 import { PlanCode } from '@/types/finance/plans/Plan.types';
 
@@ -16,22 +16,10 @@ interface PlanGuardProps {
   featureName?: string;
 }
 
-const UPGRADE_INFO: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
-  BASIC: {
-    icon: <Zap className="w-8 h-8" />,
-    label: 'Plan Básico, Estándar o Premium',
-    color: 'from-blue-600/20 to-blue-900/10 border-blue-500/30 text-blue-400',
-  },
-    STANDARD: {
-    icon: <Zap className="w-8 h-8" />,
-    label: 'Plan Estándar',
-    color: 'from-blue-600/20 to-blue-900/10 border-blue-500/30 text-blue-400',
-  },
-  PREMIUM: {
-    icon: <Rocket className="w-8 h-8" />,
-    label: 'Plan Premium',
-    color: 'from-purple-600/20 to-purple-900/10 border-purple-500/30 text-purple-400',
-  },
+const UPGRADE_INFO: Record<string, { label: string; color: string }> = {
+  BASIC:    { label: 'Plan Básico, Estándar o Premium', color: 'from-blue-600/20 to-blue-900/10 border-blue-500/30 text-blue-400' },
+  STANDARD: { label: 'Plan Estándar',                  color: 'from-blue-600/20 to-blue-900/10 border-blue-500/30 text-blue-400' },
+  PREMIUM:  { label: 'Plan Premium',                   color: 'from-purple-600/20 to-purple-900/10 border-purple-500/30 text-purple-400' },
 };
 
 export function PlanGuard({ requiredPlans, children, featureName }: PlanGuardProps) {
@@ -59,32 +47,27 @@ export function PlanGuard({ requiredPlans, children, featureName }: PlanGuardPro
   const info = UPGRADE_INFO[neededPlan];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] px-6">
-      <div className={`
-        max-w-5xl w-full rounded-3xl border-2 bg-linear-to-br px-20 py-16 text-center
-        ${info.color}
-      `}>
-        <div className={`w-44 h-44 rounded-2xl flex items-center justify-center mx-auto mb-6 bg-white/10 ${info.color.split(' ').find(c => c.startsWith('text-'))}`}>
-          <span className="scale-[2.5]">{info.icon}</span>
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] px-4">
+      <div className={`max-w-md w-full rounded-2xl border bg-linear-to-br px-8 py-10 text-center ${info.color}`}>
+        <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 bg-white/20">
+          <Lock className="w-6 h-6" />
         </div>
 
-        <Lock className="w-12 h-12 text-slate-900 mx-auto mb-6" />
-
-        <h3 className="text-6xl font-extrabold from-blue-600/20 to-blue-900/10 border-blue-500/30 text-blue-400 mb-6 drop-shadow">
+        <h3 className="text-xl font-bold text-slate-900 mb-2">
           {featureName ? `${featureName} no disponible` : 'Funcionalidad bloqueada'}
         </h3>
-        <p className="text-slate-900 text-2xl mb-10 leading-relaxed font-medium">
+        <p className="text-slate-700 text-sm mb-6 leading-relaxed">
           Esta funcionalidad requiere el{' '}
-          <span className="font-extrabold text-slate-900">{info.label}</span>.
-          Activa tu plan con una inversión y desbloquea anuncios, juegos, encuestas y más.
+          <span className="font-semibold">{info.label}</span>.
+          Activa tu plan y desbloquea anuncios, juegos, encuestas y más.
         </p>
 
         <Link
           href="/plans"
-          className="inline-flex items-center gap-3 bg-white text-slate-900 font-extrabold text-xl px-12 py-5 rounded-2xl hover:bg-slate-100 transition-colors shadow-lg"
+          className="inline-flex items-center gap-2 bg-white text-slate-900 font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
         >
           Ver planes disponibles
-          <ArrowRight className="w-6 h-6" />
+          <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     </div>

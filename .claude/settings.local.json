@@ -2,7 +2,20 @@
   "permissions": {
     "allow": [
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
-      "Bash(xargs grep -l \"useNotifications\\\\|NotificationPanel\")"
+      "Bash(xargs grep -l \"useNotifications\\\\|NotificationPanel\")",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
     ]
+  },
+  "extraKnownMarketplaces": {
+    "anthropics-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "frontend-design@anthropics-skills": true
   }
 }

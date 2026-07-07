@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
-import { Bell, Search, User, LogOut } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Search, User, LogOut } from 'lucide-react';
 import { useLogout } from '@/hooks/useLogout';
 import { usePathname } from 'next/navigation';
+import { useNotifications } from '@/hooks/useNotifications';
+import { NotificationPanel } from '@/components/notifications/NotificationsPanel';
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin': 'Dashboard',
@@ -30,6 +32,20 @@ function getPageTitle(pathname: string): string {
 const Header: React.FC = () => {
   const { logout } = useLogout();
   const pathname = usePathname();
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notificationsMenuRef = useRef<HTMLDivElement | null>(null);
+  const { notifications, unreadCount, loading: notifLoading, hasMore, markAllAsRead, loadMore } = useNotifications();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node | null;
+      if (notificationsMenuRef.current && !notificationsMenuRef.current.contains(target)) {
+        setIsNotificationsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="bg-white shadow-sm border-b px-6 py-4 h-18">
@@ -37,7 +53,7 @@ const Header: React.FC = () => {
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-semibold text-gray-800">{getPageTitle(pathname)}</h1>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           {/* Search */}
           <div className="relative">
@@ -48,24 +64,28 @@ const Header: React.FC = () => {
               className="pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          
+
           {/* Notifications */}
-          <button className="relative p-2 text-gray-600 hover:text-gray-800">
-            <Bell size={20} />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              3
-            </span>
-          </button>
-          
+          <NotificationPanel
+            notifications={notifications}
+            unreadCount={unreadCount}
+            loading={notifLoading}
+            hasMore={hasMore}
+            isOpen={isNotificationsOpen}
+            onToggle={() => setIsNotificationsOpen(v => !v)}
+            onMarkAllAsRead={markAllAsRead}
+            onLoadMore={loadMore}
+            menuRef={notificationsMenuRef}
+            variant="light"
+          />
+
           {/* User Menu */}
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
               <User size={16} className="text-white" />
             </div>
             <span className="text-sm font-medium text-gray-700">Admin</span>
-            <button className="p-2 text-gray-600 hover:text-gray-800 cursor-pointer"
-              onClick={logout}
-              >
+            <button className="p-2 text-gray-600 hover:text-gray-800 cursor-pointer" onClick={logout}>
               <LogOut size={16} />
             </button>
           </div>

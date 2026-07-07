@@ -9,7 +9,6 @@ const CYCLE_LABEL: Partial<Record<string, string>> = {
   DESIGN_IN_PROGRESS: 'Diseño en progreso',
   CHANGES_REQUESTED: 'Cambios solicitados',
   PENDING_ADVERTISER_APPROVAL: 'Pendiente de revisión',
-  READY_TO_LAUNCH: 'Listo para lanzar',
   LAUNCHED: 'Campaña activa',
 };
 
