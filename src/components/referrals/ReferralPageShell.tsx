@@ -97,7 +97,7 @@ export default function ReferralPageShell({ info }: Props) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
 
       {/* Tabs */}
       <div className="bg-white rounded-xl shadow-sm border mb-8">
@@ -108,7 +108,7 @@ export default function ReferralPageShell({ info }: Props) {
               onClick={() => setActiveTab(id)}
               className={`flex-1 min-w-max flex items-center justify-center gap-2 px-6 py-4 font-medium border-b-2 transition-colors duration-200 ${
                 activeTab === id
-                  ? 'border-blue-500 text-blue-600'
+                  ? 'border-[#00a4ff] text-[#00a4ff]'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -125,24 +125,26 @@ export default function ReferralPageShell({ info }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <ReferralStatCard
               icon={Users}
-              iconBg="bg-green-100"
-              iconColor="text-green-600"
+              iconBg="bg-[#03548C]/10"
+              iconColor="text-[#03548C]"
               value={info.totalReferrals}
               label="Total referidos"
             />
             <ReferralStatCard
               icon={Ticket}
-              iconBg="bg-blue-100"
-              iconColor="text-blue-600"
+              iconBg="bg-[#c9a227]/15"
+              iconColor="text-[#c9a227]"
               value={totalTickets}
               label="Tickets ganados"
               badge={`${currentTier?.ticketsPerReferral} por referido`}
             />
             <ReferralStatCard
-              icon={Trophy}
-              iconBg="bg-purple-100"
-              iconColor="text-purple-600"
-              value={currentTier?.level ?? 'Bronze'}
+              icon={(currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce).Icon}
+              iconStyle={{
+                background: (currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce).bg,
+                color: (currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce).bar,
+              }}
+              value={currentTier?.level ?? 'Bronce'}
               label="Nivel actual"
               badge={nextTier ? `${nextTier.minReferrals - info.totalReferrals} para ${nextTier.level}` : 'Máximo'}
             />
@@ -153,15 +155,15 @@ export default function ReferralPageShell({ info }: Props) {
             const cfg = currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce;
             const { Icon: CurIcon } = cfg;
             return (
-              <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: 'var(--border-radius-lg, 16px)', padding: '1.5rem' }}>
+              <div className="bg-white rounded-xl border shadow-sm p-6">
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                   <div>
-                    <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    <p className="text-gray-500" style={{ fontSize: 12, margin: '0 0 4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                       Nivel de referidos
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 20, fontWeight: 600 }}>{currentTier?.level ?? '—'}</span>
+                      <span className="text-gray-900" style={{ fontSize: 20, fontWeight: 600 }}>{currentTier?.level ?? '—'}</span>
                       <span style={{ fontSize: 12, fontWeight: 500, background: cfg.bg, color: cfg.text, padding: '2px 9px', borderRadius: 8 }}>
                         ×{currentTier?.ticketsPerReferral ?? 1} tickets
                       </span>
@@ -174,13 +176,13 @@ export default function ReferralPageShell({ info }: Props) {
 
                 {/* Métricas */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: '1rem' }}>
-                  <div style={{ background: 'var(--color-background-secondary)', borderRadius: 8, padding: 12 }}>
-                    <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>Referidos totales</p>
-                    <p style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{info.totalReferrals}</p>
+                  <div className="bg-gray-50" style={{ borderRadius: 8, padding: 12 }}>
+                    <p className="text-gray-500" style={{ fontSize: 12, margin: '0 0 4px' }}>Referidos totales</p>
+                    <p className="text-gray-900" style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{info.totalReferrals}</p>
                   </div>
-                  <div style={{ background: 'var(--color-background-secondary)', borderRadius: 8, padding: 12 }}>
-                    <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>Tickets ganados</p>
-                    <p style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{totalTickets}</p>
+                  <div className="bg-gray-50" style={{ borderRadius: 8, padding: 12 }}>
+                    <p className="text-gray-500" style={{ fontSize: 12, margin: '0 0 4px' }}>Tickets ganados</p>
+                    <p className="text-gray-900" style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{totalTickets}</p>
                   </div>
                 </div>
               </div>
@@ -217,7 +219,7 @@ export default function ReferralPageShell({ info }: Props) {
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder="amigo@ejemplo.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#03548C] outline-none"
                   />
                 </div>
                 <div>
@@ -227,13 +229,13 @@ export default function ReferralPageShell({ info }: Props) {
                     onChange={(e) => setInviteMessage(e.target.value)}
                     placeholder="¡Hola! Te invito a conocer esta increíble plataforma..."
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#03548C] outline-none resize-none"
                   />
                 </div>
                 <button
                   onClick={sendInvite}
                   disabled={!inviteEmail}
-                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="w-full px-6 py-3 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   Enviar invitación
                 </button>
@@ -241,13 +243,13 @@ export default function ReferralPageShell({ info }: Props) {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 border">
+          <div className="bg-linear-to-br from-blue-50 to-purple-50 rounded-xl p-8 border">
             <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">¿Cómo funciona?</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                { Icon: Share2,   bg: 'bg-blue-600',   title: '1. Comparte tu código', desc: 'Envía tu código único a amigos y familiares'              },
-                { Icon: UserPlus, bg: 'bg-green-600',  title: '2. Ellos se registran', desc: 'Tus amigos usan tu código al crear su cuenta'             },
-                { Icon: Ticket,   bg: 'bg-purple-600', title: '3. Ganas tickets',      desc: 'Recibe tickets de rifa por cada amigo que se registre'    },
+                { Icon: Share2,   bg: 'bg-[#03548C]',   title: '1. Comparte tu código', desc: 'Envía tu código único a amigos y familiares'              },
+                { Icon: UserPlus, bg: 'bg-[#0b1440]',  title: '2. Ellos se registran', desc: 'Tus amigos usan tu código al crear su cuenta'             },
+                { Icon: Ticket,   bg: 'bg-[#00a4ff]',  title: '3. Ganas tickets',      desc: 'Recibe tickets de rifa por cada amigo que se registre'    },
               ].map(({ Icon, bg, title, desc }) => (
                 <div key={title} className="text-center">
                   <div className={`w-16 h-16 ${bg} rounded-full flex items-center justify-center mx-auto mb-4`}>
@@ -272,7 +274,7 @@ export default function ReferralPageShell({ info }: Props) {
 
           {loadingReferrals && (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              <Loader2 className="w-6 h-6 animate-spin text-[#03548C]" />
             </div>
           )}
 
@@ -287,7 +289,7 @@ export default function ReferralPageShell({ info }: Props) {
               <p className="text-gray-400 text-sm mt-1">Comparte tu código y aparecerán aquí</p>
               <button
                 onClick={() => setActiveTab('invite')}
-                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-colors"
+                className="mt-4 px-6 py-2 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] text-sm transition-colors"
               >
                 Invitar amigos
               </button>
@@ -428,17 +430,21 @@ export default function ReferralPageShell({ info }: Props) {
       )}
 
       {/* CTA */}
-      <div className="my-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white text-center">
-        <h3 className="text-2xl md:text-3xl font-bold mb-4">¡Gana tickets invitando amigos!</h3>
-        <p className="text-lg mb-8 text-blue-100">
-          Cada amigo que se registre con tu código te da {currentTier?.ticketsPerReferral ?? 1} ticket{(currentTier?.ticketsPerReferral ?? 1) > 1 ? 's' : ''} de rifa
-        </p>
-        <button
-          onClick={() => setActiveTab('invite')}
-          className="px-8 py-3 bg-white text-blue-600 font-bold rounded-full hover:bg-gray-100 transition-colors"
-        >
-          Invitar amigos
-        </button>
+      <div className="my-12 relative overflow-hidden bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] rounded-2xl p-8 md:p-12 text-white text-center">
+        <div className="pointer-events-none absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-white/5" />
+        <div className="relative">
+          <h3 className="text-2xl md:text-3xl font-bold mb-4">¡Gana tickets invitando amigos!</h3>
+          <p className="text-lg mb-8 text-white/70">
+            Cada amigo que se registre con tu código te da {currentTier?.ticketsPerReferral ?? 1} ticket{(currentTier?.ticketsPerReferral ?? 1) > 1 ? 's' : ''} de rifa
+          </p>
+          <button
+            onClick={() => setActiveTab('invite')}
+            className="px-8 py-3 bg-white text-[#03548C] font-bold rounded-full hover:bg-gray-100 transition-colors"
+          >
+            Invitar amigos
+          </button>
+        </div>
       </div>
 
     </div>

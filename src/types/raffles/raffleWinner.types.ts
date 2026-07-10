@@ -45,4 +45,5 @@ export interface ClaimPrizeRequestDTO {
     newEmail?: string;
     newPhoneNumber?: string;
     smsOtpCode?: string;
+    emailOtpCode?: string;
 }

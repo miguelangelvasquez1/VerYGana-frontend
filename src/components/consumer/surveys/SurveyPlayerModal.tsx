@@ -194,7 +194,7 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
                 <div
-                  className="h-full rounded-full bg-indigo-500 transition-all duration-300"
+                  className="h-full rounded-full bg-[#03548C] transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -232,7 +232,7 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
                   <button
                     onClick={handleSubmit}
                     disabled={submitMutation.isPending}
-                    className="cursor-pointer flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 active:scale-95 transition-all"
+                    className="cursor-pointer flex items-center gap-2 rounded-xl bg-[#03548C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0b1440] disabled:opacity-60 active:scale-95 transition-all"
                   >
                     {submitMutation.isPending
                       ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -242,7 +242,7 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
                 ) : (
                   <button
                     onClick={goNext}
-                    className="cursor-pointer flex items-center gap-1 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 active:scale-95 transition-all"
+                    className="cursor-pointer flex items-center gap-1 rounded-xl bg-[#03548C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0b1440] active:scale-95 transition-all"
                   >
                     Siguiente <ChevronRight className="h-4 w-4" />
                   </button>
@@ -305,17 +305,17 @@ function PreviewScreen({
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-[#03548C]" />
           </div>
         ) : survey ? (
           <>
             {/* Reward highlight */}
-            <div className="rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 p-5 text-white">
-              <p className="text-xs font-medium text-indigo-200 uppercase tracking-wider">
+            <div className="rounded-2xl bg-linear-to-br from-[#0b1440] to-[#03548C] p-5 text-white">
+              <p className="text-xs font-medium text-white/60 uppercase tracking-wider">
                 Recompensa total
               </p>
               <p className="mt-1 text-3xl font-black">{rewardTotal}</p>
-              <p className="mt-1 text-xs text-indigo-200">
+              <p className="mt-1 text-xs text-white/60">
                 {survey.totalQuestions} preguntas
               </p>
             </div>
@@ -366,7 +366,7 @@ function PreviewScreen({
           <button
             onClick={onStart}
             disabled={isStarting}
-            className="cursor-pointer flex flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 active:scale-95 transition-all"
+            className="cursor-pointer flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#03548C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0b1440] disabled:opacity-60 active:scale-95 transition-all"
           >
             {isStarting
               ? <><Loader2 className="h-4 w-4 animate-spin" /> Iniciando…</>

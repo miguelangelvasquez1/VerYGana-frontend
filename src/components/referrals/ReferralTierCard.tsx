@@ -3,15 +3,16 @@
 import { Medal, Star, Trophy, Crown, Lock, Ticket } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+// Colores temáticos por nivel: bronceado, plateado, dorado, rojo intenso, verde intenso, cyan intenso
 export const TIER_CONFIG: Record<string, {
   bg: string; text: string; bar: string; Icon: LucideIcon
 }> = {
-  Bronce:    { bg: '#FAEEDA', text: '#854F0B', bar: '#BA7517', Icon: Medal   },
-  Plata:     { bg: '#F1EFE8', text: '#5F5E5A', bar: '#888780', Icon: Star    },
-  Oro:       { bg: '#FEF9C3', text: '#713F12', bar: '#EF9F27', Icon: Trophy  },
-  Rubí:      { bg: '#FBEAF0', text: '#72243E', bar: '#D4537E', Icon: Medal   },
-  Esmeralda: { bg: '#E1F5EE', text: '#085041', bar: '#1D9E75', Icon: Star    },
-  Diamante:  { bg: '#E6F1FB', text: '#0C447C', bar: '#378ADD', Icon: Crown   },
+  Bronce:    { bg: '#FAEEDA', text: '#854F0B', bar: '#B5651D', Icon: Medal   },
+  Plata:     { bg: '#F1F3F5', text: '#4B5563', bar: '#9CA3AF', Icon: Star    },
+  Oro:       { bg: '#FEF9C3', text: '#854D0E', bar: '#D4AF37', Icon: Trophy  },
+  Rubí:      { bg: '#FCE4E4', text: '#7F1D1D', bar: '#C81E3A', Icon: Medal   },
+  Esmeralda: { bg: '#DCFCE7', text: '#065F46', bar: '#059669', Icon: Star    },
+  Diamante:  { bg: '#CFFAFE', text: '#155E75', bar: '#06B6D4', Icon: Crown   },
 };
 
 interface Props {
@@ -30,9 +31,9 @@ export default function ReferralTierCard({ level, minReferrals, ticketsPerReferr
   return (
     <div style={{
       position: 'relative',
-      background: 'var(--color-background-primary)',
-      border: `1.5px solid ${isCurrent ? cfg.bar : 'var(--color-border-tertiary)'}`,
-      borderRadius: 'var(--border-radius-lg, 16px)',
+      background: '#ffffff',
+      border: `1.5px solid ${isCurrent ? cfg.bar : '#e5e7eb'}`,
+      borderRadius: 16,
       padding: '1.25rem 1rem',
       opacity: isUnlocked ? 1 : 0.5,
       transition: 'border-color 0.2s, opacity 0.2s',
@@ -64,7 +65,7 @@ export default function ReferralTierCard({ level, minReferrals, ticketsPerReferr
           width: 52,
           height: 52,
           borderRadius: '50%',
-          background: isUnlocked ? cfg.bg : 'var(--color-background-secondary)',
+          background: isUnlocked ? cfg.bg : '#f3f4f6',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -77,17 +78,17 @@ export default function ReferralTierCard({ level, minReferrals, ticketsPerReferr
 
         {/* Nombre y requisito */}
         <div>
-          <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 3px' }}>
+          <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: '0 0 3px' }}>
             {level}
           </p>
-          <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: 0 }}>
+          <p style={{ fontSize: 12, color: '#6b7280', margin: 0 }}>
             {minReferrals === 0 ? 'Sin mínimo' : `${minReferrals}+ referidos`}
           </p>
         </div>
 
         {/* Badge de tickets */}
         <div style={{
-          background: isUnlocked ? cfg.bg : 'var(--color-background-secondary)',
+          background: isUnlocked ? cfg.bg : '#f3f4f6',
           borderRadius: 10,
           padding: '8px 14px',
           width: '100%',

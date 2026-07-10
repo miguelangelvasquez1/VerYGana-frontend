@@ -62,7 +62,7 @@ const FormField = React.forwardRef<
       <input
         ref={ref}
         {...props}
-        className={`w-full pl-10 pr-4 py-2.5 border rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm ${
+        className={`w-full pl-10 pr-4 py-2.5 border rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C] transition text-sm ${
           error ? "border-red-400 focus:ring-red-400" : "border-gray-200"
         }`}
       />
@@ -146,7 +146,7 @@ export default function EditConsumerProfilePage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-60">
-        <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
+        <Loader2 className="animate-spin w-8 h-8 text-[#03548C]" />
       </div>
     );
   }
@@ -163,8 +163,8 @@ export default function EditConsumerProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Header */}
-      <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative overflow-hidden bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
           <Link
             href="/explore/profile"
             className="inline-flex items-center gap-1.5 text-white/70 hover:text-white text-sm mb-6 transition"
@@ -199,12 +199,20 @@ export default function EditConsumerProfilePage() {
               <button
                 type="button"
                 onClick={() => setAvatarPickerOpen(true)}
-                className="mt-1 text-xs text-white/60 hover:text-white underline transition-colors"
+                className="cursor-pointer mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 text-white text-xs font-medium px-3 py-1.5 backdrop-blur-sm hover:bg-white/30 hover:scale-105 transition-all duration-200"
               >
+                <Camera className="w-3.5 h-3.5" />
                 Cambiar avatar
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Wave bottom */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f9fafb" />
+          </svg>
         </div>
       </div>
 
@@ -278,7 +286,7 @@ export default function EditConsumerProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-5 py-3 rounded-xl font-semibold transition text-sm"
+              className="flex-1 flex justify-center items-center gap-2 bg-[#03548C] hover:bg-[#0b1440] disabled:bg-gray-400 text-white px-5 py-3 rounded-xl font-semibold transition text-sm"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

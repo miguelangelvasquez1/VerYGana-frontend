@@ -7,8 +7,7 @@ import {
   CreditCard,
   FileImage,
   Home,
-  PlusCircle,
-  Settings,
+  Headset,
   Package,
   ClipboardList,
   X,
@@ -16,11 +15,9 @@ import {
   PawPrint,
   Lock,
   Sparkles,
-  Megaphone,
   Palette,
 } from 'lucide-react';
-import { WalletStatus } from '@/types/finance/Wallet.types';
-import {PlanCode} from '@/types/finance/plans/Plan.types';
+import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { useLogout } from '@/hooks/useLogout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -41,8 +38,6 @@ interface SidebarProps {
   onClose?: () => void;
   effectivePlan?: PlanCode | null;
   hasActivePlan?: boolean;
-  remainingBudget?: number;
-  walletStatus?: WalletStatus;
   pathname?: string;
 }
 
@@ -54,11 +49,6 @@ const menuItems: MenuItem[] = [
     href: '/commercial/products', icon: Package, label: 'Mis productos',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
-  },
-  {
-    href: '/commercial/products/create', icon: PlusCircle, label: 'Crear producto',
-    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true, skipActive: true,
   },
   {
     href: '/commercial/ads', icon: FileImage, label: 'Mis Anuncios',
@@ -90,11 +80,7 @@ const menuItems: MenuItem[] = [
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
   },
-  {
-    href: '/commercial/settings', icon: Settings, label: 'Configuración',
-    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true,
-  },
+  { href: '/commercial/support', icon: Headset, label: 'Soporte' },
   { href: '/plans', icon: Sparkles, label: 'Ver Planes' },
 ];
 
@@ -137,8 +123,6 @@ export function Sidebar({
   onClose,
   effectivePlan = null,
   hasActivePlan = false,
-  remainingBudget,
-  walletStatus = WalletStatus.INACTIVE,
   pathname = '',
 }: SidebarProps) {
 
@@ -172,10 +156,6 @@ export function Sidebar({
     if (item.requiredPlans && !item.lockIfUnavailable && !canAccess(item)) return false;
     return true;
   };
-
-  const hasBudget =
-    (effectivePlan === PlanCode.STANDARD || effectivePlan === PlanCode.PREMIUM) &&
-    typeof remainingBudget === 'number';
 
   return (
     <div className="bg-[#0f1117] text-white w-64 h-screen flex flex-col border-r border-white/6">

@@ -163,7 +163,7 @@ export default function CreateProductForm() {
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-full h-48 object-cover rounded-xl"
+              className="w-full max-h-72 object-contain rounded-xl p-2"
             />
           ) : (
             <p className="text-sm text-gray-500 py-10">

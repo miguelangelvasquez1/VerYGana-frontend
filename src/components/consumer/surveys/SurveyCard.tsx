@@ -15,10 +15,10 @@ export default function SurveyCard({ survey, rank, onStart }: Props) {
   const totalReward = (survey.rewardAmountPerQuestionCents * survey.totalQuestions) / 100;
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-lg hover:border-indigo-100 transition-all duration-200">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-lg hover:border-[#03548C]/20 transition-all duration-200">
 
       {/* Top accent gradient */}
-      <div className="h-1 w-full bg-gradient-to-r from-indigo-500 to-violet-500" />
+      <div className="h-1 w-full bg-linear-to-r from-[#0b1440] to-[#03548C]" />
 
       {/* Rank badge */}
       {rank <= 3 && (
@@ -46,15 +46,15 @@ export default function SurveyCard({ survey, rank, onStart }: Props) {
         {/* Stats row */}
         <div className="flex items-stretch gap-2">
           {/* Reward */}
-          <div className="flex flex-1 items-center gap-2.5 rounded-xl bg-indigo-50 px-3 py-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 shadow-sm shadow-indigo-300">
+          <div className="flex flex-1 items-center gap-2.5 rounded-xl bg-[#03548C]/5 px-3 py-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#03548C] shadow-sm shadow-[#03548C]/30">
               <Coins className="h-4 w-4 text-white" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-indigo-400">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-[#03548C]/60">
                 Recompensa
               </p>
-              <p className="text-sm font-bold text-indigo-700 truncate">
+              <p className="text-sm font-bold text-[#03548C] truncate">
                 {formatReward(totalReward)}
               </p>
             </div>
@@ -73,7 +73,7 @@ export default function SurveyCard({ survey, rank, onStart }: Props) {
         {/* CTA */}
         <button
           onClick={onStart}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-500 active:scale-95"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#03548C] py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#0b1440] active:scale-95"
         >
           Ver encuesta
           <ChevronRight className="h-4 w-4" />

@@ -23,7 +23,7 @@ export default function QuestionRenderer({
         <h3 className="text-lg font-semibold leading-snug text-gray-900">
           {question.text}
           {question.required && (
-            <span className="ml-1 text-indigo-500">*</span>
+            <span className="ml-1 text-[#03548C]">*</span>
           )}
         </h3>
         <p className="mt-1 text-xs text-gray-400">{typeHint(question)}</p>
@@ -101,17 +101,17 @@ function SingleChoice({
             onClick={() => onChange(opt.id)}
             className={`w-full rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all ${
               selected
-                ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                : 'border-gray-200 bg-white text-gray-700 hover:border-indigo-200 hover:bg-indigo-50/50'
+                ? 'border-[#03548C] bg-[#03548C]/5 text-[#03548C]'
+                : 'border-gray-200 bg-white text-gray-700 hover:border-[#03548C]/30 hover:bg-[#03548C]/5'
             }`}
           >
             <span
               className={`mr-3 inline-flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-                selected ? 'border-indigo-500' : 'border-gray-300'
+                selected ? 'border-[#03548C]' : 'border-gray-300'
               }`}
             >
               {selected && (
-                <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                <span className="h-2 w-2 rounded-full bg-[#03548C]" />
               )}
             </span>
             {opt.text}
@@ -196,14 +196,14 @@ function MultipleChoice({
             onClick={() => toggle(opt.id)}
             className={`w-full rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all ${
               checked
-                ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                : 'border-gray-200 bg-white text-gray-700 hover:border-indigo-200'
+                ? 'border-[#03548C] bg-[#03548C]/5 text-[#03548C]'
+                : 'border-gray-200 bg-white text-gray-700 hover:border-[#03548C]/30'
             }`}
           >
             <span
               className={`mr-3 inline-flex h-4 w-4 items-center justify-center rounded ${
                 checked
-                  ? 'border-indigo-500 bg-indigo-500'
+                  ? 'border-[#03548C] bg-[#03548C]'
                   : 'border-2 border-gray-300 bg-white'
               }`}
             >
@@ -242,7 +242,7 @@ function TextAnswer({
       onChange={(e) => onChange(e.target.value)}
       rows={4}
       placeholder="Escribe tu respuesta aquí…"
-      className="w-full resize-none rounded-xl border-2 border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none placeholder:text-gray-300 focus:border-indigo-400 transition-colors"
+      className="w-full resize-none rounded-xl border-2 border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none placeholder:text-gray-300 focus:border-[#03548C] transition-colors"
     />
   );
 }
@@ -268,8 +268,8 @@ function RatingAnswer({
             onClick={() => onChange(n)}
             className={`flex h-14 w-14 flex-col items-center justify-center rounded-2xl border-2 text-xl transition-all ${
               value === n
-                ? 'border-indigo-500 bg-indigo-50 shadow-md scale-110'
-                : 'border-gray-200 bg-white hover:border-indigo-200 hover:scale-105'
+                ? 'border-[#03548C] bg-[#03548C]/5 shadow-md scale-110'
+                : 'border-gray-200 bg-white hover:border-[#03548C]/30 hover:scale-105'
             }`}
           >
             {['😞', '😕', '😐', '🙂', '😄'][n - 1]}
@@ -277,7 +277,7 @@ function RatingAnswer({
         ))}
       </div>
       {value > 0 && (
-        <p className="text-center text-sm font-medium text-indigo-600">
+        <p className="text-center text-sm font-medium text-[#03548C]">
           {labels[value - 1]}
         </p>
       )}

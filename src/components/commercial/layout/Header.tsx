@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Menu, User, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
-import { getCommercialInitialData } from '@/services/commercialService';
+import { getCommercialInitialData } from '@/services/CommercialService';
 import { EffectivePlanStateResponseDTO } from '@/types/finance/plans/Plan.types';
 import { formatBudget, formatCents } from '@/utils/currency';
 import { NotificationPanel } from '@/components/notifications/NotificationsPanel';
@@ -153,9 +153,13 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
                 <p className="text-sm font-semibold text-gray-900">{commercial?.companyName}</p>
                 <p className="text-xs text-gray-500">{commercial?.email}</p>
               </div>
-              <button className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+              <Link
+                href="/commercial/profile"
+                className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center hover:opacity-80 transition"
+                title="Ver mi perfil"
+              >
                 <User className="w-4 h-4 text-white" />
-              </button>
+              </Link>
             </div>
           </div>
         </div>

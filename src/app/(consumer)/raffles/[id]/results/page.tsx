@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { Maximize2, X } from "lucide-react";
 import { getRaffleResultByRaffleId, getDrawProofByRaffleId } from "@/services/raffleService";
 import { RaffleResultResponseDTO, DrawProofResponseDTO } from "@/types/raffles/raffleResult.types";
 
@@ -28,6 +29,8 @@ export default function RaffleResultPage() {
   const [result, setResult] = useState<RaffleResultResponseDTO | null>(null);
   const [proof, setProof] = useState<DrawProofResponseDTO | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showFullImage, setShowFullImage] = useState(false);
+  const [fullPrizeImage, setFullPrizeImage] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -70,16 +73,25 @@ export default function RaffleResultPage() {
           <span>📅 Fecha del sorteo: {new Date(result.drawnAt).toLocaleString()}</span>
           <span>👥 {result.totalParticipants} participantes</span>
           <span>🎟️ {result.totalTicketsIssued} boletos</span>
-          <span className="px-3 py-1 bg-yellow-500 text-black rounded-full font-bold text-xs">
+          <span className="px-3 py-1 bg-[#FFD700] text-black rounded-full font-bold text-xs">
             {result.raffleType}
           </span>
         </div>
 
-        <img
-          src={result.raffleImageUrl}
-          alt={result.raffleTitle}
-          className="mt-4 w-full h-64 object-cover rounded-xl"
-        />
+        <div className="relative mt-4">
+          <img
+            src={result.raffleImageUrl}
+            alt={result.raffleTitle}
+            className="w-full h-64 object-cover rounded-xl"
+          />
+          <button
+            onClick={() => setShowFullImage(true)}
+            className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/50 hover:bg-black/70 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition"
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+            Ver completa
+          </button>
+        </div>
       </div>
 
       {/* GANADORES */}
@@ -92,11 +104,19 @@ export default function RaffleResultPage() {
               key={winner.position}
               className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition"
             >
-              <img
-                src={winner.prizeImageUrl}
-                alt={winner.prizeTitle}
-                className="w-full h-40 object-cover"
-              />
+              <div className="relative">
+                <img
+                  src={winner.prizeImageUrl}
+                  alt={winner.prizeTitle}
+                  className="w-full h-40 object-cover"
+                />
+                <button
+                  onClick={() => setFullPrizeImage(winner.prizeImageUrl)}
+                  className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-lg transition"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
               <div className="p-4 space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-bold text-gray-900">
@@ -109,7 +129,7 @@ export default function RaffleResultPage() {
                 <h3 className="font-semibold text-gray-800 text-sm">{winner.prizeTitle}</h3>
                 <p className="text-xs text-gray-500">👤 {winner.userName}</p>
                 <p className="text-xs text-gray-500">🎟️ Boleta: {winner.ticketNumber}</p>
-                <p className="text-sm font-bold text-yellow-600">
+                <p className="text-sm font-bold text-[#c9a227]">
                   Valor del premio: ${winner.prizeValue.toLocaleString("es-CO")}
                 </p>
               </div>
@@ -123,13 +143,13 @@ export default function RaffleResultPage() {
         <div className="bg-white rounded-2xl shadow-md overflow-hidden">
 
           {/* Cabecera */}
-          <div className="bg-gradient-to-r from-blue-700 to-blue-500 px-6 py-5 flex items-center gap-4">
+          <div className="bg-linear-to-r from-[#0b1440] to-[#03548C] px-6 py-5 flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl shrink-0">
               🔍
             </div>
             <div>
               <h2 className="text-white font-bold text-lg leading-tight">Prueba del sorteo</h2>
-              <p className="text-blue-100 text-xs mt-0.5">
+              <p className="text-[#00a4ff] text-xs mt-0.5">
                 Registro oficial e inmutable — verificable de forma independiente
               </p>
             </div>
@@ -168,9 +188,9 @@ export default function RaffleResultPage() {
                   <p className="text-2xl font-bold text-gray-900">{proof.numberOfWinners ?? "—"}</p>
                   <p className="text-xs text-gray-500 mt-1">Ganadores</p>
                 </div>
-                <div className="bg-blue-50 rounded-xl p-4 text-center">
-                  <p className="text-sm font-bold text-blue-700 leading-tight">{drawMethodLabel(proof.actualDrawMethod)}</p>
-                  <p className="text-xs text-blue-500 mt-1">Método utilizado</p>
+                <div className="bg-[#00a4ff]/10 rounded-xl p-4 text-center">
+                  <p className="text-sm font-bold text-[#03548C] leading-tight">{drawMethodLabel(proof.actualDrawMethod)}</p>
+                  <p className="text-xs text-[#00a4ff] mt-1">Método utilizado</p>
                 </div>
               </div>
             </div>
@@ -214,11 +234,11 @@ export default function RaffleResultPage() {
 
                 {/* Random.org metadata */}
                 {proof.randomOrgDrawMetadata && (
-                  <div className="border border-blue-100 rounded-xl overflow-hidden">
-                    <div className="bg-blue-50 px-4 py-2 flex items-center gap-2">
+                  <div className="border border-[#03548C]/20 rounded-xl overflow-hidden">
+                    <div className="bg-[#0b1440]/5 px-4 py-2 flex items-center gap-2">
                       <span className="text-sm">🌐</span>
-                      <p className="text-xs font-semibold text-blue-700">Metadatos de Random.org</p>
-                      <span className="ml-auto text-xs text-blue-400">Generador externo independiente</span>
+                      <p className="text-xs font-semibold text-[#03548C]">Metadatos de Random.org</p>
+                      <span className="ml-auto text-xs text-[#00a4ff]">Generador externo independiente</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-gray-100">
                       <div className="bg-white px-4 py-3">
@@ -325,7 +345,7 @@ export default function RaffleResultPage() {
                         </div>
                         <div className="bg-white rounded-lg px-3 py-2">
                           <p className="text-xs text-gray-400">Valor del premio</p>
-                          <p className="font-bold text-yellow-600 text-base">${w.prizeValue.toLocaleString("es-CO")}</p>
+                          <p className="font-bold text-[#c9a227] text-base">${w.prizeValue.toLocaleString("es-CO")}</p>
                         </div>
                       </div>
 
@@ -364,6 +384,55 @@ export default function RaffleResultPage() {
         </div>
       )}
 
+      {fullPrizeImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85"
+          onClick={() => setFullPrizeImage(null)}
+        >
+          <div
+            className="relative max-w-3xl w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setFullPrizeImage(null)}
+              className="absolute -top-10 right-0 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition"
+            >
+              <X className="w-5 h-5" />
+              Cerrar
+            </button>
+            <img
+              src={fullPrizeImage}
+              alt="Premio"
+              className="w-full max-h-[85vh] object-contain rounded-xl"
+            />
+          </div>
+        </div>
+      )}
+
+      {showFullImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85"
+          onClick={() => setShowFullImage(false)}
+        >
+          <div
+            className="relative max-w-4xl w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowFullImage(false)}
+              className="absolute -top-10 right-0 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition"
+            >
+              <X className="w-5 h-5" />
+              Cerrar
+            </button>
+            <img
+              src={result.raffleImageUrl}
+              alt={result.raffleTitle}
+              className="w-full max-h-[85vh] object-contain rounded-xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
