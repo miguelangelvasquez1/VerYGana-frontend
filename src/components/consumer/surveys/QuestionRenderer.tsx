@@ -17,16 +17,16 @@ export default function QuestionRenderer({
   error,
 }: Props) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       {/* Question text */}
       <div>
-        <h3 className="text-lg font-semibold leading-snug text-gray-900">
+        <h3 className="text-2xl font-bold leading-snug text-gray-900 md:text-3xl">
           {question.text}
           {question.required && (
             <span className="ml-1 text-[#03548C]">*</span>
           )}
         </h3>
-        <p className="mt-1 text-xs text-gray-400">{typeHint(question)}</p>
+        <p className="mt-2 text-sm text-gray-400">{typeHint(question)}</p>
       </div>
 
       {/* Input per type */}
@@ -91,7 +91,7 @@ function SingleChoice({
   onChange: (id: number) => void;
 }) {
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
       {question.options.map((opt) => {
         const selected = selectedId === opt.id;
         return (
@@ -99,7 +99,7 @@ function SingleChoice({
             key={opt.id}
             type="button"
             onClick={() => onChange(opt.id)}
-            className={`w-full rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all ${
+            className={`w-full rounded-xl border-2 px-5 py-4 text-left text-base font-medium transition-all ${
               selected
                 ? 'border-[#03548C] bg-[#03548C]/5 text-[#03548C]'
                 : 'border-gray-200 bg-white text-gray-700 hover:border-[#03548C]/30 hover:bg-[#03548C]/5'
@@ -142,7 +142,7 @@ function YesNo({
         const selected = value === id;
         const isPositive = id === 'YES';
 
-        const baseClasses = 'flex-1 rounded-2xl border-2 py-4 text-base font-bold transition-all';
+        const baseClasses = 'flex-1 rounded-2xl border-2 py-5 text-lg font-bold transition-all';
         const colorClasses = selected
                 ? isPositive
                   ? 'border-emerald-500 bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300'
@@ -186,7 +186,7 @@ function MultipleChoice({
   };
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
       {question.options.map((opt) => {
         const checked = selectedIds.includes(opt.id);
         return (
@@ -194,7 +194,7 @@ function MultipleChoice({
             key={opt.id}
             type="button"
             onClick={() => toggle(opt.id)}
-            className={`w-full rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all ${
+            className={`w-full rounded-xl border-2 px-5 py-4 text-left text-base font-medium transition-all ${
               checked
                 ? 'border-[#03548C] bg-[#03548C]/5 text-[#03548C]'
                 : 'border-gray-200 bg-white text-gray-700 hover:border-[#03548C]/30'
@@ -240,9 +240,9 @@ function TextAnswer({
     <textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      rows={4}
+      rows={6}
       placeholder="Escribe tu respuesta aquí…"
-      className="w-full resize-none rounded-xl border-2 border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none placeholder:text-gray-300 focus:border-[#03548C] transition-colors"
+      className="w-full resize-none rounded-xl border-2 border-gray-200 px-5 py-4 text-base text-gray-800 outline-none placeholder:text-gray-300 focus:border-[#03548C] transition-colors"
     />
   );
 }
@@ -259,14 +259,14 @@ function RatingAnswer({
   const labels = ['Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'];
 
   return (
-    <div className="space-y-3">
-      <div className="flex justify-center gap-2">
+    <div className="space-y-4">
+      <div className="flex justify-center gap-3">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}
             type="button"
             onClick={() => onChange(n)}
-            className={`flex h-14 w-14 flex-col items-center justify-center rounded-2xl border-2 text-xl transition-all ${
+            className={`flex h-16 w-16 flex-col items-center justify-center rounded-2xl border-2 text-2xl transition-all md:h-20 md:w-20 md:text-3xl ${
               value === n
                 ? 'border-[#03548C] bg-[#03548C]/5 shadow-md scale-110'
                 : 'border-gray-200 bg-white hover:border-[#03548C]/30 hover:scale-105'
@@ -277,7 +277,7 @@ function RatingAnswer({
         ))}
       </div>
       {value > 0 && (
-        <p className="text-center text-sm font-medium text-[#03548C]">
+        <p className="text-center text-base font-medium text-[#03548C]">
           {labels[value - 1]}
         </p>
       )}

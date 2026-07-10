@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 import * as purchaseItemService from "@/services/PurchaseItemService";
-import * as commercialService from "@/services/CommercialService";
+import * as commercialService from "@/services/commercialService";
 
 import { MonthlyReportResponseDTO } from "@/types/Commercial.types";
 

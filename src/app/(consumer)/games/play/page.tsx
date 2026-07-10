@@ -166,7 +166,7 @@ export default function PlayGamePage() {
   return (
     <>
       <div
-        className="w-full bg-black overflow-hidden"
+        className="relative w-full bg-black overflow-hidden"
         style={{ height: gameHeight ?? '100vh' }}
       >
         <iframe
@@ -175,9 +175,21 @@ export default function PlayGamePage() {
           className="w-full h-full border-0"
           allowFullScreen
         />
+
+        {/* Botón volver escritorio: relativo al área del juego, no al viewport, para no tapar el navbar del sitio */}
+        {!isMobile && (
+          <button
+            onClick={() => router.push('/games')}
+            className="absolute top-4 left-4 z-50 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white rounded-full px-3 py-2 text-sm font-medium shadow-lg hover:bg-black/80 transition-colors cursor-pointer"
+            aria-label="Volver a juegos"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver
+          </button>
+        )}
       </div>
 
-      {/* Botón volver solo en móvil (landscape), por encima del bottom nav */}
+      {/* Botón volver móvil: encima del bottom nav */}
       {isMobile && (
         <button
           onClick={() => router.push('/games')}

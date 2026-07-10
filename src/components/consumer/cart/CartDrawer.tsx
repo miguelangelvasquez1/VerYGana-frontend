@@ -4,15 +4,33 @@
 // CART DRAWER - Panel Lateral del Carrito
 // ========================================
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { CartItem } from './CartItem';
 
+const TRANSITION_MS = 220;
+
 export function CartDrawer() {
   const router = useRouter();
   const { cart, cartSummary, isCartOpen, closeCart } = useCart();
+
+  // Mantiene el drawer montado durante la animación de salida
+  const [shouldRender, setShouldRender] = useState(isCartOpen);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (isCartOpen) {
+      setShouldRender(true);
+      const raf = requestAnimationFrame(() => setIsVisible(true));
+      return () => cancelAnimationFrame(raf);
+    }
+
+    setIsVisible(false);
+    const timeout = setTimeout(() => setShouldRender(false), TRANSITION_MS);
+    return () => clearTimeout(timeout);
+  }, [isCartOpen]);
 
   // Cerrar con tecla Escape
   useEffect(() => {
@@ -36,18 +54,24 @@ export function CartDrawer() {
     router.push('/checkout');
   };
 
-  if (!isCartOpen) return null;
+  if (!shouldRender) return null;
 
   return (
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 bg-opacity-50 z-40 transition-opacity"
+        className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         onClick={closeCart}
       />
 
       {/* Drawer */}
-      <div className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col animate-in slide-in-from-right">
+      <div
+        className={`fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transition-transform duration-[220ms] ease-out will-change-transform ${
+          isVisible ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white">
           <h2 className="text-lg font-bold">Carrito de Compras</h2>

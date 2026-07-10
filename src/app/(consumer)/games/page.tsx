@@ -9,16 +9,14 @@ import { useRouter } from 'next/navigation';
 
 const GamesPanelPage = () => {
   const router = useRouter();
-  const [sponsoredGames, setSponsoredGames] = useState<GameCardResponseDTO[]>([]);
-  const [freeGames, setFreeGames] = useState<GameCardResponseDTO[]>([]);
+  const [games, setGames] = useState<GameCardResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadGames = async () => {
       try {
         const page = await getAvailableGamesPage(0, 20);
-        setSponsoredGames(page.data.filter((g: { sponsored: any }) => g.sponsored));
-        setFreeGames(page.data.filter((g: { sponsored: any }) => !g.sponsored));
+        setGames(page.data);
       } catch (error) {
         console.error('Error loading games', error);
       } finally {
@@ -29,14 +27,12 @@ const GamesPanelPage = () => {
   }, []);
 
   const handleSponsoredPlay = async () => {
-    if (!sponsoredGames.length) return;
-    const response = await init({ gameId: sponsoredGames[0].id, sponsored: true });
+    const response = await init({ sponsored: true });
     router.push(`/games/play?url=${encodeURIComponent(response.url)}`);
   };
 
   const handlePlay = async (game: GameCardResponseDTO) => {
-    if (!freeGames.length) return;
-    const response = await init({ gameId: game.id, sponsored: true });
+    const response = await init({ gameId: game.id, sponsored: false });
     router.push(`/games/play?url=${encodeURIComponent(response.url)}`);
   };
 
@@ -73,8 +69,8 @@ const GamesPanelPage = () => {
         </div>
 
         {/* Wave bottom */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div className="absolute -bottom-px left-0 right-0 leading-0">
+          <svg className="block" viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f4f7fb" />
           </svg>
         </div>
@@ -106,16 +102,14 @@ const GamesPanelPage = () => {
               <Sparkles className="h-7 w-7" />
             </button>
           </div>
-
-          <GameSection title="" games={sponsoredGames} selectable={false} />
         </div>
 
-        {/* Free Games */}
+        {/* Games */}
         <div className="pb-10">
           <GameSection
             title="Juegos para divertirse"
             icon={<Gamepad2 className="h-5 w-5 text-[#03548C]" />}
-            games={freeGames}
+            games={games}
             onGameClick={(game) => handlePlay(game)}
           />
         </div>

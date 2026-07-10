@@ -68,15 +68,18 @@ export interface AvailableSurveyDTO {
   id: number;
   title: string;
   description: string | null;
-  rewardAmountPerQuestionCents: number;
+  totalRewardKeys: number;
   totalQuestions: number;
+  maxResponses: number | null;
+  responseCount: number | null;
+  endsAt: string | null;
 }
 
 // ─── Reward ───────────────────────────────────────────────────────────────────
 
 export interface RewardInfo {
   rewardId: number;
-  amountCents: number;
+  amountKeys: number;
   status: RewardStatus;
   grantedAt: string;
 }
@@ -112,13 +115,15 @@ export interface SurveyDetailDTO {
   id: number;
   title: string;
   description: string | null;
-  rewardAmountPerQuestionCents: number;
+  totalRewardKeys: number;
   maxResponses: number | null;
+  responseCount: number | null;
   status: SurveyStatus;
   startsAt: string | null;
   endsAt: string | null;
   categoryNames: string[];
   totalQuestions: number;
+  companyName: string | null;
 }
 
 export interface SurveySessionDTO {

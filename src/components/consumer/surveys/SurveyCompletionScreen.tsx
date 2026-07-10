@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Star } from 'lucide-react';
-import { formatReward, formatDateTime } from '@/hooks/surveys/surveyUtils';
+import { formatKeys, formatDateTime } from '@/hooks/surveys/surveyUtils';
 import type { SubmissionResult } from '@/types/survey.types';
 
 interface Props {
@@ -47,7 +47,7 @@ export default function SurveyCompletionScreen({ result, onClose }: Props) {
           Tu recompensa
         </p>
         <p className="text-3xl font-black">
-          {formatReward(reward.amountCents / 1000)}
+          {formatKeys(reward.amountKeys)} llaves
         </p>
         <p className="mt-2 text-xs text-white/60">
           {reward.status === 'PROCESSED'
