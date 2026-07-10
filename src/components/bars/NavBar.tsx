@@ -111,8 +111,12 @@ export default function Navbar() {
       <nav className="hidden lg:block sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-6 py-2">
           {/* LOGO */}
-          <div className="flex items-center gap-4">
-            <Image src="/logos/logoDorado.png" alt="Logo" width={60} height={60} />
+          <div className="flex items-center gap-3">
+            <Image src="/logos/logoDorado.png" alt="VerYGana" width={52} height={52} className="object-contain shrink-0" />
+            <div className="leading-tight">
+              <p className="text-base font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-[10px] text-white/50 font-medium tracking-wide">La alegria de ganar</p>
+            </div>
           </div>
 
           {/* NAV BUTTONS */}
@@ -423,7 +427,13 @@ export default function Navbar() {
       {/* ---------- MOBILE TOP BAR ---------- */}
       <div className="lg:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-3">
-          <Image src="/logos/logoDorado.png" alt="Logo" width={50} height={50} />
+          <div className="flex items-center gap-2.5">
+            <Image src="/logos/logoDorado.png" alt="VerYGana" width={42} height={42} className="object-contain shrink-0" />
+            <div className="leading-tight">
+              <p className="text-sm font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-[9px] text-white/50 font-medium tracking-wide">La alegria de ganar</p>
+            </div>
+          </div>
           <div className="flex items-center gap-3">
             {/* CART */}
             <CartButton />

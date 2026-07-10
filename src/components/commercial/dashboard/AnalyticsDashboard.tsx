@@ -51,7 +51,7 @@ export function AnalyticsDashboard() {
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#03548C]"
               >
                 <option value="7days">Últimos 7 días</option>
                 <option value="30days">Últimos 30 días</option>
@@ -68,7 +68,7 @@ export function AnalyticsDashboard() {
                 onChange={(e) =>
                   setSelectedMetric(e.target.value as MetricType)
                 }
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#03548C]"
               >
                 <option value="all">Todas las métricas</option>
                 <option value="impressions">Solo impresiones</option>
@@ -81,7 +81,7 @@ export function AnalyticsDashboard() {
           </div>
 
           {/* EXPORT BUTTON */}
-          <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+          <button className="flex items-center px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440]">
             <Download className="w-4 h-4 mr-2" />
             Exportar Datos
           </button>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { X, Users, Tag, MapPin, Loader2, Pencil } from 'lucide-react';
@@ -47,7 +47,7 @@ export default function SurveyDetailModal({ surveyId, onClose }: Props) {
               {survey && (
                 <button
                   onClick={() => setShowEdit(true)}
-                  className="cursor-pointer rounded-lg p-1.5 text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700"
+                  className="cursor-pointer rounded-lg p-1.5 text-[#03548C] hover:bg-[#03548C]/5 hover:text-[#03548C]"
                   title="Editar encuesta"
                 >
                   <Pencil className="h-4 w-4" />
@@ -64,7 +64,7 @@ export default function SurveyDetailModal({ surveyId, onClose }: Props) {
 
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#03548C]" />
             </div>
           ) : survey ? (
             <SurveyContent survey={survey} />
@@ -115,7 +115,7 @@ function SurveyContent({ survey }: { survey: SurveyCommercialDetailDTO }) {
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-gray-100">
           <div
-            className="h-full rounded-full bg-indigo-500 transition-all"
+            className="h-full rounded-full bg-[#00a4ff] transition-all"
             style={{ width: `${Math.min(completionRate, 100)}%` }}
           />
         </div>
@@ -192,7 +192,7 @@ function SurveyContent({ survey }: { survey: SurveyCommercialDetailDTO }) {
           {survey.questions.map((q, i) => (
             <li key={q.id} className="rounded-xl border border-gray-100 bg-gray-50 p-4">
               <div className="flex items-start gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#03548C]/10 text-xs font-bold text-[#03548C]">
                   {i + 1}
                 </span>
                 <div className="flex-1">

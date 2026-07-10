@@ -79,7 +79,7 @@ export function AdsList() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#03548C]"></div>
       </div>
     );
   }
@@ -115,7 +115,7 @@ export function AdsList() {
                   placeholder="Buscar anuncios..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                 />
               </div>
 
@@ -125,7 +125,7 @@ export function AdsList() {
                 <select 
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                 >
                   <option value="all">Todos los estados</option>
                   <option value="pending">Pendientes</option>
@@ -141,7 +141,7 @@ export function AdsList() {
             {/* Botón crear anuncio */}
             <Link
               href="/commercial/ads/create"
-              className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="flex items-center justify-center px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440] transition-colors"
             >
               <Plus className="w-4 h-4 mr-2" />
               Crear Anuncio
@@ -158,7 +158,7 @@ export function AdsList() {
             </div>
             <div className="bg-white rounded-lg shadow-md p-4">
               <p className="text-sm text-gray-600">Presupuesto Total</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-[#03548C]">
                 ${ads.reduce((sum, ad) => sum + Number(ad.totalBudget), 0).toFixed(2)}
               </p>
             </div>
@@ -170,7 +170,7 @@ export function AdsList() {
             </div>
             <div className="bg-white rounded-lg shadow-md p-4">
               <p className="text-sm text-gray-600">Likes Totales</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold text-[#0b1440]">
                 {ads.reduce((sum, ad) => sum + (ad.currentLikes || 0), 0).toLocaleString()}
               </p>
             </div>
@@ -232,7 +232,7 @@ export function AdsList() {
             </p>
             <Link
               href="/commercial/ads/create"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="inline-flex items-center px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440]"
             >
               <Plus className="w-4 h-4 mr-2" />
               Crear Anuncio

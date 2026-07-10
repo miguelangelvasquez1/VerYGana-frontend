@@ -51,7 +51,7 @@ const payoutStatusLabels: Record<PayoutStatus, string> = {
 };
 
 const payoutStatusColors: Record<PayoutStatus, string> = {
-  [PayoutStatus.PROCESSING]: 'bg-blue-100 text-blue-700',
+  [PayoutStatus.PROCESSING]: 'bg-[#03548C]/10 text-[#03548C]',
   [PayoutStatus.SCHEDULED]: 'bg-yellow-100 text-yellow-700',
   [PayoutStatus.PAID]: 'bg-green-100 text-green-700',
   [PayoutStatus.FAILED]: 'bg-red-100 text-red-700',
@@ -126,7 +126,7 @@ function YearMonthFilter({ filters, onChange }: { filters: FiltersState; onChang
       <select
         value={filters.year}
         onChange={(e) => onChange({ ...filters, year: Number(e.target.value), page: 0 })}
-        className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]"
       >
         {YEARS.map((y) => (
           <option key={y} value={y}>{y}</option>
@@ -135,7 +135,7 @@ function YearMonthFilter({ filters, onChange }: { filters: FiltersState; onChang
       <select
         value={filters.month}
         onChange={(e) => onChange({ ...filters, month: Number(e.target.value), page: 0 })}
-        className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]"
       >
         {MONTHS.map((m, i) => (
           <option key={i + 1} value={i + 1}>{m}</option>
@@ -192,7 +192,7 @@ function ErrorMessage({ onRetry }: { onRetry?: () => void }) {
     <div className="py-8 text-center space-y-2">
       <p className="text-sm text-red-500">Error al cargar los datos.</p>
       {onRetry && (
-        <button onClick={onRetry} className="text-sm text-blue-600 hover:underline">
+        <button onClick={onRetry} className="text-sm text-[#03548C] hover:underline">
           Reintentar
         </button>
       )}
@@ -283,9 +283,9 @@ export function BillingDashboard() {
         <SummaryCard
           title="Ganado Este Mes"
           value={summary ? formatCents(summary.earnedThisMonthCents) : '—'}
-          icon={<TrendingUp className="w-5 h-5 text-blue-600" />}
-          iconBg="bg-blue-50"
-          valueColor="text-blue-600"
+          icon={<TrendingUp className="w-5 h-5 text-[#03548C]" />}
+          iconBg="bg-[#03548C]/10"
+          valueColor="text-[#03548C]"
           loading={summaryLoading}
           error={summaryError}
         />
@@ -293,9 +293,9 @@ export function BillingDashboard() {
         <SummaryCard
           title="Plan Actual"
           value={summary ? planCodeLabels[summary.currentPlan.planCode] : '—'}
-          icon={<Crown className="w-5 h-5 text-purple-600" />}
-          iconBg="bg-purple-50"
-          valueColor="text-purple-700"
+          icon={<Crown className="w-5 h-5 text-[#FFD700]" />}
+          iconBg="bg-[#FFD700]/10"
+          valueColor="text-[#0b1440]"
           subtitle={
             summary?.currentPlan.daysRemaining != null
               ? `${summary.currentPlan.daysRemaining} días restantes`
@@ -347,7 +347,7 @@ export function BillingDashboard() {
                         className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
                       >
                         <td className="py-3 px-4">
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-[#03548C]/10 text-[#03548C]">
                             {depositTypeLabels[d.type]}
                           </span>
                         </td>

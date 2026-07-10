@@ -297,9 +297,6 @@ export default function ProductsDashboard() {
 
   const renderDashboard = () => (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
-      <p className="text-gray-600">Vista general de tu negocio</p>
-
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">

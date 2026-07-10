@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { STATUS_LABELS } from '@/hooks/surveys/surveyUtils';
@@ -45,7 +45,7 @@ function FilterPill({
       onClick={onClick}
       className={`cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
         active
-          ? 'bg-indigo-600 text-white shadow-sm'
+          ? 'bg-[#03548C] text-white shadow-sm'
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
       }`}
     >
