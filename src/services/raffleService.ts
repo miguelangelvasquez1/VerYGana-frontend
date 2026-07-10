@@ -99,6 +99,13 @@ export const sendClaimPhoneOtp = async (phoneNumber: string): Promise<void> => {
     return response.data;
 }
 
+export const sendClaimEmailOtp = async (email: string): Promise<void> => {
+    const response = await apiClient.post("/winners/claim/send-email-otp", null, {params: {
+        email
+    }});
+    return response.data;
+}
+
 export const claimPrize = async (claimData: ClaimPrizeRequestDTO): Promise<void> => {
     const response = await apiClient.post("/winners/claim", claimData);
     return response.data;

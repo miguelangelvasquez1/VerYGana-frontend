@@ -125,24 +125,26 @@ export default function ReferralPageShell({ info }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <ReferralStatCard
               icon={Users}
-              iconBg="bg-green-100"
-              iconColor="text-green-600"
+              iconBg="bg-[#03548C]/10"
+              iconColor="text-[#03548C]"
               value={info.totalReferrals}
               label="Total referidos"
             />
             <ReferralStatCard
               icon={Ticket}
-              iconBg="bg-blue-100"
-              iconColor="text-blue-600"
+              iconBg="bg-[#c9a227]/15"
+              iconColor="text-[#c9a227]"
               value={totalTickets}
               label="Tickets ganados"
               badge={`${currentTier?.ticketsPerReferral} por referido`}
             />
             <ReferralStatCard
-              icon={Trophy}
-              iconBg="bg-purple-100"
-              iconColor="text-purple-600"
-              value={currentTier?.level ?? 'Bronze'}
+              icon={(currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce).Icon}
+              iconStyle={{
+                background: (currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce).bg,
+                color: (currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce).bar,
+              }}
+              value={currentTier?.level ?? 'Bronce'}
               label="Nivel actual"
               badge={nextTier ? `${nextTier.minReferrals - info.totalReferrals} para ${nextTier.level}` : 'Máximo'}
             />
@@ -153,15 +155,15 @@ export default function ReferralPageShell({ info }: Props) {
             const cfg = currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce;
             const { Icon: CurIcon } = cfg;
             return (
-              <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: 'var(--border-radius-lg, 16px)', padding: '1.5rem' }}>
+              <div className="bg-white rounded-xl border shadow-sm p-6">
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                   <div>
-                    <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    <p className="text-gray-500" style={{ fontSize: 12, margin: '0 0 4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                       Nivel de referidos
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 20, fontWeight: 600 }}>{currentTier?.level ?? '—'}</span>
+                      <span className="text-gray-900" style={{ fontSize: 20, fontWeight: 600 }}>{currentTier?.level ?? '—'}</span>
                       <span style={{ fontSize: 12, fontWeight: 500, background: cfg.bg, color: cfg.text, padding: '2px 9px', borderRadius: 8 }}>
                         ×{currentTier?.ticketsPerReferral ?? 1} tickets
                       </span>
@@ -174,13 +176,13 @@ export default function ReferralPageShell({ info }: Props) {
 
                 {/* Métricas */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: '1rem' }}>
-                  <div style={{ background: 'var(--color-background-secondary)', borderRadius: 8, padding: 12 }}>
-                    <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>Referidos totales</p>
-                    <p style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{info.totalReferrals}</p>
+                  <div className="bg-gray-50" style={{ borderRadius: 8, padding: 12 }}>
+                    <p className="text-gray-500" style={{ fontSize: 12, margin: '0 0 4px' }}>Referidos totales</p>
+                    <p className="text-gray-900" style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{info.totalReferrals}</p>
                   </div>
-                  <div style={{ background: 'var(--color-background-secondary)', borderRadius: 8, padding: 12 }}>
-                    <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>Tickets ganados</p>
-                    <p style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{totalTickets}</p>
+                  <div className="bg-gray-50" style={{ borderRadius: 8, padding: 12 }}>
+                    <p className="text-gray-500" style={{ fontSize: 12, margin: '0 0 4px' }}>Tickets ganados</p>
+                    <p className="text-gray-900" style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{totalTickets}</p>
                   </div>
                 </div>
               </div>
@@ -241,7 +243,7 @@ export default function ReferralPageShell({ info }: Props) {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 border">
+          <div className="bg-linear-to-br from-blue-50 to-purple-50 rounded-xl p-8 border">
             <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">¿Cómo funciona?</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[

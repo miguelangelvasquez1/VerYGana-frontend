@@ -37,7 +37,7 @@ const helpItems = [
       "Elimina permanentemente el producto. Esta acción no se puede deshacer.",
   },
   {
-    icon: <Trophy className="w-5 h-5 text-purple-600" />,
+    icon: <Trophy className="w-5 h-5 text-[#03548C]" />,
     label: "Marcar como recompensa",
     description:
       "Marca este producto como recompensa para que sea promocionado al final de los juegos que personalices y asi potencies tus ventas entre los jugadores. Máximo puedes tener 3 productos activos como recompensa simultáneamente.",
@@ -69,7 +69,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
         onClick={() => onView?.(product.id)}
       >
         {/* Image */}
-        <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
+        <div className="relative w-full aspect-4/3 bg-gray-100 overflow-hidden">
           <Image
             src={product.imageUrl}
             alt={product.name}
@@ -99,7 +99,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
           )}
 
           {canUseGameRewards && isGameReward && (
-            <div className="absolute top-3 right-3 bg-purple-600 text-white rounded-full px-2 py-1 flex items-center gap-1 shadow-md text-xs font-semibold">
+            <div className="absolute top-2 right-2 bg-[#03548C] text-white rounded-full px-2 py-0.5 flex items-center gap-1 shadow-md text-xs font-semibold">
               <Trophy className="w-3 h-3" />
               Recompensa activa
             </div>
@@ -107,12 +107,12 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-3 sm:p-4 space-y-2 sm:space-y-3 flex flex-col flex-1">
-          <h3 className="text-sm sm:text-base font-semibold text-gray-800 line-clamp-2 leading-snug">
+        <div className="p-2.5 sm:p-3 space-y-1.5 sm:space-y-2 flex flex-col flex-1">
+          <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">
             {product.name}
           </h3>
 
-          <p className="text-base sm:text-xl font-bold text-gray-900">
+          <p className="text-sm sm:text-base font-bold text-gray-900">
             {new Intl.NumberFormat("es-CO", {
               style: "currency",
               currency: "COP",
@@ -125,19 +125,19 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${
                     i < Math.round(product.averageRate ?? 0)
                       ? "fill-yellow-400 text-yellow-400"
                       : "text-gray-200"
                   }`}
                 />
               ))}
-              <span className="text-xs sm:text-sm text-gray-600 font-medium ml-0.5 sm:ml-1">
+              <span className="text-xs text-gray-600 font-medium ml-0.5">
                 {product.averageRate?.toFixed(1) ?? "0.0"}
               </span>
             </div>
-            <span className="text-xs sm:text-sm text-gray-400 sm:ml-0.5">
-              ({product.reviewCount} {product.reviewCount === 1 ? "reseña" : "reseñas"})
+            <span className="text-xs text-gray-400 ml-0.5">
+              ({product.reviewCount})
             </span>
           </div>
 
@@ -148,7 +148,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
                   e.stopPropagation();
                   router.push(`/commercial/profile`);
                 }}
-                className="text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition cursor-pointer text-left"
+                className="text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-[#03548C]/5 hover:border-[#03548C]/20 hover:text-[#03548C] transition cursor-pointer text-left"
               >
                 <Building2 className="w-2.5 h-2.5 shrink-0" />
                 <span className="truncate">{product.companyName}</span>
@@ -170,50 +170,50 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
 
           {/* Commercial actions */}
           <div
-            className="flex flex-wrap items-center gap-1 pt-3 border-t mt-auto"
+            className="flex flex-wrap items-center gap-1 pt-2 border-t mt-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => onView?.(product.id)}
-              className="flex items-center gap-1 px-2 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition cursor-pointer"
+              className="flex items-center gap-1 px-1.5 py-0.5 text-xs bg-[#00a4ff]/10 text-[#00a4ff] rounded-md hover:bg-[#00a4ff]/20 transition cursor-pointer"
             >
-              <Eye className="w-4 h-4" /> Ver
+              <Eye className="w-3.5 h-3.5" /> Ver
             </button>
 
             <button
               onClick={() => onEdit?.(product.id)}
-              className="flex items-center gap-1 px-2 py-1 text-sm bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition cursor-pointer"
+              className="flex items-center gap-1 px-1.5 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition cursor-pointer"
             >
-              <Pencil className="w-4 h-4" /> Editar
+              <Pencil className="w-3.5 h-3.5" /> Editar
             </button>
 
             <button
               onClick={() => onDelete?.(product.id)}
-              className="flex items-center gap-1 px-2 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition cursor-pointer"
+              className="flex items-center gap-1 px-1.5 py-0.5 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition cursor-pointer"
             >
-              <Trash className="w-4 h-4" /> Eliminar
+              <Trash className="w-3.5 h-3.5" /> Eliminar
             </button>
 
             {canUseGameRewards && (
               <button
                 onClick={() => onMarkAsReward?.(product.id)}
-                className={`flex items-center gap-1 px-2 py-1 text-sm rounded-lg transition cursor-pointer ${
+                className={`flex items-center gap-1 px-1.5 py-0.5 text-xs rounded-md transition cursor-pointer ${
                   isGameReward
-                    ? "bg-purple-600 text-white hover:bg-purple-700"
-                    : "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                    ? "bg-[#03548C] text-white hover:bg-[#0b1440]"
+                    : "bg-[#03548C]/10 text-[#03548C] hover:bg-[#03548C]/20"
                 }`}
               >
-                <Trophy className="w-4 h-4" />
-                {isGameReward ? "Desmarcar como recompensa" : "Marcar como recompensa"}
+                <Trophy className="w-3.5 h-3.5" />
+                {isGameReward ? "Desmarcar" : "Recompensa"}
               </button>
             )}
 
             <button
               onClick={() => setShowHelp(true)}
-              className="flex items-center gap-1 px-2 py-1 text-sm bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 transition ml-auto"
+              className="flex items-center gap-1 px-1.5 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-md hover:bg-gray-200 transition ml-auto"
               title="Ayuda"
             >
-              <HelpCircle className="w-4 h-4 cursor-pointer" />
+              <HelpCircle className="w-3.5 h-3.5 cursor-pointer" />
             </button>
           </div>
         </div>

@@ -12,7 +12,7 @@ import {
   History,
   UserCircle,
   ShoppingBag,
-  Settings,
+  Headset,
   LogOut,
   Heart,
   Home,
@@ -398,9 +398,9 @@ export default function Navbar() {
                     <UserCircle className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Mis Referidos</span>
                   </Link>
-                  <Link href="/settings" className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
-                    <Settings className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
-                    <span>Configuración</span>
+                  <Link href="/support" className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
+                    <Headset className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
+                    <span>Soporte</span>
                   </Link>
                   <div className="border-t border-gray-100 mt-2 pt-2">
                     <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
@@ -720,9 +720,9 @@ export default function Navbar() {
               <UserCircle className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
               <span className="font-medium group-hover:text-[#00a4ff]">Mis Referidos</span>
             </Link>
-            <Link href="/settings" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
-              <Settings className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
-              <span className="font-medium group-hover:text-[#00a4ff]">Configuración</span>
+            <Link href="/support" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
+              <Headset className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
+              <span className="font-medium group-hover:text-[#00a4ff]">Soporte</span>
             </Link>
             <div className="border-t border-gray-200 mt-2 pt-2">
               <button className="w-full flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 transition-all cursor-pointer"

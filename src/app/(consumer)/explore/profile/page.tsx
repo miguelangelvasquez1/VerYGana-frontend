@@ -95,8 +95,8 @@ export default function ConsumerProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Header */}
-      <div className="bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+      <div className="relative overflow-hidden bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-20 sm:pb-24">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             {/* Avatar */}
             <div className="w-24 h-24 rounded-full border-4 border-white/30 shadow-lg shrink-0 overflow-hidden bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -137,6 +137,13 @@ export default function ConsumerProfilePage() {
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* Wave bottom */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f9fafb" />
+          </svg>
         </div>
       </div>
 

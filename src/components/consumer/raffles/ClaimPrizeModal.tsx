@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { claimPrize, sendClaimPhoneOtp } from "@/services/raffleService";
+import { claimPrize, sendClaimEmailOtp, sendClaimPhoneOtp } from "@/services/raffleService";
 import { ClaimPreferenceDeliveryMethod, PrizeWonResponseDTO } from "@/types/raffles/raffleWinner.types";
 
-type Step = "method" | "email-contact" | "sms-contact" | "sms-otp" | "success";
+type Step = "method" | "email-contact" | "email-otp" | "sms-contact" | "sms-otp" | "success";
 
 interface Props {
   prize: PrizeWonResponseDTO;
@@ -15,6 +15,7 @@ interface Props {
 }
 
 const OTP_SECONDS = 600; // 10 minutes
+const RESEND_COOLDOWN_SECONDS = 60; // 1 minute
 
 function formatCountdown(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -32,10 +33,15 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [claimedMethod, setClaimedMethod] = useState<ClaimPreferenceDeliveryMethod | null>(null);
 
   // ── Countdown timer ──
   const [timeLeft, setTimeLeft] = useState(OTP_SECONDS);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // ── Resend cooldown ──
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -48,10 +54,29 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
     }, 1000);
   };
 
+  const startResendCooldown = () => {
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+    cooldownRef.current = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) { clearInterval(cooldownRef.current!); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   useEffect(() => {
-    if (step === "sms-otp") startTimer();
-    else if (timerRef.current) clearInterval(timerRef.current);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    if (step === "sms-otp" || step === "email-otp") {
+      startTimer();
+      startResendCooldown();
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
@@ -72,23 +97,37 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
 
   /* ─── STEP: email contact → submit ─── */
 
-  const handleSubmitEmail = async () => {
+  const handleSubmitRegisteredEmail = async () => {
     clearError();
-    if (useCustomEmail && !isValidEmail(customEmail)) {
-      setError("Ingresa un correo electrónico válido.");
-      return;
-    }
     setLoading(true);
     try {
       await claimPrize({
         prizeId: prize.prizeId,
         deliveryMethod: ClaimPreferenceDeliveryMethod.EMAIL,
-        ...(useCustomEmail ? { newEmail: customEmail.trim() } : {}),
       });
+      setClaimedMethod(ClaimPreferenceDeliveryMethod.EMAIL);
       onClaimed(prize.prizeId);
       setStep("success");
     } catch {
       setError("Ocurrió un error al procesar tu solicitud. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendEmailOtp = async () => {
+    clearError();
+    if (!isValidEmail(customEmail)) {
+      setError("Ingresa un correo electrónico válido.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await sendClaimEmailOtp(customEmail.trim());
+      setOtpSent(true);
+      setStep("email-otp");
+    } catch {
+      setError("No pudimos enviar el código. Verifica el correo e intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -122,6 +161,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
         prizeId: prize.prizeId,
         deliveryMethod: ClaimPreferenceDeliveryMethod.SMS,
       });
+      setClaimedMethod(ClaimPreferenceDeliveryMethod.SMS);
       onClaimed(prize.prizeId);
       setStep("success");
     } catch {
@@ -147,6 +187,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
         newPhoneNumber: customPhone.trim(),
         smsOtpCode: otpCode.trim(),
       });
+      setClaimedMethod(ClaimPreferenceDeliveryMethod.SMS);
       onClaimed(prize.prizeId);
       setStep("success");
     } catch {
@@ -157,12 +198,56 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
   };
 
   const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
     clearError();
     setOtpCode("");
     setLoading(true);
     try {
       await sendClaimPhoneOtp(customPhone.trim());
       startTimer();
+      startResendCooldown();
+    } catch {
+      setError("No pudimos reenviar el código. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ─── STEP: email OTP verify → submit ─── */
+
+  const handleVerifyEmailOtp = async () => {
+    clearError();
+    if (otpCode.trim().length < 4) {
+      setError("Ingresa el código de verificación completo.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await claimPrize({
+        prizeId: prize.prizeId,
+        deliveryMethod: ClaimPreferenceDeliveryMethod.EMAIL,
+        newEmail: customEmail.trim(),
+        emailOtpCode: otpCode.trim(),
+      });
+      setClaimedMethod(ClaimPreferenceDeliveryMethod.EMAIL);
+      onClaimed(prize.prizeId);
+      setStep("success");
+    } catch {
+      setError("Código incorrecto o expirado. Vuelve a intentarlo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendEmailOtp = async () => {
+    if (resendCooldown > 0) return;
+    clearError();
+    setOtpCode("");
+    setLoading(true);
+    try {
+      await sendClaimEmailOtp(customEmail.trim());
+      startTimer();
+      startResendCooldown();
     } catch {
       setError("No pudimos reenviar el código. Intenta de nuevo.");
     } finally {
@@ -173,6 +258,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
   /* ─── UI ─── */
 
   const isExpired = step === "sms-otp" && timeLeft === 0;
+  const isEmailExpired = step === "email-otp" && timeLeft === 0;
   const isUrgent = timeLeft <= 60 && timeLeft > 0;
   const isWarning = timeLeft > 60 && timeLeft <= 120;
 
@@ -193,6 +279,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 onClick={() => {
                   clearError();
                   if (step === "sms-otp") { setStep("sms-contact"); setOtpCode(""); setOtpSent(false); }
+                  else if (step === "email-otp") { setStep("email-contact"); setOtpCode(""); setOtpSent(false); }
                   else setStep("method");
                 }}
                 className="text-gray-400 hover:text-gray-600 transition-colors mr-1"
@@ -204,6 +291,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
             <span className="text-lg font-bold text-gray-800">
               {step === "method" && "Reclamar premio"}
               {step === "email-contact" && "Recibir por correo"}
+              {step === "email-otp" && "Verificar correo"}
               {step === "sms-contact" && "Recibir por SMS"}
               {step === "sms-otp" && "Verificar número"}
               {step === "success" && "¡Listo!"}
@@ -358,11 +446,89 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
               {error && <ErrorBox message={error} />}
 
               <button
-                onClick={handleSubmitEmail}
+                onClick={useCustomEmail ? handleSendEmailOtp : handleSubmitRegisteredEmail}
                 disabled={loading}
                 className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
               >
-                {loading ? "Procesando..." : "Enviar"}
+                {loading
+                  ? "Procesando..."
+                  : useCustomEmail
+                    ? "Enviar código de verificación →"
+                    : "Enviar"}
+              </button>
+            </div>
+          )}
+
+          {/* ── STEP: email otp ── */}
+          {step === "email-otp" && (
+            <div className="space-y-4">
+              <div className="text-center py-2">
+                <span className="text-4xl">📩</span>
+                <p className="mt-3 text-sm text-gray-700">
+                  Ingresa el código de 6 dígitos que enviamos al correo
+                </p>
+                <p className="font-semibold text-gray-900 mt-1">{customEmail}</p>
+              </div>
+
+              {/* Countdown timer */}
+              <div className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl border ${
+                isEmailExpired
+                  ? "bg-red-50 border-red-300"
+                  : isUrgent
+                    ? "bg-red-50 border-red-200"
+                    : isWarning
+                      ? "bg-amber-50 border-amber-200"
+                      : "bg-[#03548C]/5 border-[#03548C]/20"
+              }`}>
+                <span className="text-lg">⏱️</span>
+                <span className={`text-2xl font-bold font-mono tabular-nums ${
+                  isEmailExpired || isUrgent ? "text-red-600" : isWarning ? "text-amber-600" : "text-[#03548C]"
+                }`}>
+                  {formatCountdown(timeLeft)}
+                </span>
+                <span className={`text-xs font-semibold ${
+                  isEmailExpired || isUrgent ? "text-red-500" : isWarning ? "text-amber-600" : "text-[#03548C]/70"
+                }`}>
+                  {isEmailExpired ? "código expirado" : "tiempo restante"}
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5 text-center">
+                  Código de verificación
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={8}
+                  value={otpCode}
+                  onChange={(e) => { setOtpCode(e.target.value.replace(/\D/g, "")); clearError(); }}
+                  placeholder="_ _ _ _ _ _"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 text-xl font-mono text-center tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-[#03548C] focus:border-transparent"
+                  autoFocus
+                  disabled={isEmailExpired}
+                />
+              </div>
+
+              <div className="text-center">
+                <p className="text-xs text-gray-500 mb-2">¿No recibiste el código?</p>
+                <button
+                  onClick={handleResendEmailOtp}
+                  disabled={loading || resendCooldown > 0}
+                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline"
+                >
+                  {resendCooldown > 0 ? `Reenviar código (${resendCooldown}s)` : "Reenviar código"}
+                </button>
+              </div>
+
+              {error && <ErrorBox message={error} />}
+
+              <button
+                onClick={handleVerifyEmailOtp}
+                disabled={loading || otpCode.length < 4 || isEmailExpired}
+                className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
+              >
+                {loading ? "Verificando..." : "Verificar y reclamar premio →"}
               </button>
             </div>
           )}
@@ -510,10 +676,10 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 <p className="text-xs text-gray-500 mb-2">¿No recibiste el código?</p>
                 <button
                   onClick={handleResendOtp}
-                  disabled={loading}
-                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50"
+                  disabled={loading || resendCooldown > 0}
+                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline"
                 >
-                  Reenviar código
+                  {resendCooldown > 0 ? `Reenviar código (${resendCooldown}s)` : "Reenviar código"}
                 </button>
               </div>
 
@@ -542,7 +708,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 <h3 className="text-xl font-bold text-gray-900">¡Premio reclamado!</h3>
                 <p className="text-sm text-gray-600 mt-2">
                   Hemos enviado el código y las instrucciones a tu{" "}
-                  {useCustomEmail || !useCustomPhone
+                  {claimedMethod === ClaimPreferenceDeliveryMethod.EMAIL
                     ? "correo electrónico"
                     : "número de teléfono"}
                   . Sigue los pasos indicados para completar el proceso.

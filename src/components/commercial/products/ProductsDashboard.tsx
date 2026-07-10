@@ -183,7 +183,7 @@ export default function ProductsDashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-[#03548C] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando dashboard...</p>
         </div>
       </div>
@@ -235,7 +235,7 @@ export default function ProductsDashboard() {
               placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg"
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]"
             />
           </div>
 
@@ -265,7 +265,7 @@ export default function ProductsDashboard() {
           </p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredProducts.map((product) => (
             <CommercialProductCard
               key={product.id}
@@ -301,42 +301,45 @@ export default function ProductsDashboard() {
       <p className="text-gray-600">Vista general de tu negocio</p>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-yellow-500 rounded-xl p-6 text-white">
-          <p className="text-sm">Productos pendientes</p>
-          <p className="text-3xl font-bold mt-2">
-            {stats.totalPendingProducts}
-          </p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Pendientes</p>
+          <p className="text-3xl font-extrabold text-yellow-500">{stats.totalPendingProducts}</p>
+          <div className="mt-2 h-1 rounded-full bg-yellow-100">
+            <div className="h-1 rounded-full bg-yellow-400" style={{ width: '60%' }} />
+          </div>
         </div>
 
-        <div className="bg-blue-500 rounded-xl p-6 text-white">
-          <p className="text-sm">Productos activos</p>
-          <p className="text-3xl font-bold mt-2">
-            {stats.totalActiveProducts}
-          </p>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Activos</p>
+          <p className="text-3xl font-extrabold text-[#03548C]">{stats.totalActiveProducts}</p>
+          <div className="mt-2 h-1 rounded-full bg-[#03548C]/10">
+            <div className="h-1 rounded-full bg-[#03548C]" style={{ width: '80%' }} />
+          </div>
         </div>
 
-        <div className="bg-red-500 rounded-xl p-6 text-white">
-          <p className="text-sm">Productos rechazados</p>
-          <p className="text-3xl font-bold mt-2">
-            {stats.totalRejectedProducts}
-          </p>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Rechazados</p>
+          <p className="text-3xl font-extrabold text-red-500">{stats.totalRejectedProducts}</p>
+          <div className="mt-2 h-1 rounded-full bg-red-100">
+            <div className="h-1 rounded-full bg-red-400" style={{ width: '30%' }} />
+          </div>
         </div>
 
-        <div className="bg-green-500 rounded-xl p-6 text-white">
-          <p className="text-sm">Ventas Totales</p>
-          <p className="text-3xl font-bold mt-2">
-            {stats.totalSales}
-          </p>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Ventas totales</p>
+          <p className="text-3xl font-extrabold text-green-600">{stats.totalSales}</p>
+          <div className="mt-2 h-1 rounded-full bg-green-100">
+            <div className="h-1 rounded-full bg-green-500" style={{ width: '70%' }} />
+          </div>
         </div>
 
-        <div className="bg-purple-500 rounded-xl p-6 text-white">
-          <p className="text-sm">Rating Promedio</p>
-          <p className="text-3xl font-bold mt-2">
-            {stats.averageRating > 0
-              ? `${stats.averageRating.toFixed(2)} ⭐`
-              : "N/A"}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Rating promedio</p>
+          <p className="text-3xl font-extrabold text-[#0b1440]">
+            {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "N/A"}
           </p>
+          <p className="text-xs text-yellow-500 mt-1">{'★'.repeat(Math.round(stats.averageRating))}{'☆'.repeat(5 - Math.round(stats.averageRating))}</p>
         </div>
       </div>
 

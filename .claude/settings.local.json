@@ -4,8 +4,13 @@
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
       "Bash(xargs grep -l \"useNotifications\\\\|NotificationPanel\")",
       "Skill(update-config)",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "Bash(ls src/components/consumer)",
+      "Bash(ls src/components/dashboard)"
     ]
+  },
+  "enabledPlugins": {
+    "frontend-design@anthropics-skills": true
   },
   "extraKnownMarketplaces": {
     "anthropics-skills": {
@@ -14,8 +19,5 @@
         "repo": "anthropics/skills"
       }
     }
-  },
-  "enabledPlugins": {
-    "frontend-design@anthropics-skills": true
   }
 }

@@ -163,8 +163,8 @@ export default function EditConsumerProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Header */}
-      <div className="bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative overflow-hidden bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
           <Link
             href="/explore/profile"
             className="inline-flex items-center gap-1.5 text-white/70 hover:text-white text-sm mb-6 transition"
@@ -199,12 +199,20 @@ export default function EditConsumerProfilePage() {
               <button
                 type="button"
                 onClick={() => setAvatarPickerOpen(true)}
-                className="mt-1 text-xs text-white/60 hover:text-white underline transition-colors"
+                className="cursor-pointer mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 text-white text-xs font-medium px-3 py-1.5 backdrop-blur-sm hover:bg-white/30 hover:scale-105 transition-all duration-200"
               >
+                <Camera className="w-3.5 h-3.5" />
                 Cambiar avatar
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Wave bottom */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f9fafb" />
+          </svg>
         </div>
       </div>
 

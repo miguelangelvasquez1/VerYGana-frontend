@@ -7,7 +7,7 @@ import {
   CreditCard,
   FileImage,
   Home,
-  Settings,
+  Headset,
   Package,
   ClipboardList,
   X,
@@ -78,11 +78,7 @@ const menuItems: MenuItem[] = [
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
   },
-  {
-    href: '/commercial/settings', icon: Settings, label: 'Configuración',
-    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true,
-  },
+  { href: '/commercial/support', icon: Headset, label: 'Soporte' },
   { href: '/plans', icon: Sparkles, label: 'Ver Planes' },
 ];
 

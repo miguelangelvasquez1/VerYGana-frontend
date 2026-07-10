@@ -22,7 +22,6 @@ const PROTECTED_ROUTES: { path: string; requiredPlans: PlanCode[] }[] = [
   { path: '/commercial/pets',      requiredPlans: [PlanCode.PREMIUM] },
   { path: '/commercial/analytics', requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/billing',   requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
-  { path: '/commercial/settings',  requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
 ];
 
 const PLAN_LABELS: Record<PlanCode, string> = {
@@ -245,6 +244,6 @@ export const PAGE_TITLES: Record<string, string> = {
   '/commercial/surveys': 'Encuestas',
   '/commercial/analytics': 'Estadísticas',
   '/commercial/billing': 'Facturación',
-  '/commercial/settings': 'Configuración',
+  '/commercial/support': 'Soporte',
   '/plans': 'Planes',
 };
