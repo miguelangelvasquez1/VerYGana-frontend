@@ -63,7 +63,7 @@ function SectionCard({ children, faded }: { children: React.ReactNode; faded?: b
 function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle?: string }) {
   return (
     <div className="flex items-start gap-3 mb-5">
-      <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 text-blue-600">
+      <div className="w-9 h-9 rounded-xl bg-[#03548C]/10 flex items-center justify-center flex-shrink-0 text-[#03548C]">
         {icon}
       </div>
       <div>
@@ -76,7 +76,7 @@ function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title
 
 function InfoNote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-2 text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mt-2">
+    <div className="flex items-start gap-2 text-xs text-[#03548C] bg-[#03548C]/5 border border-[#03548C]/20 rounded-lg px-3 py-2 mt-2">
       <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
       <span>{children}</span>
     </div>
@@ -289,7 +289,7 @@ export function CreateAdForm() {
           return (
             <React.Fragment key={s}>
               <div className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-all
-                ${active ? 'bg-blue-600 text-white shadow-sm shadow-blue-200'
+                ${active ? 'bg-[#03548C] text-white shadow-sm'
                   : done ? 'bg-emerald-100 text-emerald-700'
                   : 'bg-gray-100 text-gray-400'}`}
               >
@@ -297,7 +297,7 @@ export function CreateAdForm() {
                 {labels[i]}
               </div>
               {i < 2 && (
-                <div className={`flex-1 h-px transition-colors ${done ? 'bg-emerald-300' : active ? 'bg-blue-200' : 'bg-gray-200'}`} />
+                <div className={`flex-1 h-px transition-colors ${done ? 'bg-emerald-300' : active ? 'bg-[#03548C]/30' : 'bg-gray-200'}`} />
               )}
             </React.Fragment>
           );
@@ -333,7 +333,7 @@ export function CreateAdForm() {
                 type="button"
                 onClick={handleChangeFile}
                 disabled={isSubmitting}
-                className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer"
+                className="text-xs text-[#03548C] font-semibold hover:underline cursor-pointer"
               >
                 Cambiar
               </button>
@@ -351,7 +351,7 @@ export function CreateAdForm() {
                     disabled={isUploading}
                     className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border-2 flex items-center justify-center gap-2 transition-all
                       ${formData.type === t
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        ? 'border-[#03548C] bg-[#03548C]/10 text-[#03548C]'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
@@ -365,7 +365,7 @@ export function CreateAdForm() {
               {formData.type === 'IMAGE' && (
                 <div className="mb-4">
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    <Clock className="inline w-4 h-4 mr-1.5 text-blue-500 -mt-0.5" />
+                    <Clock className="inline w-4 h-4 mr-1.5 text-[#03548C] -mt-0.5" />
                     Duración de visualización
                     <span className="text-red-500 ml-0.5">*</span>
                   </label>
@@ -376,11 +376,11 @@ export function CreateAdForm() {
                       value={formData.imageDurationSeconds}
                       onChange={(e) => setFormData((prev) => ({ ...prev, imageDurationSeconds: Number(e.target.value) }))}
                       disabled={isUploading}
-                      className="flex-1 accent-blue-600 disabled:opacity-50"
+                      className="flex-1 accent-[#03548C] disabled:opacity-50"
                     />
-                    <div className="w-20 text-center bg-blue-50 border-2 border-blue-200 rounded-xl py-2">
-                      <span className="text-xl font-bold text-blue-700">{formData.imageDurationSeconds}</span>
-                      <span className="text-xs text-blue-500 ml-0.5">s</span>
+                    <div className="w-20 text-center bg-[#03548C]/5 border-2 border-[#03548C]/20 rounded-xl py-2">
+                      <span className="text-xl font-bold text-[#03548C]">{formData.imageDurationSeconds}</span>
+                      <span className="text-xs text-[#03548C]/60 ml-0.5">s</span>
                     </div>
                   </div>
                   <div className="flex justify-between text-xs text-gray-400 mt-1 px-0.5">
@@ -395,14 +395,14 @@ export function CreateAdForm() {
               {/* Drop zone / file selected */}
               {!formData.file ? (
                 <div
-                  className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-blue-300 hover:bg-gray-50 transition-all"
+                  className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-[#03548C]/40 hover:bg-gray-50 transition-all"
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
                 >
                   <Upload className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                   <p className="text-sm text-gray-600 mb-1">
                     Arrastra tu archivo aquí o{' '}
-                    <label className="text-blue-600 font-semibold hover:underline cursor-pointer">
+                    <label className="text-[#03548C] font-semibold hover:underline cursor-pointer">
                       selecciona uno
                       <input
                         type="file"
@@ -417,12 +417,12 @@ export function CreateAdForm() {
                   </p>
                 </div>
               ) : (
-                <div className="border-2 border-blue-200 bg-blue-50 rounded-xl p-4 flex items-center justify-between">
+                <div className="border-2 border-[#03548C]/20 bg-[#03548C]/5 rounded-xl p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-[#03548C]/10 rounded-lg flex items-center justify-center">
                       {formData.type === 'IMAGE'
-                        ? <ImageIcon className="w-5 h-5 text-blue-600" />
-                        : <Film className="w-5 h-5 text-blue-600" />}
+                        ? <ImageIcon className="w-5 h-5 text-[#03548C]" />
+                        : <Film className="w-5 h-5 text-[#03548C]" />}
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-gray-800 truncate max-w-[200px]">{formData.file.name}</p>
@@ -454,7 +454,7 @@ export function CreateAdForm() {
                   </div>
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                      className="h-full bg-[#03548C] rounded-full transition-all duration-300"
                       style={{ width: `${uploadState.progress}%` }}
                     />
                   </div>
@@ -466,9 +466,9 @@ export function CreateAdForm() {
                 <button
                   type="button"
                   onClick={handleConfirmFile}
-                  className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm
-                    hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2
-                    shadow-md shadow-blue-100 cursor-pointer"
+                  className="mt-4 w-full py-3 bg-[#03548C] text-white rounded-xl font-semibold text-sm
+                    hover:bg-[#0b1440] active:scale-[0.98] transition-all flex items-center justify-center gap-2
+                    shadow-md cursor-pointer"
                 >
                   {uploadStatusLabel()}
                 </button>
@@ -477,7 +477,7 @@ export function CreateAdForm() {
                 <button
                   type="button"
                   disabled
-                  className="mt-4 w-full py-3 bg-blue-400 text-white rounded-xl font-semibold text-sm
+                  className="mt-4 w-full py-3 bg-[#03548C]/50 text-white rounded-xl font-semibold text-sm
                     flex items-center justify-center gap-2 cursor-not-allowed"
                 >
                   {uploadStatusLabel()}
@@ -516,9 +516,9 @@ export function CreateAdForm() {
                   <span className="text-sm font-normal text-gray-500 ml-0.5">s</span>
                 </p>
               </div>
-              <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-100">
-                <p className="text-xs font-semibold text-blue-400 uppercase tracking-wide mb-1">Precio mín / view</p>
-                <p className="text-2xl font-bold text-blue-700">{formatCents(pricingInfo.minPricePerLike)}</p>
+              <div className="bg-[#03548C]/5 rounded-xl p-4 text-center border border-[#03548C]/15">
+                <p className="text-xs font-semibold text-[#03548C]/60 uppercase tracking-wide mb-1">Precio mín / view</p>
+                <p className="text-2xl font-bold text-[#03548C]">{formatCents(pricingInfo.minPricePerLike)}</p>
               </div>
             </div>
 
@@ -541,8 +541,8 @@ export function CreateAdForm() {
                     onClick={() => setFormData((prev) => ({ ...prev, pricePerLike: val }))}
                     className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all
                       ${formData.pricePerLike === val
-                        ? 'border-blue-500 bg-blue-600 text-white shadow-sm'
-                        : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600'
+                        ? 'border-[#03548C] bg-[#03548C] text-white shadow-sm'
+                        : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40 hover:text-[#03548C]'
                       }`}
                   >
                     {formatCents(val)}
@@ -569,7 +569,7 @@ export function CreateAdForm() {
                     readOnly
                     value={(formData.pricePerLike / 100).toFixed(2).replace('.', ',')}
                     className="w-full pl-8 pr-4 py-2.5 border-2 border-gray-200 rounded-xl text-center font-bold text-gray-900
-                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-gray-50 cursor-default"
+                      focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C] bg-gray-50 cursor-default"
                   />
                 </div>
                 <button
@@ -592,7 +592,7 @@ export function CreateAdForm() {
             {/* Max views */}
             <div className="mb-5">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <Eye className="inline w-4 h-4 mr-1.5 text-blue-500 -mt-0.5" />
+                <Eye className="inline w-4 h-4 mr-1.5 text-[#03548C] -mt-0.5" />
                 Máximo de visualizaciones <span className="text-red-500">*</span>
               </label>
               <input
@@ -602,7 +602,7 @@ export function CreateAdForm() {
                 onBlur={() => setFormData((prev) => ({ ...prev, maxViews: Math.max(1, prev.maxViews || 1) }))}
                 min={1} max={10000000}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-semibold
-                  focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                  focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
                 placeholder="Ej: 500"
                 required
               />
@@ -612,7 +612,7 @@ export function CreateAdForm() {
             {/* Max views per user per day */}
             <div className="mb-5">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <Eye className="inline w-4 h-4 mr-1.5 text-blue-500 -mt-0.5" />
+                <Eye className="inline w-4 h-4 mr-1.5 text-[#03548C] -mt-0.5" />
                 Máximo de vistas por usuario al día <span className="text-red-500">*</span>
               </label>
               <input
@@ -622,7 +622,7 @@ export function CreateAdForm() {
                 onBlur={() => setFormData((prev) => ({ ...prev, maxViewsPerUserPerDay: Math.max(1, prev.maxViewsPerUserPerDay || 1) }))}
                 min={1} max={100}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-semibold
-                  focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                  focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
                 placeholder="Ej: 10"
                 required
               />
@@ -630,17 +630,17 @@ export function CreateAdForm() {
             </div>
 
             {/* Total budget */}
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl p-5 text-white">
+            <div className="bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] rounded-xl p-5 text-white">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-blue-200 text-xs font-bold uppercase tracking-wide">Presupuesto total</p>
-                  <p className="text-blue-100 text-sm mt-0.5">
+                  <p className="text-white/50 text-xs font-bold uppercase tracking-wide">Presupuesto total</p>
+                  <p className="text-white/70 text-sm mt-0.5">
                     {formatCents(formData.pricePerLike)} × {formData.maxViews.toLocaleString('es-CO')} views
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-3xl font-extrabold">{formatCents(totalBudgetCents)}</p>
-                  <p className="text-blue-300 text-xs">se descontará de tu saldo</p>
+                  <p className="text-white/50 text-xs">se descontará de tu saldo</p>
                 </div>
               </div>
             </div>
@@ -650,8 +650,8 @@ export function CreateAdForm() {
                 type="button"
                 onClick={() => setStep('details')}
                 disabled={formData.pricePerLike < pricingInfo.minPricePerLike || formData.maxViews < 1}
-                className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-sm cursor-pointer
-                  hover:bg-blue-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="mt-4 w-full py-3 bg-[#03548C] text-white rounded-xl font-bold text-sm cursor-pointer
+                  hover:bg-[#0b1440] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Continuar con los detalles →
               </button>
@@ -676,7 +676,7 @@ export function CreateAdForm() {
                     type="text" value={formData.title}
                     onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm
-                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                      focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
                     placeholder="Título de tu anuncio" required minLength={5} maxLength={100} disabled={isSubmitting}
                   />
                 </div>
@@ -689,7 +689,7 @@ export function CreateAdForm() {
                     onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
                     rows={3}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm resize-none
-                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                      focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
                     placeholder="Describe tu anuncio..." required minLength={10} maxLength={1000} disabled={isSubmitting}
                   />
                 </div>
@@ -702,7 +702,7 @@ export function CreateAdForm() {
                     type="url" value={formData.targetUrl}
                     onChange={(e) => setFormData((p) => ({ ...p, targetUrl: e.target.value }))}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm
-                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                      focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
                     placeholder="https://ejemplo.com" maxLength={500} disabled={isSubmitting}
                   />
                 </div>
@@ -717,7 +717,7 @@ export function CreateAdForm() {
                   <input
                     type="checkbox" checked={formData.startImmediately}
                     onChange={(e) => setFormData((p) => ({ ...p, startImmediately: e.target.checked, startDate: '' }))}
-                    className="w-4 h-4 accent-blue-600 cursor-pointer" disabled={isSubmitting}
+                    className="w-4 h-4 accent-[#03548C] cursor-pointer" disabled={isSubmitting}
                   />
                   <span className="text-sm text-gray-700">Iniciar cuando el administrador apruebe el anuncio</span>
                 </div>
@@ -727,7 +727,7 @@ export function CreateAdForm() {
                     <input
                       type="datetime-local" value={formData.startDate}
                       onChange={(e) => setFormData((p) => ({ ...p, startDate: e.target.value }))}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                       min={new Date().toISOString().slice(0, 16)} disabled={isSubmitting}
                     />
                   </div>
@@ -758,8 +758,8 @@ export function CreateAdForm() {
                           disabled={isSubmitting}
                           className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all
                             ${selected
-                              ? 'border-blue-500 bg-blue-600 text-white shadow-sm shadow-blue-100'
-                              : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600'
+                              ? 'border-[#03548C] bg-[#03548C] text-white shadow-sm shadow-blue-100'
+                              : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40 hover:text-[#03548C]'
                             } disabled:opacity-50`}
                         >
                           {selected && '✓ '}{cat.name}
@@ -773,7 +773,7 @@ export function CreateAdForm() {
                     </p>
                   )}
                   {formData.categoryIds.length > 0 && (
-                    <p className="text-xs text-blue-600 mt-2 font-semibold">
+                    <p className="text-xs text-[#03548C] mt-2 font-semibold">
                       {formData.categoryIds.length} categoría{formData.categoryIds.length !== 1 ? 's' : ''} seleccionada{formData.categoryIds.length !== 1 ? 's' : ''}
                     </p>
                   )}
@@ -796,14 +796,14 @@ export function CreateAdForm() {
                     <input
                       type="number" value={formData.targetAudience.ageRange[0]}
                       onChange={(e) => setFormData((p) => ({ ...p, targetAudience: { ...p.targetAudience, ageRange: [Number(e.target.value), p.targetAudience.ageRange[1]] } }))}
-                      className="w-20 px-3 py-2 border-2 border-gray-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-20 px-3 py-2 border-2 border-gray-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                       min={13} max={100} disabled={isSubmitting}
                     />
                     <span className="text-gray-400">a</span>
                     <input
                       type="number" value={formData.targetAudience.ageRange[1]}
                       onChange={(e) => setFormData((p) => ({ ...p, targetAudience: { ...p.targetAudience, ageRange: [p.targetAudience.ageRange[0], Number(e.target.value)] } }))}
-                      className="w-20 px-3 py-2 border-2 border-gray-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-20 px-3 py-2 border-2 border-gray-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                       min={13} max={100} disabled={isSubmitting}
                     />
                     <span className="text-gray-500 text-sm">años</span>
@@ -827,7 +827,7 @@ export function CreateAdForm() {
                         disabled={isSubmitting}
                         className={`flex-1 py-2 rounded-xl border-2 text-sm font-semibold transition-all
                           ${formData.targetAudience.gender === g.v
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            ? 'border-[#03548C] bg-[#03548C]/10 text-[#03548C]'
                             : 'border-gray-200 text-gray-500 hover:border-gray-300'
                           } disabled:opacity-50`}
                       >
@@ -847,7 +847,7 @@ export function CreateAdForm() {
                     <select
                       value={selectedDepartment || ''}
                       onChange={(e) => setSelectedDepartment(e.target.value || null)}
-                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                       disabled={loadingDepartments || isSubmitting}
                     >
                       <option value="">— Selecciona un departamento —</option>
@@ -856,7 +856,7 @@ export function CreateAdForm() {
                     {selectedDepartment && (
                       <select
                         onChange={(e) => { if (e.target.value) { addMunicipality(e.target.value); e.target.value = ''; } }}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                         disabled={loadingMunicipalities || isSubmitting}
                       >
                         <option value="">— Selecciona un municipio —</option>
@@ -888,11 +888,11 @@ export function CreateAdForm() {
 
             {/* Error / creating state */}
             {uploadState.status === 'creating' && (
-              <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
-                <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+              <div className="flex items-center gap-3 bg-[#03548C]/5 border border-[#03548C]/20 rounded-xl px-5 py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-[#03548C]" />
                 <div>
-                  <p className="text-sm font-bold text-blue-800">Creando anuncio...</p>
-                  <p className="text-xs text-blue-500">Esto puede tardar unos segundos</p>
+                  <p className="text-sm font-bold text-[#0b1440]">Creando anuncio...</p>
+                  <p className="text-xs text-[#03548C]/70">Esto puede tardar unos segundos</p>
                 </div>
               </div>
             )}
@@ -927,9 +927,9 @@ export function CreateAdForm() {
               <button
                 type="submit"
                 disabled={isSubmitting || !pricingInfo || formData.pricePerLike < (pricingInfo?.minPricePerLike ?? 0) || ageRangeInvalid}
-                className="flex-[2] py-3.5 bg-blue-600 text-white rounded-xl font-bold text-sm
-                  hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed
-                  flex items-center justify-center gap-2 shadow-lg shadow-blue-100 cursor-pointer"
+                className="flex-[2] py-3.5 bg-[#03548C] text-white rounded-xl font-bold text-sm
+                  hover:bg-[#0b1440] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed
+                  flex items-center justify-center gap-2 shadow-lg cursor-pointer"
               >
                 {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isSubmitting ? 'Creando anuncio...' : `Crear anuncio · ${formatCents(totalBudgetCents)}`}

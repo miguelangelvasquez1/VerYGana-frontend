@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -178,7 +178,7 @@ function SurveyRow({
       </td>
       
       {/* Reward */}
-      <td className="px-5 py-4 text-sm font-semibold text-indigo-600">
+      <td className="px-5 py-4 text-sm font-semibold text-[#03548C]">
         {formatReward(survey.rewardAmountPerQuestionCents * survey.totalQuestions * (survey.maxResponses ?? 0) / 100)}
       </td>
 

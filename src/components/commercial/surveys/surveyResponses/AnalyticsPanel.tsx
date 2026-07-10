@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { Loader2, AlertCircle, BarChart2, Star, MessageSquare } from 'lucide-react';
@@ -79,9 +79,9 @@ function StatCard({
   label: string; value: string; accent?: boolean;
 }) {
   return (
-    <div className={`rounded-2xl border p-4 ${accent ? 'border-indigo-100 bg-indigo-50' : 'border-gray-100 bg-white'}`}>
+    <div className={`rounded-2xl border p-4 ${accent ? 'border-[#03548C]/15 bg-[#03548C]/5' : 'border-gray-100 bg-white'}`}>
       <p className="text-xs font-medium text-gray-400">{label}</p>
-      <p className={`mt-1.5 text-2xl font-black ${accent ? 'text-indigo-700' : 'text-gray-900'}`}>
+      <p className={`mt-1.5 text-2xl font-black ${accent ? 'text-[#03548C]' : 'text-gray-900'}`}>
         {value}
       </p>
     </div>
@@ -95,7 +95,7 @@ function QuestionChart({ stat, index }: { stat: QuestionStat; index: number }) {
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
       {/* Question header */}
       <div className="mb-4 flex items-start gap-3">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#03548C]/10 text-xs font-bold text-[#03548C]">
           {index}
         </span>
         <div className="min-w-0">
@@ -160,7 +160,7 @@ function BarChart({ stat }: { stat: QuestionStat }) {
                     ? isPositive
                       ? 'bg-emerald-500'
                       : 'bg-red-400'
-                    : 'bg-indigo-500'
+                    : 'bg-[#00a4ff]'
                 }`}
                 style={{ width: `${pct}%` }}
               />

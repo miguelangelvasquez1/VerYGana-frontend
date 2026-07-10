@@ -204,7 +204,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
                 }`}
               >
                 <Trophy className="w-3.5 h-3.5" />
-                {isGameReward ? "Desmarcar" : "Recompensa"}
+                {isGameReward ? "Desmarcar como recompensa" : "Marcar como recompensa"}
               </button>
             )}
 

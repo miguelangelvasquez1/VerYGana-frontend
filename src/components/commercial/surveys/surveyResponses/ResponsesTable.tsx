@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import {
@@ -107,7 +107,7 @@ function ResponseCard({
         className="flex w-full items-center gap-4 px-5 py-4 text-left hover:bg-gray-50 transition-colors"
       >
         {/* Index */}
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-600">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#03548C]/5 text-xs font-bold text-[#03548C]">
           {index}
         </span>
 
@@ -126,7 +126,7 @@ function ResponseCard({
         {/* Status pill */}
         <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
           response.status === 'REWARDED'  ? 'bg-emerald-50 text-emerald-700' :
-          response.status === 'COMPLETED' ? 'bg-indigo-50 text-indigo-600'  :
+          response.status === 'COMPLETED' ? 'bg-[#03548C]/5 text-[#03548C]'  :
                                             'bg-amber-50 text-amber-600'
         }`}>
           {response.status === 'REWARDED'  ? 'Recompensada' :
@@ -182,7 +182,7 @@ function AnswerDisplay({ answer }: { answer: SurveyResponseDetail['answers'][num
     return (
       <div className="flex flex-wrap gap-1.5">
         {answer.selectedOptionTexts.map((t) => (
-          <span key={t} className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+          <span key={t} className="rounded-full bg-[#03548C]/5 px-2.5 py-0.5 text-xs font-medium text-[#03548C]">
             {t}
           </span>
         ))}
@@ -203,8 +203,8 @@ function AnswerDisplay({ answer }: { answer: SurveyResponseDetail['answers'][num
         answer.questionType === 'YES_NO'
           ? isYes ? 'bg-emerald-50 text-emerald-700'
           : isNo  ? 'bg-red-50 text-red-600'
-                  : 'bg-indigo-50 text-indigo-700'
-          : 'bg-indigo-50 text-indigo-700'
+                  : 'bg-[#03548C]/5 text-[#03548C]'
+          : 'bg-[#03548C]/5 text-[#03548C]'
       }`}>
         {choiceText}
       </span>

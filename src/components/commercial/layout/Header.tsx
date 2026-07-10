@@ -22,10 +22,10 @@ const BUDGET_LOW_THRESHOLD = Number(
   process.env.NEXT_PUBLIC_BUDGET_LOW_THRESHOLD ?? 500000
 );
 
-const PLAN_COLORS: Record<string, string> = {
-  BASIC: 'bg-slate-100 text-slate-600',
-  STANDARD: 'bg-blue-50 text-blue-700',
-  PREMIUM: 'bg-purple-50 text-purple-700',
+const PLAN_COLORS: Record<string, { pill: string; label: string }> = {
+  BASIC:    { pill: 'bg-slate-100 text-slate-600 border border-slate-200', label: 'text-slate-400' },
+  STANDARD: { pill: 'bg-[#03548C]/10 text-[#03548C] border border-[#03548C]/20', label: 'text-[#03548C]/60' },
+  PREMIUM:  { pill: 'bg-[#0b1440]/10 text-[#0b1440] border border-[#0b1440]/20', label: 'text-[#0b1440]/60' },
 };
 
 const PLAN_LABELS: Record<string, string> = {
@@ -97,7 +97,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
 
             {/* Budget Section */}
             {hasBudget ? (
-              <div className="hidden sm:flex items-center bg-linear-to-r from-blue-50 to-purple-50 border border-blue-200/60 rounded-xl px-3 py-1.5 gap-2">
+              <div className="hidden sm:flex items-center bg-[#03548C]/5 border border-[#03548C]/15 rounded-xl px-3 py-1.5 gap-2">
                 <div className="flex flex-col items-end leading-none">
                   <span className="text-[10px] text-slate-500 font-semibold tracking-widest">PRESUPUESTO</span>
                   <span className="text-sm font-bold text-slate-800 mt-0.5">
@@ -109,7 +109,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
                 {shouldShowRechargeButton && (
                   <Link
                     href="/commercial/balance"
-                    className="text-[10px] font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="text-[10px] font-bold bg-[#03548C] text-white px-3 py-1.5 rounded-lg hover:bg-[#0b1440] transition-colors"
                   >
                     Recargar
                   </Link>
@@ -130,9 +130,19 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
             )}
 
             {/* Plan Badge */}
-            <span className={`hidden md:inline-flex items-center text-[10px] font-bold px-2.5 py-1 rounded-full tracking-widest ${PLAN_COLORS[planCode] ?? PLAN_COLORS.BASIC}`}>
-              {PLAN_LABELS[planCode] ?? 'Personal'}
-            </span>
+            {(() => {
+              const style = PLAN_COLORS[planCode] ?? PLAN_COLORS.BASIC;
+              return (
+                <div className={`hidden md:flex flex-col items-center px-3 py-1 rounded-xl border ${style.pill}`}>
+                  <span className={`text-[9px] font-semibold tracking-widest uppercase leading-none ${style.label}`}>
+                    Plan actual
+                  </span>
+                  <span className="text-[11px] font-extrabold tracking-wide leading-none mt-0.5">
+                    {PLAN_LABELS[planCode] ?? 'Personal'}
+                  </span>
+                </div>
+              );
+            })()}
 
             {/* Notifications */}
             <NotificationPanel
@@ -155,7 +165,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
               </div>
               <Link
                 href="/commercial/profile"
-                className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center hover:opacity-80 transition"
+                className="w-8 h-8 rounded-full bg-linear-to-br from-[#03548C] to-[#0b1440] flex items-center justify-center hover:opacity-80 transition"
                 title="Ver mi perfil"
               >
                 <User className="w-4 h-4 text-white" />

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -266,7 +266,7 @@ export default function SurveyFormModal() {
                   <label className="text-xs font-medium text-gray-600">Precio por pregunta</label>
                 </div>
                 <p className="text-xs text-gray-400 mb-3">
-                  Mínimo del sistema: <span className="font-semibold text-indigo-600">
+                  Mínimo del sistema: <span className="font-semibold text-[#03548C]">
                     {loadingCost ? '…' : COP.format(minPrice)}
                   </span>. Un precio más alto puede priorizar tu encuesta.
                 </p>
@@ -281,8 +281,8 @@ export default function SurveyFormModal() {
                         onClick={() => setPricePerQuestion(val)}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${
                           pricePerQuestion === val
-                            ? 'border-indigo-500 bg-indigo-600 text-white shadow-sm'
-                            : 'border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600'
+                            ? 'border-[#03548C] bg-[#03548C] text-white shadow-sm'
+                            : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40 hover:text-[#03548C]'
                         }`}
                       >
                         {COP.format(val)}
@@ -397,7 +397,7 @@ export default function SurveyFormModal() {
                           key={cat.id}
                           className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-3 py-2.5 transition-all ${
                             active
-                              ? 'border-indigo-500 bg-indigo-50'
+                              ? 'border-[#03548C] bg-[#03548C]/5'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
@@ -408,7 +408,7 @@ export default function SurveyFormModal() {
                             className="sr-only"
                           />
                           <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ${
-                            active ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300 bg-white'
+                            active ? 'border-[#03548C] bg-[#00a4ff]' : 'border-gray-300 bg-white'
                           }`}>
                             {active && (
                               <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 10 10" fill="none">
@@ -416,7 +416,7 @@ export default function SurveyFormModal() {
                               </svg>
                             )}
                           </span>
-                          <span className={`truncate text-sm font-medium ${active ? 'text-indigo-700' : 'text-gray-700'}`}>
+                          <span className={`truncate text-sm font-medium ${active ? 'text-[#03548C]' : 'text-gray-700'}`}>
                             {cat.name}
                           </span>
                         </label>
@@ -582,7 +582,7 @@ export default function SurveyFormModal() {
                     </div>
 
                     {/* Index badge */}
-                    <span className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
+                    <span className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#03548C]/10 text-xs font-bold text-[#03548C]">
                       {idx + 1}
                     </span>
 
@@ -673,7 +673,7 @@ export default function SurveyFormModal() {
                       <button
                         type="button"
                         onClick={() => addOption(q.id)}
-                        className="text-xs font-medium text-indigo-500 hover:text-indigo-700"
+                        className="text-xs font-medium text-[#03548C] hover:text-[#03548C]"
                       >
                         + Agregar opción
                       </button>
@@ -685,7 +685,7 @@ export default function SurveyFormModal() {
               <button
                 type="button"
                 onClick={addQuestion}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-500 hover:border-[#03548C]/40 hover:text-[#03548C] transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 Agregar pregunta
@@ -695,27 +695,27 @@ export default function SurveyFormModal() {
         </div>
 
         {/* Total cost — always visible */}
-        <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl p-5 text-white">
+        <div className="bg-gradient-to-br from-[#0b1440] via-[#03548C] to-[#0b1440] rounded-2xl p-5 text-white">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-indigo-200 text-xs font-bold uppercase tracking-wide">Costo total de la encuesta</p>
+              <p className="text-white/60 text-xs font-bold uppercase tracking-wide">Costo total de la encuesta</p>
               {loadingCost ? (
-                <p className="text-indigo-100 text-sm mt-0.5 flex items-center gap-2">
+                <p className="text-white/70 text-sm mt-0.5 flex items-center gap-2">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" /> Calculando…
                 </p>
               ) : (
-                <p className="text-indigo-100 text-sm mt-0.5">
+                <p className="text-white/70 text-sm mt-0.5">
                   {COP.format(pricePerQuestion)} × {form.questions.length} pregunta(s) × {maxResponsesNum.toLocaleString('es-CO')} respuesta(s).
                 </p>
               )}
             </div>
             <div className="text-right">
               {loadingCost ? (
-                <Loader2 className="h-6 w-6 animate-spin text-indigo-300" />
+                <Loader2 className="h-6 w-6 animate-spin text-white/50" />
               ) : (
                 <>
                   <p className="text-3xl font-extrabold">{COP.format(totalCost ?? 0)}</p>
-                  <p className="text-indigo-300 text-xs">se descontará de tu saldo</p>
+                  <p className="text-white/50 text-xs">se descontará de tu saldo</p>
                 </>
               )}
             </div>
@@ -766,9 +766,9 @@ export default function SurveyFormModal() {
           <button
             type="submit"
             disabled={createMutation.isPending}
-            className="flex-[2] py-3.5 bg-indigo-600 text-white rounded-xl font-bold text-sm
-              hover:bg-indigo-700 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed
-              flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 cursor-pointer"
+            className="flex-[2] py-3.5 bg-[#03548C] text-white rounded-xl font-bold text-sm
+              hover:bg-[#0b1440] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed
+              flex items-center justify-center gap-2 shadow-lg  cursor-pointer"
           >
             {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             {createMutation.isPending
@@ -809,7 +809,7 @@ function Field({
               onMouseLeave={() => setShowTip(false)}
               onFocus={() => setShowTip(true)}
               onBlur={() => setShowTip(false)}
-              className="text-gray-400 hover:text-indigo-500 transition-colors"
+              className="text-gray-400 hover:text-[#03548C] transition-colors"
               aria-label={`Ayuda para: ${label}`}
             >
               <HelpCircle className="h-3.5 w-3.5" />
@@ -851,7 +851,7 @@ function StepAccordion({
         className="flex w-full items-center gap-3 px-6 py-4 text-left hover:bg-gray-50 transition-colors"
       >
         <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white transition-colors ${
-          errorCount > 0 ? 'bg-red-500' : 'bg-indigo-600'
+          errorCount > 0 ? 'bg-red-500' : 'bg-[#03548C]'
         }`}>
           {errorCount > 0 ? errorCount : step}
         </span>
@@ -871,6 +871,6 @@ function inputCls(hasError: boolean) {
   return `w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors ${
     hasError
       ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-      : 'border-gray-200 bg-white focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400'
+      : 'border-gray-200 bg-white focus:border-[#03548C] focus:ring-1 focus:ring-[#03548C]/40'
   }`;
 }

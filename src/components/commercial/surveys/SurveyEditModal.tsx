@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { X, Loader2, Save, MapPin, Tag } from 'lucide-react';
@@ -158,7 +158,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
               onChange={(e) => setTitle(e.target.value)}
               maxLength={200}
               required
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10"
             />
           </div>
 
@@ -170,7 +170,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               maxLength={1000}
               rows={3}
-              className="w-full resize-none rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+              className="w-full resize-none rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10"
             />
           </div>
 
@@ -192,7 +192,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                     <label
                       key={cat.id}
                       className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-3 py-2.5 transition-all ${
-                        active ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
+                        active ? 'border-[#03548C] bg-[#03548C]/5' : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <input
@@ -203,7 +203,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                       />
                       <span
                         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ${
-                          active ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300 bg-white'
+                          active ? 'border-[#03548C] bg-[#00a4ff]' : 'border-gray-300 bg-white'
                         }`}
                       >
                         {active && (
@@ -218,7 +218,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                           </svg>
                         )}
                       </span>
-                      <span className={`truncate text-sm font-medium ${active ? 'text-indigo-700' : 'text-gray-700'}`}>
+                      <span className={`truncate text-sm font-medium ${active ? 'text-[#03548C]' : 'text-gray-700'}`}>
                         {cat.name}
                       </span>
                     </label>
@@ -240,7 +240,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
               value={selectedDepartment ?? ''}
               onChange={(e) => setSelectedDepartment(e.target.value || null)}
               disabled={loadingDepartments}
-              className="mb-2 w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:bg-gray-50"
+              className="mb-2 w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10 disabled:cursor-not-allowed disabled:bg-gray-50"
             >
               <option value="">— Selecciona un departamento —</option>
               {departments.map((d: { code: string; name: string }) => (
@@ -258,7 +258,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                   }
                 }}
                 disabled={loadingMunicipalities}
-                className="mb-3 w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:bg-gray-50"
+                className="mb-3 w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10 disabled:cursor-not-allowed disabled:bg-gray-50"
               >
                 <option value="">
                   {loadingMunicipalities ? 'Cargando municipios…' : '— Selecciona un municipio —'}
@@ -313,7 +313,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                   type="number" min={13} max={100} placeholder="Mín"
                   value={minAge}
                   onChange={(e) => { setMinAge(e.target.value); setAgeErrors((p) => ({ ...p, minAge: undefined })); }}
-                  className={`w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-100 ${ageErrors.minAge ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-indigo-400'}`}
+                  className={`w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#03548C]/10 ${ageErrors.minAge ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-[#03548C]'}`}
                 />
                 {ageErrors.minAge && <p className="mt-1 text-xs text-red-500">{ageErrors.minAge}</p>}
               </div>
@@ -323,7 +323,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                   type="number" min={13} max={100} placeholder="Máx"
                   value={maxAge}
                   onChange={(e) => { setMaxAge(e.target.value); setAgeErrors((p) => ({ ...p, maxAge: undefined })); }}
-                  className={`w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-100 ${ageErrors.maxAge ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-indigo-400'}`}
+                  className={`w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#03548C]/10 ${ageErrors.maxAge ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-[#03548C]'}`}
                 />
                 {ageErrors.maxAge && <p className="mt-1 text-xs text-red-500">{ageErrors.maxAge}</p>}
               </div>
@@ -341,8 +341,8 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                   onClick={() => setTargetGender(g)}
                   className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                     targetGender === g
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-gray-200 text-gray-600 hover:border-indigo-300'
+                      ? 'border-[#03548C] bg-[#03548C]/5 text-[#03548C]'
+                      : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40'
                   }`}
                 >
                   {GENDER_LABELS[g]}
@@ -360,7 +360,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                 min={minStartsAt}
                 value={startsAt}
                 onChange={(e) => setStartsAt(e.target.value)}
-                className="w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                className="w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10"
               />
             </div>
           ) : survey.startsAt ? (
@@ -388,7 +388,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
           <button
             type="submit"
             disabled={updateMutation.isPending}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#03548C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {updateMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
