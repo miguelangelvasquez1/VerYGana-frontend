@@ -8,7 +8,7 @@ export type BrandingStatus =
   | 'DESIGN_IN_PROGRESS'
   | 'PENDING_ADVERTISER_APPROVAL'
   | 'CHANGES_REQUESTED'
-  | 'LAUNCHED'
+  | 'CAMPAIGN_CREATED'
   | 'CANCELLED';
 
 export interface BrandingRequest {
@@ -33,6 +33,7 @@ export interface CreateBrandingDto {
   brandDescription: string;
   targetUrl?: string;
   budgetCents: number;
+  campaignGoal?: string;
 }
 
 export interface UploadUrlDto {
@@ -58,7 +59,6 @@ export interface BrandingConfigDto {
   targetGender?: 'MALE' | 'FEMALE' | 'ALL';
   maxSessionsPerUserPerDay?: number;
   startDate?: string | null;
-  campaignGoal?: string;
 }
 
 export interface Department {
@@ -184,6 +184,7 @@ export interface BrandingRequestDetail {
   corporateResources: BrandingCorporateResource[];
   campaignGoal: string | null;
   hasCompleteTargeting: boolean;
+  campaignId: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -280,7 +281,6 @@ export interface Designer {
   lastName: string;
   designerCode: string;
   campaignsDesigned: number;
-  canPublishDirectly: boolean;
 }
 
 export const adminGetBrandingRequests = async (): Promise<AdminBrandingRequestSummary[]> => {

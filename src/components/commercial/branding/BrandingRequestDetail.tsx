@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   ChevronLeft,
   Loader2,
@@ -18,6 +19,8 @@ import {
   Upload,
   MessageSquare,
   Settings,
+  Megaphone,
+  ArrowRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -37,7 +40,6 @@ import {
 } from '@/services/BrandingRequestService';
 import { CampaignTargetingSelector } from './CampaignTargetingSelector';
 import { CommentsSection } from './CommentsSection';
-import { useCampaignGoals } from '@/hooks/useCampaignGoals';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -59,11 +61,11 @@ const UPLOAD_ALLOWED_STATUSES: BrandingStatus[] = [
 
 const COMMENTS_ALLOWED_STATUSES: BrandingStatus[] = [
   'APPROVED', 'DESIGN_IN_PROGRESS', 'PENDING_ADVERTISER_APPROVAL',
-  'CHANGES_REQUESTED', 'LAUNCHED',
+  'CHANGES_REQUESTED', 'CAMPAIGN_CREATED',
 ];
 
 const PREVIEW_STATUSES: BrandingStatus[] = [
-  'PENDING_ADVERTISER_APPROVAL', 'CHANGES_REQUESTED', 'LAUNCHED',
+  'PENDING_ADVERTISER_APPROVAL', 'CHANGES_REQUESTED', 'CAMPAIGN_CREATED',
 ];
 
 const STATUS_META: Record<
@@ -77,7 +79,7 @@ const STATUS_META: Record<
   DESIGN_IN_PROGRESS:          { label: 'En diseño',             badge: 'bg-blue-100 text-blue-800 border-blue-200',       bannerBg: 'bg-blue-50',   bannerBorder: 'border-blue-200',  bannerTitle: 'text-blue-900',  bannerText: 'text-blue-700',  message: 'El diseñador está integrando tu marca al juego.' },
   PENDING_ADVERTISER_APPROVAL: { label: 'Pendiente tu aprobación', badge: 'bg-purple-100 text-purple-800 border-purple-200', bannerBg: 'bg-purple-50', bannerBorder: 'border-purple-200', bannerTitle: 'text-purple-900', bannerText: 'text-purple-700', message: 'El diseñador ha completado la integración. Revisa el resultado y aprueba o solicita cambios.' },
   CHANGES_REQUESTED:           { label: 'Cambios solicitados',   badge: 'bg-orange-100 text-orange-800 border-orange-200', bannerBg: 'bg-orange-50', bannerBorder: 'border-orange-200', bannerTitle: 'text-orange-900', bannerText: 'text-orange-700', message: 'Solicitaste cambios al diseñador. Te notificaremos cuando estén listos.' },
-  LAUNCHED:                    { label: 'Campaña activa',        badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bannerBg: 'bg-emerald-50', bannerBorder: 'border-emerald-200', bannerTitle: 'text-emerald-900', bannerText: 'text-emerald-700', message: 'Aprobaste el diseño. Tu campaña de branding está activa y llegando a los jugadores.' },
+  CAMPAIGN_CREATED:                    { label: 'Campaña creada',        badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bannerBg: 'bg-emerald-50', bannerBorder: 'border-emerald-200', bannerTitle: 'text-emerald-900', bannerText: 'text-emerald-700', message: 'Aprobaste el diseño. Se creó la campaña — desde ahora se administra en la sección Campañas.' },
   CANCELLED:                   { label: 'Cancelada',             badge: 'bg-gray-100 text-gray-500 border-gray-200',       bannerBg: 'bg-gray-50',   bannerBorder: 'border-gray-200',  bannerTitle: 'text-gray-700',  bannerText: 'text-gray-500',  message: 'Esta solicitud fue cancelada.' },
 };
 
@@ -125,7 +127,6 @@ interface ConfigForm {
   maxAge: string;
   maxSessionsPerUserPerDay: string;
   startDate: string;
-  campaignGoal: string;
   categoryIds: number[];
   municipalityCodes: string[];
 }
@@ -136,7 +137,6 @@ const detailToConfigForm = (d: BrandingDetailData): ConfigForm => ({
   maxAge: d.maxAge?.toString() ?? '',
   maxSessionsPerUserPerDay: d.maxSessionsPerUserPerDay?.toString() ?? '',
   startDate: isoToLocal(d.startDate),
-  campaignGoal: d.campaignGoal ?? '',
   categoryIds: d.categories.map(c => c.id),
   municipalityCodes: d.targetMunicipalities.map(m => m.code),
 });
@@ -160,6 +160,7 @@ interface Props {
 }
 
 export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) => {
+  const router = useRouter();
   const [detail, setDetail] = useState<BrandingDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -167,12 +168,12 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
   const [editingConfig, setEditingConfig] = useState(false);
   const [configForm, setConfigForm] = useState<ConfigForm>({
     targetGender: 'ALL', minAge: '', maxAge: '', maxSessionsPerUserPerDay: '',
-    startDate: '', campaignGoal: '', categoryIds: [], municipalityCodes: [],
+    startDate: '', categoryIds: [], municipalityCodes: [],
   });
   const [saving, setSaving] = useState(false);
   const [imgErrors, setImgErrors] = useState<Set<number>>(new Set());
-  const { goals: campaignGoals } = useCampaignGoals();
   const [approvingDesign, setApprovingDesign] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
   const [showChangesModal, setShowChangesModal] = useState(false);
   const [changesNote, setChangesNote] = useState('');
   const [sendingChanges, setSendingChanges] = useState(false);
@@ -250,7 +251,6 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
       if (configForm.maxAge) dto.maxAge = Number(configForm.maxAge);
       if (configForm.maxSessionsPerUserPerDay) dto.maxSessionsPerUserPerDay = Number(configForm.maxSessionsPerUserPerDay);
       dto.startDate = configForm.startDate ? new Date(configForm.startDate).toISOString() : null;
-      if (configForm.campaignGoal) dto.campaignGoal = configForm.campaignGoal;
       dto.categoryIds = configForm.categoryIds;
       dto.municipalityCodes = configForm.municipalityCodes;
       await configureBranding(detail.id, dto);
@@ -294,6 +294,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     try {
       await approveDesign(detail.id);
       toast.success('¡Diseño aprobado! Tu campaña está lista para lanzarse.');
+      setShowApproveModal(false);
       const updated = await getBrandingRequestDetail(detail.id);
       setDetail(updated);
       setConfigForm(detailToConfigForm(updated));
@@ -466,7 +467,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
               Solicitar cambios
             </button>
             <button
-              onClick={handleApproveDesign}
+              onClick={() => setShowApproveModal(true)}
               disabled={approvingDesign}
               className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 cursor-pointer"
             >
@@ -474,6 +475,28 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
               Aprobar diseño
             </button>
           </div>
+        </div>
+      )}
+
+      {/* ── Campaign Created Banner ── */}
+      {detail.status === 'CAMPAIGN_CREATED' && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+          <div className="flex items-center gap-3">
+            <Megaphone size={20} className="text-emerald-600 shrink-0" />
+            <div>
+              <p className="font-semibold text-emerald-900 text-sm">Se creó la campaña para esta solicitud</p>
+              <p className="text-xs text-emerald-700 mt-0.5">
+                Esta solicitud quedó de solo lectura. Gestiona el presupuesto, la audiencia y el estado desde Campañas.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push(detail.campaignId != null ? `/commercial/branding/campaigns/${detail.campaignId}` : '/commercial/branding')}
+            className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors cursor-pointer shrink-0"
+          >
+            Ver campaña
+            <ArrowRight size={14} />
+          </button>
         </div>
       )}
 
@@ -532,6 +555,9 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                 label="Descripción"
                 value={<span className="whitespace-pre-wrap text-sm leading-relaxed">{detail.brandDescription}</span>}
               />
+              {detail.campaignGoal && (
+                <InfoRow label="Objetivo de campaña" value={GOAL_LABELS[detail.campaignGoal] ?? detail.campaignGoal} />
+              )}
               {detail.targetUrl && (
                 <InfoRow
                   label="URL de destino"
@@ -680,13 +706,6 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
             {editingConfig ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Objetivo de campaña</label>
-                    <select value={configForm.campaignGoal} onChange={e => setConfigForm(f => ({ ...f, campaignGoal: e.target.value }))} className={fieldCls}>
-                      <option value="">Sin objetivo definido</option>
-                      {campaignGoals.map(g => <option key={g} value={g}>{GOAL_LABELS[g] ?? g}</option>)}
-                    </select>
-                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Género objetivo</label>
                     <select value={configForm.targetGender} onChange={e => setConfigForm(f => ({ ...f, targetGender: e.target.value as 'ALL' | 'MALE' | 'FEMALE' }))} className={fieldCls}>
@@ -740,9 +759,6 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                     </button>
                   )}
                 </div>
-                {detail.campaignGoal != null && (
-                  <InfoRow label="Objetivo" value={GOAL_LABELS[detail.campaignGoal] ?? detail.campaignGoal} />
-                )}
                 <InfoRow label="Género objetivo" value={genderLabel(detail.targetGender)} />
                 <InfoRow
                   label="Edad objetivo"
@@ -782,6 +798,42 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
           </div>
         )}
       </div>
+
+      {/* ── Modal: Confirm Approve Design ── */}
+      {showApproveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h2 className="text-base font-semibold text-gray-900">Aprobar diseño</h2>
+              <button onClick={() => setShowApproveModal(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Al aprobar, se creará la campaña y esta solicitud pasará a modo solo lectura — el diseño ya no podrá modificarse. Desde ese momento, la audiencia, el presupuesto y el estado de la campaña se administran en la sección Campañas.
+              </p>
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={() => setShowApproveModal(false)}
+                  disabled={approvingDesign}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-60 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleApproveDesign}
+                  disabled={approvingDesign}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {approvingDesign && <Loader2 size={14} className="animate-spin" />}
+                  Sí, aprobar diseño
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Modal: Request Changes ── */}
       {showChangesModal && (

@@ -47,7 +47,7 @@ const STATUS_META: Record<
   DESIGN_IN_PROGRESS: { label: 'En diseño', badge: 'bg-blue-100 text-blue-800 border-blue-200', bannerBg: 'bg-blue-50', bannerBorder: 'border-blue-200', bannerTitle: 'text-blue-900', bannerText: 'text-blue-700' },
   PENDING_ADVERTISER_APPROVAL: { label: 'Pend. aprobación anunciante', badge: 'bg-purple-100 text-purple-800 border-purple-200', bannerBg: 'bg-purple-50', bannerBorder: 'border-purple-200', bannerTitle: 'text-purple-900', bannerText: 'text-purple-700' },
   CHANGES_REQUESTED: { label: 'Cambios solicitados', badge: 'bg-orange-100 text-orange-800 border-orange-200', bannerBg: 'bg-orange-50', bannerBorder: 'border-orange-200', bannerTitle: 'text-orange-900', bannerText: 'text-orange-700' },
-  LAUNCHED: { label: 'Campaña activa', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bannerBg: 'bg-emerald-50', bannerBorder: 'border-emerald-200', bannerTitle: 'text-emerald-900', bannerText: 'text-emerald-700' },
+  CAMPAIGN_CREATED: { label: 'Campaña creada', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bannerBg: 'bg-emerald-50', bannerBorder: 'border-emerald-200', bannerTitle: 'text-emerald-900', bannerText: 'text-emerald-700' },
   CANCELLED: { label: 'Cancelada', badge: 'bg-gray-100 text-gray-500 border-gray-200', bannerBg: 'bg-gray-50', bannerBorder: 'border-gray-200', bannerTitle: 'text-gray-700', bannerText: 'text-gray-500' },
 };
 
@@ -145,9 +145,6 @@ const DesignerSelector: React.FC<{
             </p>
             <p className="text-xs text-gray-500">
               {d.designerCode} · {d.campaignsDesigned} campaña{d.campaignsDesigned !== 1 ? 's' : ''}
-              {d.canPublishDirectly && (
-                <span className="ml-1.5 text-green-600 font-medium">· puede publicar</span>
-              )}
             </p>
           </div>
         </label>

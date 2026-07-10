@@ -144,7 +144,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       { match: '/commercial/pets/create', title: 'Crear Mascotas' },
       { match: '/commercial/pets', title: 'Mascotas' },
 
-      { match: '/commercial/branding', title: 'Solicitudes de Marca' },
+      { match: '/commercial/branding/campaigns', title: 'Campañas' },
+      { match: '/commercial/branding/requests', title: 'Solicitudes de Marca' },
+      { match: '/commercial/branding', title: 'Campañas' },
     ];
 
     const sortedRoutes = routes.sort((a, b) => b.match.length - a.match.length);

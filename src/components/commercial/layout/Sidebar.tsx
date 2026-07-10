@@ -33,6 +33,8 @@ interface MenuItem {
   lockIfUnavailable?: boolean;
   /** Prevents this item from being highlighted even when the path matches (used for action/create pages). */
   skipActive?: boolean;
+  /** Only highlight on an exact pathname match — no matching of child routes (used for the root Dashboard link). */
+  exactMatch?: boolean;
 }
 
 interface SidebarProps {
@@ -47,7 +49,7 @@ interface SidebarProps {
 // ─── Menu items ───────────────────────────────────────────────────────────────
 
 const menuItems: MenuItem[] = [
-  { href: '/commercial', icon: Home, label: 'Dashboard' },
+  { href: '/commercial', icon: Home, label: 'Dashboard', exactMatch: true },
   {
     href: '/commercial/products', icon: Package, label: 'Mis productos',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
@@ -147,6 +149,7 @@ export function Sidebar({
     return (item: MenuItem): boolean => {
       if (item.skipActive) return false;
       if (pathname === item.href) return true;
+      if (item.exactMatch) return false;
       // List/section pages are active for any of their child paths
       return pathname.startsWith(item.href + '/');
     };

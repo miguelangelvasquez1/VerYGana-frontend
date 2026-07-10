@@ -19,7 +19,7 @@ const STATUS_CONFIG: Record<BrandingStatus, { label: string; className: string }
   DESIGN_IN_PROGRESS: { label: 'En diseño', className: 'bg-blue-100 text-blue-800' },
   PENDING_ADVERTISER_APPROVAL: { label: 'Pend. aprobación', className: 'bg-purple-100 text-purple-800' },
   CHANGES_REQUESTED: { label: 'Cambios solicitados', className: 'bg-orange-100 text-orange-800' },
-  LAUNCHED: { label: 'Campaña activa', className: 'bg-emerald-100 text-emerald-800' },
+  CAMPAIGN_CREATED: { label: 'Campaña creada', className: 'bg-emerald-100 text-emerald-800' },
   CANCELLED: { label: 'Cancelado', className: 'bg-gray-100 text-gray-500' },
 };
 
@@ -28,7 +28,7 @@ const STATUS_FILTERS: { label: string; value: BrandingStatus | 'ALL' }[] = [
   { label: 'En revisión', value: 'PENDING_REVIEW' },
   { label: 'Aprobadas', value: 'APPROVED' },
   { label: 'En diseño', value: 'DESIGN_IN_PROGRESS' },
-  { label: 'Lanzadas', value: 'LAUNCHED' },
+  { label: 'Campaña creada', value: 'CAMPAIGN_CREATED' },
   { label: 'Rechazadas', value: 'REJECTED' },
 ];
 
@@ -120,8 +120,8 @@ const AdminBrandingPanel: React.FC = () => {
               cls: 'text-blue-700',
             },
             {
-              label: 'Activos',
-              value: requests.filter(r => r.status === 'LAUNCHED').length,
+              label: 'Campaña creada',
+              value: requests.filter(r => r.status === 'CAMPAIGN_CREATED').length,
               cls: 'text-emerald-700',
             },
           ].map(s => (

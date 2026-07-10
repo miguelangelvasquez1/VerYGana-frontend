@@ -2,8 +2,16 @@
 
 import React, { useState } from 'react';
 import { Loader2, Lightbulb } from 'lucide-react';
+import { useCampaignGoals } from '@/hooks/useCampaignGoals';
 import type { BrandingGame } from '@/services/BrandingRequestService';
 import type { Step1Form } from '../branding.types';
+
+const GOAL_LABELS: Record<string, string> = {
+  BRAND_AWARENESS: 'Reconocimiento de marca',
+  WEBSITE_TRAFFIC: 'Tráfico al sitio web',
+  APP_INSTALLS: 'Instalaciones de app',
+  PRODUCT_PROMOTION: 'Promoción de producto',
+};
 
 const inputCls = (error?: string) =>
   `w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -55,6 +63,7 @@ export const Step1BrandInfo: React.FC<Props> = ({
 }) => {
   const [budgetFocused, setBudgetFocused] = useState(false);
   const [urlLocalError, setUrlLocalError] = useState('');
+  const { goals, loading: goalsLoading } = useCampaignGoals();
 
   const handleUrlChange = (value: string) => {
     onChange('targetUrl', value);
@@ -160,6 +169,32 @@ export const Step1BrandInfo: React.FC<Props> = ({
             {form.brandDescription.length}/1000
           </span>
         </div>
+      </div>
+
+      {/* Objetivo de campaña */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Objetivo de campaña <span className="text-red-500">*</span>
+        </label>
+        {goalsLoading ? (
+          <div className="flex items-center gap-2 h-9 text-sm text-gray-400">
+            <Loader2 size={14} className="animate-spin" /> Cargando opciones...
+          </div>
+        ) : (
+          <select
+            value={form.campaignGoal}
+            onChange={e => onChange('campaignGoal', e.target.value)}
+            className={inputCls(errors.campaignGoal)}
+          >
+            <option value="">Selecciona un objetivo</option>
+            {goals.map(g => (
+              <option key={g} value={g}>
+                {GOAL_LABELS[g] ?? g}
+              </option>
+            ))}
+          </select>
+        )}
+        {errors.campaignGoal && <p className="text-xs text-red-500 mt-1">{errors.campaignGoal}</p>}
       </div>
 
       {/* URL de destino */}

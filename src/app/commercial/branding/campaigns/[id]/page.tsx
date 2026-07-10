@@ -2,15 +2,15 @@
 
 import React from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { BrandingRequestDetail } from '@/components/commercial/branding/BrandingRequestDetail';
+import { CampaignDetail } from '@/components/commercial/campaigns/CampaignDetail';
 
-export default function BrandingDetailPage() {
+export default function CampaignDetailPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
 
   return (
-    <BrandingRequestDetail
-      requestId={Number(id)}
+    <CampaignDetail
+      campaignId={Number(id)}
       onBack={() => router.push('/commercial/branding')}
     />
   );

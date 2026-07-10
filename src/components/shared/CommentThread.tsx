@@ -9,7 +9,7 @@ const CYCLE_LABEL: Partial<Record<string, string>> = {
   DESIGN_IN_PROGRESS: 'Diseño en progreso',
   CHANGES_REQUESTED: 'Cambios solicitados',
   PENDING_ADVERTISER_APPROVAL: 'Pendiente de revisión',
-  LAUNCHED: 'Campaña activa',
+  CAMPAIGN_CREATED: 'Campaña creada',
 };
 
 const MAX_LENGTH = 2000;

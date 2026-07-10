@@ -13,6 +13,7 @@ export interface Step1Form {
   brandDescription: string;
   targetUrl: string;
   budgetPesos: string;
+  campaignGoal: string;
 }
 
 export interface Step3Form {
@@ -21,7 +22,6 @@ export interface Step3Form {
   maxAge: string;
   maxSessionsPerUserPerDay: string;
   startDate: string;
-  campaignGoal: string;
   categoryIds: number[];
   municipalityCodes: string[];
 }

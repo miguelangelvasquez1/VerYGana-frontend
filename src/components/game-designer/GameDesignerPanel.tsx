@@ -29,7 +29,7 @@ const STATUS_LABEL: Partial<Record<BrandingStatus, { label: string; cls: string 
   DESIGN_IN_PROGRESS: { label: 'En progreso', cls: 'bg-blue-100 text-blue-800' },
   CHANGES_REQUESTED: { label: 'Cambios solicitados', cls: 'bg-orange-100 text-orange-800' },
   PENDING_ADVERTISER_APPROVAL: { label: 'En revisión del anunciante', cls: 'bg-purple-100 text-purple-800' },
-  LAUNCHED: { label: 'Campaña activa', cls: 'bg-emerald-100 text-emerald-800' },
+  CAMPAIGN_CREATED: { label: 'Campaña creada', cls: 'bg-emerald-100 text-emerald-800' },
 };
 
 const formatDate = (iso: string) =>

@@ -43,6 +43,7 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
     brandDescription: '',
     targetUrl: '',
     budgetPesos: '',
+    campaignGoal: '',
   });
   const [step1Errors, setStep1Errors] = useState<Partial<Step1Form>>({});
 
@@ -52,7 +53,6 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
     maxAge: '',
     maxSessionsPerUserPerDay: '',
     startDate: '',
-    campaignGoal: '',
     categoryIds: [],
     municipalityCodes: [],
   });
@@ -80,6 +80,7 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
     }
     if (!step1.budgetPesos || isNaN(Number(step1.budgetPesos)) || Number(step1.budgetPesos) <= 0)
       e.budgetPesos = 'Ingresa un presupuesto mayor a 0';
+    if (!step1.campaignGoal) e.campaignGoal = 'El objetivo de campaña es requerido';
     setStep1Errors(e);
     return Object.keys(e).length === 0;
   };
@@ -99,6 +100,7 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
         brandDescription: step1.brandDescription.trim(),
         targetUrl: step1.targetUrl.trim() || undefined,
         budgetCents: Math.round(Number(step1.budgetPesos) * 100),
+        campaignGoal: step1.campaignGoal || undefined,
       });
       setRequestId(req.id);
       setCreatedRequest(req);
@@ -151,7 +153,6 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
       if (step3.maxSessionsPerUserPerDay)
         dto.maxSessionsPerUserPerDay = Number(step3.maxSessionsPerUserPerDay);
       if (step3.startDate) dto.startDate = new Date(step3.startDate).toISOString();
-      if (step3.campaignGoal) dto.campaignGoal = step3.campaignGoal;
       if (step3.categoryIds.length > 0) dto.categoryIds = step3.categoryIds;
       if (step3.municipalityCodes.length > 0) dto.municipalityCodes = step3.municipalityCodes;
       if (Object.keys(dto).length > 0) await configureBranding(requestId, dto);

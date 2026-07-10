@@ -25,7 +25,7 @@ const STATUS_LABEL: Partial<Record<BrandingStatus, { label: string; cls: string 
   DESIGN_IN_PROGRESS:         { label: 'En progreso',                 cls: 'bg-blue-100 text-blue-800 border-blue-200' },
   CHANGES_REQUESTED:          { label: 'Cambios solicitados',         cls: 'bg-orange-100 text-orange-800 border-orange-200' },
   PENDING_ADVERTISER_APPROVAL:{ label: 'En revisión del anunciante',  cls: 'bg-purple-100 text-purple-800 border-purple-200' },
-  LAUNCHED:                   { label: 'Campaña activa',              cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  CAMPAIGN_CREATED:                   { label: 'Campaña creada',              cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
 };
 
 type Tab = 'brief' | 'resources' | 'comments' | 'config' | 'json';
@@ -179,7 +179,7 @@ const handlePreview = async () => {
   const statusMeta          = STATUS_LABEL[detail.status];
   const canSubmit           = ['DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED'].includes(detail.status);
   const canPreview          = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED', 'PENDING_ADVERTISER_APPROVAL'].includes(detail.status);
-  const canComment          = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED', 'PENDING_ADVERTISER_APPROVAL', 'LAUNCHED'].includes(detail.status);
+  const canComment          = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED', 'PENDING_ADVERTISER_APPROVAL', 'CAMPAIGN_CREATED'].includes(detail.status);
   const visibleTabs         = canComment ? TABS : TABS.filter(t => t.id !== 'comments');
   const validatedCount      = detail.corporateResources.filter(r => r.status === 'VALIDATED').length;
 

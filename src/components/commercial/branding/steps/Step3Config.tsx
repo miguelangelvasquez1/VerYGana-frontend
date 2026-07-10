@@ -2,16 +2,8 @@
 
 import React from 'react';
 import { Loader2 } from 'lucide-react';
-import { useCampaignGoals } from '@/hooks/useCampaignGoals';
 import { CampaignTargetingSelector } from '../CampaignTargetingSelector';
 import type { Step3Form } from '../branding.types';
-
-const GOAL_LABELS: Record<string, string> = {
-  BRAND_AWARENESS: 'Reconocimiento de marca',
-  WEBSITE_TRAFFIC: 'Tráfico al sitio web',
-  APP_INSTALLS: 'Instalaciones de app',
-  PRODUCT_PROMOTION: 'Promoción de producto',
-};
 
 const fieldCls =
   'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
@@ -37,8 +29,6 @@ export const Step3Config: React.FC<Props> = ({
   onSkip,
   onNext,
 }) => {
-  const { goals, loading: goalsLoading } = useCampaignGoals();
-
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
       <div>
@@ -46,31 +36,6 @@ export const Step3Config: React.FC<Props> = ({
         <p className="text-sm text-gray-500 mt-0.5">
           Todos los campos son opcionales. Puedes configurarlo más adelante.
         </p>
-      </div>
-
-      {/* Objetivo de campaña */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Objetivo de campaña
-        </label>
-        {goalsLoading ? (
-          <div className="flex items-center gap-2 h-9 text-sm text-gray-400">
-            <Loader2 size={14} className="animate-spin" /> Cargando opciones...
-          </div>
-        ) : (
-          <select
-            value={form.campaignGoal}
-            onChange={e => onChange('campaignGoal', e.target.value)}
-            className={fieldCls}
-          >
-            <option value="">Sin objetivo definido</option>
-            {goals.map(g => (
-              <option key={g} value={g}>
-                {GOAL_LABELS[g] ?? g}
-              </option>
-            ))}
-          </select>
-        )}
       </div>
 
       {/* Grid de campos básicos */}
