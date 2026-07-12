@@ -47,12 +47,6 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
   const [maxAge, setMaxAge] = useState(survey.maxAge ? String(survey.maxAge) : '');
   const [ageErrors, setAgeErrors] = useState<{ minAge?: string; maxAge?: string }>({});
   const [targetGender, setTargetGender] = useState<TargetGender | ''>(survey.targetGender ?? '');
-  const [startsAt, setStartsAt] = useState(
-    survey.startsAt ? survey.startsAt.slice(0, 16) : '',
-  );
-
-  const minStartsAt = new Date().toISOString().slice(0, 16);
-  const isDraft = survey.status === 'DRAFT';
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -116,7 +110,6 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
       minAge: minVal,
       maxAge: maxVal,
       targetGender: targetGender || null,
-      startsAt: isDraft && startsAt ? startsAt : null,
     };
 
     updateMutation.mutate(payload, { onSuccess: () => onClose() });
@@ -351,23 +344,12 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
             </div>
           </div>
 
-          {/* Start date — only editable in DRAFT */}
-          {isDraft ? (
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Fecha de inicio</label>
-              <input
-                type="datetime-local"
-                min={minStartsAt}
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
-                className="w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10"
-              />
-            </div>
-          ) : survey.startsAt ? (
-            <p className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-2.5 text-xs text-amber-700">
-              La fecha de inicio solo se puede modificar cuando la encuesta está en borrador.
-            </p>
-          ) : null}
+          {/* Start date — set automatically by the backend on first publish/activation */}
+          <p className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-2.5 text-xs text-gray-500">
+            {survey.startsAt
+              ? `Se activó el ${new Date(survey.startsAt).toLocaleString('es-CO')}.`
+              : 'La fecha de inicio se fija automáticamente cuando publiques o actives la encuesta por primera vez.'}
+          </p>
 
           {updateMutation.isError && (
             <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-xs text-red-600">

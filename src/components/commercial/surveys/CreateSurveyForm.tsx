@@ -13,10 +13,11 @@ import {
   Tag,
   ArrowLeft,
   AlertCircle,
+  Info,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCreateSurvey, useSurveyConfigs } from '@/hooks/surveys/useCommercialSurvey';
-import { useSurveyForm } from '@/hooks/surveys/useSurveyForm';
+import { useSurveyForm, MAX_QUESTIONS, MAX_OPTIONS_PER_QUESTION, MAX_QUESTION_TEXT_LENGTH } from '@/hooks/surveys/useSurveyForm';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { QUESTION_TYPE_LABELS, GENDER_LABELS } from '@/hooks/surveys/surveyUtils';
@@ -111,7 +112,7 @@ export default function SurveyFormModal() {
   // ── Error → step mapping ─────────────────────────────────────────────────
 
   const ERROR_STEP: Record<string, 1 | 2 | 3> = {
-    title: 1, surveyConfigId: 1, maxResponses: 1, startsAt: 1,
+    title: 1, surveyConfigId: 1, maxResponses: 1,
     categoryIds: 2, municipalityCodes: 2, minAge: 2, maxAge: 2, targetGender: 2,
     questions: 3,
   };
@@ -157,7 +158,6 @@ export default function SurveyFormModal() {
       description: form.description.trim() || undefined,
       pricePerQuestionCents: pricePerQuestion * 100,
       maxResponses: form.maxResponses ? parseInt(form.maxResponses) : undefined,
-      startsAt: form.startsAt || undefined,
       categoryIds: form.categoryIds,
       municipalityCodes: form.municipalityCodes.length > 0 ? form.municipalityCodes : undefined,
       minAge: form.minAge ? parseInt(form.minAge) : undefined,
@@ -190,7 +190,7 @@ export default function SurveyFormModal() {
   const maxResponsesNum = Math.max(1, form.maxResponses ? parseInt(form.maxResponses) : 1);
   const totalCost = pricePerQuestion * form.questions.length * maxResponsesNum;
 
-  const step1Keys = ['title', 'surveyConfigId', 'maxResponses', 'startsAt'];
+  const step1Keys = ['title', 'surveyConfigId', 'maxResponses'];
   const step2Keys = ['categoryIds', 'municipalityCodes', 'minAge', 'maxAge', 'targetGender'];
   const countStepErrors = (keys: string[]) =>
     keys.filter((k) => touched.has(k) && errors[k]).length;
@@ -349,20 +349,6 @@ export default function SurveyFormModal() {
                 <p className="mt-1 text-xs text-gray-400">Mínimo 1 — máximo 10.000.000</p>
               </Field>
 
-              {/* Start date (future only) */}
-              <Field
-                label="Fecha de inicio"
-                tooltip="La encuesta se activará automáticamente en esta fecha y hora. Si no se define, quedará en borrador hasta que la publiques manualmente."
-              >
-                <input
-                  type="datetime-local"
-                  value={form.startsAt}
-                  onChange={(e) => setField('startsAt', e.target.value)}
-                  min={new Date().toISOString().slice(0, 16)}
-                  className={inputCls(false)}
-                />
-              </Field>
-
             </div>
           </StepAccordion>
 
@@ -376,6 +362,17 @@ export default function SurveyFormModal() {
           >
             <div className="space-y-5">
 
+              {/* Segmentation explainer */}
+              <div className="flex items-start gap-2.5 rounded-xl border border-[#03548C]/15 bg-[#03548C]/5 px-4 py-3">
+                <Info className="h-4 w-4 shrink-0 text-[#03548C] mt-0.5" />
+                <p className="text-xs leading-relaxed text-[#03548C]/90">
+                  La encuesta solo se le mostrará a usuarios que cumplan <strong>todos</strong> los
+                  filtros de esta sección (ubicación, edad, género) — a excepción de{' '}
+                  <strong>categorías</strong>, que no restringe a nadie: solo prioriza la encuesta
+                  para quienes tengan esos intereses.
+                </p>
+              </div>
+
               {/* Categories */}
               <div>
                 <div className="mb-2.5 flex items-center gap-1.5">
@@ -384,6 +381,9 @@ export default function SurveyFormModal() {
                     Categorías / Intereses *
                   </span>
                 </div>
+                <p className="mb-2.5 text-xs text-gray-400">
+                  No limita quién ve la encuesta — solo la prioriza para usuarios con estos intereses.
+                </p>
                 {loadingCats ? (
                   <div className="flex items-center gap-2 py-2 text-xs text-gray-400">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" /> Cargando categorías…
@@ -590,14 +590,20 @@ export default function SurveyFormModal() {
                     <div className="flex flex-1 flex-col gap-2 min-w-0">
                       <textarea
                         value={q.text}
-                        onChange={(e) => updateQuestion(q.id, { text: e.target.value })}
+                        onChange={(e) => updateQuestion(q.id, { text: e.target.value.slice(0, MAX_QUESTION_TEXT_LENGTH) })}
                         onBlur={() => touchField(`question_${idx}_text`)}
                         placeholder="Escribe aquí el texto completo de tu pregunta…"
                         rows={2}
+                        maxLength={MAX_QUESTION_TEXT_LENGTH}
                         className={`w-full resize-none text-sm ${inputCls(
                           !!errors[`question_${idx}_text`] && touched.has(`question_${idx}_text`),
                         )}`}
                       />
+                      <p className={`-mt-1 text-right text-[11px] ${
+                        q.text.length > MAX_QUESTION_TEXT_LENGTH - 30 ? 'text-amber-600' : 'text-gray-400'
+                      }`}>
+                        {q.text.length}/{MAX_QUESTION_TEXT_LENGTH}
+                      </p>
 
                       <div className="flex flex-wrap items-center gap-2">
                         <select
@@ -647,49 +653,71 @@ export default function SurveyFormModal() {
                           {errors[`question_${idx}_options`]}
                         </p>
                       )}
-                      {q.options.map((opt, oi) => (
-                        <div key={oi} className="flex items-center gap-2">
-                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gray-300 text-[10px] font-bold text-gray-400">
-                            {oi + 1}
-                          </span>
-                          <input
-                            type="text"
-                            value={opt}
-                            onChange={(e) => updateOption(q.id, oi, e.target.value)}
-                            placeholder={`Opción ${oi + 1}`}
-                            className={`flex-1 ${inputCls(false)}`}
-                          />
-                          {q.options.length > 2 && (
-                            <button
-                              type="button"
-                              onClick={() => removeOption(q.id, oi)}
-                              className="text-gray-300 hover:text-red-400"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => addOption(q.id)}
-                        className="text-xs font-medium text-[#03548C] hover:text-[#03548C]"
-                      >
-                        + Agregar opción
-                      </button>
+                      {q.options.map((opt, oi) => {
+                        const normalized = opt.trim().toLowerCase();
+                        const isDuplicate = normalized !== '' && q.options.some(
+                          (other, otherIdx) => otherIdx !== oi && other.trim().toLowerCase() === normalized,
+                        );
+                        return (
+                          <div key={oi} className="flex items-center gap-2">
+                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gray-300 text-[10px] font-bold text-gray-400">
+                              {oi + 1}
+                            </span>
+                            <input
+                              type="text"
+                              value={opt}
+                              onChange={(e) => {
+                                updateOption(q.id, oi, e.target.value);
+                                touchField(`question_${idx}_options`);
+                              }}
+                              onBlur={() => touchField(`question_${idx}_options`)}
+                              placeholder={`Opción ${oi + 1}`}
+                              className={`flex-1 ${inputCls(isDuplicate)}`}
+                            />
+                            {q.options.length > 2 && (
+                              <button
+                                type="button"
+                                onClick={() => removeOption(q.id, oi)}
+                                className="text-gray-300 hover:text-red-400"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                      {q.options.length < MAX_OPTIONS_PER_QUESTION ? (
+                        <button
+                          type="button"
+                          onClick={() => addOption(q.id)}
+                          className="text-xs font-medium text-[#03548C] hover:text-[#03548C]"
+                        >
+                          + Agregar opción ({q.options.length}/{MAX_OPTIONS_PER_QUESTION})
+                        </button>
+                      ) : (
+                        <p className="text-xs text-gray-400">
+                          Máximo {MAX_OPTIONS_PER_QUESTION} opciones por pregunta
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
 
-              <button
-                type="button"
-                onClick={addQuestion}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-500 hover:border-[#03548C]/40 hover:text-[#03548C] transition-colors"
-              >
-                <Plus className="h-4 w-4" />
-                Agregar pregunta
-              </button>
+              {form.questions.length < MAX_QUESTIONS ? (
+                <button
+                  type="button"
+                  onClick={addQuestion}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-500 hover:border-[#03548C]/40 hover:text-[#03548C] transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar pregunta ({form.questions.length}/{MAX_QUESTIONS})
+                </button>
+              ) : (
+                <p className="text-center text-xs text-gray-400">
+                  Alcanzaste el máximo de {MAX_QUESTIONS} preguntas por encuesta
+                </p>
+              )}
             </div>
           </StepAccordion>
         </div>

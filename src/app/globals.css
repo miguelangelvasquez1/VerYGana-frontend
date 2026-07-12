@@ -47,6 +47,20 @@ body {
   z-index: 9999 !important;
 }
 
+/* Force the app font once a browser autofill suggestion is actually
+   selected (Chrome/Safari otherwise render autofilled inputs with the
+   system font and a forced yellow background). This can't reach the
+   native autofill dropdown's hover-preview text — that's rendered by the
+   browser's own UI, outside the page, so no CSS can touch it. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  font-family: var(--font-days-one), sans-serif !important;
+  -webkit-text-fill-color: #111827 !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 /* RJSF overrides for Campaign Form*/
 /* CONTENEDOR GENERAL */
 .rjsf-form input,

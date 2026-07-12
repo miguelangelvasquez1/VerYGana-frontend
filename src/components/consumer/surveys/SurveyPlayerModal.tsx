@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
   X, ChevronLeft, ChevronRight, Loader2, Trophy,
   Tag, HelpCircle, AlertCircle, Building2, Users, Clock,
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSurveyDetail, useStartSurvey, useSubmitSurvey } from '@/hooks/surveys/useSurvey';
-import { formatKeys, formatDate, getSpotsRemaining } from '@/hooks/surveys/surveyUtils';
+import { formatKeys, formatDate, getSpotsRemaining, isSuspendedSurveyError } from '@/hooks/surveys/surveyUtils';
 import { levelService } from '@/services/LevelService';
+import { levelKeys } from '@/hooks/useLevelProfile';
 import QuestionRenderer from './QuestionRenderer';
 import SurveyCompletionScreen from './SurveyCompletionScreen';
 import type { XpRewardData } from '@/components/levels/XpRewardToast';
@@ -33,6 +35,7 @@ type Phase = 'preview' | 'questions' | 'done';
 
 export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Props) {
   const { data: session } = useSession()
+  const queryClient = useQueryClient();
   const [phase, setPhase]             = useState<Phase>('preview');
   const [sessionId, setSessionId]     = useState<number | null>(null);
   const [sessionSurvey, setSessionSurvey] = useState<SurveySessionDTO | null>(null);
@@ -40,11 +43,59 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
   const [answers, setAnswers]         = useState<Map<number, AnswerRequest>>(new Map());
   const [validationError, setValidationError] = useState<string | null>(null);
   const [result, setResult]           = useState<SubmissionResult | null>(null);
+  // Set on successful submit — the survey list shrinks (the completed
+  // survey drops out of "available") while this modal is still open, so
+  // on close we scroll to top instead of restoring the old position,
+  // which could now point at empty space that used to hold that card.
+  const didSubmitRef = useRef(false);
 
+  // Locks background scroll without `overflow:hidden`. Toggling
+  // `overflow:hidden` on <body> removes the scrollbar, which reflows page
+  // width, and restoring it relies on the browser remembering a scroll
+  // position that may no longer be valid if the page content changed
+  // underneath (e.g. the list re-rendering shorter after a submit) — both
+  // are exactly the kind of thing that leaves stray empty space and
+  // throws off anything relying on the viewport being the containing
+  // block (backdrop blur, centering) once unlocked. Pinning the body via
+  // `position: fixed` instead avoids all of that: the page literally
+  // cannot reflow while locked, and we control the restored scroll
+  // position explicitly.
   useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const prev = {
+      position: body.style.position,
+      top:      body.style.top,
+      bottom:   body.style.bottom,
+      left:     body.style.left,
+      right:    body.style.right,
+      width:    body.style.width,
+    };
+
+    body.style.position = 'fixed';
+    body.style.top      = `-${scrollY}px`;
+    // Without an explicit `bottom`, a fixed box with only `top` set sizes
+    // itself to its content's *layout* height — and on this app's root
+    // layout, that's a fixed `h-dvh` wrapper (exactly one viewport tall),
+    // not the true (taller, overflowing) page height. That left body's
+    // box short by `scrollY` px at the bottom whenever the page had been
+    // scrolled — an uncovered gap the size of the old scroll offset,
+    // which is exactly the "space below everything" bug. Pinning `bottom`
+    // too forces the box to stretch across the full viewport regardless.
+    body.style.bottom   = '0';
+    body.style.left     = '0';
+    body.style.right    = '0';
+    body.style.width    = '100%';
+
+    return () => {
+      body.style.position = prev.position;
+      body.style.top      = prev.top;
+      body.style.bottom   = prev.bottom;
+      body.style.left     = prev.left;
+      body.style.right    = prev.right;
+      body.style.width    = prev.width;
+      window.scrollTo(0, didSubmitRef.current ? 0 : scrollY);
+    };
   }, []);
 
   const detailQuery    = useSurveyDetail(surveyId, phase !== 'preview');
@@ -119,6 +170,7 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
         sessionId,
         answers: Array.from(answers.values()),
       });
+      didSubmitRef.current = true;
       setResult(res);
       setPhase('done');
 
@@ -128,6 +180,7 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
           levelService.getProfile(token),
           levelService.getHistory(token, 0, 1),
         ]).then(([profile, history]) => {
+          queryClient.setQueryData(levelKeys.profile(), profile);
           const latest = history.content[0];
           if (!latest) return;
           showReward({
@@ -204,7 +257,9 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
         <div className="shrink-0 border-t border-gray-100 px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:px-10 md:pb-4">
           {submitMutation.isError && (
             <p className="mb-3 text-center text-xs text-red-500">
-              Error al enviar la encuesta. Intenta de nuevo.
+              {isSuspendedSurveyError(submitMutation.error)
+                ? 'Esta encuesta fue suspendida por un administrador y ya no acepta respuestas.'
+                : 'Error al enviar la encuesta. Intenta de nuevo.'}
             </p>
           )}
           <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
@@ -455,6 +510,7 @@ function MetaCard({
 }
 
 function getStartErrorMessage(error: Error): string {
+  if (isSuspendedSurveyError(error)) return 'Esta encuesta fue suspendida por un administrador.';
   const status = (error as unknown as { status?: number }).status;
   if (status === 409) return 'Ya completaste esta encuesta anteriormente.';
   if (status === 400) return 'Esta encuesta no está disponible en este momento.';

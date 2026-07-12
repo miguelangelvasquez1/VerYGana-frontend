@@ -3,7 +3,7 @@ import SurveyList from '@/components/consumer/surveys/SurveyList';
 
 export default function SurveysPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#f4f7fb]">
+    <div className="min-h-full flex flex-col bg-[#f4f7fb]">
 
       {/* HERO */}
       <header className="bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white">

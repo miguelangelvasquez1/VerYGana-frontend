@@ -15,6 +15,7 @@ import type {
   SurveyResponseDetail,
   SurveyAnalytics,
   AdminSurveySummary,
+  SurveyAdminDetailDTO,
   SurveyCommercialDetailDTO,
 } from '@/types/survey.types';
 import { PagedResponse } from '@/types/Generic.types';
@@ -88,8 +89,12 @@ export const surveyAdminService = {
   createSurvey: async (
     payload: CreateSurveyRequest,
   ): Promise<SurveyResponse> => {
-    const { data } = await apiClient.post('/surveys', payload);
-    return data;
+    try {
+      const { data } = await apiClient.post('/surveys', payload);
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
   },
 
   /** Partial update — only sent fields are changed */
@@ -97,21 +102,34 @@ export const surveyAdminService = {
     surveyId: number,
     payload: UpdateSurveyRequest,
   ): Promise<SurveyCommercialDetailDTO> => {
-    const { data } = await apiClient.put(`/surveys/${surveyId}`, payload);
-    return data;
+    try {
+      const { data } = await apiClient.put(`/surveys/${surveyId}`, payload);
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
   },
 
-  /** Change survey status freely */
+  /**
+   * PATCH /surveys/:id/commercial-status?status=
+   * Lets the owning commercial change their own survey's status
+   * (ACTIVE ⇄ PAUSED, or → CLOSED). Rejects status=DRAFT and surveys
+   * that are already CLOSED (400), or surveys owned by someone else (403).
+   */
   updateSurveyStatus: async (
     surveyId: number,
     status: SurveyStatus,
   ): Promise<SurveyResponse> => {
-    const { data } = await apiClient.patch(
-      `/surveys/${surveyId}/status`,
-      null,
-      { params: { status } },
-    );
-    return data;
+    try {
+      const { data } = await apiClient.patch(
+        `/surveys/${surveyId}/commercial-status`,
+        null,
+        { params: { status } },
+      );
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
   },
 
   /** Get all surveys (admin sees all statuses) */
@@ -228,9 +246,9 @@ export const surveyAdminService = {
    * GET /api/v1/admin/surveys/:id
    * Full survey detail (metadata + targeting + questions).
    */
-  getSurveyAdminDetail: async (surveyId: number): Promise<SurveyResponse> => {
+  getSurveyAdminDetail: async (surveyId: number): Promise<SurveyAdminDetailDTO> => {
     try {
-      const { data } = await apiClient.get<SurveyResponse>(
+      const { data } = await apiClient.get<SurveyAdminDetailDTO>(
         `/surveys/admin/${surveyId}`,
       );
       return data;
@@ -290,10 +308,13 @@ export class SurveyApiError extends Error {
 function handleError(err: unknown): never {
   if (err instanceof AxiosError && err.response) {
     const { status, data } = err.response;
+    // Some endpoints return RFC7807-style { title, detail }, others plain
+    // Spring Boot error bodies { error, message } — prefer whichever has
+    // the actual human-readable text over the generic axios message.
     throw new SurveyApiError(
-      data?.title ?? 'Error en la solicitud',
+      data?.title ?? data?.message ?? data?.error ?? 'Error en la solicitud',
       status,
-      data?.detail ?? data?.message,
+      data?.detail,
     );
   }
   throw err;

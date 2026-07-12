@@ -39,7 +39,7 @@ const navItems = [
   { href: '/home',              label: 'Inicio',    Icon: Home          },
   { href: '/raffles',           label: 'Rifas',     Icon: Gift          },
   { href: '/games',             label: 'Juegos',    Icon: Gamepad2      },
-  { href: '/pet',               label: '🐾 Mascota', Icon: PawPrint     },
+  { href: '/pet',               label: 'Mascota',    Icon: PawPrint     },
   { href: '/ads',               label: 'Anuncios',  Icon: Megaphone     },
   { href: '/surveys',           label: 'Encuestas', Icon: ClipboardList },
   { href: '/products',          label: 'Productos', Icon: Package       },
@@ -631,7 +631,7 @@ export default function Navbar() {
           <Link href="/mascota" className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
               <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/mascota" ? "bg-white/20" : ""}`}>
-                <span className={`text-xl leading-none transition-all duration-200 ${pathname === "/mascota" ? "scale-110" : "opacity-70"}`}>🐾</span>
+                <PawPrint className={`w-5 h-5 transition-all duration-200 ${pathname === "/mascota" ? "text-[#00a4ff]" : "text-white/70"}`} />
               </div>
               <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/mascota" ? "text-[#00a4ff]" : "text-white/70"}`}>Mascota</span>
             </div>

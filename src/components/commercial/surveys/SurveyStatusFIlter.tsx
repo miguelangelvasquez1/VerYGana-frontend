@@ -4,7 +4,7 @@ import React from 'react';
 import { STATUS_LABELS } from '@/hooks/surveys/surveyUtils';
 import type { SurveyStatus } from '@/types/survey.types';
 
-const ALL_STATUSES: SurveyStatus[] = ['DRAFT', 'ACTIVE', 'PAUSED', 'CLOSED'];
+const ALL_STATUSES: SurveyStatus[] = ['DRAFT', 'ACTIVE', 'PAUSED', 'SUSPENDED', 'COMPLETED', 'CLOSED'];
 
 interface Props {
   value: SurveyStatus | undefined;

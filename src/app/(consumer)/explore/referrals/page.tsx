@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Loader2, Users } from 'lucide-react';
 import ReferralPageShell from '@/components/referrals/ReferralPageShell';
 import { getReferralInfo, type ReferralInfoDTO } from '@/services/ReferralService';
 import { useXpReward } from '@/hooks/useXpReward';
 import { XpRewardToast } from '@/components/levels/XpRewardToast';
 import { levelService } from '@/services/LevelService';
+import { levelKeys } from '@/hooks/useLevelProfile';
 
 const SEEN_KEY = 'xp_seen_referral_txids';
 
@@ -25,6 +27,7 @@ function markSeen(id: number) {
 
 export default function ReferralsPage() {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [info, setInfo]   = useState<ReferralInfoDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +60,7 @@ export default function ReferralsPage() {
       levelService.getHistory(token, 0, 10),
     ])
       .then(([profile, history]) => {
+        queryClient.setQueryData(levelKeys.profile(), profile);
         const seen = getSeenIds();
         const newTx = history.content.find(
           tx => tx.activityType === 'REFERRAL_ACTIVE' && !seen.has(tx.id)

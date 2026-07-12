@@ -114,13 +114,13 @@ function ResponseCard({
         {/* User */}
         <div className="flex-1 min-w-0">
           <p className="truncate text-sm font-semibold text-gray-900">
-            {response.userName ?? `Usuario #${response.userId}`}
+            Usuario <span className="font-mono font-normal text-gray-500">{response.userHash}</span>
           </p>
-          <p className="text-xs text-gray-400">
-            {response.completedAt
-              ? `Completada ${formatDateTime(response.completedAt)}`
-              : `Iniciada ${formatDateTime(response.startedAt)}`}
-          </p>
+          {response.completedAt && (
+            <p className="text-xs text-gray-400">
+              Completada {formatDateTime(response.completedAt)}
+            </p>
+          )}
         </div>
 
         {/* Status pill */}
@@ -181,8 +181,11 @@ function AnswerDisplay({ answer }: { answer: SurveyResponseDetail['answers'][num
   if (answer.questionType === 'MULTIPLE_CHOICE' && answer.selectedOptionTexts.length > 0) {
     return (
       <div className="flex flex-wrap gap-1.5">
-        {answer.selectedOptionTexts.map((t) => (
-          <span key={t} className="rounded-full bg-[#03548C]/5 px-2.5 py-0.5 text-xs font-medium text-[#03548C]">
+        {answer.selectedOptionTexts.map((t, i) => (
+          // selectedOptionTexts solo trae texto (no IDs) — dos opciones con el
+          // mismo texto en la misma pregunta producirían keys duplicadas si
+          // usáramos solo `t`, así que se combina con el índice.
+          <span key={`${i}-${t}`} className="rounded-full bg-[#03548C]/5 px-2.5 py-0.5 text-xs font-medium text-[#03548C]">
             {t}
           </span>
         ))}

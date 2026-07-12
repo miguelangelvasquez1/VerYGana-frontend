@@ -7,9 +7,10 @@ import type { SurveyAnalytics, QuestionStat } from '@/types/survey.types';
 
 interface Props {
   query: UseQueryResult<SurveyAnalytics>;
+  responseCount: number;
 }
 
-export default function AnalyticsPanel({ query }: Props) {
+export default function AnalyticsPanel({ query, responseCount }: Props) {
   const { data, isLoading, isError } = query;
 
   if (isLoading) {
@@ -42,24 +43,10 @@ export default function AnalyticsPanel({ query }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* ── Summary row ──────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Total respuestas"    value={data.totalResponses.toLocaleString('es-CO')} />
-        <StatCard label="Completadas"         value={data.completedResponses.toLocaleString('es-CO')} />
-        <StatCard
-          label="Tasa de completado"
-          value={`${data.completionRate.toFixed(1)}%`}
-          accent
-        />
-        <StatCard
-          label="Tiempo promedio"
-          value={
-            data.averageCompletionMinutes != null
-              ? `${data.averageCompletionMinutes.toFixed(1)} min`
-              : '—'
-          }
-        />
-      </div>
+      {/* ── Summary ──────────────────────────────────────────────────────── */}
+      <p className="text-xs text-gray-400">
+        {responseCount.toLocaleString('es-CO')} respuesta{responseCount !== 1 ? 's' : ''}
+      </p>
 
       {/* ── Per-question charts ───────────────────────────────────────────── */}
       <div className="space-y-4">
@@ -67,23 +54,6 @@ export default function AnalyticsPanel({ query }: Props) {
           <QuestionChart key={stat.questionId} stat={stat} index={i + 1} />
         ))}
       </div>
-    </div>
-  );
-}
-
-// ─── StatCard ─────────────────────────────────────────────────────────────────
-
-function StatCard({
-  label, value, accent = false,
-}: {
-  label: string; value: string; accent?: boolean;
-}) {
-  return (
-    <div className={`rounded-2xl border p-4 ${accent ? 'border-[#03548C]/15 bg-[#03548C]/5' : 'border-gray-100 bg-white'}`}>
-      <p className="text-xs font-medium text-gray-400">{label}</p>
-      <p className={`mt-1.5 text-2xl font-black ${accent ? 'text-[#03548C]' : 'text-gray-900'}`}>
-        {value}
-      </p>
     </div>
   );
 }
@@ -138,12 +108,12 @@ function BarChart({ stat }: { stat: QuestionStat }) {
 
   return (
     <div className="space-y-2.5">
-      {stat.optionStats.map((opt) => {
+      {stat.optionStats.map((opt, i) => {
         const pct = (opt.count / maxCount) * 100;
         const isPositive = isYesNo && /^(si|sí|yes|1)$/i.test(opt.optionText);
 
         return (
-          <div key={opt.optionText}>
+          <div key={`${i}-${opt.optionText}`}>
             <div className="mb-1 flex items-center justify-between">
               <span className="text-sm text-gray-700">{opt.optionText}</span>
               <span className="ml-4 shrink-0 text-sm font-bold text-gray-900">

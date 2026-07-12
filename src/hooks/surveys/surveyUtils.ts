@@ -6,7 +6,9 @@ export const STATUS_LABELS: Record<SurveyStatus, string> = {
   DRAFT: 'Borrador',
   ACTIVE: 'Activa',
   PAUSED: 'Pausada',
-  CLOSED: 'Cerrada',
+  CLOSED: 'Cancelada',
+  SUSPENDED: 'Suspendida',
+  COMPLETED: 'Completada',
 };
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
@@ -26,11 +28,27 @@ export const GENDER_LABELS: Record<TargetGender, string> = {
 // ─── Status badge colors (Tailwind) ───────────────────────────────────────────
 
 export const STATUS_COLORS: Record<SurveyStatus, string> = {
-  DRAFT:  'bg-zinc-100 text-zinc-600',
-  ACTIVE: 'bg-emerald-50 text-emerald-700',
-  PAUSED: 'bg-amber-50 text-amber-700',
-  CLOSED: 'bg-red-50 text-red-600',
+  DRAFT:     'bg-zinc-100 text-zinc-600',
+  ACTIVE:    'bg-emerald-50 text-emerald-700',
+  PAUSED:    'bg-amber-50 text-amber-700',
+  CLOSED:    'bg-red-50 text-red-600',
+  SUSPENDED: 'bg-purple-50 text-purple-700',
+  COMPLETED: 'bg-blue-50 text-blue-700',
 };
+
+// ─── Error helpers ────────────────────────────────────────────────────────────
+
+/**
+ * The backend sends the "suspended" message in inconsistent shapes/languages
+ * depending on the endpoint (some plain axios errors, some SurveyApiError,
+ * English or Spanish text) — this matches the "suspend" root across all of
+ * them instead of relying on any single exact string.
+ */
+export function isSuspendedSurveyError(error: unknown): boolean {
+  const err = error as { message?: string; response?: { data?: { message?: string } } } | null;
+  const msg = err?.response?.data?.message ?? err?.message;
+  return typeof msg === 'string' && /suspend/i.test(msg);
+}
 
 // ─── Reward formatting ────────────────────────────────────────────────────────
 

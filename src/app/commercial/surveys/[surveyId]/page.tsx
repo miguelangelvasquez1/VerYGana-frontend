@@ -17,6 +17,7 @@ export default function SurveyResponsesRoute() {
       <SurveyResponsesPage
         surveyId={surveyId}
         surveyTitle={survey?.title ?? '…'}
+        responseCount={survey?.responseCount ?? 0}
         onBack={() => router.push('/commercial/surveys')}
       />
   );

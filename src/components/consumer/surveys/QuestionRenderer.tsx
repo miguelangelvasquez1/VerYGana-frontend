@@ -3,6 +3,9 @@
 import React from 'react';
 import type { QuestionResponse, AnswerRequest } from '@/types/survey.types';
 
+// Debe coincidir con el límite del backend para respuestas de texto libre (400 si se excede).
+const MAX_TEXT_ANSWER_LENGTH = 1000;
+
 interface Props {
   question: QuestionResponse;
   answer: AnswerRequest | undefined;
@@ -236,14 +239,22 @@ function TextAnswer({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const remaining = MAX_TEXT_ANSWER_LENGTH - value.length;
+
   return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      rows={6}
-      placeholder="Escribe tu respuesta aquí…"
-      className="w-full resize-none rounded-xl border-2 border-gray-200 px-5 py-4 text-base text-gray-800 outline-none placeholder:text-gray-300 focus:border-[#03548C] transition-colors"
-    />
+    <div>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value.slice(0, MAX_TEXT_ANSWER_LENGTH))}
+        rows={6}
+        maxLength={MAX_TEXT_ANSWER_LENGTH}
+        placeholder="Escribe tu respuesta aquí…"
+        className="w-full resize-none rounded-xl border-2 border-gray-200 px-5 py-4 text-base text-gray-800 outline-none placeholder:text-gray-300 focus:border-[#03548C] transition-colors"
+      />
+      <p className={`mt-1.5 text-right text-xs ${remaining <= 50 ? 'text-amber-600' : 'text-gray-400'}`}>
+        {value.length}/{MAX_TEXT_ANSWER_LENGTH}
+      </p>
+    </div>
   );
 }
 

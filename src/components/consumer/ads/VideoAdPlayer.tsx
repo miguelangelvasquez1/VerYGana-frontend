@@ -2,10 +2,12 @@
 'use client'
 import { useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useQueryClient } from '@tanstack/react-query';
 import VideoControls from './VideoControls';
 import { useNextAd, useLikeAd } from '@/hooks/ads/mutations';
 import { AdForConsumerDTO, AdLikedResponse } from '@/types/ads/commercial';
 import { levelService } from '@/services/LevelService';
+import { levelKeys } from '@/hooks/useLevelProfile';
 import type { XpRewardData } from '@/components/levels/XpRewardToast';
 import toast from 'react-hot-toast';
 
@@ -15,6 +17,7 @@ interface Props {
 
 export default function VideoAdPlayer({ onXpReward }: Props) {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -183,6 +186,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
               levelService.getProfile(token),
               levelService.getHistory(token, 0, 1),
             ]).then(([profile, history]) => {
+              queryClient.setQueryData(levelKeys.profile(), profile);
               const latest = history.content[0];
               if (!latest) return;
               onXpReward({

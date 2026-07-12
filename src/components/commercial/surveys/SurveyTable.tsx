@@ -7,6 +7,8 @@ import {
   Play,
   Pause,
   XCircle,
+  Ban,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -16,10 +18,11 @@ import {
 import { usePublishSurvey, useUpdateSurveyStatus } from '@/hooks/surveys/useCommercialSurvey';
 import {
   STATUS_LABELS,
-  STATUS_COLORS, 
+  STATUS_COLORS,
   formatReward,
   formatDate
 } from '@/hooks/surveys/surveyUtils';
+import { SurveyApiError } from '@/services/surveyService';
 import SurveyDetailModal from './SurveyDetailModal';
 import type { SurveySummary, SurveyStatus } from '@/types/survey.types';
 
@@ -40,11 +43,26 @@ export default function SurveyTable({
 }: Props) {
   const router = useRouter();
   const [detailId, setDetailId] = useState<number | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const publishMutation = usePublishSurvey();
   const statusMutation  = useUpdateSurveyStatus();
 
+  const handlePublish = (id: number) => {
+    setErrorMsg(null);
+    publishMutation.mutate(id, {
+      onError: (err) => setErrorMsg(
+        err instanceof SurveyApiError ? err.message : 'Error al publicar la encuesta',
+      ),
+    });
+  };
+
   const handleStatusChange = (id: number, status: SurveyStatus) => {
-    statusMutation.mutate({ surveyId: id, status });
+    setErrorMsg(null);
+    statusMutation.mutate({ surveyId: id, status }, {
+      onError: (err) => setErrorMsg(
+        err instanceof SurveyApiError ? err.message : 'Error al actualizar el estado',
+      ),
+    });
   };
 
   if (isLoading) {
@@ -68,6 +86,19 @@ export default function SurveyTable({
 
   return (
     <>
+      {errorMsg && (
+        <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <XCircle className="h-4 w-4 shrink-0" />
+          {errorMsg}
+          <button
+            onClick={() => setErrorMsg(null)}
+            className="ml-auto text-red-400 hover:text-red-600"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <table className="min-w-full divide-y divide-gray-100">
           <thead>
@@ -93,7 +124,7 @@ export default function SurveyTable({
                 onViewResponses={() =>
                   router.push(`/commercial/surveys/${survey.id}`)
                 }
-                onPublish={() => publishMutation.mutate(survey.id)}
+                onPublish={() => handlePublish(survey.id)}
                 onStatusChange={handleStatusChange}
                 isUpdating={
                   (publishMutation.isPending &&
@@ -244,13 +275,32 @@ function SurveyRow({
 
           {['ACTIVE', 'PAUSED'].includes(survey.status) && (
             <ActionBtn
-              tooltip="Cerrar"
-              onClick={() => onStatusChange(survey.id, 'CLOSED')}
+              tooltip="Cancelar (definitivo)"
+              onClick={() => {
+                if (window.confirm(
+                  'Esta acción es DEFINITIVA: la encuesta quedará cancelada para siempre y no podrás reactivarla. ¿Continuar?',
+                )) onStatusChange(survey.id, 'CLOSED');
+              }}
               loading={isUpdating}
               className="text-red-500 hover:bg-red-50"
             >
               <XCircle className="h-3.5 w-3.5" />
             </ActionBtn>
+          )}
+
+          {survey.status === 'SUSPENDED' && (
+            <span
+              title="Suspendida por un administrador — no puedes modificarla"
+              className="text-purple-400"
+            >
+              <Ban className="h-3.5 w-3.5" />
+            </span>
+          )}
+
+          {survey.status === 'COMPLETED' && (
+            <span title="Encuesta completada — alcanzó el máximo de respuestas" className="text-blue-400">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </span>
           )}
         </div>
       </td>

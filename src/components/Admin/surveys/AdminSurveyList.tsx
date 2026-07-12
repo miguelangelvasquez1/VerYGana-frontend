@@ -8,8 +8,6 @@ import {
   ChevronRight,
   Loader2,
   Eye,
-  Play,
-  Pause,
   XCircle,
   CheckCircle2,
 } from 'lucide-react';
@@ -25,12 +23,13 @@ import {
   formatDate,
   getResponseProgress,
 } from '@/hooks/surveys/surveyUtils';
+import { TRANSITIONS, ConfirmDialog, type Transition } from './surveyStatusTransitions';
 import type { SurveyStatus } from '@/types/survey.types';
 import type { AdminSurveySummary } from '@/types/survey.types';
 
 // ─── Status filter pills ──────────────────────────────────────────────────────
 
-const ALL_STATUSES: SurveyStatus[] = ['DRAFT', 'ACTIVE', 'PAUSED', 'CLOSED'];
+const ALL_STATUSES: SurveyStatus[] = ['DRAFT', 'ACTIVE', 'PAUSED', 'SUSPENDED', 'COMPLETED', 'CLOSED'];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -39,21 +38,25 @@ export default function AdminSurveyList() {
   const [page,          setPage]          = useState(0);
   const [statusFilter,  setStatusFilter]  = useState<SurveyStatus | undefined>();
   const [errorMsg,      setErrorMsg]      = useState<string | null>(null);
+  const [pendingAction,  setPendingAction] = useState<{ surveyId: number; from: SurveyStatus; transition: Transition } | null>(null);
 
   const { data, isLoading, isError } = useAdminSurveyList(page, 15, statusFilter);
   const updateStatus = useAdminUpdateStatus();
 
-  const handleStatusChange = (surveyId: number, status: SurveyStatus) => {
+  const confirmChange = () => {
+    if (!pendingAction) return;
     setErrorMsg(null);
     updateStatus.mutate(
-      { surveyId, status },
+      { surveyId: pendingAction.surveyId, status: pendingAction.transition.next },
       {
+        onSuccess: () => setPendingAction(null),
         onError: (err:any) => {
           setErrorMsg(
             err instanceof SurveyApiError
               ? err.message
               : 'Error al actualizar el estado',
           );
+          setPendingAction(null);
         },
       },
     );
@@ -124,7 +127,7 @@ export default function AdminSurveyList() {
             <table className="min-w-full divide-y divide-gray-100">
               <thead>
                 <tr className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  {['Encuesta', 'Estado', 'Respuestas', 'Recompensa', 'Creada', 'Acciones'].map((h) => (
+                  {['Encuesta', 'Estado', 'Respuestas', 'Pagado', 'Creada', 'Acciones'].map((h) => (
                     <th key={h} className="px-5 py-3.5">{h}</th>
                   ))}
                 </tr>
@@ -141,8 +144,8 @@ export default function AdminSurveyList() {
                     onViewDetail={() =>
                       router.push(`/admin/surveys/${survey.id}`)
                     }
-                    onStatusChange={(status) =>
-                      handleStatusChange(survey.id, status)
+                    onRequestTransition={(transition) =>
+                      setPendingAction({ surveyId: survey.id, from: survey.status, transition })
                     }
                   />
                 ))}
@@ -177,22 +180,46 @@ export default function AdminSurveyList() {
           </div>
         </>
       )}
+
+      {/* ── Confirm dialog ────────────────────────────────────────────────── */}
+      {pendingAction && (
+        <ConfirmDialog
+          from={pendingAction.from}
+          transition={pendingAction.transition}
+          loading={updateStatus.isPending}
+          onConfirm={confirmChange}
+          onCancel={() => setPendingAction(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ─── SurveyRow ────────────────────────────────────────────────────────────────
 
+// Colores compactos para los botones de acción de la fila — el `btnClass`
+// de cada Transition está pensado para los botones grandes del detalle,
+// acá reutilizamos el mismo ícono/label/confirmMsg pero con el estilo
+// discreto que ya usa esta tabla.
+const COMPACT_ACTION_CLASS: Record<SurveyStatus, string> = {
+  DRAFT:     'text-gray-400',
+  ACTIVE:    'text-gray-400',
+  PAUSED:    'text-emerald-600 hover:bg-emerald-50',
+  SUSPENDED: 'text-purple-600 hover:bg-purple-50',
+  COMPLETED: 'text-gray-400',
+  CLOSED:    'text-red-500 hover:bg-red-50',
+};
+
 function SurveyRow({
   survey,
   isUpdating,
   onViewDetail,
-  onStatusChange,
+  onRequestTransition,
 }: {
   survey: AdminSurveySummary;
   isUpdating: boolean;
   onViewDetail: () => void;
-  onStatusChange: (status: SurveyStatus) => void;
+  onRequestTransition: (transition: Transition) => void;
 }) {
   const progress = getResponseProgress(survey.totalResponses, survey.maxResponses);
 
@@ -208,12 +235,6 @@ function SurveyRow({
           <p className="truncate text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
             {survey.title}
           </p>
-          {survey.categoryNames?.length > 0 && (
-            <p className="mt-0.5 truncate text-xs text-gray-400">
-              {survey.categoryNames.slice(0, 2).join(', ')}
-              {survey.categoryNames?.length > 2 && ` +${survey.categoryNames.length - 2}`}
-            </p>
-          )}
         </button>
       </td>
 
@@ -244,10 +265,12 @@ function SurveyRow({
         )}
       </td>
 
-      {/* Reward */}
+      {/* Pagado (recompensa total = por pregunta × máximo de respuestas) */}
       <td className="px-5 py-4">
         <p className="text-sm font-semibold text-indigo-600">
-          {formatReward(survey.rewardAmountPerQuestionCents / 100)}
+          {survey.maxResponses != null
+            ? formatReward((survey.rewardAmountPerQuestionCents * survey.maxResponses * survey.totalQuestions) / 100)
+            : '—'}
         </p>
       </td>
 
@@ -265,56 +288,21 @@ function SurveyRow({
             <Eye className="h-3.5 w-3.5" />
           </ActionBtn>
 
-          {/* DRAFT → publish */}
-          {survey.status === 'DRAFT' && (
+          {/* Mismas transiciones (con el mismo modal de confirmación) que el detalle */}
+          {TRANSITIONS[survey.status].map((t) => (
             <ActionBtn
-              tooltip="Publicar"
+              key={t.next}
+              tooltip={t.label}
               loading={isUpdating}
-              className="text-emerald-600 hover:bg-emerald-50"
-              onClick={() => onStatusChange('ACTIVE')}
+              className={COMPACT_ACTION_CLASS[t.next]}
+              onClick={() => onRequestTransition(t)}
             >
-              <Play className="h-3.5 w-3.5" />
+              {t.icon}
             </ActionBtn>
-          )}
-
-          {/* ACTIVE → pause */}
-          {survey.status === 'ACTIVE' && (
-            <ActionBtn
-              tooltip="Pausar"
-              loading={isUpdating}
-              className="text-amber-600 hover:bg-amber-50"
-              onClick={() => onStatusChange('PAUSED')}
-            >
-              <Pause className="h-3.5 w-3.5" />
-            </ActionBtn>
-          )}
-
-          {/* PAUSED → reactivate */}
-          {survey.status === 'PAUSED' && (
-            <ActionBtn
-              tooltip="Reactivar"
-              loading={isUpdating}
-              className="text-emerald-600 hover:bg-emerald-50"
-              onClick={() => onStatusChange('ACTIVE')}
-            >
-              <Play className="h-3.5 w-3.5" />
-            </ActionBtn>
-          )}
-
-          {/* ACTIVE or PAUSED → close */}
-          {(survey.status === 'ACTIVE' || survey.status === 'PAUSED') && (
-            <ActionBtn
-              tooltip="Cerrar encuesta"
-              loading={isUpdating}
-              className="text-red-500 hover:bg-red-50"
-              onClick={() => onStatusChange('CLOSED')}
-            >
-              <XCircle className="h-3.5 w-3.5" />
-            </ActionBtn>
-          )}
+          ))}
 
           {survey.status === 'CLOSED' && (
-            <span title="Encuesta cerrada">
+            <span title="Encuesta cancelada">
               <CheckCircle2 className="h-4 w-4 text-gray-300" />
             </span>
           )}

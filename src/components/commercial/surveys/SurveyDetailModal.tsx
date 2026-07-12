@@ -86,7 +86,7 @@ function SurveyContent({ survey }: { survey: SurveyCommercialDetailDTO }) {
   const municipalityNames = (survey.targetMunicipalities ?? []).map((m) => m.name);
 
   const questionCount = survey.questions.length;
-  const spentCents = survey.completedSessions * questionCount * survey.rewardAmountPerQuestionCents;
+  const spentCents = survey.responseCount * questionCount * survey.rewardAmountPerQuestionCents;
   const remainingCents = survey.totalBudgetCents != null ? survey.totalBudgetCents - spentCents : null;
   const completionRate = survey.maxResponses
     ? Math.round((survey.responseCount * 1000) / survey.maxResponses) / 10
@@ -196,10 +196,15 @@ function SurveyContent({ survey }: { survey: SurveyCommercialDetailDTO }) {
                   {i + 1}
                 </span>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">
-                    {q.text}
-                    {q.required && <span className="ml-1 text-red-500">*</span>}
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm font-medium text-gray-900">
+                      {q.text}
+                      {q.required && <span className="ml-1 text-red-500">*</span>}
+                    </p>
+                    <span className="shrink-0 whitespace-nowrap rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                      {formatReward(survey.rewardAmountPerQuestionCents / 100)}
+                    </span>
+                  </div>
                   <p className="mt-0.5 text-xs text-gray-400">{QUESTION_TYPE_LABELS[q.type]}</p>
                   {q.options.length > 0 && (
                     <ul className="mt-2 space-y-1">
