@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getConsumerProfile, getConsumerInitialData } from "@/services/ConsumerService";
 import type { ConsumerProfileResponseDTO, ConsumerInitialDataResponseDTO } from "@/types/Consumer.types";
-import { Loader2, Edit, Mail, Phone, MapPin, Building2, Shield, Key, Wallet, TrendingUp, AlertTriangle } from "lucide-react";
+import { Loader2, Edit, Mail, Phone, MapPin, Building2, Shield, Key, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 function getInitials(name: string, lastName: string) {
@@ -52,7 +52,7 @@ export default function ConsumerProfilePage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-60">
-        <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
+        <Loader2 className="animate-spin w-8 h-8 text-[#03548C]" />
       </div>
     );
   }
@@ -74,23 +74,20 @@ export default function ConsumerProfilePage() {
           color: "text-green-600",
           bg: "bg-green-50",
           border: "border-green-200",
-          Icon: Key,
         },
         {
           label: "Llaves de compra",
           value: initialData.purchaseKeys,
-          color: "text-blue-600",
-          bg: "bg-blue-50",
-          border: "border-blue-200",
-          Icon: TrendingUp,
+          color: "text-[#03548C]",
+          bg: "bg-[#03548C]/10",
+          border: "border-[#03548C]/30",
         },
         {
           label: "Llaves conectividad",
           value: initialData.connectivityKeys,
-          color: "text-purple-600",
-          bg: "bg-purple-50",
-          border: "border-purple-200",
-          Icon: Wallet,
+          color: "text-[#00a4ff]",
+          bg: "bg-[#00a4ff]/10",
+          border: "border-[#00a4ff]/30",
         },
       ]
     : [];
@@ -98,8 +95,8 @@ export default function ConsumerProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Header */}
-      <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+      <div className="relative overflow-hidden bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-20 sm:pb-24">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             {/* Avatar */}
             <div className="w-24 h-24 rounded-full border-4 border-white/30 shadow-lg shrink-0 overflow-hidden bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -133,7 +130,7 @@ export default function ConsumerProfilePage() {
             <div className="shrink-0">
               <Link
                 href="/explore/profile/edit"
-                className="inline-flex items-center gap-2 bg-white text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-xl font-semibold transition shadow-md"
+                className="inline-flex items-center gap-2 bg-white text-[#03548C] hover:bg-blue-50 px-5 py-2.5 rounded-xl font-semibold transition shadow-md"
               >
                 <Edit className="w-4 h-4" />
                 Editar Perfil
@@ -141,20 +138,27 @@ export default function ConsumerProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Wave bottom */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f9fafb" />
+          </svg>
+        </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-28 lg:pb-8 space-y-6">
 
         {/* Stats de llaves */}
         {initialData && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {keyCards.map(({ label, value, color, bg, border, Icon }) => (
+            {keyCards.map(({ label, value, color, bg, border }) => (
               <div
                 key={label}
                 className={`bg-white rounded-2xl border ${border} shadow-sm p-5 flex items-center gap-4`}
               >
                 <div className={`w-12 h-12 ${bg} rounded-full flex items-center justify-center shrink-0`}>
-                  <Icon className={`w-6 h-6 ${color}`} />
+                  <img src="/logos/llave.png" alt="llave" className="w-7 h-7 object-contain" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">{label}</p>
@@ -172,8 +176,8 @@ export default function ConsumerProfilePage() {
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               Información de contacto
             </h2>
-            <InfoRow icon={<Mail className="w-4 h-4 text-blue-600" />} bg="bg-blue-50" label="Email" value={profile.email} />
-            <InfoRow icon={<Phone className="w-4 h-4 text-blue-600" />} bg="bg-blue-50" label="Teléfono" value={profile.phoneNumber} />
+            <InfoRow icon={<Mail className="w-4 h-4 text-[#03548C]" />} bg="bg-[#03548C]/10" label="Email" value={profile.email} />
+            <InfoRow icon={<Phone className="w-4 h-4 text-[#03548C]" />} bg="bg-[#03548C]/10" label="Teléfono" value={profile.phoneNumber} />
           </div>
 
           {/* Ubicación */}
@@ -181,8 +185,8 @@ export default function ConsumerProfilePage() {
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               Ubicación
             </h2>
-            <InfoRow icon={<Building2 className="w-4 h-4 text-purple-600" />} bg="bg-purple-50" label="Departamento" value={profile.department || "—"} />
-            <InfoRow icon={<MapPin className="w-4 h-4 text-purple-600" />} bg="bg-purple-50" label="Municipio" value={profile.municipalityName || "—"} />
+            <InfoRow icon={<Building2 className="w-4 h-4 text-[#00a4ff]" />} bg="bg-[#00a4ff]/10" label="Departamento" value={profile.department || "—"} />
+            <InfoRow icon={<MapPin className="w-4 h-4 text-[#00a4ff]" />} bg="bg-[#00a4ff]/10" label="Municipio" value={profile.municipalityName || "—"} />
           </div>
         </div>
 
@@ -195,13 +199,13 @@ export default function ConsumerProfilePage() {
             <QuickLink
               href="/explore/wallet"
               icon={<Key className="w-5 h-5 text-white" />}
-              iconBg="bg-blue-600"
+              iconBg="bg-[#03548C]"
               title="Historial de llaves"
               description="Ver todos los movimientos"
-              borderColor="border-blue-100"
-              bg="bg-blue-50 hover:bg-blue-100"
-              textColor="text-blue-700"
-              subColor="text-blue-500"
+              borderColor="border-[#03548C]/20"
+              bg="bg-[#03548C]/5 hover:bg-[#03548C]/10"
+              textColor="text-[#03548C]"
+              subColor="text-[#00a4ff]"
             />
             <QuickLink
               href="/explore/profile/edit"

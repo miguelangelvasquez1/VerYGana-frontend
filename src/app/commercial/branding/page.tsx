@@ -1,6 +1,6 @@
 import React from 'react';
-import { BrandingRequestPanel } from '@/components/commercial/branding/BrandingRequestPanel';
+import { CampaignPanel } from '@/components/commercial/campaigns/CampaignPanel';
 
 export default function BrandingPage() {
-  return <BrandingRequestPanel />;
+  return <CampaignPanel />;
 }

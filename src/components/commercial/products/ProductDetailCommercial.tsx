@@ -15,7 +15,7 @@ interface Props {
 }
 
 const ProductDetailCommercial: React.FC<Props> = ({ product }) => {
-  const [isReward, setIsReward] = useState(product.gameReward ?? false);
+  const [isReward, setIsReward] = useState(product.isGameReward ?? false);
   const [rewardLoading, setRewardLoading] = useState(false);
 
   const handleToggleReward = async () => {

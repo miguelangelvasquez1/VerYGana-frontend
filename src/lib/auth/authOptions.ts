@@ -63,19 +63,31 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt', maxAge: 7 * 24 * 60 * 60 }, // 7 days
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       // On initial sign in, save user data and accessToken
       if (user) {
         const expSec = parseJwt(user.accessToken)?.exp;
-
-        const expMs = Date.now() + 0.25 * 60 * 1000; // Default 15 seg
-        // const expMs = expSec ? expSec * 1000 : Date.now() + 15 * 60 * 1000;
+        const expMs = expSec ? expSec * 1000 : Date.now() + 15 * 60 * 1000;
         return {
           ...token,
           accessToken: user.accessToken,
           userId: user.id,
           role: user.role,
           accessTokenExpires: expMs,
+          error: undefined,
+        };
+      }
+
+      // Client called update({ accessToken }) after refreshing — persist the new token
+      // and its real expiration instead of falling through to the expired-token check.
+      if (trigger === 'update' && session?.accessToken) {
+        const expSec = parseJwt(session.accessToken)?.exp;
+        const expMs = expSec ? expSec * 1000 : Date.now() + 15 * 60 * 1000;
+        return {
+          ...token,
+          accessToken: session.accessToken,
+          accessTokenExpires: expMs,
+          error: undefined,
         };
       }
 
@@ -83,10 +95,10 @@ export const authOptions: NextAuthOptions = {
       if (Date.now() < (token.accessTokenExpires as number)) {
         return token;
       }
-        // Token expired, try to refresh it      
+        // Token expired, try to refresh it
         console.log('🚫 Server-side: Token expired, throwing error');
         return { ...token, error: 'RefreshAccessTokenError' };
-      
+
     },
 
     async session({ session, token }) {

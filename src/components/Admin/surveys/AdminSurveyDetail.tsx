@@ -4,19 +4,18 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
-  Play,
-  Pause,
-  XCircle,
   Loader2,
   AlertCircle,
   Users,
-  Clock,
   Award,
+  Coins,
+  Wallet,
   FileEdit,
   Tag,
   MapPin,
   Calendar,
   CheckCircle2,
+  Ban,
 } from 'lucide-react';
 import {
   useAdminSurveyDetail,
@@ -33,67 +32,8 @@ import {
   formatDateTime,
   getResponseProgress,
 } from '@/hooks/surveys/surveyUtils';
-import type { QuestionResponse, OptionResponse, SurveyStatus } from '@/types/survey.types';
-
-// ─── Allowed transitions per current status ────────────────────────────────
-
-interface Transition {
-  label: string;
-  next: SurveyStatus;
-  icon: React.ReactNode;
-  btnClass: string;
-  confirmMsg: string;
-}
-
-const TRANSITIONS: Record<SurveyStatus, Transition[]> = {
-  DRAFT: [
-    {
-      label: 'Publicar encuesta',
-      next: 'ACTIVE',
-      icon: <Play className="h-4 w-4" />,
-      btnClass: 'bg-emerald-600 text-white hover:bg-emerald-500',
-      confirmMsg:
-        'La encuesta quedará visible para los usuarios y comenzará a recibir respuestas.',
-    },
-  ],
-  ACTIVE: [
-    {
-      label: 'Pausar',
-      next: 'PAUSED',
-      icon: <Pause className="h-4 w-4" />,
-      btnClass: 'bg-amber-500 text-white hover:bg-amber-400',
-      confirmMsg:
-        'La encuesta dejará de mostrarse a los usuarios temporalmente. Puedes reactivarla en cualquier momento.',
-    },
-    {
-      label: 'Cerrar encuesta',
-      next: 'CLOSED',
-      icon: <XCircle className="h-4 w-4" />,
-      btnClass: 'border border-red-200 bg-white text-red-600 hover:bg-red-50',
-      confirmMsg:
-        'La encuesta se cerrará definitivamente y no podrá recibir más respuestas. Esta acción no se puede deshacer.',
-    },
-  ],
-  PAUSED: [
-    {
-      label: 'Reactivar',
-      next: 'ACTIVE',
-      icon: <Play className="h-4 w-4" />,
-      btnClass: 'bg-emerald-600 text-white hover:bg-emerald-500',
-      confirmMsg:
-        'La encuesta volverá a ser visible para los usuarios y aceptará nuevas respuestas.',
-    },
-    {
-      label: 'Cerrar encuesta',
-      next: 'CLOSED',
-      icon: <XCircle className="h-4 w-4" />,
-      btnClass: 'border border-red-200 bg-white text-red-600 hover:bg-red-50',
-      confirmMsg:
-        'La encuesta se cerrará definitivamente y no podrá recibir más respuestas. Esta acción no se puede deshacer.',
-    },
-  ],
-  CLOSED: [],
-};
+import { TRANSITIONS, ConfirmDialog, type Transition } from './surveyStatusTransitions';
+import type { QuestionResponse } from '@/types/survey.types';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -214,13 +154,27 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
             {survey.status === 'CLOSED' && (
               <div className="mt-5 flex items-center gap-2 border-t border-gray-100 pt-5 text-sm text-gray-400">
                 <CheckCircle2 className="h-4 w-4" />
-                Encuesta cerrada permanentemente
+                Encuesta cancelada permanentemente
+              </div>
+            )}
+
+            {survey.status === 'SUSPENDED' && (
+              <div className="mt-5 flex items-center gap-2 border-t border-gray-100 pt-5 text-sm text-purple-600">
+                <Ban className="h-4 w-4" />
+                Suspendida por moderación — el comercial no puede modificarla hasta que se quite la suspensión
+              </div>
+            )}
+
+            {survey.status === 'COMPLETED' && (
+              <div className="mt-5 flex items-center gap-2 border-t border-gray-100 pt-5 text-sm text-blue-600">
+                <CheckCircle2 className="h-4 w-4" />
+                Encuesta completada — alcanzó el máximo de respuestas
               </div>
             )}
           </div>
 
           {/* ── Stats ───────────────────────────────────────────────────────── */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <StatCard
               icon={<Users className="h-4 w-4 text-indigo-400" />}
               label="Respuestas"
@@ -232,13 +186,31 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
             />
             <StatCard
               icon={<Award className="h-4 w-4 text-indigo-400" />}
-              label="Recompensa"
+              label="Recompensa por pregunta"
               value={formatReward(survey.rewardAmountPerQuestionCents / 100)}
+            />
+            <StatCard
+              icon={<Coins className="h-4 w-4 text-indigo-400" />}
+              label="Recompensa por responder la encuesta"
+              value={
+                survey.maxResponses != null
+                  ? formatReward((survey.rewardAmountPerQuestionCents * survey.totalQuestions) / 100)
+                  : 'Sin límite'
+              }
+            />
+            <StatCard
+              icon={<Wallet className="h-4 w-4 text-indigo-400" />}
+              label="Pagado"
+              value={
+                survey.totalBudgetCents != null
+                  ? formatReward(survey.totalBudgetCents / 100)
+                  : 'Sin límite'
+              }
             />
             <StatCard
               icon={<FileEdit className="h-4 w-4 text-indigo-400" />}
               label="Preguntas"
-              value={String(survey.questions.length)}
+              value={String(survey.totalQuestions)}
             />
           </div>
 
@@ -328,7 +300,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
           )}
 
           {/* ── Questions ───────────────────────────────────────────────────── */}
-          <Section title={`Preguntas (${survey.questions.length})`}>
+          <Section title={`Preguntas (${survey.totalQuestions})`}>
             <div className="space-y-3">
               {survey.questions
                 .slice()
@@ -433,51 +405,6 @@ function TargetCard({ icon, label, value }: {
         <span className="text-xs">{label}</span>
       </div>
       <p className="text-sm font-semibold text-gray-800">{value}</p>
-    </div>
-  );
-}
-
-function ConfirmDialog({ from, transition, loading, onConfirm, onCancel }: {
-  from: SurveyStatus;
-  transition: Transition;
-  loading: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  const isCritical = transition.next === 'CLOSED';
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onCancel}
-      />
-      <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-        <h3 className="text-base font-bold text-gray-900">
-          {STATUS_LABELS[from]} → {STATUS_LABELS[transition.next]}
-        </h3>
-        <p className="mt-2 text-sm leading-relaxed text-gray-500">
-          {transition.confirmMsg}
-        </p>
-        <div className="mt-6 flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 ${
-              isCritical ? 'bg-red-500 hover:bg-red-400' : 'bg-indigo-600 hover:bg-indigo-500'
-            }`}
-          >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Confirmar
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

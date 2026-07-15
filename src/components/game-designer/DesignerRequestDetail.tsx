@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronLeft, Loader2, RefreshCw, BookOpen, Package, Gamepad2, Braces, Eye, MessageSquare } from 'lucide-react';
+import { ChevronLeft, Loader2, RefreshCw, BookOpen, Package, Gamepad2, Braces, Eye, MessageSquare, Send, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   getDesignerRequestDetail,
@@ -25,8 +25,7 @@ const STATUS_LABEL: Partial<Record<BrandingStatus, { label: string; cls: string 
   DESIGN_IN_PROGRESS:         { label: 'En progreso',                 cls: 'bg-blue-100 text-blue-800 border-blue-200' },
   CHANGES_REQUESTED:          { label: 'Cambios solicitados',         cls: 'bg-orange-100 text-orange-800 border-orange-200' },
   PENDING_ADVERTISER_APPROVAL:{ label: 'En revisión del anunciante',  cls: 'bg-purple-100 text-purple-800 border-purple-200' },
-  READY_TO_LAUNCH:            { label: 'Aprobado ✓',                 cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  LAUNCHED:                   { label: 'Activa',                      cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  CAMPAIGN_CREATED:                   { label: 'Campaña creada',              cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
 };
 
 type Tab = 'brief' | 'resources' | 'comments' | 'config' | 'json';
@@ -120,17 +119,7 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     }, 1500);
   };
 
-  const handleFormValidated = async ({ formData }: { formData?: Record<string, unknown> }) => {
-    if (!detail || !formData) return;
-    if (saveDraftTimerRef.current) {
-      clearTimeout(saveDraftTimerRef.current);
-      saveDraftTimerRef.current = null;
-    }
-    try { await saveDraft(detail.id, formData); } catch {}
-    setShowSubmitConfirm(true);
-  };
-
-  const handlePreview = async () => {
+const handlePreview = async () => {
     if (!detail) return;
     setPreviewLoading(true);
     try {
@@ -190,7 +179,7 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
   const statusMeta          = STATUS_LABEL[detail.status];
   const canSubmit           = ['DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED'].includes(detail.status);
   const canPreview          = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED', 'PENDING_ADVERTISER_APPROVAL'].includes(detail.status);
-  const canComment          = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED', 'PENDING_ADVERTISER_APPROVAL', 'READY_TO_LAUNCH'].includes(detail.status);
+  const canComment          = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED', 'PENDING_ADVERTISER_APPROVAL', 'CAMPAIGN_CREATED'].includes(detail.status);
   const visibleTabs         = canComment ? TABS : TABS.filter(t => t.id !== 'comments');
   const validatedCount      = detail.corporateResources.filter(r => r.status === 'VALIDATED').length;
 
@@ -225,6 +214,25 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
             {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
             Ver juego
           </button>
+        )}
+        {canSubmit && (
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => setShowSubmitConfirm(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors cursor-pointer"
+            >
+              <Send size={14} />
+              Enviar para revisión
+            </button>
+            <div className="relative group">
+              <button type="button" className="w-5 h-5 rounded-full bg-violet-100 text-violet-600 text-xs font-bold flex items-center justify-center hover:bg-violet-200 transition-colors cursor-pointer">
+                ?
+              </button>
+              <div className="absolute right-0 top-full mt-2 w-64 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                El anunciante revisará tu diseño y podrá aprobarlo o solicitar cambios.
+              </div>
+            </div>
+          </div>
         )}
         <button onClick={() => loadDetail()} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0" title="Actualizar">
           <RefreshCw size={16} className="text-gray-500" />
@@ -281,16 +289,48 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
             detail={detail}
             gameConfig={gameConfig}
             onFormChange={handleFormChange}
-            onValidated={handleFormValidated}
-            submitting={submitting}
-            showSubmitConfirm={showSubmitConfirm}
-            setShowSubmitConfirm={setShowSubmitConfirm}
-            onSubmitDesign={handleSubmitDesign}
-            canSubmit={canSubmit}
           />
         )}
         {activeTab === 'json'      && <JsonPreviewTab gameConfig={gameConfig} />}
       </div>
+
+      {/* Modal: confirmar envío */}
+      {showSubmitConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h2 className="text-base font-semibold text-gray-900">Enviar al anunciante</h2>
+              <button onClick={() => setShowSubmitConfirm(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-5 space-y-3">
+              <p className="text-sm text-gray-700">
+                Vas a enviar tu diseño al anunciante para revisión. El anunciante podrá aprobarlo o solicitar cambios.
+              </p>
+              <p className="text-xs text-gray-400">
+                Asegúrate de que la configuración del juego esté completa antes de continuar. No podrás hacer cambios hasta que el anunciante solicite cambios.
+              </p>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowSubmitConfirm(false)}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSubmitDesign}
+                  disabled={submitting}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {submitting && <Loader2 size={14} className="animate-spin" />}
+                  Confirmar envío
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

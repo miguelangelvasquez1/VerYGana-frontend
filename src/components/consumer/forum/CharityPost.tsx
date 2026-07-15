@@ -65,7 +65,7 @@ function MediaSlide({
           draggable={false}
         />
         {/* Dark gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
         {/* Play button */}
         <button
           onClick={() => setPlaying(true)}
@@ -295,7 +295,7 @@ export default function CharityPost({ story }: CharityPostProps) {
           </p>
           {isLongDesc && (
             <button
-              className="mt-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 transition-colors"
+              className="mt-1.5 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] transition-colors"
               onClick={() => setDescExpanded((v) => !v)}
             >
               {descExpanded ? 'Ver menos ↑' : 'Ver más ↓'}
@@ -347,7 +347,7 @@ function StatChip({
   icon: React.ReactNode; label: string; color: 'blue' | 'emerald';
 }) {
   const cls = color === 'blue'
-    ? 'bg-blue-50 text-blue-700 border-blue-100'
+    ? 'bg-[#03548C]/5 text-[#03548C] border-[#03548C]/15'
     : 'bg-emerald-50 text-emerald-700 border-emerald-100';
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${cls}`}>

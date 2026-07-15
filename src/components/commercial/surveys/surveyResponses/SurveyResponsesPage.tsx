@@ -21,12 +21,13 @@ import AnalyticsPanel from './AnalyticsPanel';
 interface Props {
   surveyId: number;
   surveyTitle: string;
+  responseCount: number;
   onBack: () => void;
 }
 
 type Tab = 'analytics' | 'responses';
 
-export default function SurveyResponsesPage({ surveyId, surveyTitle, onBack }: Props) {
+export default function SurveyResponsesPage({ surveyId, surveyTitle, responseCount, onBack }: Props) {
   const [tab,  setTab]  = useState<Tab>('analytics');
   const [page, setPage] = useState(0);
   const SIZE = 20;
@@ -104,7 +105,7 @@ export default function SurveyResponsesPage({ surveyId, surveyTitle, onBack }: P
       </div>
 
       {/* ── Content ────────────────────────────────────────────────────────── */}
-      {tab === 'analytics'  && <AnalyticsPanel  query={analyticsQuery} />}
+      {tab === 'analytics'  && <AnalyticsPanel  query={analyticsQuery} responseCount={responseCount} />}
       {tab === 'responses'  && (
         <ResponsesTable
           query={responsesQuery}

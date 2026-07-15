@@ -1,6 +1,6 @@
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-export type SurveyStatus = 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'CLOSED';
+export type SurveyStatus = 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'CLOSED' | 'SUSPENDED' | 'COMPLETED';
 
 export type RewardStatus = 'PENDING' | 'PROCESSED' | 'FAILED';
 
@@ -68,15 +68,18 @@ export interface AvailableSurveyDTO {
   id: number;
   title: string;
   description: string | null;
-  rewardAmountPerQuestionCents: number;
+  totalRewardKeys: number;
   totalQuestions: number;
+  maxResponses: number | null;
+  responseCount: number | null;
+  endsAt: string | null;
 }
 
 // ─── Reward ───────────────────────────────────────────────────────────────────
 
 export interface RewardInfo {
   rewardId: number;
-  amountCents: number;
+  amountKeys: number;
   status: RewardStatus;
   grantedAt: string;
 }
@@ -112,13 +115,15 @@ export interface SurveyDetailDTO {
   id: number;
   title: string;
   description: string | null;
-  rewardAmountPerQuestionCents: number;
+  totalRewardKeys: number;
   maxResponses: number | null;
+  responseCount: number | null;
   status: SurveyStatus;
   startsAt: string | null;
   endsAt: string | null;
   categoryNames: string[];
   totalQuestions: number;
+  companyName: string | null;
 }
 
 export interface SurveySessionDTO {
@@ -147,7 +152,6 @@ export interface CreateSurveyRequest {
   description?: string;
   pricePerQuestionCents: number;
   maxResponses?: number;
-  startsAt?: string;
   categoryIds: number[];
   municipalityCodes?: string[];
   minAge?: number;
@@ -171,10 +175,8 @@ export interface SurveyAnswerDetail {
  
 export interface SurveyResponseDetail {
   id: number;
-  userId: number;
-  userName: string | null;
+  userHash: string;
   status: ResponseStatus;
-  startedAt: string;
   completedAt: string | null;
   answers: SurveyAnswerDetail[];
 }
@@ -201,9 +203,6 @@ export interface SurveyAnalytics {
   surveyId: number;
   surveyTitle: string;
   totalResponses: number;
-  completedResponses: number;
-  completionRate: number;
-  averageCompletionMinutes: number | null;
   questionStats: QuestionStat[];
 }
  
@@ -232,7 +231,6 @@ export interface SurveyFormState {
   description: string;
   rewardAmount: string;
   maxResponses: string;
-  startsAt: string;
   endsAt: string;
   categoryIds: number[];
   municipalityCodes: string[];
@@ -250,12 +248,55 @@ export interface AdminSurveySummary {
   description: string | null;
   rewardAmountPerQuestionCents: number;
   totalResponses: number;
+  totalQuestions: number;
   maxResponses: number | null;
   status: SurveyStatus;
   createdAt: string;
   startsAt: string | null;
   endsAt: string | null;
+}
+
+// ─── Admin Detail ─────────────────────────────────────────────────────────────
+
+/** GET /surveys/admin/:id — full detail as seen by a system admin. */
+export interface SurveyAdminDetailDTO {
+  id: number;
+  title: string;
+  description: string | null;
+  status: SurveyStatus;
+  rewardAmountPerQuestionCents: number;
+  maxResponses: number | null;
+  responseCount: number;
+  startsAt: string | null;
+  endsAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+
   categoryNames: string[];
+  municipalityNames: string[];
+  minAge: number | null;
+  maxAge: number | null;
+  targetGender: TargetGender | null;
+
+  totalQuestions: number;
+  questions: QuestionResponse[];
+
+  creatorId: number | null;
+  companyName: string | null;
+  creatorEmail: string | null;
+
+  totalSessions: number;
+  activeSessions: number;
+  completedSessions: number;
+  expiredSessions: number;
+  abandonedSessions: number;
+
+  /** rewardPerQuestion × questionCount × maxResponses; null when maxResponses is open-ended */
+  totalBudgetCents: number | null;
+  /** rewardPerQuestion × questionCount × completedSessions */
+  spentCents: number;
+  /** completedSessions / maxResponses × 100 (or over totalSessions when open-ended) */
+  completionRate: number;
 }
 
 // ─── Commercial Detail ────────────────────────────────────────────────────────
@@ -276,8 +317,6 @@ export interface SurveyCommercialDetailDTO {
   maxAge: number | null;
   targetGender: TargetGender | null;
   questions: QuestionResponse[];
-  // Live progress
-  completedSessions: number;
   // Budget
   totalBudgetCents: number | null;
 }
@@ -292,5 +331,4 @@ export interface UpdateSurveyRequest {
   minAge?: number | null;
   maxAge?: number | null;
   targetGender?: TargetGender | null;
-  startsAt?: string | null;
 }

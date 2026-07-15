@@ -18,6 +18,7 @@ import {
   TargetIcon,
   TicketIcon,
   Palette,
+  Headset,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -95,6 +96,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
       icon: MessageSquare,
       href: '/admin/forum',
       color: 'text-purple-500'
+    },
+    {
+      title: 'PQRS',
+      icon: Headset,
+      href: '/admin/pqrs',
+      color: 'text-teal-500'
     },
     {
       title: 'Reportes',

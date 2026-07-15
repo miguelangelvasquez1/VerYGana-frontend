@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Star, ShoppingCart, Package, X, SlidersHorizontal, ChevronRight } from "lucide-react";
 
-import ProductCard from "@/components/consumer/products/ProductCard";
+import ConsumerProductCard from "@/components/consumer/products/ConsumerProductCard";
 import SearchBar from "@/components/consumer/products/SearchBar";
 import InfiniteScroll from "@/components/consumer/products/InfiniteScroll";
 import { filterProducts } from "@/services/ProductService";
@@ -217,8 +217,8 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div className="absolute -bottom-px left-0 right-0 leading-0">
+          <svg className="block" viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f9fafb" />
           </svg>
         </div>
@@ -450,7 +450,7 @@ export default function ProductsPage() {
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                     {products.map((product) => (
-                      <ProductCard key={product.id} product={product} mode="consumer" />
+                      <ConsumerProductCard key={product.id} product={product} />
                     ))}
                   </div>
                 )}

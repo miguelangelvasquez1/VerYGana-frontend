@@ -163,7 +163,7 @@ export default function CreateProductForm() {
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-full h-48 object-cover rounded-xl"
+              className="w-full max-h-72 object-contain rounded-xl p-2"
             />
           ) : (
             <p className="text-sm text-gray-500 py-10">
@@ -259,7 +259,7 @@ export default function CreateProductForm() {
         <div className="space-y-2">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-[#03548C] h-2 rounded-full transition-all duration-300"
               style={{ width: `${state.progress}%` }}
             />
           </div>
@@ -278,7 +278,7 @@ export default function CreateProductForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-green-600 text-white p-3 rounded-xl text-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="w-full bg-[#03548C] text-white p-3 rounded-xl text-lg hover:bg-[#0b1440] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
         {isSubmitting ? statusLabel[state.status] : 'Crear producto'}
       </button>

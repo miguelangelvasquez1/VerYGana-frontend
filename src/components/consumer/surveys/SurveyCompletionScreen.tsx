@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Star } from 'lucide-react';
-import { formatReward, formatDateTime } from '@/hooks/surveys/surveyUtils';
+import { formatKeys, formatDateTime } from '@/hooks/surveys/surveyUtils';
 import type { SubmissionResult } from '@/types/survey.types';
 
 interface Props {
@@ -42,14 +42,14 @@ export default function SurveyCompletionScreen({ result, onClose }: Props) {
       </div>
 
       {/* Reward card */}
-      <div className="w-full rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 p-5 text-white shadow-lg shadow-indigo-200">
-        <p className="text-xs font-medium text-indigo-200 uppercase tracking-wider mb-1">
+      <div className="w-full rounded-2xl bg-linear-to-br from-[#0b1440] to-[#03548C] p-5 text-white shadow-lg shadow-[#03548C]/20">
+        <p className="text-xs font-medium text-white/60 uppercase tracking-wider mb-1">
           Tu recompensa
         </p>
         <p className="text-3xl font-black">
-          {formatReward(reward.amountCents / 1000)}
+          {formatKeys(reward.amountKeys)} llaves
         </p>
-        <p className="mt-2 text-xs text-indigo-200">
+        <p className="mt-2 text-xs text-white/60">
           {reward.status === 'PROCESSED'
             ? 'Acreditada exitosamente'
             : 'Pendiente de procesamiento'}
@@ -86,7 +86,7 @@ export default function SurveyCompletionScreen({ result, onClose }: Props) {
       {/* Close */}
       <button
         onClick={onClose}
-        className="mt-2 rounded-xl bg-gray-900 px-8 py-3 text-sm font-semibold text-white hover:bg-gray-800 active:scale-95 transition-all cursor-pointer"
+        className="mt-2 rounded-xl bg-[#0b1440] px-8 py-3 text-sm font-semibold text-white hover:bg-[#03548C] active:scale-95 transition-all cursor-pointer"
       >
         Continuar
       </button>

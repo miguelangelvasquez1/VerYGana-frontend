@@ -1,5 +1,6 @@
 import apiClient from "@/lib/api/client";
 import { PagedResponse } from "@/types/Generic.types";
+import { PrizeStatus } from "@/types/raffles/prize.types";
 import { ParticipantLeaderboardDTO, RaffleResponseDTO, RaffleStatsResponseDTO, RaffleStatus, RaffleSummaryResponseDTO, UserRaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
 import { DrawProofResponseDTO, RaffleResultResponseDTO, RaffleSummaryResultResponseDTO } from "@/types/raffles/raffleResult.types";
 import { RaffleTicketResponseDTO } from "@/types/raffles/raffleTicket.types";
@@ -75,12 +76,12 @@ export const getRaffleWinners = async (raffleId: number): Promise<WinnerSummaryR
     return response.data;
 }
 
-export const getWonPrizes = async (size?: 10, page?: 0, isClaimed?: boolean | null): Promise<PagedResponse<PrizeWonResponseDTO>> => {
+export const getWonPrizes = async (size?: 10, page?: 0, status?: PrizeStatus | null): Promise<PagedResponse<PrizeWonResponseDTO>> => {
     const response = await apiClient.get("/winners/my-prizes", {
         params: {
             size,
             page,
-            isClaimed
+            status
         }
     });
     return response.data;
@@ -92,9 +93,16 @@ export const getLastWinners = async (): Promise<WinnerSummaryResponseDTO[]> => {
 }
 
 export const sendClaimPhoneOtp = async (phoneNumber: string): Promise<void> => {
-    const response = await apiClient.post("/winners/send-otp", {
+    const response = await apiClient.post("/winners/claim/send-otp", null, {params: {
         phoneNumber
-    });
+    }});
+    return response.data;
+}
+
+export const sendClaimEmailOtp = async (email: string): Promise<void> => {
+    const response = await apiClient.post("/winners/claim/send-email-otp", null, {params: {
+        email
+    }});
     return response.data;
 }
 

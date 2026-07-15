@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { v4 as uuid } from 'uuid';
 import type {
   SurveyFormState,
@@ -6,6 +6,13 @@ import type {
   QuestionType,
   CreateSurveyRequest,
 } from '@/types/survey.types';
+
+// ─── Limits ───────────────────────────────────────────────────────────────────
+// Deben coincidir con la validación del backend (400 si se exceden).
+
+export const MAX_QUESTIONS = 20;
+export const MAX_OPTIONS_PER_QUESTION = 8;
+export const MAX_QUESTION_TEXT_LENGTH = 500;
 
 // ─── Initial state ────────────────────────────────────────────────────────────
 
@@ -22,7 +29,6 @@ const INITIAL_FORM: SurveyFormState = {
   description: '',
   rewardAmount: '',
   maxResponses: '',
-  startsAt: '',
   endsAt: '',
   categoryIds: [],
   municipalityCodes: [],
@@ -65,16 +71,29 @@ function validate(state: SurveyFormState): FormErrors {
 
   if (state.questions.length === 0)
     errors.questions = 'Agrega al menos una pregunta';
+  else if (state.questions.length > MAX_QUESTIONS)
+    errors.questions = `Máximo ${MAX_QUESTIONS} preguntas`;
 
   state.questions.forEach((q, i) => {
     if (!q.text.trim())
       errors[`question_${i}_text`] = 'La pregunta no puede estar vacía';
+    else if (q.text.trim().length > MAX_QUESTION_TEXT_LENGTH)
+      errors[`question_${i}_text`] = `Máximo ${MAX_QUESTION_TEXT_LENGTH} caracteres`;
 
     if (['SINGLE_CHOICE', 'MULTIPLE_CHOICE'].includes(q.type)) {
       const filledOpts = q.options.filter((o) => o.trim());
+      const normalized = filledOpts.map((o) => o.trim().toLowerCase());
+      const hasDuplicates = new Set(normalized).size !== normalized.length;
+
       if (filledOpts.length < 2)
         errors[`question_${i}_options`] =
           'Agrega al menos 2 opciones válidas';
+      else if (filledOpts.length > MAX_OPTIONS_PER_QUESTION)
+        errors[`question_${i}_options`] =
+          `Máximo ${MAX_OPTIONS_PER_QUESTION} opciones`;
+      else if (hasDuplicates)
+        errors[`question_${i}_options`] =
+          'Hay opciones repetidas — cada opción debe ser distinta';
     }
   });
 
@@ -88,7 +107,9 @@ export function useSurveyForm(initial?: Partial<SurveyFormState>) {
     ...INITIAL_FORM,
     ...initial,
   });
-  const [errors, setErrors] = useState<FormErrors>({});
+  // Derived live from `form` so an error disappears the instant it's fixed,
+  // instead of lingering until the next validateAll() on submit.
+  const errors = useMemo(() => validate(form), [form]);
   const [touched, setTouched] = useState<Set<string>>(new Set());
 
   // ── Generic field setter ──────────────────────────────────────────────────
@@ -108,10 +129,11 @@ export function useSurveyForm(initial?: Partial<SurveyFormState>) {
   // ── Question helpers ──────────────────────────────────────────────────────
 
   const addQuestion = useCallback(() => {
-    setForm((prev) => ({
-      ...prev,
-      questions: [...prev.questions, emptyQuestion()],
-    }));
+    setForm((prev) =>
+      prev.questions.length >= MAX_QUESTIONS
+        ? prev
+        : { ...prev, questions: [...prev.questions, emptyQuestion()] },
+    );
   }, []);
 
   const removeQuestion = useCallback((questionId: string) => {
@@ -170,7 +192,9 @@ export function useSurveyForm(initial?: Partial<SurveyFormState>) {
     setForm((prev) => ({
       ...prev,
       questions: prev.questions.map((q) =>
-        q.id === questionId ? { ...q, options: [...q.options, ''] } : q,
+        q.id === questionId && q.options.length < MAX_OPTIONS_PER_QUESTION
+          ? { ...q, options: [...q.options, ''] }
+          : q,
       ),
     }));
   }, []);
@@ -212,9 +236,6 @@ export function useSurveyForm(initial?: Partial<SurveyFormState>) {
 
   /** Validates everything and marks all fields as touched to show errors. */
   const validateAll = useCallback((): boolean => {
-    const errs = validate(form);
-    setErrors(errs);
-
     const allKeys = new Set([
       ...Object.keys(INITIAL_FORM),
       ...form.questions.flatMap((_, i) => [
@@ -224,7 +245,7 @@ export function useSurveyForm(initial?: Partial<SurveyFormState>) {
     ]);
     setTouched(allKeys);
 
-    return Object.keys(errs).length === 0;
+    return Object.keys(validate(form)).length === 0;
   }, [form]);
 
   /** Serializes form state to the backend CreateSurveyRequest DTO. */
@@ -234,7 +255,6 @@ export function useSurveyForm(initial?: Partial<SurveyFormState>) {
     surveyConfigId: form.surveyConfigId!,
     rewardAmount: form.rewardAmount ? parseFloat(form.rewardAmount) : 0,
     maxResponses: form.maxResponses ? parseInt(form.maxResponses) : undefined,
-    startsAt: form.startsAt || undefined,
     endsAt: form.endsAt || undefined,
     categoryIds: form.categoryIds,
     municipalityCodes:
@@ -253,7 +273,6 @@ export function useSurveyForm(initial?: Partial<SurveyFormState>) {
 
   const reset = useCallback(() => {
     setForm({ ...INITIAL_FORM, ...initial });
-    setErrors({});
     setTouched(new Set());
   }, [initial]);
 

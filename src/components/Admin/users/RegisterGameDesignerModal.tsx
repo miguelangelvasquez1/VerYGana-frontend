@@ -11,7 +11,6 @@ interface GameDesignerForm {
   email: string;
   phoneNumber: string;
   bio: string;
-  canPublishDirectly: boolean;
 }
 
 const emptyForm: GameDesignerForm = {
@@ -20,7 +19,6 @@ const emptyForm: GameDesignerForm = {
   email: '',
   phoneNumber: '',
   bio: '',
-  canPublishDirectly: false,
 };
 
 interface Props {
@@ -59,7 +57,6 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
         email: form.email.trim(),
         phoneNumber: form.phoneNumber.trim(),
         bio: form.bio.trim() || undefined,
-        canPublishDirectly: form.canPublishDirectly,
       });
       const backendMsg = typeof response.data === 'string' ? response.data : '';
       toast.success(backendMsg || `Se envió el enlace de activación a ${form.email.trim()}`);
@@ -188,25 +185,6 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 {form.bio.length}/500
               </span>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3 py-1">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={form.canPublishDirectly}
-              onClick={() => handleField('canPublishDirectly', !form.canPublishDirectly)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 cursor-pointer ${
-                form.canPublishDirectly ? 'bg-violet-600' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  form.canPublishDirectly ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <span className="text-sm text-gray-700">Puede publicar directamente</span>
           </div>
 
           <div className="flex gap-3 pt-2">

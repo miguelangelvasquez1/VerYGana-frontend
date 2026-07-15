@@ -15,6 +15,7 @@ import {
 } from "@/types/raffles/raffle.types";
 
 import { PrizeWonResponseDTO } from "@/types/raffles/raffleWinner.types";
+import { PrizeStatus } from "@/types/raffles/prize.types";
 import { RaffleTicketResponseDTO } from "@/types/raffles/raffleTicket.types";
 import { PagedResponse } from "@/types/Generic.types";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,7 +23,7 @@ import ClaimPrizeModal from "@/components/consumer/raffles/ClaimPrizeModal";
 
 type MainTab = "BOLETOS" | "PRIZES";
 type RaffleSubTab = "ACTIVE" | "COMPLETED";
-type PrizeFilter = "ALL" | "CLAIMED" | "PENDING";
+type PrizeFilter = "ALL" | "CLAIMED" | "PENDING" | "EXPIRED";
 
 export default function MyParticipationsPage() {
   const { user } = useAuth();
@@ -63,10 +64,11 @@ export default function MyParticipationsPage() {
 
   const fetchPrizes = async () => {
     try {
-      let isClaimed: boolean | null = null;
-      if (prizeFilter === "CLAIMED") isClaimed = true;
-      if (prizeFilter === "PENDING") isClaimed = false;
-      const data: PagedResponse<PrizeWonResponseDTO> = await getWonPrizes(10, 0, isClaimed);
+      let status: PrizeStatus | null = null;
+      if (prizeFilter === "CLAIMED") status = PrizeStatus.DELIVERED;
+      if (prizeFilter === "PENDING") status = PrizeStatus.PENDING;
+      if (prizeFilter === "EXPIRED") status = PrizeStatus.EXPIRED;
+      const data: PagedResponse<PrizeWonResponseDTO> = await getWonPrizes(10, 0, status);
       setPrizes(data.data);
     } catch (error) {
       console.error(error);
@@ -75,26 +77,57 @@ export default function MyParticipationsPage() {
 
   return (
     <>
-      <div className="p-4 md:p-6 max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-5">Mis participaciones</h1>
+      {/* ── HERO ── */}
+      <header className="bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white">
+        {/* Decorative circles */}
+        <div className="relative overflow-hidden">
+          <div className="pointer-events-none absolute -top-10 -right-10 w-56 h-56 rounded-full bg-white/5" />
+          <div className="pointer-events-none absolute -bottom-12 -left-8 w-44 h-44 rounded-full bg-white/5" />
 
-        {/* Main tabs */}
-        <div className="flex gap-2 mb-4 border-b border-gray-200 pb-0">
-          <MainTabBtn
-            label="Mis boletos"
-            active={mainTab === "BOLETOS"}
-            onClick={() => setMainTab("BOLETOS")}
-          />
-          <MainTabBtn
-            label="Mis premios"
-            active={mainTab === "PRIZES"}
-            onClick={() => setMainTab("PRIZES")}
-          />
+          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-8">
+            <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              🎟️ Historial de participaciones
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
+              Mis participaciones
+            </h1>
+            <p className="text-white/70 text-sm max-w-md mb-7">
+              Consulta tus boletos activos, rifas finalizadas y todos los premios que has ganado.
+            </p>
+
+            {/* Main tab switcher — integrated in hero */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setMainTab("BOLETOS")}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-sm ${
+                  mainTab === "BOLETOS"
+                    ? "bg-white text-[#03548C] shadow-md"
+                    : "bg-white/15 text-white hover:bg-white/25"
+                }`}
+              >
+                🎟️ Mis boletos
+              </button>
+              <button
+                onClick={() => setMainTab("PRIZES")}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-sm ${
+                  mainTab === "PRIZES"
+                    ? "bg-white text-[#03548C] shadow-md"
+                    : "bg-white/15 text-white hover:bg-white/25"
+                }`}
+              >
+                🏆 Mis premios
+              </button>
+            </div>
+          </div>
         </div>
+      </header>
+
+      {/* ── CONTENT ── */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-10">
 
         {mainTab === "BOLETOS" ? (
           <>
-            <div className="flex gap-2 mt-4 mb-5">
+            <div className="flex gap-2 mb-5">
               <FilterPill
                 label={`Activas${raffleSubTab === "ACTIVE" ? ` (${count})` : ""}`}
                 active={raffleSubTab === "ACTIVE"}
@@ -109,7 +142,10 @@ export default function MyParticipationsPage() {
 
             <div className="flex flex-col gap-4">
               {raffles.length === 0 && (
-                <p className="text-sm text-gray-500">No tienes participaciones en esta categoría</p>
+                <div className="text-center py-14">
+                  <div className="text-4xl mb-3">🎟️</div>
+                  <p className="text-gray-500 font-medium">No tienes participaciones en esta categoría</p>
+                </div>
               )}
               {raffles.map((r) => (
                 <RaffleCard
@@ -125,20 +161,25 @@ export default function MyParticipationsPage() {
           </>
         ) : (
           <>
-            <div className="flex gap-2 mt-4 mb-5">
+            <div className="flex gap-2 mb-5 flex-wrap">
               <FilterPill label="Todos" active={prizeFilter === "ALL"} onClick={() => setPrizeFilter("ALL")} />
               <FilterPill label="Reclamados" active={prizeFilter === "CLAIMED"} onClick={() => setPrizeFilter("CLAIMED")} />
               <FilterPill label="Pendientes" active={prizeFilter === "PENDING"} onClick={() => setPrizeFilter("PENDING")} />
+              <FilterPill label="Expirados" active={prizeFilter === "EXPIRED"} onClick={() => setPrizeFilter("EXPIRED")} />
             </div>
 
             <div className="flex flex-col gap-4">
               {prizes.length === 0 && (
-                <p className="text-sm text-gray-500">No tienes premios en esta categoría</p>
+                <div className="text-center py-14">
+                  <div className="text-4xl mb-3">🏆</div>
+                  <p className="text-gray-500 font-medium">No tienes premios en esta categoría</p>
+                </div>
               )}
               {prizes.map((p) => (
                 <PrizeCard
                   key={p.prizeId}
                   prize={p}
+                  isExpired={prizeFilter === "EXPIRED"}
                   onClaim={() => setClaimingPrize(p)}
                 />
               ))}
@@ -228,23 +269,24 @@ function TicketsModal({ raffleId, onClose }: { raffleId: number; onClose: () => 
   }, [handleObserver]);
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-end md:items-center justify-center" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white w-full md:max-w-5xl rounded-t-2xl md:rounded-2xl p-4 md:p-6 max-h-[90vh] overflow-y-auto"
+        className="bg-white w-full md:max-w-5xl rounded-t-2xl md:rounded-2xl overflow-hidden max-h-[90vh] flex flex-col"
       >
-        <div className="flex justify-between mb-4">
-          <h2 className="text-xl font-semibold">🎟️ Mis boletos</h2>
-          <button onClick={onClose}>✕</button>
+        <div className="flex justify-between items-center px-5 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900">🎟️ Mis boletos</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {tickets.map((t) => (
-            <TicketCard key={t.id} ticket={t} />
-          ))}
+        <div className="overflow-y-auto p-4 md:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {tickets.map((t) => (
+              <TicketCard key={t.id} ticket={t} />
+            ))}
+          </div>
+          {hasNext && <div ref={loader} className="h-10" />}
         </div>
-
-        {hasNext && <div ref={loader} className="h-10" />}
       </div>
     </div>
   );
@@ -258,17 +300,17 @@ function TicketCard({ ticket }: { ticket: RaffleTicketResponseDTO }) {
   return (
     <div className="relative group">
       <div
-        className={`rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.03]
-        ${isWinner
-            ? "bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 border-2 border-yellow-600 shadow-xl shadow-yellow-300/40"
+        className={`rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.03] ${
+          isWinner
+            ? "bg-linear-to-br from-yellow-300 via-yellow-400 to-yellow-500 border-2 border-yellow-600 shadow-xl shadow-yellow-300/40"
             : "bg-white border border-gray-200 shadow-md"
-          }`}
+        }`}
       >
         {isWinner && (
           <div className="absolute inset-0 rounded-2xl bg-yellow-300 opacity-20 blur-xl" />
         )}
 
-        <div className={`px-4 py-2 flex justify-between text-xs font-semibold ${isWinner ? "bg-yellow-600 text-white" : "bg-gray-100 text-gray-600"}`}>
+        <div className={`px-4 py-2 flex justify-between text-xs font-semibold ${isWinner ? "bg-yellow-600 text-white" : "bg-[#03548C]/5 text-[#03548C]"}`}>
           <span>{ticket.raffleTicketStatus}</span>
         </div>
 
@@ -327,13 +369,13 @@ function RaffleCard({
             </div>
 
             {raffle.isWinner && (
-              <p className="text-xs text-yellow-600 font-semibold mt-1.5">🏆 ¡Ganaste esta rifa!</p>
+              <p className="text-xs text-[#c9a227] font-semibold mt-1.5">🏆 ¡Ganaste esta rifa!</p>
             )}
           </div>
 
           <button
             onClick={() => onViewTickets(raffle.id)}
-            className="self-start bg-blue-500 hover:bg-blue-600 active:scale-95 transition text-white text-xs font-semibold px-4 py-2 rounded-lg"
+            className="self-start bg-[#03548C] hover:bg-[#0b1440] active:scale-95 transition text-white text-xs font-semibold px-4 py-2 rounded-lg"
           >
             Ver mis boletos
           </button>
@@ -345,7 +387,15 @@ function RaffleCard({
 
 /* ================= PRIZE CARD ================= */
 
-function PrizeCard({ prize, onClaim }: { prize: PrizeWonResponseDTO; onClaim: () => void }) {
+function PrizeCard({
+  prize,
+  isExpired,
+  onClaim,
+}: {
+  prize: PrizeWonResponseDTO;
+  isExpired?: boolean;
+  onClaim: () => void;
+}) {
   const isClaimed = prize.isClaimed || !!prize.claimedAt;
 
   const drawnDate = new Date(prize.drawnAt).toLocaleDateString("es-CO", {
@@ -376,7 +426,7 @@ function PrizeCard({ prize, onClaim }: { prize: PrizeWonResponseDTO; onClaim: ()
             {prize.prizeType === "PHYSICAL" ? "🎁 Físico" : "💻 Digital"}
           </span>
           {prize.position && (
-            <span className="absolute bottom-2 left-2 bg-yellow-400 text-black text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="absolute bottom-2 left-2 bg-[#FFD700] text-black text-xs font-bold px-2 py-0.5 rounded-full">
               #{prize.position}° lugar
             </span>
           )}
@@ -384,7 +434,6 @@ function PrizeCard({ prize, onClaim }: { prize: PrizeWonResponseDTO; onClaim: ()
 
         {/* Content */}
         <div className="flex-1 p-3 md:p-4 flex flex-col gap-2 min-w-0">
-          {/* Title + status badge */}
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h2 className="font-bold text-sm md:text-base leading-tight">{prize.title}</h2>
@@ -393,6 +442,10 @@ function PrizeCard({ prize, onClaim }: { prize: PrizeWonResponseDTO; onClaim: ()
             {isClaimed ? (
               <span className="shrink-0 inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">
                 ✅ Reclamado
+              </span>
+            ) : isExpired ? (
+              <span className="shrink-0 inline-flex items-center gap-1 bg-red-100 text-red-600 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">
+                ⌛ Expirado
               </span>
             ) : (
               <span className="shrink-0 inline-flex items-center gap-1 bg-orange-100 text-orange-600 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">
@@ -407,7 +460,6 @@ function PrizeCard({ prize, onClaim }: { prize: PrizeWonResponseDTO; onClaim: ()
             <p className="text-xs text-gray-500 line-clamp-2">{prize.description}</p>
           )}
 
-          {/* Details */}
           <div className="mt-auto grid grid-cols-2 gap-x-3 gap-y-1 text-xs border-t border-gray-100 pt-2">
             <span className="text-gray-400">🎟️ Boleto ganador</span>
             <span className="font-mono font-semibold text-gray-700">{prize.ticketWinnerNumber}</span>
@@ -426,12 +478,11 @@ function PrizeCard({ prize, onClaim }: { prize: PrizeWonResponseDTO; onClaim: ()
             )}
           </div>
 
-          {/* Claim button */}
-          {!isClaimed && (
+          {!isClaimed && !isExpired && (
             <div className="flex justify-end mt-1">
               <button
                 onClick={onClaim}
-                className="bg-green-600 hover:bg-green-700 active:scale-95 transition text-white text-xs font-semibold px-4 py-2 rounded-lg"
+                className="bg-[#03548C] hover:bg-[#0b1440] active:scale-95 transition text-white text-xs font-semibold px-4 py-2 rounded-lg"
               >
                 Reclamar premio →
               </button>
@@ -445,27 +496,14 @@ function PrizeCard({ prize, onClaim }: { prize: PrizeWonResponseDTO; onClaim: ()
 
 /* ================= UI ================= */
 
-function MainTabBtn({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-5 py-2.5 text-sm font-semibold border-b-2 transition-colors -mb-px ${
-        active
-          ? "border-black text-black"
-          : "border-transparent text-gray-500 hover:text-gray-800"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
 function FilterPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-        active ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+        active
+          ? "bg-[#03548C] text-white"
+          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
       }`}
     >
       {label}

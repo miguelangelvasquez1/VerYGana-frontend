@@ -2,7 +2,6 @@
 
 import { useParams, useRouter } from "next/navigation";
 import EditProductForm from "@/components/commercial/products/EditProductForm";
-import ProductStockSection from "@/components/consumer/products/stock/ProductStockSection";
 
 export default function EditProductPage() {
   const params = useParams();
@@ -15,14 +14,10 @@ export default function EditProductPage() {
   }
 
   return (
-      <div className="space-y-10">
-        <EditProductForm
-          productId={productId}
-          onSuccess={() => router.push("/commercial/products")}
-          onCancel={() => router.back()}
-        />
-
-        <ProductStockSection productId={productId} />
-      </div>
+    <EditProductForm
+      productId={productId}
+      onSuccess={() => router.push("/commercial/products")}
+      onCancel={() => router.back()}
+    />
   );
 }

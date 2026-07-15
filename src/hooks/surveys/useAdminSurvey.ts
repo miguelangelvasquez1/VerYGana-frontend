@@ -61,9 +61,16 @@ export function useAdminSurveyDetail(surveyId: number) {
 
 /**
  * Changes the survey status.
- * On success:
- *  - updates the detail cache immediately (no extra fetch)
- *  - invalidates the list so the status badge refreshes
+ * On success invalidates both the detail and the list so they refetch.
+ *
+ * Note: `publishSurvey`/`updateStatus` return the lighter `SurveyResponse`
+ * shape, not the full `SurveyAdminDetailDTO` that the detail page uses
+ * (which has `totalQuestions`, `totalBudgetCents`, etc.). Writing that
+ * response straight into the detail cache via `setQueryData` used to
+ * corrupt it — the detail page would render `undefined`/`NaN` for the
+ * fields the mutation response doesn't have until a full page reload
+ * bypassed the stale cache. Invalidating instead forces a real refetch
+ * with the correct shape.
  */
 export function useAdminUpdateStatus() {
   const queryClient = useQueryClient();
@@ -81,7 +88,7 @@ export function useAdminUpdateStatus() {
         : surveyAdminService.updateStatus(surveyId, status),
 
     onSuccess: (updated) => {
-      queryClient.setQueryData(adminSurveyKeys.detail(updated.id), updated);
+      queryClient.invalidateQueries({ queryKey: adminSurveyKeys.detail(updated.id) });
       queryClient.invalidateQueries({ queryKey: adminSurveyKeys.lists() });
     },
   });

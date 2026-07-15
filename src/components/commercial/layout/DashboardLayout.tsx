@@ -11,7 +11,7 @@ import { Header } from './Header';
 import { getEffectivePlanState } from '@/services/planService';
 import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
 import { WalletStatus } from '@/types/finance/Wallet.types';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 // ─── Route protection ─────────────────────────────────────────────────────────
 
@@ -22,7 +22,6 @@ const PROTECTED_ROUTES: { path: string; requiredPlans: PlanCode[] }[] = [
   { path: '/commercial/pets',      requiredPlans: [PlanCode.PREMIUM] },
   { path: '/commercial/analytics', requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/billing',   requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
-  { path: '/commercial/settings',  requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
 ];
 
 const PLAN_LABELS: Record<PlanCode, string> = {
@@ -59,14 +58,14 @@ function LockedPage({ requiredPlans }: { requiredPlans: PlanCode[] }) {
       </p>
       <div className="flex gap-2 mb-6">
         {requiredPlans.map(p => (
-          <span key={p} className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200">
+          <span key={p} className="px-3 py-1 bg-[#03548C]/10 text-[#03548C] text-xs font-bold rounded-full border border-[#03548C]/20">
             {PLAN_LABELS[p]}
           </span>
         ))}
       </div>
       <Link
         href="/plans"
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
       >
         <Sparkles className="w-4 h-4" />
         Ver planes disponibles
@@ -124,6 +123,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [loadingPlan, setLoadingPlan] = useState(true);
 
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (pathname === '/commercial') router.replace('/commercial/products');
+  }, [pathname, router]);
   // Memoizamos el pathname actual para evitar renders inestables
   const currentPath = useMemo(() => pathname, [pathname]);
 
@@ -144,7 +148,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       { match: '/commercial/pets/create', title: 'Crear Mascotas' },
       { match: '/commercial/pets', title: 'Mascotas' },
 
-      { match: '/commercial/branding', title: 'Solicitudes de Marca' },
+      { match: '/commercial/branding/campaigns', title: 'Campañas' },
+      { match: '/commercial/branding/requests', title: 'Solicitudes de Marca' },
+      { match: '/commercial/branding', title: 'Campañas' },
     ];
 
     const sortedRoutes = routes.sort((a, b) => b.match.length - a.match.length);
@@ -204,8 +210,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             onClose={() => setSidebarOpen(false)}
             effectivePlan={planState?.effectivePlan as PlanCode | null ?? null}
             hasActivePlan={planState?.hasActivePlan ?? false}
-            remainingBudget={planState?.remainingBudgetCents ?? 0}
-            walletStatus={planState?.walletStatus ?? WalletStatus.INACTIVE}
             pathname={currentPath}
           />
         </div>
@@ -247,6 +251,6 @@ export const PAGE_TITLES: Record<string, string> = {
   '/commercial/surveys': 'Encuestas',
   '/commercial/analytics': 'Estadísticas',
   '/commercial/billing': 'Facturación',
-  '/commercial/settings': 'Configuración',
+  '/commercial/support': 'Soporte',
   '/plans': 'Planes',
 };

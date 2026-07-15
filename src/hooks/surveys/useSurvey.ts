@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 import { surveyAdminService, surveyService } from '@/services/surveyService';
 import { surveyKeys } from './surveyKeys';
+import { consumerKeys } from '@/hooks/consumer/useConsumerData';
 import type { SubmitSurveyRequest } from '@/types/survey.types';
 
 // ─── Available surveys (ranked by profile match) ──────────────────────────────
@@ -83,6 +84,8 @@ export function useSubmitSurvey(surveyId: number) {
       queryClient.invalidateQueries({ queryKey: surveyKeys.lists() });
       queryClient.removeQueries({ queryKey: surveyKeys.detail(surveyId) });
       queryClient.invalidateQueries({ queryKey: surveyKeys.rewards() });
+      // La recompensa se acredita en llaves — refresca el contador del navbar.
+      queryClient.invalidateQueries({ queryKey: consumerKeys.data() });
     },
   });
 }

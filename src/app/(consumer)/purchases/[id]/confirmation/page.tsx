@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, XCircle } from 'lucide-react';
 
 import { purchaseService } from '@/services/PurchaseService';
@@ -10,6 +11,7 @@ import { PurchaseResponseDTO } from '@/types/purchases/purchase.types';
 import { useXpReward } from '@/hooks/useXpReward';
 import { XpRewardToast } from '@/components/levels/XpRewardToast';
 import { levelService } from '@/services/LevelService';
+import { levelKeys } from '@/hooks/useLevelProfile';
 
 type Status = 'loading' | 'success' | 'error';
 
@@ -17,6 +19,7 @@ export default function PurchaseConfirmationPage() {
   const { purchaseId } = useParams();
   const router = useRouter();
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const { rewardData, showReward, dismiss } = useXpReward();
 
   const [status, setStatus] = useState<Status>('loading');
@@ -63,6 +66,7 @@ export default function PurchaseConfirmationPage() {
       levelService.getHistory(token, 0, 5),
     ])
       .then(([profile, history]) => {
+        queryClient.setQueryData(levelKeys.profile(), profile);
         const tx = history.content.find(t => t.activityType === 'PURCHASE');
         if (!tx) return;
         sessionStorage.setItem(seenKey, '1');

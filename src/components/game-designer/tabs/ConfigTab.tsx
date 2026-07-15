@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useCallback, useRef } from 'react';
-import { Gamepad2, Info, Loader2, Send } from 'lucide-react';
+import React, { useCallback } from 'react';
+import { Gamepad2, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
@@ -42,27 +42,9 @@ interface Props {
   detail: DesignerBrandingDetail;
   gameConfig: Record<string, unknown>;
   onFormChange: (e: { formData?: Record<string, unknown> }) => void;
-  onValidated: (e: { formData?: Record<string, unknown> }) => void;
-  submitting: boolean;
-  showSubmitConfirm: boolean;
-  setShowSubmitConfirm: (v: boolean) => void;
-  onSubmitDesign: () => void;
-  canSubmit: boolean;
 }
 
-export const ConfigTab: React.FC<Props> = ({
-  detail,
-  gameConfig,
-  onFormChange,
-  onValidated,
-  submitting,
-  showSubmitConfirm,
-  setShowSubmitConfirm,
-  onSubmitDesign,
-  canSubmit,
-}) => {
-  const formRef = useRef<any>(null);
-
+export const ConfigTab: React.FC<Props> = ({ detail, gameConfig, onFormChange }) => {
   const canEdit = ['APPROVED', 'DESIGN_IN_PROGRESS', 'CHANGES_REQUESTED'].includes(detail.status);
 
   const transformErrors = useCallback((errors: any[]) => {
@@ -91,8 +73,6 @@ export const ConfigTab: React.FC<Props> = ({
 
   return (
     <div className="p-5 space-y-5">
-
-      {/* RJSF form */}
       {!detail.gameSchema ? (
         <div className="py-8 text-center">
           <Gamepad2 size={32} className="text-gray-300 mx-auto mb-3" />
@@ -116,7 +96,6 @@ export const ConfigTab: React.FC<Props> = ({
             )}
           </div>
           <Form
-            ref={formRef}
             schema={detail.gameSchema.jsonSchema as any}
             uiSchema={detail.gameSchema.uiSchema as any}
             formData={gameConfig}
@@ -126,55 +105,11 @@ export const ConfigTab: React.FC<Props> = ({
             templates={rjsfTemplates}
             formContext={{ brandingRequestId: detail.id }}
             onChange={onFormChange}
-            onSubmit={onValidated}
             transformErrors={transformErrors}
             onError={() => toast.error('Hay campos con errores. Corrígelos antes de enviar.')}
           >
             <></>
           </Form>
-        </div>
-      )}
-
-      {/* Enviar para revisión */}
-      {canSubmit && (
-        <div className="pt-5 border-t border-gray-100">
-          {!showSubmitConfirm ? (
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-medium text-gray-900 text-sm">¿Listo para enviar al anunciante?</p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  El anunciante revisará tu diseño y podrá aprobarlo o solicitar cambios.
-                </p>
-              </div>
-              <button
-                onClick={() => formRef.current?.submit()}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors cursor-pointer shrink-0"
-              >
-                <Send size={15} />
-                Enviar para revisión
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-medium text-gray-900">¿Confirmas el envío al anunciante?</p>
-              <div className="flex gap-2 shrink-0">
-                <button
-                  onClick={() => setShowSubmitConfirm(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={onSubmitDesign}
-                  disabled={submitting}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-60 cursor-pointer"
-                >
-                  {submitting && <Loader2 size={14} className="animate-spin" />}
-                  Confirmar envío
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>

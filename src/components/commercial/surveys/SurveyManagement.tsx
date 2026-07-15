@@ -30,7 +30,7 @@ export default function SurveyManagement() {
 
         <button
           onClick={() => router.push('/commercial/surveys/new')}
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 active:scale-95 transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#03548C] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Nueva encuesta

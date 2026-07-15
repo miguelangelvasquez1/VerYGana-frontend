@@ -2,7 +2,36 @@
   "permissions": {
     "allow": [
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
-      "Bash(xargs grep -l \"useNotifications\\\\|NotificationPanel\")"
+      "Bash(xargs grep -l \"useNotifications\\\\|NotificationPanel\")",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(npm view *)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\Usuario\\\\Projects\\\\verygana\\\\VerYGana-frontend\\\\src\\\\app\\\\commercial\\\\campaigns\\\\[id]\" *)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\Usuario\\\\Projects\\\\verygana\\\\VerYGana-frontend\\\\src\\\\app\\\\commercial\\\\branding\\\\campaigns\\\\[id]\")",
+      "Bash(mkdir -p \"c:\\\\Users\\\\Usuario\\\\Projects\\\\verygana\\\\VerYGana-frontend\\\\src\\\\app\\\\commercial\\\\branding\\\\requests\\\\[id]\")",
+      "Bash(rm -rf \"c:\\\\Users\\\\Usuario\\\\Projects\\\\verygana\\\\VerYGana-frontend\\\\src\\\\app\\\\commercial\\\\branding\\\\[id]\" *)",
+      "Bash(node -e ' *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Usuario\\Projects\\verygana\\VerYGana-frontend\\src\\app\\commercial\\campaigns",
+      "c:\\Users\\Usuario\\Projects\\verygana\\VerYGana-frontend\\src\\app\\commercial\\branding\\campaigns",
+      "c:\\Users\\Usuario\\Projects\\verygana\\VerYGana-frontend\\src\\app\\commercial\\branding\\requests",
+      "c:\\Users\\Usuario\\Projects\\verygana\\VerYGana-frontend\\src\\app\\commercial\\branding\\[id]",
+      "Bash(ls src/components/consumer)",
+      "Bash(ls src/components/dashboard)"
     ]
+  },
+  "enabledPlugins": {
+    "frontend-design@anthropics-skills": true
+  },
+  "extraKnownMarketplaces": {
+    "anthropics-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
+    }
   }
 }

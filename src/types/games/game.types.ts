@@ -19,8 +19,6 @@ export interface GameCardResponseDTO {
   title: string;
   description: string;
   frontPageUrl: string;
-  sponsored: boolean;
-  rewardText?: string; // ej: "Gana hasta $500"
 }
 
 export interface GameAssetDefinitionDTO {
@@ -33,7 +31,7 @@ export interface GameAssetDefinitionDTO {
 }
 
 export interface InitGameRequestDTO {
-  gameId: number;
+  gameId?: number;
   sponsored: boolean;
 }
 

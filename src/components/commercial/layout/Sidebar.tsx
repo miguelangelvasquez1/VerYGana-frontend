@@ -6,9 +6,7 @@ import {
   BarChart3,
   CreditCard,
   FileImage,
-  Home,
-  PlusCircle,
-  Settings,
+  Headset,
   Package,
   ClipboardList,
   X,
@@ -16,11 +14,9 @@ import {
   PawPrint,
   Lock,
   Sparkles,
-  Megaphone,
   Palette,
 } from 'lucide-react';
-import { WalletStatus } from '@/types/finance/Wallet.types';
-import {PlanCode} from '@/types/finance/plans/Plan.types';
+import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { useLogout } from '@/hooks/useLogout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -33,30 +29,24 @@ interface MenuItem {
   lockIfUnavailable?: boolean;
   /** Prevents this item from being highlighted even when the path matches (used for action/create pages). */
   skipActive?: boolean;
+  /** Only highlight on an exact pathname match — no matching of child routes (used for the root Dashboard link). */
+  exactMatch?: boolean;
 }
 
 interface SidebarProps {
   onClose?: () => void;
   effectivePlan?: PlanCode | null;
   hasActivePlan?: boolean;
-  remainingBudget?: number;
-  walletStatus?: WalletStatus;
   pathname?: string;
 }
 
 // ─── Menu items ───────────────────────────────────────────────────────────────
 
 const menuItems: MenuItem[] = [
-  { href: '/commercial', icon: Home, label: 'Dashboard' },
   {
     href: '/commercial/products', icon: Package, label: 'Mis productos',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
-  },
-  {
-    href: '/commercial/products/create', icon: PlusCircle, label: 'Crear producto',
-    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true, skipActive: true,
   },
   {
     href: '/commercial/ads', icon: FileImage, label: 'Mis Anuncios',
@@ -88,46 +78,9 @@ const menuItems: MenuItem[] = [
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
   },
-  {
-    href: '/commercial/settings', icon: Settings, label: 'Configuración',
-    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
-    lockIfUnavailable: true,
-  },
+  { href: '/commercial/support', icon: Headset, label: 'Soporte' },
   { href: '/plans', icon: Sparkles, label: 'Ver Planes' },
 ];
-
-// ─── Plan badge ───────────────────────────────────────────────────────────────
-
-const PLAN_STYLES: Record<PlanCode, { label: string; className: string }> = {
-  [PlanCode.BASIC]: {
-    label: 'Personal',
-    className: 'bg-slate-600/40 text-slate-300 border border-slate-500/30',
-  },
-  [PlanCode.STANDARD]: {
-    label: 'Estándar',
-    className: 'bg-blue-600/30 text-blue-300 border border-blue-500/40',
-  },
-  [PlanCode.PREMIUM]: {
-    label: 'Premium',
-    className: 'bg-purple-600/30 text-purple-300 border border-purple-500/40',
-  },
-};
-
-function PlanBadge({ plan }: { plan: PlanCode | null }) {
-  if (!plan) {
-    return (
-      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full tracking-widest bg-slate-700/40 text-slate-500 border border-slate-600/30">
-        SIN PLAN
-      </span>
-    );
-  }
-  const style = PLAN_STYLES[plan];
-  return (
-    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full tracking-widest ${style.className}`}>
-      {style.label.toUpperCase()}
-    </span>
-  );
-}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -135,8 +88,6 @@ export function Sidebar({
   onClose,
   effectivePlan = null,
   hasActivePlan = false,
-  remainingBudget,
-  walletStatus = WalletStatus.INACTIVE,
   pathname = '',
 }: SidebarProps) {
 
@@ -147,6 +98,7 @@ export function Sidebar({
     return (item: MenuItem): boolean => {
       if (item.skipActive) return false;
       if (pathname === item.href) return true;
+      if (item.exactMatch) return false;
       // List/section pages are active for any of their child paths
       return pathname.startsWith(item.href + '/');
     };
@@ -170,22 +122,21 @@ export function Sidebar({
     return true;
   };
 
-  const hasBudget =
-    (effectivePlan === PlanCode.STANDARD || effectivePlan === PlanCode.PREMIUM) &&
-    typeof remainingBudget === 'number';
-
   return (
     <div className="bg-[#0f1117] text-white w-64 h-screen flex flex-col border-r border-white/6">
 
       {/* ── Header ── */}
-      <div className="p-5 border-b border-white/[0.07]">
+      <div className="px-4 py-4 border-b border-white/[0.07]">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-black tracking-tight text-white">
-              Control <span className="text-blue-400">Panel</span>
-            </h1>
-            <div className="mt-2">
-              <PlanBadge plan={effectivePlan} />
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logos/logoDorado.png"
+              alt="VerYGana"
+              className="w-9 h-9 object-contain shrink-0"
+            />
+            <div className="leading-tight">
+              <p className="text-base font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-[10px] text-white/40 font-medium tracking-wide">Activación de ventas</p>
             </div>
           </div>
           {onClose && (
@@ -223,17 +174,17 @@ export function Sidebar({
                   className={`
                     flex items-center px-3 py-2.5 rounded-lg transition-colors duration-100 group
                     ${active
-                      ? 'bg-blue-600/20 text-white border border-blue-500/30'
+                      ? 'bg-[#00a4ff]/15 text-[#00a4ff] border border-[#00a4ff]/25'
                       : 'text-slate-400 hover:bg-white/6 hover:text-white border border-transparent'
                     }
                   `}
                 >
                   <Icon className={`w-4 h-4 mr-3 shrink-0 transition-colors ${
-                    active ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'
+                    active ? 'text-[#00a4ff]' : 'text-slate-500 group-hover:text-slate-300'
                   }`} />
                   <span className="text-sm font-medium">{item.label}</span>
                   {item.href === '/plans' && (
-                    <span className="ml-auto text-[9px] font-bold bg-linear-to-r from-blue-500 to-purple-500 text-white px-1.5 py-0.5 rounded-full">
+                    <span className="ml-auto text-[9px] font-bold bg-linear-to-r from-[#03548C] to-[#00a4ff] text-white px-1.5 py-0.5 rounded-full">
                       NEW
                     </span>
                   )}

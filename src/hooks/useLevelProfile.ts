@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { levelService } from '@/services/LevelService'
 import type { LevelProfile } from '@/types/level'
@@ -17,19 +17,24 @@ const LEVEL_LABELS: Record<string, string> = {
   RUBI: 'Rubí', ESMERALDA: 'Esmeralda', DIAMANTE: 'Diamante',
 }
 
+// Query key shared with every flow that earns XP (surveys, ads, referrals,
+// purchases…) — after fetching a fresh profile from /api/levels/me for the
+// XP reward toast, those flows push it into this same cache entry so the
+// navbar's XP bar updates immediately, without a second fetch.
+export const levelKeys = {
+  profile: () => ['levelProfile'] as const,
+}
+
 export function useLevelProfile() {
   const { data: session } = useSession()
-  const [profile, setProfile] = useState<LevelProfile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const token = (session as any)?.accessToken as string | undefined
 
-  useEffect(() => {
-    const token = (session as any)?.accessToken as string | undefined
-    if (!token) return
-    levelService.getProfile(token)
-      .then(setProfile)
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [session])
+  const { data: profile, isLoading: loading } = useQuery<LevelProfile>({
+    queryKey: levelKeys.profile(),
+    queryFn: () => levelService.getProfile(token!),
+    enabled: !!token,
+    staleTime: 60_000,
+  })
 
   const colors = profile
     ? LEVEL_COLORS[profile.currentLevel] ?? LEVEL_COLORS.BRONCE
@@ -39,5 +44,5 @@ export function useLevelProfile() {
   const pct = profile ? Math.min((profile.xpTotal / xpMax) * 100, 100) : 0
   const label = profile ? LEVEL_LABELS[profile.currentLevel] ?? profile.currentLevel : ''
 
-  return { profile, loading, colors, pct, label }
+  return { profile: profile ?? null, loading, colors, pct, label }
 }
