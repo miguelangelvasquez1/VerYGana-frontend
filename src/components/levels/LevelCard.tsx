@@ -55,9 +55,9 @@ export function LevelCard() {
     : 100
 
   const missionPct = profile.reactivationMissionActive &&
-    profile.reactivationKeysGoal
+    profile.reactivationXpGoal
     ? Math.min(
-        ((profile.reactivationKeysProgress ?? 0) / profile.reactivationKeysGoal) * 100,
+        ((profile.reactivationXpProgress ?? 0) / profile.reactivationXpGoal) * 100,
         100
       )
     : 0
@@ -95,7 +95,7 @@ export function LevelCard() {
             </span>
           </div>
           <div style={{ background: 'var(--color-background-secondary)', borderRadius: 99, height: 8, overflow: 'hidden' }}>
-            <div style={{ width: `${progressPct}%`, height: '100%', background: colors.bar, borderRadius: 99, transition: 'width 0.6s ease' }} />
+            <div style={{ width: '100%', height: '100%', background: colors.bar, borderRadius: 99, transform: `scaleX(${progressPct / 100})`, transformOrigin: 'left', transition: 'transform 0.6s ease' }} />
           </div>
           <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '6px 0 0' }}>
             {profile.currentLevel === 'DIAMANTE'
@@ -128,7 +128,7 @@ export function LevelCard() {
       </div>
 
       {/* Misión de reactivación */}
-      {profile.reactivationMissionActive && profile.reactivationKeysGoal && (
+      {profile.reactivationMissionActive && profile.reactivationXpGoal && (
         <div className="level-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <i className="ti ti-target" style={{ fontSize: 16, color: 'var(--color-text-secondary)' }} aria-hidden="true" />
@@ -137,14 +137,14 @@ export function LevelCard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
             <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>Progreso</span>
             <span style={{ fontSize: 13, fontWeight: 500 }}>
-              {profile.reactivationKeysProgress ?? 0} / {profile.reactivationKeysGoal} XP
+              {profile.reactivationXpProgress ?? 0} / {profile.reactivationXpGoal} XP
             </span>
           </div>
           <div style={{ background: 'var(--color-background-secondary)', borderRadius: 99, height: 6, overflow: 'hidden' }}>
             <div style={{ width: `${missionPct}%`, height: '100%', background: '#1D9E75', borderRadius: 99 }} />
           </div>
           <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '6px 0 0' }}>
-            {(profile.reactivationKeysGoal - (profile.reactivationKeysProgress ?? 0)).toLocaleString()} XP restantes
+            {(profile.reactivationXpGoal - (profile.reactivationXpProgress ?? 0)).toLocaleString()} XP restantes
           </p>
         </div>
       )}

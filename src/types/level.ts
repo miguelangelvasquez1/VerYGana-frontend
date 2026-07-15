@@ -5,8 +5,8 @@ export interface LevelProfile {
   multiplier: number
   benefitsPaused: boolean
   reactivationMissionActive: boolean
-  reactivationKeysGoal: number | null
-  reactivationKeysProgress: number | null
+  reactivationXpGoal: number | null
+  reactivationXpProgress: number | null
 }
 
 export interface TransactionLog {
@@ -22,7 +22,6 @@ export interface LevelConfig {
   xpMin: number
   xpMax: number | string
   multiplier: number
-  referralKeys: number
   referralTickets: number
   raffleTickets: number
 }
