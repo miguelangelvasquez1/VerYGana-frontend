@@ -226,7 +226,7 @@ export function XpRewardToast({ data, onDismiss }: Props) {
           pointerEvents: 'none',
           transform:     `translateX(-50%) translateY(${visible ? '0px' : '20px'})`,
           opacity:       visible ? 1 : 0,
-          transition:    'opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1)',
+          transition:    'opacity 0.35s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1)',
         }}
       >
         {/* ── Tarjeta principal XP ─────────────────────────────────────── */}
@@ -278,7 +278,7 @@ export function XpRewardToast({ data, onDismiss }: Props) {
                 position:   'absolute',
                 bottom:     '100%',
                 left:       '50%',
-                fontSize:   10,
+                fontSize:   12,
                 fontWeight: 700,
                 color:      act.color,
                 background: act.bg,
@@ -328,10 +328,10 @@ export function XpRewardToast({ data, onDismiss }: Props) {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-              <span style={{ fontSize: 11, color: '#9ca3af' }}>
+              <span style={{ fontSize: 12, color: '#9ca3af' }}>
                 {data.xpTotal.toLocaleString('es-CO')} XP
               </span>
-              <span style={{ fontSize: 11, color: '#9ca3af' }}>
+              <span style={{ fontSize: 12, color: '#9ca3af' }}>
                 {data.currentLevel === 'DIAMANTE'
                   ? 'Nivel máximo'
                   : `${data.xpToNextLevel.toLocaleString('es-CO')} para el siguiente`}
@@ -368,7 +368,7 @@ export function XpRewardToast({ data, onDismiss }: Props) {
                 width:      '60%',
                 height:     '100%',
                 background: `linear-gradient(90deg, transparent 0%, ${newLv.bar}30 50%, transparent 100%)`,
-                animation:  'xp-shimmer 1.2s ease-in-out 0.1s both',
+                animation:  'xp-shimmer 0.9s ease-in-out 0.1s both',
                 pointerEvents: 'none',
               }} />
             )}

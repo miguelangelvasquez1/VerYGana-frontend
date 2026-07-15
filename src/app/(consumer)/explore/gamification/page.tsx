@@ -190,7 +190,7 @@ export default function GamificationPage() {
             )}
 
             {/* Misión de reactivación */}
-            {profile?.reactivationMissionActive && profile.reactivationKeysGoal && (
+            {profile?.reactivationMissionActive && profile.reactivationXpGoal && (
               <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100">
                 <div className="flex items-center gap-2 mb-3">
                   <Target className="w-5 h-5 text-emerald-600" />
@@ -199,17 +199,17 @@ export default function GamificationPage() {
                 <div className="flex justify-between text-sm text-gray-500 mb-2">
                   <span>Progreso</span>
                   <span className="font-semibold text-gray-700">
-                    {profile.reactivationKeysProgress ?? 0} / {profile.reactivationKeysGoal} XP
+                    {profile.reactivationXpProgress ?? 0} / {profile.reactivationXpGoal} XP
                   </span>
                 </div>
                 <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-emerald-500 transition-all duration-700"
-                    style={{ width: `${Math.min(((profile.reactivationKeysProgress ?? 0) / profile.reactivationKeysGoal) * 100, 100)}%` }}
+                    style={{ width: `${Math.min(((profile.reactivationXpProgress ?? 0) / profile.reactivationXpGoal) * 100, 100)}%` }}
                   />
                 </div>
                 <p className="text-xs text-gray-400 mt-2">
-                  {(profile.reactivationKeysGoal - (profile.reactivationKeysProgress ?? 0)).toLocaleString()} XP restantes para restaurar beneficios
+                  {(profile.reactivationXpGoal - (profile.reactivationXpProgress ?? 0)).toLocaleString()} XP restantes para restaurar beneficios
                 </p>
               </div>
             )}
@@ -349,16 +349,12 @@ export default function GamificationPage() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-50">
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-50">
                       <div className="text-center">
-                        <p className="text-xs text-gray-400">Llaves referido</p>
-                        <p className="text-sm font-bold text-gray-700">{lc.referralKeys}</p>
-                      </div>
-                      <div className="text-center border-x border-gray-100">
                         <p className="text-xs text-gray-400">Tickets referido</p>
                         <p className="text-sm font-bold text-gray-700">{lc.referralTickets}</p>
                       </div>
-                      <div className="text-center">
+                      <div className="text-center border-l border-gray-100">
                         <p className="text-xs text-gray-400">Tickets rifa</p>
                         <p className="text-sm font-bold text-gray-700">{lc.raffleTickets}</p>
                       </div>

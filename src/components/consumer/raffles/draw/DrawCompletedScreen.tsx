@@ -157,8 +157,9 @@ export function DrawCompletedScreen({ payload, onGoToRaffles }: Props) {
 
   useEffect(() => {
     fireCompleted()
-    setTimeout(fireCompleted, 700)
-    setTimeout(fireCompleted, 1800)
+    const t1 = setTimeout(fireCompleted, 700)
+    const t2 = setTimeout(fireCompleted, 1800)
+    return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [fireCompleted])
 
   useEffect(() => {

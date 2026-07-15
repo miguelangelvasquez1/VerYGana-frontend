@@ -46,7 +46,7 @@ export default function ReferralTierCard({ level, minReferrals, ticketsPerReferr
           transform: 'translateX(-50%)',
           background: cfg.bar,
           color: 'white',
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: 600,
           padding: '2px 10px',
           borderRadius: 99,

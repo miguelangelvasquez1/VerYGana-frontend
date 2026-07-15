@@ -306,7 +306,7 @@ function RaffleCard({
     <div className="border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white">
       <div className="flex">
         <div className="shrink-0 w-28 md:w-40">
-          <img src={raffle.imageUrl} className="w-full h-full object-cover min-h-30" />
+          <img src={raffle.imageUrl} alt={raffle.title} className="w-full h-full object-cover min-h-30" />
         </div>
 
         <div className="flex-1 p-3 md:p-4 flex flex-col justify-between gap-2 min-w-0">

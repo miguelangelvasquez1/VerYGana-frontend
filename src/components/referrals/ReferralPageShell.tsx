@@ -305,10 +305,10 @@ export default function ReferralPageShell({ info }: Props) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {referrals.map((r, i) => {
+                  {referrals.map((r) => {
                     const state = USER_STATE_LABEL[r.userState] ?? { label: r.userState, className: 'bg-gray-100 text-gray-600' };
                     return (
-                      <tr key={i} className="hover:bg-gray-50">
+                      <tr key={r.email} className="hover:bg-gray-50">
                         <td className="py-4 px-6">
                           <p className="font-medium text-gray-900">{r.name} {r.lastName}</p>
                           <p className="text-sm text-gray-500">{r.email}</p>
