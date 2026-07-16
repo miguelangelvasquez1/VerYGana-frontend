@@ -45,6 +45,34 @@ export const verifyToken = async (): Promise<boolean> => {
 };
 
 /**
+ * Verificar email con código OTP
+ */
+export const verifyEmail = async (email: string, code: string): Promise<void> => {
+  await apiClient.post('/auth/verify-email', { email, code });
+};
+
+/**
+ * Reenviar código de verificación por correo
+ */
+export const resendEmailVerification = async (email: string): Promise<void> => {
+  await apiClient.post('/auth/resend-verification', { email });
+};
+
+/**
+ * Enviar OTP por SMS al teléfono registrado
+ */
+export const sendPhoneVerification = async (email: string): Promise<void> => {
+  await apiClient.post('/auth/send-phone-verification', { email });
+};
+
+/**
+ * Verificar código OTP de SMS
+ */
+export const verifyPhone = async (email: string, code: string): Promise<void> => {
+  await apiClient.post('/auth/verify-phone', { email, code });
+};
+
+/**
  * Recuperar contraseña
  */
 export const requestPasswordReset = async (email: string): Promise<void> => {
