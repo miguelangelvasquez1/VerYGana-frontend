@@ -28,7 +28,7 @@ export const registerConsumer = async (data: {
   documentNumber: string;
   occupation?: string;
   incomeRange?: IncomeRange;
-  pepDeclaration: boolean;
+  isPEP: boolean;
 }): Promise<any> => {
   const payload: RegisterConsumerDTO = {
     email: data.email,
@@ -48,7 +48,7 @@ export const registerConsumer = async (data: {
     documentNumber: data.documentNumber,
     occupation: data.occupation || undefined,
     incomeRange: data.incomeRange || undefined,
-    pepDeclaration: data.pepDeclaration,
+    isPEP: data.isPEP,
   };
 
   const response = await apiClient.post('/auth/register/consumer', payload);

@@ -26,7 +26,7 @@ export interface RegisterConsumerDTO {
   documentNumber: string;
   occupation?: string;
   incomeRange?: IncomeRange;
-  pepDeclaration: boolean;
+  isPEP: boolean;
 }
 
 export type Gender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";

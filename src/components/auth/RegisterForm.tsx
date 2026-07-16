@@ -63,7 +63,7 @@ const inputCls = (hasError?: boolean) =>
 
 export default function RegisterForm() {
   const [role, setRole] = useState<Role | null>(null);
-  const [formData, setFormData] = useState<any>({ pepDeclaration: false });
+  const [formData, setFormData] = useState<any>({ isPEP: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatars, setAvatars] = useState<AvatarDTO[]>([]);
   const [loadingAvatars, setLoadingAvatars] = useState(false);
@@ -150,7 +150,7 @@ export default function RegisterForm() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFieldErrors({});
 
@@ -225,13 +225,17 @@ export default function RegisterForm() {
             documentNumber: formData.documentNumber,
             occupation: formData.occupation?.trim() || undefined,
             incomeRange: formData.incomeRange || undefined,
-            pepDeclaration: formData.pepDeclaration ?? false,
+            isPEP: formData.isPEP ?? false,
           });
           if (res?.underReview === true || res?.status === "PENDING_REVIEW") {
             setRegistrationResult("pep_review");
           } else {
-            toast.success("¡Registro exitoso! Ahora puedes iniciar sesión");
-            setTimeout(() => { window.location.href = "/login"; }, 2000);
+            // Store masked phone for verify page
+            if (formData.phoneNumber) {
+              const p = formData.phoneNumber.replace(/\D/g, '');
+              sessionStorage.setItem('verifyPhone', `***${p.slice(-4)}`);
+            }
+            window.location.href = `/verify?email=${encodeURIComponent(formData.email)}`;
           }
           break;
         }
@@ -253,8 +257,11 @@ export default function RegisterForm() {
           if (res?.underReview === true || res?.status === "PENDING_REVIEW") {
             setRegistrationResult("pep_review");
           } else {
-            toast.success("¡Registro exitoso! Ahora puedes iniciar sesión");
-            setTimeout(() => { window.location.href = "/login"; }, 2000);
+            if (formData.phoneNumber) {
+              const p = formData.phoneNumber.replace(/\D/g, '');
+              sessionStorage.setItem('verifyPhone', `***${p.slice(-4)}`);
+            }
+            window.location.href = `/verify?email=${encodeURIComponent(formData.email)}`;
           }
           break;
         }
@@ -683,16 +690,16 @@ export default function RegisterForm() {
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
-                  checked={formData.pepDeclaration ?? false}
-                  onChange={(e) => setFormData((prev: any) => ({ ...prev, pepDeclaration: e.target.checked }))}
+                  checked={formData.isPEP ?? false}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, isPEP: e.target.checked }))}
                   className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#03548C] focus:ring-[#03548C]/40 shrink-0"
                 />
                 <span className="text-sm text-gray-700 leading-snug">
-                  Declaro que <span className="font-semibold">soy</span> o <span className="font-semibold">no soy</span> una Persona Expuesta Políticamente (PEP), conforme a la normativa de prevención de lavado de activos y financiación del terrorismo.
+                  Soy una Persona Expuesta Políticamente (PEP), conforme a la normativa de prevención de lavado de activos y financiación del terrorismo.
                 </span>
               </label>
               <p className="text-xs text-gray-400 mt-2 ml-7">
-                Marcar esta casilla si eres PEP puede requerir una revisión adicional de tu cuenta.
+                Opcional. Si marcas esta casilla, tu cuenta puede requerir una revisión adicional antes de ser activada.
               </p>
             </section>
           </>
