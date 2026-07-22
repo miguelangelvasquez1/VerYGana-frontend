@@ -9,6 +9,7 @@ import {
   type PageResponse,
   type AuditLogFilters,
 } from '@/services/ComplianceService';
+import { dateToZonedIsoStart, dateToZonedIsoEnd } from '@/lib/utils/dateTime';
 
 const LEVEL_STYLE: Record<string, string> = {
   INFO: 'bg-blue-100 text-blue-700',
@@ -45,10 +46,12 @@ export default function AuditLogsPanel() {
     setLoading(true);
     setError(false);
     try {
+      const from = dateToZonedIsoStart(activeFilters.from);
+      const to = dateToZonedIsoEnd(activeFilters.to);
       if (activeTab === 'critical') {
-        setData(await getCriticalAuditLogs(activeFilters.from || undefined, activeFilters.to || undefined, page, PAGE_SIZE));
+        setData(await getCriticalAuditLogs(from, to, page, PAGE_SIZE));
       } else {
-        setData(await getAuditLogs({ ...activeFilters, page, size: PAGE_SIZE }));
+        setData(await getAuditLogs({ ...activeFilters, from, to, page, size: PAGE_SIZE }));
       }
     } catch {
       setError(true);

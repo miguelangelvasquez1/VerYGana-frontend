@@ -1,4 +1,5 @@
 import apiClient from "@/lib/api/client";
+import type { ContractStatus, OnboardingDocument, OnboardingRoute } from "@/services/commercial/OnboardingService";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -144,4 +145,66 @@ export const getCriticalAuditLogs = async (
     params: { from, to, page, size },
   });
   return res.data;
+};
+
+// ── Contratos comerciales (paso 11 del onboarding) ──────────────────────────
+
+// Estados que puede devolver el listado — PENDING_BUSINESS_REVIEW nunca aparece aquí.
+export type ContractReviewListStatus = Extract<
+  ContractStatus,
+  "PENDING_VERYGANA_REVIEW" | "APPROVED" | "REJECTED"
+>;
+
+export interface PendingContractSummary {
+  contractId: number;
+  userId: number;
+  companyName: string;
+  email: string;
+  route: OnboardingRoute;
+  version: number;
+  generatedAt: string;
+  businessApprovedAt: string | null;
+  status: ContractReviewListStatus;
+  veryganaReviewedAt: string | null;
+}
+
+export interface ContractReviewDetail {
+  contractId: number;
+  version: number;
+  status: ContractStatus;
+  generatedAt: string;
+  downloadUrl: string;
+  businessApprovedAt: string | null;
+  veryganaReviewedAt: string | null;
+  veryganaDecisionNotes: string | null;
+  // Documentos cargados por el comercial (descartados/ORPHANED no aparecen).
+  // downloadUrl de cada uno viene null si no está VALIDATED, y las URLs
+  // (tanto esta como la del contrato) expiran a los ~5 min — no reutilizar.
+  documents: OnboardingDocument[];
+}
+
+export const getContracts = async (
+  status?: ContractReviewListStatus
+): Promise<PendingContractSummary[]> => {
+  const res = await apiClient.get("/compliance/contracts", {
+    params: status ? { status } : undefined,
+  });
+  return res.data;
+};
+
+export const getContractForReview = async (contractId: number): Promise<ContractReviewDetail> => {
+  const res = await apiClient.get(`/compliance/contracts/${contractId}`);
+  return res.data;
+};
+
+export const approveContractReview = async (contractId: number): Promise<void> => {
+  await apiClient.post(`/compliance/contracts/${contractId}/approve`);
+};
+
+export const rejectContractReview = async (
+  contractId: number,
+  reason: string,
+  documentsIssue: boolean
+): Promise<void> => {
+  await apiClient.post(`/compliance/contracts/${contractId}/reject`, { reason, documentsIssue });
 };

@@ -313,6 +313,9 @@ export default function VerificationForm() {
       {/* Switch to SMS — only shown in email mode */}
       {mode === 'email' && (
         <div style={{ textAlign: 'center', paddingTop: '0.75rem', borderTop: '1px solid #f3f4f6' }}>
+          <p style={{ fontSize: 13, color: '#6b7280', margin: '0 0 6px' }}>
+            ¿No te llegó el correo?
+          </p>
           <button
             onClick={handleSwitchToSMS}
             disabled={isSending}
@@ -321,7 +324,8 @@ export default function VerificationForm() {
               border: 'none',
               cursor: 'pointer',
               fontSize: 13,
-              color: '#6b7280',
+              color: '#03548C',
+              fontWeight: 600,
               padding: 0,
               display: 'inline-flex',
               alignItems: 'center',
@@ -329,8 +333,8 @@ export default function VerificationForm() {
             }}
           >
             <MessageSquare style={{ width: 14, height: 14, color: '#03548C' }} />
-            ¿No te llegó el correo?{' '}
-            <span style={{ color: '#03548C', fontWeight: 600 }}>Recibir código por SMS</span>
+            <ArrowRight style={{ width: 13, height: 13 }} />
+            Recibir código por SMS
           </button>
         </div>
       )}

@@ -3,27 +3,15 @@ import apiClient from "@/lib/api/client";
 // ============================================
 // INTERFACES
 // ============================================
-export type CommercialDocumentType = "CC" | "CE" | "PP";
 
-export type AnnualIncomeRange =
-  | "LESS_THAN_500_SMMLV"
-  | "FROM_500_TO_5000_SMMLV"
-  | "FROM_5000_TO_50000_SMMLV"
-  | "MORE_THAN_50000_SMMLV";
-
+// El registro básico solo pide lo mínimo para crear la cuenta y verificar el
+// correo. La identificación jurídica de la empresa (razón social, NIT,
+// representante legal, declaración PEP, etc.) se captura después, en el
+// paso 3 del onboarding — ver OnboardingService.submitLegalIdentification.
 export interface RegisterCommercialDTO {
   email: string;
   password: string;
   phoneNumber: string;
-  companyName: string;
-  nit: string;
-  ciiuCode: string;
-  mercantileRegistration?: string;
-  legalRepDocumentType: CommercialDocumentType;
-  legalRepDocumentNumber: string;
-  legalRepPepDeclaration: boolean;
-  annualIncomeRange?: AnnualIncomeRange;
-  municipalityCode?: string;
 }
 
 export interface CommercialProfile {
@@ -59,35 +47,14 @@ export interface CreateAdDTO {
 // ============================================
 
 /**
- * Registrar un nuevo comerciante
+ * Registrar un nuevo comerciante (registro básico — el resto de la
+ * identificación jurídica se completa en el onboarding, paso 3)
  */
-export const registerCommercial = async (data: {
-  email: string;
-  password: string;
-  phoneNumber: string;
-  name: string;
-  nit: string;
-  ciiuCode: string;
-  mercantileRegistration?: string;
-  legalRepDocumentType: CommercialDocumentType;
-  legalRepDocumentNumber: string;
-  legalRepPepDeclaration: boolean;
-  annualIncomeRange?: AnnualIncomeRange;
-  municipalityCode?: string;
-}): Promise<any> => {
+export const registerCommercial = async (data: RegisterCommercialDTO): Promise<{ message: string }> => {
   const payload: RegisterCommercialDTO = {
     email: data.email,
     password: data.password,
     phoneNumber: data.phoneNumber,
-    companyName: data.name,
-    nit: data.nit,
-    ciiuCode: data.ciiuCode,
-    mercantileRegistration: data.mercantileRegistration || undefined,
-    legalRepDocumentType: data.legalRepDocumentType,
-    legalRepDocumentNumber: data.legalRepDocumentNumber,
-    legalRepPepDeclaration: data.legalRepPepDeclaration,
-    annualIncomeRange: data.annualIncomeRange || undefined,
-    municipalityCode: data.municipalityCode || undefined,
   };
 
   const response = await apiClient.post('/auth/register/commercial', payload);

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShieldCheck, AlertTriangle, ScrollText, Menu, X, LogOut } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, ScrollText, FileSignature, Menu, X, LogOut } from 'lucide-react';
 import { useLogout } from '@/hooks/useLogout';
 
 const navItems = [
@@ -18,6 +18,12 @@ const navItems = [
     href: '/compliance/screenings',
     icon: AlertTriangle,
     color: 'text-amber-500',
+  },
+  {
+    title: 'Contratos comerciales',
+    href: '/compliance/contracts',
+    icon: FileSignature,
+    color: 'text-emerald-500',
   },
   {
     title: 'Logs de Auditoría',

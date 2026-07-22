@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Calculator, Tag, Link as LinkIcon, Save, Loader2, MapPin, Calendar, Info, AlertCircle } from 'lucide-react';
+import { X, Calculator, Tag, Link as LinkIcon, Save, Loader2, MapPin, Info, AlertCircle } from 'lucide-react';
 import { AdResponseDTO, EditAdFormData, SelectedMunicipalityData } from '@/types/ads/commercial';
 import { AdUpdateDTO } from '@/types/ads/commercial';
 import { useCategories } from '@/hooks/useCategories';
@@ -32,7 +32,6 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
     title: ad.title,
     description: ad.description,
     categoryIds: ad.categories.map(c => c.id),
-    startDate: ad.startDate ? new Date(ad.startDate).toISOString().slice(0, 16) : '',
     targetUrl: ad.targetUrl || '',
     targetAudience: {
       ageRange: [ad.minAge, ad.maxAge],
@@ -43,10 +42,6 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
 
   const formatMoney = (value: number) =>
     value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const minStartDate = new Date(
-    Date.now() - new Date().getTimezoneOffset() * 60000
-  ).toISOString().slice(0, 16);
 
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [selectedMunicipalitiesData, setSelectedMunicipalitiesData] = useState<SelectedMunicipalityData[]>(initialSelectedMunicipalities);
@@ -132,7 +127,6 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
       title: formData.title,
       description: formData.description,
       targetUrl: formData.targetUrl || undefined,
-      startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
       categoryIds: formData.categoryIds,
       targetMunicipalitiesCodes: formData.targetAudience.municipalityCodes,
       minAge: formData.targetAudience.ageRange[0],
@@ -339,37 +333,6 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
               <span>Presupuesto consumido: <strong>${formatMoney(ad.currentLikes * ad.rewardPerLike)}</strong></span>
               <span className="w-px bg-blue-200" />
               <span>Presupuesto restante: <strong>${formatMoney((ad.maxLikes - ad.currentLikes) * ad.rewardPerLike)}</strong></span>
-            </div>
-          </div>
-
-          {/* Fechas */}
-          <div className="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-6 border border-green-200">
-            <div className="flex items-center mb-4">
-              <Calendar className="w-5 h-5 text-green-600 mr-2" />
-              <h3 className="text-lg font-bold text-gray-900">Fechas de Campaña</h3>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <label className="text-sm font-semibold text-gray-700">Fecha de Inicio</label>
-                <div className="relative group">
-                  <button
-                    type="button"
-                    className="w-4 h-4 rounded-full border border-gray-300 text-gray-400 text-[11px] flex items-center justify-center hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                  >?</button>
-                  <div className="absolute left-0 bottom-full mb-2 w-56 bg-white border border-gray-200 rounded-lg p-2.5 text-xs text-gray-600 shadow-lg hidden group-hover:block z-10 leading-relaxed pointer-events-none">
-                    Fecha en que el anuncio comenzará a mostrarse. Si se deja vacío, inicia inmediatamente tras ser aprobado.
-                  </div>
-                </div>
-              </div>
-              <input
-                type="datetime-local"
-                value={formData.startDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                min={minStartDate}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-              <p className="text-xs text-gray-400 mt-1">Debe ser una fecha futura</p>
             </div>
           </div>
 

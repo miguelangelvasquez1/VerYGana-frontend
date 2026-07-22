@@ -1,15 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { DollarSign, Shield } from 'lucide-react';
+import { DollarSign, FileText, Shield } from 'lucide-react';
 import SistemaTab from './tabs/SistemaTab';
 import PreciosTab from './tabs/PreciosTab';
+import DocumentosLegalesTab from './tabs/DocumentosLegalesTab';
 
-type Tab = 'sistema' | 'precios';
+type Tab = 'sistema' | 'precios' | 'documentos-legales';
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'sistema', label: 'Sistema', icon: <Shield size={16} /> },
   { id: 'precios', label: 'Precios', icon: <DollarSign size={16} /> },
+  { id: 'documentos-legales', label: 'Documentos Legales', icon: <FileText size={16} /> },
 ];
 
 function TabButton({
@@ -59,6 +61,7 @@ export default function ConfigPanel() {
 
       {activeTab === 'sistema' && <SistemaTab />}
       {activeTab === 'precios' && <PreciosTab />}
+      {activeTab === 'documentos-legales' && <DocumentosLegalesTab />}
     </div>
   );
 }

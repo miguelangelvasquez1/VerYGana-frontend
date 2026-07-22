@@ -3,15 +3,18 @@
 // components/layout/DashboardLayout.tsx
 // Versión con carga de EffectivePlanState y propagación a Sidebar/Header
 
-import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext, useMemo } from 'react';
 import Link from 'next/link';
 import { Lock, Sparkles, Loader2 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { getEffectivePlanState } from '@/services/planService';
+import { getCommercialInitialData } from '@/services/commercialService';
+import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
 import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
 import { WalletStatus } from '@/types/finance/Wallet.types';
 import { usePathname, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 // ─── Route protection ─────────────────────────────────────────────────────────
 
@@ -74,6 +77,26 @@ function LockedPage({ requiredPlans }: { requiredPlans: PlanCode[] }) {
   );
 }
 
+function OnboardingErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+      <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+        <Lock className="w-8 h-8 text-gray-400" />
+      </div>
+      <h2 className="text-xl font-bold text-gray-900 mb-2">No pudimos cargar tu registro</h2>
+      <p className="text-sm text-gray-500 mb-4 max-w-xs">
+        Ocurrió un error al verificar el estado de tu registro comercial. Intenta de nuevo.
+      </p>
+      <button
+        onClick={onRetry}
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+      >
+        Reintentar
+      </button>
+    </div>
+  );
+}
+
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 interface PlanContextValue {
@@ -121,7 +144,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isMobile, setIsMobile]       = useState(false);
   const [planState, setPlanState]     = useState<EffectivePlanStateResponseDTO | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
+  const [commercialData, setCommercialData]           = useState<CommercialInitialDataResponseDTO | null>(null);
+  const [loadingCommercialData, setLoadingCommercialData] = useState(true);
+  const [commercialDataError, setCommercialDataError]     = useState(false);
 
+  const onboardingCompleted = commercialData?.onboardingStatus === 'COMPLETED';
+  // Evita el doble llamado a getCommercialInitialData()/getEffectivePlanState()
+  // que provoca React Strict Mode en dev (monta -> limpia -> vuelve a montar
+  // cada efecto). No se resetea en el cleanup a propósito: solo debe permitir
+  // una carga automática por cada montaje real del layout.
+  const hasStartedCommercialDataLoad = useRef(false);
+
+  const { status: sessionStatus } = useSession();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -186,7 +220,52 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
-  useEffect(() => { loadPlan(); }, []);
+  const loadCommercialData = async () => {
+    setLoadingCommercialData(true);
+    try {
+      const data = await getCommercialInitialData();
+      setCommercialData(data);
+      setCommercialDataError(false);
+      if (data.onboardingStatus === 'COMPLETED') {
+        await loadPlan();
+      } else {
+        setLoadingPlan(false);
+      }
+    } catch (err) {
+      console.error('Error cargando datos del comercial:', err);
+      setCommercialDataError(true);
+      setLoadingPlan(false);
+    } finally {
+      setLoadingCommercialData(false);
+    }
+  };
+
+  useEffect(() => {
+    // Esperamos a que la sesión de NextAuth esté realmente lista antes de
+    // pedir el estado del onboarding/plan. Si disparábamos esto apenas se
+    // montaba el layout, justo después de loguearse y ser redirigido a
+    // /commercial la request podía salir antes de que el token nuevo
+    // estuviera sincronizado (whenTokenReady() solo espera la primera
+    // sincronización de toda la pestaña, que ya ocurrió en /login con token
+    // null) — el backend respondía 401 y se veía un flash de LockedPage
+    // hasta que la sesión terminaba de sincronizar.
+    if (sessionStatus === 'unauthenticated') {
+      router.replace('/login');
+      return;
+    }
+    if (sessionStatus !== 'authenticated') return;
+    if (hasStartedCommercialDataLoad.current) return;
+    hasStartedCommercialDataLoad.current = true;
+    loadCommercialData();
+  }, [sessionStatus, router]);
+
+  // El onboarding vive en su propia ruta (sin sidebar/header del panel
+  // comercial) — si todavía no está completo, sacamos al usuario de ahí.
+  useEffect(() => {
+    if (commercialData && !onboardingCompleted) {
+      router.replace('/commercial-onboarding');
+    }
+  }, [commercialData, onboardingCompleted, router]);
 
   return (
     <PlanContext.Provider value={{ planState, loadingPlan, refreshPlanState: loadPlan }}>
@@ -220,9 +299,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             onMenuClick={() => setSidebarOpen(true)}
             showMenuButton={isMobile}
             planState={planState}
+            commercialData={commercialData}
           />
           <main className="p-4 lg:p-6">
             {(() => {
+              if (loadingCommercialData) {
+                return (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-300" />
+                  </div>
+                );
+              }
+              if (commercialDataError) {
+                return <OnboardingErrorState onRetry={loadCommercialData} />;
+              }
+              if (commercialData && !onboardingCompleted) {
+                // Redirigiendo a /commercial-onboarding (ver efecto arriba).
+                return (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-300" />
+                  </div>
+                );
+              }
               if (loadingPlan) {
                 return (
                   <div className="flex items-center justify-center h-64">
