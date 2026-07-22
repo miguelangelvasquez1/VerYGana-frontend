@@ -2,6 +2,7 @@ import { CreatePrizeRequestDTO, PrizeResponseDTO, PrizeUploadSlotDTO } from "./p
 import { CreateRaffleRuleRequestDTO, RaffleRuleResponseDTO } from "./raffleRule.types";
 import { WinnerSummaryResponseDTO } from "./raffleWinner.types";
 import { FileUploadPermissionDTO, FileUploadRequestDTO } from "../Generic.types";
+import { OptionalTargetAudienceDTO, TargetAudienceResponseDTO } from "../TargetAudience.types";
 
 export enum RaffleType {
     PREMIUM = 'PREMIUM',
@@ -55,6 +56,7 @@ export interface CreateRaffleRequestDTO {
     prizes: CreatePrizeRequestDTO[];
     rules: CreateRaffleRuleRequestDTO[];
     termsAndConditions: string;
+    targeting: OptionalTargetAudienceDTO;
 }
 
 export interface UpdateRaffleRequestDTO {
@@ -65,6 +67,7 @@ export interface UpdateRaffleRequestDTO {
     startDate: string;
     endDate: string;
     drawDate: string;
+    targeting: OptionalTargetAudienceDTO;
 }
 
 export interface RaffleSummaryResponseDTO {
@@ -101,6 +104,7 @@ export interface RaffleResponseDTO {
     requiresPet: boolean;
     drawMethod: DrawMethod
     termsAndConditions: string;
+    targeting: TargetAudienceResponseDTO | null;
 }
 
 export interface DrawResultResponseDTO {
@@ -113,19 +117,10 @@ export interface DrawResultResponseDTO {
 export interface RaffleStatsResponseDTO {
     id: number;
     maxTicketsFromPurchases: number;
-    maxTicketsFromAds: number;
-    maxTicketsFromGames: number;
+    maxTicketsFromDailyLogin: number;
     maxTicketsFromReferrals: number;
     totalPrizesValue: number;
-    ticketsBySource: Map<string, number>;
-}
-
-export interface ParticipantLeaderboardDTO {
-    consumerId: number;
-    userName: string;
-    avatarUrl: string;
-    ticketsCount: number;
-    winProbability: number;
+    ticketsBySource: Record<string, number>;
 }
 
 export interface UserRaffleSummaryResponseDTO {

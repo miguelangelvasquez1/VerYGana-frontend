@@ -5,11 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import RaffleDetailCard from "@/components/admin/raffles/RaffleDetailAdmin";
-import { RaffleResponseDTO } from "@/types/raffles/raffle.types";
+import { RaffleResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
 import {
     getRaffleById,
     conductDraw,
     cancelRaffle,
+    updateRaffle,
 } from "@/services/admin/AdminRaffleService";
 import AdminLayout from "@/components/admin/AdminLayout";
 
@@ -66,6 +67,20 @@ export default function RaffleDetailPage() {
         await fetchRaffle();
     };
 
+    const handleUpdate = async (id: number, data: UpdateRaffleRequestDTO) => {
+        try {
+            await updateRaffle(id, data);
+            toast.success("Rifa actualizada correctamente");
+            await fetchRaffle();
+        } catch (err: any) {
+            toast.error(
+                err?.response?.data?.message ||
+                "Error al actualizar la rifa"
+            );
+            throw err;
+        }
+    };
+
     if (loading) {
         return (
             <div className="p-8">
@@ -98,6 +113,7 @@ export default function RaffleDetailPage() {
                     raffle={raffle}
                     onDraw={handleDraw}
                     onCancel={handleCancel}
+                    onUpdate={handleUpdate}
                 />
             </div>
         </div>

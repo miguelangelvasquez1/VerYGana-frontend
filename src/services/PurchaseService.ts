@@ -19,10 +19,5 @@ export const purchaseService = {
     });
     return response.data;
   },
-
-  async getTotalPurchases(): Promise<number> {
-    const response = await apiClient.get<number>('/purchases/totalPurchases');
-    return response.data;
-  },
 };
 

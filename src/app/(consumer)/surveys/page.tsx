@@ -1,7 +1,15 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import SurveyList from '@/components/consumer/surveys/SurveyList';
 
 export default function SurveysPage() {
+  const [animateHero, setAnimateHero] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setAnimateHero(true), 50);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <div className="min-h-full flex flex-col bg-[#f4f7fb]">
 
@@ -11,7 +19,7 @@ export default function SurveysPage() {
           <div className="pointer-events-none absolute -top-10 -right-10 w-56 h-56 rounded-full bg-white/5" />
           <div className="pointer-events-none absolute -bottom-12 -left-8 w-44 h-44 rounded-full bg-white/5" />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 text-center">
+          <div className={`relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 text-center transition-all duration-700 ${animateHero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
             <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
               📋 Gana respondiendo
             </div>

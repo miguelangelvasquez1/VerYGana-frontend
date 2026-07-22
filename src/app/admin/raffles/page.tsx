@@ -2,12 +2,12 @@
 
 import React from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import RaffleManagement from '@/components/admin/raffles/RaffleManagement';
+import AdminRafflesPanel from '@/components/admin/raffles/AdminRafflesPanel';
 
 export default function AdminRafflesPage() {
   return (
     <AdminLayout>
-      <RaffleManagement />
+      <AdminRafflesPanel />
     </AdminLayout>
   );
 }

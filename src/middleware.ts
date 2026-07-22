@@ -13,7 +13,7 @@ export const config = {
     '/consumer/home/:path*',
     '/consumer/orders/:path*',
     '/consumer/profile',
-    '/consumer/wallet/:path*',
+    '/consumer/transactions/:path*',
     '/raffles',
     "/ads",
     // "/forum",
@@ -39,7 +39,7 @@ const CONSUMER_ALLOWED = [
   '/consumer/home/:path*',
   '/consumer/orders/:path*',
   '/consumer/profile',       
-  '/consumer/wallet/:path*',
+  '/consumer/transactions/:path*',
   '/raffles',
   '/ads',
 ] as const;

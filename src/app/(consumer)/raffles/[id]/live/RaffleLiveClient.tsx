@@ -104,7 +104,7 @@ export function RaffleLiveClient({ raffleId, raffle }: Props) {
                 exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
                 <DrawCompletedScreen
                   payload={drawCompleted}
-                  onGoToRaffles={() => router.push('/rifas')}
+                  onGoToRaffles={() => router.push('/raffles')}
                 />
               </motion.div>
             )}

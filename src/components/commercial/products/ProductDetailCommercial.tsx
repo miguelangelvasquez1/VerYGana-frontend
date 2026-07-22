@@ -46,14 +46,6 @@ const ProductDetailCommercial: React.FC<Props> = ({ product }) => {
           <Pencil className="w-4 h-4" />
           Editar producto
         </Link>
-        <Link
-          href={`/commercial/products/${product.id}/stock`}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold border-2 transition hover:bg-blue-50"
-          style={{ borderColor: "#014C92", color: "#014C92" }}
-        >
-          <Package className="w-4 h-4" />
-          Gestionar stock
-        </Link>
       </div>
 
       <button

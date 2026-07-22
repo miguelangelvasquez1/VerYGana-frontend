@@ -1,12 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Gift, Award, Eye, Heart, Loader2, AlertCircle } from 'lucide-react';
 import CharityPost from '@/components/consumer/forum/CharityPost';
 import { useImpactStoriesForConsumer } from '@/hooks/useImpactStory';
 
 export default function ForumPage() {
   const { data, isLoading, isError, error } = useImpactStoriesForConsumer({ status: 'PUBLISHED', size: 20 });
+  const [animateHero, setAnimateHero] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setAnimateHero(true), 50);
+    return () => clearTimeout(t);
+  }, []);
 
   const stories = data?.content ?? [];
   const totalBeneficiaries = stories.reduce((sum, s) => sum + s.beneficiariesCount, 0);
@@ -49,7 +54,7 @@ export default function ForumPage() {
         <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5" />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
+        <div className={`relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 transition-all duration-700 ${animateHero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
               ❤️ Comunidad VerYGana

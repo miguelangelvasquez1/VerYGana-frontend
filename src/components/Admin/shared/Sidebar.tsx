@@ -16,7 +16,6 @@ import {
   MonitorSmartphone,
   MessageSquare,
   TargetIcon,
-  TicketIcon,
   Palette,
   Headset,
 } from 'lucide-react';
@@ -129,24 +128,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
     }
       ]
     },
-    {
-      section: 'Rifas',
-      items: [
-        {
-          title: 'Gestión de Rifas',
-          icon: Gift,
-          href: '/admin/raffles',
-          color: 'text-purple-500'
-        },
-        {
-          title: 'Reglas de boletos',
-          icon: TicketIcon,
-          href: '/admin/ticket-rules',
-          color: 'text-pink-500'
-        }
-      ]
-    },
-    
   ];
 
   return (

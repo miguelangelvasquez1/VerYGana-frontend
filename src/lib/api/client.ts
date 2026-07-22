@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
+  timeout: 30000,
 });
 
 // REQUEST INTERCEPTOR
@@ -20,6 +21,14 @@ apiClient.interceptors.response.use((response) => response, async (error) => {
 
   const status = error?.response?.status;
   const message = error?.response?.data?.message;
+
+  /*
+   * TIMEOUT (el backend no respondió a tiempo)
+   */
+  if (error?.code === 'ECONNABORTED' && error?.message?.includes('timeout')) {
+    toast.error('El servidor tardó demasiado en responder. Inténtalo de nuevo.');
+    return Promise.reject(error);
+  }
 
   /*
    * FEATURE FLAGS / MANTENIMIENTO

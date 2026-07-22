@@ -173,13 +173,13 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
 
   // ── Panel de campos compartidos ─────────────────────────────
   const sharedPanel = (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t mt-2">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200 mt-2">
       <div>
         <label className="block text-sm font-medium mb-1">Info adicional (todos)</label>
         <input
           value={sharedFields.additionalInfo}
           onChange={(e) => updateSharedField('additionalInfo', e.target.value)}
-          className="w-full border p-2 rounded-lg"
+          className="w-full border border-gray-200 p-2 rounded-lg"
           placeholder="Opcional"
           disabled={disabled}
         />
@@ -190,7 +190,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
           type="date"
           value={sharedFields.expirationDate_date}
           onChange={(e) => updateSharedField('expirationDate_date', e.target.value)}
-          className="w-full border p-2 rounded-lg"
+          className="w-full border border-gray-200 p-2 rounded-lg"
           disabled={disabled}
         />
       </div>
@@ -200,7 +200,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
           type="time"
           value={sharedFields.expirationDate_time}
           onChange={(e) => updateSharedField('expirationDate_time', e.target.value)}
-          className="w-full border p-2 rounded-lg"
+          className="w-full border border-gray-200 p-2 rounded-lg"
           disabled={disabled}
         />
       </div>
@@ -216,9 +216,9 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
       <p className="text-sm font-medium text-green-700 mb-2">
         ✓ {activeCodes.length} código{activeCodes.length !== 1 ? 's' : ''} listos para enviar
       </p>
-      <div className="max-h-36 overflow-y-auto border rounded-lg bg-white p-2">
+      <div className="max-h-36 overflow-y-auto border border-gray-200 rounded-lg bg-white p-2">
         {activeCodes.slice(0, PREVIEW_LIMIT).map((code, i) => (
-          <p key={i} className="text-sm font-mono text-gray-700 py-0.5 border-b last:border-0">
+          <p key={i} className="text-sm font-mono text-gray-700 py-0.5 border-b border-gray-200 last:border-0">
             {code}
           </p>
         ))}
@@ -269,14 +269,14 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
 
       {/* ── Modo: Pegar lista ── */}
       {mode === 'bulk' && (
-        <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
           <p className="text-sm text-gray-600">
             Pega tus códigos separados por salto de línea, coma o punto y coma.
           </p>
           <textarea
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
-            className="w-full border p-2 rounded-lg font-mono text-sm resize-none"
+            className="w-full border border-gray-200 p-2 rounded-lg font-mono text-sm resize-none"
             rows={8}
             placeholder={'CODE001\nCODE002\nCODE003'}
             disabled={disabled}
@@ -303,7 +303,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
 
       {/* ── Modo: Cargar archivo ── */}
       {mode === 'file' && (
-        <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
           <p className="text-sm text-gray-600">
             Sube un archivo con tus códigos. La primera columna de cada fila se usará como código.
             Formatos soportados: <span className="font-medium">.csv, .txt, .xlsx</span>
@@ -359,7 +359,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
 
       {/* ── Modo: Generar automático ── */}
       {mode === 'auto' && (
-        <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
           <p className="text-sm text-gray-600">
             ¿No tienes códigos para tus productos?, no te preocupes. Nosotros lo hacemos por ti. Ingresa la cantidad de unidades y se generarán códigos únicos que el comprador presentará
             al retirar su producto físico.
@@ -371,7 +371,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className="border p-2 rounded-lg w-36"
+                className="border border-gray-200 p-2 rounded-lg w-36"
                 min="1"
                 max={MAX_QUANTITY}
                 placeholder="ej: 100"

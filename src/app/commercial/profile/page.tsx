@@ -15,7 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { getCommercialProfile } from "@/services/commercialService";
+import { getCommercialProfile } from "@/services/CommercialService";
 import {
   deleteProduct,
   markProductAsReward,

@@ -6,6 +6,7 @@ import { useLogout } from '@/hooks/useLogout';
 import { usePathname } from 'next/navigation';
 import { useNotifications } from '@/hooks/useNotifications';
 import { NotificationPanel } from '@/components/notifications/NotificationsPanel';
+import { useAdminSearch } from '@/context/AdminSearchContext';
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin': 'Dashboard',
@@ -16,7 +17,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/surveys': 'Encuestas',
   '/admin/forum': 'Historias de Impacto',
   '/admin/system': 'Gestión del Sistema',
-  '/admin/ticket-rules': 'Reglas de boletos',
   '/admin/branding': 'Solicitudes de Branding',
   '/admin/config': 'Configuración',
 };
@@ -35,6 +35,7 @@ const Header: React.FC = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const notificationsMenuRef = useRef<HTMLDivElement | null>(null);
   const { notifications, unreadCount, loading: notifLoading, hasMore, markAllAsRead, loadMore } = useNotifications();
+  const { searchTerm, setSearchTerm, placeholder } = useAdminSearch();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -60,7 +61,9 @@ const Header: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Buscar..."
+              placeholder={placeholder}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>

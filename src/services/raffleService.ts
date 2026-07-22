@@ -1,16 +1,18 @@
 import apiClient from "@/lib/api/client";
 import { PagedResponse } from "@/types/Generic.types";
 import { PrizeStatus } from "@/types/raffles/prize.types";
-import { ParticipantLeaderboardDTO, RaffleResponseDTO, RaffleStatsResponseDTO, RaffleStatus, RaffleSummaryResponseDTO, UserRaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
+import { RaffleResponseDTO, RaffleStatsResponseDTO, RaffleStatus, RaffleSummaryResponseDTO, UserRaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
 import { DrawProofResponseDTO, RaffleResultResponseDTO, RaffleSummaryResultResponseDTO } from "@/types/raffles/raffleResult.types";
 import { RaffleTicketResponseDTO } from "@/types/raffles/raffleTicket.types";
 import { ClaimPrizeRequestDTO, PrizeWonResponseDTO, WinnerSummaryResponseDTO } from "@/types/raffles/raffleWinner.types";
 
 // RaffleController
-export const getRafflesByStatusAndType = async (status?: string, type?: string, size?: number, page?: number): Promise<PagedResponse<RaffleSummaryResponseDTO>> => {
+export const getRafflesByFilters = async (status?: string, search?: string, drawDate?: string, type?: string, size?: number, page?: number): Promise<PagedResponse<RaffleSummaryResponseDTO>> => {
     const response = await apiClient.get("/api/raffles", {
         params: {
             status,
+            search,
+            drawDate,
             type,
             size,
             page
@@ -24,28 +26,8 @@ export const getRaffleById = async (raffleId: number): Promise<RaffleResponseDTO
     return response.data;
 }
 
-export const getRaffleStats = async (raffleId: number): Promise<RaffleStatsResponseDTO> => {
-    const response = await apiClient.get(`/api/raffles/${raffleId}/stats`);
-    return response.data;
-}
-
-export const getRaffleLeaderBoard = async (raffleId: number): Promise<ParticipantLeaderboardDTO[]> => {
-    const response = await apiClient.get(`/api/raffles/${raffleId}/leaderboard`);
-    return response.data;
-}
-
 export const getLiveRaffles = async (): Promise<RaffleSummaryResponseDTO[]> => {
     const response = await apiClient.get("/api/raffles/lives");
-    return response.data;
-}
-
-export const getActiveRaffles = async (type: string, pageNumber: number): Promise<PagedResponse<RaffleSummaryResponseDTO>> => {
-    const response = await apiClient.get("/api/raffles/actives", {
-        params: {
-            type,
-            pageNumber
-        }
-    });
     return response.data;
 }
 
@@ -70,11 +52,6 @@ export const countMyRafflesByStatus = async (status : RaffleStatus): Promise<num
 }
 
 // RaffleWinnerController
-
-export const getRaffleWinners = async (raffleId: number): Promise<WinnerSummaryResponseDTO[]> => {
-    const response = await apiClient.get(`/winners/raffle/${raffleId}`);
-    return response.data;
-}
 
 export const getWonPrizes = async (size?: 10, page?: 0, status?: PrizeStatus | null): Promise<PagedResponse<PrizeWonResponseDTO>> => {
     const response = await apiClient.get("/winners/my-prizes", {
@@ -120,34 +97,6 @@ export const getUserTicketsByRaffle = async (raffleId: number, size?: number, pa
             page
         }
     });
-    return response.data;
-}
-
-export const getUserTotalTickets = async (status?: string): Promise<number> => {
-    const response = await apiClient.get("/api/my/raffle-tickets/balance", {
-        params: {
-            status
-        }
-    });
-    return response.data;
-}
-
-export const getUserTicketBalanceByRaffle = async (): Promise<number> => {
-    const response = await apiClient.get("/api/my/raffle-tickets/balance/by-raffle");
-    return response.data;
-}
-
-export const getUserTicketBalanceInRaffle = async (raffleId: number, status?: string): Promise<number> => {
-    const response = await apiClient.get(`/api/my/raffle-tickets/balance/raffle/${raffleId}`, {
-        params: {
-            status
-        }
-    });
-    return response.data;
-}
-
-export const canUserReceiveTickets = async (raffleType: string): Promise<boolean> => {
-    const response = await apiClient.get(`/api/my/raffle-tickets/eligibility/${raffleType}`);
     return response.data;
 }
 

@@ -33,13 +33,6 @@ export const deleteProduct = async (productId: number): Promise<void> => {
 };
 
 /**
- * Eliminar producto como administrador (ADMIN)
- */
-export const deleteProductForAdmin = async (productId: number): Promise<void> => {
-  await apiClient.delete(`/products/delete/admin/${productId}`);
-};
-
-/**
  * obtener producto existente para editarlo (COMMERCIAL)
  */
 export const getProductEditInfo = async (productId: number): Promise<ProductTypes.ProductEditInfoResponseDTO> => {
@@ -87,23 +80,6 @@ export const getProductStock = async (
   return response.data;
 };
 
-
-/**
-  * Agregar un nuevo código de stock
-  */
-export const addStockItem = async (productId: number, request: ProductStockRequestDTO): Promise<ProductStockResponseDTO> => {
-  const response = await apiClient.post(`/products/${productId}/stock`, request);
-  return response.data;
-}
-
-/**
-  * Editar un código de stock específico
-  */
-export const updateStockItem = async (productId: number, stockId: number, request: ProductStockRequestDTO) => {
-  const response = await apiClient.put(`/products/${productId}/stock/${stockId}`, request);
-  return response.data;
-}
-
 /**
   * Eliminar un código de stock específico
   */
@@ -119,27 +95,6 @@ export const addBulkStockItems = async (productId: number, requests: ProductStoc
   const response = await apiClient.post(`/products/${productId}/stock/bulk`, requests);
   return response.data;
 }
-
-/**
- * Construye la URL del endpoint de imagen privada para productos PENDING/REJECTED.
- * El backend genera un presigned URL fresco (60s) y responde con un redirect 302.
- */
-export const buildPrivateImageUrl = (productId: number, token: string | undefined): string | undefined => {
-  if (!token) return undefined;
-  return `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}/private-image?token=${encodeURIComponent(token)}`;
-};
-
-/**
- * Obtener todos los productos con paginación (PÚBLICO)
- */
-export const getAllProducts = async (
-  page: number = 0
-): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
-  const response = await apiClient.get('/products', {
-    params: { page }
-  });
-  return response.data;
-};
 
 /**
  * Filtrar productos con múltiples criterios (PÚBLICO)
@@ -245,5 +200,10 @@ export const countFavorites = async (): Promise<number> => {
  */
 export const markProductAsReward = async (productId: number): Promise<void> => {
   const response = await apiClient.patch(`/products/${productId}/gameReward`);
+  return response.data;
+}
+
+export const getProductStockCode = async (productId: number, stockId: number): Promise<string> => {
+  const response = await apiClient.get(`/products/${productId}/stock/${stockId}/code`);
   return response.data;
 }

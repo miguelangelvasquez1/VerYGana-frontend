@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Menu, User, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
-import { getCommercialInitialData } from '@/services/commercialService';
+import { getCommercialInitialData } from '@/services/CommercialService';
 import { EffectivePlanStateResponseDTO } from '@/types/finance/plans/Plan.types';
 import { formatBudget, formatCents } from '@/utils/currency';
 import { NotificationPanel } from '@/components/notifications/NotificationsPanel';

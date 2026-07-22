@@ -10,12 +10,3 @@ export interface RaffleTicketResponseDTO {
     usedAt: string | null;
     isWinner: boolean;
 }
-
-export interface TicketBalanceResponseDTO {
-    raffleId: number;
-    raffleTitle: string;
-    raffleType: 'PREMIUM' | 'STANDARD';
-    ticketsCount: number;
-    drawDate: string;
-    raffleStatus: 'DRAFT' | 'ACTIVE' | 'CLOSED' | 'DRAWING' | 'COMPLETED' | 'CANCELLED';
-}
