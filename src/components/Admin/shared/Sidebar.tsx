@@ -18,6 +18,7 @@ import {
   TargetIcon,
   Palette,
   Headset,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -103,6 +104,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
       color: 'text-teal-500'
     },
     {
+      title: 'Eventos de seguridad',
+      icon: ShieldAlert,
+      href: '/admin/security-events',
+      color: 'text-red-500'
+    },
+    {
       title: 'Reportes',
       icon: BarChart3,
       href: '/admin/reports',
@@ -167,15 +174,15 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center px-4 py-3 mx-2 rounded-lg transition-all duration-200 ${
+                  className={`flex items-center px-4 py-3 mx-2 rounded-lg border-r-4 whitespace-nowrap transition-all duration-200 ${
                     isActive
-                      ? 'bg-blue-50 border-r-4 border-blue-500 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                      ? 'bg-blue-50 border-blue-500 text-blue-700'
+                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-800'
                   }`}
                 >
                   <Icon
                     size={20}
-                    className={`${isActive ? 'text-blue-500' : item.color} ${
+                    className={`shrink-0 ${isActive ? 'text-blue-500' : item.color} ${
                       isCollapsed ? '' : 'mr-3'
                     }`}
                   />

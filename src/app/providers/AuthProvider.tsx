@@ -2,9 +2,10 @@
 
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { authService } from '@/lib/auth/authService';  // Ajusta el path
 import { useRouter } from 'next/navigation';
 import { parseJwt } from '@/lib/utils/parseJwt';
+import { setAccessToken } from '@/lib/auth/tokenStore';
+import { refreshAccessToken } from '@/lib/auth/tokenRefresh';
 
 // Canal para broadcast entre pestañas (evita race conditions)
 const broadcastChannel = typeof window !== 'undefined' ? new BroadcastChannel('auth-channel') : null;
@@ -23,6 +24,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       handleClientRefresh();
     }
   }, [session, status, isRefreshing]);
+
+  // Sincroniza el token en memoria que lee apiClient — evita que cada
+  // request tenga que esperar un round-trip a /api/auth/session. Se
+  // ignora mientras status === 'loading' para no marcar el store como
+  // "listo" con null antes de que la sesión real haya resuelto.
+  useEffect(() => {
+    if (status === 'loading') return;
+    setAccessToken(session?.accessToken ?? null);
+  }, [session?.accessToken, status]);
 
   // Escuchar broadcasts de otras pestañas
   useEffect(() => {
@@ -70,21 +80,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     broadcastChannel?.postMessage({ type: 'refresh-start' });
 
     try {
-      const refreshed = await authService.refresh();  // Llama refresh (envía cookie)
-      const payload = parseJwt(refreshed.accessToken);  // Asegúrate de tener parseJwt
+      // Comparte el lock en memoria con el interceptor 401 de apiClient —
+      // si ya hay un refresh en vuelo en esta pestaña (disparado por una
+      // request que falló con 401), reusa esa misma promesa en vez de
+      // pegarle otra vez a /auth/refresh.
+      const newAccessToken = await refreshAccessToken();
+      const payload = parseJwt(newAccessToken);
 
-      // Sincroniza con NextAuth
-      const result = await signIn('credentials-sync', {
-        redirect: false,
-        accessToken: refreshed.accessToken,
-        identifier: payload.sub,  // O el identifier que uses
-      });
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-      await update({ accessToken: refreshed.accessToken });
+      await update({ accessToken: newAccessToken });
 
       console.log('✅ Session refreshed and synced');
 
@@ -92,8 +95,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       broadcastChannel?.postMessage({
         type: 'token-refreshed',
         data: {
-          accessToken: refreshed.accessToken,
-          identifier: payload.sub,
+          accessToken: newAccessToken,
+          identifier: payload?.sub,
         },
       });
     } catch (error) {

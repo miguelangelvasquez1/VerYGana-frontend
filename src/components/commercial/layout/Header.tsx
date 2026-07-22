@@ -15,6 +15,10 @@ interface HeaderProps {
   onMenuClick: () => void;
   showMenuButton: boolean;
   planState?: EffectivePlanStateResponseDTO | null;
+  // La pide DashboardLayout una sola vez (junto con el estado de onboarding)
+  // y la pasa hacia abajo — antes Header la pedía por su cuenta, duplicando
+  // la llamada a /commercials/initialData en cada carga del panel.
+  commercialData?: CommercialInitialDataResponseDTO | null;
 }
 
 // Umbral desde variable de entorno (con fallback seguro)
@@ -34,23 +38,10 @@ const PLAN_LABELS: Record<string, string> = {
   PREMIUM: 'Premium',
 };
 
-export function Header({ title, onMenuClick, showMenuButton, planState }: HeaderProps) {
-  const [commercial, setCommercial] = useState<CommercialInitialDataResponseDTO | null>(null);
+export function Header({ title, onMenuClick, showMenuButton, planState, commercialData }: HeaderProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const notificationsMenuRef = useRef<HTMLDivElement | null>(null);
   const { notifications, unreadCount, loading: notifLoading, hasMore, markAllAsRead, loadMore } = useNotifications();
-
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const data = await getCommercialInitialData();
-        setCommercial(data);
-      } catch (err) {
-        console.error('Error cargando datos del comercial:', err);
-      }
-    }
-    loadUser();
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -160,8 +151,8 @@ export function Header({ title, onMenuClick, showMenuButton, planState }: Header
 
             <div className="flex items-center gap-2.5">
               <div className="hidden lg:block text-right leading-tight">
-                <p className="text-sm font-semibold text-gray-900">{commercial?.companyName}</p>
-                <p className="text-xs text-gray-500">{commercial?.email}</p>
+                <p className="text-sm font-semibold text-gray-900">{commercialData?.companyName}</p>
+                <p className="text-xs text-gray-500">{commercialData?.email}</p>
               </div>
               <Link
                 href="/commercial/profile"

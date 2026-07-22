@@ -43,26 +43,14 @@ function formatDate(iso: string): string {
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
+// Un solo ícono por tipo, en un contenedor neutro — el color se reserva para
+// estado (igual que en SistemaTab y DocumentosLegalesTab), no para identidad.
 
 const TYPE_ICON: Record<PricingType, React.ReactNode> = {
-  [PricingType.SURVEY_REWARD_PER_QUESTION_CENTS]: <Activity size={18} className="text-emerald-600" />,
-  [PricingType.GAME_COST_PER_POINT_CENTS]: <Zap size={18} className="text-yellow-600" />,
-  [PricingType.GAME_COST_PER_VICTORY_CENTS]: <Shield size={18} className="text-purple-600" />,
-  [PricingType.AD_COST_PER_SECOND_CENTS]: <DollarSign size={18} className="text-blue-600" />,
-};
-
-const TYPE_ACCENT: Record<PricingType, string> = {
-  [PricingType.SURVEY_REWARD_PER_QUESTION_CENTS]: 'border-l-emerald-400 bg-emerald-50/40',
-  [PricingType.GAME_COST_PER_POINT_CENTS]: 'border-l-yellow-400 bg-yellow-50/40',
-  [PricingType.GAME_COST_PER_VICTORY_CENTS]: 'border-l-purple-400 bg-purple-50/40',
-  [PricingType.AD_COST_PER_SECOND_CENTS]: 'border-l-blue-400 bg-blue-50/40',
-};
-
-const TYPE_ICON_BG: Record<PricingType, string> = {
-  [PricingType.SURVEY_REWARD_PER_QUESTION_CENTS]: 'bg-emerald-100',
-  [PricingType.GAME_COST_PER_POINT_CENTS]: 'bg-yellow-100',
-  [PricingType.GAME_COST_PER_VICTORY_CENTS]: 'bg-purple-100',
-  [PricingType.AD_COST_PER_SECOND_CENTS]: 'bg-blue-100',
+  [PricingType.SURVEY_REWARD_PER_QUESTION_CENTS]: <Activity size={16} className="text-gray-400" />,
+  [PricingType.GAME_COST_PER_POINT_CENTS]: <Zap size={16} className="text-gray-400" />,
+  [PricingType.GAME_COST_PER_VICTORY_CENTS]: <Shield size={16} className="text-gray-400" />,
+  [PricingType.AD_COST_PER_SECOND_CENTS]: <DollarSign size={16} className="text-gray-400" />,
 };
 
 // ─── Edit modal ───────────────────────────────────────────────────────────────
@@ -99,7 +87,6 @@ function EditModal({ config, isPending, onSave, onClose }: EditModalProps) {
   };
 
   const typeLabel = PRICING_TYPE_LABELS[config.type] ?? config.type;
-  const iconBg = TYPE_ICON_BG[config.type] ?? 'bg-gray-100';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -111,8 +98,8 @@ function EditModal({ config, isPending, onSave, onClose }: EditModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center`}>
-              <Edit2 size={15} className="text-gray-600" />
+            <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center">
+              <Edit2 size={15} className="text-blue-600" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-gray-900">Editar precio</h2>
@@ -213,24 +200,22 @@ interface PricingCardProps {
 }
 
 function PricingCard({ config, onEdit }: PricingCardProps) {
-  const accent = TYPE_ACCENT[config.type] ?? 'border-l-gray-300 bg-gray-50/40';
-  const iconBg = TYPE_ICON_BG[config.type] ?? 'bg-gray-100';
-  const icon = TYPE_ICON[config.type] ?? <DollarSign size={18} className="text-gray-500" />;
+  const icon = TYPE_ICON[config.type] ?? <DollarSign size={16} className="text-gray-400" />;
   const label = PRICING_TYPE_LABELS[config.type] ?? config.type;
   const description = PRICING_TYPE_DESCRIPTIONS[config.type] ?? config.description;
 
   return (
-    <div className={`bg-white rounded-xl border border-l-4 shadow-sm px-5 py-4 flex items-center gap-4 transition-all hover:shadow-md ${accent}`}>
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4 transition-all hover:border-gray-200 hover:shadow-md">
       {/* Icon */}
-      <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
+      <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
         {icon}
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">{label}</p>
-        <p className="text-xs text-gray-600 mt-0.5 line-clamp-2 leading-relaxed">{description}</p>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-sm font-bold text-gray-900">{label}</p>
+        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">{description}</p>
+        <p className="text-xs text-gray-400 mt-1">
           v{config.version} · Actualizado {formatDate(config.createdAt)}
         </p>
       </div>
@@ -238,21 +223,20 @@ function PricingCard({ config, onEdit }: PricingCardProps) {
       {/* Value + edit */}
       <div className="flex items-center gap-3 shrink-0">
         <div className="text-right">
-          <p className="text-xl font-black text-gray-900">
+          <p className="text-sm font-bold text-gray-900">
             {formatCOP(config.amountInCents)}
-            <span className="text-xs font-semibold text-gray-500 ml-1">{config.currency}</span>
+            <span className="text-xs font-semibold text-gray-400 ml-1">{config.currency}</span>
           </p>
-          <p className="text-xs text-gray-600">{config.amountInCents.toLocaleString('es-CO')} centavos</p>
-          <p className="text-xs text-gray-600 mt-0.5">
+          <p className="text-xs text-gray-400">
             🗝️ {(config.amountInCents / 1000).toLocaleString('es-CO', { maximumFractionDigits: 3 })} llaves
           </p>
         </div>
         <button
           onClick={() => onEdit(config)}
-          className="cursor-pointer p-2 rounded-xl border border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-all"
-          title="Editar"
+          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-600 hover:text-blue-700 text-xs font-semibold rounded-lg transition-colors"
         >
-          <Edit2 size={15} />
+          <Edit2 size={13} />
+          Editar
         </button>
       </div>
     </div>

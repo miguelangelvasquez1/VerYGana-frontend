@@ -59,6 +59,45 @@ const inputCls = (hasError?: boolean) =>
       : "border-gray-200 focus:ring-[#03548C]/40 focus:border-[#03548C]"
   }`;
 
+// Colombia-only: prefijo +57 con bandera, y el input solo deja escribir los
+// 10 dígitos del número local (sin indicativo).
+function PhoneInput({
+  value,
+  onChange,
+  hasError,
+}: {
+  value: string;
+  onChange: (rawValue: string) => void;
+  hasError?: boolean;
+}) {
+  return (
+    <div
+      className={`flex items-center gap-2 bg-gray-50 border rounded-xl pl-3 pr-1 focus-within:bg-white transition ${
+        hasError
+          ? "border-red-400 focus-within:ring-2 focus-within:ring-red-300"
+          : "border-gray-200 focus-within:ring-2 focus-within:ring-[#03548C]/40 focus-within:border-[#03548C]"
+      }`}
+    >
+      <span className="flex items-center gap-1.5 pr-2 border-r border-gray-200 text-sm font-medium text-gray-600 shrink-0">
+        <span className="text-base leading-none" role="img" aria-label="Colombia">🇨🇴</span>
+        +57
+      </span>
+      <input
+        type="tel"
+        inputMode="numeric"
+        autoComplete="tel-national"
+        placeholder="300 000 0000"
+        pattern="[0-9]{10}"
+        maxLength={10}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="flex-1 py-3 bg-transparent text-sm focus:outline-none min-w-0"
+        required
+      />
+    </div>
+  );
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function RegisterForm() {
@@ -137,6 +176,16 @@ export default function RegisterForm() {
     }
   };
 
+  const handlePhoneChange = (rawValue: string) => {
+    const digits = rawValue.replace(/\D/g, "").slice(0, 10);
+
+    if (fieldErrors["phoneNumber"]) {
+      setFieldErrors((prev) => { const n = { ...prev }; delete n["phoneNumber"]; return n; });
+    }
+
+    setFormData((prev: any) => ({ ...prev, phoneNumber: digits }));
+  };
+
   const handleCheckboxChange = (category: Category) => {
     setFormData((prev: any) => {
       const current: Category[] = prev.categories || [];
@@ -159,6 +208,12 @@ export default function RegisterForm() {
       return;
     }
     if (isSubmitting) return;
+
+    if (!formData.phoneNumber || formData.phoneNumber.length !== 10) {
+      setFieldErrors((prev) => ({ ...prev, phoneNumber: "El número debe tener 10 dígitos" }));
+      return;
+    }
+
     setIsSubmitting(true);
 
     // Client-side validations for BENEFICIARIO
@@ -185,18 +240,6 @@ export default function RegisterForm() {
         if (age < 13) clientErrors["birthDate"] = "Debes tener al menos 13 años para registrarte";
       }
 
-      if (Object.keys(clientErrors).length > 0) {
-        setFieldErrors(clientErrors);
-        setIsSubmitting(false);
-        return;
-      }
-    }
-
-    if (role === "COMERCIANTE") {
-      const clientErrors: FieldErrors = {};
-      if (!formData.ciiuCode) clientErrors["ciiuCode"] = "El código CIIU es requerido";
-      if (!formData.legalRepDocumentType) clientErrors["legalRepDocumentType"] = "El tipo de documento es requerido";
-      if (!formData.legalRepDocumentNumber) clientErrors["legalRepDocumentNumber"] = "El número de documento es requerido";
       if (Object.keys(clientErrors).length > 0) {
         setFieldErrors(clientErrors);
         setIsSubmitting(false);
@@ -240,29 +283,20 @@ export default function RegisterForm() {
           break;
         }
         case "COMERCIANTE": {
-          const res = await registerCommercial({
+          // Registro básico: solo lo mínimo para crear la cuenta y verificar
+          // el correo. La identificación jurídica del negocio (razón social,
+          // NIT, representante legal, declaración PEP, etc.) se completa
+          // después, en el paso 3 del onboarding comercial.
+          await registerCommercial({
             email: formData.email,
             password: formData.password,
             phoneNumber: formData.phoneNumber,
-            name: formData.name,
-            nit: formData.nit,
-            ciiuCode: formData.ciiuCode,
-            mercantileRegistration: formData.mercantileRegistration?.trim() || undefined,
-            legalRepDocumentType: formData.legalRepDocumentType,
-            legalRepDocumentNumber: formData.legalRepDocumentNumber,
-            legalRepPepDeclaration: formData.legalRepPepDeclaration ?? false,
-            annualIncomeRange: formData.annualIncomeRange || undefined,
-            municipalityCode: formData.municipalityCode || undefined,
           });
-          if (res?.underReview === true || res?.status === "PENDING_REVIEW") {
-            setRegistrationResult("pep_review");
-          } else {
-            if (formData.phoneNumber) {
-              const p = formData.phoneNumber.replace(/\D/g, '');
-              sessionStorage.setItem('verifyPhone', `***${p.slice(-4)}`);
-            }
-            window.location.href = `/verify?email=${encodeURIComponent(formData.email)}`;
+          if (formData.phoneNumber) {
+            const p = formData.phoneNumber.replace(/\D/g, '');
+            sessionStorage.setItem('verifyPhone', `***${p.slice(-4)}`);
           }
+          window.location.href = `/verify?email=${encodeURIComponent(formData.email)}`;
           break;
         }
         default:
@@ -504,7 +538,11 @@ export default function RegisterForm() {
                 </FieldWrapper>
 
                 <FieldWrapper label="Teléfono" required error={fieldErrors["phoneNumber"]}>
-                  <input name="phoneNumber" placeholder="300 000 0000" onChange={handleChange} value={formData.phoneNumber || ""} className={inputCls(!!fieldErrors["phoneNumber"])} required />
+                  <PhoneInput
+                    value={formData.phoneNumber || ""}
+                    onChange={handlePhoneChange}
+                    hasError={!!fieldErrors["phoneNumber"]}
+                  />
                 </FieldWrapper>
 
                 <FieldWrapper label="Código de referido" error={fieldErrors["referredByCode"]}>
@@ -709,124 +747,17 @@ export default function RegisterForm() {
         {role === "COMERCIANTE" && (
           <>
             <section>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Información del negocio</h3>
-              <div className="space-y-4">
-                <FieldWrapper label="Nombre o empresa" required error={fieldErrors["name"]}>
-                  <input name="name" placeholder="Nombre de tu empresa o negocio" onChange={handleChange} value={formData.name || ""} className={inputCls(!!fieldErrors["name"])} required />
-                </FieldWrapper>
-                <FieldWrapper label="NIT" required error={fieldErrors["nit"]}>
-                  <input name="nit" placeholder="900.000.000-0" onChange={handleChange} value={formData.nit || ""} className={inputCls(!!fieldErrors["nit"])} required />
-                </FieldWrapper>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FieldWrapper label="Código CIIU" required error={fieldErrors["ciiuCode"]}>
-                    <input name="ciiuCode" placeholder="Ej. 4711" maxLength={10} onChange={handleChange} value={formData.ciiuCode || ""} className={inputCls(!!fieldErrors["ciiuCode"])} required />
-                  </FieldWrapper>
-                  <FieldWrapper label="Matrícula mercantil" error={fieldErrors["mercantileRegistration"]}>
-                    <input name="mercantileRegistration" placeholder="Opcional" maxLength={20} onChange={handleChange} value={formData.mercantileRegistration || ""} className={inputCls(!!fieldErrors["mercantileRegistration"])} />
-                  </FieldWrapper>
-                </div>
-              </div>
-            </section>
-
-            <hr className="border-gray-100" />
-
-            <section>
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Datos de contacto</h3>
               <div className="space-y-4">
                 <FieldWrapper label="Correo electrónico" required error={fieldErrors["email"]}>
                   <input type="email" name="email" placeholder="empresa@correo.com" onChange={handleChange} value={formData.email || ""} className={inputCls(!!fieldErrors["email"])} required />
                 </FieldWrapper>
                 <FieldWrapper label="Teléfono" required error={fieldErrors["phoneNumber"]}>
-                  <input name="phoneNumber" placeholder="300 000 0000" onChange={handleChange} value={formData.phoneNumber || ""} className={inputCls(!!fieldErrors["phoneNumber"])} required />
-                </FieldWrapper>
-              </div>
-            </section>
-
-            <hr className="border-gray-100" />
-
-            <section>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Representante legal</h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FieldWrapper label="Tipo de documento" required error={fieldErrors["legalRepDocumentType"]}>
-                    <select name="legalRepDocumentType" onChange={handleChange} value={formData.legalRepDocumentType || ""} className={inputCls(!!fieldErrors["legalRepDocumentType"])} required>
-                      <option value="">Selecciona</option>
-                      <option value="CC">Cédula de Ciudadanía (CC)</option>
-                      <option value="CE">Cédula de Extranjería (CE)</option>
-                      <option value="PP">Pasaporte (PP)</option>
-                    </select>
-                  </FieldWrapper>
-                  <FieldWrapper label="Número de documento" required error={fieldErrors["legalRepDocumentNumber"]}>
-                    <input name="legalRepDocumentNumber" placeholder="Ej. 1234567890" onChange={handleChange} value={formData.legalRepDocumentNumber || ""} className={inputCls(!!fieldErrors["legalRepDocumentNumber"])} required />
-                  </FieldWrapper>
-                </div>
-                <FieldWrapper label="Rango de ingresos anuales del negocio" error={fieldErrors["annualIncomeRange"]}>
-                  <select name="annualIncomeRange" onChange={handleChange} value={formData.annualIncomeRange || ""} className={inputCls(!!fieldErrors["annualIncomeRange"])}>
-                    <option value="">Selecciona (opcional)</option>
-                    <option value="LESS_THAN_500_SMMLV">Menos de 500 SMMLV</option>
-                    <option value="FROM_500_TO_5000_SMMLV">500 a 5.000 SMMLV</option>
-                    <option value="FROM_5000_TO_50000_SMMLV">5.000 a 50.000 SMMLV</option>
-                    <option value="MORE_THAN_50000_SMMLV">Más de 50.000 SMMLV</option>
-                  </select>
-                </FieldWrapper>
-                <label className="flex items-start gap-3 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={formData.legalRepPepDeclaration ?? false}
-                    onChange={(e) => setFormData((prev: any) => ({ ...prev, legalRepPepDeclaration: e.target.checked }))}
-                    className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#03548C] focus:ring-[#03548C]/40 shrink-0"
+                  <PhoneInput
+                    value={formData.phoneNumber || ""}
+                    onChange={handlePhoneChange}
+                    hasError={!!fieldErrors["phoneNumber"]}
                   />
-                  <span className="text-sm text-gray-700 leading-snug">
-                    El representante legal declara que <span className="font-semibold">es</span> o <span className="font-semibold">no es</span> una Persona Expuesta Políticamente (PEP), conforme a la normativa de prevención de lavado de activos y financiación del terrorismo.
-                  </span>
-                </label>
-                <p className="text-xs text-gray-400 ml-7">
-                  Marcar esta casilla si el representante es PEP puede requerir una revisión adicional.
-                </p>
-              </div>
-            </section>
-
-            <hr className="border-gray-100" />
-
-            <section>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Ubicación <span className="normal-case font-normal text-gray-300">(opcional)</span></h3>
-              <div className="space-y-4">
-                <FieldWrapper label="Departamento" error={fieldErrors["departmentName"]}>
-                  <select
-                    name="departmentCode"
-                    onChange={handleChange}
-                    value={formData.departmentCode || ""}
-                    className={inputCls(!!fieldErrors["departmentName"])}
-                    disabled={loadingDepartments}
-                  >
-                    <option value="">
-                      {loadingDepartments ? "Cargando departamentos..." : "Selecciona tu departamento"}
-                    </option>
-                    {departments.map((d) => (
-                      <option key={d.code} value={d.code}>{d.name}</option>
-                    ))}
-                  </select>
-                </FieldWrapper>
-
-                <FieldWrapper label="Municipio" error={fieldErrors["municipalityName"]}>
-                  <select
-                    name="municipalityCode"
-                    onChange={handleMunicipalityChange}
-                    value={formData.municipalityCode || ""}
-                    className={inputCls(!!fieldErrors["municipalityName"])}
-                    disabled={!formData.departmentCode || loadingMunicipalities}
-                  >
-                    <option value="">
-                      {!formData.departmentCode
-                        ? "Selecciona primero el departamento"
-                        : loadingMunicipalities
-                          ? "Cargando municipios..."
-                          : "Selecciona tu municipio"}
-                    </option>
-                    {municipalities?.map((m: Municipality) => (
-                      <option key={m.code} value={m.code}>{m.name}</option>
-                    ))}
-                  </select>
                 </FieldWrapper>
               </div>
             </section>
