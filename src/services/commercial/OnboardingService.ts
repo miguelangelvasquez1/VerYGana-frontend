@@ -13,6 +13,8 @@ export type OnboardingStep =
   | "CONTRACT_PENDING"
   | "BUSINESS_REVIEW_PENDING"
   | "VERYGANA_REVIEW_PENDING"
+  | "SIGNATURE_PENDING"
+  | "PAYMENT_PENDING"
   | "COMPLETED";
 
 export type OnboardingRoute = "A" | "B" | "C" | "D" | "E";
@@ -45,6 +47,10 @@ export interface OnboardingStatus {
   businessApproved: boolean;
   veryganaReviewed: boolean;
   completed: boolean;
+  // true mientras compliance tiene una negociación pendiente por resolver
+  // (rutas D/E) — bloquea "Generar contrato" hasta que se resuelva. Pasa a
+  // false solo, sin polling: se refleja en el siguiente refresco del status.
+  requiresSpecialNegotiation: boolean;
   // Ambos null salvo que contractStatus === "REJECTED". Si documentsCompleted
   // es false el rechazo fue documental (currentStep vuelve a DOCUMENTS_PENDING,
   // autoservicio disponible); si es true, no hay autoservicio (currentStep se
@@ -111,8 +117,8 @@ export interface DiagnosticRequest {
   primaryGoal?: PrimaryGoal;
   wantsFixedFee?: boolean;
   requiresCustomGames?: boolean;
-  regulatedSector?: boolean;
-  requiresSpecialNegotiation?: boolean;
+  requiresPets?: boolean;
+  requiresSurveys?: boolean;
 }
 
 // ── Plan (pasos 6-7) ─────────────────────────────────────────────────────────
@@ -147,7 +153,7 @@ export interface OnboardingPlanOption {
 export interface OnboardingPlanCatalog {
   recommendedPlanCode: PlanCode;
   // Ruta D/E — mostrar aviso de contactar asesor sin importar el plan elegido.
-  requiresAdvisorContact: boolean;
+  requiresSpecialNegotiation: boolean;
   // A nivel raíz, no varían por plan.
   taxNote: string;
   liquidationConditions: string;
@@ -163,14 +169,12 @@ export interface AcceptPlanRequest {
   // el monto invertido se consume vía comisión al ritmo de las ventas, no por
   // período. El backend lo ignora si se envía para esos dos planes.
   contractDurationMonths?: number;
-}
-
-export interface AcceptedPlanSummary {
-  planCode: PlanCode;
-  // El monto aceptado — null para BASIC.
-  investmentAmountCents: number | null;
-  // La duración aceptada — null para STANDARD/PREMIUM.
-  contractDurationMonths: number | null;
+  // Si viene true, la cuenta se reclasifica a Ruta E (requiresSpecialNegotiation
+  // pasa a true en status/plan) pero el plan elegido se acepta con
+  // normalidad — no hay ruta "sin plan".
+  requiresSpecialNegotiation?: boolean;
+  // Requerido si requiresSpecialNegotiation es true (máx. 1000 caracteres).
+  specialNegotiationDetails?: string;
 }
 
 // ── Documentos (paso 8) ──────────────────────────────────────────────────────
@@ -245,25 +249,6 @@ export interface OnboardingSummaryLegalIdentification {
   departmentName: string | null;
 }
 
-export interface OnboardingSummaryDiagnostic {
-  techIntegrationNeeds: TechIntegrationNeed[];
-  integrationDetails: string | null;
-  // Ruta D (techIntegrationNeeds no vacío) — el resto de las preguntas no se
-  // pidieron, así que llegan en null.
-  primaryGoal: PrimaryGoal | null;
-  wantsFixedFee: boolean | null;
-  requiresCustomGames: boolean | null;
-  regulatedSector: boolean | null;
-  requiresSpecialNegotiation: boolean | null;
-}
-
-export interface OnboardingSummaryClassification {
-  route: OnboardingRoute;
-  routeName: string;
-  explanation: string;
-  confirmed: boolean;
-}
-
 export interface OnboardingSummaryPlan {
   planCode: PlanCode;
   planName: string;
@@ -276,19 +261,27 @@ export interface OnboardingSummaryPlan {
   maxKeysPct: number;
   taxNote: string;
   liquidationConditions: string;
-  requiresAdvisorContact: boolean;
   accepted: boolean;
   acceptedAt: string | null;
   // Solo aplica a BASIC — null en STANDARD/PREMIUM y en BASIC antes de aceptar.
   contractDurationMonths: number | null;
+  // true mientras haya una negociación especial pendiente por resolver (Ruta
+  // D o E) — bloquea "Generar contrato" y "Cambiar de plan" hasta que
+  // compliance la resuelva. Antes esto vivía en un campo separado
+  // (requiresAdvisorContact, solo Ruta E) — ahora Ruta D también lo usa.
+  requiresSpecialNegotiation: boolean;
+  specialNegotiationDetails: string | null;
+  // Cuándo se resolvió la negociación — null si nunca hubo una o sigue
+  // pendiente. Si no es null y requiresSpecialNegotiation ya es false, el
+  // plan quedó "congelado" (acceptPlan ahora responde 4xx si se intenta
+  // cambiar), solo queda continuar a generar el contrato.
+  specialNegotiationResolvedAt: string | null;
 }
 
 export interface OnboardingSummary {
   termsVersion: string | null;
   termsAcceptedAt: string | null;
   legalIdentification: OnboardingSummaryLegalIdentification | null;
-  diagnostic: OnboardingSummaryDiagnostic | null;
-  classification: OnboardingSummaryClassification | null;
   plan: OnboardingSummaryPlan | null;
   documents: OnboardingDocumentsResponse;
 }
@@ -371,7 +364,8 @@ export const OnboardingService = {
     return response.data;
   },
 
-  async acceptPlan(data: AcceptPlanRequest): Promise<AcceptedPlanSummary> {
+  // Devuelve el mismo PlanSummaryResponseDTO que trae GET /summary → plan.
+  async acceptPlan(data: AcceptPlanRequest): Promise<OnboardingSummaryPlan> {
     const response = await apiClient.post(`${BASE}/plan/accept`, data);
     return response.data;
   },

@@ -10,6 +10,7 @@ import {
   ExternalLink,
   FileText,
   Loader2,
+  RefreshCw,
   X,
   XCircle,
 } from 'lucide-react';
@@ -23,6 +24,7 @@ import {
   type PendingContractSummary,
 } from '@/services/ComplianceService';
 import { DOCUMENT_TYPE_LABELS } from '@/services/commercial/OnboardingService';
+import NegotiationsPanel from './NegotiationsPanel';
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -41,6 +43,13 @@ const STATUS_BADGE: Record<ContractReviewListStatus, { label: string; className:
   REJECTED: { label: 'Rechazado', className: 'bg-red-100 text-red-700' },
 };
 
+// Fallback defensivo — si el backend agrega un status nuevo que este panel
+// todavía no mapea (ej. estados post-aprobación de firma/pago), mostramos el
+// valor crudo en vez de tronar el render con `STATUS_BADGE[...]` undefined.
+function getStatusBadge(status: string): { label: string; className: string } {
+  return STATUS_BADGE[status as ContractReviewListStatus] ?? { label: status, className: 'bg-gray-100 text-gray-700' };
+}
+
 type FilterOption = ContractReviewListStatus | 'ALL';
 
 const FILTER_TABS: { value: FilterOption; label: string }[] = [
@@ -49,6 +58,18 @@ const FILTER_TABS: { value: FilterOption; label: string }[] = [
   { value: 'REJECTED', label: 'Rechazados' },
   { value: 'ALL', label: 'Todos' },
 ];
+
+function PepBadge() {
+  return (
+    <span
+      title="Representante legal declarado como PEP"
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700"
+    >
+      <AlertTriangle className="w-3 h-3" />
+      PEP
+    </span>
+  );
+}
 
 function ContractDetailModal({
   summary,
@@ -116,7 +137,10 @@ function ContractDetailModal({
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-gray-900">Contrato de {summary.companyName}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-gray-900">Contrato de {summary.companyName}</h3>
+            {summary.pep && <PepBadge />}
+          </div>
           <button onClick={onClose} className="cursor-pointer p-1 rounded-lg hover:bg-gray-100">
             <X className="w-4 h-4 text-gray-500" />
           </button>
@@ -124,13 +148,13 @@ function ContractDetailModal({
 
         {loading ? (
           <div className="flex justify-center py-10">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+            <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
           </div>
         ) : error || !detail ? (
           <div className="flex flex-col items-center gap-3 py-10 text-red-500">
             <AlertTriangle className="w-6 h-6" />
             <p className="text-sm font-medium">Error al cargar el contrato.</p>
-            <button onClick={load} className="cursor-pointer text-xs text-blue-600 hover:underline">Reintentar</button>
+            <button onClick={load} className="cursor-pointer text-xs text-indigo-600 hover:underline">Reintentar</button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -155,7 +179,7 @@ function ContractDetailModal({
               href={detail.downloadUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition"
             >
               <FileText className="w-3.5 h-3.5" />
               Ver contrato
@@ -189,7 +213,7 @@ function ContractDetailModal({
                           href={doc.downloadUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"
+                          className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:underline"
                         >
                           Ver <ExternalLink className="w-3 h-3" />
                         </a>
@@ -251,7 +275,7 @@ function ContractDetailModal({
                       onClick={() => setDocumentsIssue(false)}
                       className={`cursor-pointer py-2 rounded-xl border-2 text-sm font-semibold transition ${
                         documentsIssue === false
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
                           : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'
                       }`}
                     >
@@ -297,7 +321,7 @@ function ContractDetailModal({
                 <button
                   onClick={handleApprove}
                   disabled={actionLoading}
-                  className="cursor-pointer flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
+                  className="cursor-pointer flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
                 >
                   {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   Aprobar
@@ -311,7 +335,16 @@ function ContractDetailModal({
   );
 }
 
+type MainTab = 'negotiations' | 'contracts';
+
+const MAIN_TABS: { value: MainTab; label: string }[] = [
+  { value: 'negotiations', label: 'Negociaciones' },
+  { value: 'contracts', label: 'Contratos' },
+];
+
 export default function ContractsReviewPanel() {
+  const [activeTab, setActiveTab] = useState<MainTab>('contracts');
+  const [negotiationsCount, setNegotiationsCount] = useState<number | null>(null);
   const [contracts, setContracts] = useState<PendingContractSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -355,108 +388,142 @@ export default function ContractsReviewPanel() {
 
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">Contratos comerciales</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {contracts.length} contrato{contracts.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-          <button onClick={load} className="cursor-pointer text-xs text-blue-600 hover:underline font-medium">
-            Actualizar
-          </button>
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Contratos comerciales</h2>
+          <p className="text-sm text-gray-500 mt-0.5">Negociaciones de asesor y contratos generados por comercios.</p>
         </div>
 
-        <div className="flex gap-1.5 border-b border-gray-200">
-          {FILTER_TABS.map((tab) => (
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+          {MAIN_TABS.map((tab) => (
             <button
               key={tab.value}
-              onClick={() => setFilter(tab.value)}
-              className={`cursor-pointer px-3 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
-                filter === tab.value
-                  ? 'border-blue-600 text-blue-700'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              onClick={() => setActiveTab(tab.value)}
+              className={`cursor-pointer px-4 py-1.5 rounded-lg text-sm font-semibold transition ${
+                activeTab === tab.value ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               {tab.label}
+              {tab.value === 'negotiations' && !!negotiationsCount && (
+                <span className="ml-1.5 inline-flex items-center justify-center min-w-[1.1rem] h-[1.1rem] px-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">
+                  {negotiationsCount}
+                </span>
+              )}
             </button>
           ))}
         </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center h-60">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          </div>
-        ) : error ? (
-          <div className="flex flex-col items-center gap-3 py-16 text-red-500">
-            <AlertTriangle className="w-8 h-8" />
-            <p className="text-sm font-medium">Error al cargar contratos.</p>
-            <button onClick={load} className="cursor-pointer text-xs text-blue-600 hover:underline">Reintentar</button>
-          </div>
-        ) : contracts.length === 0 ? (
-          <div className="bg-white rounded-2xl border p-12 text-center">
-            <ClipboardCheck className="w-10 h-10 text-green-400 mx-auto mb-3" />
-            <p className="text-sm font-medium text-gray-600">{emptyLabel}</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-gray-50">
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Empresa</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Correo</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ruta</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Versión</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Generado</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Decidido</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acción</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {contracts.map((c) => (
-                    <tr key={c.contractId} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-gray-900">{c.companyName}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.email}</td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                          Ruta {c.route}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-gray-700">v{c.version}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_BADGE[c.status].className}`}>
-                          {STATUS_BADGE[c.status].label}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{formatDate(c.generatedAt)}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{formatDate(c.veryganaReviewedAt)}</td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => setSelected(c)}
-                          className="cursor-pointer flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition ml-auto"
-                        >
-                          {c.status === 'PENDING_VERYGANA_REVIEW' ? (
-                            <>
-                              <ClipboardCheck className="w-3 h-3" />
-                              Revisar
-                            </>
-                          ) : (
-                            <>
-                              <Eye className="w-3 h-3" />
-                              Ver detalle
-                            </>
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {activeTab === 'negotiations' && <NegotiationsPanel onCountChange={setNegotiationsCount} />}
+
+        {activeTab === 'contracts' && (
+          <>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500">
+                {contracts.length} contrato{contracts.length !== 1 ? 's' : ''}
+              </p>
+              <button
+                onClick={load}
+                className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Actualizar
+              </button>
             </div>
-          </div>
+
+            <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+              {FILTER_TABS.map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => setFilter(tab.value)}
+                  className={`cursor-pointer px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                    filter === tab.value ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center items-center h-60">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center gap-3 py-16 text-red-500">
+                <AlertTriangle className="w-8 h-8" />
+                <p className="text-sm font-medium">Error al cargar contratos.</p>
+                <button onClick={load} className="cursor-pointer text-xs text-indigo-600 hover:underline">Reintentar</button>
+              </div>
+            ) : contracts.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+                <ClipboardCheck className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-600">{emptyLabel}</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200 bg-gray-50">
+                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Empresa</th>
+                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Correo</th>
+                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Ruta</th>
+                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Versión</th>
+                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Generado</th>
+                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Decidido</th>
+                        <th className="text-right px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {contracts.map((c) => (
+                        <tr key={c.contractId} className="hover:bg-gray-50/80 transition-colors">
+                          <td className="px-4 py-3 font-medium text-gray-900">
+                            <div className="flex items-center gap-1.5">
+                              {c.companyName}
+                              {c.pep && <PepBadge />}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">{c.email}</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                              Ruta {c.route}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-700">v{c.version}</td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusBadge(c.status).className}`}>
+                              {getStatusBadge(c.status).label}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-500 text-xs">{formatDate(c.generatedAt)}</td>
+                          <td className="px-4 py-3 text-gray-500 text-xs">{formatDate(c.veryganaReviewedAt)}</td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => setSelected(c)}
+                              className="cursor-pointer flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition ml-auto"
+                            >
+                              {c.status === 'PENDING_VERYGANA_REVIEW' ? (
+                                <>
+                                  <ClipboardCheck className="w-3 h-3" />
+                                  Revisar
+                                </>
+                              ) : (
+                                <>
+                                  <Eye className="w-3 h-3" />
+                                  Ver detalle
+                                </>
+                              )}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 

@@ -1,5 +1,12 @@
 import apiClient from "@/lib/api/client";
-import type { ContractStatus, OnboardingDocument, OnboardingRoute } from "@/services/commercial/OnboardingService";
+import type {
+  ContractStatus,
+  OnboardingDocument,
+  OnboardingRoute,
+  OnboardingStep,
+  OnboardingSummaryLegalIdentification,
+  OnboardingSummaryPlan,
+} from "@/services/commercial/OnboardingService";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -166,6 +173,9 @@ export interface PendingContractSummary {
   businessApprovedAt: string | null;
   status: ContractReviewListStatus;
   veryganaReviewedAt: string | null;
+  // true si el representante legal fue declarado (o dio hit de screening)
+  // como PEP — compliance debe tenerlo en cuenta al revisar/aprobar.
+  pep: boolean;
 }
 
 export interface ContractReviewDetail {
@@ -207,4 +217,45 @@ export const rejectContractReview = async (
   documentsIssue: boolean
 ): Promise<void> => {
   await apiClient.post(`/compliance/contracts/${contractId}/reject`, { reason, documentsIssue });
+};
+
+// ── Negociaciones pendientes (rutas D/E) ────────────────────────────────────
+// Casos de integración técnica (D) o condiciones a la medida (E) que todavía
+// no tienen contrato generado — compliance debe resolverlos antes de que el
+// comercial pueda continuar su onboarding.
+
+export type NegotiationRoute = Extract<OnboardingRoute, "D" | "E">;
+
+export interface PendingNegotiation {
+  onboardingId: number;
+  companyName: string;
+  email: string;
+  phoneNumber: string;
+  route: NegotiationRoute;
+  routeExplanation: string;
+  // Uno de los dos viene con texto según la ruta: integrationDetails en D,
+  // specialNegotiationDetails en E.
+  integrationDetails: string | null;
+  specialNegotiationDetails: string | null;
+  currentStep: OnboardingStep;
+  classifiedAt: string;
+  // true si el representante legal fue declarado (o dio hit de screening)
+  // como PEP — mismo criterio que en listContracts.
+  pep: boolean;
+  // Contexto jurídico completo, para no depender de otro fetch antes de
+  // contactar al empresario — misma forma que en el resumen del comercial.
+  legalIdentification: OnboardingSummaryLegalIdentification;
+  // null en Ruta D (nunca llega a elegir plan). En Ruta E sí trae el plan
+  // aceptado — misma forma que en el resumen del comercial.
+  plan: OnboardingSummaryPlan | null;
+}
+
+export const getPendingNegotiations = async (): Promise<PendingNegotiation[]> => {
+  const res = await apiClient.get("/compliance/contracts/negotiations");
+  return res.data;
+};
+
+// Sin body — solo marca el caso como resuelto.
+export const resolveNegotiation = async (onboardingId: number): Promise<void> => {
+  await apiClient.post(`/compliance/contracts/negotiations/${onboardingId}/resolve`);
 };

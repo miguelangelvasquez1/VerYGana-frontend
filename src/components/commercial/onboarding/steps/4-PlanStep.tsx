@@ -4,12 +4,19 @@ import type { OnboardingPlanCatalog, OnboardingPlanOption } from "@/services/com
 import type { PlanCode } from "@/types/finance/plans/Plan.types";
 import { formatCOP, StepButton } from "../onboarding.shared";
 
+export interface AcceptPlanData {
+  investmentAmountCents?: number;
+  contractDurationMonths?: number;
+  requiresSpecialNegotiation?: boolean;
+  specialNegotiationDetails?: string;
+}
+
 interface Props {
   catalog: OnboardingPlanCatalog | null;
   selectedPlanCode: PlanCode | null;
   onSelectPlan: (planCode: PlanCode) => void;
   submitting: boolean;
-  onAccept: (investmentAmountCents?: number, contractDurationMonths?: number) => void;
+  onAccept: (data: AcceptPlanData) => void;
 }
 
 function formatMoneyOrNA(cents: number | null): string {
@@ -95,6 +102,8 @@ const METRIC_GROUPS: MetricGroup[] = [
 export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, onAccept }: Props) {
   const [investmentInput, setInvestmentInput] = useState("");
   const [durationInput, setDurationInput] = useState("");
+  const [specialNegotiation, setSpecialNegotiation] = useState(false);
+  const [specialNegotiationDetails, setSpecialNegotiationDetails] = useState("");
 
   // El monto de inversión y la duración dependen del plan elegido — si cambia
   // el plan, los valores anteriores ya no aplican.
@@ -126,8 +135,13 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
   const durationMonths = durationInput ? parseInt(durationInput, 10) : null;
   const durationValid = durationMonths != null && durationMonths > 0;
 
+  const specialNegotiationValid = !specialNegotiation || specialNegotiationDetails.trim().length > 0;
+
   const canAccept =
-    !!selectedPlan && (!requiresInvestment || investmentInRange) && (!isBasic || durationValid);
+    !!selectedPlan &&
+    (!requiresInvestment || investmentInRange) &&
+    (!isBasic || durationValid) &&
+    specialNegotiationValid;
 
   const handleAcceptClick = () => {
     if (!selectedPlan) return;
@@ -135,7 +149,12 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
       ? Math.round(investmentCOPValue * 100)
       : undefined;
     const contractDurationMonths = isBasic && durationMonths != null ? durationMonths : undefined;
-    onAccept(investmentAmountCents, contractDurationMonths);
+    onAccept({
+      investmentAmountCents,
+      contractDurationMonths,
+      requiresSpecialNegotiation: specialNegotiation || undefined,
+      specialNegotiationDetails: specialNegotiation ? specialNegotiationDetails : undefined,
+    });
   };
 
   return (
@@ -147,7 +166,7 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
         </p>
       </div>
 
-      {catalog.requiresAdvisorContact && (
+      {catalog.requiresSpecialNegotiation && (
         <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <PhoneCall className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-800">
@@ -290,6 +309,44 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
           )}
         </div>
       )}
+
+      <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={specialNegotiation}
+            onChange={(e) => setSpecialNegotiation(e.target.checked)}
+            className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#03548C] focus:ring-[#03548C]/40 cursor-pointer"
+          />
+          <span className="text-sm font-semibold text-gray-700">
+            ¿Necesitas condiciones a la medida además de este plan?
+          </span>
+        </label>
+
+        {specialNegotiation && (
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+              Cuéntanos qué necesitas <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={specialNegotiationDetails}
+              onChange={(e) => setSpecialNegotiationDetails(e.target.value.slice(0, 1000))}
+              maxLength={1000}
+              rows={3}
+              className={`w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:bg-white transition ${
+                !specialNegotiationValid
+                  ? "border-red-400 focus:ring-red-300"
+                  : "border-gray-200 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+              }`}
+            />
+            <p className="text-xs text-gray-400 mt-1">{specialNegotiationDetails.length}/1000</p>
+            <p className="text-xs text-amber-700 mt-2 flex items-start gap-1.5">
+              <PhoneCall className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              Un asesor de VerYGana se pondrá en contacto contigo para ajustar las condiciones finales.
+            </p>
+          </div>
+        )}
+      </div>
 
       <div className="space-y-3">
         <div>

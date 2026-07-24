@@ -9,11 +9,11 @@ export default function AdPage() {
   const { rewardData, showReward, dismiss } = useXpReward();
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-69px)] lg:h-[calc(100dvh-76px)] overflow-hidden bg-black text-white">
+    <div className="flex flex-col h-[calc(100dvh-69px)] lg:h-[calc(100dvh-76px)] overflow-hidden bg-[#f4f7fb] text-[#0b1440]">
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar (oculta en móvil) */}
-        <aside className="hidden md:block w-90 bg-black">
+        <aside className="hidden md:block w-90 bg-white border-r border-gray-100">
           <Sidebar />
         </aside>
 

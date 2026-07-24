@@ -238,10 +238,10 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
 
   if (!isInitialized || (isLoadingAd && !currentAd)) {
     return (
-      <div className="flex justify-center items-center w-full h-full bg-black">
+      <div className="flex justify-center items-center w-full h-full bg-[#f4f7fb]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white">Cargando anuncio...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#03548C] mx-auto mb-4"></div>
+          <p className="text-[#0b1440]">Cargando anuncio...</p>
         </div>
       </div>
     );
@@ -249,8 +249,8 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
 
   if (!currentAd) {
     return (
-      <div className="flex justify-center items-center w-full h-full bg-black">
-        <div className="text-center text-white p-6">
+      <div className="flex justify-center items-center w-full h-full bg-[#f4f7fb]">
+        <div className="text-center text-[#0b1440] p-6">
           <p className="text-xl mb-4">No hay más anuncios disponibles</p>
         </div>
       </div>
@@ -261,16 +261,16 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
   const formattedLikes = new Intl.NumberFormat(navigator.language || 'en-US').format(currentAd.currentLikes);
 
   return (
-    <div 
-      ref={containerRef} 
-      className="relative flex justify-center items-center w-full h-full overflow-hidden bg-black touch-none"
+    <div
+      ref={containerRef}
+      className="relative flex justify-center items-center w-full h-full overflow-hidden bg-[#f4f7fb] touch-none"
     >
-      <div className="relative max-w-full max-h-[100dvh] overflow-hidden rounded-lg">
+      <div className="relative max-w-full max-h-[100dvh] overflow-hidden rounded-2xl shadow-xl bg-black">
 
         {/* Progress bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/20 z-30">
           <div
-            className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+            className="h-full bg-linear-to-r from-[#03548C] to-[#00a4ff]"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -397,7 +397,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
           {currentAd.description && currentAd.description.length > 100 && (
             <button
               onClick={() => setIsExpanded(v => !v)}
-              className="text-blue-400 text-[10px] mt-0.5 font-medium"
+              className="text-[#00a4ff] text-[10px] mt-0.5 font-medium"
             >
               {isExpanded ? 'Ver menos' : 'Ver más'}
             </button>
@@ -520,7 +520,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
       </div>
 
       {/* Desktop controls */}
-      <div className="hidden md:flex flex-col justify-center ml-4">
+      <div className="hidden md:flex flex-col justify-center ml-4 bg-linear-to-b from-[#0b1440] to-[#03548C] rounded-2xl px-4 py-6 shadow-lg">
         <VideoControls
           onVisit={handleVisitAd}
           onShare={handleShare}

@@ -92,7 +92,7 @@ const GamesPanelPage = () => {
             <Star className="h-5 w-5 text-[#c9a227]" />
             <div>
               <h2 className="text-lg font-bold text-[#0b1440]">Juegos Patrocinados</h2>
-              <p className="text-xs text-gray-500">Selección aleatoria para igualdad entre participantes</p>
+              <p className="text-xs text-gray-500">¡Gana llaves mientras te diviertes!</p>
             </div>
           </div>
 

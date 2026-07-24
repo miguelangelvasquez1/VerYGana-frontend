@@ -21,28 +21,36 @@ import { LegalDocumentsService, LegalDocument } from "@/services/LegalDocumentsS
 import { extractApiError, FieldErrors, getLastSeenRejection, markRejectionSeen } from "./onboarding.shared";
 import { TermsStep } from "./steps/1-TermsStep";
 import { LegalIdentificationStep, LegalIdentificationForm } from "./steps/2-LegalIdentificationStep";
-import { DiagnosticStep, DiagnosticForm } from "./steps/3-DiagnosticStep";
-import { ClassificationStep } from "./steps/4-ClassificationStep";
-import { PlanStep } from "./steps/5-PlanStep";
-import { DocumentsStep } from "./steps/6-DocumentsStep";
-import { ContractGenerateStep } from "./steps/7-ContractGenerateStep";
-import { ContractReviewStep } from "./steps/8-ContractReviewStep";
-import { VeryGanaReviewStep } from "./steps/9-VeryGanaReviewStep";
+import { DiagnosticStep, DiagnosticForm, ClassificationStep } from "./steps/3-DiagnosticStep";
+import { PlanStep, AcceptPlanData } from "./steps/4-PlanStep";
+import { DocumentsStep } from "./steps/5-DocumentsStep";
+import {
+  ContractGenerateStep,
+  ContractReviewStep,
+  VeryGanaReviewStep,
+  SignatureStep,
+} from "./steps/6-ContractStep";
+import { PaymentStep } from "./steps/7-PaymentStep";
 
-const STEP_LABELS = ["Términos", "Identificación", "Diagnóstico", "Clasificación", "Plan", "Documentos", "Contrato"];
+const STEP_LABELS = ["Términos", "Identificación", "Diagnóstico", "Plan", "Documentos", "Contrato", "Pago"];
 
 type WizardStep = Exclude<OnboardingStep, "COMPLETED">;
 
+// Clasificación se muestra como parte de "Diagnóstico" y Firma como parte de
+// "Contrato" — comparten el mismo índice del stepper que su paso anterior en
+// vez de tener su propia burbuja.
 const STEP_INDEX: Record<WizardStep, number> = {
   TERMS_PENDING: 0,
   LEGAL_IDENTIFICATION_PENDING: 1,
   DIAGNOSTIC_PENDING: 2,
-  CLASSIFICATION_PENDING: 3,
-  PLAN_PENDING: 4,
-  DOCUMENTS_PENDING: 5,
-  CONTRACT_PENDING: 6,
-  BUSINESS_REVIEW_PENDING: 6,
-  VERYGANA_REVIEW_PENDING: 6,
+  CLASSIFICATION_PENDING: 2,
+  PLAN_PENDING: 3,
+  DOCUMENTS_PENDING: 4,
+  CONTRACT_PENDING: 5,
+  BUSINESS_REVIEW_PENDING: 5,
+  VERYGANA_REVIEW_PENDING: 5,
+  SIGNATURE_PENDING: 5,
+  PAYMENT_PENDING: 6,
 };
 
 // Modal bloqueante — se muestra una sola vez por cada rechazo nuevo
@@ -138,6 +146,10 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   // contrato de arriba) — documentsCompleted decide si hay autoservicio
   // (corregir documentos) o no (currentStep se queda en VERYGANA_REVIEW_PENDING).
   const [contractStatus, setContractStatus] = useState<ContractStatus | null>(initialStatus.contractStatus);
+  const [contractGenerated, setContractGenerated] = useState(initialStatus.contractGenerated);
+  // Negociación pendiente con compliance (rutas D/E) — bloquea "Generar
+  // contrato" hasta que se resuelva; se refresca con cualquier getStatus().
+  const [requiresSpecialNegotiation, setRequiresSpecialNegotiation] = useState(initialStatus.requiresSpecialNegotiation);
   const [documentsCompleted, setDocumentsCompleted] = useState(initialStatus.documentsCompleted);
   const [rejectionReason, setRejectionReason] = useState<string | null>(initialStatus.rejectionReason);
   const [rejectedAt, setRejectedAt] = useState<string | null>(initialStatus.rejectedAt);
@@ -166,6 +178,8 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   // hay que abrir el modal bloqueante (rechazo nuevo o nunca visto).
   const syncRejectionState = (status: OnboardingStatus) => {
     setContractStatus(status.contractStatus);
+    setContractGenerated(status.contractGenerated);
+    setRequiresSpecialNegotiation(status.requiresSpecialNegotiation);
     setDocumentsCompleted(status.documentsCompleted);
     setRejectionReason(status.rejectionReason);
     setRejectedAt(status.rejectedAt);
@@ -255,7 +269,13 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   }, [step, documents]);
 
   useEffect(() => {
-    if ((step === "BUSINESS_REVIEW_PENDING" || step === "VERYGANA_REVIEW_PENDING") && !contract) {
+    if (
+      (step === "BUSINESS_REVIEW_PENDING" ||
+        step === "VERYGANA_REVIEW_PENDING" ||
+        step === "SIGNATURE_PENDING" ||
+        step === "PAYMENT_PENDING") &&
+      !contract
+    ) {
       if (hasLoadedContractRef.current) return;
       hasLoadedContractRef.current = true;
       OnboardingService.getContract()
@@ -264,11 +284,13 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
     }
   }, [step, contract]);
 
-  // Si recargamos justo en CONTRACT_PENDING, puede ser porque VerYGana
-  // rechazó una versión anterior — traemos el contrato previo en silencio
-  // para mostrar el motivo, sin molestar a quien nunca generó uno.
+  // Si recargamos justo en CONTRACT_PENDING con un contrato ya generado
+  // antes (contractGenerated === true), puede ser porque VerYGana rechazó
+  // esa versión anterior — traemos el contrato previo en silencio para
+  // mostrar el motivo. Si nunca se generó un contrato (caso normal al llegar
+  // por primera vez desde documentos), no hay nada que pedir todavía.
   useEffect(() => {
-    if (step === "CONTRACT_PENDING" && rejectionNotes === null && !contract) {
+    if (step === "CONTRACT_PENDING" && contractGenerated && rejectionNotes === null && !contract) {
       if (hasLoadedContractRecoveryRef.current) return;
       hasLoadedContractRecoveryRef.current = true;
       OnboardingService.getContract()
@@ -276,9 +298,9 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
           setContract(c);
           if (c.status === "REJECTED") setRejectionNotes(c.veryganaDecisionNotes ?? null);
         })
-        .catch(() => { /* aún no se ha generado un contrato — nada que mostrar */ });
+        .catch(() => { /* no se pudo recuperar el contrato anterior — nada que mostrar */ });
     }
-  }, [step, rejectionNotes, contract]);
+  }, [step, contractGenerated, rejectionNotes, contract]);
 
   // Resumen de solo lectura para la pantalla de revisión previa a generar
   // el contrato real.
@@ -375,11 +397,14 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
     }
   };
 
-  const handleAcceptPlan = async (investmentAmountCents?: number, contractDurationMonths?: number) => {
+  const handleAcceptPlan = async (data: AcceptPlanData) => {
     if (submitting || !selectedPlanCode) return;
     setSubmitting(true);
     try {
-      await OnboardingService.acceptPlan({ planCode: selectedPlanCode, investmentAmountCents, contractDurationMonths });
+      await OnboardingService.acceptPlan({ planCode: selectedPlanCode, ...data });
+      if (data.requiresSpecialNegotiation) {
+        toast.success("Registramos tu solicitud de condiciones especiales. Un asesor de VerYGana se pondrá en contacto contigo.");
+      }
       setStep("DOCUMENTS_PENDING");
     } catch (err) {
       handleApiError(err);
@@ -421,6 +446,7 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
       // El banner de rechazo del status desaparece apenas se regenera el
       // contrato — no hace falta esperar otro getStatus() para eso.
       setContractStatus(result.status);
+      setContractGenerated(true);
       setStep("BUSINESS_REVIEW_PENDING");
     } catch (err) {
       handleApiError(err);
@@ -495,6 +521,44 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
           setRejectionNotes(freshContract.veryganaDecisionNotes ?? null);
         } catch {
           /* sin contrato aún — nada que mostrar */
+        }
+      }
+      setStep(status.currentStep as WizardStep);
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
+
+  // Refresco genérico para las pantallas de espera post-aprobación (firma y
+  // pago) — a diferencia de handleRefreshVeryGanaStatus no necesitan toasts
+  // ni recuperación de contrato especiales, solo avanzar según currentStep.
+  const handleRefreshStatus = async () => {
+    try {
+      const status = await OnboardingService.getStatus();
+      syncRejectionState(status);
+      if (status.completed) {
+        toast.success("¡Tu cuenta ya está activa!");
+        onCompleted();
+        return;
+      }
+      setStep(status.currentStep as WizardStep);
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
+
+  // Variante para la pantalla de resumen (paso 9): además del status,
+  // refresca el summary — ahí vive specialNegotiationResolvedAt (dentro de
+  // summary.plan), que el status por sí solo no trae.
+  const handleRefreshContractStatus = async () => {
+    try {
+      const status = await OnboardingService.getStatus();
+      syncRejectionState(status);
+      if (status.currentStep === "CONTRACT_PENDING") {
+        try {
+          setSummary(await OnboardingService.getSummary());
+        } catch {
+          /* el summary anterior sigue siendo válido — no bloqueante */
         }
       }
       setStep(status.currentStep as WizardStep);
@@ -661,6 +725,8 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
             onGenerate={handleGenerateContract}
             onRequestChanges={handleRequestContractChanges}
             rejectionNotes={rejectionNotes}
+            requiresSpecialNegotiation={requiresSpecialNegotiation}
+            onRefreshStatus={handleRefreshContractStatus}
           />
         )}
 
@@ -685,6 +751,14 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
             rejected={contractStatus === "REJECTED" && documentsCompleted}
             rejectionReason={rejectionReason}
           />
+        )}
+
+        {step === "SIGNATURE_PENDING" && (
+          <SignatureStep contract={contract} onRefresh={handleRefreshStatus} />
+        )}
+
+        {step === "PAYMENT_PENDING" && (
+          <PaymentStep contract={contract} onRefresh={handleRefreshStatus} />
         )}
       </div>
 
