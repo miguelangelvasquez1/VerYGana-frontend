@@ -73,18 +73,20 @@ export const verifyPhone = async (email: string, code: string): Promise<void> =>
 };
 
 /**
- * Recuperar contraseña
+ * Solicitar código de recuperación de contraseña
+ * Siempre devuelve 200, exista o no el correo (anti-enumeración)
  */
-export const requestPasswordReset = async (email: string): Promise<void> => {
-  await apiClient.post('/auth/password-reset/request', { email });
+export const forgotPassword = async (email: string): Promise<void> => {
+  await apiClient.post('/auth/forgot-password', { email });
 };
 
 /**
- * Cambiar contraseña
+ * Confirmar código y establecer nueva contraseña
  */
-export const resetPassword = async (token: string, newPassword: string): Promise<void> => {
-  await apiClient.post('/auth/password-reset/confirm', {
-    token,
-    newPassword
-  });
+export const resetPassword = async (
+  email: string,
+  code: string,
+  newPassword: string
+): Promise<void> => {
+  await apiClient.post('/auth/reset-password', { email, code, newPassword });
 };
