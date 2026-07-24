@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Star } from "lucide-react";
 import {
   prepareProductCategoryCreation,
   confirmProductCategoryCreation,
@@ -14,14 +15,17 @@ import {
 } from "@/services/admin/AdminProductsService";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { getProductDetail } from "@/services/ProductService";
+import { getProductReviewsByProductId, hideProductReview } from "@/services/ProductReviewService";
 import { useSession } from "next-auth/react";
 import { fileUploadService } from "@/services/FileUploadService";
+import { useAdminSectionSearch } from "@/context/AdminSearchContext";
 import { ProductCategoryResponseDTO } from "@/types/products/ProductCategory.types";
 import {
   ProductSummaryResponseDTO,
   ProductResponseDTO,
   ProductStatus,
 } from "@/types/products/Product.types";
+import { ProductReviewResponseDTO } from "@/types/products/ProductReview.types";
 
 // ─────────────────────────────────────────────
 // TIPOS LOCALES
@@ -46,7 +50,16 @@ interface ProductActionState {
 
 interface ProductDetailState {
   product: ProductResponseDTO | null;
+  status: ProductStatus | null;
   loading: boolean;
+}
+
+interface ReviewsState {
+  open: boolean;
+  productId: number | null;
+  reviews: ProductReviewResponseDTO[];
+  loading: boolean;
+  hidingId: number | null;
 }
 
 // ─────────────────────────────────────────────
@@ -103,11 +116,22 @@ export default function AdminProductsPage() {
   // ── Estado productos ───────────────────────
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<ProductStatus>(ProductStatus.PENDING);
+  const [statusFilter, setStatusFilter] = useState<ProductStatus | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const PAGE_SIZE = 20;
+
+  const { searchTerm } = useAdminSectionSearch("Buscar productos por nombre...");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(0);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
 
   // ── Estado acción sobre producto ───────────
   const [actionState, setActionState] = useState<ProductActionState>({
@@ -120,7 +144,17 @@ export default function AdminProductsPage() {
   // ── Estado detalle producto ────────────────
   const [detailState, setDetailState] = useState<ProductDetailState>({
     product: null,
+    status: null,
     loading: false,
+  });
+
+  // ── Estado reseñas producto ─────────────────
+  const [reviewsState, setReviewsState] = useState<ReviewsState>({
+    open: false,
+    productId: null,
+    reviews: [],
+    loading: false,
+    hidingId: null,
   });
 
   const isCreatingCat = ["preparing", "uploading", "creating"].includes(createCatState.status);
@@ -135,7 +169,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     if (activeTab === "products") loadProducts();
-  }, [activeTab, statusFilter, currentPage]);
+  }, [activeTab, statusFilter, debouncedSearch, currentPage]);
 
   useEffect(() => {
     return () => {
@@ -162,7 +196,7 @@ export default function AdminProductsPage() {
   const loadProducts = async () => {
     setLoadingProducts(true);
     try {
-      const res = await getAllProductsForAdmin(statusFilter, currentPage, PAGE_SIZE);
+      const res = await getAllProductsForAdmin(statusFilter, debouncedSearch || undefined, currentPage, PAGE_SIZE);
       setProducts(res.data);
       setTotalPages(res.meta.totalPages);
       setTotalElements(res.meta.totalElements);
@@ -273,17 +307,45 @@ export default function AdminProductsPage() {
     setActionState({ productId: null, action: null, reason: "", loading: false });
   };
 
-  const openDetail = async (productId: number) => {
-    setDetailState({ product: null, loading: true });
+  const openDetail = async (summary: ProductSummaryResponseDTO) => {
+    setDetailState({ product: null, status: summary.status, loading: true });
     try {
-      const product = await getProductDetail(productId);
-      setDetailState({ product, loading: false });
+      const product = await getProductDetail(summary.id);
+      setDetailState({ product, status: summary.status, loading: false });
     } catch {
-      setDetailState({ product: null, loading: false });
+      setDetailState({ product: null, status: null, loading: false });
     }
   };
 
-  const closeDetail = () => setDetailState({ product: null, loading: false });
+  const closeDetail = () => setDetailState({ product: null, status: null, loading: false });
+
+  const openReviews = async (productId: number) => {
+    setReviewsState({ open: true, productId, reviews: [], loading: true, hidingId: null });
+    try {
+      const res = await getProductReviewsByProductId(productId, 0, 50);
+      setReviewsState((prev) => ({ ...prev, reviews: res.data, loading: false }));
+    } catch {
+      setReviewsState((prev) => ({ ...prev, loading: false }));
+    }
+  };
+
+  const closeReviews = () => {
+    setReviewsState({ open: false, productId: null, reviews: [], loading: false, hidingId: null });
+  };
+
+  const handleHideReview = async (reviewId: number) => {
+    setReviewsState((prev) => ({ ...prev, hidingId: reviewId }));
+    try {
+      await hideProductReview(reviewId);
+      setReviewsState((prev) => ({
+        ...prev,
+        reviews: prev.reviews.filter((r) => r.id !== reviewId),
+        hidingId: null,
+      }));
+    } catch {
+      setReviewsState((prev) => ({ ...prev, hidingId: null }));
+    }
+  };
 
   const handleProductAction = async () => {
     const { productId, action, reason } = actionState;
@@ -303,7 +365,7 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleStatusFilterChange = (status: ProductStatus) => {
+  const handleStatusFilterChange = (status: ProductStatus | undefined) => {
     setStatusFilter(status);
     setCurrentPage(0);
   };
@@ -370,6 +432,15 @@ export default function AdminProductsPage() {
 
           {/* Filtros de estado */}
           <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => handleStatusFilterChange(undefined)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer ${statusFilter === undefined
+                  ? "bg-violet-600 text-white border-violet-600"
+                  : "bg-white text-gray-600 border-gray-300 hover:border-violet-400"
+                }`}
+            >
+              Todos
+            </button>
             {Object.values(ProductStatus).map((status) => (
               <button
                 key={status}
@@ -393,7 +464,9 @@ export default function AdminProductsPage() {
               <div className="py-16 text-center text-sm text-gray-400">Cargando productos...</div>
             ) : products.length === 0 ? (
               <div className="py-16 text-center text-sm text-gray-400">
-                No hay productos con estado {STATUS_LABELS[statusFilter].toLowerCase()}
+                {statusFilter
+                  ? `No hay productos con estado ${STATUS_LABELS[statusFilter].toLowerCase()}`
+                  : "No hay productos que coincidan con la búsqueda."}
               </div>
             ) : (
               <table className="w-full text-base">
@@ -421,7 +494,7 @@ export default function AdminProductsPage() {
                             <div className="h-9 w-9 rounded-lg bg-gray-100 shrink-0 cursor-pointer" />
                           )}
                           <button
-                            onClick={() => openDetail(p.id)}
+                            onClick={() => openDetail(p)}
                             className="font-medium text-gray-800 hover:text-violet-600 text-left transition cursor-pointer"
                           >
                             {p.name}
@@ -763,7 +836,15 @@ export default function AdminProductsPage() {
             ) : detailState.product ? (
               <div className="p-6 space-y-4">
                 <div className="flex items-start justify-between gap-4">
-                  <h2 className="text-lg font-semibold text-gray-800">{detailState.product.name}</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-gray-800">{detailState.product.name}</h2>
+                    {detailState.status && (
+                      <span className={`inline-flex items-center gap-1.5 text-xs border px-2 py-0.5 rounded-full ${STATUS_STYLES[detailState.status]}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[detailState.status]}`} />
+                        {STATUS_LABELS[detailState.status]}
+                      </span>
+                    )}
+                  </div>
                   <button onClick={closeDetail} className="text-gray-400 hover:text-gray-600 text-2xl leading-none shrink-0  cursor-pointer">×</button>
                 </div>
 
@@ -792,6 +873,26 @@ export default function AdminProductsPage() {
                     <span className="text-gray-400 text-xs">Stock disponible</span>
                     <p className="font-medium text-gray-800">{detailState.product.stock}</p>
                   </div>
+                  <div>
+                    <span className="text-gray-400 text-xs">Máx. llaves permitidas</span>
+                    <p className="font-medium text-gray-800">{detailState.product.maxKeysAllowed}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 text-xs">Piso en efectivo</span>
+                    <p className="font-medium text-gray-800">
+                      ${(detailState.product.minCashCents / 100).toLocaleString("es-CO")}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 text-xs">Rating promedio</span>
+                    <p className="font-medium text-gray-800">
+                      {detailState.product.averageRate > 0 ? detailState.product.averageRate.toFixed(1) : "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 text-xs">Recompensa de juego</span>
+                    <p className="font-medium text-gray-800">{detailState.product.isGameReward ? "Sí" : "No"}</p>
+                  </div>
                 </div>
 
                 {detailState.product.description && (
@@ -801,9 +902,17 @@ export default function AdminProductsPage() {
                   </div>
                 )}
 
-                {statusFilter !== ProductStatus.INACTIVE && (
+                <button
+                  onClick={() => openReviews(detailState.product!.id)}
+                  className="w-full flex items-center justify-center gap-2 text-sm border border-gray-300 text-gray-700 hover:border-violet-400 hover:text-violet-600 py-2 rounded-lg transition cursor-pointer"
+                >
+                  <Star size={14} />
+                  Ver reseñas ({detailState.product.reviewCount})
+                </button>
+
+                {detailState.status !== ProductStatus.INACTIVE && (
                   <div className="flex gap-2 pt-2 border-t border-gray-100">
-                    {statusFilter === ProductStatus.PENDING && (
+                    {detailState.status === ProductStatus.PENDING && (
                       <>
                         <button
                           onClick={() => { closeDetail(); openAction(detailState.product!.id, "approve"); }}
@@ -819,7 +928,7 @@ export default function AdminProductsPage() {
                         </button>
                       </>
                     )}
-                    {(statusFilter === ProductStatus.ACTIVE || statusFilter === ProductStatus.REJECTED) && (
+                    {(detailState.status === ProductStatus.ACTIVE || detailState.status === ProductStatus.REJECTED) && (
                       <button
                         onClick={() => { closeDetail(); openAction(detailState.product!.id, "delete"); }}
                         className="flex-1 text-sm border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 py-2 rounded-lg transition cursor-pointer"
@@ -831,6 +940,64 @@ export default function AdminProductsPage() {
                 )}
               </div>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          MODAL: RESEÑAS DEL PRODUCTO
+      ══════════════════════════════════════════ */}
+      {reviewsState.open && (
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+          onClick={closeReviews}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
+              <h2 className="text-lg font-semibold text-gray-800">Reseñas del producto</h2>
+              <button onClick={closeReviews} className="text-gray-400 hover:text-gray-600 text-2xl leading-none cursor-pointer">×</button>
+            </div>
+
+            <div className="p-6 space-y-3">
+              {reviewsState.loading ? (
+                <div className="py-16 text-center text-sm text-gray-400">Cargando reseñas...</div>
+              ) : reviewsState.reviews.length === 0 ? (
+                <div className="py-16 text-center text-sm text-gray-400">Este producto aún no tiene reseñas.</div>
+              ) : (
+                reviewsState.reviews.map((review) => (
+                  <div key={review.id} className="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-gray-800 text-sm">{review.consumerName}</p>
+                        <div className="flex gap-0.5 mt-1">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              size={13}
+                              className={i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleHideReview(review.id)}
+                        disabled={reviewsState.hidingId === review.id}
+                        className="text-xs border border-red-300 text-red-600 hover:bg-red-50 px-3 py-1 rounded-lg transition disabled:opacity-50 cursor-pointer shrink-0"
+                      >
+                        {reviewsState.hidingId === review.id ? "Ocultando..." : "Ocultar"}
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-700 mt-2">{review.comment}</p>
+                    <p className="text-xs text-gray-400 mt-2">
+                      {new Date(review.createdAt).toLocaleDateString("es-CO")}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}

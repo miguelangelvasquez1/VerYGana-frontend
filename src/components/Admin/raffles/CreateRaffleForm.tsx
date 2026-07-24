@@ -9,6 +9,9 @@ import { CreatePrizeRequestDTO, PrizeType } from "@/types/raffles/prize.types";
 import { CreateRaffleRequestDTO, DrawMethod, RaffleType } from "@/types/raffles/raffle.types";
 import { CreateRaffleRuleRequestDTO } from "@/types/raffles/raffleRule.types";
 import { TicketEarningRuleResponseDTO } from "@/types/raffles/ticketEarningRule.types";
+import TargetAudienceFields, {
+  isTargetAudienceValid,
+} from "@/components/shared/targeting/TargetAudienceFields";
 
 /* ================= TYPES ================= */
 
@@ -58,6 +61,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
     prizes: [],
     rules: [],
     termsAndConditions: "",
+    targeting: {},
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -175,6 +179,10 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
 
     const isValid = validateForm();
     if (!isValid) return;
+    if (!isTargetAudienceValid(formData.targeting)) {
+      alert("En Disponibilidad: la edad máxima debe ser mayor o igual a la mínima");
+      return;
+    }
     if (!raffleImageFile) {
       alert("Debes subir la imagen principal de la rifa");
       return;
@@ -484,6 +492,14 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
 
         </div>
       </section>
+
+      {/* ═══════════════ SEGMENTACIÓN DE AUDIENCIA ═══════════════ */}
+
+      <TargetAudienceFields
+        value={formData.targeting}
+        onChange={(targeting) => setFormData((prev) => ({ ...prev, targeting }))}
+        mode="restriction"
+      />
 
       {/* ═══════════════ IMAGEN RIFA ═══════════════ */}
 

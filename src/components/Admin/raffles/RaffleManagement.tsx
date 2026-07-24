@@ -10,15 +10,22 @@ import {
   prepareRaffleCreation,
   confirmRaffleCreation,
 } from "@/services/admin/AdminRaffleService";
-import { getRafflesByStatusAndType } from "@/services/raffleService";
+import { getRafflesByFilters } from "@/services/raffleService";
 import { fileUploadService } from "@/services/FileUploadService";
+import { useAdminSectionSearch } from "@/context/AdminSearchContext";
 
 import RaffleCard from "@/components/admin/raffles/RaffleCardAdmin";
 import CreateRaffleForm, {
   CreateRaffleFormSubmitPayload,
 } from "@/components/admin/raffles/CreateRaffleForm";
 
-export default function AdminRafflesDashboard() {
+const PAGE_SIZE = 10;
+
+interface Props {
+  onViewStats?: (raffle: RaffleSummaryResponseDTO) => void;
+}
+
+export default function AdminRafflesDashboard({ onViewStats }: Props) {
   /* ================== STATE ================== */
 
   const [raffles, setRaffles] = useState<RaffleSummaryResponseDTO[]>([]);
@@ -26,8 +33,19 @@ export default function AdminRafflesDashboard() {
   const [error, setError] = useState<string>("");
   const [showCreateRaffle, setShowCreateRaffle] = useState(false);
 
-  const [statusFilter, setStatusFilter] = useState("ACTIVE");
-  const [typeFilter, setTypeFilter] = useState("STANDARD");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [drawDateFilter, setDrawDateFilter] = useState("");
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const { searchTerm } = useAdminSectionSearch("Buscar rifas por título...");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
 
   const [stats, setStats] = useState({
     draftRaffles: 0,
@@ -68,12 +86,17 @@ export default function AdminRafflesDashboard() {
     setError("");
 
     try {
-      const response = await getRafflesByStatusAndType(
-        statusFilter,
-        typeFilter
+      const response = await getRafflesByFilters(
+        statusFilter || undefined,
+        debouncedSearch || undefined,
+        drawDateFilter || undefined,
+        typeFilter || undefined,
+        PAGE_SIZE,
+        page
       );
 
       setRaffles(response?.data ?? []);
+      setTotalPages(response?.meta?.totalPages ?? 0);
     } catch (err: any) {
       console.error(err);
       setError("Error al cargar rifas");
@@ -92,7 +115,7 @@ export default function AdminRafflesDashboard() {
 
   useEffect(() => {
     loadRaffles();
-  }, [statusFilter, typeFilter]);
+  }, [statusFilter, typeFilter, drawDateFilter, debouncedSearch, page]);
 
   /* ================== ORQUESTADOR CREATE RAFFLE ================== */
   const handleCreateRaffle = async (
@@ -232,16 +255,18 @@ export default function AdminRafflesDashboard() {
         />
       </div>
 
-      {/* ===== FILTROS ===== */}
-      <h3 className="text-lg font-semibold ml-2">Filtros</h3>
-      <div className="flex gap-4">
+      <div className="flex gap-4 flex-wrap">
         <div>
           <p className="text-sm font-medium text-gray-700 mb-1">Estado</p>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(0);
+            }}
             className="border px-3 py-1 rounded-lg"
           >
+            <option value="">Todos</option>
             <option value="DRAFT">Borradores</option>
             <option value="ACTIVE">Activas</option>
             <option value="CLOSED">Cerradas</option>
@@ -255,17 +280,72 @@ export default function AdminRafflesDashboard() {
           <p className="text-sm font-medium text-gray-700 mb-1">Tipo</p>
           <select
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
+            onChange={(e) => {
+              setTypeFilter(e.target.value);
+              setPage(0);
+            }}
             className="border px-3 py-2 rounded-lg"
           >
+            <option value="">Todos</option>
             <option value="STANDARD">Estándar</option>
             <option value="PREMIUM">Premium</option>
           </select>
         </div>
+
+        <div>
+          <p className="text-sm font-medium text-gray-700 mb-1">Fecha de sorteo</p>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={drawDateFilter}
+              onChange={(e) => {
+                setDrawDateFilter(e.target.value);
+                setPage(0);
+              }}
+              className="border px-3 py-1 rounded-lg"
+            />
+            {drawDateFilter && (
+              <button
+                onClick={() => {
+                  setDrawDateFilter("");
+                  setPage(0);
+                }}
+                className="text-xs text-gray-500 hover:text-gray-800 underline"
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ===== RaffleCard ===== */}
-      <RaffleCard raffles={raffles} onRefresh={loadDashboardData} />
+      <RaffleCard raffles={raffles} onRefresh={loadDashboardData} onViewStats={onViewStats} />
+
+      {/* ===== Paginador ===== */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-400">
+            Página {page + 1} de {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage((p) => p - 1)}
+              disabled={page === 0}
+              className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+            >
+              Anterior
+            </button>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page >= totalPages - 1}
+              className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ===== MODAL ===== */}
       {showCreateRaffle && (

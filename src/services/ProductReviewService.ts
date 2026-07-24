@@ -1,12 +1,7 @@
 import apiClient from "@/lib/api/client";
 import { PagedResponse } from "@/types/Generic.types";
 import { EntityCreatedResponseDTO } from "@/types/Generic.types";
-import { CreateProductReviewRequestDTO, ProductReviewResponseDTO, PurchaseItemToReviewResponseDTO, ReviewableProductResponseDTO } from "@/types/productReview.types";
-
-export const gerProductAvgRating = async (productId: number): Promise<number> => {
-    const response = await apiClient.get<number>(`/productsReviews/${productId}/avg`);
-    return response.data;
-};
+import { CreateProductReviewRequestDTO, ProductReviewResponseDTO} from "@/types/products/ProductReview.types";
 
 export const getCommercialAvgRating = async (): Promise<number> => {
     const response = await apiClient.get<number>("/productsReviews/commercial/avg");
@@ -24,4 +19,8 @@ export const getProductReviewsByProductId = async (productId: number, page?: num
     });
     return response.data;
 };
+
+export const hideProductReview = async (reviewId: number): Promise<void> => {
+    await apiClient.patch(`/productsReviews/${reviewId}/hide`);
+}
 

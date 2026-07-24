@@ -31,11 +31,5 @@ export const pqrsStatusDot: Record<PqrsStatus, string> = {
   [PqrsStatus.CERRADA]: "bg-gray-400",
 };
 
-export const OPEN_PQRS_STATUSES: PqrsStatus[] = [
-  PqrsStatus.PENDIENTE_ASIGNACION,
-  PqrsStatus.RECIBIDA,
-  PqrsStatus.EN_REVISION,
-];
-
 export const formatPqrsDate = (iso: string) =>
   new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });

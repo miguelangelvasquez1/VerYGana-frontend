@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { editProduct, getProductEditInfo, getProductStock, deleteStockItem, addBulkStockItems } from "@/services/ProductService";
+import { editProduct, getProductEditInfo, getProductStock, getProductStockCode, deleteStockItem, addBulkStockItems } from "@/services/ProductService";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { useProductImageUpdate } from "@/hooks/products/useProductImageUpdate";
 import {
@@ -9,10 +9,14 @@ import {
   UpdateProductRequestDTO,
 } from "@/types/products/Product.types";
 import { ProductStockResponseDTO, ProductStockRequestDTO } from "@/types/products/ProductStock.types";
+import { OptionalTargetAudienceDTO } from "@/types/TargetAudience.types";
 import { PagedResponse } from "@/types/Generic.types";
 import StockInputSection, { StockItemForm } from "./stock/StockInputSection";
+import TargetAudienceFields, {
+  isTargetAudienceValid,
+} from "@/components/shared/targeting/TargetAudienceFields";
 import toast from "react-hot-toast";
-import { RefreshCw, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { RefreshCw, ChevronLeft, ChevronRight, Trash2, Eye, EyeOff, Copy } from "lucide-react";
 
 // ============================================================
 // TIPOS LOCALES
@@ -67,7 +71,9 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
     imageUrl: "",
     totalStockItems: 0,
     availableStockItems: 0,
+    targeting: null,
   });
+  const [targeting, setTargeting] = useState<OptionalTargetAudienceDTO>({});
 
   // ── Imagen ─────────────────────────────────────────────────
   const [newImage, setNewImage] = useState<File | null>(null);
@@ -88,6 +94,10 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
   const [newStockItems, setNewStockItems] = useState<StockItemForm[]>([]);
   const [isSavingStock, setIsSavingStock] = useState(false);
 
+  // ── Revelar código de stock ──────────────────────────────────
+  const [revealedCodes, setRevealedCodes] = useState<Record<number, string>>({});
+  const [loadingCodeId, setLoadingCodeId] = useState<number | null>(null);
+
   // ============================================================
   // CARGA DE DATOS
   // ============================================================
@@ -100,6 +110,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
           getActiveProductCategories(),
         ]);
         setForm(product);
+        setTargeting(product.targeting ?? {});
         setCategories(cats);
       } catch (err) {
         console.error('Error cargando datos del producto:', err);
@@ -170,11 +181,16 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
 
   const handleSubmitData = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!isTargetAudienceValid(targeting)) {
+      toast.error('En Preferencia de audiencia: la edad máxima debe ser mayor o igual a la mínima');
+      return;
+    }
     const request: UpdateProductRequestDTO = {
       name: form.name,
       description: form.description,
       productCategoryId: form.productCategoryId,
       price: form.price,
+      targeting,
     };
     try {
       setIsSavingData(true);
@@ -210,6 +226,31 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? 'Error al eliminar el código');
     }
+  };
+
+  const handleToggleCode = async (stockId: number) => {
+    if (revealedCodes[stockId] != null) {
+      setRevealedCodes((prev) => {
+        const next = { ...prev };
+        delete next[stockId];
+        return next;
+      });
+      return;
+    }
+    try {
+      setLoadingCodeId(stockId);
+      const code = await getProductStockCode(productId, stockId);
+      setRevealedCodes((prev) => ({ ...prev, [stockId]: code }));
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? 'Error al obtener el código');
+    } finally {
+      setLoadingCodeId(null);
+    }
+  };
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success('Código copiado');
   };
 
   const handleSaveNewStock = async () => {
@@ -272,7 +313,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
         {form.imageUrl && !newImagePreview && (
           <div>
             <p className="text-xs text-gray-400 mb-1">Imagen actual</p>
-            <div className="border rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
+            <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
               <img
                 src={form.imageUrl}
                 alt="Imagen actual del producto"
@@ -285,7 +326,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
         {newImagePreview && (
           <div className="relative">
             <p className="text-xs text-gray-400 mb-1">Nueva imagen seleccionada</p>
-            <div className="border rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
+            <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
               <img
                 src={newImagePreview}
                 alt="Nueva imagen"
@@ -303,7 +344,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
           </div>
         )}
 
-        <label className="flex items-center justify-center w-full h-12 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+        <label className="flex items-center justify-center w-full h-12 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
           <span className="text-sm text-gray-500">
             {newImage ? newImage.name : 'Haz clic para cambiar la imagen'}
           </span>
@@ -358,7 +399,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               name="name"
               value={form.name}
               onChange={handleChange}
-              className="w-full border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+              className="w-full border border-gray-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
               required
               disabled={isAnythingLoading}
             />
@@ -370,7 +411,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               name="description"
               value={form.description}
               onChange={handleChange}
-              className="w-full border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+              className="w-full border border-gray-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
               rows={4}
               required
               disabled={isAnythingLoading}
@@ -385,7 +426,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                 name="price"
                 value={form.price}
                 onChange={handleChange}
-                className="w-full border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+                className="w-full border border-gray-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
                 min={1}
                 step="0.01"
                 required
@@ -399,7 +440,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                 name="productCategoryId"
                 value={form.productCategoryId}
                 onChange={handleChange}
-                className="w-full border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+                className="w-full border border-gray-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
                 required
                 disabled={isAnythingLoading}
               >
@@ -416,6 +457,13 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
             <p>Disponibles: <strong>{form.availableStockItems}</strong></p>
           </div>
 
+          <TargetAudienceFields
+            value={targeting}
+            onChange={setTargeting}
+            mode="preference"
+            disabled={isAnythingLoading}
+          />
+
           <div className="flex gap-4 pt-2">
             <button
               type="submit"
@@ -428,7 +476,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               type="button"
               onClick={onCancel}
               disabled={isAnythingLoading}
-              className="flex-1 border py-3 rounded-xl hover:bg-gray-50 transition disabled:opacity-40"
+              className="flex-1 border border-gray-200 py-3 rounded-xl hover:bg-gray-50 transition disabled:opacity-40"
             >
               Cancelar
             </button>
@@ -449,7 +497,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value as StockStatus | ''); setStockPage(0); }}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
             >
               <option value="">Todos los estados</option>
               {(Object.keys(STATUS_LABELS) as StockStatus[]).map((s) => (
@@ -465,13 +513,13 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                 type="date"
                 value={soldDateFilter}
                 onChange={(e) => { setSoldDateFilter(e.target.value); setStockPage(0); }}
-                className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
               />
               <button
                 type="button"
                 onClick={() => { setStatusFilter(''); setSoldDateFilter(''); setStockPage(0); }}
                 title="Limpiar filtros"
-                className="px-2 py-2 border rounded-lg hover:bg-gray-50 transition text-gray-500 self-end"
+                className="px-2 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-gray-500 self-end"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -480,7 +528,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
         </div>
 
         {/* Tabla */}
-        <div className="overflow-x-auto rounded-xl border border-gray-100">
+        <div className="overflow-x-auto rounded-xl border border-gray-200">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -512,7 +560,43 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                 stockItems.map((item, index) => (
                   <tr key={item.id} className="hover:bg-gray-50 transition">
                     <td className="px-4 py-3 text-gray-400 text-xs">{stockPage * 10 + index + 1}</td>
-                    <td className="px-4 py-3 font-mono text-gray-800">{item.code}</td>
+                    <td className="px-4 py-3">
+                      {revealedCodes[item.id] != null ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-gray-800">{revealedCodes[item.id]}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyCode(revealedCodes[item.id])}
+                            title="Copiar código"
+                            className="p-1 text-gray-400 hover:text-gray-600 rounded transition"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleCode(item.id)}
+                            title="Ocultar código"
+                            className="p-1 text-gray-400 hover:text-gray-600 rounded transition"
+                          >
+                            <EyeOff className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleCode(item.id)}
+                          disabled={loadingCodeId === item.id}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] disabled:opacity-40 transition"
+                        >
+                          {loadingCodeId === item.id ? (
+                            <span className="w-3 h-3 border-2 border-[#03548C] border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Eye className="w-3.5 h-3.5" />
+                          )}
+                          Ver código
+                        </button>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLORS[item.status]}`}>
                         {STATUS_LABELS[item.status]}
@@ -547,14 +631,14 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               <button
                 onClick={() => setStockPage((p) => p - 1)}
                 disabled={stockPage === 0}
-                className="p-1.5 border rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
+                className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setStockPage((p) => p + 1)}
                 disabled={stockPage >= totalPages - 1}
-                className="p-1.5 border rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
+                className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

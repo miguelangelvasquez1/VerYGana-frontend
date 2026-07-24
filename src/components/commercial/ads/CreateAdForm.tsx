@@ -3,9 +3,10 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
-  Upload, X, DollarSign, Eye, Calendar, MapPin, Tag,
+  Upload, X, DollarSign, Eye, MapPin, Tag,
   Link as LinkIcon, Loader2, Clock, Info, CheckCircle2,
   AlertCircle, ChevronUp, ChevronDown, Film, Image as ImageIcon, ArrowLeft,
+  HelpCircle,
 } from 'lucide-react';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
@@ -27,8 +28,6 @@ interface CreateAdFormData {
   maxViews: number;
   maxViewsPerUserPerDay: number;
   categoryIds: number[];
-  startImmediately: boolean;
-  startDate: string;
   targetUrl: string;
   targetAudience: {
     ageRange: [number, number];
@@ -100,8 +99,6 @@ export function CreateAdForm() {
     maxViews: 100,
     maxViewsPerUserPerDay: 10,
     categoryIds: [],
-    startImmediately: true,
-    startDate: '',
     targetUrl: '',
     targetAudience: { ageRange: [18, 65], gender: 'ALL', municipalityCodes: [] },
   });
@@ -110,6 +107,7 @@ export function CreateAdForm() {
     { code: string; name: string; departmentName: string }[]
   >([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  const [showTargetUrlTip, setShowTargetUrlTip] = useState(false);
 
   const { categories, loading: loadingCategories } = useCategories();
   const { departments, loading: loadingDepartments } = useDepartments();
@@ -120,8 +118,6 @@ export function CreateAdForm() {
     title: formData.title,
     description: formData.description,
     targetUrl: formData.targetUrl || null,
-    startDate: formData.startImmediately ? null
-      : formData.startDate ? new Date(formData.startDate).toISOString() : null,
     categoryIds: formData.categoryIds,
     targetMunicipalitiesCodes: formData.targetAudience.municipalityCodes,
     minAge: formData.targetAudience.ageRange[0],
@@ -232,7 +228,6 @@ export function CreateAdForm() {
     e.preventDefault();
     if (!pricingInfo) { toast.error('Debes subir un archivo primero'); return; }
     if (formData.categoryIds.length === 0) { toast.error('Selecciona al menos una categoría'); return; }
-    if (!formData.startImmediately && !formData.startDate) { toast.error('Selecciona una fecha de inicio'); return; }
     if (ageRangeInvalid) { toast.error('La edad mínima no puede ser mayor que la edad máxima'); return; }
 
     const result = await uploadAd();
@@ -694,9 +689,31 @@ export function CreateAdForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                    <LinkIcon className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
+                  <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
+                    <LinkIcon className="w-3.5 h-3.5" />
                     URL de destino <span className="text-gray-400 text-xs font-normal">(opcional)</span>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onMouseEnter={() => setShowTargetUrlTip(true)}
+                        onMouseLeave={() => setShowTargetUrlTip(false)}
+                        onFocus={() => setShowTargetUrlTip(true)}
+                        onBlur={() => setShowTargetUrlTip(false)}
+                        className="text-gray-400 hover:text-[#03548C] transition-colors"
+                        aria-label="Ayuda para: URL de destino"
+                      >
+                        <HelpCircle className="h-3.5 w-3.5" />
+                      </button>
+                      {showTargetUrlTip && (
+                        <div
+                          role="tooltip"
+                          className="absolute bottom-full left-1/2 z-20 mb-2 w-60 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2.5 text-xs font-normal leading-relaxed text-white shadow-xl"
+                        >
+                          Será el destino al que irán los usuarios al ver el anuncio y darle al botón correspondiente.
+                          <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                        </div>
+                      )}
+                    </div>
                   </label>
                   <input
                     type="url" value={formData.targetUrl}
@@ -706,32 +723,6 @@ export function CreateAdForm() {
                     placeholder="https://ejemplo.com" maxLength={500} disabled={isSubmitting}
                   />
                 </div>
-              </div>
-            </SectionCard>
-
-            {/* Campaign dates */}
-            <SectionCard>
-              <SectionHeader icon={<Calendar className="w-5 h-5" />} title="Duración de campaña" />
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 select-none">
-                  <input
-                    type="checkbox" checked={formData.startImmediately}
-                    onChange={(e) => setFormData((p) => ({ ...p, startImmediately: e.target.checked, startDate: '' }))}
-                    className="w-4 h-4 accent-[#03548C] cursor-pointer" disabled={isSubmitting}
-                  />
-                  <span className="text-sm text-gray-700">Iniciar cuando el administrador apruebe el anuncio</span>
-                </div>
-                {!formData.startImmediately && (
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Fecha de inicio</label>
-                    <input
-                      type="datetime-local" value={formData.startDate}
-                      onChange={(e) => setFormData((p) => ({ ...p, startDate: e.target.value }))}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
-                      min={new Date().toISOString().slice(0, 16)} disabled={isSubmitting}
-                    />
-                  </div>
-                )}
               </div>
             </SectionCard>
 

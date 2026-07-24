@@ -1,9 +1,11 @@
 import { MunicipalityDTO } from "@/services/LocationService";
+import { OnboardingStep } from "@/services/commercial/OnboardingService";
 
 export interface CommercialInitialDataResponseDTO {
     companyName : string;
     nit : string;
     email : string;
+    onboardingStatus : OnboardingStep;
 }
 
 // types/commercial.ts
@@ -82,7 +84,7 @@ export interface AdResponseDTO {
   status: AdStatus;
   createdAt: string;
   updatedAt: string;
-  startDate: string | null;
+  startDate: string | null; // null mientras el anuncio esté PENDING/APPROVED; lo fija el servidor al pasar a ACTIVE (no es editable por el front)
   endDate: string | null;
   totalBudget: number;
   spentBudget: number;
@@ -110,7 +112,6 @@ export interface EditAdFormData {
   title: string;
   description: string;
   categoryIds: number[];
-  startDate: string;
   targetUrl: string;
   targetAudience: {
     ageRange: [number, number];
@@ -122,7 +123,6 @@ export interface EditAdFormData {
 export interface AdUpdateDTO {
   title?: string;
   description?: string;
-  startDate?: string | null;
   targetUrl?: string;
   categoryIds?: number[];
   targetMunicipalitiesCodes?: string[];
@@ -168,7 +168,7 @@ export type AdForAdminDTO = {
   status: AdStatus;
   createdAt: string;               // LocalDateTime → ISO string
   updatedAt: string;
-  startDate: string;
+  startDate: string | null;        // null hasta que el anuncio pase a ACTIVE
   endDate: string;
   totalBudget: number;
   spentBudget: number;
@@ -209,7 +209,6 @@ export interface AdDetails {
   maxLikes: number;
   maxLikesPerUserPerDay: number;
   targetUrl: string | null;
-  startDate: string | null; // ISO string or null if immediate
   categoryIds: number[];
   targetMunicipalitiesCodes: string[];
   minAge: number;

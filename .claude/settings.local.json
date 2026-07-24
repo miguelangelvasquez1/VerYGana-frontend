@@ -12,7 +12,8 @@
       "Bash(mkdir -p \"c:\\\\Users\\\\Usuario\\\\Projects\\\\verygana\\\\VerYGana-frontend\\\\src\\\\app\\\\commercial\\\\branding\\\\campaigns\\\\[id]\")",
       "Bash(mkdir -p \"c:\\\\Users\\\\Usuario\\\\Projects\\\\verygana\\\\VerYGana-frontend\\\\src\\\\app\\\\commercial\\\\branding\\\\requests\\\\[id]\")",
       "Bash(rm -rf \"c:\\\\Users\\\\Usuario\\\\Projects\\\\verygana\\\\VerYGana-frontend\\\\src\\\\app\\\\commercial\\\\branding\\\\[id]\" *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(npx eslint *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Usuario\\Projects\\verygana\\VerYGana-frontend\\src\\app\\commercial\\campaigns",

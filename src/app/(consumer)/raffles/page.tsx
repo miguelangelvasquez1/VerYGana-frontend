@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Gift } from "lucide-react";
 import LiveRafflesCarousel from "@/components/consumer/raffles/LiveRafflesCarousel";
 import ActiveRafflesSection from "@/components/consumer/raffles/ActiveRafflesSection";
@@ -7,6 +8,11 @@ import LastRafflesResultsPanel from "@/components/consumer/raffles/LastRafflesRe
 import LastWinnersPanel from "@/components/consumer/raffles/LastWinnersPanel";
 
 export default function RafflesPage() {
+  const [animateHero, setAnimateHero] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setAnimateHero(true), 50);
+    return () => clearTimeout(t);
+  }, []);
   return (
     <div className="w-full min-h-screen bg-gray-50">
 
@@ -19,7 +25,7 @@ export default function RafflesPage() {
         <div className="pointer-events-none absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute top-1/2 left-1/4 w-48 h-48 rounded-full bg-white/5" />
 
-        <div className="relative w-full px-6 sm:px-8 lg:px-10 pt-8 pb-14 sm:pb-16 text-center">
+        <div className={`relative w-full px-6 sm:px-8 lg:px-10 pt-8 pb-14 sm:pb-16 text-center transition-all duration-700 ${animateHero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
             <Gift className="w-3.5 h-3.5 text-[#FFD700]" />
             Compra boletos y gana premios increíbles

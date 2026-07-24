@@ -11,6 +11,14 @@ const GamesPanelPage = () => {
   const router = useRouter();
   const [games, setGames] = useState<GameCardResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [animateHero, setAnimateHero] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      const t = setTimeout(() => setAnimateHero(true), 50);
+      return () => clearTimeout(t);
+    }
+  }, [loading]);
 
   useEffect(() => {
     const loadGames = async () => {
@@ -54,7 +62,7 @@ const GamesPanelPage = () => {
         <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 text-center">
+        <div className={`relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 text-center transition-all duration-700 ${animateHero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
             <Zap className="w-3.5 h-3.5 text-yellow-300" />
             Juega, compite y gana premios reales

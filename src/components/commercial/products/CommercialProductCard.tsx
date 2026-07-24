@@ -170,50 +170,53 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
 
           {/* Commercial actions */}
           <div
-            className="flex flex-wrap items-center gap-1 pt-2 border-t mt-auto"
+            className="flex items-center gap-1.5 pt-2 border-t border-gray-200 mt-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => onView?.(product.id)}
-              className="flex items-center gap-1 px-1.5 py-0.5 text-xs bg-[#00a4ff]/10 text-[#00a4ff] rounded-md hover:bg-[#00a4ff]/20 transition cursor-pointer"
+              title="Ver"
+              className="flex items-center justify-center w-7 h-7 shrink-0 bg-[#00a4ff]/10 text-[#00a4ff] rounded-md hover:bg-[#00a4ff]/20 transition cursor-pointer"
             >
-              <Eye className="w-3.5 h-3.5" /> Ver
+              <Eye className="w-3.5 h-3.5" />
             </button>
 
             <button
               onClick={() => onEdit?.(product.id)}
-              className="flex items-center gap-1 px-1.5 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition cursor-pointer"
+              title="Editar"
+              className="flex items-center justify-center w-7 h-7 shrink-0 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition cursor-pointer"
             >
-              <Pencil className="w-3.5 h-3.5" /> Editar
+              <Pencil className="w-3.5 h-3.5" />
             </button>
 
             <button
               onClick={() => onDelete?.(product.id)}
-              className="flex items-center gap-1 px-1.5 py-0.5 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition cursor-pointer"
+              title="Eliminar"
+              className="flex items-center justify-center w-7 h-7 shrink-0 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition cursor-pointer"
             >
-              <Trash className="w-3.5 h-3.5" /> Eliminar
+              <Trash className="w-3.5 h-3.5" />
             </button>
 
             {canUseGameRewards && (
               <button
                 onClick={() => onMarkAsReward?.(product.id)}
-                className={`flex items-center gap-1 px-1.5 py-0.5 text-xs rounded-md transition cursor-pointer ${
+                title={isGameReward ? "Desmarcar como recompensa" : "Marcar como recompensa"}
+                className={`flex items-center justify-center w-7 h-7 shrink-0 rounded-md transition cursor-pointer ${
                   isGameReward
                     ? "bg-[#03548C] text-white hover:bg-[#0b1440]"
                     : "bg-[#03548C]/10 text-[#03548C] hover:bg-[#03548C]/20"
                 }`}
               >
                 <Trophy className="w-3.5 h-3.5" />
-                {isGameReward ? "Desmarcar como recompensa" : "Marcar como recompensa"}
               </button>
             )}
 
             <button
               onClick={() => setShowHelp(true)}
-              className="flex items-center gap-1 px-1.5 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-md hover:bg-gray-200 transition ml-auto"
               title="Ayuda"
+              className="flex items-center justify-center w-7 h-7 shrink-0 bg-gray-100 text-gray-500 rounded-md hover:bg-gray-200 transition cursor-pointer ml-auto"
             >
-              <HelpCircle className="w-3.5 h-3.5 cursor-pointer" />
+              <HelpCircle className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

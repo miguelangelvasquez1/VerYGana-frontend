@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { RaffleResponseDTO } from "@/types/raffles/raffle.types";
+import { RaffleResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
 import { PrizeResponseDTO } from "@/types/raffles/prize.types";
 import { RaffleRuleResponseDTO } from "@/types/raffles/raffleRule.types";
 import ConfirmDialog from "@/components/generic/ConfirmDialog";
+import EditRaffleForm from "@/components/admin/raffles/EditRaffleForm";
+import { X } from "lucide-react";
 
 type TabType = "general" | "prizes" | "rules" | "draw";
 
@@ -10,18 +12,21 @@ interface Props {
   raffle: RaffleResponseDTO;
   onDraw?: (raffleId: number) => Promise<void>;
   onCancel?: (raffleId: number) => Promise<void>;
+  onUpdate?: (raffleId: number, data: UpdateRaffleRequestDTO) => Promise<void>;
 }
 
 export default function RaffleDetailCard({
   raffle,
   onDraw,
   onCancel,
+  onUpdate,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"draw" | "cancel" | null>(
     null
   );
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const openConfirm = (action: "draw" | "cancel") => {
     setConfirmAction(action);
@@ -81,6 +86,15 @@ export default function RaffleDetailCard({
         </div>
 
         <div className="flex gap-2">
+          {onUpdate && (
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition"
+            >
+              Editar
+            </button>
+          )}
+
           {raffle.raffleStatus === "ACTIVE" && (
             <button
               onClick={() => openConfirm("draw")}
@@ -139,6 +153,28 @@ export default function RaffleDetailCard({
         requireTextConfirmation
         confirmationText="CONFIRMAR"
       />
+
+      {/* EDIT MODAL */}
+      {isEditOpen && onUpdate && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full relative shadow-lg overflow-y-auto max-h-[90vh]">
+            <button
+              onClick={() => setIsEditOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+            >
+              <X />
+            </button>
+            <EditRaffleForm
+              raffle={raffle}
+              onCancel={() => setIsEditOpen(false)}
+              onSubmit={async (data) => {
+                await onUpdate(raffle.id, data);
+                setIsEditOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 

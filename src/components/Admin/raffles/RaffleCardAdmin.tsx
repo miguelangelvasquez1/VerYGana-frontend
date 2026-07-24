@@ -12,14 +12,15 @@ import {
 } from "@/services/admin/AdminRaffleService";
 import { RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
 import { useRouter } from "next/navigation";
-import { Eye } from "lucide-react";
+import { Eye, BarChart3 } from "lucide-react";
 
 interface Props {
   raffles: RaffleSummaryResponseDTO[];
   onRefresh: () => Promise<void>;
+  onViewStats?: (raffle: RaffleSummaryResponseDTO) => void;
 }
 
-export default function RaffleCard({ raffles, onRefresh }: Props) {
+export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
   const router = useRouter();
 
   const [selectedRaffle, setSelectedRaffle] =
@@ -166,15 +167,27 @@ export default function RaffleCard({ raffles, onRefresh }: Props) {
                   )}
 
                   {raffle.raffleStatus === "COMPLETED" && (
-                    <button
-                      onClick={() => {
-                        setSelectedRaffle(raffle);
-                        setActionType("verify");
-                      }}
-                      className="text-blue-600 hover:underline"
-                    >
-                      Verificar
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          setSelectedRaffle(raffle);
+                          setActionType("verify");
+                        }}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Verificar
+                      </button>
+
+                      {onViewStats && (
+                        <button
+                          onClick={() => onViewStats(raffle)}
+                          className="text-[#03548C] hover:underline inline-flex items-center gap-1"
+                        >
+                          <BarChart3 size={14} />
+                          Estadísticas
+                        </button>
+                      )}
+                    </>
                   )}
 
                   <button

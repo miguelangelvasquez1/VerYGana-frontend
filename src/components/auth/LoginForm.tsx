@@ -2,14 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authService, AccountPendingReviewError } from "@/lib/auth/authService";
+import {
+  authService,
+  AccountPendingReviewError,
+  AccountLockedError,
+  EmailVerificationPendingError,
+  KycReviewPendingError,
+  PasswordSetupRequiredError,
+} from "@/lib/auth/authService";
+import { getCommercialInitialDataWithToken } from "@/services/commercialService";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { signIn } from "next-auth/react";
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -25,8 +34,9 @@ const LoginForm = () => {
     setError(null);
     setIsLoading(true);
 
+    const identifier = formData.identifier.trim();
+
     try {
-      const identifier = formData.identifier.trim();
       const password = formData.password.trim();
 
       if (!identifier || !password) {
@@ -54,7 +64,18 @@ const LoginForm = () => {
       } else if (role === "ROLE_CONSUMER") {
         router.push("/home");
       } else if (role === "ROLE_COMMERCIAL") {
-        router.push("/commercial");
+        try {
+          const initialData = await getCommercialInitialDataWithToken(loginResponse.accessToken);
+          if (initialData.onboardingStatus === "COMPLETED") {
+            router.push("/commercial");
+          } else {
+            router.push("/commercial-onboarding");
+          }
+        } catch {
+          // Si falla la consulta, dejamos que /commercial decida — ese panel
+          // también verifica el estado del onboarding y redirige si hace falta.
+          router.push("/commercial");
+        }
       } else if (role === "ROLE_GAME_DESIGNER") {
         router.push("/game-designer");
       } else if (role === "ROLE_COMPLIANCE_OFFICER") {
@@ -62,10 +83,21 @@ const LoginForm = () => {
       }
 
     } catch (err: any) {
-      if (err?.status === 403) {
-        setError('Tu cuenta aún no está activada. Revisa tu correo electrónico para encontrar el enlace de configuración de contraseña.');
+      if (err instanceof AccountLockedError) {
+        router.push(`/unlock-account?identifier=${encodeURIComponent(err.identifier)}`);
+        return;
+      } else if (err instanceof EmailVerificationPendingError) {
+        router.push(`/verify?email=${encodeURIComponent(identifier)}`);
+        return;
+      } else if (err instanceof KycReviewPendingError) {
+        setError(err.message);
+      } else if (err instanceof PasswordSetupRequiredError) {
+        setError(err.message);
       } else if (err instanceof AccountPendingReviewError) {
         setError('Tu cuenta está en revisión por el equipo de cumplimiento. Te notificaremos cuando sea aprobada.');
+      } else if (err.message?.toLowerCase().includes('invalid credentials')) {
+        setError('Correo/teléfono o contraseña incorrectos.');
+        setFormData((f) => ({ ...f, password: '' }));
       } else {
         setError(err.message || 'Error al iniciar sesión');
       }
@@ -129,23 +161,34 @@ const LoginForm = () => {
                 ¿Olvidaste tu contraseña?
               </a>
             </div>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-              autoComplete="current-password"
-              placeholder="Ingrese su contraseña"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm
-                         focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]
-                         transition-all duration-200 ease-in-out
-                         hover:border-gray-400
-                         text-gray-900 placeholder-gray-500
-                         bg-white text-sm"
-              disabled={isLoading}
-            />
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                autoComplete="current-password"
+                placeholder="Ingrese su contraseña"
+                className="w-full px-4 py-3 pr-11 border border-gray-300 rounded-lg shadow-sm
+                           focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]
+                           transition-all duration-200 ease-in-out
+                           hover:border-gray-400
+                           text-gray-900 placeholder-gray-500
+                           bg-white text-sm"
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+              </button>
+            </div>
           </div>
 
           <div className="pt-2">

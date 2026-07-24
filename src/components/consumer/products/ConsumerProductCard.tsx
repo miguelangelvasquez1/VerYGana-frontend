@@ -21,7 +21,7 @@ const ConsumerProductCard: React.FC<ConsumerProductCardProps> = ({ product }) =>
 
   return (
     <div
-      className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer overflow-hidden flex flex-col"
+      className="bg-white border border-gray-300 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer overflow-hidden flex flex-col"
       onClick={() => router.push(`/products/${product.id}`)}
     >
       {/* Image */}

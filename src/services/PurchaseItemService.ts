@@ -26,3 +26,8 @@ export const getTopSellingProductsPage = async(size? : number, page? : number) :
     });
     return response.data;
 }
+
+export const getDeliveredCode = async(purchaseItemId : number) : Promise<string> => {
+    const response = await apiClient.get(`/purchaseItems/${purchaseItemId}/delivered-code`);
+    return response.data;
+}

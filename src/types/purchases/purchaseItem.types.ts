@@ -22,7 +22,6 @@ export interface ConsumerPurchaseItemResponseDTO {
     productName: string;
     imageUrl: string;
     unitPriceCents: number;
-    deliveredCode: string | null;
     deliveredAt: string | null;
     status: PurchaseItemStatus;
     canBeReviewed: boolean;

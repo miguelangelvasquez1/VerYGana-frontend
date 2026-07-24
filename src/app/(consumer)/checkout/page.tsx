@@ -91,7 +91,7 @@ export default function CheckoutPage() {
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14">
           <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
             <CreditCard className="w-3.5 h-3.5 text-[#FFD700]" />
-            Pago seguro con Wompi
+            Pago seguro
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Finalizar compra</h1>
           <p className="text-white/70 text-sm sm:text-base">
@@ -108,10 +108,10 @@ export default function CheckoutPage() {
 
       {/* ══════════════ CONTENT ══════════════ */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-5 gap-6">
 
           {/* ── Columna principal ── */}
-          <div className="md:col-span-2 space-y-5">
+          <div className="lg:col-span-3 space-y-5">
 
             {/* Errores de stock */}
             {!stockValidation.isValid && (
@@ -163,13 +163,11 @@ export default function CheckoutPage() {
                         type="number"
                         min={0}
                         max={totalMaxKeysAllowed}
-                        value={keysToUse}
-                        onChange={(e) => handleKeysChange(Number(e.target.value))}
+                        value={keysToUse || ''}
+                        placeholder="0"
+                        onChange={(e) => handleKeysChange(Number(e.target.value) || 0)}
                         className="w-28 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                       />
-                      <span className="text-sm text-gray-600">
-                        llaves = <span className="font-semibold text-[#03548C]">{formatCOP(keysValueCOP)}</span>
-                      </span>
                     </div>
 
                     {/* Desglose */}
@@ -179,7 +177,7 @@ export default function CheckoutPage() {
                         <span className="text-[#03548C] font-medium">−{formatCOP(keysValueCOP)}</span>
                       </div>
                       <div className="flex justify-between border-t border-gray-200 pt-2">
-                        <span className="text-gray-700 font-medium">Pago con Wompi</span>
+                        <span className="text-gray-700 font-medium">Pago en efectivo</span>
                         <span className="font-bold text-[#0b1440]">{formatCOP(cashToPayCOP)}</span>
                       </div>
                       {totalMinCashCOP > 0 && (
@@ -196,7 +194,7 @@ export default function CheckoutPage() {
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Mail className="w-4 h-4 text-[#03548C]" />
-                  <h2 className="font-semibold text-gray-800 text-sm">Email de entrega</h2>
+                  <h2 className="font-semibold text-gray-800 text-sm">Agregar un email de entrega diferente</h2>
                   <span className="text-xs text-gray-400">(opcional)</span>
                 </div>
 
@@ -223,7 +221,7 @@ export default function CheckoutPage() {
                     </>
                   ) : (
                     <>
-                      Pagar {formatCOP(cashToPayCOP)} con Wompi
+                      Pagar {formatCOP(cashToPayCOP)}
                       <ChevronRight className="w-4 h-4" />
                     </>
                   )}
@@ -233,43 +231,62 @@ export default function CheckoutPage() {
           </div>
 
           {/* ── Resumen del pedido ── */}
-          <div className="md:col-span-1">
+          <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden sticky top-24">
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-[#03548C]" />
-                <h2 className="font-bold text-gray-900 text-sm">Resumen del pedido</h2>
+
+              {/* Header */}
+              <div className="px-5 py-4 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-white" />
+                <h2 className="font-bold text-white text-sm">Resumen del pedido</h2>
+                <span className="ml-auto text-[#00a4ff] text-xs font-semibold">
+                  {cartSummary.itemCount} producto{cartSummary.itemCount !== 1 ? 's' : ''}
+                </span>
               </div>
 
-              <div className="p-5 space-y-3">
+              {/* Productos */}
+              <div className="divide-y divide-gray-50">
                 {cart.map((item) => (
-                  <div key={item.productId} className="flex justify-between gap-2 text-sm">
-                    <span className="text-gray-600 truncate flex-1">
-                      {item.name}
-                      <span className="text-gray-400 ml-1">×{item.quantity}</span>
-                    </span>
-                    <span className="font-medium text-gray-900 shrink-0">
-                      {formatCOP(item.price * item.quantity)}
-                    </span>
+                  <div key={item.productId} className="flex gap-3 p-4">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-16 h-16 rounded-xl object-cover shrink-0 border border-gray-100"
+                    />
+                    <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                      <p className="text-sm font-semibold text-gray-800 leading-snug">{item.name}</p>
+                      <div className="flex items-center justify-between mt-1.5">
+                        <span className="text-xs text-gray-400">
+                          {formatCOP(item.price)} × {item.quantity}
+                        </span>
+                        <span className="text-sm font-bold text-gray-900">
+                          {formatCOP(item.price * item.quantity)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 ))}
+              </div>
 
-                <div className="border-t border-gray-100 pt-3 space-y-2">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Subtotal</span>
-                    <span>{formatCOP(cartSummary.total)}</span>
+              {/* Totales */}
+              <div className="px-5 py-4 bg-gray-50 space-y-2.5 border-t border-gray-100">
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>Subtotal</span>
+                  <span className="font-medium text-gray-700">{formatCOP(cartSummary.total)}</span>
+                </div>
+
+                {keysToUse > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[#03548C]">Llaves ({keysToUse.toLocaleString('es-CO')})</span>
+                    <span className="font-semibold text-[#03548C]">−{formatCOP(keysValueCOP)}</span>
                   </div>
-                  {keysToUse > 0 && (
-                    <div className="flex justify-between text-sm text-[#03548C]">
-                      <span>Llaves ({keysToUse.toLocaleString('es-CO')})</span>
-                      <span className="font-medium">−{formatCOP(keysValueCOP)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-base font-bold border-t border-gray-100 pt-2">
-                    <span className="text-gray-900">Total a pagar</span>
-                    <span className="text-[#03548C]">{formatCOP(cashToPayCOP)}</span>
-                  </div>
+                )}
+
+                <div className="flex justify-between items-center pt-2.5 border-t border-gray-200">
+                  <span className="text-base font-bold text-gray-900">Total a pagar</span>
+                  <span className="text-lg font-extrabold text-[#03548C]">{formatCOP(cashToPayCOP)}</span>
                 </div>
               </div>
+
             </div>
           </div>
 

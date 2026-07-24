@@ -1,33 +1,9 @@
 import apiClient from "@/lib/api/client";
 import { EntityCreatedResponseDTO, EntityUpdatedResponseDTO, PagedResponse } from "@/types/Generic.types";
-import { ConfirmRaffleCreationRequestDTO, CreateRaffleRequestDTO, DrawResultResponseDTO, PrepareRaffleCreationRequestBodyDTO, RaffleAssetsUploadPermissionDTO, RaffleResponseDTO, RaffleSummaryResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
-import { RaffleTicketResponseDTO } from "@/types/raffles/raffleTicket.types";
+import { ConfirmRaffleCreationRequestDTO, DrawResultResponseDTO, PrepareRaffleCreationRequestBodyDTO, RaffleAssetsUploadPermissionDTO, RaffleResponseDTO, RaffleStatsResponseDTO, RaffleSummaryResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
+import { TicketAuditLogResponseDTO, SuspiciousIpActivityResponseDTO } from "@/types/raffles/ticketAuditLog.types";
 import { CreateTicketEarningRuleRequestDTO, TicketEarningRuleResponseDTO, UpdateTicketEarningRuleRequestDTO } from "@/types/raffles/ticketEarningRule.types";
 
-// AdminTicketController
-
-export const getTicketsByRaffle = async (raffleId: number, status: string, source: string, issuedAt: string, size?: 20, page?: 0): Promise<RaffleTicketResponseDTO> => {
-    const response = await apiClient.get(`/api/admin/tickets/raffle/${raffleId}`, {
-        params: {
-            status,
-            source,
-            issuedAt,
-            size,
-            page
-        }
-    });
-    return response.data;
-}
-
-export const validateTicket = async (ticketNumber: string): Promise<boolean> => {
-    const response = await apiClient.get(`/api/admin/tickets/${ticketNumber}/validate`);
-    return response.data;
-}
-
-export const expireTickets = async (raffleId: number): Promise<void> => {
-    const response = await apiClient.post(`/api/admin/tickets/raffle/${raffleId}/expire`);
-    return response.data;
-}
 
 // RaffleAdminController
 
@@ -86,6 +62,33 @@ export const countRafflesByStatus = async (status: string): Promise<number> => {
     return response.data;
 }
 
+export const getTicketAuditLogs = async (ticketId: number) : Promise<TicketAuditLogResponseDTO[]> => {
+    const response = await apiClient.get(`/api/admin/raffles/tickets/${ticketId}/audit-logs`);
+    return response.data;
+}
+
+export const getAuditLogsBetWeenDates = async (from: string, to: string, page: number, size: number) : Promise<PagedResponse<TicketAuditLogResponseDTO>> => {
+    const response = await apiClient.get("/api/admin/raffles/audit-logs", {
+        params: {
+            from,
+            to,
+            page,
+            size
+        }
+    });
+    return response.data;
+}
+
+export const getSuspiciousActivity = async (since: string, threshold: number) : Promise<SuspiciousIpActivityResponseDTO[]> => {
+    const response = await apiClient.get("/api/admin/raffles/audit-logs/suspicious", {
+        params: {
+            since,
+            threshold
+        }
+    });
+    return response.data;
+}
+
 // TicketEarningRuleController
 
 export const createTicketEarningRule = async (ticketEarningRule: CreateTicketEarningRuleRequestDTO): Promise<EntityCreatedResponseDTO> => {
@@ -114,11 +117,6 @@ export const getTicketEarningRulesList = async (type?: string, isActive?: boolea
     return response.data;
 }
 
-export const getTicketEarningRule = async (ruleId: number): Promise<TicketEarningRuleResponseDTO> => {
-    const response = await apiClient.get(`/api/admin/ticket-rules/${ruleId}`);
-    return response.data;
-}
-
 export const activeTicketEarningRule = async (ruleId: number): Promise<void> => {
     await apiClient.patch(`/api/admin/ticket-rules/${ruleId}/activate`);
 }
@@ -129,5 +127,10 @@ export const deactivateTicketEarningRule = async (ruleId: number): Promise<void>
 
 export const countActiveTicketEarningRules = async (): Promise<number> => {
     const response = await apiClient.get("/api/admin/ticket-rules/count/active");
+    return response.data;
+}
+
+export const getRaffleStats = async (raffleId: number): Promise<RaffleStatsResponseDTO> => {
+    const response = await apiClient.get(`/api/admin/raffles/${raffleId}/stats`);
     return response.data;
 }

@@ -7,7 +7,6 @@ export interface ProductStockRequestDTO {
 
 export interface ProductStockResponseDTO {
   id : number;
-  code : string;
   status : 'AVAILABLE' | 'RESERVED' | 'SOLD' | 'EXPIRED' | 'INVALID';
   createdAt: string;
   soldAt : string;

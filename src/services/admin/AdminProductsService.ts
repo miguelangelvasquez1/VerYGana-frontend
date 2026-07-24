@@ -26,8 +26,8 @@ export const getInactiveProductCategories = async (): Promise<ProductCategoryRes
     return response.data;
 }
 
-export const getAllProductsForAdmin = async (status: ProductStatus, page: number, size: number): Promise<PagedResponse<ProductSummaryResponseDTO>> => {
-    const response = await apiClient.get("/admin/products", { params: { status, page, size } });
+export const getAllProductsForAdmin = async (status?: ProductStatus, search?: string, page?: number, size?: number): Promise<PagedResponse<ProductSummaryResponseDTO>> => {
+    const response = await apiClient.get("/admin/products", { params: { status, search, page, size } });
     return response.data;
 }
 

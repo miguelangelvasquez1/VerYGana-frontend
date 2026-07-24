@@ -5,7 +5,11 @@ import { useProductCreation } from "@/hooks/products/useProductCreation";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { CreateProductRequestDTO } from "@/types/products/Product.types";
 import { ProductStockRequestDTO } from "@/types/products/ProductStock.types";
+import { OptionalTargetAudienceDTO } from "@/types/TargetAudience.types";
 import StockInputSection, { StockItemForm } from "./stock/StockInputSection";
+import TargetAudienceFields, {
+  isTargetAudienceValid,
+} from "@/components/shared/targeting/TargetAudienceFields";
 import toast from "react-hot-toast";
 
 // ============================================================
@@ -49,6 +53,7 @@ const initialForm: ProductFormState = {
 
 export default function CreateProductForm() {
   const [form, setForm] = useState<ProductFormState>(initialForm);
+  const [targeting, setTargeting] = useState<OptionalTargetAudienceDTO>({});
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -100,6 +105,9 @@ export default function CreateProductForm() {
 
     if (form.stockItems.length === 0) return toast.error('Debes agregar al menos un código de stock');
     if (form.stockItems.some((item) => !item.code.trim())) return toast.error('Todos los códigos deben tener un valor');
+    if (!isTargetAudienceValid(targeting)) {
+      return toast.error('En Preferencia de audiencia: la edad máxima debe ser mayor o igual a la mínima');
+    }
 
     const stockItems: ProductStockRequestDTO[] = form.stockItems.map((item) => ({
       code: item.code,
@@ -113,6 +121,7 @@ export default function CreateProductForm() {
       productCategoryId: parseInt(form.productCategoryId),
       price,
       stockItems,
+      targeting,
     };
 
     const result = await createProduct(image, productData);
@@ -122,6 +131,7 @@ export default function CreateProductForm() {
         "Solicitud enviada con éxito. La revisaremos pronto."
       );
       setForm(initialForm);
+      setTargeting({});
       setImage(null);
       setImagePreview(null);
       reset();
@@ -156,7 +166,7 @@ export default function CreateProductForm() {
           Imagen del producto *
         </label>
         <label
-          className="flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden"
+          className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-200 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden"
           style={{ minHeight: '10rem' }}
         >
           {imagePreview ? (
@@ -193,7 +203,7 @@ export default function CreateProductForm() {
             name="name"
             value={form.name}
             onChange={handleChange}
-            className="w-full border p-2 rounded-lg"
+            className="w-full border border-gray-200 p-2 rounded-lg"
             required
             disabled={isSubmitting}
           />
@@ -206,7 +216,7 @@ export default function CreateProductForm() {
             name="price"
             value={form.price}
             onChange={handleChange}
-            className="w-full border p-2 rounded-lg"
+            className="w-full border border-gray-200 p-2 rounded-lg"
             required
             min="1"
             disabled={isSubmitting}
@@ -219,7 +229,7 @@ export default function CreateProductForm() {
             name="productCategoryId"
             value={form.productCategoryId}
             onChange={handleChange}
-            className="w-full border p-2 rounded-lg"
+            className="w-full border border-gray-200 p-2 rounded-lg"
             required
             disabled={isSubmitting}
           >
@@ -240,12 +250,15 @@ export default function CreateProductForm() {
           name="description"
           value={form.description}
           onChange={handleChange}
-          className="w-full border p-2 rounded-lg"
+          className="w-full border border-gray-200 p-2 rounded-lg"
           rows={4}
           required
           disabled={isSubmitting}
         />
       </div>
+
+      {/* ── Segmentación de audiencia ── */}
+      <TargetAudienceFields value={targeting} onChange={setTargeting} mode="preference" disabled={isSubmitting} />
 
       {/* ── Stock ── */}
       <StockInputSection

@@ -274,7 +274,7 @@ export default function Navbar() {
                   {/* BUTTON */}
                   <div className="mt-5">
                     <Link
-                      href="/explore/wallet"
+                      href="/explore/transactions"
                       className="w-full flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold hover:scale-[1.02] transition-all shadow-lg hover:shadow-blue-500/20"
                     >
                       <History className="w-5 h-5" />
@@ -566,7 +566,7 @@ export default function Navbar() {
                   {/* BUTTON */}
                   <div className="mt-5">
                     <Link
-                      href="/explore/wallet"
+                      href="/explore/transactions"
                       className="w-full flex items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-[#004b8d] to-[#0075c4] text-white px-4 py-4 font-semibold shadow-lg"
                     >
                       <History className="w-5 h-5" />

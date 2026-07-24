@@ -1,3 +1,4 @@
+import { OptionalTargetAudienceDTO, TargetAudienceResponseDTO } from "../TargetAudience.types";
 import { ProductReviewResponseDTO } from "./ProductReview.types";
 import { ProductStockRequestDTO } from "./ProductStock.types";
 
@@ -58,6 +59,7 @@ export interface ProductEditInfoResponseDTO {
   imageUrl: string;
   totalStockItems: number;
   availableStockItems: number;
+  targeting: TargetAudienceResponseDTO | null;
 }
 
 export interface CreateProductRequestDTO {
@@ -66,6 +68,7 @@ export interface CreateProductRequestDTO {
   productCategoryId: number;
   price: number;
   stockItems: ProductStockRequestDTO[];
+  targeting: OptionalTargetAudienceDTO;
 }
 
 export interface UpdateProductRequestDTO {
@@ -73,6 +76,7 @@ export interface UpdateProductRequestDTO {
   description : string;
   productCategoryId : number;
   price : number;
+  targeting: OptionalTargetAudienceDTO;
 }
 
 export interface ConfirmProductImageUploadRequestDTO {

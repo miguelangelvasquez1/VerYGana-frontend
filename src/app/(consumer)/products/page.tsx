@@ -35,6 +35,12 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [animateHero, setAnimateHero] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setAnimateHero(true), 50);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -201,7 +207,7 @@ export default function ProductsPage() {
         <div className="pointer-events-none absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5" />
         <div className="pointer-events-none absolute top-1/2 left-1/4 w-48 h-48 rounded-full bg-cyan-400/10" />
 
-        <div className="relative w-full px-4 sm:px-6 lg:px-10 pt-10 pb-16 text-center">
+        <div className={`relative w-full px-4 sm:px-6 lg:px-10 pt-10 pb-16 text-center transition-all duration-700 ${animateHero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
             <Package className="w-3.5 h-3.5 text-yellow-300" />
             Usa tus llaves para comprar productos exclusivos

@@ -197,7 +197,7 @@ export default function ConsumerProfilePage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <QuickLink
-              href="/explore/wallet"
+              href="/explore/transactions"
               icon={<Key className="w-5 h-5 text-white" />}
               iconBg="bg-[#03548C]"
               title="Historial de llaves"

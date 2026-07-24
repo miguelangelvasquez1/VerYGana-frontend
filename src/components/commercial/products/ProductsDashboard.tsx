@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Package, Search, Filter, Grid, List, PlusCircle, X } from "lucide-react";
+import { Package, Search, PlusCircle, X } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { ProductStatus, ProductSummaryResponseDTO } from "@/types/products/Product.types";
@@ -35,7 +35,6 @@ export default function ProductsDashboard() {
     averageRating: 0,
   });
 
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -227,31 +226,15 @@ export default function ProductsDashboard() {
       </div>
 
       <div className="bg-white rounded-xl shadow p-4">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]"
-            />
-          </div>
-
-          <button className="border px-4 py-2 rounded-lg flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Filtros
-          </button>
-
-          <button
-            onClick={() =>
-              setViewMode(viewMode === "grid" ? "list" : "grid")
-            }
-            className="border px-4 py-2 rounded-lg"
-          >
-            {viewMode === "grid" ? <List /> : <Grid />}
-          </button>
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Buscar..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+          />
         </div>
       </div>
 
@@ -264,7 +247,7 @@ export default function ProductsDashboard() {
               : "No tienes productos publicados"}
           </p>
         </div>
-      ) : viewMode === "grid" ? (
+      ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredProducts.map((product) => (
             <CommercialProductCard
@@ -274,19 +257,6 @@ export default function ProductsDashboard() {
               onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
               onMarkAsReward={() => handleToggleReward(product.id)}
               onView={() => router.push(`/commercial/products/${product.id}`)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          {filteredProducts.map((product) => (
-            <CommercialProductCard
-              key={product.id}
-              product={product}
-              onDelete={() => handleDeleteProduct(product.id)}
-              onEdit={() => router.push(`/commercial/products/edit/${product.id}`)}
-              onMarkAsReward={() => handleToggleReward(product.id)}
-              onView={() => router.push(`/products/${product.id}?mode=commercial`)}
             />
           ))}
         </div>
@@ -342,7 +312,7 @@ export default function ProductsDashboard() {
 
       <TopSellingProducts />
 
-      <div className="pt-6 border-t">{renderProducts()}</div>
+      <div className="pt-6 border-t border-gray-200">{renderProducts()}</div>
     </div>
   );
 
@@ -366,7 +336,7 @@ export default function ProductsDashboard() {
             className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-bold text-gray-900">Crear producto</h2>
               <button
                 onClick={() => setShowCreateForm(false)}

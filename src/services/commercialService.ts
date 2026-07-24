@@ -51,6 +51,28 @@ export const getCommercialInitialData = async (): Promise<CommercialInitialDataR
   return response.data;
 }
 
+/**
+ * Variante de getCommercialInitialData que recibe el accessToken explícito
+ * en vez de depender del token en memoria que sincroniza <AuthProvider>
+ * desde useSession(). Úsala justo después de login: signIn('credentials-sync')
+ * ya resolvió, pero useSession() todavía no reflejó la sesión nueva (necesita
+ * al menos un ciclo de render), así que el token en memoria puede seguir
+ * siendo el anterior (o null) — apiClient dispararía la petición sin el
+ * token correcto y el backend respondería 401.
+ */
+export const getCommercialInitialDataWithToken = async (
+  accessToken: string
+): Promise<CommercialInitialDataResponseDTO> => {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+  const response = await fetch(`${API_URL}/commercials/initialData`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!response.ok) {
+    throw new Error('Error al obtener los datos iniciales del comercial');
+  }
+  return response.json();
+};
+
 // ============================================
 // MÉTODOS DEL SERVICE
 // ============================================

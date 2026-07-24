@@ -52,7 +52,7 @@ export default function TopSellingProducts() {
           <button
             onClick={() => setPage((p) => p - 1)}
             disabled={!meta?.hasPrevious || loading}
-            className="p-2 border rounded-lg disabled:opacity-40"
+            className="p-2 border border-gray-200 rounded-lg disabled:opacity-40"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -60,7 +60,7 @@ export default function TopSellingProducts() {
           <button
             onClick={() => setPage((p) => p + 1)}
             disabled={!meta?.hasNext || loading}
-            className="p-2 border rounded-lg disabled:opacity-40"
+            className="p-2 border border-gray-200 rounded-lg disabled:opacity-40"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -75,7 +75,7 @@ export default function TopSellingProducts() {
         {products.map((product) => (
           <div
             key={product.id}
-            className="flex items-center gap-4 border rounded-lg p-4 hover:bg-gray-50 transition"
+            className="flex items-center gap-4 border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition"
           >
             <div className="relative w-16 h-16 rounded overflow-hidden bg-gray-100">
               <Image
