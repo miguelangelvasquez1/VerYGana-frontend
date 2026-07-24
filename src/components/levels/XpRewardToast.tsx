@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   TrendingUp, ClipboardList, Tv2, Gamepad2,
   Users, ShoppingBag, Medal, Star, Trophy, Crown, Diamond,
@@ -123,9 +124,9 @@ const PARTICLE_CSS = PARTICLE_ANGLES.map((angle, i) => {
 
 const ANIMATIONS_CSS = `
   @keyframes xp-toast-in {
-    from { opacity: 0; transform: scale(0.88) translateY(12px); }
-    60%  { transform: scale(1.03) translateY(-2px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
+    from { transform: scale(0.9); }
+    60%  { transform: scale(1.03); }
+    to   { transform: scale(1); }
   }
   @keyframes xp-icon-pop {
     0%   { transform: scale(0.4); opacity: 0; }
@@ -165,7 +166,11 @@ export function XpRewardToast({ data, onDismiss }: Props) {
   const [barTarget, setBarTarget]   = useState(0)
   const [showLevelUp, setShowLevelUp] = useState(false)
   const [animKey, setAnimKey]       = useState(0)
+  const [mounted, setMounted]       = useState(false)
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const exitTimer    = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => { setMounted(true) }, [])
 
   const xpDisplayed = useCountUp(data?.xpEarned ?? 0, 700, animKey, reduceMotion)
 
@@ -188,25 +193,31 @@ export function XpRewardToast({ data, onDismiss }: Props) {
     if (data.leveledUp && reduceMotion) setShowLevelUp(true)
 
     if (dismissTimer.current) clearTimeout(dismissTimer.current)
+    if (exitTimer.current) clearTimeout(exitTimer.current)
     dismissTimer.current = setTimeout(() => {
       setVisible(false)
-      setTimeout(onDismiss, 400)
+      exitTimer.current = setTimeout(onDismiss, 400)
     }, 5000)
 
     return () => {
       if (barTimer) clearTimeout(barTimer)
       if (lvlTimer) clearTimeout(lvlTimer)
+      if (dismissTimer.current) clearTimeout(dismissTimer.current)
+      if (exitTimer.current) clearTimeout(exitTimer.current)
     }
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!data) return null
+  if (!data || !mounted) return null
 
   const act     = ACTIVITY_CONFIG[data.activityType] ?? ACTIVITY_CONFIG.SURVEY_COMPLETED
   const lv      = LEVEL_CONFIG[data.currentLevel]    ?? LEVEL_CONFIG.BRONCE
   const ActIcon = act.Icon
   const newLv   = data.newLevel ? (LEVEL_CONFIG[data.newLevel] ?? LEVEL_CONFIG.BRONCE) : null
 
-  return (
+  // Al subir de nivel, la barra se llena al 100% y adopta el color del nuevo nivel
+  const barColor = (data.leveledUp && newLv && showLevelUp) ? newLv.bar : lv.bar
+
+  return createPortal(
     <>
       <style>{ANIMATIONS_CSS}</style>
 
@@ -321,9 +332,9 @@ export function XpRewardToast({ data, onDismiss }: Props) {
               <div style={{
                 height:     '100%',
                 width:      `${barTarget}%`,
-                background: lv.bar,
+                background: barColor,
                 borderRadius: 99,
-                transition: reduceMotion ? undefined : 'width 0.9s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: reduceMotion ? undefined : 'width 0.9s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease',
               }} />
             </div>
 
@@ -390,6 +401,7 @@ export function XpRewardToast({ data, onDismiss }: Props) {
           </div>
         )}
       </div>
-    </>
+    </>,
+    document.body
   )
 }

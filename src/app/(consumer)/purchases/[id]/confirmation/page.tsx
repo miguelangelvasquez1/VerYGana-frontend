@@ -12,6 +12,8 @@ import { useXpReward } from '@/hooks/useXpReward';
 import { XpRewardToast } from '@/components/levels/XpRewardToast';
 import { levelService } from '@/services/LevelService';
 import { levelKeys } from '@/hooks/useLevelProfile';
+import type { LevelProfile } from '@/types/level';
+import { resolveLevelUp } from '@/utils/levelUp';
 
 type Status = 'loading' | 'success' | 'error';
 
@@ -61,6 +63,7 @@ export default function PurchaseConfirmationPage() {
     const seenKey = `xp_seen_purchase_${purchase.id}`;
     if (sessionStorage.getItem(seenKey)) return;
 
+    const prevLevel = queryClient.getQueryData<LevelProfile>(levelKeys.profile())?.currentLevel;
     Promise.all([
       levelService.getProfile(token),
       levelService.getHistory(token, 0, 5),
@@ -74,9 +77,9 @@ export default function PurchaseConfirmationPage() {
           activityType: 'PURCHASE',
           xpEarned: tx.xpEarned,
           multiplier: tx.multiplierApplied,
-          currentLevel: profile.currentLevel,
           xpTotal: profile.xpTotal,
           xpToNextLevel: profile.xpToNextLevel,
+          ...resolveLevelUp(prevLevel, profile.currentLevel),
         });
       })
       .catch(() => {});

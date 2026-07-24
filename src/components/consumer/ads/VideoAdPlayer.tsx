@@ -9,6 +9,8 @@ import { AdForConsumerDTO, AdLikedResponse } from '@/types/ads/commercial';
 import { levelService } from '@/services/LevelService';
 import { levelKeys } from '@/hooks/useLevelProfile';
 import type { XpRewardData } from '@/components/levels/XpRewardToast';
+import type { LevelProfile } from '@/types/level';
+import { resolveLevelUp } from '@/utils/levelUp';
 import toast from 'react-hot-toast';
 
 interface Props {
@@ -182,6 +184,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
 
           const token = session?.accessToken as string | undefined;
           if (token && onXpReward) {
+            const prevLevel = queryClient.getQueryData<LevelProfile>(levelKeys.profile())?.currentLevel;
             Promise.all([
               levelService.getProfile(token),
               levelService.getHistory(token, 0, 1),
@@ -193,9 +196,9 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
                 activityType: 'VIDEO_WATCHED',
                 xpEarned:     latest.xpEarned,
                 multiplier:   latest.multiplierApplied,
-                currentLevel: profile.currentLevel,
                 xpTotal:      profile.xpTotal,
                 xpToNextLevel: profile.xpToNextLevel,
+                ...resolveLevelUp(prevLevel, profile.currentLevel),
               });
             }).catch(() => {/* non-critical */});
           }
