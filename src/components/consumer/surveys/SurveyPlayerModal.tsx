@@ -12,6 +12,8 @@ import { useSurveyDetail, useStartSurvey, useSubmitSurvey } from '@/hooks/survey
 import { formatKeys, formatDate, getSpotsRemaining, isSuspendedSurveyError } from '@/hooks/surveys/surveyUtils';
 import { levelService } from '@/services/LevelService';
 import { levelKeys } from '@/hooks/useLevelProfile';
+import type { LevelProfile } from '@/types/level';
+import { resolveLevelUp } from '@/utils/levelUp';
 import QuestionRenderer from './QuestionRenderer';
 import SurveyCompletionScreen from './SurveyCompletionScreen';
 import type { XpRewardData } from '@/components/levels/XpRewardToast';
@@ -176,6 +178,10 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
 
       const token = session?.accessToken as string | undefined;
       if (token && showReward) {
+        // Nivel previo (cache) para detectar subida de nivel al comparar con el nuevo
+        const prevProfile = queryClient.getQueryData<LevelProfile>(levelKeys.profile());
+        const prevLevel = prevProfile?.currentLevel;
+
         Promise.all([
           levelService.getProfile(token),
           levelService.getHistory(token, 0, 1),
@@ -183,13 +189,14 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
           queryClient.setQueryData(levelKeys.profile(), profile);
           const latest = history.content[0];
           if (!latest) return;
+
           showReward({
             activityType: 'SURVEY_COMPLETED',
             xpEarned:     latest.xpEarned,
             multiplier:   latest.multiplierApplied,
-            currentLevel: profile.currentLevel,
             xpTotal:      profile.xpTotal,
             xpToNextLevel: profile.xpToNextLevel,
+            ...resolveLevelUp(prevLevel, profile.currentLevel),
           });
         }).catch(() => {/* non-critical */});
       }

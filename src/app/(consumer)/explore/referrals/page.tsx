@@ -10,6 +10,8 @@ import { useXpReward } from '@/hooks/useXpReward';
 import { XpRewardToast } from '@/components/levels/XpRewardToast';
 import { levelService } from '@/services/LevelService';
 import { levelKeys } from '@/hooks/useLevelProfile';
+import type { LevelProfile } from '@/types/level';
+import { resolveLevelUp } from '@/utils/levelUp';
 
 const SEEN_KEY = 'xp_seen_referral_txids';
 
@@ -55,6 +57,7 @@ export default function ReferralsPage() {
     const token = (session as any)?.accessToken as string | undefined;
     if (!token) return;
 
+    const prevLevel = queryClient.getQueryData<LevelProfile>(levelKeys.profile())?.currentLevel;
     Promise.all([
       levelService.getProfile(token),
       levelService.getHistory(token, 0, 10),
@@ -72,9 +75,9 @@ export default function ReferralsPage() {
           activityType: 'REFERRAL_ACTIVE',
           xpEarned: newTx.xpEarned,
           multiplier: newTx.multiplierApplied,
-          currentLevel: profile.currentLevel,
           xpTotal: profile.xpTotal,
           xpToNextLevel: profile.xpToNextLevel,
+          ...resolveLevelUp(prevLevel, profile.currentLevel),
         });
       })
       .catch(() => {});
