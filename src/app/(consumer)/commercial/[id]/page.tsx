@@ -16,7 +16,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 
-import { getCommercialProfile } from "@/services/CommercialService";
+import { getCommercialProfile } from "@/services/commercialService";
 import { getCommercialProducts } from "@/services/ProductService";
 import { CommercialProfileResponseDTO } from "@/types/Commercial.types";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";

@@ -3,7 +3,8 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { getGameRewards } from '@/services/GameService';
+import toast from 'react-hot-toast';
+import { getGameRewards, init } from '@/services/GameService';
 import { RewardCardResponseDTO } from '@/types/games/game.types';
 import { useCart } from '@/context/CartContext';
 
@@ -99,22 +100,45 @@ export default function PlayGamePage() {
         }
       }
 
-      // TODO: descomentar cuando el nuevo build del juego entregue el DTO completo
-      // if (data.type === 'PRODUCT_CLICKED') {
-      //   const p = data.product;
-      //   if (!p) return;
-      //   addItem({
-      //     id: Number(p.id),
-      //     name: p.name,
-      //     imageUrl: p.imageUrl,
-      //     price: p.regularPrice,
-      //     maxKeysAllowed: p.maxKeysAllowed,
-      //     minCashCents: p.minCashCents,
-      //     stock: p.stock,
-      //     categoryName: p.categoryName,
-      //   });
-      //   openCart();
-      // }
+      if (data.type === 'PRODUCT_CLICKED') {
+        const p = data.product;
+        if (!p) return;
+
+        try {
+          // El juego debería mandar snake_case (contrato original), pero hoy manda
+          // camelCase en este evento — se acepta cualquiera de los dos formatos
+          // para no depender de que el otro equipo despliegue su fix.
+          addItem({
+            id: Number(p.id),
+            name: p.name,
+            imageUrl: p.imageUrl ?? p.image_url,
+            price: Number(p.regularPrice ?? p.regular_price),
+            maxKeysAllowed: Number(p.maxKeysAllowed ?? p.max_keys_allowed),
+            minCashCents: Number(p.minCashCents ?? p.min_cash_cents),
+            stock: Number(p.stock),
+            categoryName: p.categoryName ?? p.category_name,
+          });
+          openCart();
+        } catch (err: any) {
+          console.error('Error agregando producto del juego al carrito', err);
+          toast.error(err?.message || 'No se pudo agregar el producto al carrito.');
+        }
+      }
+
+      if (data.type === 'GAME_FINISHED') {
+        try {
+          setLoading(true);
+          // El iframe siempre continúa en modo campañas patrocinadas: el
+          // backend decide qué campaña sigue, nunca se le pide un gameId puntual.
+          const response = await init({ sponsored: true });
+          setIframeUrl(response.url);
+        } catch (err) {
+          console.error('Error cargando una nueva campaña tras GAME_FINISHED', err);
+          toast.error('No se pudo cargar otro juego. Vuelve a intentarlo.');
+        } finally {
+          setLoading(false);
+        }
+      }
     };
 
     window.addEventListener('message', handleMessage);
