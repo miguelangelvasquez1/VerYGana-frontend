@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
+import { motion, AnimatePresence, useReducedMotion, type Variants } from 'framer-motion'
 import {
   Zap, Trophy, Star, Diamond, Medal, Crown,
   ChevronRight, ChevronLeft, Clock, TrendingUp,
@@ -10,27 +11,38 @@ import {
 } from 'lucide-react'
 import type { LevelProfile, TransactionLog, LevelConfig, PagedResponse } from '@/types/level'
 import { levelService } from '@/services/LevelService'
+import {
+  BRAND, LEVEL_ORDER, levelTheme, levelGradient, levelSheen, activityTheme, MEDALLION_BEVEL,
+} from '@/components/levels/levelTheme'
 
-// ─── Configuración visual por nivel ──────────────────────────────────────────
+// ─── Íconos por nivel / actividad (colores viven en levelTheme) ───────────────
 
-const LEVEL_CONFIG = {
-  BRONCE:    { label: 'Bronce',    from: '#b45309', to: '#d97706', bg: 'from-amber-600 to-amber-500',    badge: 'bg-amber-100 text-amber-800',    bar: 'bg-amber-500',    Icon: Medal   },
-  PLATA:     { label: 'Plata',     from: '#6b7280', to: '#9ca3af', bg: 'from-gray-500 to-gray-400',      badge: 'bg-gray-100 text-gray-700',      bar: 'bg-gray-500',     Icon: Star    },
-  ORO:       { label: 'Oro',       from: '#b45309', to: '#fbbf24', bg: 'from-yellow-600 to-yellow-400',  badge: 'bg-yellow-100 text-yellow-800',  bar: 'bg-yellow-500',   Icon: Trophy  },
-  RUBI:      { label: 'Rubí',      from: '#be123c', to: '#f43f5e', bg: 'from-rose-700 to-rose-500',      badge: 'bg-rose-100 text-rose-800',      bar: 'bg-rose-500',     Icon: Zap     },
-  ESMERALDA: { label: 'Esmeralda', from: '#065f46', to: '#10b981', bg: 'from-emerald-700 to-emerald-500',badge: 'bg-emerald-100 text-emerald-800',bar: 'bg-emerald-500',  Icon: Diamond },
-  DIAMANTE:  { label: 'Diamante',  from: '#1d4ed8', to: '#60a5fa', bg: 'from-blue-700 to-blue-400',      badge: 'bg-blue-100 text-blue-800',      bar: 'bg-blue-500',     Icon: Crown   },
-} as const
-
-const ACTIVITY_CONFIG = {
-  SURVEY_COMPLETED: { label: 'Encuesta completada', Icon: ClipboardList, color: 'text-purple-500', bg: 'bg-purple-50' },
-  VIDEO_WATCHED:    { label: 'Video visto',          Icon: Tv2,           color: 'text-blue-500',   bg: 'bg-blue-50'   },
-  GAME_PLAYED:      { label: 'Partida jugada',       Icon: Gamepad2,      color: 'text-green-500',  bg: 'bg-green-50'  },
-  REFERRAL_ACTIVE:  { label: 'Referido activo',      Icon: Users,         color: 'text-amber-500',  bg: 'bg-amber-50'  },
-  PURCHASE:         { label: 'Compra realizada',     Icon: ShoppingBag,   color: 'text-rose-500',   bg: 'bg-rose-50'   },
+const LEVEL_ICON: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+  BRONCE: Medal, PLATA: Star, ORO: Trophy, RUBI: Zap, ESMERALDA: Diamond, DIAMANTE: Crown,
 }
 
-const LEVEL_ORDER = ['BRONCE', 'PLATA', 'ORO', 'RUBI', 'ESMERALDA', 'DIAMANTE']
+const ACTIVITY_ICON: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+  SURVEY_COMPLETED: ClipboardList,
+  VIDEO_WATCHED:    Tv2,
+  GAME_PLAYED:      Gamepad2,
+  REFERRAL_ACTIVE:  Users,
+  PURCHASE:         ShoppingBag,
+}
+
+// ─── Tokens de animación (curvas fuertes, duraciones cortas) ──────────────────
+
+const EASE_OUT = [0.23, 1, 0.32, 1] as const
+const TAB_SPRING = { type: 'spring' as const, duration: 0.5, bounce: 0.18 }
+
+// Contenedor con entrada escalonada de sus hijos
+const listV: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.05, delayChildren: 0.02 } },
+}
+const itemV: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE_OUT } },
+}
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -77,20 +89,27 @@ export default function GamificationPage() {
     if (tab === 'historial') loadHistory(page)
   }, [tab, page, loadHistory])
 
-  const lv = profile ? LEVEL_CONFIG[profile.currentLevel] : LEVEL_CONFIG.BRONCE
-  const LvIcon = lv.Icon
+  const reduce = useReducedMotion()
+  const currentLevel = profile?.currentLevel ?? 'BRONCE'
+  const lv = levelTheme(currentLevel)
+  const LvIcon = LEVEL_ICON[currentLevel] ?? Medal
   const xpMax = profile ? profile.xpTotal + profile.xpToNextLevel : 1000
   const pct = profile ? Math.min((profile.xpTotal / xpMax) * 100, 100) : 0
   const lvIndex = profile ? LEVEL_ORDER.indexOf(profile.currentLevel) : 0
   const nextLevel = lvIndex < 5 ? LEVEL_ORDER[lvIndex + 1] : null
-  const nextLvConfig = nextLevel ? LEVEL_CONFIG[nextLevel as keyof typeof LEVEL_CONFIG] : null
+  const nextLvConfig = nextLevel ? levelTheme(nextLevel) : null
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24 lg:pb-8">
 
       {/* ── Header hero ─────────────────────────────────────────────────────── */}
-      <div className={`bg-gradient-to-br ${lv.bg} px-4 pt-6 pb-20 lg:px-8 lg:pt-10 lg:pb-24`}>
-        <div className="max-w-2xl mx-auto text-center">
+      <div
+        className="relative overflow-hidden px-4 pt-6 pb-20 lg:px-8 lg:pt-10 lg:pb-24"
+        style={{ background: levelSheen(currentLevel) }}
+      >
+        {/* viñeta suave para dar profundidad al metal */}
+        <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,0.16), transparent 60%)' }} />
+        <div className="relative max-w-2xl mx-auto text-center">
           {loading ? (
             <div className="flex flex-col items-center gap-3">
               <Skeleton className="w-20 h-20 rounded-full" />
@@ -99,17 +118,22 @@ export default function GamificationPage() {
             </div>
           ) : (
             <>
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 backdrop-blur mb-3">
-                <LvIcon className="w-10 h-10 text-white" />
+              {/* medallón acuñado */}
+              <div
+                className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-3"
+                style={{ background: 'rgba(255,255,255,0.16)', boxShadow: MEDALLION_BEVEL, backdropFilter: 'blur(4px)' }}
+              >
+                <LvIcon className="w-10 h-10 text-white" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
               </div>
-              <h1 className="text-3xl font-bold text-white">{lv.label}</h1>
+              <p className="text-white/70 text-[11px] font-semibold mb-1" style={{ letterSpacing: '0.22em', textTransform: 'uppercase' }}>Tu nivel</p>
+              <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.01em' }}>{lv.label}</h1>
               <p className="text-white/70 text-sm mt-1">
-                Multiplicador <span className="font-bold text-white">×{profile?.multiplier.toFixed(1)}</span> en todas tus actividades
+                Multiplicador <span className="font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>×{profile?.multiplier.toFixed(1)}</span> en todas tus actividades
               </p>
 
               {/* barra xp */}
               <div className="mt-5 mx-auto max-w-xs">
-                <div className="flex justify-between text-xs text-white/70 mb-1.5">
+                <div className="flex justify-between text-xs text-white/70 mb-1.5" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   <span>{profile?.xpTotal.toLocaleString('es-CO')} XP</span>
                   <span>{xpMax.toLocaleString('es-CO')} XP</span>
                 </div>
@@ -144,56 +168,74 @@ export default function GamificationPage() {
       <div className="max-w-2xl mx-auto px-4 -mt-14 lg:-mt-16 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg p-1.5 flex gap-1">
           {(['perfil', 'historial', 'niveles'] as Tab[]).map(t => (
-            <button
+            <motion.button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all capitalize ${
-                tab === t
-                  ? `bg-gradient-to-r ${lv.bg} text-white shadow-md`
-                  : 'text-gray-500 hover:text-gray-800'
+              whileTap={reduce ? undefined : { scale: 0.96 }}
+              transition={{ duration: 0.15, ease: EASE_OUT }}
+              className={`relative flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-colors duration-200 ${
+                tab === t ? 'text-white' : 'text-gray-500 hover:text-gray-800'
               }`}
             >
-              {t === 'perfil' ? 'Mi nivel' : t === 'historial' ? 'Historial' : 'Todos los niveles'}
-            </button>
+              {tab === t && (
+                <motion.span
+                  layoutId="tab-pill"
+                  className="absolute inset-0 rounded-xl shadow-md"
+                  style={{ background: levelGradient(currentLevel, 90) }}
+                  transition={reduce ? { duration: 0 } : TAB_SPRING}
+                />
+              )}
+              <span className="relative z-10">
+                {t === 'perfil' ? 'Mi nivel' : t === 'historial' ? 'Historial' : 'Todos los niveles'}
+              </span>
+            </motion.button>
           ))}
         </div>
       </div>
 
       {/* ── Contenido ────────────────────────────────────────────────────────── */}
-      <div className="max-w-2xl mx-auto px-4 mt-5 space-y-4">
+      <div className="max-w-2xl mx-auto px-4 mt-5">
+        <AnimatePresence mode="wait">
 
         {/* ── TAB: PERFIL ────────────────────────────────────────────────────── */}
         {tab === 'perfil' && (
-          <>
+          <motion.div
+            key="perfil"
+            className="space-y-4"
+            variants={listV}
+            initial={reduce ? false : 'hidden'}
+            animate="show"
+            exit={reduce ? undefined : { opacity: 0, y: -6, transition: { duration: 0.15 } }}
+          >
             {/* Métricas */}
             {loading ? (
               <div className="grid grid-cols-2 gap-3">
                 <Skeleton className="h-24" /><Skeleton className="h-24" />
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <motion.div variants={itemV} className="grid grid-cols-2 gap-3">
                 <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-4 h-4 text-purple-500" />
-                    <span className="text-xs text-gray-500 font-medium">XP total</span>
+                    <TrendingUp className="w-4 h-4" style={{ color: BRAND.azulClaro }} />
+                    <span className="text-[11px] text-gray-500 font-semibold uppercase" style={{ letterSpacing: '0.1em' }}>XP total</span>
                   </div>
-                  <p className="text-2xl font-bold text-gray-800">{profile?.xpTotal.toLocaleString('es-CO')}</p>
+                  <p className="text-2xl font-bold text-gray-800" style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>{profile?.xpTotal.toLocaleString('es-CO')}</p>
                 </div>
                 <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
                   <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-4 h-4 text-amber-500" />
-                    <span className="text-xs text-gray-500 font-medium">Multiplicador</span>
+                    <Zap className="w-4 h-4" style={{ color: BRAND.azulMedianoche }} />
+                    <span className="text-[11px] text-gray-500 font-semibold uppercase" style={{ letterSpacing: '0.1em' }}>Multiplicador</span>
                   </div>
-                  <p className="text-2xl font-bold text-gray-800">×{profile?.multiplier.toFixed(1)}</p>
+                  <p className="text-2xl font-bold" style={{ color: BRAND.azulMedianoche, fontVariantNumeric: 'tabular-nums' }}>×{profile?.multiplier.toFixed(1)}</p>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Misión de reactivación */}
             {profile?.reactivationMissionActive && profile.reactivationXpGoal && (
-              <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100">
+              <motion.div variants={itemV} className="bg-white rounded-2xl p-4 shadow-sm" style={{ border: `1px solid ${BRAND.azulClaro}33` }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <Target className="w-5 h-5 text-emerald-600" />
+                  <Target className="w-5 h-5" style={{ color: BRAND.azulMedianoche }} />
                   <span className="font-semibold text-gray-800">Misión de reactivación</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-500 mb-2">
@@ -204,41 +246,55 @@ export default function GamificationPage() {
                 </div>
                 <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-emerald-500 transition-all duration-700"
-                    style={{ width: `${Math.min(((profile.reactivationXpProgress ?? 0) / profile.reactivationXpGoal) * 100, 100)}%` }}
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${Math.min(((profile.reactivationXpProgress ?? 0) / profile.reactivationXpGoal) * 100, 100)}%`,
+                      background: `linear-gradient(90deg, ${BRAND.azulClaroDark}, ${BRAND.azulClaro})`,
+                    }}
                   />
                 </div>
                 <p className="text-xs text-gray-400 mt-2">
                   {(profile.reactivationXpGoal - (profile.reactivationXpProgress ?? 0)).toLocaleString()} XP restantes para restaurar beneficios
                 </p>
-              </div>
+              </motion.div>
             )}
 
             {/* Cómo ganar XP */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <motion.div variants={itemV} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
               <h3 className="font-semibold text-gray-800 mb-3">Cómo ganar XP</h3>
               <div className="space-y-2.5">
-                {Object.entries(ACTIVITY_CONFIG).map(([key, { label, Icon, color, bg }]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center`}>
-                        <Icon className={`w-4 h-4 ${color}`} />
+                {Object.keys(ACTIVITY_ICON).map(key => {
+                  const act = activityTheme(key)
+                  const Icon = ACTIVITY_ICON[key]
+                  return (
+                    <div key={key} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: lv.soft }}>
+                          <Icon className="w-4 h-4" style={{ color: lv.accent }} />
+                        </div>
+                        <span className="text-sm text-gray-700">{act.label}</span>
                       </div>
-                      <span className="text-sm text-gray-700">{label}</span>
+                      <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: lv.soft, color: lv.on }}>
+                        ×{profile?.multiplier.toFixed(1)}
+                      </span>
                     </div>
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${lv.badge}`}>
-                      ×{profile?.multiplier.toFixed(1)}
-                    </span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
-            </div>
-          </>
+            </motion.div>
+          </motion.div>
         )}
 
         {/* ── TAB: HISTORIAL ─────────────────────────────────────────────────── */}
         {tab === 'historial' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <motion.div
+            key="historial"
+            variants={itemV}
+            initial={reduce ? false : 'hidden'}
+            animate="show"
+            exit={reduce ? undefined : { opacity: 0, y: -6, transition: { duration: 0.15 } }}
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+          >
             {histLoading ? (
               <div className="p-4 space-y-3">
                 {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-16" />)}
@@ -253,15 +309,13 @@ export default function GamificationPage() {
               <>
                 <div className="divide-y divide-gray-50">
                   {history.content.map(tx => {
-                    const act = ACTIVITY_CONFIG[tx.activityType] ?? {
-                      label: tx.activityType, Icon: Zap, color: 'text-gray-500', bg: 'bg-gray-50',
-                    }
-                    const ActIcon = act.Icon
+                    const act = activityTheme(tx.activityType)
+                    const ActIcon = ACTIVITY_ICON[tx.activityType] ?? Zap
                     const date = new Date(tx.createdAt)
                     return (
                       <div key={tx.id} className="flex items-center gap-3 px-4 py-3.5">
-                        <div className={`w-10 h-10 rounded-xl ${act.bg} flex items-center justify-center shrink-0`}>
-                          <ActIcon className={`w-5 h-5 ${act.color}`} />
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: act.bg }}>
+                          <ActIcon className="w-5 h-5" style={{ color: act.color }} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-800 truncate">{act.label}</p>
@@ -271,7 +325,7 @@ export default function GamificationPage() {
                           </p>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="text-sm font-bold text-purple-600">+{tx.xpEarned} XP</span>
+                          <span className="text-sm font-bold" style={{ color: BRAND.dorado }}>+{tx.xpEarned} XP</span>
                         </div>
                       </div>
                     )
@@ -281,90 +335,106 @@ export default function GamificationPage() {
                 {/* Paginación */}
                 {history.totalPages > 1 && (
                   <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-                    <button
+                    <motion.button
                       onClick={() => { setPage(p => p - 1) }}
                       disabled={page === 0}
+                      whileTap={reduce ? undefined : { scale: 0.95 }}
                       className="flex items-center gap-1 text-sm text-gray-500 disabled:opacity-30 hover:text-gray-800 transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4" /> Anterior
-                    </button>
-                    <span className="text-xs text-gray-400">
+                    </motion.button>
+                    <span className="text-xs text-gray-400" style={{ fontVariantNumeric: 'tabular-nums' }}>
                       {page + 1} / {history.totalPages}
                     </span>
-                    <button
+                    <motion.button
                       onClick={() => { setPage(p => p + 1) }}
                       disabled={history.last}
+                      whileTap={reduce ? undefined : { scale: 0.95 }}
                       className="flex items-center gap-1 text-sm text-gray-500 disabled:opacity-30 hover:text-gray-800 transition-colors"
                     >
                       Siguiente <ChevronRight className="w-4 h-4" />
-                    </button>
+                    </motion.button>
                   </div>
                 )}
               </>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* ── TAB: NIVELES ───────────────────────────────────────────────────── */}
         {tab === 'niveles' && (
-          <div className="space-y-3">
+          <motion.div
+            key="niveles"
+            className="space-y-3"
+            variants={listV}
+            initial={reduce ? false : 'hidden'}
+            animate="show"
+            exit={reduce ? undefined : { opacity: 0, y: -6, transition: { duration: 0.15 } }}
+          >
             {config.length === 0 ? (
               <div className="space-y-3">
                 {[1,2,3,4,5,6].map(i => <Skeleton key={i} className="h-24" />)}
               </div>
             ) : (
               config.map(lc => {
-                const lvCfg = LEVEL_CONFIG[lc.level as keyof typeof LEVEL_CONFIG]
-                if (!lvCfg) return null
-                const LcIcon = lvCfg.Icon
+                const lvCfg = levelTheme(lc.level)
+                const LcIcon = LEVEL_ICON[lc.level]
+                if (!LcIcon) return null
                 const isCurrent = profile?.currentLevel === lc.level
-                const isUnlocked = lvIndex >= LEVEL_ORDER.indexOf(lc.level)
+                const isUnlocked = lvIndex >= LEVEL_ORDER.indexOf(lc.level as typeof LEVEL_ORDER[number])
 
                 return (
-                  <div
+                  <motion.div
                     key={lc.level}
-                    className={`bg-white rounded-2xl p-4 shadow-sm border transition-all ${
-                      isCurrent ? 'border-2 border-purple-400 shadow-purple-100' : 'border-gray-100'
-                    } ${!isUnlocked ? 'opacity-60' : ''}`}
+                    variants={itemV}
+                    whileHover={reduce ? undefined : { y: -3 }}
+                    whileTap={reduce ? undefined : { scale: 0.99 }}
+                    transition={{ duration: 0.2, ease: EASE_OUT }}
+                    className={`bg-white rounded-2xl p-4 shadow-sm ${!isUnlocked ? 'opacity-60' : ''}`}
+                    style={{
+                      border: isCurrent ? `2px solid ${lvCfg.accent}` : '1px solid #f3f4f6',
+                      boxShadow: isCurrent ? `0 8px 24px ${lvCfg.accent}22` : undefined,
+                    }}
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${lvCfg.bg} flex items-center justify-center`}>
-                        <LcIcon className="w-6 h-6 text-white" />
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: levelSheen(lc.level), boxShadow: `${MEDALLION_BEVEL}, 0 6px 14px ${lvCfg.accent}2E` }}>
+                        <LcIcon className="w-6 h-6" style={{ color: lvCfg.onGrad, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.25))' }} />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-gray-800">{lvCfg.label}</span>
                           {isCurrent && (
-                            <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase" style={{ background: lvCfg.soft, color: lvCfg.on, letterSpacing: '0.08em' }}>
                               Tu nivel
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-gray-400" style={{ fontVariantNumeric: 'tabular-nums' }}>
                           {lc.xpMin.toLocaleString()} — {typeof lc.xpMax === 'number' ? lc.xpMax.toLocaleString() : lc.xpMax} XP
                         </span>
                       </div>
-                      <span className={`text-sm font-bold px-3 py-1.5 rounded-xl ${lvCfg.badge}`}>
+                      <span className="text-sm font-bold px-3 py-1.5 rounded-xl" style={{ background: lvCfg.soft, color: lvCfg.on, fontVariantNumeric: 'tabular-nums' }}>
                         ×{lc.multiplier.toFixed(1)}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-50">
                       <div className="text-center">
-                        <p className="text-xs text-gray-400">Tickets referido</p>
-                        <p className="text-sm font-bold text-gray-700">{lc.referralTickets}</p>
+                        <p className="text-[11px] text-gray-400 uppercase" style={{ letterSpacing: '0.1em' }}>Tickets referido</p>
+                        <p className="text-sm font-bold text-gray-700" style={{ fontVariantNumeric: 'tabular-nums' }}>{lc.referralTickets}</p>
                       </div>
                       <div className="text-center border-l border-gray-100">
-                        <p className="text-xs text-gray-400">Tickets rifa</p>
-                        <p className="text-sm font-bold text-gray-700">{lc.raffleTickets}</p>
+                        <p className="text-[11px] text-gray-400 uppercase" style={{ letterSpacing: '0.1em' }}>Tickets rifa</p>
+                        <p className="text-sm font-bold text-gray-700" style={{ fontVariantNumeric: 'tabular-nums' }}>{lc.raffleTickets}</p>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )
               })
             )}
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </div>
   )

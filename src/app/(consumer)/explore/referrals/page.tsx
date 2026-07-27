@@ -99,7 +99,7 @@ export default function ReferralsPage() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-3">
-            Sistema de Referidos
+            Referidos
           </h1>
 
           {info ? (

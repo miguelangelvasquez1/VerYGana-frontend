@@ -4,15 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { levelService } from '@/services/LevelService'
 import type { LevelProfile } from '@/types/level'
-
-const LEVEL_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
-  BRONCE:    { bg: '#FAEEDA', text: '#854F0B', bar: '#BA7517' },
-  PLATA:     { bg: '#F1EFE8', text: '#5F5E5A', bar: '#888780' },
-  ORO:       { bg: '#FAEEDA', text: '#633806', bar: '#EF9F27' },
-  RUBI:      { bg: '#FBEAF0', text: '#72243E', bar: '#D4537E' },
-  ESMERALDA: { bg: '#E1F5EE', text: '#085041', bar: '#1D9E75' },
-  DIAMANTE:  { bg: '#E6F1FB', text: '#0C447C', bar: '#378ADD' },
-}
+import { BRAND, levelTheme, levelGradient, levelSheen, MEDALLION_BEVEL } from './levelTheme'
 
 const LEVEL_ICONS: Record<string, string> = {
   BRONCE:    'ti-medal',
@@ -21,11 +13,6 @@ const LEVEL_ICONS: Record<string, string> = {
   RUBI:      'ti-diamond',
   ESMERALDA: 'ti-star',
   DIAMANTE:  'ti-crown',
-}
-
-const LEVEL_LABELS: Record<string, string> = {
-  BRONCE: 'Bronce', PLATA: 'Plata', ORO: 'Oro',
-  RUBI: 'Rubí', ESMERALDA: 'Esmeralda', DIAMANTE: 'Diamante',
 }
 
 export function LevelCard() {
@@ -45,9 +32,9 @@ export function LevelCard() {
   if (loading) return <LevelCardSkeleton />
   if (!profile) return null
 
-  const colors = LEVEL_COLORS[profile.currentLevel]
+  const theme  = levelTheme(profile.currentLevel)
   const icon   = LEVEL_ICONS[profile.currentLevel]
-  const label  = LEVEL_LABELS[profile.currentLevel]
+  const label  = theme.label
 
   const xpMax      = profile.xpTotal + profile.xpToNextLevel
   const progressPct = xpMax > 0
@@ -71,31 +58,37 @@ export function LevelCard() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
           <div>
-            <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <p style={{ fontSize: 11, color: 'var(--color-text-tertiary)', margin: '0 0 6px', letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}>
               Nivel actual
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 22, fontWeight: 500 }}>{label}</span>
-              <span style={{ fontSize: 12, fontWeight: 500, background: colors.bg, color: colors.text, padding: '3px 10px', borderRadius: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}>{label}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, background: theme.soft, color: theme.on, padding: '3px 10px', borderRadius: 999, fontVariantNumeric: 'tabular-nums' }}>
                 ×{profile.multiplier.toFixed(1)}
               </span>
             </div>
           </div>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', background: colors.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <i className={`ti ${icon}`} style={{ fontSize: 24, color: colors.text }} aria-hidden="true" />
+          {/* Medallón acuñado */}
+          <div style={{
+            width: 52, height: 52, borderRadius: '50%',
+            background: levelSheen(profile.currentLevel),
+            boxShadow: `${MEDALLION_BEVEL}, 0 8px 20px ${theme.accent}33`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <i className={`ti ${icon}`} style={{ fontSize: 24, color: theme.onGrad, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.25))' }} aria-hidden="true" />
           </div>
         </div>
 
         {/* Barra XP */}
         <div style={{ marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-            <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>Progreso XP</span>
-            <span style={{ fontSize: 13, fontWeight: 500 }}>
+            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600 }}>Progreso XP</span>
+            <span style={{ fontSize: 13, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
               {profile.xpTotal.toLocaleString()} / {xpMax.toLocaleString()} XP
             </span>
           </div>
           <div style={{ background: 'var(--color-background-secondary)', borderRadius: 99, height: 8, overflow: 'hidden' }}>
-            <div style={{ width: '100%', height: '100%', background: colors.bar, borderRadius: 99, transform: `scaleX(${progressPct / 100})`, transformOrigin: 'left', transition: 'transform 0.6s ease' }} />
+            <div style={{ width: '100%', height: '100%', background: levelGradient(profile.currentLevel, 90), borderRadius: 99, transform: `scaleX(${progressPct / 100})`, transformOrigin: 'left', transition: 'transform 0.6s ease' }} />
           </div>
           <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '6px 0 0' }}>
             {profile.currentLevel === 'DIAMANTE'
@@ -106,13 +99,13 @@ export function LevelCard() {
 
         {/* Métricas */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div style={{ background: 'var(--color-background-secondary)', borderRadius: 8, padding: 12 }}>
-            <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>XP total</p>
-            <p style={{ fontSize: 20, fontWeight: 500, margin: 0 }}>{profile.xpTotal.toLocaleString()}</p>
+          <div style={{ background: 'var(--color-background-secondary)', borderRadius: 12, padding: 14 }}>
+            <p style={{ fontSize: 11, color: 'var(--color-text-tertiary)', margin: '0 0 4px', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600 }}>XP total</p>
+            <p style={{ fontSize: 20, fontWeight: 600, margin: 0, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>{profile.xpTotal.toLocaleString()}</p>
           </div>
-          <div style={{ background: 'var(--color-background-secondary)', borderRadius: 8, padding: 12 }}>
-            <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>Multiplicador</p>
-            <p style={{ fontSize: 20, fontWeight: 500, margin: 0 }}>×{profile.multiplier.toFixed(1)}</p>
+          <div style={{ background: 'var(--color-background-secondary)', borderRadius: 12, padding: 14 }}>
+            <p style={{ fontSize: 11, color: 'var(--color-text-tertiary)', margin: '0 0 4px', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600 }}>Multiplicador</p>
+            <p style={{ fontSize: 20, fontWeight: 600, margin: 0, color: BRAND.azulMedianoche, fontVariantNumeric: 'tabular-nums' }}>×{profile.multiplier.toFixed(1)}</p>
           </div>
         </div>
 
@@ -141,7 +134,7 @@ export function LevelCard() {
             </span>
           </div>
           <div style={{ background: 'var(--color-background-secondary)', borderRadius: 99, height: 6, overflow: 'hidden' }}>
-            <div style={{ width: `${missionPct}%`, height: '100%', background: '#1D9E75', borderRadius: 99 }} />
+            <div style={{ width: `${missionPct}%`, height: '100%', background: `linear-gradient(90deg, ${BRAND.azulClaroDark}, ${BRAND.azulClaro})`, borderRadius: 99, transition: 'width 0.6s ease' }} />
           </div>
           <p style={{ fontSize: 12, color: 'var(--color-text-tertiary)', margin: '6px 0 0' }}>
             {(profile.reactivationXpGoal - (profile.reactivationXpProgress ?? 0)).toLocaleString()} XP restantes
