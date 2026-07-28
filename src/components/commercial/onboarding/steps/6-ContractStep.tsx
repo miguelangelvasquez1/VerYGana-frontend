@@ -439,10 +439,6 @@ export function VeryGanaReviewStep({ contract, onRefresh, rejected, rejectionRea
           <p className="text-sm text-gray-600 leading-relaxed max-w-sm mx-auto">
             {rejectionReason || "Nuestro equipo de VerYGana revisó tu caso y lo rechazó."}
           </p>
-          <p className="text-xs text-gray-400 mt-3">
-            Nuestro equipo se pondrá en contacto contigo para resolverlo — no hace falta que hagas
-            nada más por ahora.
-          </p>
         </div>
 
         <button

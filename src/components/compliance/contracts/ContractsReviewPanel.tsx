@@ -286,7 +286,7 @@ function ContractDetailModal({
                     {documentsIssue === true
                       ? 'El empresario podrá corregir los documentos por su cuenta.'
                       : documentsIssue === false
-                      ? 'Sin autoservicio — el empresario verá que debemos contactarlo.'
+                      ? 'El empresario verá este motivo tal cual, así que especifícalo bien. Comunícate con él directamente si es necesario.'
                       : 'Elige una opción para poder confirmar el rechazo.'}
                   </p>
                 </div>

@@ -166,6 +166,9 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
         </p>
       </div>
 
+      {/* Ruta D ya no llega a esta pantalla — se detiene antes en
+          ADVISOR_CONTACT_PENDING (ver OnboardingWizard). Este banner ahora
+          solo puede aparecer para Ruta E. */}
       {catalog.requiresSpecialNegotiation && (
         <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <PhoneCall className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
@@ -346,19 +349,6 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
             </p>
           </div>
         )}
-      </div>
-
-      <div className="space-y-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Nota tributaria</p>
-          <p className="text-sm text-gray-600 leading-relaxed">{catalog.taxNote}</p>
-        </div>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">
-            Condiciones de liquidación
-          </p>
-          <p className="text-sm text-gray-600 leading-relaxed">{catalog.liquidationConditions}</p>
-        </div>
       </div>
 
       <StepButton
