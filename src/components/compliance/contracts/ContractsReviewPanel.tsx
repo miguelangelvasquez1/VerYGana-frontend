@@ -11,14 +11,26 @@ import {
   FileText,
   Loader2,
   RefreshCw,
+  Search,
+  Shield,
   X,
   XCircle,
 } from 'lucide-react';
 import {
   approveContractReview,
+  getBackgroundCheckDetail,
+  getBackgroundChecks,
   getContractForReview,
   getContracts,
+  refreshBackgroundCheck,
   rejectContractReview,
+  triggerBackgroundChecks,
+  type BackgroundCheck,
+  type BackgroundCheckDetail,
+  type BackgroundCheckFindingResult,
+  type BackgroundCheckFindingSeverity,
+  type BackgroundCheckStatus,
+  type BackgroundCheckType,
   type ContractReviewDetail,
   type ContractReviewListStatus,
   type PendingContractSummary,
@@ -50,6 +62,66 @@ function getStatusBadge(status: string): { label: string; className: string } {
   return STATUS_BADGE[status as ContractReviewListStatus] ?? { label: status, className: 'bg-gray-100 text-gray-700' };
 }
 
+function formatRelative(iso: string): string {
+  const diffMin = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (diffMin < 1) return 'hace instantes';
+  if (diffMin < 60) return `hace ${diffMin} min`;
+  const diffH = Math.round(diffMin / 60);
+  if (diffH < 24) return `hace ${diffH} h`;
+  return `hace ${Math.round(diffH / 24)} d`;
+}
+
+const BACKGROUND_CHECK_STATUS_BADGE: Record<BackgroundCheckStatus, { label: string; className: string }> = {
+  NOT_STARTED: { label: 'No iniciado', className: 'bg-amber-100 text-amber-700' },
+  IN_PROGRESS: { label: 'En progreso', className: 'bg-amber-100 text-amber-700' },
+  DELAYED: { label: 'Demorado', className: 'bg-amber-100 text-amber-700' },
+  ERROR: { label: 'Error', className: 'bg-red-100 text-red-700' },
+  COMPLETED: { label: 'Completado', className: 'bg-emerald-100 text-emerald-700' },
+};
+
+const CHECK_TYPE_LABELS: Record<BackgroundCheckType, string> = {
+  PERSON: 'Representante legal',
+  COMPANY: 'Empresa',
+};
+
+const FINDING_RESULT_LABELS: Record<BackgroundCheckFindingResult, string> = {
+  found: 'Hallazgo',
+  not_found: 'Sin hallazgos',
+  error: 'Error',
+  delayed: 'Demorado',
+  expired: 'Expirado',
+  skipped: 'Omitido',
+};
+
+const FINDING_RESULT_BADGE: Record<BackgroundCheckFindingResult, string> = {
+  found: 'bg-amber-100 text-amber-700',
+  not_found: 'bg-emerald-100 text-emerald-700',
+  error: 'bg-red-100 text-red-700',
+  delayed: 'bg-amber-100 text-amber-700',
+  expired: 'bg-gray-100 text-gray-700',
+  skipped: 'bg-gray-100 text-gray-700',
+};
+
+const FINDING_SEVERITY_LABELS: Record<BackgroundCheckFindingSeverity, string> = {
+  none: 'Sin severidad',
+  unknown: 'Desconocida',
+  very_low: 'Muy baja',
+  low: 'Baja',
+  medium: 'Media',
+  high: 'Alta',
+  very_high: 'Muy alta',
+};
+
+const FINDING_SEVERITY_BADGE: Record<BackgroundCheckFindingSeverity, string> = {
+  none: 'bg-emerald-100 text-emerald-700',
+  unknown: 'bg-gray-100 text-gray-700',
+  very_low: 'bg-emerald-100 text-emerald-700',
+  low: 'bg-lime-100 text-lime-700',
+  medium: 'bg-amber-100 text-amber-700',
+  high: 'bg-orange-100 text-orange-700',
+  very_high: 'bg-red-100 text-red-700',
+};
+
 type FilterOption = ContractReviewListStatus | 'ALL';
 
 const FILTER_TABS: { value: FilterOption; label: string }[] = [
@@ -68,6 +140,291 @@ function PepBadge() {
       <AlertTriangle className="w-3 h-3" />
       PEP
     </span>
+  );
+}
+
+function BackgroundCheckDetailModal({
+  check,
+  onClose,
+}: {
+  check: BackgroundCheck;
+  onClose: () => void;
+}) {
+  const [detail, setDetail] = useState<BackgroundCheckDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const hasLoadedRef = useRef(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      setDetail(await getBackgroundCheckDetail(check.id));
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [check.id]);
+
+  useEffect(() => {
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+    load();
+  }, [load]);
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-gray-900">Detalle de antecedentes — {check.subjectName}</h3>
+          <button onClick={onClose} className="cursor-pointer p-1 rounded-lg hover:bg-gray-100">
+            <X className="w-4 h-4 text-gray-500" />
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+          </div>
+        ) : error || !detail ? (
+          <div className="flex flex-col items-center gap-3 py-10 text-red-500">
+            <AlertTriangle className="w-6 h-6" />
+            <p className="text-sm font-medium">Error al cargar el detalle.</p>
+            <button onClick={load} className="cursor-pointer text-xs text-indigo-600 hover:underline">Reintentar</button>
+          </div>
+        ) : detail.details.length === 0 ? (
+          <p className="text-sm text-gray-400 py-6 text-center">Sin hallazgos reportados.</p>
+        ) : (
+          <div className="space-y-3">
+            {detail.details.map((finding, i) => (
+              <div key={i} className="border border-gray-200 rounded-xl p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                  <p className="font-semibold text-sm text-gray-800">{finding.database_name}</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${FINDING_RESULT_BADGE[finding.result] ?? 'bg-gray-100 text-gray-700'}`}>
+                      {FINDING_RESULT_LABELS[finding.result] ?? finding.result}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${FINDING_SEVERITY_BADGE[finding.severity] ?? 'bg-gray-100 text-gray-700'}`}>
+                      {FINDING_SEVERITY_LABELS[finding.severity] ?? finding.severity}
+                    </span>
+                  </div>
+                </div>
+                {finding.update_date && (
+                  <p className="text-[11px] text-gray-400 mb-2">Actualizado: {formatDate(finding.update_date)}</p>
+                )}
+                {(finding.tables ?? []).map((table, ti) => (
+                  <div key={ti} className="mt-2">
+                    <p className="text-xs font-semibold text-gray-600 mb-1">{table.title}</p>
+                    <div className="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
+                      {table.rows.map((row, ri) => (
+                        <div key={ri} className="px-2.5 py-1.5 text-xs flex flex-wrap gap-x-4 gap-y-1 bg-gray-50/60">
+                          {row.cells.map((cell, ci) => (
+                            <span key={ci}>
+                              <span className="text-gray-400">{cell.label}: </span>
+                              <span className="text-gray-700 font-medium">{cell.value}</span>
+                            </span>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BackgroundChecksSection({ contractId }: { contractId: number }) {
+  const [checks, setChecks] = useState<BackgroundCheck[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [triggering, setTriggering] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [refreshingId, setRefreshingId] = useState<number | null>(null);
+  const [detailCheck, setDetailCheck] = useState<BackgroundCheck | null>(null);
+  const hasLoadedRef = useRef(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      setChecks(await getBackgroundChecks(contractId));
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [contractId]);
+
+  useEffect(() => {
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+    load();
+  }, [load]);
+
+  const handleTrigger = async () => {
+    setTriggering(true);
+    try {
+      const created = await triggerBackgroundChecks(contractId);
+      setChecks(created);
+      setShowConfirm(false);
+    } catch {
+      // el botón de "Consultar antecedentes" vuelve a estar disponible — el
+      // officer puede reintentar manualmente, no hay retry automático.
+    } finally {
+      setTriggering(false);
+    }
+  };
+
+  const handleRefresh = async (id: number) => {
+    setRefreshingId(id);
+    try {
+      const updated = await refreshBackgroundCheck(id);
+      setChecks((prev) => prev.map((c) => (c.id === id ? updated : c)));
+    } catch {
+      // silencioso — el registro conserva su último estado conocido.
+    } finally {
+      setRefreshingId(null);
+    }
+  };
+
+  return (
+    <div className="pt-2 border-t border-gray-100">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5">
+          <Shield className="w-3.5 h-3.5" />
+          Antecedentes
+        </p>
+        <button
+          onClick={() => setShowConfirm(true)}
+          disabled={triggering}
+          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white text-xs font-semibold rounded-lg transition"
+        >
+          {triggering ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+          Consultar antecedentes
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-6">
+          <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center gap-2 py-6 text-red-500">
+          <AlertTriangle className="w-5 h-5" />
+          <p className="text-xs font-medium">Error al cargar antecedentes.</p>
+          <button onClick={load} className="cursor-pointer text-xs text-indigo-600 hover:underline">Reintentar</button>
+        </div>
+      ) : checks.length === 0 ? (
+        <p className="text-sm text-gray-400">Aún no se han consultado antecedentes para este contrato.</p>
+      ) : (
+        <ul className="space-y-2">
+          {checks.map((check) => {
+            const badge = BACKGROUND_CHECK_STATUS_BADGE[check.status];
+            return (
+              <li key={check.id} className="p-3 bg-gray-50 border border-gray-200 rounded-xl">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      {CHECK_TYPE_LABELS[check.checkType]} · {check.subjectName}
+                    </p>
+                    <p className="text-xs text-gray-500">{check.subjectDocument}</p>
+                  </div>
+                  <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold ${badge.className}`}>
+                    {badge.label}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 mt-2">
+                  <p className="text-[11px] text-gray-400">
+                    Solicitado {formatRelative(check.requestedAt)}
+                    {check.completedAt && ` · Completado ${formatRelative(check.completedAt)}`}
+                  </p>
+
+                  {check.status === 'COMPLETED' ? (
+                    <div className="flex items-center gap-3 shrink-0">
+                      {check.score !== null && (
+                        <span className="text-xs font-semibold text-gray-700">
+                          Score: {(check.score * 10).toFixed(1)}/10
+                        </span>
+                      )}
+                      {check.pdfReportUrl && (
+                        <a
+                          href={check.pdfReportUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:underline"
+                        >
+                          <FileText className="w-3 h-3" /> Ver reporte PDF
+                        </a>
+                      )}
+                      <button
+                        onClick={() => setDetailCheck(check)}
+                        className="cursor-pointer inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:underline"
+                      >
+                        <Eye className="w-3 h-3" /> Ver detalle
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleRefresh(check.id)}
+                      disabled={refreshingId === check.id}
+                      className="cursor-pointer shrink-0 inline-flex items-center gap-1 px-2.5 py-1 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 transition disabled:opacity-50"
+                    >
+                      {refreshingId === check.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-3 h-3" />
+                      )}
+                      Actualizar
+                    </button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => !triggering && setShowConfirm(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-5">
+            <h4 className="font-bold text-gray-900 mb-2">Consultar antecedentes</h4>
+            <p className="text-sm text-gray-600">
+              Esto genera una consulta nueva en ZapSign y tiene costo. ¿Continuar?
+            </p>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => setShowConfirm(false)}
+                disabled={triggering}
+                className="cursor-pointer flex-1 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleTrigger}
+                disabled={triggering}
+                className="cursor-pointer flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
+              >
+                {triggering ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {detailCheck && (
+        <BackgroundCheckDetailModal check={detailCheck} onClose={() => setDetailCheck(null)} />
+      )}
+    </div>
   );
 }
 
@@ -227,6 +584,8 @@ function ContractDetailModal({
                 </ul>
               )}
             </div>
+
+            <BackgroundChecksSection contractId={summary.contractId} />
 
             {detail.status !== 'PENDING_VERYGANA_REVIEW' ? (
               <div

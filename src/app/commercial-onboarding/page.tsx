@@ -77,7 +77,7 @@ export default function CommercialOnboardingPage() {
       <header className="bg-white border-b border-gray-100 px-6 h-16 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <Image src="/logos/logoDorado.png" alt="Ver y Gana" width={32} height={32} />
-          <span className="font-bold text-[#0b1440] hidden sm:inline">Ver y Gana</span>
+          <span className="font-bold text-[#0b1440] hidden sm:inline">VERyGANA</span>
         </div>
         <button
           onClick={logout}

@@ -259,3 +259,108 @@ export const getPendingNegotiations = async (): Promise<PendingNegotiation[]> =>
 export const resolveNegotiation = async (onboardingId: number): Promise<void> => {
   await apiClient.post(`/compliance/contracts/negotiations/${onboardingId}/resolve`);
 };
+
+// ── Antecedentes (ZapSign Background Checks) ────────────────────────────────
+// Consulta manual y explícita del representante legal (y de la empresa, si es
+// persona jurídica) contra el proveedor ZapSign. Tiene costo por consulta, así
+// que nunca se dispara sola ni se reintenta automáticamente. El resultado real
+// llega por webhook al backend — el refresh puntual es solo para cuando el
+// compliance officer quiere confirmar en el momento (ZapSign tarda 2-20 min).
+
+export type BackgroundCheckType = "PERSON" | "COMPANY";
+
+export type BackgroundCheckStatus =
+  | "NOT_STARTED"
+  | "IN_PROGRESS"
+  | "DELAYED"
+  | "ERROR"
+  | "COMPLETED";
+
+export interface BackgroundCheck {
+  id: number;
+  contractId: number;
+  checkId: string;
+  checkType: BackgroundCheckType;
+  country: string;
+  subjectName: string;
+  subjectDocument: string;
+  status: BackgroundCheckStatus;
+  // 0-1 desde ZapSign (10 = sin hallazgos negativos, decrece con la
+  // severidad). null hasta que la consulta avanza.
+  score: number | null;
+  pdfReportUrl: string | null;
+  requestedByOfficerId: number;
+  requestedAt: string;
+  completedAt: string | null;
+}
+
+export interface BackgroundCheckDetailCell {
+  label: string;
+  value: string;
+}
+
+export interface BackgroundCheckDetailRow {
+  cells: BackgroundCheckDetailCell[];
+}
+
+export interface BackgroundCheckDetailTable {
+  title: string;
+  rows: BackgroundCheckDetailRow[];
+}
+
+export type BackgroundCheckFindingResult =
+  | "found"
+  | "not_found"
+  | "error"
+  | "delayed"
+  | "expired"
+  | "skipped";
+
+export type BackgroundCheckFindingSeverity =
+  | "none"
+  | "unknown"
+  | "very_low"
+  | "low"
+  | "medium"
+  | "high"
+  | "very_high";
+
+// Forma cruda tal como la entrega ZapSign — no hay tipo fijo, cada
+// data_set/fuente trae sus propias tables/rows, así que se renderiza genérico.
+export interface BackgroundCheckFinding {
+  data_set: string;
+  database_name: string;
+  result: BackgroundCheckFindingResult;
+  severity: BackgroundCheckFindingSeverity;
+  found_first_name?: string;
+  found_last_name?: string;
+  tables?: BackgroundCheckDetailTable[];
+  update_date?: string;
+}
+
+export interface BackgroundCheckDetail {
+  details: BackgroundCheckFinding[];
+  next: string;
+}
+
+// Dispara una consulta nueva — siempre un registro PERSON (representante
+// legal), más uno COMPANY si el comercio es persona jurídica.
+export const triggerBackgroundChecks = async (contractId: number): Promise<BackgroundCheck[]> => {
+  const res = await apiClient.post(`/compliance/contracts/${contractId}/background-checks`);
+  return res.data;
+};
+
+export const getBackgroundChecks = async (contractId: number): Promise<BackgroundCheck[]> => {
+  const res = await apiClient.get(`/compliance/contracts/${contractId}/background-checks`);
+  return res.data;
+};
+
+export const refreshBackgroundCheck = async (id: number): Promise<BackgroundCheck> => {
+  const res = await apiClient.post(`/compliance/contracts/background-checks/${id}/refresh`);
+  return res.data;
+};
+
+export const getBackgroundCheckDetail = async (id: number): Promise<BackgroundCheckDetail> => {
+  const res = await apiClient.get(`/compliance/contracts/background-checks/${id}/detail`);
+  return res.data;
+};
