@@ -1,6 +1,7 @@
 import apiClient from "@/lib/api/client";
 import { CommercialInitialDataResponseDTO } from "@/types/ads/commercial";
 import { CommercialProfileResponseDTO, MonthlyReportResponseDTO } from "@/types/Commercial.types";
+import { PayoutReportResponseDTO } from "@/types/Payout.types";
 
 // ============================================
 // INTERFACES
@@ -104,32 +105,7 @@ export const getCommercialProducts = async (commercialId: number): Promise<Produ
   return response.data;
 };
 
-/**
- * Crear un nuevo producto
- */
-export const createProduct = async (commercialId: number, productData: any): Promise<Product> => {
-  const response = await apiClient.post(`/commercials/${commercialId}/products`, productData);
-  return response.data;
-};
 
-/**
- * Actualizar un producto
- */
-export const updateProduct = async (
-  commercialId: number,
-  productId: number,
-  productData: any
-): Promise<Product> => {
-  const response = await apiClient.put(`/commercials/${commercialId}/products/${productId}`, productData);
-  return response.data;
-};
-
-/**
- * Eliminar un producto
- */
-export const deleteProduct = async (commercialId: number, productId: number): Promise<void> => {
-  await apiClient.delete(`/commercials/${commercialId}/products/${productId}`);
-};
 
 /**
  * Obtener historial de ventas
@@ -139,34 +115,44 @@ export const getCommercialSales = async (commercialId: number): Promise<Sale[]> 
   return response.data;
 };
 
-/**
- * Solicitar retiro de saldo
- */
-export const requestWithdrawal = async (
-  commercialId: number,
-  amount: number,
-  bankInfo: any
-): Promise<any> => {
-  const response = await apiClient.post(`/commercials/${commercialId}/withdrawals`, {
-    amount,
-    bankInfo
+export const getPayoutReport = async (commercialId: number, year: number, month: number): Promise<PayoutReportResponseDTO> => {
+  const response = await apiClient.get(`/commercials/${commercialId}/report/payout`, {
+    params: {
+      year,
+      month
+    }
   });
   return response.data;
 };
 
-/**
- * Obtener estadísticas de ventas
- */
-export const getCommercialStats = async (commercialId: number): Promise<any> => {
-  const response = await apiClient.get(`/commercials/${commercialId}/stats`);
+export const getPayoutReports = async (year: number): Promise<PayoutReportResponseDTO[]> => {
+  const response = await apiClient.get(`/commercials/report/payouts`, {
+    params: {
+      year
+    }
+  });
   return response.data;
 };
 
-/**
- * Obtener monedero del vendedor
- */
-export const getCommercialWallet = async (commercialId: number): Promise<any> => {
-  const response = await apiClient.get(`/commercials/${commercialId}/wallet`);
+export const getSalesReport = async (year: number, month: number): Promise<MonthlyReportResponseDTO> => {
+  const response = await apiClient.get(`/commercials/report/sales`, {
+    params: {
+      year,
+      month
+    }
+  });
+  return response.data;
+};
+
+export const getDailySales = async (startDate: string, endDate: string, page: number, size: number): Promise<MonthlyReportResponseDTO> => {
+  const response = await apiClient.get(`/commercials/report/sales`, {
+    params: {
+      startDate,
+      endDate,
+      page,
+      size
+    }
+  });
   return response.data;
 };
 

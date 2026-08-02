@@ -18,7 +18,13 @@ import {
 } from "@/services/commercial/OnboardingService";
 import { PlanCode } from "@/types/finance/plans/Plan.types";
 import { LegalDocumentsService, LegalDocument } from "@/services/LegalDocumentsService";
-import { extractApiError, FieldErrors, getLastSeenRejection, markRejectionSeen } from "./onboarding.shared";
+import {
+  extractApiError,
+  FieldErrors,
+  getLastSeenRejection,
+  markRejectionSeen,
+  ONBOARDING_PAYMENT_REFERENCE_KEY,
+} from "./onboarding.shared";
 import { TermsStep } from "./steps/1-TermsStep";
 import { LegalIdentificationStep, LegalIdentificationForm } from "./steps/2-LegalIdentificationStep";
 import { DiagnosticStep, DiagnosticForm, ClassificationStep } from "./steps/3-DiagnosticStep";
@@ -537,6 +543,24 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
     }
   };
 
+  // Paso 7 (pago): crea el checkout de Wompi y navega fuera de la app. Al
+  // volver (éxito, rechazo o abandono) Wompi redirige de vuelta a esta misma
+  // página, que vuelve a montar el wizard desde OnboardingService.getStatus()
+  // — por eso solo hace falta guardar la referencia para que PaymentStep
+  // sepa que debe auto-verificar, no manejar el resultado aquí.
+  const handleInitiatePayment = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const checkout = await OnboardingService.initiatePayment();
+      sessionStorage.setItem(ONBOARDING_PAYMENT_REFERENCE_KEY, checkout.reference);
+      window.location.href = checkout.checkoutUrl;
+    } catch (err) {
+      handleApiError(err);
+      setSubmitting(false);
+    }
+  };
+
   // Refresco genérico para las pantallas de espera post-aprobación (firma y
   // pago) — a diferencia de handleRefreshVeryGanaStatus no necesitan toasts
   // ni recuperación de contrato especiales, solo avanzar según currentStep.
@@ -798,7 +822,12 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
         )}
 
         {step === "PAYMENT_PENDING" && (
-          <PaymentStep contract={contract} onRefresh={handleRefreshStatus} />
+          <PaymentStep
+            contract={contract}
+            submitting={submitting}
+            onPay={handleInitiatePayment}
+            onRefresh={handleRefreshStatus}
+          />
         )}
       </div>
 

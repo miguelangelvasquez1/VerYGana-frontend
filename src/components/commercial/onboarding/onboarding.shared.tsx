@@ -2,6 +2,12 @@ import React from "react";
 
 export type FieldErrors = Record<string, string>;
 
+// sessionStorage — marca que el usuario salió a pagar con Wompi desde el
+// paso 7, así el PaymentStep sabe que debe auto-verificar el estado al
+// volver (el webhook puede tardar unos segundos en confirmar el pago) en
+// vez de esperar a que el usuario presione "Verificar estado" a mano.
+export const ONBOARDING_PAYMENT_REFERENCE_KEY = "vg_onboarding_payment_reference";
+
 export const formatCOP = (cents: number | null | undefined): string => {
   if (cents == null) return "—";
   return new Intl.NumberFormat("es-CO", {

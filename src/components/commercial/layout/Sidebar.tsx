@@ -45,7 +45,7 @@ interface SidebarProps {
 const menuItems: MenuItem[] = [
   {
     href: '/commercial/products', icon: Package, label: 'Mis productos',
-    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
+    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD],
     lockIfUnavailable: true,
   },
   {

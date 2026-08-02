@@ -218,7 +218,7 @@ export default function ProductsDashboard() {
       </h2>
       <button
         onClick={() => setShowCreateForm(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition"
+        className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition cursor-pointer"
       >
         <PlusCircle className="w-4 h-4" />
         Crear producto

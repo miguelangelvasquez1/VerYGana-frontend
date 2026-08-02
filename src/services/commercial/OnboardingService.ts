@@ -1,5 +1,6 @@
 import apiClient from "@/lib/api/client";
 import { PlanCode } from "@/types/finance/plans/Plan.types";
+import { WompiCheckoutResponseDTO } from "@/types/finance/wompi/Wompi.types";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -440,4 +441,9 @@ export const OnboardingService = {
     const response = await apiClient.post(`${BASE}/contract/request-changes`);
     return response.data;
   },
+
+  async initiatePayment(): Promise<WompiCheckoutResponseDTO> {
+    const response = await apiClient.post(`${BASE}/pay`);
+    return response.data;
+  }
 };

@@ -19,8 +19,9 @@ import { useSession } from 'next-auth/react';
 // ─── Route protection ─────────────────────────────────────────────────────────
 
 const PROTECTED_ROUTES: { path: string; requiredPlans: PlanCode[] }[] = [
-  { path: '/commercial/products',  requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
+  { path: '/commercial/products',  requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD] },
   { path: '/commercial/ads',       requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
+  { path: '/commercial/branding',  requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/surveys',   requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/pets',      requiredPlans: [PlanCode.PREMIUM] },
   { path: '/commercial/analytics', requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },

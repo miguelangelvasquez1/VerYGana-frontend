@@ -42,5 +42,5 @@ export const rejectProduct = async (productId: number, reason : string): Promise
 }
 
 export const deleteProduct = async (productId: number, reason : string): Promise<void> => {
-    await apiClient.delete(`/admin/products/${productId}`, { params: { reason } });
+    await apiClient.delete(`/admin/products/${productId}`, { params: { productId, reason } });
 }

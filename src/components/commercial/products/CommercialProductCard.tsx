@@ -69,7 +69,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
         onClick={() => onView?.(product.id)}
       >
         {/* Image */}
-        <div className="relative w-full aspect-4/3 bg-gray-100 overflow-hidden">
+        <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
           <Image
             src={product.imageUrl}
             alt={product.name}

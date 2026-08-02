@@ -309,15 +309,18 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
       ══════════════════════════════════════════════════ */}
       <div className="bg-white p-6 rounded-xl shadow space-y-4">
         <h3 className="text-base font-semibold text-gray-700">Imagen del producto</h3>
+        <p className="text-xs text-gray-400 -mt-2">
+          La imagen debe ser cuadrada (proporción 1:1). Otras proporciones serán rechazadas.
+        </p>
 
         {form.imageUrl && !newImagePreview && (
           <div>
             <p className="text-xs text-gray-400 mb-1">Imagen actual</p>
-            <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
+            <div className="aspect-square w-full max-w-xs mx-auto border border-gray-200 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
               <img
                 src={form.imageUrl}
                 alt="Imagen actual del producto"
-                className="w-full max-h-72 object-contain p-2"
+                className="w-full h-full object-contain p-2"
               />
             </div>
           </div>
@@ -326,11 +329,11 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
         {newImagePreview && (
           <div className="relative">
             <p className="text-xs text-gray-400 mb-1">Nueva imagen seleccionada</p>
-            <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
+            <div className="aspect-square w-full max-w-xs mx-auto border border-gray-200 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
               <img
                 src={newImagePreview}
                 alt="Nueva imagen"
-                className="w-full max-h-72 object-contain p-2"
+                className="w-full h-full object-contain p-2"
               />
             </div>
             <button
