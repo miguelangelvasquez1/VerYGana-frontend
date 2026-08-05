@@ -67,7 +67,7 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
   return (
     <div
       onClick={onClick}
-      className="group relative bg-white rounded-2xl border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer"
+      className="group relative bg-white rounded-2xl border border-gray-200 hover:border-[#03548C]/30 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer"
     >
       {/* Left status bar */}
       <div className={`absolute left-0 inset-y-0 w-1 bg-linear-to-b ${cfg.gradient}`} />
@@ -76,7 +76,7 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
         {/* Brand + status */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-base font-bold text-gray-900 truncate leading-snug group-hover:text-blue-600 transition-colors duration-150">
+            <h3 className="text-base font-bold text-gray-900 truncate leading-snug group-hover:text-[#03548C] transition-colors duration-150">
               {req.brandName}
             </h3>
             <p className="text-xs text-gray-400 mt-0.5 truncate">{req.gameName}</p>
@@ -107,7 +107,7 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
             <Calendar size={12} className="text-gray-400" />
             {formatDate(req.createdAt)}
           </span>
-          <span className="ml-auto text-blue-500 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+          <span className="ml-auto text-[#03548C] flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
             Ver <ChevronRight size={12} />
           </span>
         </div>
@@ -212,7 +212,7 @@ const filtered = requests.filter(r => {
                 placeholder="Buscar por marca o juego..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
               />
             </div>
             {/* Status filter */}
@@ -221,7 +221,7 @@ const filtered = requests.filter(r => {
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value as BrandingStatus | 'all')}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
               >
                 {STATUS_FILTER_OPTIONS.map(o => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -232,7 +232,7 @@ const filtered = requests.filter(r => {
           {/* New request button */}
           <button
             onClick={() => setView('create')}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors cursor-pointer shadow-sm"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-[#03548C] text-white text-sm font-semibold rounded-md hover:bg-[#0b1440] transition-colors cursor-pointer shadow-sm"
           >
             <Plus size={16} />
             Nueva solicitud
@@ -274,7 +274,7 @@ const filtered = requests.filter(r => {
       {/* Content */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#03548C]" />
         </div>
       ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
@@ -303,7 +303,7 @@ const filtered = requests.filter(r => {
           </p>
           <button
             onClick={() => setView('create')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440] text-sm cursor-pointer"
           >
             <Plus size={16} />
             Nueva solicitud

@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { getRoleHomePath } from "@/lib/auth/roleRedirect";
+import {
   Play,
   Gift,
   ShoppingCart,
@@ -169,9 +172,19 @@ const stats = [
 ];
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [showAd, setShowAd] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [adCredits, setAdCredits] = useState(0);
+
+  const roleHomePath = status === 'authenticated' ? getRoleHomePath(session?.user?.role) : null;
+
+  // Si ya hay una sesión activa, no mostramos la landing pública:
+  // mandamos directo al panel que le corresponde a su rol.
+  useEffect(() => {
+    if (roleHomePath) router.replace(roleHomePath);
+  }, [roleHomePath, router]);
 
   const formatPrice = (price: string | number | bigint) => {
     const numericPrice = typeof price === 'string' ? Number(price) : price;
@@ -198,6 +211,16 @@ export default function Home() {
       setShowAd(false);
     }, 3000);
   };
+
+  // Mientras se resuelve la sesión, o mientras se redirige a un usuario
+  // autenticado a su panel, no renderizamos la landing pública.
+  if (status === 'loading' || roleHomePath) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
