@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { AlertTriangle, Check, Loader2, PhoneCall, X } from "lucide-react";
 import type { OnboardingPlanCatalog, OnboardingPlanOption } from "@/services/commercial/OnboardingService";
 import type { PlanCode } from "@/types/finance/plans/Plan.types";
-import { formatCOP, StepButton } from "../onboarding.shared";
+import { useKeysReservePct } from "@/hooks/useTreasuryConfig";
+import { formatCOP, HelpTooltip, StepButton } from "../onboarding.shared";
 
 export interface AcceptPlanData {
   investmentAmountCents?: number;
@@ -100,6 +101,7 @@ const METRIC_GROUPS: MetricGroup[] = [
 ];
 
 export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, onAccept }: Props) {
+  const { data: keysReservePct } = useKeysReservePct();
   const [investmentInput, setInvestmentInput] = useState("");
   const [durationInput, setDurationInput] = useState("");
   const [specialNegotiation, setSpecialNegotiation] = useState(false);
@@ -253,8 +255,13 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
 
       {requiresInvestment && selectedPlan && (
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+          <label className="flex items-center text-sm font-semibold text-gray-700 mb-1.5">
             Monto de inversión <span className="text-red-500">*</span>
+            {keysReservePct != null && (
+              <HelpTooltip
+                text={`Del monto que inviertas, podrás usar el ${keysReservePct}% para crear recursos dentro del ecosistema (anuncios, juegos de marca, encuestas, etc.).`}
+              />
+            )}
           </label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>

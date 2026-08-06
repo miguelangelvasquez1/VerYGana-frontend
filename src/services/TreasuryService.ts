@@ -12,3 +12,10 @@ export const getMovements = async (code: string): Promise<PagedResponse<Treasury
     return response.data;
 }
 
+// Porcentaje de reserva de llaves configurado en tesorería (ej. 20 = 20%).
+// Accesible para ROLE_ADMIN y ROLE_COMMERCIAL.
+export const getKeysReservePct = async (): Promise<number> => {
+    const response = await apiClient.get<number>("/admin/treasury/config/keys-reserve-pct");
+    return response.data;
+}
+

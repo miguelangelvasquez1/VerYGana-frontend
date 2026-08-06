@@ -44,7 +44,15 @@ export function PaymentStep({ contract, submitting, onPay, onRefresh }: Props) {
       try {
         await onRefresh();
       } finally {
-        if (cancelled) return;
+        // Si el efecto se canceló mientras onRefresh() estaba en vuelo (p.ej.
+        // el mount->cleanup->mount de React Strict Mode en dev), no seguimos
+        // reintentando — pero igual hay que apagar el spinner, o se queda
+        // "cargando" para siempre porque hasAutoPolledRef ya bloqueó
+        // cualquier poll() futuro que pudiera resetearlo.
+        if (cancelled) {
+          setAutoChecking(false);
+          return;
+        }
         tries += 1;
         if (tries >= AUTO_POLL_MAX_TRIES) {
           sessionStorage.removeItem(ONBOARDING_PAYMENT_REFERENCE_KEY);
