@@ -264,7 +264,7 @@ export default function TargetAudienceFields({ value, onChange, mode, disabled }
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
-        className="w-full flex items-center justify-between gap-3 px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+        className="cursor-pointer w-full flex items-center justify-between gap-3 px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
       >
         <div className="flex items-center gap-3">
           <span className="text-xl shrink-0">🎯</span>
@@ -321,7 +321,7 @@ export default function TargetAudienceFields({ value, onChange, mode, disabled }
                   type="button"
                   onClick={toggleSelectAllDept}
                   disabled={disabled}
-                  className="text-xs font-semibold text-[#03548C] hover:text-[#0b1440] disabled:opacity-40 transition-colors"
+                  className="cursor-pointer text-xs font-semibold text-[#03548C] hover:text-[#0b1440] disabled:opacity-40 transition-colors"
                 >
                   {allDeptSelected ? "Quitar todos" : `Seleccionar todos en ${selectedDeptName}`}
                 </button>
@@ -366,7 +366,7 @@ export default function TargetAudienceFields({ value, onChange, mode, disabled }
                       <button
                         type="button"
                         onClick={() => removeGroup(group)}
-                        className="hover:text-[#0b1440]"
+                        className="cursor-pointer hover:text-[#0b1440]"
                       >
                         <X className="w-3 h-3" />
                       </button>

@@ -160,7 +160,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
               type="button"
               onClick={() => setPage((p) => p - 1)}
               disabled={page === 0}
-              className="text-xs px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+              className="cursor-pointer text-xs px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
             >
               Anterior
             </button>
@@ -171,7 +171,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
               type="button"
               onClick={() => setPage((p) => p + 1)}
               disabled={page >= totalPages - 1}
-              className="text-xs px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+              className="cursor-pointer text-xs px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
             >
               Siguiente
             </button>

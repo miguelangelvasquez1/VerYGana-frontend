@@ -28,7 +28,7 @@ export default function PetCatalogEditor() {
               key={value}
               type="button"
               onClick={() => setTab(value)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition"
+              className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition"
               style={
                 active
                   ? { background: 'linear-gradient(135deg, #00a4ff, #0089d6)', color: '#fff' }

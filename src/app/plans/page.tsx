@@ -138,7 +138,7 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
             <h3 className="text-white font-bold text-base">Plan {plan.name}</h3>
             <p className="text-slate-400 text-sm">{range.label}</p>
           </div>
-          <button onClick={onClose} className="ml-auto text-slate-500 hover:text-white transition-colors">
+          <button onClick={onClose} className="ml-auto text-slate-500 hover:text-white transition-colors cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>

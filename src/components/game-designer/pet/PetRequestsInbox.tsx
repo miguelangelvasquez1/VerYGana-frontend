@@ -68,7 +68,7 @@ function ApproveModal({
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-lg" style={{ color: '#0b1440' }}>Aprobar solicitud</h3>
-          <button type="button" onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100"><X className="w-4 h-4 text-gray-500" /></button>
+          <button type="button" onClick={onClose} className="cursor-pointer p-1 rounded-lg hover:bg-gray-100"><X className="w-4 h-4 text-gray-500" /></button>
         </div>
 
         <p className="text-sm text-gray-500">
@@ -106,11 +106,11 @@ function ApproveModal({
 
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose} disabled={loading}
-            className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+            className="cursor-pointer flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
             Cancelar
           </button>
           <button type="button" onClick={submit} disabled={loading}
-            className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition"
+            className="cursor-pointer flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition"
             style={{ background: 'linear-gradient(135deg, #00a4ff, #0089d6)' }}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             Aprobar y crear ítem
@@ -157,7 +157,7 @@ function RejectModal({
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-lg text-red-700">Rechazar solicitud</h3>
-          <button type="button" onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100"><X className="w-4 h-4 text-gray-500" /></button>
+          <button type="button" onClick={onClose} className="cursor-pointer p-1 rounded-lg hover:bg-gray-100"><X className="w-4 h-4 text-gray-500" /></button>
         </div>
         <p className="text-sm text-gray-500">
           Escribe el motivo de rechazo. El comercial lo verá en su panel.
@@ -177,11 +177,11 @@ function RejectModal({
         {error && <p className="text-sm text-red-600">{error}</p>}
         <div className="flex gap-3">
           <button type="button" onClick={onClose} disabled={loading}
-            className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+            className="cursor-pointer flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
             Cancelar
           </button>
           <button type="button" onClick={submit} disabled={loading}
-            className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition">
+            className="cursor-pointer flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
             Rechazar
           </button>
@@ -235,7 +235,7 @@ function RequestCard({
           <button
             type="button"
             onClick={() => setExpanded(v => !v)}
-            className="flex items-center gap-1 mt-2 text-xs font-medium hover:underline"
+            className="cursor-pointer flex items-center gap-1 mt-2 text-xs font-medium hover:underline"
             style={{ color: '#03548C' }}
           >
             {expanded ? <><ChevronUp className="w-3 h-3" /> Ocultar detalles</> : <><ChevronDown className="w-3 h-3" /> Ver detalles</>}
@@ -265,7 +265,7 @@ function RequestCard({
             type="button"
             onClick={onReview}
             disabled={actionLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition disabled:opacity-50"
+            className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition disabled:opacity-50"
             style={{ borderColor: '#03548C', color: '#03548C' }}
           >
             <Eye className="w-3 h-3" /> Marcar en revisión
@@ -274,7 +274,7 @@ function RequestCard({
             type="button"
             onClick={onReject}
             disabled={actionLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50"
+            className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50"
           >
             <XCircle className="w-3 h-3" /> Rechazar
           </button>
@@ -287,7 +287,7 @@ function RequestCard({
             type="button"
             onClick={onApprove}
             disabled={actionLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg text-white transition disabled:opacity-50"
+            className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg text-white transition disabled:opacity-50"
             style={{ background: 'linear-gradient(135deg, #00a4ff, #0089d6)' }}
           >
             <CheckCircle2 className="w-3 h-3" /> Aprobar
@@ -296,7 +296,7 @@ function RequestCard({
             type="button"
             onClick={onReject}
             disabled={actionLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50"
+            className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50"
           >
             <XCircle className="w-3 h-3" /> Rechazar
           </button>
@@ -374,7 +374,7 @@ export default function PetRequestsInbox() {
           <button
             type="button"
             onClick={() => load(activeStatus)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-500"
+            className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition text-gray-500"
             title="Actualizar"
           >
             <RefreshCw className="w-4 h-4" />
@@ -391,7 +391,7 @@ export default function PetRequestsInbox() {
                 key={s}
                 type="button"
                 onClick={() => setActiveStatus(s)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                className={`cursor-pointer px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                   active ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
                 }`}
                 style={active ? { color: '#0b1440' } : {}}
@@ -411,7 +411,7 @@ export default function PetRequestsInbox() {
           <div className="flex flex-col items-center gap-3 py-16 text-red-500">
             <AlertTriangle className="w-8 h-8" />
             <p className="text-sm font-medium">Error al cargar solicitudes.</p>
-            <button type="button" onClick={() => load(activeStatus)} className="text-xs hover:underline" style={{ color: '#00a4ff' }}>
+            <button type="button" onClick={() => load(activeStatus)} className="cursor-pointer text-xs hover:underline" style={{ color: '#00a4ff' }}>
               Reintentar
             </button>
           </div>

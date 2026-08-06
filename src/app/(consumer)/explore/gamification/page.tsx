@@ -147,7 +147,7 @@ export default function GamificationPage() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all capitalize ${
+              className={`cursor-pointer flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all capitalize ${
                 tab === t
                   ? `bg-gradient-to-r ${lv.bg} text-white shadow-md`
                   : 'text-gray-500 hover:text-gray-800'
@@ -284,7 +284,7 @@ export default function GamificationPage() {
                     <button
                       onClick={() => { setPage(p => p - 1) }}
                       disabled={page === 0}
-                      className="flex items-center gap-1 text-sm text-gray-500 disabled:opacity-30 hover:text-gray-800 transition-colors"
+                      className="cursor-pointer flex items-center gap-1 text-sm text-gray-500 disabled:opacity-30 hover:text-gray-800 transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4" /> Anterior
                     </button>
@@ -294,7 +294,7 @@ export default function GamificationPage() {
                     <button
                       onClick={() => { setPage(p => p + 1) }}
                       disabled={history.last}
-                      className="flex items-center gap-1 text-sm text-gray-500 disabled:opacity-30 hover:text-gray-800 transition-colors"
+                      className="cursor-pointer flex items-center gap-1 text-sm text-gray-500 disabled:opacity-30 hover:text-gray-800 transition-colors"
                     >
                       Siguiente <ChevronRight className="w-4 h-4" />
                     </button>

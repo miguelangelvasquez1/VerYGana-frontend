@@ -88,7 +88,7 @@ export default function SurveyCard({ survey, rank, onStart }: Props) {
           {/* CTA */}
           <button
             onClick={onStart}
-            className="flex items-center justify-center gap-1.5 rounded-xl bg-[#03548C] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#0b1440] active:scale-95"
+            className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl bg-[#03548C] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#0b1440] active:scale-95"
           >
             Ver encuesta
             <ChevronRight className="h-4 w-4" />

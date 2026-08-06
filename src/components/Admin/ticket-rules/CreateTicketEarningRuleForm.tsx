@@ -349,7 +349,7 @@ export default function CreateTicketEarningRuleForm({ onSubmit }: Props) {
 
       <button
         type="submit"
-        className="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium text-sm"
+        className="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium text-sm cursor-pointer"
       >
         Crear Regla
       </button>

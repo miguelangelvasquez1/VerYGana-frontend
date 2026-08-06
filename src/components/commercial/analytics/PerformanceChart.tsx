@@ -3,12 +3,13 @@
 
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import type { DateRangeFilter } from './analytics.types';
 
 type MetricType = "impressions" | "clicks" | "ctr";
 
 interface PerformanceChartProps {
   metric?: MetricType;
-  dateRange?: string;
+  dateRange?: DateRangeFilter;
 }
 
 const performanceData = [
@@ -40,7 +41,12 @@ export function PerformanceChart({ metric, dateRange }: PerformanceChartProps) {
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold text-gray-900">
-          {getTitle()} ({dateRange})
+          {getTitle()}
+          {dateRange && (
+            <span className="ml-2 text-sm font-normal text-gray-500">
+              ({dateRange.startDate} — {dateRange.endDate})
+            </span>
+          )}
         </h3>
       </div>
 

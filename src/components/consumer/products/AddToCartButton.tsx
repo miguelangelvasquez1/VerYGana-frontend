@@ -68,7 +68,7 @@ export function AddToCartButton({
       <button
         onClick={handleAddToCart}
         disabled={isAdding || product.stock === 0 || justAdded}
-        className={`p-2 rounded-lg transition-colors ${
+        className={`p-2 rounded-lg transition-colors cursor-pointer ${
           justAdded
             ? 'bg-green-600 text-white'
             : product.stock === 0
@@ -93,7 +93,7 @@ export function AddToCartButton({
       <button
         onClick={handleAddToCart}
         disabled={isAdding || product.stock === 0 || justAdded}
-        className={`flex items-center justify-center gap-2 px-4 py-2 border-2 rounded-lg transition-all ${
+        className={`flex items-center justify-center gap-2 px-4 py-2 border-2 rounded-lg transition-all cursor-pointer ${
           justAdded
             ? 'border-green-600 text-green-600 bg-green-50'
             : product.stock === 0

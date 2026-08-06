@@ -140,7 +140,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
                     key={t.next}
                     onClick={() => setPendingTransition(t)}
                     disabled={updateStatus.isPending}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all disabled:opacity-50 active:scale-95 ${t.btnClass}`}
+                    className={`cursor-pointer flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all disabled:opacity-50 active:scale-95 ${t.btnClass}`}
                   >
                     {updateStatus.isPending && updateStatus.variables?.status === t.next
                       ? <Loader2 className="h-4 w-4 animate-spin" />

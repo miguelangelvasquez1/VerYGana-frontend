@@ -64,7 +64,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
                 key={opt.value}
                 type="button"
                 onClick={() => toggleTechNeed(opt.value)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all cursor-pointer
                   ${
                     selected
                       ? "bg-[#03548C] border-[#03548C] text-white shadow-sm shadow-blue-200"
@@ -120,7 +120,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
                   key={opt.value}
                   type="button"
                   onClick={() => onChange("primaryGoal", opt.value)}
-                  className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition text-left
+                  className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition text-left cursor-pointer
                     ${
                       form.primaryGoal === opt.value
                         ? "border-blue-500 bg-blue-50 text-blue-700"

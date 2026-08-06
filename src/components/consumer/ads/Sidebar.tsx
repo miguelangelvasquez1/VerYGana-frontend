@@ -23,7 +23,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
         </div>
         <button
           onClick={onClose}
-          className="md:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#0b1440] transition"
+          className="md:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#0b1440] transition cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

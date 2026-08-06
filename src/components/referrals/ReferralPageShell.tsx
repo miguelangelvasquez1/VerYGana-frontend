@@ -106,7 +106,7 @@ export default function ReferralPageShell({ info }: Props) {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex-1 min-w-max flex items-center justify-center gap-2 px-6 py-4 font-medium border-b-2 transition-colors duration-200 ${
+              className={`cursor-pointer flex-1 min-w-max flex items-center justify-center gap-2 px-6 py-4 font-medium border-b-2 transition-colors duration-200 ${
                 activeTab === id
                   ? 'border-[#00a4ff] text-[#00a4ff]'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -235,7 +235,7 @@ export default function ReferralPageShell({ info }: Props) {
                 <button
                   onClick={sendInvite}
                   disabled={!inviteEmail}
-                  className="w-full px-6 py-3 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="cursor-pointer w-full px-6 py-3 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   Enviar invitación
                 </button>
@@ -289,7 +289,7 @@ export default function ReferralPageShell({ info }: Props) {
               <p className="text-gray-400 text-sm mt-1">Comparte tu código y aparecerán aquí</p>
               <button
                 onClick={() => setActiveTab('invite')}
-                className="mt-4 px-6 py-2 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] text-sm transition-colors"
+                className="cursor-pointer mt-4 px-6 py-2 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] text-sm transition-colors"
               >
                 Invitar amigos
               </button>
@@ -440,7 +440,7 @@ export default function ReferralPageShell({ info }: Props) {
           </p>
           <button
             onClick={() => setActiveTab('invite')}
-            className="px-8 py-3 bg-white text-[#03548C] font-bold rounded-full hover:bg-gray-100 transition-colors"
+            className="cursor-pointer px-8 py-3 bg-white text-[#03548C] font-bold rounded-full hover:bg-gray-100 transition-colors"
           >
             Invitar amigos
           </button>

@@ -167,7 +167,7 @@ export default function StoryRow({ story, onEdit, onDelete }: StoryRowProps) {
             onClick={handleToggleStatus}
             className={`
               inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md
-              border border-transparent text-gray-400
+              border border-transparent text-gray-400 cursor-pointer
               transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed
               ${transition.cls}
             `}
@@ -236,7 +236,7 @@ function ActionBtn({
       type="button"
       title={title}
       onClick={onClick}
-      className={`w-7 h-7 flex items-center justify-center rounded-lg border border-transparent transition-all ${cls}`}
+      className={`w-7 h-7 flex items-center justify-center rounded-lg border border-transparent transition-all cursor-pointer ${cls}`}
     >
       {children}
     </button>

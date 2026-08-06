@@ -192,7 +192,7 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
                     <button
                       type="button"
                       onClick={() => onSelectPlan(plan.planCode)}
-                      className={`w-full flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition ${
+                      className={`w-full flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition cursor-pointer ${
                         isSelected
                           ? "border-[#03548C] bg-[#03548C]/5"
                           : "border-gray-200 bg-white hover:border-gray-300"

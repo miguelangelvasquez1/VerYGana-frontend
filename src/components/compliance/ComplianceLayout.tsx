@@ -80,7 +80,7 @@ function ComplianceSidebar({ pathname, onClose }: { pathname: string; onClose?: 
           {onClose && (
             <button
               onClick={onClose}
-              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors"
+              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -135,7 +135,7 @@ function ComplianceHeader({ title, onMenuClick, showMenuButton }: { title: strin
           {showMenuButton && (
             <button
               onClick={onMenuClick}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 lg:hidden"
+              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 lg:hidden cursor-pointer"
             >
               <Menu className="w-5 h-5" />
             </button>

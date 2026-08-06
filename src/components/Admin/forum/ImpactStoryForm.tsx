@@ -422,7 +422,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
           <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100 flex-wrap">
             <button
               type="button"
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40"
+              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40 cursor-pointer"
               disabled={isBusy}
               onClick={onCancel}
             >
@@ -430,7 +430,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 bg-white border border-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-40"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 bg-white border border-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-40 cursor-pointer"
               disabled={isBusy}
               onClick={() => handleSubmit('DRAFT')}
             >
@@ -438,7 +438,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors disabled:opacity-40 flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors disabled:opacity-40 flex items-center gap-2 cursor-pointer"
               disabled={isBusy}
               onClick={() => handleSubmit('PUBLISHED')}
             >
@@ -560,7 +560,7 @@ function MediaCard({ media, disabled, onRemove, onSetCover, onAltText }: {
         {!media.isCover && (
           <button
             type="button"
-            className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-40"
+            className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-40 cursor-pointer"
             onClick={onSetCover} disabled={disabled} title="Usar como portada"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -570,7 +570,7 @@ function MediaCard({ media, disabled, onRemove, onSetCover, onAltText }: {
         )}
         <button
           type="button"
-          className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
+          className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 cursor-pointer"
           onClick={onRemove} disabled={disabled} title="Eliminar"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

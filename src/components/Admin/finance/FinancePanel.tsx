@@ -242,7 +242,7 @@ export default function TreasuryPanel() {
         <button
           onClick={() => refetchBalance()}
           disabled={balanceLoading}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className={`w-4 h-4 ${balanceLoading ? 'animate-spin' : ''}`} />
           Actualizar
@@ -318,7 +318,7 @@ export default function TreasuryPanel() {
             <button
               key={code}
               onClick={() => setSelectedAccount(isSelected ? null : code)}
-              className={`text-left w-full p-5 rounded-2xl border-2 transition-all shadow-sm ${
+              className={`text-left w-full p-5 rounded-2xl border-2 transition-all shadow-sm cursor-pointer ${
                 isSelected
                   ? `${c.border} ${c.bg} shadow-md ring-2 ring-offset-1 ${c.ring}`
                   : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow'

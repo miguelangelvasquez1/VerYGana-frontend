@@ -152,14 +152,14 @@ export default function PurchaseConfirmationPage() {
             <div className="space-y-3">
               <button
                 onClick={() => router.push('/explore/purchases')}
-                className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
               >
                 Ver mis compras
               </button>
 
               <button
                 onClick={() => router.push('/products')}
-                className="w-full py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+                className="w-full py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition cursor-pointer"
               >
                 Seguir comprando
               </button>
@@ -177,7 +177,7 @@ export default function PurchaseConfirmationPage() {
 
             <button
               onClick={() => router.push('/explore/purchases')}
-              className="w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition"
+              className="w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition cursor-pointer"
             >
               Ir a mis compras
             </button>

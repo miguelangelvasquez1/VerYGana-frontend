@@ -25,7 +25,7 @@ const ProductImageGallery: React.FC<Props> = ({ product, overlay }) => {
       <div className="flex gap-3">
         <button
           onClick={() => setSelectedImage(product.imageUrl)}
-          className={`w-20 h-20 rounded-xl overflow-hidden border-2 transition ${
+          className={`w-20 h-20 rounded-xl overflow-hidden border-2 transition cursor-pointer ${
             selectedImage === product.imageUrl
               ? "border-[#014C92] shadow-md"
               : "border-gray-200 hover:border-gray-300"

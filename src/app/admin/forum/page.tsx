@@ -86,7 +86,7 @@ export default function AdminImpactStoriesPage() {
           </p>
           <button
             onClick={() => setView('create')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
@@ -109,7 +109,7 @@ export default function AdminImpactStoriesPage() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <button type="submit" className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium text-gray-600 transition-colors">
+            <button type="submit" className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium text-gray-600 transition-colors cursor-pointer">
               Buscar
             </button>
           </form>
@@ -129,7 +129,7 @@ export default function AdminImpactStoriesPage() {
 
           {(filters.status || filters.search) && (
             <button
-              className="text-xs text-gray-400 hover:text-gray-600 underline transition-colors"
+              className="text-xs text-gray-400 hover:text-gray-600 underline transition-colors cursor-pointer"
               onClick={() => { setFilters({ size: 10, page: 0 }); setSearch(''); }}
             >
               Limpiar filtros
@@ -174,7 +174,7 @@ export default function AdminImpactStoriesPage() {
               </p>
               <button
                 onClick={() => setView('create')}
-                className="mt-4 text-sm text-emerald-700 hover:text-emerald-900 font-semibold underline transition-colors"
+                className="mt-4 text-sm text-emerald-700 hover:text-emerald-900 font-semibold underline transition-colors cursor-pointer"
               >
                 Crear la primera historia
               </button>
@@ -271,7 +271,7 @@ function PaginationBtn({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors
+      className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer
         ${active
           ? 'bg-emerald-700 text-white border-emerald-700'
           : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}
@@ -313,7 +313,7 @@ function ConfirmDeleteModal({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
           >
             Cancelar
           </button>
@@ -321,7 +321,7 @@ function ConfirmDeleteModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             {isLoading && (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">

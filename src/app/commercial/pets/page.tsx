@@ -81,7 +81,7 @@ function RequestCard({ req }: { req: PetRequest }) {
           <button
             type="button"
             onClick={() => setExpanded(v => !v)}
-            className="flex items-center gap-1 mt-2 text-xs font-medium hover:underline"
+            className="cursor-pointer flex items-center gap-1 mt-2 text-xs font-medium hover:underline"
             style={{ color: '#03548C' }}
           >
             {expanded
@@ -162,7 +162,7 @@ function NewRequestForm({ onCreated }: { onCreated: () => void }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-md transition hover:opacity-90"
+        className="cursor-pointer flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-md transition hover:opacity-90"
         style={{ background: 'linear-gradient(135deg, #00a4ff, #0089d6)' }}
       >
         <Plus className="w-4 h-4" /> Nueva solicitud
@@ -181,7 +181,7 @@ function NewRequestForm({ onCreated }: { onCreated: () => void }) {
           <h3 className="font-bold text-lg" style={{ color: '#0b1440' }}>
             Integra tu producto al juego
           </h3>
-          <button type="button" onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-gray-100">
+          <button type="button" onClick={() => setOpen(false)} className="cursor-pointer p-1 rounded-lg hover:bg-gray-100">
             <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
@@ -231,14 +231,14 @@ function NewRequestForm({ onCreated }: { onCreated: () => void }) {
             type="button"
             onClick={() => setOpen(false)}
             disabled={loading}
-            className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            className="cursor-pointer flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition hover:opacity-90 disabled:opacity-50"
+            className="cursor-pointer flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition hover:opacity-90 disabled:opacity-50"
             style={{ background: 'linear-gradient(135deg, #00a4ff, #0089d6)' }}
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -310,7 +310,7 @@ export default function PetsPage() {
           <div className="flex flex-col items-center gap-3 py-16 text-red-500">
             <AlertTriangle className="w-8 h-8" />
             <p className="text-sm font-medium">Error al cargar solicitudes.</p>
-            <button type="button" onClick={load} className="text-xs hover:underline" style={{ color: '#00a4ff' }}>
+            <button type="button" onClick={load} className="cursor-pointer text-xs hover:underline" style={{ color: '#00a4ff' }}>
               Reintentar
             </button>
           </div>

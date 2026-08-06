@@ -132,7 +132,7 @@ export function BoolToggle({
           key={String(opt.v)}
           type="button"
           onClick={() => onChange(opt.v)}
-          className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition
+          className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition cursor-pointer
             ${
               value === opt.v
                 ? "border-blue-500 bg-blue-50 text-blue-700"

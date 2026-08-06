@@ -140,7 +140,7 @@ export default function Navbar() {
             <div className="relative" ref={keyWalletMenuRefDesktop}>
               <button
                 onClick={() => setIsKeyWalletOpen((v) => !v)}
-                className="group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/10 hover:bg-white/20 hover:scale-105 transition-all"
+                className="cursor-pointer group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/10 hover:bg-white/20 hover:scale-105 transition-all"
               >
                 <Image
                   src="/logos/llave.png"
@@ -301,7 +301,7 @@ export default function Navbar() {
             <div className="relative" ref={profileMenuRef}>
               <button
                 onClick={() => setOpenMenu((v) => !v)}
-                className="flex items-center gap-3 hover:bg-white/10 px-3 py-2 rounded-full transition-all"
+                className="cursor-pointer flex items-center gap-3 hover:bg-white/10 px-3 py-2 rounded-full transition-all"
               >
                 <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden flex items-center justify-center">
                   {consumer?.avatarUrl ? (
@@ -441,7 +441,7 @@ export default function Navbar() {
             <div className="relative" ref={keyWalletMenuRefMobile}>
               <button
                 onClick={() => setIsKeyWalletOpen((v) => !v)}
-                className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-2xl border border-white/10"
+                className="cursor-pointer flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-2xl border border-white/10"
               >
                 <Image
                   src="/logos/llave.png"
@@ -648,7 +648,7 @@ export default function Navbar() {
           </Link>
 
           {/* PERFIL */}
-          <button onClick={() => setOpenMenu((v) => !v)} className="flex flex-col items-center justify-center">
+          <button onClick={() => setOpenMenu((v) => !v)} className="cursor-pointer flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
               <div className={`p-1.5 rounded-full transition-all duration-200 ${openMenu ? "bg-white/20" : ""}`}>
                 <User className={`w-5 h-5 transition-all duration-200 ${openMenu ? "text-[#00a4ff]" : "text-white/70"}`} />

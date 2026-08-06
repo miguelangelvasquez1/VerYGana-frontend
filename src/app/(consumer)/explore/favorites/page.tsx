@@ -84,7 +84,7 @@ export default function FavoritesPage() {
               Explora el marketplace y guarda los productos que más te gusten con el botón ❤️
             </p>
             <Link href="/products">
-              <button className="inline-flex items-center gap-2 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+              <button className="inline-flex items-center gap-2 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer">
                 <Package className="w-4 h-4" />
                 Explorar productos
               </button>

@@ -54,7 +54,7 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
             <Info className="w-5 h-5 text-blue-600" />
             <h2 className="text-lg font-bold text-gray-900">Detalle del anuncio</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
             <X className="w-5 h-5 text-gray-500 cursor-pointer" />
           </button>
         </div>
@@ -251,7 +251,7 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
                         <button
                           onClick={() => setLikesPage(p => Math.max(0, p - 1))}
                           disabled={likesPage === 0}
-                          className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                           <ChevronLeft className="w-4 h-4" /> Anterior
                         </button>
@@ -261,7 +261,7 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
                         <button
                           onClick={() => setLikesPage(p => Math.min(likesData.meta.totalPages - 1, p + 1))}
                           disabled={likesPage >= likesData.meta.totalPages - 1}
-                          className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                           Siguiente <ChevronRight className="w-4 h-4" />
                         </button>

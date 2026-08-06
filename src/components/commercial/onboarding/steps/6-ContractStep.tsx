@@ -168,7 +168,7 @@ export function ContractGenerateStep({
                 type="button"
                 onClick={handleCheckStatus}
                 disabled={checkingStatus}
-                className="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-amber-800 hover:underline disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-amber-800 hover:underline disabled:opacity-50 cursor-pointer"
               >
                 {checkingStatus ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                 Verificar estado
@@ -445,7 +445,7 @@ export function VeryGanaReviewStep({ contract, onRefresh, rejected, rejectionRea
           type="button"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 cursor-pointer"
         >
           {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           Verificar estado

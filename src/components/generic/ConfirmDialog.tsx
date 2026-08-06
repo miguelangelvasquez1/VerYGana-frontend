@@ -112,7 +112,7 @@ export default function ConfirmDialog({
           <button
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
+            className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
           >
             {cancelText}
           </button>
@@ -120,7 +120,7 @@ export default function ConfirmDialog({
           <button
             onClick={handleConfirm}
             disabled={loading || !isTextValid}
-            className={`px-4 py-2 rounded-lg text-white transition focus:ring-2 ${getButtonStyle()} disabled:opacity-50`}
+            className={`px-4 py-2 rounded-lg text-white transition focus:ring-2 cursor-pointer ${getButtonStyle()} disabled:opacity-50`}
           >
             {loading ? "Procesando..." : confirmText}
           </button>

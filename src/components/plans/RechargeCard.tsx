@@ -121,7 +121,7 @@ export const RechargeCard = ({ recharge }: { recharge: Recharge }) => {
         </div>
 
         {/* Botón */}
-        <button className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200">
+        <button className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 cursor-pointer">
           Recargar Ahora
         </button>
       </div>

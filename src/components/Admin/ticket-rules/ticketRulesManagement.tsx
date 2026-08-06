@@ -148,7 +148,7 @@ export default function TicketRulesManagement() {
       <div className="flex justify-between items-center">
         <button
           onClick={() => setShowCreate(true)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700"
+          className="cursor-pointer bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700"
         >
           <Plus size={18} />
           Crear Regla
@@ -212,7 +212,7 @@ export default function TicketRulesManagement() {
 
         <button
           onClick={resetFilters}
-          className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+          className="cursor-pointer px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
         >
           Limpiar filtros
         </button>
@@ -241,7 +241,7 @@ export default function TicketRulesManagement() {
         <button
           disabled={page === 0}
           onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          className="cursor-pointer px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
         >
           Anterior
         </button>
@@ -251,7 +251,7 @@ export default function TicketRulesManagement() {
         <button
           disabled={rules.length < size}
           onClick={() => setPage((prev) => prev + 1)}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          className="cursor-pointer px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
         >
           Siguiente
         </button>
@@ -279,7 +279,7 @@ function Modal({
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-xl w-full max-w-2xl relative">
-        <button onClick={onClose} className="absolute top-4 right-4">
+        <button onClick={onClose} className="cursor-pointer absolute top-4 right-4">
           <X />
         </button>
         {children}

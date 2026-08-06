@@ -131,7 +131,7 @@ export default function ImpactStoryEditForm({
             <button
               type="button"
               onClick={onCancel}
-              className="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors shrink-0"
+              className="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
               title="Volver"
             >
               <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -319,7 +319,7 @@ export default function ImpactStoryEditForm({
                     type="button"
                     disabled={isBusy}
                     onClick={() => set('status', opt.value)}
-                    className={`py-3 px-4 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 ${colorMap[opt.value]}`}
+                    className={`py-3 px-4 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 cursor-pointer ${colorMap[opt.value]}`}
                   >
                     {opt.label}
                   </button>
@@ -358,7 +358,7 @@ export default function ImpactStoryEditForm({
           <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100 flex-wrap">
             <button
               type="button"
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40"
+              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40 cursor-pointer"
               disabled={isBusy}
               onClick={onCancel}
             >
@@ -366,7 +366,7 @@ export default function ImpactStoryEditForm({
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors disabled:opacity-40 flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors disabled:opacity-40 flex items-center gap-2 cursor-pointer"
               disabled={isBusy}
               onClick={handleSubmit}
             >

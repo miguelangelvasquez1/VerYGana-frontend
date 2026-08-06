@@ -75,7 +75,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState, commerci
             {showMenuButton && (
               <button
                 onClick={onMenuClick}
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 lg:hidden"
+                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 lg:hidden cursor-pointer"
               >
                 <Menu className="w-5 h-5" />
               </button>

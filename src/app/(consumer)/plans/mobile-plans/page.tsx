@@ -281,7 +281,7 @@ export default function MobileServicesPage() {
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-1">
               <button
                 onClick={() => setActiveTab("planes")}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 cursor-pointer ${
                   activeTab === "planes"
                     ? "bg-white text-blue-600 shadow-lg"
                     : "text-white hover:text-blue-200"
@@ -292,7 +292,7 @@ export default function MobileServicesPage() {
               </button>
               <button
                 onClick={() => setActiveTab("recargas")}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 cursor-pointer ${
                   activeTab === "recargas"
                     ? "bg-white text-blue-600 shadow-lg"
                     : "text-white hover:text-blue-200"
@@ -328,7 +328,7 @@ export default function MobileServicesPage() {
             <div className="flex flex-wrap items-center gap-4 mb-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
               >
                 <Filter className="w-4 h-4" />
                 Filtros
@@ -457,7 +457,7 @@ export default function MobileServicesPage() {
                   setSelectedType("todos");
                   setSearchTerm("");
                 }}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 cursor-pointer"
               >
                 Limpiar filtros
               </button>

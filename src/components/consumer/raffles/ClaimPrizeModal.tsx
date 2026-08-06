@@ -282,7 +282,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                   else if (step === "email-otp") { setStep("email-contact"); setOtpCode(""); setOtpSent(false); }
                   else setStep("method");
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors mr-1"
+                className="text-gray-400 hover:text-gray-600 transition-colors mr-1 cursor-pointer"
                 aria-label="Volver"
               >
                 ←
@@ -299,7 +299,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
+            className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none cursor-pointer"
             aria-label="Cerrar"
           >
             ✕
@@ -336,7 +336,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={handleChooseEmail}
-                    className="flex flex-col items-center gap-2 p-5 border-2 border-gray-200 rounded-2xl hover:border-[#03548C] hover:bg-[#03548C]/5 transition-all group"
+                    className="flex flex-col items-center gap-2 p-5 border-2 border-gray-200 rounded-2xl hover:border-[#03548C] hover:bg-[#03548C]/5 transition-all group cursor-pointer"
                   >
                     <span className="text-3xl">📧</span>
                     <span className="font-semibold text-sm text-gray-700 group-hover:text-[#03548C]">
@@ -349,7 +349,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
 
                   <button
                     onClick={handleChooseSms}
-                    className="flex flex-col items-center gap-2 p-5 border-2 border-gray-200 rounded-2xl hover:border-[#03548C] hover:bg-[#03548C]/5 transition-all group"
+                    className="flex flex-col items-center gap-2 p-5 border-2 border-gray-200 rounded-2xl hover:border-[#03548C] hover:bg-[#03548C]/5 transition-all group cursor-pointer"
                   >
                     <span className="text-3xl">📱</span>
                     <span className="font-semibold text-sm text-gray-700 group-hover:text-[#03548C]">
@@ -382,7 +382,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
 
               <button
                 onClick={() => { setUseCustomEmail(false); clearError(); }}
-                className={`w-full flex items-start gap-3 p-4 border-2 rounded-xl transition-all text-left ${
+                className={`w-full flex items-start gap-3 p-4 border-2 rounded-xl transition-all text-left cursor-pointer ${
                   !useCustomEmail
                     ? "border-[#03548C] bg-[#03548C]/5"
                     : "border-gray-200 hover:border-gray-300"
@@ -402,7 +402,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
 
               <button
                 onClick={() => { setUseCustomEmail(true); clearError(); }}
-                className={`w-full flex items-start gap-3 p-4 border-2 rounded-xl transition-all text-left ${
+                className={`w-full flex items-start gap-3 p-4 border-2 rounded-xl transition-all text-left cursor-pointer ${
                   useCustomEmail
                     ? "border-[#03548C] bg-[#03548C]/5"
                     : "border-gray-200 hover:border-gray-300"
@@ -448,7 +448,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
               <button
                 onClick={useCustomEmail ? handleSendEmailOtp : handleSubmitRegisteredEmail}
                 disabled={loading}
-                className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
+                className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors cursor-pointer"
               >
                 {loading
                   ? "Procesando..."
@@ -515,7 +515,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 <button
                   onClick={handleResendEmailOtp}
                   disabled={loading || resendCooldown > 0}
-                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline"
+                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline cursor-pointer"
                 >
                   {resendCooldown > 0 ? `Reenviar código (${resendCooldown}s)` : "Reenviar código"}
                 </button>
@@ -526,7 +526,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
               <button
                 onClick={handleVerifyEmailOtp}
                 disabled={loading || otpCode.length < 4 || isEmailExpired}
-                className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
+                className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors cursor-pointer"
               >
                 {loading ? "Verificando..." : "Verificar y reclamar premio →"}
               </button>
@@ -543,7 +543,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
 
               <button
                 onClick={() => { setUseCustomPhone(false); clearError(); }}
-                className={`w-full flex items-start gap-3 p-4 border-2 rounded-xl transition-all text-left ${
+                className={`w-full flex items-start gap-3 p-4 border-2 rounded-xl transition-all text-left cursor-pointer ${
                   !useCustomPhone
                     ? "border-[#03548C] bg-[#03548C]/5"
                     : "border-gray-200 hover:border-gray-300"
@@ -563,7 +563,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
 
               <button
                 onClick={() => { setUseCustomPhone(true); clearError(); }}
-                className={`w-full flex items-start gap-3 p-4 border-2 rounded-xl transition-all text-left ${
+                className={`w-full flex items-start gap-3 p-4 border-2 rounded-xl transition-all text-left cursor-pointer ${
                   useCustomPhone
                     ? "border-[#03548C] bg-[#03548C]/5"
                     : "border-gray-200 hover:border-gray-300"
@@ -610,7 +610,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
               <button
                 onClick={useCustomPhone ? handleSendOtp : handleSubmitRegisteredPhone}
                 disabled={loading}
-                className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
+                className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors cursor-pointer"
               >
                 {loading
                   ? "Procesando..."
@@ -677,7 +677,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 <button
                   onClick={handleResendOtp}
                   disabled={loading || resendCooldown > 0}
-                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline"
+                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline cursor-pointer"
                 >
                   {resendCooldown > 0 ? `Reenviar código (${resendCooldown}s)` : "Reenviar código"}
                 </button>
@@ -688,7 +688,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
               <button
                 onClick={handleVerifyOtp}
                 disabled={loading || otpCode.length < 4 || isExpired}
-                className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
+                className="w-full bg-[#03548C] hover:bg-[#0b1440] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors cursor-pointer"
               >
                 {loading ? "Verificando..." : "Verificar y reclamar premio →"}
               </button>
@@ -726,7 +726,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
 
               <button
                 onClick={onClose}
-                className="w-full bg-[#0b1440] hover:bg-[#03548C] text-white font-semibold py-3 rounded-xl transition-colors"
+                className="w-full bg-[#0b1440] hover:bg-[#03548C] text-white font-semibold py-3 rounded-xl transition-colors cursor-pointer"
               >
                 Entendido
               </button>

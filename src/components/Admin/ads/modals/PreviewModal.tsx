@@ -15,7 +15,7 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({ url, type, onClose }
     >
       <div className="relative" onClick={e => e.stopPropagation()}>
         <button 
-          className="absolute top-4 right-4 bg-white/80 p-2 rounded-full z-10 hover:bg-white transition-colors" 
+          className="absolute top-4 right-4 bg-white/80 p-2 rounded-full z-10 hover:bg-white transition-colors cursor-pointer"
           onClick={onClose}
         >
           <XCircle className="w-6 h-6 text-gray-800" />

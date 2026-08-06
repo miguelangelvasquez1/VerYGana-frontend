@@ -344,7 +344,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
                 <button
                   onClick={handleLike}
                   disabled={isLikingAd}
-                  className={`px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full font-bold text-lg transition-all duration-200 disabled:cursor-not-allowed
+                  className={`px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full font-bold text-lg transition-all duration-200 disabled:cursor-not-allowed cursor-pointer
                     ${isLikingAd ? 'scale-95 opacity-80' : 'hover:scale-105 active:scale-95'}`}
                 >
                   {isLikingAd ? (
@@ -400,7 +400,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
           {currentAd.description && currentAd.description.length > 100 && (
             <button
               onClick={() => setIsExpanded(v => !v)}
-              className="text-[#00a4ff] text-[10px] mt-0.5 font-medium"
+              className="text-[#00a4ff] text-[10px] mt-0.5 font-medium cursor-pointer"
             >
               {isExpanded ? 'Ver menos' : 'Ver más'}
             </button>
@@ -500,7 +500,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
                         setRewardAmount(null);
                         loadNextAd();
                       }}
-                      className="mt-1 w-full px-6 py-3 bg-amber-900/20 hover:bg-amber-900/30 active:scale-95 text-amber-900 font-bold rounded-2xl transition-all duration-150 border border-amber-900/20"
+                      className="mt-1 w-full px-6 py-3 bg-amber-900/20 hover:bg-amber-900/30 active:scale-95 text-amber-900 font-bold rounded-2xl transition-all duration-150 border border-amber-900/20 cursor-pointer"
                     >
                       Ver siguiente anuncio →
                     </button>

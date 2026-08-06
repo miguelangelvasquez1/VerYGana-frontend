@@ -150,7 +150,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
         >
           {isCollapsed ? <Menu size={20} /> : <X size={20} />}
         </button>

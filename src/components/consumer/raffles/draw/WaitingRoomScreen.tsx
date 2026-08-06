@@ -124,7 +124,7 @@ function PrizesCarousel({ prizes }: { prizes: PrizeResponseDTO[] }) {
             <button
               key={i}
               onClick={() => setCurrent(i)}
-              className={`h-2 rounded-full transition-all duration-300 ${
+              className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                 i === current ? 'w-5 bg-[#03548C]' : 'w-2 bg-gray-300'
               }`}
             />

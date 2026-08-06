@@ -190,7 +190,7 @@ const Dashboard: React.FC = () => {
                 );
               })}
             </div>
-            <button className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium">
+            <button className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer">
               Ver toda la actividad →
             </button>
           </div>
@@ -224,7 +224,7 @@ const Dashboard: React.FC = () => {
                 </div>
               ))}
             </div>
-            <button className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium">
+            <button className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer">
               Ver todas las rifas →
             </button>
           </div>
@@ -238,25 +238,25 @@ const Dashboard: React.FC = () => {
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
+            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer">
               <Gift className="h-8 w-8 text-purple-600 mb-2" />
               <h4 className="font-medium text-gray-900">Nueva Rifa</h4>
               <p className="text-sm text-gray-600">Crear una nueva rifa</p>
             </button>
             
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
+            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors cursor-pointer">
               <Users className="h-8 w-8 text-blue-600 mb-2" />
               <h4 className="font-medium text-gray-900">Gestionar Usuarios</h4>
               <p className="text-sm text-gray-600">Ver y editar usuarios</p>
             </button>
             
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors">
+            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors cursor-pointer">
               <TrendingUp className="h-8 w-8 text-orange-600 mb-2" />
               <h4 className="font-medium text-gray-900">Ver Reportes</h4>
               <p className="text-sm text-gray-600">Analizar métricas</p>
             </button>
             
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-colors">
+            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-colors cursor-pointer">
               <Activity className="h-8 w-8 text-red-600 mb-2" />
               <h4 className="font-medium text-gray-900">Configuración</h4>
               <p className="text-sm text-gray-600">Ajustes del sistema</p>

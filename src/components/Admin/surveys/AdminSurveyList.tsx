@@ -89,7 +89,7 @@ export default function AdminSurveyList() {
           {errorMsg}
           <button
             onClick={() => setErrorMsg(null)}
-            className="ml-auto text-red-400 hover:text-red-600"
+            className="ml-auto text-red-400 hover:text-red-600 cursor-pointer"
           >
             ✕
           </button>
@@ -163,14 +163,14 @@ export default function AdminSurveyList() {
                   <button
                     disabled={page === 0}
                     onClick={() => setPage((p) => p - 1)}
-                    className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                    className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <button
                     disabled={page >= data.meta.totalPages - 1}
                     onClick={() => setPage((p) => p + 1)}
-                    className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                    className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
@@ -230,7 +230,7 @@ function SurveyRow({
       <td className="max-w-[260px] px-5 py-4">
         <button
           onClick={onViewDetail}
-          className="text-left"
+          className="text-left cursor-pointer"
         >
           <p className="truncate text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
             {survey.title}
@@ -322,7 +322,7 @@ function FilterPill({
   return (
     <button
       onClick={onClick}
-      className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
+      className={`cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
         active
           ? 'bg-indigo-600 text-white shadow-sm'
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -350,7 +350,7 @@ function ActionBtn({
       title={tooltip}
       onClick={onClick}
       disabled={loading}
-      className={`rounded-lg p-1.5 transition-colors disabled:opacity-50 ${className}`}
+      className={`cursor-pointer rounded-lg p-1.5 transition-colors disabled:opacity-50 ${className}`}
     >
       {loading
         ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

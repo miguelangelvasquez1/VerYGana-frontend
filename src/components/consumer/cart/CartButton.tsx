@@ -14,7 +14,7 @@ export function CartButton() {
   return (
     <button
       onClick={toggleCart}
-      className="relative p-2 hover:bg-white/20 hover:scale-105 transition-all rounded-md"
+      className="relative p-2 hover:bg-white/20 hover:scale-105 transition-all rounded-md cursor-pointer"
       aria-label="Shopping cart"
     >
       <ShoppingCart className="w-6 h-6 white" />

@@ -177,7 +177,7 @@ export default function PlayGamePage() {
         {/* Botón volver – en portrait top-right = landscape top-left */}
         <button
           onClick={() => router.push('/games')}
-          className="fixed z-[70] bg-black/60 backdrop-blur-sm text-white rounded-full p-2.5 shadow-lg"
+          className="fixed z-[70] bg-black/60 backdrop-blur-sm text-white rounded-full p-2.5 shadow-lg cursor-pointer"
           style={{ top: '12px', right: '12px' }}
           aria-label="Volver a juegos"
         >
@@ -217,7 +217,7 @@ export default function PlayGamePage() {
       {isMobile && (
         <button
           onClick={() => router.push('/games')}
-          className="fixed bottom-20 left-4 z-50 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white rounded-full px-3 py-2 text-sm font-medium shadow-lg"
+          className="fixed bottom-20 left-4 z-50 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white rounded-full px-3 py-2 text-sm font-medium shadow-lg cursor-pointer"
           aria-label="Volver a juegos"
         >
           <ArrowLeft className="w-4 h-4" />

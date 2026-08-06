@@ -340,7 +340,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               type="button"
               onClick={handleRemoveNewImage}
               disabled={isUploadingImage}
-              className="absolute top-7 right-2 bg-white text-red-600 border border-red-300 text-xs px-2 py-1 rounded-lg hover:bg-red-50 disabled:opacity-40"
+              className="absolute top-7 right-2 bg-white text-red-600 border border-red-300 text-xs px-2 py-1 rounded-lg hover:bg-red-50 disabled:opacity-40 cursor-pointer"
             >
               Quitar
             </button>
@@ -382,7 +382,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
             type="button"
             onClick={handleImageUpdate}
             disabled={isUploadingImage}
-            className="w-full bg-[#03548C] text-white py-2 rounded-lg hover:bg-[#0b1440] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#03548C] text-white py-2 rounded-lg hover:bg-[#0b1440] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {isUploadingImage ? imageStatusLabel[imageState.status] : 'Actualizar imagen'}
           </button>
@@ -471,7 +471,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
             <button
               type="submit"
               disabled={isAnythingLoading}
-              className="flex-1 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold py-3 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold py-3 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isSavingData ? 'Guardando...' : 'Guardar cambios'}
             </button>
@@ -479,7 +479,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               type="button"
               onClick={onCancel}
               disabled={isAnythingLoading}
-              className="flex-1 border border-gray-200 py-3 rounded-xl hover:bg-gray-50 transition disabled:opacity-40"
+              className="flex-1 border border-gray-200 py-3 rounded-xl hover:bg-gray-50 transition disabled:opacity-40 cursor-pointer"
             >
               Cancelar
             </button>
@@ -522,7 +522,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                 type="button"
                 onClick={() => { setStatusFilter(''); setSoldDateFilter(''); setStockPage(0); }}
                 title="Limpiar filtros"
-                className="px-2 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-gray-500 self-end"
+                className="px-2 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-gray-500 self-end cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -571,7 +571,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                             type="button"
                             onClick={() => handleCopyCode(revealedCodes[item.id])}
                             title="Copiar código"
-                            className="p-1 text-gray-400 hover:text-gray-600 rounded transition"
+                            className="p-1 text-gray-400 hover:text-gray-600 rounded transition cursor-pointer"
                           >
                             <Copy className="w-3.5 h-3.5" />
                           </button>
@@ -579,7 +579,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                             type="button"
                             onClick={() => handleToggleCode(item.id)}
                             title="Ocultar código"
-                            className="p-1 text-gray-400 hover:text-gray-600 rounded transition"
+                            className="p-1 text-gray-400 hover:text-gray-600 rounded transition cursor-pointer"
                           >
                             <EyeOff className="w-3.5 h-3.5" />
                           </button>
@@ -589,7 +589,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                           type="button"
                           onClick={() => handleToggleCode(item.id)}
                           disabled={loadingCodeId === item.id}
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] disabled:opacity-40 transition"
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] disabled:opacity-40 transition cursor-pointer"
                         >
                           {loadingCodeId === item.id ? (
                             <span className="w-3 h-3 border-2 border-[#03548C] border-t-transparent rounded-full animate-spin" />
@@ -612,7 +612,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                         type="button"
                         onClick={() => handleDeleteStockItem(item.id)}
                         title="Eliminar código"
-                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -634,14 +634,14 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               <button
                 onClick={() => setStockPage((p) => p - 1)}
                 disabled={stockPage === 0}
-                className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
+                className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setStockPage((p) => p + 1)}
                 disabled={stockPage >= totalPages - 1}
-                className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
+                className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -668,7 +668,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
             type="button"
             onClick={handleSaveNewStock}
             disabled={isSavingStock}
-            className="w-full bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold py-3 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold py-3 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {isSavingStock ? 'Guardando códigos...' : `Guardar ${newStockItems.length} código(s)`}
           </button>

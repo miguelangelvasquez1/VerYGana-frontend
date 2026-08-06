@@ -344,7 +344,7 @@ export function CreateAdForm() {
                     type="button"
                     onClick={() => setFormData((prev) => ({ ...prev, type: t, file: null }))}
                     disabled={isUploading}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border-2 flex items-center justify-center gap-2 transition-all
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border-2 flex items-center justify-center gap-2 transition-all cursor-pointer
                       ${formData.type === t
                         ? 'border-[#03548C] bg-[#03548C]/10 text-[#03548C]'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300'
@@ -428,7 +428,7 @@ export function CreateAdForm() {
                     type="button"
                     onClick={() => setFormData((prev) => ({ ...prev, file: null }))}
                     disabled={isUploading}
-                    className="text-gray-400 hover:text-red-500 transition disabled:opacity-50"
+                    className="text-gray-400 hover:text-red-500 transition disabled:opacity-50 cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -534,7 +534,7 @@ export function CreateAdForm() {
                     key={val}
                     type="button"
                     onClick={() => setFormData((prev) => ({ ...prev, pricePerLike: val }))}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all cursor-pointer
                       ${formData.pricePerLike === val
                         ? 'border-[#03548C] bg-[#03548C] text-white shadow-sm'
                         : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40 hover:text-[#03548C]'
@@ -553,7 +553,7 @@ export function CreateAdForm() {
                     ...prev,
                     pricePerLike: Math.max(pricingInfo.minPricePerLike, prev.pricePerLike - 10),
                   }))}
-                  className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600"
+                  className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 cursor-pointer"
                 >
                   <ChevronDown className="w-4 h-4" />
                 </button>
@@ -570,7 +570,7 @@ export function CreateAdForm() {
                 <button
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, pricePerLike: prev.pricePerLike + 10 }))}
-                  className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600"
+                  className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 cursor-pointer"
                 >
                   <ChevronUp className="w-4 h-4" />
                 </button>
@@ -699,7 +699,7 @@ export function CreateAdForm() {
                         onMouseLeave={() => setShowTargetUrlTip(false)}
                         onFocus={() => setShowTargetUrlTip(true)}
                         onBlur={() => setShowTargetUrlTip(false)}
-                        className="text-gray-400 hover:text-[#03548C] transition-colors"
+                        className="text-gray-400 hover:text-[#03548C] transition-colors cursor-pointer"
                         aria-label="Ayuda para: URL de destino"
                       >
                         <HelpCircle className="h-3.5 w-3.5" />
@@ -747,7 +747,7 @@ export function CreateAdForm() {
                           key={cat.id} type="button"
                           onClick={() => toggleCategory(cat.id)}
                           disabled={isSubmitting}
-                          className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all cursor-pointer
                             ${selected
                               ? 'border-[#03548C] bg-[#03548C] text-white shadow-sm shadow-blue-100'
                               : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40 hover:text-[#03548C]'
@@ -816,7 +816,7 @@ export function CreateAdForm() {
                         key={g.v} type="button"
                         onClick={() => setFormData((p) => ({ ...p, targetAudience: { ...p.targetAudience, gender: g.v as any } }))}
                         disabled={isSubmitting}
-                        className={`flex-1 py-2 rounded-xl border-2 text-sm font-semibold transition-all
+                        className={`flex-1 py-2 rounded-xl border-2 text-sm font-semibold transition-all cursor-pointer
                           ${formData.targetAudience.gender === g.v
                             ? 'border-[#03548C] bg-[#03548C]/10 text-[#03548C]'
                             : 'border-gray-200 text-gray-500 hover:border-gray-300'
@@ -864,7 +864,7 @@ export function CreateAdForm() {
                       {selectedMunicipalitiesData.map((m) => (
                         <span key={m.code} className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full">
                           📍 {m.name}, {m.departmentName}
-                          <button type="button" onClick={() => removeMunicipality(m.code)} disabled={isSubmitting}>
+                          <button type="button" onClick={() => removeMunicipality(m.code)} disabled={isSubmitting} className="cursor-pointer">
                             <X className="w-3 h-3" />
                           </button>
                         </span>
