@@ -628,12 +628,12 @@ export default function Navbar() {
           </Link>
 
           {/* MASCOTA */}
-          <Link href="/mascota" className="flex flex-col items-center justify-center">
+          <Link href="/pet" className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/mascota" ? "bg-white/20" : ""}`}>
-                <PawPrint className={`w-5 h-5 transition-all duration-200 ${pathname === "/mascota" ? "text-[#00a4ff]" : "text-white/70"}`} />
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/pet" ? "bg-white/20" : ""}`}>
+                <PawPrint className={`w-5 h-5 transition-all duration-200 ${pathname === "/pet" ? "text-[#00a4ff]" : "text-white/70"}`} />
               </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/mascota" ? "text-[#00a4ff]" : "text-white/70"}`}>Mascota</span>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/pet" ? "text-[#00a4ff]" : "text-white/70"}`}>Mascota</span>
             </div>
           </Link>
 

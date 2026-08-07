@@ -7,7 +7,7 @@ import {
   Zap, Trophy, Star, Diamond, Medal, Crown,
   ChevronRight, ChevronLeft, Clock, TrendingUp,
   AlertCircle, Target, Users, ShoppingBag,
-  Gamepad2, ClipboardList, Tv2,
+  Gamepad2, ClipboardList, Tv2, ArrowRight,
 } from 'lucide-react'
 import type { LevelProfile, TransactionLog, LevelConfig, PagedResponse } from '@/types/level'
 import { levelService } from '@/services/LevelService'
@@ -48,6 +48,11 @@ const itemV: Variants = {
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-gray-200 rounded-xl ${className}`} />
+}
+
+// Skeleton para superficies de color (hero)
+function SkeletonOnDark({ className }: { className?: string }) {
+  return <div className={`animate-pulse bg-white/20 rounded-xl ${className}`} />
 }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
@@ -99,73 +104,159 @@ export default function GamificationPage() {
   const nextLevel = lvIndex < 5 ? LEVEL_ORDER[lvIndex + 1] : null
   const nextLvConfig = nextLevel ? levelTheme(nextLevel) : null
 
+  // Métricas de la columna derecha del hero
+  const heroStats = [
+    { label: 'XP total',      value: profile?.xpTotal.toLocaleString('es-CO') ?? '—', icon: TrendingUp },
+    { label: 'Multiplicador', value: `×${profile?.multiplier.toFixed(1) ?? '1.0'}`,   icon: Zap },
+    {
+      label: nextLvConfig ? 'XP al siguiente' : 'Progreso',
+      value: nextLvConfig ? (profile?.xpToNextLevel.toLocaleString('es-CO') ?? '—') : 'Máximo',
+      icon: Target,
+    },
+    {
+      label: nextLvConfig ? 'Siguiente nivel' : 'Nivel actual',
+      value: nextLvConfig ? nextLvConfig.label : lv.label,
+      icon: Trophy,
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24 lg:pb-8">
 
-      {/* ── Header hero ─────────────────────────────────────────────────────── */}
-      <div
-        className="relative overflow-hidden px-4 pt-6 pb-20 lg:px-8 lg:pt-10 lg:pb-24"
-        style={{ background: levelSheen(currentLevel) }}
-      >
+      {/* ── Hero ────────────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden" style={{ background: levelSheen(currentLevel) }}>
+        {/* círculos decorativos */}
+        <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute top-1/2 right-1/4 w-48 h-48 rounded-full bg-white/10" />
         {/* viñeta suave para dar profundidad al metal */}
         <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,0.16), transparent 60%)' }} />
-        <div className="relative max-w-2xl mx-auto text-center">
-          {loading ? (
-            <div className="flex flex-col items-center gap-3">
-              <Skeleton className="w-20 h-20 rounded-full" />
-              <Skeleton className="w-32 h-8" />
-              <Skeleton className="w-48 h-4" />
-            </div>
-          ) : (
-            <>
-              {/* medallón acuñado */}
-              <div
-                className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-3"
-                style={{ background: 'rgba(255,255,255,0.16)', boxShadow: MEDALLION_BEVEL, backdropFilter: 'blur(4px)' }}
-              >
-                <LvIcon className="w-10 h-10 text-white" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
-              </div>
-              <p className="text-white/70 text-[11px] font-semibold mb-1" style={{ letterSpacing: '0.22em', textTransform: 'uppercase' }}>Tu nivel</p>
-              <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.01em' }}>{lv.label}</h1>
-              <p className="text-white/70 text-sm mt-1">
-                Multiplicador <span className="font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>×{profile?.multiplier.toFixed(1)}</span> en todas tus actividades
-              </p>
 
-              {/* barra xp */}
-              <div className="mt-5 mx-auto max-w-xs">
-                <div className="flex justify-between text-xs text-white/70 mb-1.5" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  <span>{profile?.xpTotal.toLocaleString('es-CO')} XP</span>
-                  <span>{xpMax.toLocaleString('es-CO')} XP</span>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 lg:pt-20 lg:pb-28">
+          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+
+            {/* Columna izquierda — copy */}
+            <motion.div
+              className="flex-1 w-full text-white"
+              initial={reduce ? false : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: EASE_OUT }}
+            >
+              {loading ? (
+                <div className="space-y-4">
+                  <SkeletonOnDark className="w-40 h-7 rounded-full" />
+                  <SkeletonOnDark className="w-64 h-14" />
+                  <SkeletonOnDark className="w-full max-w-xl h-5" />
+                  <SkeletonOnDark className="w-full max-w-md h-10 rounded-2xl" />
                 </div>
-                <div className="h-2.5 rounded-full bg-white/20 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-white transition-all duration-700"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                {nextLvConfig && (
-                  <p className="text-white/60 text-xs mt-1.5">
-                    {profile?.xpToNextLevel.toLocaleString('es-CO')} XP para <span className="text-white font-medium">{nextLvConfig.label}</span>
+              ) : (
+                <>
+                  {/* pill superior */}
+                  <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
+                    <LvIcon className="w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.25))' }} />
+                    Tu nivel actual
+                  </div>
+
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight mb-5">
+                    <span className="text-white/70">Nivel</span><br />
+                    {lv.label}
+                  </h1>
+
+                  <p className="text-white/75 text-base lg:text-lg leading-relaxed max-w-xl mb-8">
+                    Multiplicador{' '}
+                    <span className="font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      ×{profile?.multiplier.toFixed(1)}
+                    </span>{' '}
+                    en todas tus actividades. Acumula XP para desbloquear más beneficios.
                   </p>
-                )}
-                {!nextLvConfig && (
-                  <p className="text-white/80 text-xs mt-1.5 font-medium">🏆 Nivel máximo alcanzado</p>
-                )}
-              </div>
 
-              {profile?.benefitsPaused && (
-                <div className="mt-4 inline-flex items-center gap-2 bg-red-500/20 border border-red-300/30 rounded-full px-4 py-2">
-                  <AlertCircle className="w-4 h-4 text-red-200" />
-                  <span className="text-red-100 text-xs font-medium">Beneficios pausados por inactividad</span>
-                </div>
+                  {/* barra xp */}
+                  <div className="max-w-md mb-8">
+                    <div className="flex justify-between text-xs text-white/70 mb-1.5" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <span>{profile?.xpTotal.toLocaleString('es-CO')} XP</span>
+                      <span>{xpMax.toLocaleString('es-CO')} XP</span>
+                    </div>
+                    <div className="h-2.5 rounded-full bg-white/20 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-white transition-all duration-700"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    {nextLvConfig ? (
+                      <p className="text-white/60 text-xs mt-1.5">
+                        {profile?.xpToNextLevel.toLocaleString('es-CO')} XP para <span className="text-white font-medium">{nextLvConfig.label}</span>
+                      </p>
+                    ) : (
+                      <p className="text-white/80 text-xs mt-1.5 font-medium">🏆 Nivel máximo alcanzado</p>
+                    )}
+                  </div>
+
+                  {/* CTAs */}
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={() => setTab('niveles')}
+                      className="flex items-center gap-2 bg-white hover:brightness-105 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer"
+                      style={{ color: lv.on }}
+                    >
+                      Ver todos los niveles
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setTab('historial')}
+                      className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-6 py-3 rounded-full transition-all cursor-pointer"
+                    >
+                      Ver mi historial
+                    </button>
+                  </div>
+
+                  {profile?.benefitsPaused && (
+                    <div className="mt-6 inline-flex items-center gap-2 bg-red-500/20 border border-red-300/30 rounded-full px-4 py-2">
+                      <AlertCircle className="w-4 h-4 text-red-200" />
+                      <span className="text-red-100 text-xs font-medium">Beneficios pausados por inactividad</span>
+                    </div>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </div>
-      </div>
+            </motion.div>
 
-      {/* ── Tabs flotantes ───────────────────────────────────────────────────── */}
-      <div className="max-w-2xl mx-auto px-4 -mt-14 lg:-mt-16 relative z-10">
+            {/* Columna derecha — tarjetas de métricas */}
+            <motion.div
+              className="shrink-0 w-full lg:w-80"
+              initial={reduce ? false : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: EASE_OUT }}
+            >
+              <div className="grid grid-cols-2 gap-3">
+                {heroStats.map(({ label, value, icon: Icon }) => (
+                  <div
+                    key={label}
+                    className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-white"
+                  >
+                    <div className="flex items-center gap-2 text-white/70 mb-2">
+                      <Icon className="w-5 h-5" />
+                      <span className="text-xs">{label}</span>
+                    </div>
+                    <div className="text-2xl font-extrabold" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {loading ? '—' : value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+
+        {/* onda inferior */}
+        <div className="absolute -bottom-px left-0 right-0 leading-0">
+          <svg className="block w-full" viewBox="0 0 1440 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 40 C360 0 1080 0 1440 40 L1440 40 L0 40 Z" fill="#f9fafb" />
+          </svg>
+        </div>
+      </section>
+
+      {/* ── Tabs ─────────────────────────────────────────────────────────────── */}
+      <div className="max-w-2xl mx-auto px-4 mt-6 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg p-1.5 flex gap-1">
           {(['perfil', 'historial', 'niveles'] as Tab[]).map(t => (
             <motion.button

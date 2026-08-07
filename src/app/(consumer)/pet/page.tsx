@@ -1,19 +1,11 @@
 import PetGame from '@/components/PetGame';
 
 export default function MascotaPage() {
+  // Sin encabezado ni copy: el juego se presenta solo, y todo el alto
+  // disponible bajo la navbar es suyo.
   return (
-    <section className="max-w-4xl mx-auto px-6 py-10 w-full">
-      <div className="flex flex-col gap-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-            Tu Mascota Virtual
-          </h1>
-          <p className="text-sm text-gray-500">
-            Cuida a tu mascota todos los días para mantenerla feliz y saludable.
-          </p>
-        </div>
-        <PetGame />
-      </div>
+    <section className="h-full w-full p-0 sm:p-4 lg:p-6">
+      <PetGame />
     </section>
   );
 }
