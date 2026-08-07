@@ -1,20 +1,63 @@
 'use client';
 
+/**
+ * Cola de revisión KYC.
+ *
+ * A diferencia de los demás paneles —que son ledgers para comparar— aquí el
+ * oficial no compara: decide, caso por caso. Por eso son tarjetas y no filas:
+ * cada expediente tiene espacio para su veredicto, y al decidirlo sale de la
+ * pila mientras el contador baja. La cola se ve encoger.
+ */
+
 import { useEffect, useState } from 'react';
-import { CheckCircle, XCircle, Loader2, ShieldAlert, X, AlertTriangle, ListChecks } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Building2, CheckCircle2, ListChecks, ShieldCheck, XCircle } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
-  getPendingKyc,
   approveKyc,
-  rejectKyc,
+  getPendingKyc,
   getUserScreeningHistory,
+  rejectKyc,
   type KycPendingEntry,
   type ScreeningHistoryEntry,
 } from '@/services/ComplianceService';
+import {
+  Btn,
+  EmptyState,
+  ErrorState,
+  Modal,
+  PanelHeader,
+  Ref,
+  RefreshButton,
+  SkeletonRows,
+  Spine,
+  StatusTag,
+  TextField,
+  type Tone,
+} from '@/components/compliance/ui/primitives';
 
-const STATUS_STYLE: Record<string, string> = {
-  HIT: 'bg-red-100 text-red-700',
-  FUZZY_HIT: 'bg-amber-100 text-amber-700',
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+
+/**
+ * La cola mezcla dos tipos de expediente: personas naturales (documento,
+ * PEP) y empresas (NIT, representante legal). Se leen distinto, así que la
+ * tarjeta se arma según lo que el backend realmente mandó.
+ */
+const isCompany = (e: KycPendingEntry) =>
+  Boolean(e.companyName || e.nit) ||
+  String(e.role ?? '').replace(/^ROLE_/, '').toUpperCase() === 'COMMERCIAL';
+
+const subjectName = (e: KycPendingEntry) => {
+  const person = [e.name, e.lastName].filter(Boolean).join(' ').trim();
+  return e.companyName?.trim() || person || e.email;
 };
+
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+
+/* ── Historial de screening ──────────────────────────────────────────── */
+
+const HIT_TONE: Record<string, Tone> = { HIT: 'flag', FUZZY_HIT: 'hold' };
 
 function ScreeningHistoryModal({
   entry,
@@ -35,101 +78,94 @@ function ScreeningHistoryModal({
   }, [entry.id]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b shrink-0">
-          <div>
-            <h3 className="font-bold text-gray-900">Historial de screening</h3>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {entry.name} {entry.lastName} — {entry.documentType} {entry.documentNumber}
-            </p>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-            <X className="w-4 h-4 text-gray-500" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="overflow-y-auto flex-1 px-5 py-4">
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-            </div>
-          ) : error ? (
-            <div className="flex flex-col items-center gap-2 py-12 text-red-500">
-              <AlertTriangle className="w-6 h-6" />
-              <p className="text-sm">No se pudo cargar el historial.</p>
-            </div>
-          ) : history.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-12 text-gray-400">
-              <CheckCircle className="w-8 h-8 text-green-400" />
-              <p className="text-sm font-medium text-gray-500">Sin resultados en listas restrictivas</p>
-              <p className="text-xs">El usuario no aparece en ninguna lista de screening.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {history.map((h) => {
-                const badge = STATUS_STYLE[h.status] ?? 'bg-gray-100 text-gray-600';
-                return (
-                  <div
-                    key={h.id}
-                    className={`rounded-xl border p-4 ${h.status === 'HIT' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${badge}`}>
-                            {h.status.replace('_', ' ')}
-                          </span>
-                          <span className="text-xs font-semibold text-gray-700">{h.listName}</span>
-                        </div>
-                        <p className="text-sm text-gray-700">
-                          Nombre consultado: <span className="font-medium">{h.queriedName}</span>
-                        </p>
-                        <p className="text-xs text-gray-500">Documento: {h.documentNumber}</p>
-                        {h.notes && (
-                          <p className="text-xs text-gray-600 bg-white rounded-lg px-3 py-2 border mt-2">
-                            Notas: {h.notes}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-xs text-gray-400">
-                          {new Date(h.createdAt).toLocaleDateString('es-CO', {
-                            day: '2-digit', month: 'short', year: 'numeric',
-                          })}
-                        </p>
-                        {h.reviewed && h.reviewedAt && (
-                          <p className="text-xs text-green-600 mt-1">
-                            Revisado {new Date(h.reviewedAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PepBadge({ isPep }: { isPep: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-        isPep ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'
-      }`}
+    <Modal
+      size="lg"
+      onClose={onClose}
+      title="Historial de screening"
+      subtitle={
+        <span>
+          {subjectName(entry)}
+          {entry.documentNumber && ` · ${entry.documentType ?? ''} ${entry.documentNumber}`}
+          {isCompany(entry) && entry.nit && ` · NIT ${entry.nit}`}
+        </span>
+      }
     >
-      {isPep ? 'PEP' : 'No PEP'}
-    </span>
+      {loading ? (
+        <div className="space-y-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="cmp-skeleton h-24 rounded-xl"
+              style={{ animationDelay: `${i * 90}ms` }}
+            />
+          ))}
+        </div>
+      ) : error ? (
+        <ErrorState
+          message="No se pudo cargar el historial."
+          onRetry={() => {
+            setError(false);
+            setLoading(true);
+            getUserScreeningHistory(entry.id)
+              .then(setHistory)
+              .catch(() => setError(true))
+              .finally(() => setLoading(false));
+          }}
+        />
+      ) : history.length === 0 ? (
+        <EmptyState
+          tone="clear"
+          icon={CheckCircle2}
+          title="Sin coincidencias en listas restrictivas"
+          hint="Este usuario no aparece en ninguna lista consultada."
+        />
+      ) : (
+        <ul className="space-y-3">
+          {history.map((h, i) => {
+            const tone = HIT_TONE[h.status] ?? 'neutral';
+            return (
+              <li
+                key={h.id}
+                className="cmp-row-in relative overflow-hidden rounded-xl border border-cmp-rule bg-white p-4 pl-5"
+                style={{ animationDelay: `${Math.min(i, 8) * 30}ms` }}
+              >
+                <Spine tone={tone} />
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StatusTag tone={tone}>{h.status.replace('_', ' ')}</StatusTag>
+                      <span className="text-sm font-semibold text-cmp-ink">{h.listName}</span>
+                    </div>
+                    <p className="text-sm text-cmp-slate">
+                      Nombre consultado:{' '}
+                      <span className="font-medium text-cmp-ink">{h.queriedName}</span>
+                    </p>
+                    <Ref muted>{h.documentNumber}</Ref>
+                    {h.notes && (
+                      <p className="rounded-lg border border-cmp-rule-soft bg-cmp-rule-soft/40 px-3 py-2 text-xs text-cmp-slate">
+                        {h.notes}
+                      </p>
+                    )}
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="cmp-mono text-[11px] text-cmp-mute">{formatDate(h.createdAt)}</p>
+                    {h.reviewed && h.reviewedAt && (
+                      <p className="cmp-label mt-1.5 text-cmp-clear">
+                        Revisado {formatDate(h.reviewedAt)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Modal>
   );
 }
+
+/* ── Rechazo ─────────────────────────────────────────────────────────── */
 
 function RejectModal({
   entry,
@@ -144,56 +180,134 @@ function RejectModal({
 }) {
   const [reason, setReason] = useState('');
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-gray-900">Rechazar solicitud KYC</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
-            <X className="w-4 h-4 text-gray-500" />
-          </button>
-        </div>
-        <p className="text-sm text-gray-600 mb-4">
-          Ingresa el motivo del rechazo para{' '}
-          <span className="font-semibold">
-            {entry.name} {entry.lastName}
-          </span>
-          .
-        </p>
-        <textarea
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          rows={3}
-          placeholder="Motivo del rechazo..."
-          className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
-        />
-        <div className="flex gap-3 mt-4">
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="flex-1 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={() => onConfirm(reason.trim())}
-            disabled={!reason.trim() || loading}
-            className="flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-            Rechazar
-          </button>
-        </div>
+    <Modal onClose={onClose} title="Rechazar solicitud KYC" subtitle={subjectName(entry)}>
+      <p className="mb-4 text-sm text-cmp-slate">
+        El motivo queda registrado en la auditoría y se le muestra al usuario.
+      </p>
+      <TextField
+        label="Motivo del rechazo"
+        rows={4}
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        placeholder="Ej. El documento cargado no coincide con los datos registrados."
+      />
+      <div className="mt-5 flex gap-3">
+        <Btn className="flex-1" onClick={onClose} disabled={loading}>
+          Cancelar
+        </Btn>
+        <Btn
+          className="flex-1"
+          variant="danger"
+          icon={XCircle}
+          loading={loading}
+          disabled={!reason.trim()}
+          onClick={() => onConfirm(reason.trim())}
+        >
+          Rechazar
+        </Btn>
       </div>
-    </div>
+    </Modal>
   );
 }
+
+/* ── Tarjeta de expediente ───────────────────────────────────────────── */
+
+function CaseCard({
+  entry,
+  index,
+  busy,
+  onScreening,
+  onApprove,
+  onReject,
+}: {
+  entry: KycPendingEntry;
+  index: number;
+  busy: 'approve' | 'reject' | null;
+  onScreening: () => void;
+  onApprove: () => void;
+  onReject: () => void;
+}) {
+  const reduce = useReducedMotion();
+  const locked = busy !== null;
+  const company = isCompany(entry);
+
+  return (
+    <motion.li
+      layout={!reduce}
+      initial={reduce ? { opacity: 0 } : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      // El desenfoque al salir funde la tarjeta con el hueco que deja: sin
+      // él se ven dos objetos distintos durante el reacomodo.
+      exit={reduce ? { opacity: 0 } : { opacity: 0, x: -20, filter: 'blur(4px)' }}
+      transition={{
+        duration: 0.26,
+        ease: EASE_OUT,
+        delay: reduce ? 0 : Math.min(index, 8) * 0.03,
+      }}
+      className="relative overflow-hidden rounded-xl border border-cmp-rule bg-white shadow-[0_1px_2px_rgba(11,31,51,0.04)]"
+    >
+      <Spine tone={entry.isPep ? 'flag' : company ? 'info' : 'hold'} />
+      <div className="flex flex-col gap-4 p-4 pl-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {company && <Building2 className="h-4 w-4 shrink-0 text-cmp-azul" />}
+            <h3 className="text-[15px] font-semibold leading-tight text-cmp-ink">
+              {subjectName(entry)}
+            </h3>
+            {company && <StatusTag tone="info">Empresa</StatusTag>}
+            {entry.isPep && <StatusTag tone="flag">PEP</StatusTag>}
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-cmp-slate">
+            {company
+              ? entry.nit && <Ref>NIT {entry.nit}</Ref>
+              : entry.documentNumber && (
+                  <Ref>
+                    {entry.documentType} {entry.documentNumber}
+                  </Ref>
+                )}
+            <span className="truncate">{entry.email}</span>
+            {company && entry.legalRepDocNumber && (
+              <span className="cmp-mono text-[11px] text-cmp-mute">
+                Rep. legal {entry.legalRepDocType} {entry.legalRepDocNumber}
+              </span>
+            )}
+            <span className="cmp-mono text-[11px] text-cmp-mute">
+              Registro {formatDate(entry.registeredDate)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <Btn size="sm" icon={ListChecks} onClick={onScreening} disabled={locked}>
+            Screening
+          </Btn>
+          <Btn size="sm" variant="reject" icon={XCircle} onClick={onReject} disabled={locked}>
+            Rechazar
+          </Btn>
+          <Btn
+            size="sm"
+            variant="approve"
+            icon={CheckCircle2}
+            loading={busy === 'approve'}
+            disabled={locked}
+            onClick={onApprove}
+          >
+            Aprobar
+          </Btn>
+        </div>
+      </div>
+    </motion.li>
+  );
+}
+
+/* ── Panel ───────────────────────────────────────────────────────────── */
 
 export default function KycReviewPanel() {
   const [entries, setEntries] = useState<KycPendingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [busyKind, setBusyKind] = useState<'approve' | 'reject' | null>(null);
   const [rejectTarget, setRejectTarget] = useState<KycPendingEntry | null>(null);
   const [screeningTarget, setScreeningTarget] = useState<KycPendingEntry | null>(null);
 
@@ -209,165 +323,106 @@ export default function KycReviewPanel() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
-  const handleApprove = async (id: number) => {
-    setActionLoading(id);
+  const handleApprove = async (entry: KycPendingEntry) => {
+    setBusyId(entry.id);
+    setBusyKind('approve');
     try {
-      await approveKyc(id);
-      setEntries((prev) => prev.filter((e) => e.id !== id));
+      await approveKyc(entry.id);
+      setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+      toast.success(`KYC aprobado — ${subjectName(entry)}`);
     } catch {
-      /* silent — backend error toast could be added here */
+      toast.error('No se pudo aprobar el KYC. Intenta de nuevo.');
     } finally {
-      setActionLoading(null);
+      setBusyId(null);
+      setBusyKind(null);
     }
   };
 
   const handleReject = async (reason: string) => {
     if (!rejectTarget) return;
-    setActionLoading(rejectTarget.id);
+    const target = rejectTarget;
+    setBusyId(target.id);
+    setBusyKind('reject');
     try {
-      await rejectKyc(rejectTarget.id, reason);
-      setEntries((prev) => prev.filter((e) => e.id !== rejectTarget.id));
+      await rejectKyc(target.id, reason);
+      setEntries((prev) => prev.filter((e) => e.id !== target.id));
       setRejectTarget(null);
+      toast.success(`KYC rechazado — ${subjectName(target)}`);
     } catch {
-      /* silent */
+      toast.error('No se pudo rechazar el KYC. Intenta de nuevo.');
     } finally {
-      setActionLoading(null);
+      setBusyId(null);
+      setBusyKind(null);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-60">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-16 text-red-500">
-        <ShieldAlert className="w-8 h-8" />
-        <p className="text-sm font-medium">Error al cargar usuarios pendientes.</p>
-        <button onClick={load} className="text-xs text-blue-600 hover:underline">Reintentar</button>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">Revisión KYC</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {entries.length} usuario{entries.length !== 1 ? 's' : ''} pendiente{entries.length !== 1 ? 's' : ''} de revisión
-            </p>
-          </div>
-          <button
-            onClick={load}
-            className="text-xs text-blue-600 hover:underline font-medium"
-          >
-            Actualizar
-          </button>
-        </div>
+      <div className="space-y-6">
+        <PanelHeader
+          eyebrow="Expedientes · SARLAFT"
+          title="Revisión KYC"
+          description="Verifica identidad y listas restrictivas antes de habilitar la cuenta."
+          count={loading ? 0 : entries.length}
+          countLabel="En cola"
+          actions={<RefreshButton onClick={load} loading={loading} />}
+        />
 
-        {entries.length === 0 ? (
-          <div className="bg-white rounded-2xl border p-12 text-center">
-            <CheckCircle className="w-10 h-10 text-green-400 mx-auto mb-3" />
-            <p className="text-sm font-medium text-gray-600">No hay usuarios pendientes de revisión</p>
-          </div>
+        {loading ? (
+          <SkeletonRows rows={4} cols={4} />
+        ) : error ? (
+          <ErrorState message="No se pudieron cargar los usuarios pendientes." onRetry={load} />
+        ) : entries.length === 0 ? (
+          <EmptyState
+            tone="clear"
+            icon={ShieldCheck}
+            title="Cola vacía"
+            hint="No hay usuarios pendientes de revisión."
+          />
         ) : (
-          <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-gray-50">
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Documento</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">PEP</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Registro</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {entries.map((entry) => (
-                    <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-gray-900">
-                        {entry.name} {entry.lastName}
-                      </td>
-                      <td className="px-4 py-3 text-gray-500">{entry.email}</td>
-                      <td className="px-4 py-3 text-gray-700">
-                        <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">
-                          {entry.documentType} {entry.documentNumber}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <PepBadge isPep={entry.isPep} />
-                      </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">
-                        {new Date(entry.registeredAt).toLocaleDateString('es-CO', {
-                          day: '2-digit', month: 'short', year: 'numeric',
-                        })}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => setScreeningTarget(entry)}
-                            disabled={actionLoading !== null}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 text-xs font-semibold rounded-lg transition"
-                          >
-                            <ListChecks className="w-3 h-3" />
-                            Screening
-                          </button>
-                          <button
-                            onClick={() => handleApprove(entry.id)}
-                            disabled={actionLoading !== null}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white text-xs font-semibold rounded-lg transition"
-                          >
-                            {actionLoading === entry.id ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <CheckCircle className="w-3 h-3" />
-                            )}
-                            Aprobar
-                          </button>
-                          <button
-                            onClick={() => setRejectTarget(entry)}
-                            disabled={actionLoading !== null}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white text-xs font-semibold rounded-lg transition"
-                          >
-                            <XCircle className="w-3 h-3" />
-                            Rechazar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <ul className="space-y-3">
+            <AnimatePresence mode="popLayout">
+              {entries.map((entry, i) => (
+                <CaseCard
+                  key={entry.id}
+                  entry={entry}
+                  index={i}
+                  busy={busyId === entry.id ? busyKind : null}
+                  onScreening={() => setScreeningTarget(entry)}
+                  onApprove={() => handleApprove(entry)}
+                  onReject={() => setRejectTarget(entry)}
+                />
+              ))}
+            </AnimatePresence>
+          </ul>
         )}
       </div>
 
-      {rejectTarget && (
-        <RejectModal
-          entry={rejectTarget}
-          onClose={() => setRejectTarget(null)}
-          onConfirm={handleReject}
-          loading={actionLoading === rejectTarget.id}
-        />
-      )}
+      <AnimatePresence>
+        {rejectTarget && (
+          <RejectModal
+            key="reject"
+            entry={rejectTarget}
+            onClose={() => setRejectTarget(null)}
+            onConfirm={handleReject}
+            loading={busyId === rejectTarget.id && busyKind === 'reject'}
+          />
+        )}
+      </AnimatePresence>
 
-      {screeningTarget && (
-        <ScreeningHistoryModal
-          entry={screeningTarget}
-          onClose={() => setScreeningTarget(null)}
-        />
-      )}
+      <AnimatePresence>
+        {screeningTarget && (
+          <ScreeningHistoryModal
+            key="screening"
+            entry={screeningTarget}
+            onClose={() => setScreeningTarget(null)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
