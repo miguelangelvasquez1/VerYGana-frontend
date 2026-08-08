@@ -1,5 +1,7 @@
+import type { DateRangeFilter } from './analytics.types';
+
 interface AdsTableProps {
-  dateRange?: string;
+  dateRange?: DateRangeFilter;
 }
 
 export default function AdsTable({ dateRange }: AdsTableProps) {

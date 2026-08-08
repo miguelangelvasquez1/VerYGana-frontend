@@ -288,7 +288,7 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium shrink-0 transition-colors border-b-2 ${
+                  className={`cursor-pointer flex items-center gap-2 px-5 py-3.5 text-sm font-medium shrink-0 transition-colors border-b-2 ${
                     active ? 'text-blue-600 border-blue-600' : 'text-gray-500 hover:text-gray-700 border-transparent'
                   }`}
                 >

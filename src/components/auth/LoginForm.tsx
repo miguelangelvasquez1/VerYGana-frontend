@@ -11,6 +11,7 @@ import {
   PasswordSetupRequiredError,
 } from "@/lib/auth/authService";
 import { getCommercialInitialDataWithToken } from "@/services/commercialService";
+import { getRoleHomePath } from "@/lib/auth/roleRedirect";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { signIn } from "next-auth/react";
@@ -59,11 +60,7 @@ const LoginForm = () => {
 
       const role = loginResponse.role;
 
-      if (role === "ROLE_ADMIN") {
-        router.push("/admin");
-      } else if (role === "ROLE_CONSUMER") {
-        router.push("/home");
-      } else if (role === "ROLE_COMMERCIAL") {
+      if (role === "ROLE_COMMERCIAL") {
         try {
           const initialData = await getCommercialInitialDataWithToken(loginResponse.accessToken);
           if (initialData.onboardingStatus === "COMPLETED") {
@@ -76,10 +73,9 @@ const LoginForm = () => {
           // también verifica el estado del onboarding y redirige si hace falta.
           router.push("/commercial");
         }
-      } else if (role === "ROLE_GAME_DESIGNER") {
-        router.push("/game-designer");
-      } else if (role === "ROLE_COMPLIANCE_OFFICER") {
-        router.push("/compliance");
+      } else {
+        const homePath = getRoleHomePath(role);
+        if (homePath) router.push(homePath);
       }
 
     } catch (err: any) {

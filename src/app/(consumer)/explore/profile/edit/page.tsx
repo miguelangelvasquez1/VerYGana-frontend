@@ -176,7 +176,7 @@ export default function EditConsumerProfilePage() {
             <button
               type="button"
               onClick={() => setAvatarPickerOpen(true)}
-              className="relative w-16 h-16 rounded-full border-4 border-white/30 shadow-lg shrink-0 overflow-hidden bg-white/20 backdrop-blur-sm group"
+              className="relative w-16 h-16 rounded-full border-4 border-white/30 shadow-lg shrink-0 overflow-hidden bg-white/20 backdrop-blur-sm group cursor-pointer"
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -286,7 +286,7 @@ export default function EditConsumerProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 flex justify-center items-center gap-2 bg-[#03548C] hover:bg-[#0b1440] disabled:bg-gray-400 text-white px-5 py-3 rounded-xl font-semibold transition text-sm"
+              className="flex-1 flex justify-center items-center gap-2 bg-[#03548C] hover:bg-[#0b1440] disabled:bg-gray-400 text-white px-5 py-3 rounded-xl font-semibold transition text-sm cursor-pointer"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

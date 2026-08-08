@@ -40,7 +40,7 @@ export default function AvatarSelector({ avatars, selectedId, onSelect, loading 
               type="button"
               onClick={() => onSelect(avatar.id)}
               title={avatar.name}
-              className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 transition-all
+              className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 transition-all cursor-pointer
                 ${isSelected
                   ? "border-blue-500 bg-blue-50 scale-105 shadow-md"
                   : "border-transparent hover:border-gray-300 hover:bg-gray-200"

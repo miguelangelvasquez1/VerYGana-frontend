@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { AdCard } from './AdCard';
 import { EditAdModal } from './EditAdModal';
-import { Search, Filter, Plus, FileImage, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, Plus, FileImage, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { AdResponseDTO } from '@/types/ads/commercial';
 import { useAds } from '@/hooks/ads/querys';
@@ -78,8 +78,8 @@ export function AdsList() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#03548C]"></div>
+      <div className="flex items-center justify-center py-24 text-gray-400">
+        <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
   }
@@ -92,7 +92,7 @@ export function AdsList() {
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
         >
           Reintentar
         </button>
@@ -106,26 +106,26 @@ export function AdsList() {
         {/* Controles superiores */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex flex-col sm:flex-row gap-4 flex-1">
+            <div className="flex flex-col sm:flex-row gap-3 flex-1">
               {/* Búsqueda */}
               <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Buscar anuncios..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                  className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                 />
               </div>
 
               {/* Filtro por estado */}
-              <div className="flex items-center space-x-2">
-                <Filter className="w-4 h-4 text-gray-500" />
-                <select 
+              <div className="flex items-center gap-2">
+                <Filter size={16} className="text-gray-500 shrink-0" />
+                <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                 >
                   <option value="all">Todos los estados</option>
                   <option value="pending">Pendientes</option>
@@ -141,9 +141,9 @@ export function AdsList() {
             {/* Botón crear anuncio */}
             <Link
               href="/commercial/ads/create"
-              className="flex items-center justify-center px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440] transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="h-4 w-4" />
               Crear Anuncio
             </Link>
           </div>
@@ -195,46 +195,43 @@ export function AdsList() {
 
             {/* Paginación */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-2 mt-6">
+              <div className="flex justify-center items-center gap-1 mt-6">
+                <span className="mr-2 text-xs text-gray-500">
+                  Página {currentPage + 1} de {totalPages}
+                </span>
+
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 0}
-                  className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="h-4 w-4" />
                 </button>
-                
-                <span className="text-sm text-gray-600">
-                  Página {currentPage + 1} de {totalPages}
-                </span>
-                
+
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage >= totalPages - 1}
-                  className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
             )}
           </>
         ) : (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <FileImage className="w-16 h-16 mx-auto" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron anuncios</h3>
-            <p className="text-gray-600 mb-6">
-              {searchTerm || statusFilter !== 'all' 
-                ? 'Intenta ajustar los filtros de búsqueda'
-                : 'Crea tu primer anuncio para comenzar'
+          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-gray-200 bg-white py-20 text-center">
+            <FileImage className="h-10 w-10 text-gray-300" />
+            <p className="text-sm font-medium text-gray-500">
+              {searchTerm || statusFilter !== 'all'
+                ? 'No se encontraron anuncios con este filtro'
+                : 'No se encontraron anuncios'
               }
             </p>
             <Link
               href="/commercial/ads/create"
-              className="inline-flex items-center px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440]"
+              className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="h-4 w-4" />
               Crear Anuncio
             </Link>
           </div>

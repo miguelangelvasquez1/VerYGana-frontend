@@ -54,7 +54,7 @@ export const NumberInputWidget: React.FC<WidgetProps> = (props) => {
           onClick={decrement}
           disabled={!canDecrement}
           className={`
-            flex-shrink-0 h-10 w-10 flex items-center justify-center border rounded-l-lg transition-all
+            flex-shrink-0 h-10 w-10 flex items-center justify-center border rounded-l-lg transition-all cursor-pointer
             ${canDecrement
               ? 'bg-white hover:bg-gray-50 border-gray-300 text-gray-700'
               : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
@@ -100,7 +100,7 @@ export const NumberInputWidget: React.FC<WidgetProps> = (props) => {
           onClick={increment}
           disabled={!canIncrement}
           className={`
-            flex-shrink-0 h-10 w-10 flex items-center justify-center border rounded-r-lg transition-all
+            flex-shrink-0 h-10 w-10 flex items-center justify-center border rounded-r-lg transition-all cursor-pointer
             ${canIncrement
               ? 'bg-white hover:bg-gray-50 border-gray-300 text-gray-700'
               : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'

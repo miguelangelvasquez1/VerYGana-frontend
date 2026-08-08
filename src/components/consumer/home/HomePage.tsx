@@ -167,13 +167,13 @@ export default function HomePage() {
 
               <div className="flex flex-wrap gap-3">
                 <Link href="/ads">
-                  <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all">
+                  <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer">
                     Empezar a ganar
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </Link>
                 <Link href="/explore/profile">
-                  <button className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-6 py-3 rounded-full transition-all">
+                  <button className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-6 py-3 rounded-full transition-all cursor-pointer">
                     Ver mi perfil
                   </button>
                 </Link>

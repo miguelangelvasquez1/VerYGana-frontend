@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { getRoleHomePath } from "@/lib/auth/roleRedirect";
+import {
   Play,
   Gift,
   ShoppingCart,
@@ -169,9 +172,19 @@ const stats = [
 ];
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [showAd, setShowAd] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [adCredits, setAdCredits] = useState(0);
+
+  const roleHomePath = status === 'authenticated' ? getRoleHomePath(session?.user?.role) : null;
+
+  // Si ya hay una sesión activa, no mostramos la landing pública:
+  // mandamos directo al panel que le corresponde a su rol.
+  useEffect(() => {
+    if (roleHomePath) router.replace(roleHomePath);
+  }, [roleHomePath, router]);
 
   const formatPrice = (price: string | number | bigint) => {
     const numericPrice = typeof price === 'string' ? Number(price) : price;
@@ -199,6 +212,16 @@ export default function Home() {
     }, 3000);
   };
 
+  // Mientras se resuelve la sesión, o mientras se redirige a un usuario
+  // autenticado a su panel, no renderizamos la landing pública.
+  if (status === 'loading' || roleHomePath) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
 
@@ -222,10 +245,10 @@ export default function Home() {
                 y accede a un mundo de oportunidades para ganar los mejores premios.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg">
+                <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg cursor-pointer">
                   Empezar Ahora
                 </button>
-                <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-600 transition-all duration-200">
+                <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-600 transition-all duration-200 cursor-pointer">
                   Ver Rifas Activas
                 </button>
               </div>
@@ -348,7 +371,7 @@ export default function Home() {
                 {!showAd ? (
                   <button
                     onClick={simulateAdWatch}
-                    className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg inline-flex items-center gap-3"
+                    className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg inline-flex items-center gap-3 cursor-pointer"
                   >
                     <Play className="w-6 h-6" />
                     Ver Anuncio y Ganar Créditos
@@ -452,7 +475,7 @@ export default function Home() {
                       </div>
                     </div>
                     
-                    <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105">
+                    <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 cursor-pointer">
                       Participar Ahora
                     </button>
                   </div>
@@ -462,7 +485,7 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12">
-            <button className="bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors duration-200 inline-flex items-center gap-2">
+            <button className="bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors duration-200 inline-flex items-center gap-2 cursor-pointer">
               Ver Todas las Rifas
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -609,7 +632,7 @@ export default function Home() {
                       </span>
                     </div>
                     
-                    <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 inline-flex items-center justify-center gap-2">
+                    <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 inline-flex items-center justify-center gap-2 cursor-pointer">
                       <ShoppingCart className="w-4 h-4" />
                       Agregar al Carrito
                     </button>
@@ -620,7 +643,7 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12">
-            <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 inline-flex items-center gap-2">
+            <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 inline-flex items-center gap-2 cursor-pointer">
               Ver Toda la Tienda
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -676,7 +699,7 @@ export default function Home() {
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  className={`w-3 h-3 rounded-full transition-all duration-200 cursor-pointer ${
                     index === currentTestimonial ? 'bg-white scale-125' : 'bg-white/50'
                   }`}
                 />
@@ -715,7 +738,7 @@ export default function Home() {
                   </div>
                 </div>
                 
-                <button className="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg inline-flex items-center gap-3">
+                <button className="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg inline-flex items-center gap-3 cursor-pointer">
                   <Users className="w-6 h-6" />
                   Empezar a Referir
                 </button>
@@ -821,10 +844,10 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-            <button className="bg-white text-blue-600 px-10 py-4 rounded-2xl font-bold text-xl hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-2xl">
+            <button className="bg-white text-blue-600 px-10 py-4 rounded-2xl font-bold text-xl hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-2xl cursor-pointer">
               🚀 Crear Cuenta Gratis
             </button>
-            <button className="border-2 border-white text-white px-10 py-4 rounded-2xl font-bold text-xl hover:bg-white hover:text-blue-600 transition-all duration-200 transform hover:scale-105">
+            <button className="border-2 border-white text-white px-10 py-4 rounded-2xl font-bold text-xl hover:bg-white hover:text-blue-600 transition-all duration-200 transform hover:scale-105 cursor-pointer">
               📱 Descargar App
             </button>
           </div>

@@ -206,7 +206,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
         <p className="text-red-600">{error}</p>
         <button
           onClick={loadRaffles}
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg"
+          className="cursor-pointer mt-4 px-4 py-2 bg-red-600 text-white rounded-lg"
         >
           Reintentar
         </button>
@@ -219,7 +219,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
       <div className="flex justify-between items-center">
         <button
           onClick={() => setShowCreateRaffle(true)}
-          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2"
+          className="cursor-pointer bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2"
         >
           <Plus size={18} />
           Crear Rifa
@@ -310,7 +310,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
                   setDrawDateFilter("");
                   setPage(0);
                 }}
-                className="text-xs text-gray-500 hover:text-gray-800 underline"
+                className="cursor-pointer text-xs text-gray-500 hover:text-gray-800 underline"
               >
                 Limpiar
               </button>
@@ -332,14 +332,14 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
             <button
               onClick={() => setPage((p) => p - 1)}
               disabled={page === 0}
-              className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+              className="cursor-pointer text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
             >
               Anterior
             </button>
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={page >= totalPages - 1}
-              className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+              className="cursor-pointer text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
             >
               Siguiente
             </button>
@@ -371,7 +371,7 @@ function Modal({
       <div className="bg-white rounded-2xl p-6 max-w-2xl w-full relative shadow-lg overflow-y-auto max-h-[90vh]">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+          className="cursor-pointer absolute top-4 right-4 text-gray-500 hover:text-gray-800"
         >
           <X />
         </button>

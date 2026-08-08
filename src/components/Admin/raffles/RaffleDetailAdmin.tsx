@@ -89,7 +89,7 @@ export default function RaffleDetailCard({
           {onUpdate && (
             <button
               onClick={() => setIsEditOpen(true)}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition"
+              className="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition"
             >
               Editar
             </button>
@@ -98,7 +98,7 @@ export default function RaffleDetailCard({
           {raffle.raffleStatus === "ACTIVE" && (
             <button
               onClick={() => openConfirm("draw")}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition"
+              className="cursor-pointer px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition"
             >
               Realizar Sorteo
             </button>
@@ -108,7 +108,7 @@ export default function RaffleDetailCard({
             raffle.raffleStatus !== "COMPLETED" && (
               <button
                 onClick={() => openConfirm("cancel")}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition"
+                className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition"
               >
                 Cancelar Rifa
               </button>
@@ -160,7 +160,7 @@ export default function RaffleDetailCard({
           <div className="bg-white rounded-2xl p-6 max-w-2xl w-full relative shadow-lg overflow-y-auto max-h-[90vh]">
             <button
               onClick={() => setIsEditOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+              className="cursor-pointer absolute top-4 right-4 text-gray-500 hover:text-gray-800"
             >
               <X />
             </button>
@@ -190,7 +190,7 @@ export default function RaffleDetailCard({
     return (
       <button
         onClick={() => setActiveTab(value)}
-        className={`px-4 py-2 text-sm font-medium rounded-lg transition ${isActive
+        className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${isActive
           ? "bg-purple-600 text-white"
           : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}

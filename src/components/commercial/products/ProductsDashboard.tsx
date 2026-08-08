@@ -9,12 +9,10 @@ import { DashboardStats } from "@/types/Commercial.types";
 import CommercialProductCard from "@/components/commercial/products/CommercialProductCard";
 import CreateProductForm from "@/components/commercial/products/CreateProductForm";
 import { useRouter, useSearchParams } from "next/navigation";
-import TopSellingProducts from "@/components/commercial/products/commercialStats/TopSellingProducts";
 
 // Servicios
 import * as productService from "@/services/ProductService";
 import * as productReviewService from "@/services/ProductReviewService";
-import * as purchaseItemService from "@/services/PurchaseItemService";
 import toast from "react-hot-toast";
 
 export default function ProductsDashboard() {
@@ -31,7 +29,6 @@ export default function ProductsDashboard() {
     totalPendingProducts: 0,
     totalActiveProducts: 0,
     totalRejectedProducts: 0,
-    totalSales: 0,
     averageRating: 0,
   });
 
@@ -50,7 +47,6 @@ export default function ProductsDashboard() {
         productService.getTotalCommercialProducts(ProductStatus.PENDING),
         productService.getTotalCommercialProducts(ProductStatus.ACTIVE),
         productService.getTotalCommercialProducts(ProductStatus.REJECTED),
-        purchaseItemService.getTotalCommercialSales(),
         productReviewService.getCommercialAvgRating(),
         productService.getMyProducts(0),
       ]);
@@ -59,7 +55,6 @@ export default function ProductsDashboard() {
         totalPendingProductsRes,
         totalActiveProductsRes,
         totalRejectedProductsRes,
-        totalSalesRes,
         ratingRes,
         productsRes,
       ] = results;
@@ -77,10 +72,6 @@ export default function ProductsDashboard() {
         totalRejectedProducts:
           totalRejectedProductsRes.status === "fulfilled"
             ? totalRejectedProductsRes.value
-            : 0,
-        totalSales:
-          totalSalesRes.status === "fulfilled"
-            ? totalSalesRes.value
             : 0,
         averageRating:
           ratingRes.status === "fulfilled" ? ratingRes.value : 0,
@@ -198,7 +189,7 @@ export default function ProductsDashboard() {
           <p className="text-red-600">{error}</p>
           <button
             onClick={loadDashboardData}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
           >
             Reintentar
           </button>
@@ -218,7 +209,7 @@ export default function ProductsDashboard() {
       </h2>
       <button
         onClick={() => setShowCreateForm(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition"
+        className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition cursor-pointer"
       >
         <PlusCircle className="w-4 h-4" />
         Crear producto
@@ -268,7 +259,7 @@ export default function ProductsDashboard() {
   const renderDashboard = () => (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Pendientes</p>
           <p className="text-3xl font-extrabold text-yellow-500">{stats.totalPendingProducts}</p>
@@ -294,14 +285,6 @@ export default function ProductsDashboard() {
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Ventas totales</p>
-          <p className="text-3xl font-extrabold text-green-600">{stats.totalSales}</p>
-          <div className="mt-2 h-1 rounded-full bg-green-100">
-            <div className="h-1 rounded-full bg-green-500" style={{ width: '70%' }} />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Rating promedio</p>
           <p className="text-3xl font-extrabold text-[#0b1440]">
             {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "N/A"}
@@ -309,8 +292,6 @@ export default function ProductsDashboard() {
           <p className="text-xs text-yellow-500 mt-1">{'★'.repeat(Math.round(stats.averageRating))}{'☆'.repeat(5 - Math.round(stats.averageRating))}</p>
         </div>
       </div>
-
-      <TopSellingProducts />
 
       <div className="pt-6 border-t border-gray-200">{renderProducts()}</div>
     </div>
@@ -340,7 +321,7 @@ export default function ProductsDashboard() {
               <h2 className="text-lg font-bold text-gray-900">Crear producto</h2>
               <button
                 onClick={() => setShowCreateForm(false)}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>

@@ -517,7 +517,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   data-active={active || undefined}
-                  className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium shrink-0 transition-colors ${
+                  className={`cursor-pointer flex items-center gap-2 px-5 py-3.5 text-sm font-medium shrink-0 transition-colors ${
                     active ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >

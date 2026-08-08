@@ -32,7 +32,10 @@ function validateFile(file: File): string | null {
 }
 
 export function DocumentsStep({ data, submitting, onDataChange, onNext }: Props) {
-  const [uploadingType, setUploadingType] = useState<OnboardingDocumentType | null>(null);
+  // Set en vez de un solo valor — subir varios documentos a la vez es válido
+  // (cada input es independiente), así que hay que poder marcar más de un
+  // tipo como "subiendo" simultáneamente sin que uno pise el estado del otro.
+  const [uploadingTypes, setUploadingTypes] = useState<Set<OnboardingDocumentType>>(new Set());
   const [discardingId, setDiscardingId] = useState<number | null>(null);
   const inputRefs = useRef<Partial<Record<OnboardingDocumentType, HTMLInputElement | null>>>({});
 
@@ -46,7 +49,7 @@ export function DocumentsStep({ data, submitting, onDataChange, onNext }: Props)
       toast.error(validationError);
       return;
     }
-    setUploadingType(documentType);
+    setUploadingTypes((prev) => new Set(prev).add(documentType));
     try {
       const { documentId, permission } = await OnboardingService.prepareDocumentUpload({
         documentType,
@@ -62,7 +65,11 @@ export function DocumentsStep({ data, submitting, onDataChange, onNext }: Props)
       const { message } = extractApiError(err);
       toast.error(message);
     } finally {
-      setUploadingType(null);
+      setUploadingTypes((prev) => {
+        const next = new Set(prev);
+        next.delete(documentType);
+        return next;
+      });
     }
   };
 
@@ -91,7 +98,7 @@ export function DocumentsStep({ data, submitting, onDataChange, onNext }: Props)
       <div className="space-y-3">
         {data.checklist.map((item) => {
           const doc = documentFor(item.documentType);
-          const isUploading = uploadingType === item.documentType;
+          const isUploading = uploadingTypes.has(item.documentType);
           const isDiscarding = doc && discardingId === doc.id;
 
           return (
@@ -142,7 +149,7 @@ export function DocumentsStep({ data, submitting, onDataChange, onNext }: Props)
                   type="button"
                   onClick={() => handleDiscard(doc)}
                   disabled={isDiscarding || isUploading}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition shrink-0 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition shrink-0 disabled:opacity-50 cursor-pointer"
                 >
                   {isDiscarding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                   Eliminar
@@ -152,7 +159,7 @@ export function DocumentsStep({ data, submitting, onDataChange, onNext }: Props)
                   type="button"
                   onClick={() => inputRefs.current[item.documentType]?.click()}
                   disabled={isUploading}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#03548C] border border-[#03548C]/30 rounded-lg hover:bg-[#03548C]/5 transition shrink-0 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#03548C] border border-[#03548C]/30 rounded-lg hover:bg-[#03548C]/5 transition shrink-0 disabled:opacity-50 cursor-pointer"
                 >
                   {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                   Subir

@@ -83,7 +83,7 @@ function HistoryModal({ type, onClose }: { type: LegalDocumentType; onClose: () 
             <div className="flex flex-col items-center gap-3 py-10 text-red-500">
               <AlertTriangle size={20} />
               <p className="text-sm font-medium">Error al cargar el historial.</p>
-              <button onClick={() => refetch()} className="text-xs text-blue-600 hover:underline">Reintentar</button>
+              <button onClick={() => refetch()} className="cursor-pointer text-xs text-blue-600 hover:underline">Reintentar</button>
             </div>
           ) : history.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-10">
@@ -315,7 +315,7 @@ function PublishModal({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isPending}
-                className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-dashed text-sm font-semibold transition disabled:opacity-50 ${
+                className={`cursor-pointer w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-dashed text-sm font-semibold transition disabled:opacity-50 ${
                   errors.file
                     ? 'border-red-300 text-red-500 hover:bg-red-50'
                     : 'border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600'

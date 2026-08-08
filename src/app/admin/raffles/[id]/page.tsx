@@ -95,7 +95,7 @@ export default function RaffleDetailPage() {
                 <p className="text-red-600 font-semibold">{error}</p>
                 <button
                     onClick={() => router.back()}
-                    className="px-4 py-2 bg-gray-800 text-white rounded-lg"
+                    className="cursor-pointer px-4 py-2 bg-gray-800 text-white rounded-lg"
                 >
                     Volver
                 </button>

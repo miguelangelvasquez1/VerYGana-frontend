@@ -1,6 +1,7 @@
 import React from "react";
-import { PhoneCall } from "lucide-react";
+import { PhoneCall, Sparkles } from "lucide-react";
 import type {
+  ClassificationResult,
   DiagnosticRequest,
   PrimaryGoal,
   TechIntegrationNeed,
@@ -9,7 +10,7 @@ import { BoolToggle, FieldErrors, FieldWrapper, inputCls, StepButton } from "../
 
 export type DiagnosticForm = Partial<DiagnosticRequest>;
 
-interface Props {
+interface DiagnosticProps {
   form: DiagnosticForm;
   errors: FieldErrors;
   submitting: boolean;
@@ -29,7 +30,7 @@ const TECH_NEEDS_OPTIONS: { value: TechIntegrationNeed; label: string }[] = [
   { value: "ACTIVACION_AUTOMATICA", label: "Activación automática" },
 ];
 
-export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: Props) {
+export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: DiagnosticProps) {
   const toggleTechNeed = (need: TechIntegrationNeed) => {
     const current = form.techIntegrationNeeds || [];
     const next = current.includes(need)
@@ -63,7 +64,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: P
                 key={opt.value}
                 type="button"
                 onClick={() => toggleTechNeed(opt.value)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all cursor-pointer
                   ${
                     selected
                       ? "bg-[#03548C] border-[#03548C] text-white shadow-sm shadow-blue-200"
@@ -119,7 +120,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: P
                   key={opt.value}
                   type="button"
                   onClick={() => onChange("primaryGoal", opt.value)}
-                  className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition text-left
+                  className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition text-left cursor-pointer
                     ${
                       form.primaryGoal === opt.value
                         ? "border-blue-500 bg-blue-50 text-blue-700"
@@ -151,30 +152,60 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: P
           </FieldWrapper>
 
           <FieldWrapper
-            label="¿Perteneces a un sector regulado?"
+            label="¿Requieres mascotas?"
             required
-            error={errors["regulatedSector"]}
-            tooltip="Sectores regulados son aquellos con supervisión especial del Estado (por ejemplo, financiero, salud, farmacéutico, seguros). Si tu actividad económica pertenece a uno de estos, responde 'Sí'."
+            error={errors["requiresPets"]}
+            tooltip="Indica si tu negocio necesita la funcionalidad de mascotas dentro de la plataforma VerYGana."
           >
-            <BoolToggle value={form.regulatedSector} onChange={(v) => onChange("regulatedSector", v)} error={errors["regulatedSector"]} />
+            <BoolToggle value={form.requiresPets} onChange={(v) => onChange("requiresPets", v)} error={errors["requiresPets"]} />
           </FieldWrapper>
 
           <FieldWrapper
-            label="¿Requieres una negociación especial?"
+            label="¿Requieres encuestas?"
             required
-            error={errors["requiresSpecialNegotiation"]}
-            tooltip="Marca 'Sí' si tu negocio necesita condiciones comerciales fuera de los planes estándar (tarifas, alcances o compromisos particulares) que deban negociarse directamente con un asesor."
+            error={errors["requiresSurveys"]}
+            tooltip="Indica si tu negocio necesita crear encuestas para tus clientes dentro de la plataforma VerYGana."
           >
-            <BoolToggle
-              value={form.requiresSpecialNegotiation}
-              onChange={(v) => onChange("requiresSpecialNegotiation", v)}
-              error={errors["requiresSpecialNegotiation"]}
-            />
+            <BoolToggle value={form.requiresSurveys} onChange={(v) => onChange("requiresSurveys", v)} error={errors["requiresSurveys"]} />
           </FieldWrapper>
         </>
       )}
 
       <StepButton submitting={submitting} onClick={onNext} label={hasTechNeeds ? "Enviar diagnóstico" : "Ver mi clasificación"} />
+    </div>
+  );
+}
+
+interface ClassificationProps {
+  classification: ClassificationResult;
+  submitting: boolean;
+  onConfirm: () => void;
+}
+
+export function ClassificationStep({ classification, submitting, onConfirm }: ClassificationProps) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-bold text-gray-900 mb-1">Tu ruta comercial</h3>
+        <p className="text-sm text-gray-500">
+          Con base en tus respuestas, te asignamos la siguiente ruta comercial en VerYGana.
+        </p>
+      </div>
+
+      <div className="flex items-start gap-4 p-5 bg-[#03548C]/5 border border-[#03548C]/20 rounded-xl">
+        <div className="w-11 h-11 bg-[#03548C]/10 rounded-lg flex items-center justify-center shrink-0">
+          <Sparkles className="w-5 h-5 text-[#03548C]" />
+        </div>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-[#03548C]/70 mb-1">
+            Ruta {classification.route}
+          </p>
+          <p className="text-base font-bold text-gray-900 mb-2">{classification.routeLabel}</p>
+          <p className="text-sm text-gray-600 leading-relaxed">{classification.explanation}</p>
+        </div>
+      </div>
+
+      <StepButton submitting={submitting} onClick={onConfirm} label="Continuar" />
     </div>
   );
 }

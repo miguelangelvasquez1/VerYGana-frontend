@@ -255,7 +255,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
               type="button"
               onClick={() => handleModeChange(m)}
               disabled={disabled}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition ${
+              className={`cursor-pointer px-3 py-1 rounded-lg text-sm font-medium transition ${
                 mode === m
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -287,7 +287,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
               type="button"
               onClick={processBulk}
               disabled={disabled || !bulkText.trim()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+              className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
             >
               Procesar códigos
             </button>
@@ -387,7 +387,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
                 parseInt(quantity) <= 0 ||
                 parseInt(quantity) > MAX_QUANTITY
               }
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+              className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
             >
               Generar códigos
             </button>

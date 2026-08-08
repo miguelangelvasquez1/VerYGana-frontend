@@ -77,7 +77,7 @@ export function CartDrawer() {
           <h2 className="text-lg font-bold">Carrito de Compras</h2>
           <button
             onClick={closeCart}
-            className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+            className="cursor-pointer p-1.5 hover:bg-white/20 rounded-lg transition-colors"
             aria-label="Close cart"
           >
             <X className="w-5 h-5" />
@@ -128,14 +128,14 @@ export function CartDrawer() {
               {/* Botón de checkout */}
               <button
                 onClick={handleCheckout}
-                className="w-full py-3 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold rounded-lg transition-colors"
+                className="cursor-pointer w-full py-3 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold rounded-lg transition-colors"
               >
                 Finalizar Compra
               </button>
 
               <button
                 onClick={closeCart}
-                className="w-full py-2 text-[#03548C] hover:text-[#0b1440] font-medium transition-colors"
+                className="cursor-pointer w-full py-2 text-[#03548C] hover:text-[#0b1440] font-medium transition-colors"
               >
                 Continuar Comprando
               </button>

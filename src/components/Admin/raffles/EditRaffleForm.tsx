@@ -234,7 +234,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 rounded-xl font-semibold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="cursor-pointer flex-1 bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 rounded-xl font-semibold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {loading ? "Guardando..." : "Guardar cambios"}
         </button>
@@ -242,7 +242,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel }: Props) {
           type="button"
           onClick={onCancel}
           disabled={loading}
-          className="flex-1 border border-gray-300 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition disabled:opacity-40"
+          className="cursor-pointer flex-1 border border-gray-300 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition disabled:opacity-40"
         >
           Cancelar
         </button>

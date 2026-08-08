@@ -124,7 +124,7 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
                     onClick={() =>
                       router.push(`/admin/raffles/${raffle.id}`)
                     }
-                    className="text-gray-600 hover:text-black inline-flex items-center gap-1"
+                    className="cursor-pointer text-gray-600 hover:text-black inline-flex items-center gap-1"
                   >
                     <Eye size={16} />
                     Ver
@@ -136,7 +136,7 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
                         setSelectedRaffle(raffle);
                         setActionType("activate");
                       }}
-                      className="text-green-600 hover:underline"
+                      className="cursor-pointer text-green-600 hover:underline"
                     >
                       Activar
                     </button>
@@ -148,7 +148,7 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
                         setSelectedRaffle(raffle);
                         setActionType("close");
                       }}
-                      className="text-yellow-600 hover:underline"
+                      className="cursor-pointer text-yellow-600 hover:underline"
                     >
                       Cerrar
                     </button>
@@ -160,7 +160,7 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
                         setSelectedRaffle(raffle);
                         setActionType("draw");
                       }}
-                      className="text-purple-600 hover:underline"
+                      className="cursor-pointer text-purple-600 hover:underline"
                     >
                       Sortear
                     </button>
@@ -173,7 +173,7 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
                           setSelectedRaffle(raffle);
                           setActionType("verify");
                         }}
-                        className="text-blue-600 hover:underline"
+                        className="cursor-pointer text-blue-600 hover:underline"
                       >
                         Verificar
                       </button>
@@ -181,7 +181,7 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
                       {onViewStats && (
                         <button
                           onClick={() => onViewStats(raffle)}
-                          className="text-[#03548C] hover:underline inline-flex items-center gap-1"
+                          className="cursor-pointer text-[#03548C] hover:underline inline-flex items-center gap-1"
                         >
                           <BarChart3 size={14} />
                           Estadísticas
@@ -195,7 +195,7 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
                       setSelectedRaffle(raffle);
                       setActionType("delete");
                     }}
-                    className="text-red-600 hover:underline"
+                    className="cursor-pointer text-red-600 hover:underline"
                   >
                     Eliminar
                   </button>

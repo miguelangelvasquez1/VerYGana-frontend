@@ -555,7 +555,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
             <button
               type="button"
               onClick={addPrize}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-2 items-center transition-colors"
+              className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-2 items-center transition-colors"
             >
               <Plus size={15} />
               Agregar Premio
@@ -586,7 +586,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                 <button
                   type="button"
                   onClick={() => removePrize(index)}
-                  className="text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
+                  className="cursor-pointer text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
                 >
                   <Trash2 size={14} />
                   Eliminar
@@ -760,7 +760,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
             <button
               type="button"
               onClick={addRule}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-2 items-center transition-colors"
+              className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-2 items-center transition-colors"
             >
               <Plus size={15} />
               Agregar Regla
@@ -823,7 +823,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
               <button
                 type="button"
                 onClick={() => removeRule(index)}
-                className="text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
+                className="cursor-pointer text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
               >
                 <Trash2 size={14} />
                 Eliminar regla
@@ -838,7 +838,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 rounded-xl font-semibold text-base shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        className="cursor-pointer w-full bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 rounded-xl font-semibold text-base shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
         {loading ? "Creando rifa..." : "✓ Crear Rifa"}
       </button>

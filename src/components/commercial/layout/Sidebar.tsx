@@ -15,6 +15,7 @@ import {
   Lock,
   Sparkles,
   Palette,
+  Handshake,
 } from 'lucide-react';
 import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { useLogout } from '@/hooks/useLogout';
@@ -45,7 +46,7 @@ interface SidebarProps {
 const menuItems: MenuItem[] = [
   {
     href: '/commercial/products', icon: Package, label: 'Mis productos',
-    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
+    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD],
     lockIfUnavailable: true,
   },
   {
@@ -65,6 +66,11 @@ const menuItems: MenuItem[] = [
   },
   {
     href: '/commercial/pets', icon: PawPrint, label: 'Mascotas',
+    requiredPlans: [PlanCode.PREMIUM],
+    lockIfUnavailable: true,
+  },
+  {
+    href: '/commercial/allies', icon: Handshake, label: 'Aliados',
     requiredPlans: [PlanCode.PREMIUM],
     lockIfUnavailable: true,
   },
@@ -142,7 +148,7 @@ export function Sidebar({
           {onClose && (
             <button
               onClick={onClose}
-              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors"
+              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>

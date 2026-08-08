@@ -21,7 +21,7 @@ function OnboardingErrorState({ onRetry }: { onRetry: () => void }) {
       </p>
       <button
         onClick={onRetry}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors cursor-pointer"
       >
         Reintentar
       </button>
@@ -77,7 +77,7 @@ export default function CommercialOnboardingPage() {
       <header className="bg-white border-b border-gray-100 px-6 h-16 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <Image src="/logos/logoDorado.png" alt="Ver y Gana" width={32} height={32} />
-          <span className="font-bold text-[#0b1440] hidden sm:inline">Ver y Gana</span>
+          <span className="font-bold text-[#0b1440] hidden sm:inline">VERyGANA</span>
         </div>
         <button
           onClick={logout}

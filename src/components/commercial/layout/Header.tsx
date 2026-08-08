@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Menu, User, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
-import { getCommercialInitialData } from '@/services/CommercialService';
+import { getCommercialInitialData } from '@/services/commercialService';
 import { EffectivePlanStateResponseDTO } from '@/types/finance/plans/Plan.types';
 import { formatBudget, formatCents } from '@/utils/currency';
 import { NotificationPanel } from '@/components/notifications/NotificationsPanel';
@@ -75,7 +75,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState, commerci
             {showMenuButton && (
               <button
                 onClick={onMenuClick}
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 lg:hidden"
+                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 lg:hidden cursor-pointer"
               >
                 <Menu className="w-5 h-5" />
               </button>

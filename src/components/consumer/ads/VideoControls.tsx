@@ -31,7 +31,7 @@ export default function VideoControls({ onVisit, onShare, size = 'lg' }: VideoCo
       {/* Visit */}
       <button
         onClick={onVisit}
-        className="flex flex-col items-center gap-1.5 group"
+        className="flex flex-col items-center gap-1.5 group cursor-pointer"
         aria-label="Visitar sitio del anunciante"
       >
         <div className={`${btnSize} rounded-full bg-white/10 backdrop-blur-md
@@ -46,7 +46,7 @@ export default function VideoControls({ onVisit, onShare, size = 'lg' }: VideoCo
       {/* Share */}
       <button
         onClick={onShare}
-        className="flex flex-col items-center gap-1.5 group"
+        className="flex flex-col items-center gap-1.5 group cursor-pointer"
         aria-label="Compartir"
       >
         <div className={`${btnSize} rounded-full bg-white/10 backdrop-blur-md

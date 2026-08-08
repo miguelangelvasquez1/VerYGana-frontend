@@ -165,18 +165,18 @@ export default function CreateProductForm() {
         <label className="block text-sm font-medium mb-1">
           Imagen del producto *
         </label>
-        <label
-          className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-200 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden"
-          style={{ minHeight: '10rem' }}
-        >
+        <p className="text-xs text-gray-400 mb-2">
+          La imagen debe ser cuadrada (proporción 1:1). Otras proporciones serán rechazadas.
+        </p>
+        <label className="flex flex-col items-center justify-center aspect-square w-full max-w-xs mx-auto border-2 border-dashed border-gray-200 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
           {imagePreview ? (
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-full max-h-72 object-contain rounded-xl p-2"
+              className="w-full h-full object-contain p-2"
             />
           ) : (
-            <p className="text-sm text-gray-500 py-10">
+            <p className="text-sm text-gray-500 text-center px-4">
               Haz clic para subir una imagen
             </p>
           )}

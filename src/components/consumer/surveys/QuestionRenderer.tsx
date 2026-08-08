@@ -102,7 +102,7 @@ function SingleChoice({
             key={opt.id}
             type="button"
             onClick={() => onChange(opt.id)}
-            className={`w-full rounded-xl border-2 px-5 py-4 text-left text-base font-medium transition-all ${
+            className={`cursor-pointer w-full rounded-xl border-2 px-5 py-4 text-left text-base font-medium transition-all ${
               selected
                 ? 'border-[#03548C] bg-[#03548C]/5 text-[#03548C]'
                 : 'border-gray-200 bg-white text-gray-700 hover:border-[#03548C]/30 hover:bg-[#03548C]/5'
@@ -145,7 +145,7 @@ function YesNo({
         const selected = value === id;
         const isPositive = id === 'YES';
 
-        const baseClasses = 'flex-1 rounded-2xl border-2 py-5 text-lg font-bold transition-all';
+        const baseClasses = 'cursor-pointer flex-1 rounded-2xl border-2 py-5 text-lg font-bold transition-all';
         const colorClasses = selected
                 ? isPositive
                   ? 'border-emerald-500 bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300'
@@ -197,7 +197,7 @@ function MultipleChoice({
             key={opt.id}
             type="button"
             onClick={() => toggle(opt.id)}
-            className={`w-full rounded-xl border-2 px-5 py-4 text-left text-base font-medium transition-all ${
+            className={`cursor-pointer w-full rounded-xl border-2 px-5 py-4 text-left text-base font-medium transition-all ${
               checked
                 ? 'border-[#03548C] bg-[#03548C]/5 text-[#03548C]'
                 : 'border-gray-200 bg-white text-gray-700 hover:border-[#03548C]/30'
@@ -277,7 +277,7 @@ function RatingAnswer({
             key={n}
             type="button"
             onClick={() => onChange(n)}
-            className={`flex h-16 w-16 flex-col items-center justify-center rounded-2xl border-2 text-2xl transition-all md:h-20 md:w-20 md:text-3xl ${
+            className={`cursor-pointer flex h-16 w-16 flex-col items-center justify-center rounded-2xl border-2 text-2xl transition-all md:h-20 md:w-20 md:text-3xl ${
               value === n
                 ? 'border-[#03548C] bg-[#03548C]/5 shadow-md scale-110'
                 : 'border-gray-200 bg-white hover:border-[#03548C]/30 hover:scale-105'

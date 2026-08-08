@@ -160,7 +160,7 @@ function SetupPasswordForm() {
             <button
               type="button"
               onClick={() => setShowPassword(v => !v)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -189,7 +189,7 @@ function SetupPasswordForm() {
             <button
               type="button"
               onClick={() => setShowConfirm(v => !v)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
             >
               {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>

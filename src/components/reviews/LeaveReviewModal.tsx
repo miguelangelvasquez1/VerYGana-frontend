@@ -19,7 +19,7 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
           key={star}
           type="button"
           onClick={() => onChange(star)}
-          className={`text-2xl transition-colors ${star <= value ? "text-yellow-400" : "text-gray-300"}`}
+          className={`text-2xl transition-colors cursor-pointer ${star <= value ? "text-yellow-400" : "text-gray-300"}`}
         >
           ★
         </button>
@@ -80,7 +80,7 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
             {selected && (
-              <button onClick={handleBack} className="text-gray-400 hover:text-gray-700 text-lg leading-none">
+              <button onClick={handleBack} className="text-gray-400 hover:text-gray-700 text-lg leading-none cursor-pointer">
                 ←
               </button>
             )}
@@ -88,7 +88,7 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
               {selected ? selected.productName : "Dejar una reseña"}
             </h2>
           </div>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-700 text-lg leading-none">
+          <button onClick={handleClose} className="text-gray-400 hover:text-gray-700 text-lg leading-none cursor-pointer">
             ✕
           </button>
         </div>
@@ -106,7 +106,7 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
                 <button
                   key={item.id}
                   onClick={() => setSelected(item)}
-                  className="w-full flex items-center justify-between border rounded-xl p-3 hover:bg-gray-50 transition-colors text-left"
+                  className="w-full flex items-center justify-between border rounded-xl p-3 hover:bg-gray-50 transition-colors text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     <img
@@ -148,7 +148,7 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
             <button
               onClick={handleSubmit}
               disabled={rating === 0 || submitting}
-              className="w-full bg-gray-900 text-white rounded-full py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-gray-900 text-white rounded-full py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               {submitting ? "Enviando..." : "Enviar reseña"}
             </button>

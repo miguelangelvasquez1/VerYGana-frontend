@@ -63,7 +63,7 @@ export default function MonthlyEarningsModal({
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+          className="cursor-pointer absolute right-4 top-4 text-gray-500 hover:text-gray-700"
         >
           <X />
         </button>

@@ -70,14 +70,14 @@ export default function ResponsesTable({ query, page, size, onPageChange }: Prop
             <button
               disabled={page === 0}
               onClick={() => onPageChange(page - 1)}
-              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+              className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               disabled={page === data.meta.totalPages - 1}
               onClick={() => onPageChange(page + 1)}
-              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+              className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -104,7 +104,7 @@ function ResponseCard({
       {/* Card header */}
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-center gap-4 px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+        className="cursor-pointer flex w-full items-center gap-4 px-5 py-4 text-left hover:bg-gray-50 transition-colors"
       >
         {/* Index */}
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#03548C]/5 text-xs font-bold text-[#03548C]">

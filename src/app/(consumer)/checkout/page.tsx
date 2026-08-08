@@ -70,7 +70,7 @@ export default function CheckoutPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Tu carrito está vacío</h1>
           <p className="text-gray-500 mb-6">Agrega productos para continuar con la compra</p>
           <Link href="/products">
-            <button className="inline-flex items-center gap-2 px-6 py-3 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold rounded-xl transition-colors">
+            <button className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold rounded-xl transition-colors">
               <Package className="w-4 h-4" />
               Explorar productos
             </button>
@@ -212,7 +212,7 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={isProcessing || !stockValidation.isValid}
-                  className="w-full py-3.5 bg-[#03548C] hover:bg-[#0b1440] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+                  className="cursor-pointer w-full py-3.5 bg-[#03548C] hover:bg-[#0b1440] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
                 >
                   {isProcessing ? (
                     <>

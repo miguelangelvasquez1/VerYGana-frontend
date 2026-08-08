@@ -40,7 +40,7 @@ export function TermsStep({
           <button
             type="button"
             onClick={onRetry}
-            className="text-xs text-[#03548C] hover:underline font-medium"
+            className="text-xs text-[#03548C] hover:underline font-medium cursor-pointer"
           >
             Reintentar
           </button>
