@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion, type Variants } from 'framer-motion';
 import {
   Users, Gift, Trophy, TrendingUp, UserPlus,
   Share2, CheckCircle, Clock, Loader2, MapPin, Ticket
@@ -11,7 +12,21 @@ import ReferralQR           from '@/components/referrals/ReferralQR';
 import ReferralStatCard     from '@/components/referrals/ReferralStatCard';
 import ReferralShareButtons from '@/components/referrals/ReferralShareButtons';
 import ReferralTierCard, { TIER_CONFIG } from '@/components/referrals/ReferralTierCard';
+import { tierTheme, levelSheen, LEVEL_BY_LABEL, MEDALLION_BEVEL } from '@/components/levels/levelTheme';
 import { type ReferralInfoDTO, type ReferralItemDTO, getMyReferrals } from '@/services/ReferralService';
+
+// ─── Tokens de animación (curvas fuertes, duraciones cortas) ──────────────────
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+const listV: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.03 } } };
+const itemV: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.3, ease: EASE_OUT } },
+};
+const panelV: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE_OUT, staggerChildren: 0.06, delayChildren: 0.02 } },
+  exit:   { opacity: 0, y: -6, transition: { duration: 0.15 } },
+};
 
 // ─── constantes ───────────────────────────────────────────────────────────────
 const TIERS = [
@@ -60,6 +75,7 @@ interface Props {
 }
 
 export default function ReferralPageShell({ info }: Props) {
+  const reduce = useReducedMotion();
   const [activeTab, setActiveTab]     = useState('dashboard');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
@@ -103,26 +119,36 @@ export default function ReferralPageShell({ info }: Props) {
       <div className="bg-white rounded-xl shadow-sm border mb-8">
         <div className="flex overflow-x-auto">
           {TABS.map(({ id, label, icon: Icon }) => (
-            <button
+            <motion.button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`cursor-pointer flex-1 min-w-max flex items-center justify-center gap-2 px-6 py-4 font-medium border-b-2 transition-colors duration-200 ${
-                activeTab === id
-                  ? 'border-[#00a4ff] text-[#00a4ff]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              whileTap={reduce ? undefined : { scale: 0.97 }}
+              transition={{ duration: 0.15, ease: EASE_OUT }}
+              className={`relative flex-1 min-w-max flex items-center justify-center gap-2 px-6 py-4 font-medium transition-colors duration-200 ${
+                activeTab === id ? 'text-[#00a4ff]' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               <Icon className="w-4 h-4" />
               {label}
-            </button>
+              {activeTab === id && (
+                <motion.span
+                  layoutId="ref-tab-underline"
+                  className="absolute left-4 right-4 -bottom-px h-0.5 rounded-full"
+                  style={{ background: 'linear-gradient(90deg, #0089d6, #00a4ff)' }}
+                  transition={reduce ? { duration: 0 } : { type: 'spring', duration: 0.5, bounce: 0.18 }}
+                />
+              )}
+            </motion.button>
           ))}
         </div>
       </div>
 
+      <AnimatePresence mode="wait">
+
       {/* ── Dashboard ── */}
       {activeTab === 'dashboard' && (
-        <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div key="dashboard" className="space-y-8" variants={panelV} initial={reduce ? false : 'hidden'} animate="show" exit="exit">
+          <motion.div variants={listV} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <ReferralStatCard
               icon={Users}
               iconBg="bg-[#03548C]/10"
@@ -148,53 +174,59 @@ export default function ReferralPageShell({ info }: Props) {
               label="Nivel actual"
               badge={nextTier ? `${nextTier.minReferrals - info.totalReferrals} para ${nextTier.level}` : 'Máximo'}
             />
-          </div>
+          </motion.div>
 
           {/* Progreso */}
           {(() => {
-            const cfg = currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce;
-            const { Icon: CurIcon } = cfg;
+            const t = tierTheme(currentTier?.level);
+            const levelKey = LEVEL_BY_LABEL[currentTier?.level ?? 'Bronce'];
+            const CurIcon = (currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce).Icon;
             return (
-              <div className="bg-white rounded-xl border shadow-sm p-6">
+              <motion.div variants={itemV} className="bg-white rounded-xl border shadow-sm p-6">
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                   <div>
-                    <p className="text-gray-500" style={{ fontSize: 12, margin: '0 0 4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    <p className="text-gray-500" style={{ fontSize: 11, margin: '0 0 6px', letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}>
                       Nivel de referidos
                     </p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span className="text-gray-900" style={{ fontSize: 20, fontWeight: 600 }}>{currentTier?.level ?? '—'}</span>
-                      <span style={{ fontSize: 12, fontWeight: 500, background: cfg.bg, color: cfg.text, padding: '2px 9px', borderRadius: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="text-gray-900" style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.01em' }}>{currentTier?.level ?? '—'}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, background: t.soft, color: t.on, padding: '3px 10px', borderRadius: 999, fontVariantNumeric: 'tabular-nums' }}>
                         ×{currentTier?.ticketsPerReferral ?? 1} tickets
                       </span>
                     </div>
                   </div>
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CurIcon style={{ width: 22, height: 22, color: cfg.bar }} />
+                  <div style={{
+                    width: 52, height: 52, borderRadius: '50%',
+                    background: levelSheen(levelKey),
+                    boxShadow: `${MEDALLION_BEVEL}, 0 8px 20px ${t.accent}33`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <CurIcon style={{ width: 24, height: 24, color: t.onGrad, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.25))' }} />
                   </div>
                 </div>
 
                 {/* Métricas */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: '1rem' }}>
-                  <div className="bg-gray-50" style={{ borderRadius: 8, padding: 12 }}>
-                    <p className="text-gray-500" style={{ fontSize: 12, margin: '0 0 4px' }}>Referidos totales</p>
-                    <p className="text-gray-900" style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{info.totalReferrals}</p>
+                  <div className="bg-gray-50" style={{ borderRadius: 12, padding: 14 }}>
+                    <p className="text-gray-500" style={{ fontSize: 11, margin: '0 0 4px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>Referidos totales</p>
+                    <p className="text-gray-900" style={{ fontSize: 20, fontWeight: 600, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{info.totalReferrals}</p>
                   </div>
-                  <div className="bg-gray-50" style={{ borderRadius: 8, padding: 12 }}>
-                    <p className="text-gray-500" style={{ fontSize: 12, margin: '0 0 4px' }}>Tickets ganados</p>
-                    <p className="text-gray-900" style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>{totalTickets}</p>
+                  <div className="bg-gray-50" style={{ borderRadius: 12, padding: 14 }}>
+                    <p className="text-gray-500" style={{ fontSize: 11, margin: '0 0 4px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>Tickets ganados</p>
+                    <p style={{ fontSize: 20, fontWeight: 600, margin: 0, color: '#c9a227', fontVariantNumeric: 'tabular-nums' }}>{totalTickets}</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })()}
-        </div>
+        </motion.div>
       )}
 
       {/* ── Invite ── */}
       {activeTab === 'invite' && (
-        <div className="space-y-8">
-          <div className="bg-white rounded-xl p-8 shadow-sm border">
+        <motion.div key="invite" className="space-y-8" variants={panelV} initial={reduce ? false : 'hidden'} animate="show" exit="exit">
+          <motion.div variants={itemV} className="bg-white rounded-xl p-8 shadow-sm border">
             <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Tu código de referido</h2>
             <div className="flex flex-col lg:flex-row items-center gap-10">
               <div className="flex-1 w-full">
@@ -202,9 +234,9 @@ export default function ReferralPageShell({ info }: Props) {
               </div>
               <ReferralQR base64={info.qrCodeBase64} referralCode={info.referralCode} />
             </div>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <motion.div variants={itemV} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-white rounded-xl p-6 shadow-sm border">
               <h3 className="text-xl font-semibold mb-6">Compartir en redes sociales</h3>
               <ReferralShareButtons referralLink={info.referralLink} />
@@ -232,41 +264,46 @@ export default function ReferralPageShell({ info }: Props) {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#03548C] outline-none resize-none"
                   />
                 </div>
-                <button
+                <motion.button
                   onClick={sendInvite}
                   disabled={!inviteEmail}
-                  className="cursor-pointer w-full px-6 py-3 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  whileTap={reduce ? undefined : { scale: 0.98 }}
+                  transition={{ duration: 0.15, ease: EASE_OUT }}
+                  className="w-full px-6 py-3 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   Enviar invitación
-                </button>
+                </motion.button>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="bg-linear-to-br from-blue-50 to-purple-50 rounded-xl p-8 border">
+          <motion.div variants={itemV} className="rounded-xl p-8 border" style={{ background: 'linear-gradient(135deg, #EAF4FB, #F3F8FC)', borderColor: '#DCEAF5' }}>
             <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">¿Cómo funciona?</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                { Icon: Share2,   bg: 'bg-[#03548C]',   title: '1. Comparte tu código', desc: 'Envía tu código único a amigos y familiares'              },
-                { Icon: UserPlus, bg: 'bg-[#0b1440]',  title: '2. Ellos se registran', desc: 'Tus amigos usan tu código al crear su cuenta'             },
-                { Icon: Ticket,   bg: 'bg-[#00a4ff]',  title: '3. Ganas tickets',      desc: 'Recibe tickets de rifa por cada amigo que se registre'    },
+                { Icon: Share2,   bg: '#03548C', title: '1. Comparte tu código', desc: 'Envía tu código único a amigos y familiares'              },
+                { Icon: UserPlus, bg: '#0b1440', title: '2. Ellos se registran', desc: 'Tus amigos usan tu código al crear su cuenta'             },
+                { Icon: Ticket,   bg: '#00a4ff', title: '3. Ganas tickets',      desc: 'Recibe tickets de rifa por cada amigo que se registre'    },
               ].map(({ Icon, bg, title, desc }) => (
                 <div key={title} className="text-center">
-                  <div className={`w-16 h-16 ${bg} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                    <Icon className="w-8 h-8 text-white" />
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ background: `linear-gradient(135deg, ${bg}, ${bg}CC)`, boxShadow: `${MEDALLION_BEVEL}, 0 8px 18px ${bg}33` }}
+                  >
+                    <Icon className="w-8 h-8 text-white" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.25))' }} />
                   </div>
                   <h4 className="text-lg font-semibold mb-2">{title}</h4>
                   <p className="text-gray-600">{desc}</p>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {/* ── Referrals ── */}
       {activeTab === 'referrals' && (
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <motion.div key="referrals" variants={panelV} initial={reduce ? false : 'hidden'} animate="show" exit="exit" className="bg-white rounded-xl shadow-sm border overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-xl font-semibold">Mis Referidos ({info.totalReferrals})</h3>
             <p className="text-gray-600 mt-1">Personas que se registraron con tu código</p>
@@ -287,12 +324,14 @@ export default function ReferralPageShell({ info }: Props) {
               <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 font-medium">Aún no tienes referidos</p>
               <p className="text-gray-400 text-sm mt-1">Comparte tu código y aparecerán aquí</p>
-              <button
+              <motion.button
                 onClick={() => setActiveTab('invite')}
-                className="cursor-pointer mt-4 px-6 py-2 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] text-sm transition-colors"
+                whileTap={reduce ? undefined : { scale: 0.96 }}
+                transition={{ duration: 0.15, ease: EASE_OUT }}
+                className="mt-4 px-6 py-2 bg-[#03548C] text-white rounded-lg hover:bg-[#0b1440] text-sm transition-colors"
               >
                 Invitar amigos
-              </button>
+              </motion.button>
             </div>
           )}
 
@@ -339,15 +378,15 @@ export default function ReferralPageShell({ info }: Props) {
               </table>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* ── Rewards ── */}
       {activeTab === 'rewards' && (
-        <div className="space-y-8">
-          <div className="bg-white rounded-xl p-8 shadow-sm border">
+        <motion.div key="rewards" className="space-y-8" variants={panelV} initial={reduce ? false : 'hidden'} animate="show" exit="exit">
+          <motion.div variants={itemV} className="bg-white rounded-xl p-8 shadow-sm border">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Sistema de Niveles</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div variants={listV} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {TIERS.map((tier) => (
                 <ReferralTierCard
                   key={tier.level}
@@ -356,50 +395,57 @@ export default function ReferralPageShell({ info }: Props) {
                   isUnlocked={info.totalReferrals >= tier.minReferrals}
                 />
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Próximo nivel */}
           {(() => {
-            const nextCfg = nextTier ? (TIER_CONFIG[nextTier.level] ?? TIER_CONFIG.Diamante) : null;
-            const curCfg  = currentTier ? (TIER_CONFIG[currentTier.level] ?? TIER_CONFIG.Bronce) : TIER_CONFIG.Bronce;
-            const accentBar = nextCfg?.bar ?? curCfg.bar;
-            const accentBg  = nextCfg?.bg  ?? curCfg.bg;
-            const accentText = nextCfg?.text ?? curCfg.text;
-            const NextIcon = nextCfg?.Icon ?? Trophy;
+            const accentLabel = nextTier?.level ?? currentTier?.level;
+            const t = tierTheme(accentLabel);
+            const levelKey = LEVEL_BY_LABEL[accentLabel ?? 'Bronce'];
+            const NextIcon = (nextTier ? TIER_CONFIG[nextTier.level] : currentTier ? TIER_CONFIG[currentTier.level] : undefined)?.Icon ?? Trophy;
 
             return (
-              <div style={{ background: accentBg, border: `1.5px solid ${accentBar}44`, borderRadius: 'var(--border-radius-lg, 16px)', padding: '1.5rem' }}>
+              <motion.div variants={itemV} style={{ background: t.soft, border: `1.5px solid ${t.accent}44`, borderRadius: 'var(--border-radius-lg, 16px)', padding: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: accentText, margin: 0 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: t.on, margin: 0 }}>
                     {nextTier ? `Próximo: ${nextTier.level}` : '¡Nivel máximo!'}
                   </h3>
-                  <NextIcon style={{ width: 22, height: 22, color: accentBar }} />
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: levelSheen(levelKey),
+                    boxShadow: `${MEDALLION_BEVEL}, 0 6px 14px ${t.accent}33`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <NextIcon style={{ width: 20, height: 20, color: t.onGrad, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.25))' }} />
+                  </div>
                 </div>
 
                 {nextTier ? (
                   <>
-                    <p style={{ fontSize: 13, color: accentText, opacity: 0.85, marginBottom: 14 }}>
+                    <p style={{ fontSize: 13, color: t.on, opacity: 0.85, marginBottom: 14 }}>
                       Gana <strong>{nextTier.ticketsPerReferral} tickets</strong> por cada referido al alcanzar este nivel.
                     </p>
-                    <button
+                    <motion.button
                       onClick={() => setActiveTab('invite')}
-                      style={{ background: accentBar, color: 'white', fontWeight: 600, fontSize: 14, padding: '10px 20px', borderRadius: 10, border: 'none', cursor: 'pointer' }}
+                      whileTap={reduce ? undefined : { scale: 0.97 }}
+                      transition={{ duration: 0.15, ease: EASE_OUT }}
+                      style={{ background: t.accent, color: t.onGrad, fontWeight: 600, fontSize: 14, padding: '10px 20px', borderRadius: 10, border: 'none', cursor: 'pointer' }}
                     >
                       Invitar más amigos
-                    </button>
+                    </motion.button>
                   </>
                 ) : (
-                  <p style={{ fontSize: 13, color: accentText, opacity: 0.85, margin: 0 }}>
-                    Platinum — {currentTier?.ticketsPerReferral} tickets por referido. ¡Felicitaciones!
+                  <p style={{ fontSize: 13, color: t.on, opacity: 0.85, margin: 0 }}>
+                    {currentTier?.ticketsPerReferral} tickets por referido. ¡Felicitaciones!
                   </p>
                 )}
-              </div>
+              </motion.div>
             );
           })()}
 
           {/* Términos */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <motion.div variants={itemV} className="bg-white rounded-xl p-6 shadow-sm border">
             <h3 className="text-xl font-semibold mb-6">Términos y beneficios</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
@@ -425,9 +471,11 @@ export default function ReferralPageShell({ info }: Props) {
                 </ul>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+
+      </AnimatePresence>
 
       {/* CTA */}
       <div className="my-12 relative overflow-hidden bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] rounded-2xl p-8 md:p-12 text-white text-center">
@@ -438,12 +486,14 @@ export default function ReferralPageShell({ info }: Props) {
           <p className="text-lg mb-8 text-white/70">
             Cada amigo que se registre con tu código te da {currentTier?.ticketsPerReferral ?? 1} ticket{(currentTier?.ticketsPerReferral ?? 1) > 1 ? 's' : ''} de rifa
           </p>
-          <button
+          <motion.button
             onClick={() => setActiveTab('invite')}
-            className="cursor-pointer px-8 py-3 bg-white text-[#03548C] font-bold rounded-full hover:bg-gray-100 transition-colors"
+            whileTap={reduce ? undefined : { scale: 0.96 }}
+            transition={{ duration: 0.15, ease: EASE_OUT }}
+            className="px-8 py-3 bg-white text-[#03548C] font-bold rounded-full hover:bg-gray-100 transition-colors"
           >
             Invitar amigos
-          </button>
+          </motion.button>
         </div>
       </div>
 

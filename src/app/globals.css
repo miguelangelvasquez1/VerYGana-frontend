@@ -97,3 +97,167 @@ input:-webkit-autofill:active {
          transition;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PORTAL DE CUMPLIMIENTO
+   Sala aparte del mismo edificio: el consumidor vive en el azul brillante
+   de la marca, el oficial de cumplimiento trabaja en una versión callada y
+   densa de ese mismo azul. Los tokens viven en `@theme` para poder usarse
+   como utilidades de Tailwind (bg-cmp-ink, text-cmp-slate, …).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* Tinta y superficies */
+  --color-cmp-ink: #0b1f33;
+  --color-cmp-ink-2: #14304a;
+  --color-cmp-ink-3: #1d4162;
+  --color-cmp-slate: #56687a;
+  --color-cmp-mute: #8a9aa8;
+  --color-cmp-paper: #edf1f5;
+  --color-cmp-surface: #ffffff;
+  --color-cmp-rule: #dce4ec;
+  --color-cmp-rule-soft: #eaeff4;
+
+  /* Marca */
+  --color-cmp-azul: #014c92;
+  --color-cmp-azul-hi: #01397a;
+  --color-cmp-cian: #1ea5bd;
+
+  /* Veredictos: los tres estados que existen en un expediente */
+  --color-cmp-hold: #a9660a;
+  --color-cmp-hold-bg: #fdf3e4;
+  --color-cmp-clear: #0e7357;
+  --color-cmp-clear-bg: #e6f4ef;
+  --color-cmp-flag: #a82820;
+  --color-cmp-flag-bg: #fbeceb;
+
+  --font-cmp-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-cmp-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+.compliance-root {
+  /* Curvas propias: las de CSS por defecto no tienen suficiente carácter */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+
+  font-family: var(--font-cmp-sans);
+  color: var(--color-cmp-ink);
+  font-feature-settings: "cv05" 1;
+}
+
+/* Cifras tabulares en todo lo que se lee en columna */
+.compliance-root table,
+.compliance-root .cmp-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.cmp-mono {
+  font-family: var(--font-cmp-mono);
+}
+
+/* Micro-etiqueta de ledger: encabezados de tabla, eyebrows, códigos */
+.cmp-label {
+  font-family: var(--font-cmp-mono);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Foco visible y consistente en todo el portal */
+.compliance-root :is(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-cmp-cian);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Presión: todo lo pulsable responde al instante */
+.compliance-root :is(button, a[role="button"], .cmp-pressable) {
+  transition: transform 140ms var(--ease-out-strong),
+    background-color 140ms ease, border-color 140ms ease, color 140ms ease,
+    opacity 140ms ease;
+}
+.compliance-root :is(button, a[role="button"], .cmp-pressable):active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Entrada escalonada de filas — decorativa, corta y cancelable */
+@keyframes cmp-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cmp-row-in {
+  animation: cmp-row-in 220ms var(--ease-out-strong) both;
+}
+
+@keyframes cmp-sheen {
+  from {
+    background-position: -160% 0;
+  }
+  to {
+    background-position: 260% 0;
+  }
+}
+
+.cmp-skeleton {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-cmp-rule-soft) 0%,
+    #f6f9fb 40%,
+    var(--color-cmp-rule-soft) 80%
+  );
+  background-size: 200% 100%;
+  animation: cmp-sheen 1.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compliance-root :is(button, a[role="button"], .cmp-pressable):active:not(:disabled) {
+    transform: none;
+  }
+  .cmp-row-in {
+    animation: none;
+  }
+  .cmp-skeleton {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   JUEGO DE MASCOTA — aviso de rotación
+   El icono imita el gesto que le pedimos al usuario. Va en CSS y no en JS
+   a propósito: Unity WebGL satura el hilo principal, y una animación por
+   requestAnimationFrame se vería a tirones justo mientras el juego carga.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@keyframes pet-rotate-hint {
+  0%,
+  28% {
+    transform: rotate(0deg);
+  }
+  48%,
+  78% {
+    transform: rotate(-90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.pet-rotate-hint {
+  animation: pet-rotate-hint 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-rotate-hint {
+    animation: none;
+    transform: rotate(-90deg);
+  }
+}

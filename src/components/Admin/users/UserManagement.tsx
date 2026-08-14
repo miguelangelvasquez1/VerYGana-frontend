@@ -126,7 +126,6 @@ const UserManagement: React.FC = () => {
       setStatsLoading(false);
     }
   }, []);
-
   useEffect(() => { loadStats(); }, [loadStats]);
 
   /* ================== LIST ================== */
@@ -136,34 +135,34 @@ const UserManagement: React.FC = () => {
     setError(null);
     try {
       if (activeTab === 'RECENT') {
-        const res = await getNewUsers(startDate, endDate, page, PAGE_SIZE);
+        const res = await getNewUsers(startDate, endDate, undefined, page, PAGE_SIZE);
         setItems(res.data);
         setMeta(res.meta);
       } else if (activeTab === Role.CONSUMER) {
         const res = await getConsumers(
           levelFilter || undefined, debouncedSearch || undefined, stateFilter || undefined,
-          undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined,
+          undefined, undefined, undefined, undefined, undefined, undefined, undefined,
           page, PAGE_SIZE,
         );
         setItems(res.data);
         setMeta(res.meta);
       } else if (activeTab === Role.COMMERCIAL) {
         const res = await getCommercials(
-          debouncedSearch || undefined, stateFilter || undefined, undefined, undefined,
-          planFilter || undefined, page, PAGE_SIZE,
+          debouncedSearch || undefined, stateFilter || undefined, planFilter || undefined,
+          page, PAGE_SIZE,
         );
         setItems(res.data);
         setMeta(res.meta);
       } else if (activeTab === Role.ADMIN) {
-        const res = await getAdmins(debouncedSearch || undefined, stateFilter || undefined, undefined, page, PAGE_SIZE);
+        const res = await getAdmins(debouncedSearch || undefined, stateFilter || undefined, page, PAGE_SIZE);
         setItems(res.data);
         setMeta(res.meta);
       } else if (activeTab === Role.GAME_DESIGNER) {
-        const res = await getGameDesigners(debouncedSearch || undefined, stateFilter || undefined, undefined, undefined, page, PAGE_SIZE);
+        const res = await getGameDesigners(debouncedSearch || undefined, stateFilter || undefined, page, PAGE_SIZE);
         setItems(res.data);
         setMeta(res.meta);
       } else if (activeTab === Role.COMPLIANCE_OFFICER) {
-        const res = await getComplianceOfficers(debouncedSearch || undefined, stateFilter || undefined, undefined, undefined, page, PAGE_SIZE);
+        const res = await getComplianceOfficers(debouncedSearch || undefined, stateFilter || undefined, page, PAGE_SIZE);
         setItems(res.data);
         setMeta(res.meta);
       }

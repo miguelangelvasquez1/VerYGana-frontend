@@ -1,26 +1,61 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Loader2, AlertTriangle, ChevronLeft, ChevronRight, ClipboardCheck, RefreshCw, X } from 'lucide-react';
+/**
+ * Alertas de screening.
+ *
+ * Aquí el trabajo es comparar: el mismo nombre contra varias listas. Formato
+ * ledger, identificadores en monoespaciada y la severidad marcada en el
+ * borde izquierdo para poder barrer la columna sin leer.
+ */
+
+import { useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { AnimatePresence } from 'framer-motion';
+import { ClipboardCheck, ShieldCheck } from 'lucide-react';
 import {
   getScreeningHits,
   reviewScreening,
+  type PageResponse,
   type ScreeningHit,
   type ScreeningList,
-  type PageResponse,
 } from '@/services/ComplianceService';
+import {
+  Btn,
+  EmptyState,
+  ErrorState,
+  Ledger,
+  LedgerBody,
+  LedgerHead,
+  LedgerRow,
+  LedgerTable,
+  Modal,
+  Pager,
+  PanelHeader,
+  Ref,
+  RefreshButton,
+  SkeletonRows,
+  StatusTag,
+  Td,
+  TextField,
+  Th,
+  ThSpine,
+  type Tone,
+} from '@/components/compliance/ui/primitives';
 
-const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  HIT: { label: 'HIT', cls: 'bg-red-100 text-red-700' },
-  FUZZY_HIT: { label: 'FUZZY HIT', cls: 'bg-amber-100 text-amber-700' },
+const PAGE_SIZE = 20;
+
+const HIT_TONE: Record<ScreeningHit['status'], Tone> = { HIT: 'flag', FUZZY_HIT: 'hold' };
+const HIT_LABEL: Record<ScreeningHit['status'], string> = {
+  HIT: 'Coincidencia',
+  FUZZY_HIT: 'Parcial',
 };
 
 const LIST_LABELS: Record<ScreeningList, string> = {
   OFAC_SDN: 'OFAC SDN',
-  UN: 'UN',
-  ATTORNEY_GENERAL: 'Attorney General',
-  COMPTROLLER: 'Comptroller',
-  NATIONAL_POLICE: 'National Police',
+  UN: 'ONU',
+  ATTORNEY_GENERAL: 'Fiscalía',
+  COMPTROLLER: 'Contraloría',
+  NATIONAL_POLICE: 'Policía Nacional',
 };
 
 function ReviewModal({
@@ -36,49 +71,43 @@ function ReviewModal({
 }) {
   const [notes, setNotes] = useState('');
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-gray-900">Marcar como revisado</h3>
-          <button onClick={onClose} className="cursor-pointer p-1 rounded-lg hover:bg-gray-100">
-            <X className="w-4 h-4 text-gray-500" />
-          </button>
-        </div>
-        <p className="text-sm text-gray-600 mb-1">
-          <span className="font-semibold">{hit.queriedName}</span> — {hit.listName}
-        </p>
-        <p className="text-xs text-gray-400 mb-4">Documento: {hit.documentNumber}</p>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          rows={3}
-          placeholder="Notas de revisión (opcional)..."
-          className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
-        />
-        <div className="flex gap-3 mt-4">
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="cursor-pointer flex-1 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={() => onConfirm(notes.trim())}
-            disabled={loading}
-            className="cursor-pointer flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ClipboardCheck className="w-4 h-4" />}
-            Confirmar
-          </button>
-        </div>
+    <Modal
+      onClose={onClose}
+      title="Marcar como revisada"
+      subtitle={
+        <span>
+          {hit.queriedName} · {LIST_LABELS[hit.listName] ?? hit.listName}
+        </span>
+      }
+    >
+      <div className="mb-4 flex items-center gap-2">
+        <StatusTag tone={HIT_TONE[hit.status]}>{HIT_LABEL[hit.status] ?? hit.status}</StatusTag>
+        <Ref muted>{hit.documentNumber}</Ref>
       </div>
-    </div>
+      <TextField
+        label="Notas de revisión"
+        rows={4}
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Qué se verificó y con qué fuente. Opcional, pero queda en la auditoría."
+      />
+      <div className="mt-5 flex gap-3">
+        <Btn className="flex-1" onClick={onClose} disabled={loading}>
+          Cancelar
+        </Btn>
+        <Btn
+          className="flex-1"
+          variant="primary"
+          icon={ClipboardCheck}
+          loading={loading}
+          onClick={() => onConfirm(notes.trim())}
+        >
+          Marcar revisada
+        </Btn>
+      </div>
+    </Modal>
   );
 }
-
-const PAGE_SIZE = 20;
 
 export default function ScreeningsPanel() {
   const [page, setPage] = useState<PageResponse<ScreeningHit> | null>(null);
@@ -100,17 +129,20 @@ export default function ScreeningsPanel() {
     }
   }, []);
 
-  useEffect(() => { load(currentPage); }, [currentPage, load]);
+  useEffect(() => {
+    load(currentPage);
+  }, [currentPage, load]);
 
   const handleReview = async (notes: string) => {
     if (!reviewTarget) return;
     setActionLoading(reviewTarget.id);
     try {
       await reviewScreening(reviewTarget.id, notes);
+      toast.success(`Alerta revisada — ${reviewTarget.queriedName}`);
       setReviewTarget(null);
       await load(currentPage);
     } catch {
-      /* silent */
+      toast.error('No se pudo registrar la revisión. Intenta de nuevo.');
     } finally {
       setActionLoading(null);
     }
@@ -121,127 +153,103 @@ export default function ScreeningsPanel() {
 
   return (
     <>
-      <div className="space-y-5">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Alertas de Screening</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Coincidencias en listas restrictivas pendientes de revisión.</p>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            {page ? `${page.totalElements} resultado${page.totalElements !== 1 ? 's' : ''} sin revisar` : ' '}
-          </p>
-          <button
-            onClick={() => load(currentPage)}
-            className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Actualizar
-          </button>
-        </div>
+      <div className="space-y-6">
+        <PanelHeader
+          eyebrow="Listas restrictivas"
+          title="Alertas de screening"
+          description="Coincidencias contra OFAC, ONU y listas nacionales pendientes de revisión."
+          count={loading ? 0 : page?.totalElements ?? 0}
+          countLabel="Sin revisar"
+          actions={<RefreshButton onClick={() => load(currentPage)} loading={loading} />}
+        />
 
         {loading ? (
-          <div className="flex justify-center items-center h-60">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-          </div>
+          <SkeletonRows rows={6} cols={6} />
         ) : error ? (
-          <div className="flex flex-col items-center gap-3 py-16 text-red-500">
-            <AlertTriangle className="w-8 h-8" />
-            <p className="text-sm font-medium">Error al cargar alertas.</p>
-            <button onClick={() => load(currentPage)} className="cursor-pointer text-xs text-indigo-600 hover:underline">Reintentar</button>
-          </div>
+          <ErrorState
+            message="No se pudieron cargar las alertas."
+            onRetry={() => load(currentPage)}
+          />
         ) : hits.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <ClipboardCheck className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
-            <p className="text-sm font-medium text-gray-600">No hay alertas pendientes de revisión</p>
-          </div>
+          <EmptyState
+            tone="clear"
+            icon={ShieldCheck}
+            title="Sin alertas pendientes"
+            hint="Ninguna coincidencia espera revisión en este momento."
+          />
         ) : (
           <>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50">
-                      <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Nombre consultado</th>
-                      <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Documento</th>
-                      <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Lista</th>
-                      <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                      <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
-                      <th className="text-right px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {hits.map((hit) => {
-                      const badge = STATUS_LABELS[hit.status] ?? { label: hit.status, cls: 'bg-gray-100 text-gray-600' };
-                      return (
-                        <tr key={hit.id} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="px-4 py-3 font-medium text-gray-900">{hit.queriedName}</td>
-                          <td className="px-4 py-3">
-                            <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{hit.documentNumber}</span>
-                          </td>
-                          <td className="px-4 py-3 text-gray-700">{LIST_LABELS[hit.listName] ?? hit.listName}</td>
-                          <td className="px-4 py-3">
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${badge.cls}`}>
-                              {badge.label}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-gray-500 text-xs">
-                            {new Date(hit.createdAt).toLocaleDateString('es-CO', {
-                              day: '2-digit', month: 'short', year: 'numeric',
-                            })}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <button
-                              onClick={() => setReviewTarget(hit)}
-                              disabled={actionLoading !== null}
-                              className="cursor-pointer flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white text-xs font-semibold rounded-lg transition ml-auto"
-                            >
-                              <ClipboardCheck className="w-3 h-3" />
-                              Revisar
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <Ledger>
+              <LedgerTable>
+                <LedgerHead>
+                  <ThSpine />
+                  <Th>Nombre consultado</Th>
+                  <Th>Documento</Th>
+                  <Th>Lista</Th>
+                  <Th>Severidad</Th>
+                  <Th>Detectada</Th>
+                  <Th align="right">Acción</Th>
+                </LedgerHead>
+                <LedgerBody>
+                  {hits.map((hit, i) => (
+                    <LedgerRow key={hit.id} index={i} tone={HIT_TONE[hit.status]}>
+                      <Td className="font-medium text-cmp-ink">{hit.queriedName}</Td>
+                      <Td>
+                        <Ref muted>{hit.documentNumber}</Ref>
+                      </Td>
+                      <Td className="text-cmp-slate">
+                        {LIST_LABELS[hit.listName] ?? hit.listName}
+                      </Td>
+                      <Td>
+                        <StatusTag tone={HIT_TONE[hit.status]}>
+                          {HIT_LABEL[hit.status] ?? hit.status}
+                        </StatusTag>
+                      </Td>
+                      <Td className="cmp-mono text-[11px] text-cmp-mute">
+                        {new Date(hit.createdAt).toLocaleDateString('es-CO', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </Td>
+                      <Td align="right">
+                        <Btn
+                          size="sm"
+                          variant="primary"
+                          icon={ClipboardCheck}
+                          onClick={() => setReviewTarget(hit)}
+                          disabled={actionLoading !== null}
+                        >
+                          Revisar
+                        </Btn>
+                      </Td>
+                    </LedgerRow>
+                  ))}
+                </LedgerBody>
+              </LedgerTable>
+            </Ledger>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between pt-2">
-              <p className="text-xs text-gray-500">
-                Página {currentPage + 1} de {totalPages}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-                  disabled={currentPage === 0}
-                  className="cursor-pointer p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-                  disabled={currentPage >= totalPages - 1}
-                  className="cursor-pointer p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+            <Pager
+              page={currentPage}
+              totalPages={totalPages}
+              total={page?.totalElements}
+              onChange={setCurrentPage}
+            />
           </>
         )}
       </div>
 
-      {reviewTarget && (
-        <ReviewModal
-          hit={reviewTarget}
-          onClose={() => setReviewTarget(null)}
-          onConfirm={handleReview}
-          loading={actionLoading === reviewTarget.id}
-        />
-      )}
+      <AnimatePresence>
+        {reviewTarget && (
+          <ReviewModal
+            key="review"
+            hit={reviewTarget}
+            onClose={() => setReviewTarget(null)}
+            onConfirm={handleReview}
+            loading={actionLoading === reviewTarget.id}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

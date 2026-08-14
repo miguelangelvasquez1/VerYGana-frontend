@@ -1,6 +1,17 @@
 'use client';
 
+/**
+ * Contratos comerciales.
+ *
+ * Ledger para localizar el contrato, y un diálogo para decidirlo. El rechazo
+ * vive detrás de una segunda pantalla dentro del mismo diálogo: aprobar es un
+ * clic, rechazar exige escribir el motivo y decir si es documental — de eso
+ * depende que el empresario pueda corregirlo por su cuenta.
+ */
+
 import { useCallback, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   AlertTriangle,
   Check,
@@ -9,6 +20,7 @@ import {
   Eye,
   ExternalLink,
   FileText,
+  Inbox,
   Loader2,
   RefreshCw,
   Search,
@@ -36,6 +48,30 @@ import {
   type PendingContractSummary,
 } from '@/services/ComplianceService';
 import { DOCUMENT_TYPE_LABELS } from '@/services/commercial/OnboardingService';
+import {
+  Btn,
+  EmptyState,
+  ErrorState,
+  Ledger,
+  LedgerBody,
+  LedgerHead,
+  LedgerRow,
+  LedgerTable,
+  Modal,
+  PanelHeader,
+  Ref,
+  RefreshButton,
+  SkeletonRows,
+  StatusTag,
+  Tabs,
+  Td,
+  TextField,
+  Th,
+  ThSpine,
+  type Tone,
+} from '@/components/compliance/ui/primitives';
+
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 import NegotiationsPanel from './NegotiationsPanel';
 
 function formatBytes(bytes: number): string {
@@ -49,17 +85,17 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-const STATUS_BADGE: Record<ContractReviewListStatus, { label: string; className: string }> = {
-  PENDING_VERYGANA_REVIEW: { label: 'Pendiente', className: 'bg-amber-100 text-amber-700' },
-  APPROVED: { label: 'Aprobado', className: 'bg-emerald-100 text-emerald-700' },
-  REJECTED: { label: 'Rechazado', className: 'bg-red-100 text-red-700' },
+const STATUS: Record<ContractReviewListStatus, { label: string; tone: Tone }> = {
+  PENDING_VERYGANA_REVIEW: { label: 'Pendiente', tone: 'hold' },
+  APPROVED: { label: 'Aprobado', tone: 'clear' },
+  REJECTED: { label: 'Rechazado', tone: 'flag' },
 };
 
 // Fallback defensivo — si el backend agrega un status nuevo que este panel
 // todavía no mapea (ej. estados post-aprobación de firma/pago), mostramos el
-// valor crudo en vez de tronar el render con `STATUS_BADGE[...]` undefined.
-function getStatusBadge(status: string): { label: string; className: string } {
-  return STATUS_BADGE[status as ContractReviewListStatus] ?? { label: status, className: 'bg-gray-100 text-gray-700' };
+// valor crudo en vez de tronar el render con `STATUS[...]` undefined.
+function getStatus(status: string): { label: string; tone: Tone } {
+  return STATUS[status as ContractReviewListStatus] ?? { label: status, tone: 'neutral' };
 }
 
 function formatRelative(iso: string): string {
@@ -427,6 +463,7 @@ function BackgroundChecksSection({ contractId }: { contractId: number }) {
     </div>
   );
 }
+/* ── Diálogo de revisión ─────────────────────────────────────────────── */
 
 function ContractDetailModal({
   summary,
@@ -437,6 +474,7 @@ function ContractDetailModal({
   onClose: () => void;
   onDecided: () => void;
 }) {
+  const reduce = useReducedMotion();
   const [detail, setDetail] = useState<ContractReviewDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -472,8 +510,10 @@ function ContractDetailModal({
     setActionLoading(true);
     try {
       await approveContractReview(summary.contractId);
+      toast.success(`Contrato aprobado — ${summary.companyName}`);
       onDecided();
     } catch {
+      toast.error('No se pudo aprobar el contrato. Intenta de nuevo.');
       setActionLoading(false);
     }
   };
@@ -483,223 +523,250 @@ function ContractDetailModal({
     setActionLoading(true);
     try {
       await rejectContractReview(summary.contractId, reason.trim(), documentsIssue);
+      toast.success(`Contrato rechazado — ${summary.companyName}`);
       onDecided();
     } catch {
+      toast.error('No se pudo rechazar el contrato. Intenta de nuevo.');
       setActionLoading(false);
     }
   };
 
+  const slide = (dir: 1 | -1) =>
+    reduce
+      ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+      : {
+          initial: { opacity: 0, x: 24 * dir },
+          animate: { opacity: 1, x: 0 },
+          exit: { opacity: 0, x: -24 * dir },
+        };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <h3 className="font-bold text-gray-900">Contrato de {summary.companyName}</h3>
-            {summary.pep && <PepBadge />}
-          </div>
-          <button onClick={onClose} className="cursor-pointer p-1 rounded-lg hover:bg-gray-100">
-            <X className="w-4 h-4 text-gray-500" />
-          </button>
+    <Modal
+      onClose={onClose}
+      size="lg"
+      title={`Contrato · ${summary.companyName}`}
+      subtitle={
+        <span className="inline-flex items-center gap-2">
+          <span className="cmp-mono">
+            v{summary.version} · Ruta {summary.route}
+          </span>
+          {summary.pep && <PepBadge />}
+        </span>
+      }
+    >
+      {loading ? (
+        <div className="space-y-3">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="cmp-skeleton h-14 rounded-xl"
+              style={{ animationDelay: `${i * 80}ms` }}
+            />
+          ))}
         </div>
-
-        {loading ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+      ) : error || !detail ? (
+        <ErrorState message="No se pudo cargar el contrato." onRetry={load} />
+      ) : (
+        <div className="space-y-5">
+          <div className="flex items-start gap-2.5 rounded-lg border border-cmp-hold/25 bg-cmp-hold-bg px-3 py-2.5">
+            <AlertTriangle className="mt-px h-4 w-4 shrink-0 text-cmp-hold" />
+            <p className="text-xs leading-relaxed text-cmp-hold">
+              Plantilla base pendiente de validación jurídica final por el equipo legal.
+            </p>
           </div>
-        ) : error || !detail ? (
-          <div className="flex flex-col items-center gap-3 py-10 text-red-500">
-            <AlertTriangle className="w-6 h-6" />
-            <p className="text-sm font-medium">Error al cargar el contrato.</p>
-            <button onClick={load} className="cursor-pointer text-xs text-indigo-600 hover:underline">Reintentar</button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-800">
-                Plantilla base pendiente de validación jurídica final por el equipo legal.
-              </p>
-            </div>
 
-            <div className="text-sm text-gray-600 space-y-1">
-              <p><span className="font-semibold text-gray-800">Correo:</span> {summary.email}</p>
-              <p><span className="font-semibold text-gray-800">Ruta:</span> {summary.route}</p>
-              <p><span className="font-semibold text-gray-800">Versión:</span> {detail.version}</p>
-              <p>
-                <span className="font-semibold text-gray-800">Aprobado por el negocio:</span>{' '}
-                {formatDate(detail.businessApprovedAt)}
-              </p>
-            </div>
+          <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+            {[
+              ['Correo', summary.email],
+              ['Ruta', summary.route],
+              ['Versión', `v${detail.version}`],
+              ['Aprobado por el negocio', formatDate(detail.businessApprovedAt)],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="cmp-label text-cmp-mute">{label}</dt>
+                <dd className="mt-1 truncate text-sm text-cmp-ink">{value}</dd>
+              </div>
+            ))}
+          </dl>
 
-            <a
-              href={detail.downloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition"
+          <a
+            href={detail.downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cmp-pressable inline-flex items-center gap-1.5 rounded-lg border border-cmp-azul/25 bg-white px-3 py-2 text-xs font-semibold text-cmp-azul hover:bg-[#E8F1FA]"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            Ver contrato
+            <ExternalLink className="h-3 w-3" />
+          </a>
+
+          <section>
+            <p className="cmp-label mb-2 text-cmp-mute">Documentos ({detail.documents.length})</p>
+            {detail.documents.length === 0 ? (
+              <p className="text-sm text-cmp-slate">No hay documentos cargados.</p>
+            ) : (
+              <ul className="space-y-2">
+                {detail.documents.map((doc, i) => (
+                  <li
+                    key={doc.id}
+                    className="cmp-row-in flex items-center gap-3 rounded-lg border border-cmp-rule bg-white px-3 py-2.5"
+                    style={{ animationDelay: `${Math.min(i, 8) * 30}ms` }}
+                  >
+                    <FileText className="h-4 w-4 shrink-0 text-cmp-mute" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-cmp-ink">
+                        {DOCUMENT_TYPE_LABELS[doc.documentType]}
+                      </p>
+                      <p className="cmp-mono truncate text-[11px] text-cmp-mute">
+                        {doc.originalFileName} · {formatBytes(doc.sizeBytes)}
+                      </p>
+                    </div>
+                    {doc.downloadUrl ? (
+                      <a
+                        href={doc.downloadUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 text-xs font-semibold text-cmp-azul hover:underline"
+                      >
+                        Ver
+                      </a>
+                    ) : (
+                      <span className="inline-flex shrink-0 items-center gap-1 text-xs text-cmp-hold">
+                        <Clock className="h-3 w-3" /> Pendiente
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <BackgroundChecksSection contractId={summary.contractId} />
+
+          {detail.status !== 'PENDING_VERYGANA_REVIEW' ? (
+            <div
+              className={`rounded-lg border px-3 py-3 text-sm ${
+                detail.status === 'APPROVED'
+                  ? 'border-cmp-clear/25 bg-cmp-clear-bg text-cmp-clear'
+                  : 'border-cmp-flag/25 bg-cmp-flag-bg text-cmp-flag'
+              }`}
             >
-              <FileText className="w-3.5 h-3.5" />
-              Ver contrato
-              <ExternalLink className="w-3 h-3" />
-            </a>
-
-            <div className="pt-2 border-t border-gray-100">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
-                Documentos ({detail.documents.length})
+              <p className="font-semibold">
+                {detail.status === 'APPROVED' ? 'Contrato aprobado' : 'Contrato rechazado'}
+                {detail.veryganaReviewedAt && ` · ${formatDate(detail.veryganaReviewedAt)}`}
               </p>
-              {detail.documents.length === 0 ? (
-                <p className="text-sm text-gray-400">No hay documentos cargados.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {detail.documents.map((doc) => (
-                    <li
-                      key={doc.id}
-                      className="flex items-center gap-3 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl"
-                    >
-                      <FileText className="w-4 h-4 text-gray-400 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 truncate">
-                          {DOCUMENT_TYPE_LABELS[doc.documentType]}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {doc.originalFileName} · {formatBytes(doc.sizeBytes)}
-                        </p>
-                      </div>
-                      {doc.downloadUrl ? (
-                        <a
-                          href={doc.downloadUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:underline"
-                        >
-                          Ver <ExternalLink className="w-3 h-3" />
-                        </a>
-                      ) : (
-                        <span className="shrink-0 inline-flex items-center gap-1 text-xs text-amber-600">
-                          <Clock className="w-3 h-3" /> Pendiente
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+              {detail.veryganaDecisionNotes && (
+                <p className="mt-1 text-xs opacity-90">{detail.veryganaDecisionNotes}</p>
               )}
             </div>
+          ) : (
+            <div className="border-t border-cmp-rule pt-4">
+              {/* Decidir y motivar el rechazo son dos pantallas; se deslizan
+                  una sobre otra para que se entienda que es un paso más. */}
+              <AnimatePresence mode="wait" initial={false}>
+                {showRejectForm ? (
+                  <motion.div
+                    key="reject"
+                    {...slide(1)}
+                    transition={{ duration: 0.22, ease: EASE_OUT }}
+                    className="space-y-4"
+                  >
+                    <TextField
+                      label="Motivo del rechazo"
+                      rows={3}
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      placeholder="Qué debe corregir el empresario."
+                    />
 
-            <BackgroundChecksSection contractId={summary.contractId} />
+                    <div>
+                      <p className="cmp-label mb-2 text-cmp-mute">¿El rechazo es por documentos?</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { v: true, label: 'Sí, es documental' },
+                          { v: false, label: 'No, otro motivo' },
+                        ].map(({ v, label }) => (
+                          <button
+                            key={String(v)}
+                            type="button"
+                            onClick={() => setDocumentsIssue(v)}
+                            className={`cursor-pointer rounded-lg border px-3 py-2.5 text-sm font-medium ${
+                              documentsIssue === v
+                                ? 'border-cmp-azul bg-[#E8F1FA] text-cmp-azul'
+                                : 'border-cmp-rule bg-white text-cmp-slate hover:border-cmp-mute'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="mt-2 text-xs text-cmp-slate">
+                        {documentsIssue === true
+                          ? 'El empresario podrá corregir los documentos por su cuenta.'
+                          : documentsIssue === false
+                          ? 'Sin autoservicio: el empresario verá que lo vamos a contactar.'
+                          : 'Elige una opción para poder confirmar el rechazo.'}
+                      </p>
+                    </div>
 
-            {detail.status !== 'PENDING_VERYGANA_REVIEW' ? (
-              <div
-                className={`p-3 rounded-xl border text-sm ${
-                  detail.status === 'APPROVED'
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                    : 'bg-red-50 border-red-200 text-red-800'
-                }`}
-              >
-                <p className="font-semibold">
-                  {detail.status === 'APPROVED' ? 'Contrato aprobado' : 'Contrato rechazado'}
-                  {detail.veryganaReviewedAt && ` · ${formatDate(detail.veryganaReviewedAt)}`}
-                </p>
-                {detail.veryganaDecisionNotes && (
-                  <p className="mt-1 text-xs opacity-90">{detail.veryganaDecisionNotes}</p>
+                    <div className="flex gap-3">
+                      <Btn
+                        className="flex-1"
+                        onClick={() => setShowRejectForm(false)}
+                        disabled={actionLoading}
+                      >
+                        Volver
+                      </Btn>
+                      <Btn
+                        className="flex-1"
+                        variant="danger"
+                        icon={XCircle}
+                        loading={actionLoading}
+                        disabled={!reason.trim() || documentsIssue === null}
+                        onClick={handleReject}
+                      >
+                        Confirmar rechazo
+                      </Btn>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="decide"
+                    {...slide(-1)}
+                    transition={{ duration: 0.22, ease: EASE_OUT }}
+                    className="flex gap-3"
+                  >
+                    <Btn
+                      className="flex-1"
+                      variant="reject"
+                      onClick={() => setShowRejectForm(true)}
+                      disabled={actionLoading}
+                    >
+                      Rechazar
+                    </Btn>
+                    <Btn
+                      className="flex-1"
+                      variant="approve"
+                      icon={Check}
+                      loading={actionLoading}
+                      onClick={handleApprove}
+                    >
+                      Aprobar
+                    </Btn>
+                  </motion.div>
                 )}
-              </div>
-            ) : showRejectForm ? (
-              <div className="space-y-3 pt-2 border-t border-gray-100">
-                <textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  rows={3}
-                  placeholder="Motivo del rechazo (obligatorio)..."
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
-                />
-
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                    ¿El rechazo es por documentos?
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setDocumentsIssue(true)}
-                      className={`cursor-pointer py-2 rounded-xl border-2 text-sm font-semibold transition ${
-                        documentsIssue === true
-                          ? 'border-red-500 bg-red-50 text-red-700'
-                          : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'
-                      }`}
-                    >
-                      Sí, es documental
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDocumentsIssue(false)}
-                      className={`cursor-pointer py-2 rounded-xl border-2 text-sm font-semibold transition ${
-                        documentsIssue === false
-                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                          : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'
-                      }`}
-                    >
-                      No, otro motivo
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1.5">
-                    {documentsIssue === true
-                      ? 'El empresario podrá corregir los documentos por su cuenta.'
-                      : documentsIssue === false
-                      ? 'El empresario verá este motivo tal cual, así que especifícalo bien. Comunícate con él directamente si es necesario.'
-                      : 'Elige una opción para poder confirmar el rechazo.'}
-                  </p>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowRejectForm(false)}
-                    disabled={actionLoading}
-                    className="cursor-pointer flex-1 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleReject}
-                    disabled={actionLoading || !reason.trim() || documentsIssue === null}
-                    className="cursor-pointer flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
-                  >
-                    {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                    Confirmar rechazo
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex gap-3 pt-2 border-t border-gray-100">
-                <button
-                  onClick={() => setShowRejectForm(true)}
-                  disabled={actionLoading}
-                  className="cursor-pointer flex-1 py-2 border border-red-200 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-50 transition"
-                >
-                  Rechazar
-                </button>
-                <button
-                  onClick={handleApprove}
-                  disabled={actionLoading}
-                  className="cursor-pointer flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
-                >
-                  {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                  Aprobar
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+      )}
+    </Modal>
   );
 }
 
-type MainTab = 'negotiations' | 'contracts';
+/* ── Panel ───────────────────────────────────────────────────────────── */
 
-const MAIN_TABS: { value: MainTab; label: string }[] = [
-  { value: 'negotiations', label: 'Negociaciones' },
-  { value: 'contracts', label: 'Contratos' },
-];
+type MainTab = 'negotiations' | 'contracts';
 
 export default function ContractsReviewPanel() {
   const [activeTab, setActiveTab] = useState<MainTab>('contracts');
@@ -740,159 +807,132 @@ export default function ContractsReviewPanel() {
     filter === 'ALL'
       ? 'No hay contratos registrados.'
       : filter === 'PENDING_VERYGANA_REVIEW'
-      ? 'No hay contratos pendientes de revisión'
+      ? 'Ningún contrato espera revisión.'
       : filter === 'APPROVED'
-      ? 'No hay contratos aprobados todavía.'
-      : 'No hay contratos rechazados todavía.';
+      ? 'Todavía no hay contratos aprobados.'
+      : 'Todavía no hay contratos rechazados.';
+
+  const mainTabs: { value: MainTab; label: string }[] = [
+    {
+      value: 'negotiations',
+      label: negotiationsCount ? `Negociaciones (${negotiationsCount})` : 'Negociaciones',
+    },
+    { value: 'contracts', label: 'Contratos' },
+  ];
 
   return (
     <>
-      <div className="space-y-5">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Contratos comerciales</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Negociaciones de asesor y contratos generados por comercios.</p>
-        </div>
+      <div className="space-y-6">
+        <PanelHeader
+          eyebrow="Onboarding comercial"
+          title="Contratos comerciales"
+          description="Negociaciones de asesor y contratos generados por comercios."
+          count={activeTab === 'contracts' ? (loading ? 0 : contracts.length) : undefined}
+          countLabel={filter === 'PENDING_VERYGANA_REVIEW' ? 'Pendientes' : 'Contratos'}
+          actions={
+            activeTab === 'contracts' ? (
+              <RefreshButton onClick={load} loading={loading} />
+            ) : undefined
+          }
+        />
 
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-          {MAIN_TABS.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setActiveTab(tab.value)}
-              className={`cursor-pointer px-4 py-1.5 rounded-lg text-sm font-semibold transition ${
-                activeTab === tab.value ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {tab.label}
-              {tab.value === 'negotiations' && !!negotiationsCount && (
-                <span className="ml-1.5 inline-flex items-center justify-center min-w-[1.1rem] h-[1.1rem] px-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">
-                  {negotiationsCount}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          layoutId="cmp-contracts-main-tab"
+          options={mainTabs}
+          value={activeTab}
+          onChange={setActiveTab}
+        />
 
-        {activeTab === 'negotiations' && <NegotiationsPanel onCountChange={setNegotiationsCount} />}
+        {activeTab === 'negotiations' && (
+          <NegotiationsPanel onCountChange={setNegotiationsCount} />
+        )}
 
         {activeTab === 'contracts' && (
           <>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                {contracts.length} contrato{contracts.length !== 1 ? 's' : ''}
-              </p>
-              <button
-                onClick={load}
-                className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Actualizar
-              </button>
-            </div>
+        <Tabs
+          layoutId="cmp-contracts-tab"
+          options={FILTER_TABS}
+          value={filter}
+          onChange={setFilter}
+        />
 
-            <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-              {FILTER_TABS.map((tab) => (
-                <button
-                  key={tab.value}
-                  onClick={() => setFilter(tab.value)}
-                  className={`cursor-pointer px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    filter === tab.value ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {loading ? (
-              <div className="flex justify-center items-center h-60">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-              </div>
-            ) : error ? (
-              <div className="flex flex-col items-center gap-3 py-16 text-red-500">
-                <AlertTriangle className="w-8 h-8" />
-                <p className="text-sm font-medium">Error al cargar contratos.</p>
-                <button onClick={load} className="cursor-pointer text-xs text-indigo-600 hover:underline">Reintentar</button>
-              </div>
-            ) : contracts.length === 0 ? (
-              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-                <ClipboardCheck className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
-                <p className="text-sm font-medium text-gray-600">{emptyLabel}</p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-200 bg-gray-50">
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Empresa</th>
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Correo</th>
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Ruta</th>
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Versión</th>
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Generado</th>
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Decidido</th>
-                        <th className="text-right px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {contracts.map((c) => (
-                        <tr key={c.contractId} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="px-4 py-3 font-medium text-gray-900">
-                            <div className="flex items-center gap-1.5">
-                              {c.companyName}
-                              {c.pep && <PepBadge />}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">{c.email}</td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
-                              Ruta {c.route}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-gray-700">v{c.version}</td>
-                          <td className="px-4 py-3">
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusBadge(c.status).className}`}>
-                              {getStatusBadge(c.status).label}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-gray-500 text-xs">{formatDate(c.generatedAt)}</td>
-                          <td className="px-4 py-3 text-gray-500 text-xs">{formatDate(c.veryganaReviewedAt)}</td>
-                          <td className="px-4 py-3 text-right">
-                            <button
-                              onClick={() => setSelected(c)}
-                              className="cursor-pointer flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition ml-auto"
-                            >
-                              {c.status === 'PENDING_VERYGANA_REVIEW' ? (
-                                <>
-                                  <ClipboardCheck className="w-3 h-3" />
-                                  Revisar
-                                </>
-                              ) : (
-                                <>
-                                  <Eye className="w-3 h-3" />
-                                  Ver detalle
-                                </>
-                              )}
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+        {loading ? (
+          <SkeletonRows rows={5} cols={6} />
+        ) : error ? (
+          <ErrorState message="No se pudieron cargar los contratos." onRetry={load} />
+        ) : contracts.length === 0 ? (
+          <EmptyState icon={Inbox} title="Nada por aquí" hint={emptyLabel} />
+        ) : (
+          <Ledger>
+            <LedgerTable>
+              <LedgerHead>
+                <ThSpine />
+                <Th>Empresa</Th>
+                <Th>Correo</Th>
+                <Th>Ruta</Th>
+                <Th>Versión</Th>
+                <Th>Estado</Th>
+                <Th>Generado</Th>
+                <Th>Decidido</Th>
+                <Th align="right">Acción</Th>
+              </LedgerHead>
+              <LedgerBody>
+                {contracts.map((c, i) => {
+                  const status = getStatus(c.status);
+                  const pending = c.status === 'PENDING_VERYGANA_REVIEW';
+                  return (
+                    <LedgerRow key={c.contractId} index={i} tone={status.tone}>
+                      <Td className="font-medium text-cmp-ink">
+                        <span className="inline-flex items-center gap-1.5">
+                          {c.companyName}
+                          {c.pep && <PepBadge />}
+                        </span>
+                      </Td>
+                      <Td className="text-cmp-slate">{c.email}</Td>
+                      <Td>
+                        <Ref muted>Ruta {c.route}</Ref>
+                      </Td>
+                      <Td className="cmp-mono text-[12px] text-cmp-slate">v{c.version}</Td>
+                      <Td>
+                        <StatusTag tone={status.tone}>{status.label}</StatusTag>
+                      </Td>
+                      <Td className="cmp-mono text-[11px] text-cmp-mute">
+                        {formatDate(c.generatedAt)}
+                      </Td>
+                      <Td className="cmp-mono text-[11px] text-cmp-mute">
+                        {formatDate(c.veryganaReviewedAt)}
+                      </Td>
+                      <Td align="right">
+                        <Btn
+                          size="sm"
+                          variant={pending ? 'primary' : 'quiet'}
+                          icon={pending ? ClipboardCheck : Eye}
+                          onClick={() => setSelected(c)}
+                        >
+                          {pending ? 'Revisar' : 'Ver detalle'}
+                        </Btn>
+                      </Td>
+                    </LedgerRow>
+                  );
+                })}
+              </LedgerBody>
+            </LedgerTable>
+          </Ledger>
+        )}
           </>
         )}
       </div>
 
-      {selected && (
-        <ContractDetailModal
-          summary={selected}
-          onClose={() => setSelected(null)}
-          onDecided={handleDecided}
-        />
-      )}
+      <AnimatePresence>
+        {selected && (
+          <ContractDetailModal
+            key="contract-detail"
+            summary={selected}
+            onClose={() => setSelected(null)}
+            onDecided={handleDecided}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
