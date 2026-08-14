@@ -7,11 +7,13 @@ import toast from "react-hot-toast";
 import RaffleDetailCard from "@/components/admin/raffles/RaffleDetailAdmin";
 import { RaffleResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
 import {
-    getRaffleById,
     conductDraw,
     cancelRaffle,
     updateRaffle,
+    activateRaffle,
+    deleteRaffle,
 } from "@/services/admin/AdminRaffleService";
+import { getRaffleById } from "@/services/raffleService";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 export default function RaffleDetailPage() {
@@ -67,6 +69,32 @@ export default function RaffleDetailPage() {
         await fetchRaffle();
     };
 
+    const handleActivate = async (id: number) => {
+        try {
+            await activateRaffle(id);
+            toast.success("Rifa reactivada correctamente");
+            await fetchRaffle();
+        } catch (err: any) {
+            toast.error(
+                err?.response?.data?.message ||
+                "Error al reactivar la rifa"
+            );
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        try {
+            await deleteRaffle(id);
+            toast.success("Rifa eliminada correctamente");
+            router.push("/admin/raffles");
+        } catch (err: any) {
+            toast.error(
+                err?.response?.data?.message ||
+                "Error al eliminar la rifa"
+            );
+        }
+    };
+
     const handleUpdate = async (id: number, data: UpdateRaffleRequestDTO) => {
         try {
             await updateRaffle(id, data);
@@ -114,6 +142,8 @@ export default function RaffleDetailPage() {
                     onDraw={handleDraw}
                     onCancel={handleCancel}
                     onUpdate={handleUpdate}
+                    onActivate={handleActivate}
+                    onDelete={handleDelete}
                 />
             </div>
         </div>

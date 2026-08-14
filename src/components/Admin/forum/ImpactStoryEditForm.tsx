@@ -27,7 +27,7 @@ const inputCls = (err?: string) =>
     'disabled:opacity-50 disabled:cursor-not-allowed',
     err
       ? 'border-red-400 focus:ring-2 focus:ring-red-100'
-      : 'border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100',
+      : 'border-gray-200 focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/20',
   ].join(' ');
 
 const labelCls = 'block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide';
@@ -122,11 +122,11 @@ export default function ImpactStoryEditForm({
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-admin-blue/5 to-slate-100 py-8 px-4">
       <div className="max-w-2xl mx-auto">
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-800 to-emerald-600 rounded-2xl p-6 mb-2 shadow-lg shadow-emerald-900/20">
+        <div className="bg-admin-navy-gradient rounded-2xl p-6 mb-2 shadow-lg shadow-admin-navy/20">
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -140,7 +140,7 @@ export default function ImpactStoryEditForm({
             </button>
             <div>
               <h1 className="text-xl font-bold text-white tracking-tight">Editar Historia</h1>
-              <p className="text-emerald-200 text-sm mt-0.5 truncate max-w-md">{story.title}</p>
+              <p className="text-white/70 text-sm mt-0.5 truncate max-w-md">{story.title}</p>
             </div>
           </div>
         </div>
@@ -235,10 +235,10 @@ export default function ImpactStoryEditForm({
           <Section num="02" title="Métricas de Impacto">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-              <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-4">
+              <div className="bg-admin-blue/5 border border-admin-blue/20 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <div className="w-8 h-8 rounded-lg bg-admin-blue/10 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-admin-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                       <circle cx="9" cy="7" r="4"/>
                       <path strokeLinecap="round" d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -259,10 +259,10 @@ export default function ImpactStoryEditForm({
                 {errors.beneficiariesCount && <Err msg={errors.beneficiariesCount} />}
               </div>
 
-              <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-4">
+              <div className="bg-admin-gold/10 border border-admin-gold/20 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <div className="w-8 h-8 rounded-lg bg-admin-gold/20 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-admin-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <line x1="12" y1="1" x2="12" y2="23" strokeLinecap="round"/>
                       <path strokeLinecap="round" d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                     </svg>
@@ -271,9 +271,9 @@ export default function ImpactStoryEditForm({
                 </div>
                 <div className="flex gap-2">
                   <select
-                    className={`w-24 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 
-                                shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 
-                                focus:border-blue-400 transition-colors disabled:opacity-50 cursor-pointer`}
+                    className={`w-24 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700
+                                shadow-sm focus:outline-none focus:ring-2 focus:ring-admin-blue
+                                focus:border-admin-blue transition-colors disabled:opacity-50 cursor-pointer`}
                     value={values.investedCurrency}
                     onChange={(e) => set('investedCurrency', e.target.value)}
                     disabled={isBusy}
@@ -366,7 +366,7 @@ export default function ImpactStoryEditForm({
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors disabled:opacity-40 flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark transition-colors disabled:opacity-40 flex items-center gap-2 cursor-pointer"
               disabled={isBusy}
               onClick={handleSubmit}
             >
@@ -391,7 +391,7 @@ function Section({ num, title, children }: { num: string; title: string; childre
   return (
     <div className="px-6 py-5 border-b border-gray-100 last:border-b-0">
       <h2 className="flex items-center gap-2.5 text-sm font-bold text-gray-800 mb-4">
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold">
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-admin-blue/10 text-admin-blue text-xs font-bold">
           {num}
         </span>
         {title}

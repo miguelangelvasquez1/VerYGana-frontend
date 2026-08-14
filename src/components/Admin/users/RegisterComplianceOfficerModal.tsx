@@ -86,7 +86,7 @@ const RegisterComplianceOfficerModal: React.FC<Props> = ({ isOpen, onClose }) =>
   };
 
   const inputCls = (hasError?: boolean) =>
-    `w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+    `w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-midnight ${
       hasError ? 'border-red-400' : 'border-gray-300'
     }`;
 
@@ -95,7 +95,7 @@ const RegisterComplianceOfficerModal: React.FC<Props> = ({ isOpen, onClose }) =>
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="text-blue-600" size={22} />
+            <ShieldCheck className="text-admin-midnight" size={22} />
             <h2 className="text-lg font-semibold text-gray-900">Registrar Oficial de Cumplimiento</h2>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
@@ -187,7 +187,7 @@ const RegisterComplianceOfficerModal: React.FC<Props> = ({ isOpen, onClose }) =>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-admin-midnight rounded-lg hover:bg-admin-midnight/90 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? 'Registrando...' : 'Registrar Oficial'}
             </button>

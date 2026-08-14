@@ -112,9 +112,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between px-6 py-2">
           {/* LOGO */}
           <div className="flex items-center gap-3">
-            <Image src="/logos/logoDorado.png" alt="VerYGana" width={52} height={52} className="object-contain shrink-0" />
+            <Image src="/logos/logoDorado.png" alt="VERyGANA" width={52} height={52} className="object-contain shrink-0" />
             <div className="leading-tight">
-              <p className="text-base font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-base font-extrabold text-white tracking-tight">VERyGANA</p>
               <p className="text-[10px] text-white/50 font-medium tracking-wide">La alegria de ganar</p>
             </div>
           </div>
@@ -428,9 +428,9 @@ export default function Navbar() {
       <div className="lg:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
-            <Image src="/logos/logoDorado.png" alt="VerYGana" width={42} height={42} className="object-contain shrink-0" />
+            <Image src="/logos/logoDorado.png" alt="VERyGANA" width={42} height={42} className="object-contain shrink-0" />
             <div className="leading-tight">
-              <p className="text-sm font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-sm font-extrabold text-white tracking-tight">VERyGANA</p>
               <p className="text-[9px] text-white/50 font-medium tracking-wide">La alegria de ganar</p>
             </div>
           </div>

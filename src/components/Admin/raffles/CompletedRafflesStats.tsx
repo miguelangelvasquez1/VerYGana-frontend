@@ -118,7 +118,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
       {/* ===== Lista de rifas completadas ===== */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden h-fit">
         <div className="px-5 py-4 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-sm font-bold text-[#0b1440]">Rifas completadas</h3>
+          <h3 className="text-sm font-bold text-admin-navy">Rifas completadas</h3>
           <p className="text-xs text-gray-500 mt-0.5">Selecciona una para ver sus estadísticas</p>
         </div>
 
@@ -136,12 +136,12 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
                 type="button"
                 onClick={() => handleSelectRaffle(raffle)}
                 className={`w-full text-left px-5 py-3 transition cursor-pointer ${
-                  selectedRaffle?.id === raffle.id ? "bg-[#03548C]/10" : "hover:bg-gray-50"
+                  selectedRaffle?.id === raffle.id ? "bg-admin-midnight/10" : "hover:bg-gray-50"
                 }`}
               >
                 <p
                   className={`text-sm font-semibold truncate ${
-                    selectedRaffle?.id === raffle.id ? "text-[#03548C]" : "text-gray-800"
+                    selectedRaffle?.id === raffle.id ? "text-admin-midnight" : "text-gray-800"
                   }`}
                 >
                   {raffle.title}
@@ -188,7 +188,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
           </div>
         ) : isLoadingStats ? (
           <div className="h-full min-h-[320px] flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-200">
-            <div className="w-10 h-10 border-4 border-[#03548C] border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-admin-midnight border-t-transparent rounded-full animate-spin" />
           </div>
         ) : !stats ? (
           <div className="h-full min-h-[320px] flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-200 p-10 text-center">
@@ -197,7 +197,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
         ) : (
           <div className="space-y-6">
             {/* Header */}
-            <div className="bg-linear-to-r from-[#0b1440] to-[#03548C] rounded-2xl p-6 text-white">
+            <div className="bg-admin-navy-gradient rounded-2xl p-6 text-white">
               <p className="text-xs uppercase tracking-wide text-white/60 font-semibold">Rifa completada</p>
               <h2 className="text-xl font-bold mt-1">{selectedRaffle.title}</h2>
               <p className="text-sm text-white/70 mt-1">
@@ -212,12 +212,12 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
 
             {/* Stat cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-linear-to-br from-[#FFD700] to-[#c9a227] rounded-2xl p-5 shadow-sm">
-                <div className="flex items-center gap-2 text-[#0b1440]/70">
+              <div className="bg-linear-to-br from-admin-yellow to-admin-gold rounded-2xl p-5 shadow-sm">
+                <div className="flex items-center gap-2 text-admin-navy/70">
                   <Trophy className="w-4 h-4" />
                   <p className="text-xs font-bold uppercase tracking-wide">Valor total en premios</p>
                 </div>
-                <p className="text-3xl font-extrabold text-[#0b1440] mt-2">
+                <p className="text-3xl font-extrabold text-admin-navy mt-2">
                   {new Intl.NumberFormat("es-CO", {
                     style: "currency",
                     currency: "COP",
@@ -231,13 +231,13 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
                   <Ticket className="w-4 h-4" />
                   <p className="text-xs font-bold uppercase tracking-wide">Tickets emitidos (todas las fuentes)</p>
                 </div>
-                <p className="text-3xl font-extrabold text-[#03548C] mt-2">{totalTicketsIssued}</p>
+                <p className="text-3xl font-extrabold text-admin-midnight mt-2">{totalTicketsIssued}</p>
               </div>
             </div>
 
             {/* Sources breakdown */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">
-              <h3 className="text-sm font-bold text-[#0b1440]">
+              <h3 className="text-sm font-bold text-admin-navy">
                 Tickets emitidos vs. límite configurado por fuente
               </h3>
 
@@ -248,7 +248,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
                   <div key={key}>
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4 text-[#03548C]" />
+                        <Icon className="w-4 h-4 text-admin-midnight" />
                         <span className="text-sm font-medium text-gray-700">{label}</span>
                       </div>
                       <span className="text-xs text-gray-500">
@@ -257,7 +257,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2">
                       <div
-                        className="h-2 rounded-full bg-linear-to-r from-[#00a4ff] to-[#0089d6] transition-all"
+                        className="h-2 rounded-full bg-admin-gradient transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>

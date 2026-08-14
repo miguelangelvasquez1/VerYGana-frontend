@@ -16,7 +16,8 @@ export enum RaffleStatus {
     DRAWING = 'DRAWING',
     LIVE = 'LIVE',
     COMPLETED = 'COMPLETED',
-    CANCELLED = 'CANCELLED'
+    CANCELLED = 'CANCELLED',
+    MISSED_DRAW = 'MISSED_DRAW'
 }
 
 export enum DrawMethod {

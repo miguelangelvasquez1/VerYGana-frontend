@@ -134,7 +134,7 @@ export default function TicketRulesManagement() {
   if (loading && rules.length === 0) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-14 h-14 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-14 h-14 border-4 border-admin-blue border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -148,7 +148,7 @@ export default function TicketRulesManagement() {
       <div className="flex justify-between items-center">
         <button
           onClick={() => setShowCreate(true)}
-          className="cursor-pointer bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700"
+          className="cursor-pointer bg-admin-blue text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-admin-blue-dark"
         >
           <Plus size={18} />
           Crear Regla

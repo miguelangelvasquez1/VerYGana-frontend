@@ -229,7 +229,7 @@ function ActionBtn({
   children: React.ReactNode;
 }) {
   const cls = color === 'blue'
-    ? 'hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-gray-400'
+    ? 'hover:bg-admin-blue/10 hover:text-admin-blue hover:border-admin-blue/30 text-gray-400'
     : 'hover:bg-red-50 hover:text-red-500 hover:border-red-200 text-gray-400';
   return (
     <button

@@ -1,10 +1,28 @@
 @import "tailwindcss";
+@config "../../tailwind.config.js";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --gradient-bg: linear-gradient(to bottom, #014C92, #1EA5BD, #014C92);
   --primary-bg: linear-gradient(to bottom, #E6F2FF, #F4F8FB);
+
+  /* Admin brand palette */
+  --admin-navy: #0b1440;
+  --admin-midnight: #03548C;
+  --admin-blue: #00a4ff;
+  --admin-blue-dark: #0089d6;
+  --admin-yellow: #FFD700;
+  --admin-gold: #c9a227;
+}
+
+@theme {
+  --color-admin-navy: #0b1440;
+  --color-admin-midnight: #03548C;
+  --color-admin-blue: #00a4ff;
+  --color-admin-blue-dark: #0089d6;
+  --color-admin-yellow: #FFD700;
+  --color-admin-gold: #c9a227;
 }
 
 @theme inline {
@@ -40,6 +58,14 @@ body {
 
 .primary-bg {
   background: var(--primary-bg);
+}
+
+.bg-admin-gradient {
+  background: linear-gradient(135deg, var(--admin-blue) 0%, var(--admin-blue-dark) 100%);
+}
+
+.bg-admin-navy-gradient {
+  background: linear-gradient(135deg, var(--admin-navy) 0%, var(--admin-midnight) 100%);
 }
 
 /* react-datepicker: ensure calendar popup renders above page icons */

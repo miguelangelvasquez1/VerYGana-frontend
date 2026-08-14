@@ -232,7 +232,7 @@ function SurveyRow({
           onClick={onViewDetail}
           className="text-left cursor-pointer"
         >
-          <p className="truncate text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+          <p className="truncate text-sm font-semibold text-gray-900 group-hover:text-admin-blue transition-colors">
             {survey.title}
           </p>
         </button>
@@ -258,7 +258,7 @@ function SurveyRow({
         {survey.maxResponses && (
           <div className="mt-1 h-1.5 w-24 overflow-hidden rounded-full bg-gray-100">
             <div
-              className="h-full rounded-full bg-indigo-400"
+              className="h-full rounded-full bg-admin-gradient"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -267,7 +267,7 @@ function SurveyRow({
 
       {/* Pagado (recompensa total = por pregunta × máximo de respuestas) */}
       <td className="px-5 py-4">
-        <p className="text-sm font-semibold text-indigo-600">
+        <p className="text-sm font-semibold text-admin-midnight">
           {survey.maxResponses != null
             ? formatReward((survey.rewardAmountPerQuestionCents * survey.maxResponses * survey.totalQuestions) / 100)
             : '—'}
@@ -324,7 +324,7 @@ function FilterPill({
       onClick={onClick}
       className={`cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
         active
-          ? 'bg-indigo-600 text-white shadow-sm'
+          ? 'bg-admin-blue text-white shadow-sm'
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
       }`}
     >

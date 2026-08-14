@@ -13,22 +13,40 @@ interface Props {
   onDraw?: (raffleId: number) => Promise<void>;
   onCancel?: (raffleId: number) => Promise<void>;
   onUpdate?: (raffleId: number, data: UpdateRaffleRequestDTO) => Promise<void>;
+  onActivate?: (raffleId: number) => Promise<void>;
+  onDelete?: (raffleId: number) => Promise<void>;
 }
+
+const STATUS_STYLES: Record<string, string> = {
+  DRAFT: "bg-gray-200 text-gray-800",
+  ACTIVE: "bg-green-100 text-green-700",
+  CLOSED: "bg-red-100 text-red-700",
+  DRAWING: "bg-yellow-100 text-yellow-700",
+  LIVE: "bg-yellow-100 text-yellow-700",
+  COMPLETED: "bg-blue-100 text-blue-700",
+  CANCELLED: "bg-gray-300 text-gray-900",
+  MISSED_DRAW: "bg-orange-100 text-orange-700",
+};
 
 export default function RaffleDetailCard({
   raffle,
   onDraw,
   onCancel,
   onUpdate,
+  onActivate,
+  onDelete,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<"draw" | "cancel" | null>(
-    null
-  );
+  const [confirmAction, setConfirmAction] = useState<
+    "draw" | "cancel" | "activate" | "delete" | null
+  >(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const openConfirm = (action: "draw" | "cancel") => {
+  const isMissedDraw = raffle.raffleStatus === "MISSED_DRAW";
+  const datesNeedUpdate = isMissedDraw && new Date(raffle.drawDate) <= new Date();
+
+  const openConfirm = (action: "draw" | "cancel" | "activate" | "delete") => {
     setConfirmAction(action);
     setIsConfirmOpen(true);
   };
@@ -42,6 +60,14 @@ export default function RaffleDetailCard({
 
     if (confirmAction === "cancel" && onCancel) {
       await onCancel(raffle.id);
+    }
+
+    if (confirmAction === "activate" && onActivate) {
+      await onActivate(raffle.id);
+    }
+
+    if (confirmAction === "delete" && onDelete) {
+      await onDelete(raffle.id);
     }
 
     setIsConfirmOpen(false);
@@ -71,7 +97,10 @@ export default function RaffleDetailCard({
             <h5 className="text-sm text-gray-950">
               Estado :
             </h5>
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[raffle.raffleStatus] || "bg-admin-blue/10 text-admin-blue"
+                }`}
+            >
               {raffle.raffleStatus}
             </span>
           </div>
@@ -98,9 +127,24 @@ export default function RaffleDetailCard({
           {raffle.raffleStatus === "ACTIVE" && (
             <button
               onClick={() => openConfirm("draw")}
-              className="cursor-pointer px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition"
+              className="cursor-pointer px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark transition"
             >
               Realizar Sorteo
+            </button>
+          )}
+
+          {isMissedDraw && onActivate && (
+            <button
+              onClick={() => openConfirm("activate")}
+              disabled={datesNeedUpdate}
+              title={
+                datesNeedUpdate
+                  ? "Actualiza las fechas de la rifa (botón Editar) antes de reactivarla"
+                  : undefined
+              }
+              className="cursor-pointer px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-green-600"
+            >
+              Reactivar
             </button>
           )}
 
@@ -113,8 +157,25 @@ export default function RaffleDetailCard({
                 Cancelar Rifa
               </button>
             )}
+
+          {isMissedDraw && onDelete && (
+            <button
+              onClick={() => openConfirm("delete")}
+              className="cursor-pointer px-4 py-2 bg-gray-800 text-white rounded-lg text-sm hover:bg-black transition"
+            >
+              Eliminar
+            </button>
+          )}
         </div>
       </div>
+
+      {isMissedDraw && (
+        <div className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800">
+          Esta rifa superó la fecha de sorteo sin ejecutarse. Actualiza las
+          fechas (Inicio, Fin y Sorteo) con el botón <strong>Editar</strong>{" "}
+          antes de reactivarla, o bien cancélala o elimínala.
+        </div>
+      )}
 
       {/* TABS */}
       <div className="flex gap-2 border-b pb-2">
@@ -138,11 +199,19 @@ export default function RaffleDetailCard({
         title={
           confirmAction === "draw"
             ? "Confirmar Sorteo"
+            : confirmAction === "activate"
+            ? "Confirmar Reactivación"
+            : confirmAction === "delete"
+            ? "Confirmar Eliminación"
             : "Confirmar Cancelación"
         }
         description={
           confirmAction === "draw"
             ? "Esta acción ejecutará el sorteo y no podrá revertirse."
+            : confirmAction === "activate"
+            ? "La rifa pasará a estado ACTIVE. Asegúrate de haber actualizado sus fechas."
+            : confirmAction === "delete"
+            ? "Esta acción eliminará la rifa permanentemente."
             : "Esta acción cancelará la rifa permanentemente."
         }
         variant="danger"
@@ -191,7 +260,7 @@ export default function RaffleDetailCard({
       <button
         onClick={() => setActiveTab(value)}
         className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition ${isActive
-          ? "bg-purple-600 text-white"
+          ? "bg-admin-blue text-white"
           : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
       >
@@ -242,7 +311,7 @@ function GeneralTab({ raffle }: { raffle: RaffleResponseDTO }) {
 
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
-            className="bg-purple-600 h-2 rounded-full transition-all"
+            className="bg-admin-gradient h-2 rounded-full transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -322,11 +391,11 @@ function RulesTab({ rules }: { rules: RaffleRuleResponseDTO[] }) {
   const getRuleTypeColor = (type: string) => {
     switch (type) {
       case "PURCHASE":
-        return "bg-blue-100 text-blue-700";
+        return "bg-admin-blue/10 text-admin-blue";
       case "DAILY_LOGIN":
-        return "bg-yellow-100 text-yellow-700";
+        return "bg-admin-gold/10 text-admin-gold";
       case "REFERRAL":
-        return "bg-green-100 text-green-700";
+        return "bg-admin-midnight/10 text-admin-midnight";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -449,7 +518,7 @@ function RulesTab({ rules }: { rules: RaffleRuleResponseDTO[] }) {
 
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
-                  className="bg-purple-600 h-2 rounded-full transition-all"
+                  className="bg-admin-gradient h-2 rounded-full transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>

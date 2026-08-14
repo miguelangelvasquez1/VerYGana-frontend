@@ -195,7 +195,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
   if (isLoading && raffles.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-16 h-16 border-4 border-admin-blue border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -219,7 +219,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
       <div className="flex justify-between items-center">
         <button
           onClick={() => setShowCreateRaffle(true)}
-          className="cursor-pointer bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2"
+          className="cursor-pointer bg-admin-blue text-white px-4 py-2 rounded-lg hover:bg-admin-blue-dark flex items-center gap-2"
         >
           <Plus size={18} />
           Crear Rifa
@@ -273,6 +273,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
             <option value="LIVE">En vivo</option>
             <option value="COMPLETED">Completadas</option>
             <option value="CANCELLED">Canceladas</option>
+            <option value="MISSED_DRAW">Sorteo no realizado</option>
           </select>
         </div>
 

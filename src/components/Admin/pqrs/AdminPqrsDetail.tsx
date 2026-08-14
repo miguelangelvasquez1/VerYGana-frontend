@@ -80,7 +80,7 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin text-blue-600" size={32} />
+        <Loader2 className="animate-spin text-admin-blue" size={32} />
       </div>
     );
   }
@@ -187,13 +187,13 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
                 rows={4}
                 maxLength={2000}
                 placeholder="Escribe la respuesta para el solicitante..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue resize-none"
               />
               <div className="flex justify-end">
                 <button
                   onClick={handleRespond}
                   disabled={responding || !responseText.trim()}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 cursor-pointer"
+                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors disabled:opacity-60 cursor-pointer"
                 >
                   {responding && <Loader2 size={14} className="animate-spin" />}
                   Enviar respuesta
@@ -201,7 +201,7 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
               </div>
             </div>
           ) : detail.response ? (
-            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed p-3.5 bg-blue-50 border-l-4 border-blue-600 rounded-r-lg">
+            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed p-3.5 bg-admin-blue/10 border-l-4 border-admin-blue rounded-r-lg">
               {detail.response}
             </p>
           ) : (

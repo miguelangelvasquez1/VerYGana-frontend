@@ -117,7 +117,7 @@ const AdminBrandingPanel: React.FC = () => {
               value: requests.filter(r =>
                 ['APPROVED', 'DESIGN_IN_PROGRESS', 'PENDING_ADVERTISER_APPROVAL', 'CHANGES_REQUESTED'].includes(r.status)
               ).length,
-              cls: 'text-blue-700',
+              cls: 'text-admin-blue',
             },
             {
               label: 'Campaña creada',
@@ -141,7 +141,7 @@ const AdminBrandingPanel: React.FC = () => {
             onClick={() => setFilter(f.value)}
             className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
               filter === f.value
-                ? 'bg-blue-600 text-white'
+                ? 'bg-admin-blue text-white'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
           >
@@ -158,7 +158,7 @@ const AdminBrandingPanel: React.FC = () => {
       {/* Content */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-admin-blue border-t-transparent rounded-full animate-spin" />
         </div>
       ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">

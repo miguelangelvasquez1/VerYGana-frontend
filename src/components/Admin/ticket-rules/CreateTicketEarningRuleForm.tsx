@@ -40,7 +40,7 @@ const RULE_TYPE_META = {
 };
 
 const base =
-  "w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition";
+  "w-full border rounded-lg px-3 py-2 mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue transition";
 
 export default function CreateTicketEarningRuleForm({ onSubmit }: Props) {
   const [formData, setFormData] = useState<CreateTicketEarningRuleRequestDTO>({
@@ -234,7 +234,7 @@ export default function CreateTicketEarningRuleForm({ onSubmit }: Props) {
           </option>
           <option value={TicketEarningRuleType.REFERRAL}>Referidos</option>
         </select>
-        <p className="text-xs text-indigo-600 mt-1 flex items-center gap-1">
+        <p className="text-xs text-admin-midnight mt-1 flex items-center gap-1">
           {meta.icon}
           {meta.hint}
         </p>
@@ -270,13 +270,13 @@ export default function CreateTicketEarningRuleForm({ onSubmit }: Props) {
 
       {/* Condicional: DAILY_LOGIN */}
       {formData.ruleType === TicketEarningRuleType.DAILY_LOGIN && (
-        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex items-start gap-3">
-          <Calendar size={20} className="text-indigo-600 shrink-0 mt-0.5" />
+        <div className="bg-admin-blue/10 border border-admin-blue/20 rounded-lg p-4 flex items-start gap-3">
+          <Calendar size={20} className="text-admin-blue shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-indigo-800">
+            <p className="text-sm font-medium text-admin-navy">
               Login Diario Activado
             </p>
-            <p className="text-xs text-indigo-600 mt-0.5">
+            <p className="text-xs text-admin-midnight mt-0.5">
               Se otorgarán {formData.ticketsToAward} ticket(s) por cada día que
               el usuario inicie sesión.
             </p>
@@ -349,7 +349,7 @@ export default function CreateTicketEarningRuleForm({ onSubmit }: Props) {
 
       <button
         type="submit"
-        className="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium text-sm cursor-pointer"
+        className="w-full bg-admin-blue text-white py-2.5 rounded-lg hover:bg-admin-blue-dark transition font-medium text-sm cursor-pointer"
       >
         Crear Regla
       </button>

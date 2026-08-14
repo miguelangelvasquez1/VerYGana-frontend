@@ -10,14 +10,14 @@ export default function Footer() {
         {/* Company Info */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <Image src="/logos/logo.png" alt="VeryGana Logo" width={60} height={60} className="object-contain" />
-            <h3 className="text-xl font-bold">VerYGana</h3>
+            <Image src="/logos/logo.png" alt="VERyGANA Logo" width={60} height={60} className="object-contain" />
+            <h3 className="text-xl font-bold">VERyGANA</h3>
           </div>
           <p className="text-sm text-gray-200">
             Tu plataforma integral donde puedes participar en rifas emocionantes, comprar productos increíbles, 
             recargar tu celular y descubrir historias de impacto social en nuestra comunidad.
           </p>
-          <p className="text-xs text-gray-300">© 2025 VerYGana. Todos los derechos reservados.</p>
+          <p className="text-xs text-gray-300">© 2026 VERyGANA. Todos los derechos reservados.</p>
         </div>
 
         {/* Quick Links */}
@@ -48,7 +48,7 @@ export default function Footer() {
             </a>
           </div>
           <div className="space-y-2">
-            <p className="text-sm text-gray-200">Email: soporte@VerYGana.com</p>
+            <p className="text-sm text-gray-200">Email: soporte@verygana.com</p>
             <p className="text-sm text-gray-200">Tel: +57 (300) 123-4567</p>
             <p className="text-sm text-gray-200">Armenia, Quindío - Colombia</p>
           </div>

@@ -71,9 +71,9 @@ function ComplianceSidebar({ pathname, onClose }: { pathname: string; onClose?: 
       <div className="px-4 py-4 border-b border-white/[0.07]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/logos/logoDorado.png" alt="VerYGana" className="w-9 h-9 object-contain shrink-0" />
+            <img src="/logos/logoDorado.png" alt="VERyGANA" className="w-9 h-9 object-contain shrink-0" />
             <div className="leading-tight">
-              <p className="text-base font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-base font-extrabold text-white tracking-tight">VERyGANA</p>
               <p className="text-[10px] text-white/40 font-medium tracking-wide">Cumplimiento</p>
             </div>
           </div>

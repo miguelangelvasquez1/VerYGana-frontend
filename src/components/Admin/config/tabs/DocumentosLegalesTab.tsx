@@ -83,7 +83,7 @@ function HistoryModal({ type, onClose }: { type: LegalDocumentType; onClose: () 
             <div className="flex flex-col items-center gap-3 py-10 text-red-500">
               <AlertTriangle size={20} />
               <p className="text-sm font-medium">Error al cargar el historial.</p>
-              <button onClick={() => refetch()} className="cursor-pointer text-xs text-blue-600 hover:underline">Reintentar</button>
+              <button onClick={() => refetch()} className="cursor-pointer text-xs text-admin-midnight hover:text-admin-blue hover:underline">Reintentar</button>
             </div>
           ) : history.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-10">
@@ -95,14 +95,14 @@ function HistoryModal({ type, onClose }: { type: LegalDocumentType; onClose: () 
                 <li
                   key={doc.id}
                   className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border ${
-                    doc.active ? 'border-blue-200 bg-blue-50/50' : 'border-gray-100 bg-gray-50/60'
+                    doc.active ? 'border-admin-blue/20 bg-admin-blue/5' : 'border-gray-100 bg-gray-50/60'
                   }`}
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-gray-800">v{doc.version}</span>
                       {doc.active && (
-                        <span className="text-[10px] font-bold uppercase tracking-wide text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-admin-blue bg-admin-blue/10 px-1.5 py-0.5 rounded-full">
                           Vigente
                         </span>
                       )}
@@ -113,7 +113,7 @@ function HistoryModal({ type, onClose }: { type: LegalDocumentType; onClose: () 
                     href={doc.documentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"
+                    className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-admin-midnight hover:text-admin-blue hover:underline"
                   >
                     Ver <ExternalLink size={12} />
                   </a>
@@ -318,7 +318,7 @@ function PublishModal({
                 className={`cursor-pointer w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-dashed text-sm font-semibold transition disabled:opacity-50 ${
                   errors.file
                     ? 'border-red-300 text-red-500 hover:bg-red-50'
-                    : 'border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600'
+                    : 'border-gray-200 text-gray-500 hover:border-admin-blue/40 hover:bg-admin-blue/5 hover:text-admin-blue'
                 }`}
               >
                 <Upload size={15} />
@@ -394,7 +394,7 @@ export default function DocumentosLegalesTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 gap-3 text-gray-400">
-        <Loader2 size={18} className="animate-spin text-blue-500" />
+        <Loader2 size={18} className="animate-spin text-admin-blue" />
         <span className="text-sm">Cargando documentos legales...</span>
       </div>
     );
@@ -412,7 +412,7 @@ export default function DocumentosLegalesTab() {
         </div>
         <button
           onClick={() => refetch()}
-          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-admin-blue hover:bg-admin-blue-dark text-white text-sm font-semibold rounded-xl transition-colors"
         >
           Reintentar
         </button>
@@ -452,7 +452,7 @@ export default function DocumentosLegalesTab() {
                     </td>
                     <td className="px-4 py-3">
                       {active ? (
-                        <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-bold text-admin-blue bg-admin-blue/10 px-2 py-0.5 rounded-full">
                           v{active.version}
                         </span>
                       ) : (
@@ -470,7 +470,7 @@ export default function DocumentosLegalesTab() {
                           href={active.documentUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-blue-600 hover:underline text-xs font-semibold"
+                          className="inline-flex items-center gap-1 text-admin-midnight hover:text-admin-blue hover:underline text-xs font-semibold"
                         >
                           Ver PDF <ExternalLink size={11} />
                         </a>
@@ -482,7 +482,7 @@ export default function DocumentosLegalesTab() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setHistoryType(type)}
-                          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-600 hover:text-blue-700 text-xs font-semibold rounded-lg transition-colors"
+                          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:border-admin-blue/40 hover:bg-admin-blue/5 text-gray-600 hover:text-admin-blue text-xs font-semibold rounded-lg transition-colors"
                         >
                           <History size={13} />
                           Historial

@@ -56,7 +56,7 @@ export interface OnboardingStatus {
   // Ambos null salvo que contractStatus === "REJECTED". Si documentsCompleted
   // es false el rechazo fue documental (currentStep vuelve a DOCUMENTS_PENDING,
   // autoservicio disponible); si es true, no hay autoservicio (currentStep se
-  // queda en VERYGANA_REVIEW_PENDING, lo resuelve VerYGana manualmente).
+  // queda en VERYGANA_REVIEW_PENDING, lo resuelvE VERyGANA manualmente).
   rejectionReason: string | null;
   rejectedAt: string | null;
 }

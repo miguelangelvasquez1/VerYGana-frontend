@@ -186,7 +186,7 @@ function ConfirmModal({ feature, newStatus, isPending, onConfirm, onCancel }: Co
                 className={`w-full px-3 py-2.5 text-sm font-mono border rounded-xl outline-none transition-colors ${
                   confirmText && !canConfirm
                     ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                    : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                    : 'border-gray-200 focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10'
                 }`}
               />
             </div>
@@ -207,7 +207,7 @@ function ConfirmModal({ feature, newStatus, isPending, onConfirm, onCancel }: Co
             className={`cursor-pointer px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 ${
               newStatus === 'DISABLED' ? 'bg-red-600 hover:bg-red-700' :
               newStatus === 'MAINTENANCE' ? 'bg-orange-600 hover:bg-orange-700' :
-              'bg-blue-600 hover:bg-blue-700'
+              'bg-admin-blue hover:bg-admin-blue-dark'
             }`}
           >
             {isPending && <Loader2 size={14} className="animate-spin" />}
@@ -263,12 +263,12 @@ function FeatureCard({ feature, isUpdating, onStatusChange }: FeatureCardProps) 
         </span>
 
         {isUpdating
-          ? <Loader2 size={15} className="animate-spin text-blue-500" />
+          ? <Loader2 size={15} className="animate-spin text-admin-blue" />
           : (
             <select
               value={feature.status}
               onChange={(e) => onStatusChange(feature, e.target.value as FeatureStatus)}
-              className="cursor-pointer text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="cursor-pointer text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10"
             >
               {(Object.keys(STATUS_CONFIG) as FeatureStatus[]).map((s) => (
                 <option key={s} value={s} className={STATUS_CONFIG[s].option}>
@@ -449,7 +449,7 @@ export default function SistemaTab() {
         </div>
         <button
           onClick={() => refetch()}
-          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-admin-blue hover:bg-admin-blue-dark text-white text-sm font-semibold rounded-xl transition-colors"
         >
           <RefreshCw size={15} />
           Reintentar
@@ -481,7 +481,7 @@ export default function SistemaTab() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar módulo..."
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10 bg-white"
           />
         </div>
         <div className="flex gap-2 shrink-0">
@@ -497,7 +497,7 @@ export default function SistemaTab() {
                 statusFilter === key
                   ? key === 'attention'
                     ? 'bg-orange-100 border-orange-300 text-orange-700'
-                    : 'bg-blue-100 border-blue-300 text-blue-700'
+                    : 'bg-admin-blue/10 border-admin-blue text-admin-blue'
                   : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -519,7 +519,7 @@ export default function SistemaTab() {
           <p className="text-sm">No se encontraron módulos con ese criterio.</p>
           <button
             onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
-            className="cursor-pointer mt-2 text-sm text-blue-600 hover:underline font-medium"
+            className="cursor-pointer mt-2 text-sm text-admin-midnight hover:text-admin-blue hover:underline font-medium"
           >
             Limpiar filtros
           </button>

@@ -45,3 +45,20 @@ export interface EffectivePlanStateResponseDTO {
   subscriptionDaysRemaining: number | null;  // solo BASIC
   walletStatus: WalletStatus;
 }
+
+export interface PlanSummaryResponseDTO {
+    planCode: PlanCode;
+    planName: string;
+    description: string;
+    monthlyFeeCents: number;
+    minInvestmentCents: number;
+    maxInvestmentCents: number;
+    contractDurationMonths: number;
+    saleCommissionPct: number;
+    maxKeysPct: number;
+    requiresSpecialNegotiation: boolean;
+    specialNegotiationResolvedAt: string | null;
+    specialNegotiationDetails: string | null;
+    accepted: boolean | null;
+    acceptedAt: string | null;
+}

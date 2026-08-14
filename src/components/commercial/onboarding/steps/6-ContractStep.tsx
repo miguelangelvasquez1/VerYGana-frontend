@@ -160,7 +160,7 @@ export function ContractGenerateStep({
           <PhoneCall className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="text-sm text-amber-800">
-              Un asesor de VerYGana se pondrá en contacto para confirmar las condiciones de tu
+              Un asesor de VERyGANA se pondrá en contacto para confirmar las condiciones de tu
               cuenta antes de continuar. Podrás generar el contrato apenas quede resuelto.
             </p>
             {onRefreshStatus && (
@@ -259,7 +259,7 @@ export function ContractGenerateStep({
                 <div className="flex items-start gap-2 py-2.5">
                   <PhoneCall className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <p className="text-xs text-amber-700 leading-relaxed">
-                    Un asesor de VerYGana confirmará las condiciones finales de este plan contigo.
+                    Un asesor de VERyGANA confirmará las condiciones finales de este plan contigo.
                   </p>
                 </div>
               )}
@@ -268,7 +268,7 @@ export function ContractGenerateStep({
             <div className="flex items-start gap-2 py-2.5">
               <PhoneCall className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
               <p className="text-xs text-amber-700 leading-relaxed">
-                Tu plan será definido directamente por un asesor comercial de VerYGana.
+                Tu plan será definido directamente por un asesor comercial de VERyGANA.
               </p>
             </div>
           )}
@@ -378,7 +378,7 @@ export function ContractReviewStep({ contract, submitting, onOpenContract, onApp
         <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
         <p className="text-sm text-amber-800">
           Este documento es una plantilla base, pendiente de validación jurídica por el equipo
-          legal de VerYGana. Revisa las condiciones antes de aprobarlo.
+          legal de VERyGANA. Revisa las condiciones antes de aprobarlo.
         </p>
       </div>
 
@@ -405,7 +405,7 @@ export function ContractReviewStep({ contract, submitting, onOpenContract, onApp
   );
 }
 
-// ─── Paso 11: VerYGana revisando el contrato aprobado por el empresario ───
+// ─── Paso 11:  revisando el contrato aprobado por el empresario ───
 
 interface VeryGanaReviewProps {
   contract: OnboardingContract | null;
@@ -437,7 +437,7 @@ export function VeryGanaReviewStep({ contract, onRefresh, rejected, rejectionRea
         <div>
           <h3 className="text-lg font-bold text-gray-900 mb-2">Tu contrato fue rechazado</h3>
           <p className="text-sm text-gray-600 leading-relaxed max-w-sm mx-auto">
-            {rejectionReason || "Nuestro equipo de VerYGana revisó tu caso y lo rechazó."}
+            {rejectionReason || "Nuestro equipo de VERyGANA revisó tu caso y lo rechazó."}
           </p>
         </div>
 
@@ -462,7 +462,7 @@ export function VeryGanaReviewStep({ contract, onRefresh, rejected, rejectionRea
       <div>
         <h3 className="text-lg font-bold text-gray-900 mb-2">Contrato en revisión</h3>
         <p className="text-sm text-gray-600 leading-relaxed max-w-sm mx-auto">
-          Aprobaste tu contrato — ahora el equipo de VerYGana lo está revisando. Te
+          Aprobaste tu contrato — ahora el equipo de VERyGANA lo está revisando. Te
           notificaremos por correo cuando quede activo.
         </p>
         {contract && (
@@ -492,7 +492,7 @@ export function VeryGanaReviewStep({ contract, onRefresh, rejected, rejectionRea
   );
 }
 
-// ─── Paso 11b: contrato aprobado por VerYGana, enviado a firma electrónica ─
+// ─── Paso 11b: contrato aprobado por VERyGANA, enviado a firma electrónica ─
 
 interface SignatureProps {
   contract: OnboardingContract | null;
