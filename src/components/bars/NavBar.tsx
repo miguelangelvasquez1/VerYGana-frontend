@@ -136,8 +136,21 @@ export default function Navbar() {
             {/* CART BUTTON */}
             <CartButton />
 
+            {/* NOTIFICATIONS */}
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              loading={loading}
+              hasMore={hasMore}
+              isOpen={isNotificationsOpen}
+              onToggle={() => setIsNotificationsOpen((v) => !v)}
+              onMarkAllAsRead={markAllAsRead}
+              onLoadMore={loadMore}
+              menuRef={notificationsMenuRefDesktop}
+            />
+
             {/* KEY WALLET */}
-            <div className="relative" ref={keyWalletMenuRefDesktop}>
+            <div className="relative order-first" ref={keyWalletMenuRefDesktop}>
               <button
                 onClick={() => setIsKeyWalletOpen((v) => !v)}
                 className="cursor-pointer group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/10 hover:bg-white/20 hover:scale-105 transition-all"
@@ -285,18 +298,6 @@ export default function Navbar() {
               </div>
             </div>
 
-            <NotificationPanel
-              notifications={notifications}
-              unreadCount={unreadCount}
-              loading={loading}
-              hasMore={hasMore}
-              isOpen={isNotificationsOpen}
-              onToggle={() => setIsNotificationsOpen((v) => !v)}
-              onMarkAllAsRead={markAllAsRead}
-              onLoadMore={loadMore}
-              menuRef={notificationsMenuRefDesktop}
-            />
-
             {/* PROFILE MENU */}
             <div className="relative" ref={profileMenuRef}>
               <button
@@ -437,8 +438,22 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             {/* CART */}
             <CartButton />
+
+            {/* NOTIFICATIONS */}
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              loading={loading}
+              hasMore={hasMore}
+              isOpen={isNotificationsOpen}
+              onToggle={() => setIsNotificationsOpen((v) => !v)}
+              onMarkAllAsRead={markAllAsRead}
+              onLoadMore={loadMore}
+              menuRef={notificationsMenuRefMobile}
+            />
+
             {/* KEY WALLET */}
-            <div className="relative" ref={keyWalletMenuRefMobile}>
+            <div className="relative order-first" ref={keyWalletMenuRefMobile}>
               <button
                 onClick={() => setIsKeyWalletOpen((v) => !v)}
                 className="cursor-pointer flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-2xl border border-white/10"
@@ -577,18 +592,6 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* NOTIFICATIONS */}
-            <NotificationPanel
-              notifications={notifications}
-              unreadCount={unreadCount}
-              loading={loading}
-              hasMore={hasMore}
-              isOpen={isNotificationsOpen}
-              onToggle={() => setIsNotificationsOpen((v) => !v)}
-              onMarkAllAsRead={markAllAsRead}
-              onLoadMore={loadMore}
-              menuRef={notificationsMenuRefMobile}
-            />
           </div>
         </div>
       </div>

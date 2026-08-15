@@ -182,17 +182,17 @@ export default function HomePage() {
 
             {/* Right stats cards */}
             <div
-              className={`flex-shrink-0 w-full lg:w-80 transition-all duration-700 delay-200 ${
+              className={`w-full flex-shrink-0 lg:ml-auto lg:mr-8 lg:w-[360px] transition-all duration-700 delay-200 ${
                 animateHero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
             >
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid w-full grid-cols-2 gap-4">
                 {STATS.map(({ value, label, icon }) => (
                   <div
                     key={label}
-                    className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-white"
+                    className="rounded-2xl border border-white/20 bg-white/10 p-4 text-white backdrop-blur-sm"
                   >
-                    <div className="flex items-center gap-2 text-blue-200 mb-2">
+                    <div className="mb-2 flex items-center gap-2 text-blue-200">
                       {icon}
                       <span className="text-xs">{label}</span>
                     </div>
