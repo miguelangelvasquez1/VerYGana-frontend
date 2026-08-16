@@ -2,15 +2,10 @@
 
 import React from 'react';
 import { Smartphone } from 'lucide-react';
-import { usePetBridge } from '@/hooks/pet/usePetBridge';
 import { usePetSession } from '@/hooks/pet/usePetSession';
 
 const PetGame: React.FC = () => {
-  // El build actual le pega directo a la API y no usa el bridge, pero lo
-  // dejamos montado: es el camino previsto para que el JWT no salga de nuestro
-  // origen, y se activa solo cuando llegue un build que hable postMessage.
-  const { iframeRef } = usePetBridge();
-  const { iframeUrl, loading, error, retry } = usePetSession();
+  const { iframeUrl, loading, error, retry, iframeRef } = usePetSession();
 
   // Los tres estados comparten marco para que no haya salto de tamaño entre
   // "preparando" y el juego ya cargado. El fondo va en el mismo #231f20 del

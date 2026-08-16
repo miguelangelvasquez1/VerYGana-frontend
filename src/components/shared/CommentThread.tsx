@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Send, Loader2, MessageSquare } from 'lucide-react';
-import type { BrandingComment } from '@/services/BrandingRequestService';
 
 const CYCLE_LABEL: Partial<Record<string, string>> = {
   APPROVED: 'Inicio del proceso',
@@ -14,6 +13,34 @@ const CYCLE_LABEL: Partial<Record<string, string>> = {
 
 const MAX_LENGTH = 2000;
 
+/**
+ * Forma mínima que necesita el hilo. `BrandingComment` y `PetComment` encajan
+ * las dos, así que el componente sirve para ambos módulos.
+ */
+export interface ThreadComment {
+  id: number;
+  content: string;
+  authorName: string;
+  authorRole: string;
+  relatedStatus: string;
+  createdAt: string;
+}
+
+type Accent = 'violet' | 'blue';
+
+const ACCENT: Record<Accent, { bubble: string; button: string; ring: string }> = {
+  violet: {
+    bubble: 'bg-violet-600',
+    button: 'bg-violet-600 hover:bg-violet-700',
+    ring: 'focus:ring-violet-500 focus:border-violet-400',
+  },
+  blue: {
+    bubble: 'bg-blue-600',
+    button: 'bg-blue-600 hover:bg-blue-700',
+    ring: 'focus:ring-blue-500 focus:border-blue-400',
+  },
+};
+
 function formatDate(iso: string): string {
   const date = new Date(iso);
   return (
@@ -24,11 +51,15 @@ function formatDate(iso: string): string {
 }
 
 interface Props {
-  comments: BrandingComment[];
+  comments: ThreadComment[];
   loading: boolean;
   sending: boolean;
-  currentUserRole: 'COMMERCIAL' | 'DESIGNER';
+  currentUserRole: string;
   onSend: (content: string) => Promise<void>;
+  /** Etiquetas legibles por estado; por defecto las del ciclo de branding. */
+  statusLabels?: Partial<Record<string, string>>;
+  accent?: Accent;
+  placeholder?: string;
 }
 
 export const CommentThread: React.FC<Props> = ({
@@ -37,7 +68,11 @@ export const CommentThread: React.FC<Props> = ({
   sending,
   currentUserRole,
   onSend,
+  statusLabels = CYCLE_LABEL,
+  accent = 'violet',
+  placeholder = 'Escribe un mensaje… (Enter para enviar, Shift+Enter para nueva línea)',
 }) => {
+  const theme = ACCENT[accent];
   const [text, setText] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -86,7 +121,7 @@ export const CommentThread: React.FC<Props> = ({
                     <div className="flex items-center gap-3 my-1">
                       <div className="flex-1 h-px bg-gray-100" />
                       <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2">
-                        {CYCLE_LABEL[comment.relatedStatus] ?? comment.relatedStatus}
+                        {statusLabels[comment.relatedStatus] ?? comment.relatedStatus}
                       </span>
                       <div className="flex-1 h-px bg-gray-100" />
                     </div>
@@ -101,7 +136,7 @@ export const CommentThread: React.FC<Props> = ({
                       <div
                         className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
                           isMe
-                            ? 'bg-violet-600 text-white rounded-tr-sm'
+                            ? `${theme.bubble} text-white rounded-tr-sm`
                             : 'bg-gray-100 text-gray-800 rounded-tl-sm'
                         }`}
                       >
@@ -132,9 +167,9 @@ export const CommentThread: React.FC<Props> = ({
               value={text}
               onChange={e => setText(e.target.value.slice(0, MAX_LENGTH))}
               onKeyDown={handleKeyDown}
-              placeholder="Escribe un mensaje… (Enter para enviar, Shift+Enter para nueva línea)"
+              placeholder={placeholder}
               rows={2}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-400 placeholder-gray-400"
+              className={`w-full px-3 py-2 text-sm border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 ${theme.ring} placeholder-gray-400`}
             />
             {text.length > MAX_LENGTH * 0.8 && (
               <span className="absolute bottom-2 right-2 text-[10px] text-gray-400 pointer-events-none">
@@ -145,7 +180,7 @@ export const CommentThread: React.FC<Props> = ({
           <button
             onClick={handleSend}
             disabled={!text.trim() || sending}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-xl hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 self-end cursor-pointer"
+            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white ${theme.button} rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 self-end cursor-pointer`}
           >
             {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
             Enviar

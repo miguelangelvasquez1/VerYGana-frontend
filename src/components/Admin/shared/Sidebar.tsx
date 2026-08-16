@@ -19,6 +19,7 @@ import {
   Palette,
   Headset,
   ShieldAlert,
+  PawPrint,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -72,6 +73,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           icon: Palette,
           href: '/admin/branding',
           color: 'text-violet-500'
+        },
+        {
+          title: 'Mascotas',
+          icon: PawPrint,
+          href: '/admin/pet-requests',
+          color: 'text-pink-500'
         },
         {
           title: 'Productos',
