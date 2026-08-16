@@ -91,7 +91,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-2">
-            <Gamepad2 className="text-violet-600" size={22} />
+            <Gamepad2 className="text-admin-gold" size={22} />
             <h2 className="text-lg font-semibold text-gray-900">Registrar Game Designer</h2>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
@@ -110,7 +110,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 value={form.name}
                 onChange={e => handleField('name', e.target.value)}
                 placeholder="Juan"
-                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-gold ${
                   errors.name ? 'border-red-400' : 'border-gray-300'
                 }`}
               />
@@ -126,7 +126,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 value={form.lastName}
                 onChange={e => handleField('lastName', e.target.value)}
                 placeholder="Pérez"
-                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-gold ${
                   errors.lastName ? 'border-red-400' : 'border-gray-300'
                 }`}
               />
@@ -143,7 +143,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
               value={form.email}
               onChange={e => handleField('email', e.target.value)}
               placeholder="juan.perez@verygana.com"
-              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-gold ${
                 errors.email ? 'border-red-400' : 'border-gray-300'
               }`}
             />
@@ -159,7 +159,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
               value={form.phoneNumber}
               onChange={e => handleField('phoneNumber', e.target.value)}
               placeholder="3001234567"
-              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-gold ${
                 errors.phoneNumber ? 'border-red-400' : 'border-gray-300'
               }`}
             />
@@ -175,7 +175,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
               onChange={e => handleField('bio', e.target.value)}
               rows={3}
               placeholder="Descripción breve del diseñador..."
-              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none ${
+              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-gold resize-none ${
                 errors.bio ? 'border-red-400' : 'border-gray-300'
               }`}
             />
@@ -198,7 +198,7 @@ const RegisterGameDesignerModal: React.FC<Props> = ({ isOpen, onClose }) => {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-admin-gold rounded-lg hover:bg-admin-gold/90 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? 'Registrando...' : 'Registrar Designer'}
             </button>

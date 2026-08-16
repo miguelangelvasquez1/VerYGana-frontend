@@ -29,7 +29,7 @@ const Dashboard: React.FC = () => {
       change: '+3',
       changeType: 'positive',
       icon: Gift,
-      color: 'purple'
+      color: 'gold'
     },
     {
       title: 'Ingresos Mes',
@@ -37,7 +37,7 @@ const Dashboard: React.FC = () => {
       change: '+8.2%',
       changeType: 'positive',
       icon: DollarSign,
-      color: 'green'
+      color: 'midnight'
     },
     {
       title: 'Tickets Vendidos',
@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
       change: '+15.3%',
       changeType: 'positive',
       icon: Trophy,
-      color: 'orange'
+      color: 'navy'
     }
   ];
 
@@ -64,7 +64,7 @@ const Dashboard: React.FC = () => {
       message: 'Nueva rifa creada: "MacBook Pro M3"',
       time: 'Hace 15 minutos',
       icon: Gift,
-      color: 'purple'
+      color: 'gold'
     },
     {
       id: 3,
@@ -72,7 +72,7 @@ const Dashboard: React.FC = () => {
       message: 'Pago recibido: $250,000 COP',
       time: 'Hace 23 minutos',
       icon: DollarSign,
-      color: 'green'
+      color: 'midnight'
     },
     {
       id: 4,
@@ -110,10 +110,10 @@ const Dashboard: React.FC = () => {
 
   const getColorClasses = (color: string) => {
     const colors = {
-      blue: 'bg-blue-100 text-blue-600',
-      purple: 'bg-purple-100 text-purple-600',
-      green: 'bg-green-100 text-green-600',
-      orange: 'bg-orange-100 text-orange-600',
+      blue: 'bg-admin-blue/10 text-admin-blue',
+      gold: 'bg-admin-gold/10 text-admin-gold',
+      midnight: 'bg-admin-midnight/10 text-admin-midnight',
+      navy: 'bg-admin-navy/10 text-admin-navy',
       red: 'bg-red-100 text-red-600'
     };
     return colors[color as keyof typeof colors] || colors.blue;
@@ -122,12 +122,12 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+      <div className="bg-linear-to-br from-[#041521] to-admin-midnight rounded-lg p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">¡Bienvenido al Panel de Administración!</h1>
-        <p className="text-blue-100">Aquí tienes un resumen de la actividad de tu sistema</p>
+        <p className="text-white/70">Aquí tienes un resumen de la actividad de tu sistema</p>
         <div className="mt-4 flex items-center space-x-4 text-sm">
           <div className="flex items-center space-x-2">
-            <Activity className="h-4 w-4" />
+            <Activity className="h-4 w-4 text-admin-gold" />
             <span>Sistema: Operativo</span>
           </div>
           <div className="flex items-center space-x-2">
@@ -190,7 +190,7 @@ const Dashboard: React.FC = () => {
                 );
               })}
             </div>
-            <button className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer">
+            <button className="mt-4 text-sm text-admin-midnight hover:text-admin-blue font-medium cursor-pointer">
               Ver toda la actividad →
             </button>
           </div>
@@ -211,7 +211,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
+                      className="bg-admin-gradient h-2 rounded-full"
                       style={{ width: `${(raffle.sold / raffle.total) * 100}%` }}
                     ></div>
                   </div>
@@ -224,7 +224,7 @@ const Dashboard: React.FC = () => {
                 </div>
               ))}
             </div>
-            <button className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer">
+            <button className="mt-4 text-sm text-admin-midnight hover:text-admin-blue font-medium cursor-pointer">
               Ver todas las rifas →
             </button>
           </div>
@@ -238,26 +238,26 @@ const Dashboard: React.FC = () => {
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer">
-              <Gift className="h-8 w-8 text-purple-600 mb-2" />
+            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-admin-gold/40 hover:bg-admin-gold/5 transition-colors cursor-pointer">
+              <Gift className="h-8 w-8 text-admin-gold mb-2" />
               <h4 className="font-medium text-gray-900">Nueva Rifa</h4>
               <p className="text-sm text-gray-600">Crear una nueva rifa</p>
             </button>
-            
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors cursor-pointer">
-              <Users className="h-8 w-8 text-blue-600 mb-2" />
+
+            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-admin-blue/40 hover:bg-admin-blue/5 transition-colors cursor-pointer">
+              <Users className="h-8 w-8 text-admin-blue mb-2" />
               <h4 className="font-medium text-gray-900">Gestionar Usuarios</h4>
               <p className="text-sm text-gray-600">Ver y editar usuarios</p>
             </button>
-            
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors cursor-pointer">
-              <TrendingUp className="h-8 w-8 text-orange-600 mb-2" />
+
+            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-admin-midnight/40 hover:bg-admin-midnight/5 transition-colors cursor-pointer">
+              <TrendingUp className="h-8 w-8 text-admin-midnight mb-2" />
               <h4 className="font-medium text-gray-900">Ver Reportes</h4>
               <p className="text-sm text-gray-600">Analizar métricas</p>
             </button>
-            
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-colors cursor-pointer">
-              <Activity className="h-8 w-8 text-red-600 mb-2" />
+
+            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-admin-navy/40 hover:bg-admin-navy/5 transition-colors cursor-pointer">
+              <Activity className="h-8 w-8 text-admin-navy mb-2" />
               <h4 className="font-medium text-gray-900">Configuración</h4>
               <p className="text-sm text-gray-600">Ajustes del sistema</p>
             </button>

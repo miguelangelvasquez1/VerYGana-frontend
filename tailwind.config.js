@@ -9,12 +9,6 @@ module.exports = {
       fontFamily: {
         sans: ['var(--font-days-one)', 'sans-serif'],
       },
-    },
-  },
-  plugins: [],
-  
-  theme: {
-    extend: {
       keyframes: {
         slideUp: {
           "0%": { transform: "translateY(100%)", opacity: "0" },
@@ -36,4 +30,5 @@ module.exports = {
       },
     },
   },
+  plugins: [],
 };

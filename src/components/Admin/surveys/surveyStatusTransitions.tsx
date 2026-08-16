@@ -93,7 +93,7 @@ export function ConfirmDialog({ from, transition, loading, onConfirm, onCancel }
             onClick={onConfirm}
             disabled={loading}
             className={`cursor-pointer flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 ${
-              isCritical ? 'bg-red-500 hover:bg-red-400' : 'bg-indigo-600 hover:bg-indigo-500'
+              isCritical ? 'bg-red-500 hover:bg-red-400' : 'bg-admin-blue hover:bg-admin-blue-dark'
             }`}
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}

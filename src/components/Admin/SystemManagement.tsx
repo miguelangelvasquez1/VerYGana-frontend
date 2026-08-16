@@ -93,8 +93,8 @@ const SystemManagement: React.FC = () => {
         
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded">
-              <Settings className="h-6 w-6 text-blue-600" />
+            <div className="p-2 bg-admin-blue/10 rounded">
+              <Settings className="h-6 w-6 text-admin-blue" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Módulos Activos</p>
@@ -102,11 +102,11 @@ const SystemManagement: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded">
-              <AlertTriangle className="h-6 w-6 text-purple-600" />
+            <div className="p-2 bg-admin-gold/10 rounded">
+              <AlertTriangle className="h-6 w-6 text-admin-gold" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tiempo de Actividad</p>
@@ -187,9 +187,9 @@ const SystemManagement: React.FC = () => {
               </div>
             </button>
             
-            <button className="p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 text-left cursor-pointer">
+            <button className="p-4 border-2 border-dashed border-admin-blue/30 rounded-lg hover:border-admin-blue/50 hover:bg-admin-blue/5 text-left cursor-pointer">
               <div className="flex items-center space-x-3">
-                <Settings className="h-8 w-8 text-blue-500" />
+                <Settings className="h-8 w-8 text-admin-blue" />
                 <div>
                   <h4 className="font-medium text-gray-900">Reiniciar Servicios</h4>
                   <p className="text-sm text-gray-600">Reiniciar todos los servicios del sistema</p>

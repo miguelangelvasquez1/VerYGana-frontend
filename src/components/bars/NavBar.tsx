@@ -112,9 +112,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between px-6 py-2">
           {/* LOGO */}
           <div className="flex items-center gap-3">
-            <Image src="/logos/logoDorado.png" alt="VerYGana" width={52} height={52} className="object-contain shrink-0" />
+            <Image src="/logos/logoDorado.png" alt="VERyGANA" width={52} height={52} className="object-contain shrink-0" />
             <div className="leading-tight">
-              <p className="text-base font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-base font-extrabold text-white tracking-tight">VERyGANA</p>
               <p className="text-[10px] text-white/50 font-medium tracking-wide">La alegria de ganar</p>
             </div>
           </div>
@@ -136,8 +136,21 @@ export default function Navbar() {
             {/* CART BUTTON */}
             <CartButton />
 
+            {/* NOTIFICATIONS */}
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              loading={loading}
+              hasMore={hasMore}
+              isOpen={isNotificationsOpen}
+              onToggle={() => setIsNotificationsOpen((v) => !v)}
+              onMarkAllAsRead={markAllAsRead}
+              onLoadMore={loadMore}
+              menuRef={notificationsMenuRefDesktop}
+            />
+
             {/* KEY WALLET */}
-            <div className="relative" ref={keyWalletMenuRefDesktop}>
+            <div className="relative order-first" ref={keyWalletMenuRefDesktop}>
               <button
                 onClick={() => setIsKeyWalletOpen((v) => !v)}
                 className="cursor-pointer group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/10 hover:bg-white/20 hover:scale-105 transition-all"
@@ -285,18 +298,6 @@ export default function Navbar() {
               </div>
             </div>
 
-            <NotificationPanel
-              notifications={notifications}
-              unreadCount={unreadCount}
-              loading={loading}
-              hasMore={hasMore}
-              isOpen={isNotificationsOpen}
-              onToggle={() => setIsNotificationsOpen((v) => !v)}
-              onMarkAllAsRead={markAllAsRead}
-              onLoadMore={loadMore}
-              menuRef={notificationsMenuRefDesktop}
-            />
-
             {/* PROFILE MENU */}
             <div className="relative" ref={profileMenuRef}>
               <button
@@ -428,17 +429,31 @@ export default function Navbar() {
       <div className="lg:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
-            <Image src="/logos/logoDorado.png" alt="VerYGana" width={42} height={42} className="object-contain shrink-0" />
+            <Image src="/logos/logoDorado.png" alt="VERyGANA" width={42} height={42} className="object-contain shrink-0" />
             <div className="leading-tight">
-              <p className="text-sm font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-sm font-extrabold text-white tracking-tight">VERyGANA</p>
               <p className="text-[9px] text-white/50 font-medium tracking-wide">La alegria de ganar</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {/* CART */}
             <CartButton />
+
+            {/* NOTIFICATIONS */}
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              loading={loading}
+              hasMore={hasMore}
+              isOpen={isNotificationsOpen}
+              onToggle={() => setIsNotificationsOpen((v) => !v)}
+              onMarkAllAsRead={markAllAsRead}
+              onLoadMore={loadMore}
+              menuRef={notificationsMenuRefMobile}
+            />
+
             {/* KEY WALLET */}
-            <div className="relative" ref={keyWalletMenuRefMobile}>
+            <div className="relative order-first" ref={keyWalletMenuRefMobile}>
               <button
                 onClick={() => setIsKeyWalletOpen((v) => !v)}
                 className="cursor-pointer flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-2xl border border-white/10"
@@ -577,18 +592,6 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* NOTIFICATIONS */}
-            <NotificationPanel
-              notifications={notifications}
-              unreadCount={unreadCount}
-              loading={loading}
-              hasMore={hasMore}
-              isOpen={isNotificationsOpen}
-              onToggle={() => setIsNotificationsOpen((v) => !v)}
-              onMarkAllAsRead={markAllAsRead}
-              onLoadMore={loadMore}
-              menuRef={notificationsMenuRefMobile}
-            />
           </div>
         </div>
       </div>

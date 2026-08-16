@@ -98,8 +98,8 @@ function EditModal({ config, isPending, onSave, onClose }: EditModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center">
-              <Edit2 size={15} className="text-blue-600" />
+            <div className="w-9 h-9 rounded-xl bg-admin-blue/10 flex items-center justify-center">
+              <Edit2 size={15} className="text-admin-blue" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-gray-900">Editar precio</h2>
@@ -151,7 +151,7 @@ function EditModal({ config, isPending, onSave, onClose }: EditModalProps) {
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && !isPending && handleSave()}
                 placeholder="0"
-                className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10"
               />
             </div>
             {parsedCOP > 0 && (
@@ -181,7 +181,7 @@ function EditModal({ config, isPending, onSave, onClose }: EditModalProps) {
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="cursor-pointer px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="cursor-pointer px-4 py-2 text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isPending && <Loader2 size={14} className="animate-spin" />}
             Guardar cambio
@@ -233,7 +233,7 @@ function PricingCard({ config, onEdit }: PricingCardProps) {
         </div>
         <button
           onClick={() => onEdit(config)}
-          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-600 hover:text-blue-700 text-xs font-semibold rounded-lg transition-colors"
+          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:border-admin-blue/40 hover:bg-admin-blue/5 text-gray-600 hover:text-admin-blue text-xs font-semibold rounded-lg transition-colors"
         >
           <Edit2 size={13} />
           Editar
@@ -265,7 +265,7 @@ export default function PreciosTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 gap-3 text-gray-400">
-        <Loader2 size={18} className="animate-spin text-blue-500" />
+        <Loader2 size={18} className="animate-spin text-admin-blue" />
         <span className="text-sm">Cargando configuraciones...</span>
       </div>
     );
@@ -284,7 +284,7 @@ export default function PreciosTab() {
         </div>
         <button
           onClick={() => refetch()}
-          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-admin-blue hover:bg-admin-blue-dark text-white text-sm font-semibold rounded-xl transition-colors"
         >
           <RefreshCw size={15} />
           Reintentar

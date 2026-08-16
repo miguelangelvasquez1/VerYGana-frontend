@@ -49,10 +49,10 @@ const Header: React.FC = () => {
   }, []);
 
   return (
-    <header className="bg-white shadow-sm border-b px-6 py-4 h-18">
+    <header className="bg-white shadow-sm border-b-2 border-admin-blue/20 px-6 py-4 h-18">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-semibold text-gray-800">{getPageTitle(pathname)}</h1>
+          <h1 className="text-2xl font-semibold text-admin-navy">{getPageTitle(pathname)}</h1>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -64,7 +64,7 @@ const Header: React.FC = () => {
               placeholder={placeholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-admin-blue"
             />
           </div>
 
@@ -84,11 +84,11 @@ const Header: React.FC = () => {
 
           {/* User Menu */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-admin-gradient rounded-full flex items-center justify-center">
               <User size={16} className="text-white" />
             </div>
-            <span className="text-sm font-medium text-gray-700">Admin</span>
-            <button className="p-2 text-gray-600 hover:text-gray-800 cursor-pointer" onClick={logout}>
+            <span className="text-sm font-medium text-admin-navy">Admin</span>
+            <button className="p-2 text-gray-500 hover:text-admin-navy cursor-pointer" onClick={logout}>
               <LogOut size={16} />
             </button>
           </div>

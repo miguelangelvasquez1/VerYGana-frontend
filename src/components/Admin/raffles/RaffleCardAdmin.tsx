@@ -79,6 +79,7 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
       DRAWING: "bg-yellow-100 text-yellow-700",
       COMPLETED: "bg-blue-100 text-blue-700",
       CANCELLED: "bg-gray-300 text-gray-900",
+      MISSED_DRAW: "bg-orange-100 text-orange-700",
     };
 
     return (
@@ -160,9 +161,21 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
                         setSelectedRaffle(raffle);
                         setActionType("draw");
                       }}
-                      className="cursor-pointer text-purple-600 hover:underline"
+                      className="cursor-pointer text-admin-midnight hover:underline"
                     >
                       Sortear
+                    </button>
+                  )}
+
+                  {raffle.raffleStatus === "MISSED_DRAW" && (
+                    <button
+                      onClick={() =>
+                        router.push(`/admin/raffles/${raffle.id}`)
+                      }
+                      className="cursor-pointer text-orange-600 hover:underline"
+                      title="Actualiza las fechas y reactiva la rifa desde el detalle"
+                    >
+                      Reactivar
                     </button>
                   )}
 
@@ -181,7 +194,7 @@ export default function RaffleCard({ raffles, onRefresh, onViewStats }: Props) {
                       {onViewStats && (
                         <button
                           onClick={() => onViewStats(raffle)}
-                          className="cursor-pointer text-[#03548C] hover:underline inline-flex items-center gap-1"
+                          className="cursor-pointer text-admin-midnight hover:underline inline-flex items-center gap-1"
                         >
                           <BarChart3 size={14} />
                           Estadísticas

@@ -17,7 +17,7 @@ export const formatCOP = (cents: number | null | undefined): string => {
   }).format(cents / 100);
 };
 
-// Recuerda el último rechazo de VerYGana que el usuario ya vio (modal
+// Recuerda el último rechazo de VERyGANA que el usuario ya vio (modal
 // bloqueante), para no repetirlo en cada visita mientras siga siendo el
 // mismo rechazo — solo se re-muestra si `rejectedAt` cambia.
 const LAST_SEEN_REJECTION_KEY = "onboarding_last_seen_rejection";

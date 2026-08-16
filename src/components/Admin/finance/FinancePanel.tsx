@@ -62,21 +62,21 @@ const ACCOUNTS = [
 ] as const;
 
 const REF_TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  RAFFLE:   { label: 'Rifa',     color: 'bg-purple-100 text-purple-700' },
-  PAYOUT:   { label: 'Pago',     color: 'bg-orange-100 text-orange-700' },
-  DEPOSIT:  { label: 'Depósito', color: 'bg-green-100 text-green-700'   },
-  FEE:      { label: 'Comisión', color: 'bg-blue-100 text-blue-700'     },
-  TRANSFER: { label: 'Transfer', color: 'bg-gray-100 text-gray-700'     },
+  RAFFLE:   { label: 'Rifa',     color: 'bg-admin-gold/10 text-admin-gold'         },
+  PAYOUT:   { label: 'Pago',     color: 'bg-admin-navy/10 text-admin-navy'         },
+  DEPOSIT:  { label: 'Depósito', color: 'bg-admin-midnight/10 text-admin-midnight' },
+  FEE:      { label: 'Comisión', color: 'bg-admin-blue/10 text-admin-blue'         },
+  TRANSFER: { label: 'Transfer', color: 'bg-gray-100 text-gray-700'                },
 };
 
 const COLOR_MAP: Record<string, {
   bg: string; icon: string; badge: string; border: string;
   light: string; ring: string; bar: string;
 }> = {
-  blue:   { bg: 'bg-blue-50',   icon: 'bg-blue-100 text-blue-600',    badge: 'bg-blue-600',   border: 'border-blue-200',   light: 'text-blue-600',   ring: 'ring-blue-300',   bar: 'bg-blue-500'   },
-  purple: { bg: 'bg-purple-50', icon: 'bg-purple-100 text-purple-600', badge: 'bg-purple-600', border: 'border-purple-200', light: 'text-purple-600', ring: 'ring-purple-300', bar: 'bg-purple-500' },
-  green:  { bg: 'bg-green-50',  icon: 'bg-green-100 text-green-600',   badge: 'bg-green-600',  border: 'border-green-200',  light: 'text-green-600',  ring: 'ring-green-300',  bar: 'bg-green-500'  },
-  orange: { bg: 'bg-orange-50', icon: 'bg-orange-100 text-orange-600', badge: 'bg-orange-600', border: 'border-orange-200', light: 'text-orange-600', ring: 'ring-orange-300', bar: 'bg-orange-400' },
+  blue:   { bg: 'bg-admin-blue/5',     icon: 'bg-admin-blue/10 text-admin-blue',         badge: 'bg-admin-blue',     border: 'border-admin-blue/20',     light: 'text-admin-blue',     ring: 'ring-admin-blue/30',     bar: 'bg-admin-blue'     },
+  purple: { bg: 'bg-admin-gold/5',     icon: 'bg-admin-gold/10 text-admin-gold',         badge: 'bg-admin-gold',     border: 'border-admin-gold/20',     light: 'text-admin-gold',     ring: 'ring-admin-gold/30',     bar: 'bg-admin-gold'     },
+  green:  { bg: 'bg-admin-midnight/5', icon: 'bg-admin-midnight/10 text-admin-midnight', badge: 'bg-admin-midnight', border: 'border-admin-midnight/20', light: 'text-admin-midnight', ring: 'ring-admin-midnight/30', bar: 'bg-admin-midnight' },
+  orange: { bg: 'bg-admin-navy/5',     icon: 'bg-admin-navy/10 text-admin-navy',         badge: 'bg-admin-navy',     border: 'border-admin-navy/20',     light: 'text-admin-navy',     ring: 'ring-admin-navy/30',     bar: 'bg-admin-navy'     },
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -271,10 +271,10 @@ export default function TreasuryPanel() {
       )}
 
       {/* ── Hero: Total balance ── */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white">
+      <div className="bg-admin-navy-gradient rounded-2xl p-6 text-white">
         <div className="flex items-center justify-between flex-wrap gap-6">
           <div>
-            <p className="text-sm font-medium text-blue-100 uppercase tracking-wide">
+            <p className="text-sm font-medium text-white/70 uppercase tracking-wide">
               Balance Total del Tesoro
             </p>
             {balanceLoading ? (
@@ -295,7 +295,7 @@ export default function TreasuryPanel() {
                 </span>
               )}
               {balance && (
-                <span className="flex items-center gap-1.5 text-xs bg-white/15 border border-white/25 text-blue-100 px-3 py-1.5 rounded-full">
+                <span className="flex items-center gap-1.5 text-xs bg-white/15 border border-white/25 text-white/80 px-3 py-1.5 rounded-full">
                   <Shield className="w-3.5 h-3.5" />
                   Salud reserva: {balance.keysReserveHealthPct.toFixed(1)}%
                 </span>
@@ -399,8 +399,8 @@ export default function TreasuryPanel() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-xl">
-              <Shield className="w-5 h-5 text-blue-600" />
+            <div className="p-2 bg-admin-blue/10 rounded-xl">
+              <Shield className="w-5 h-5 text-admin-blue" />
             </div>
             <div>
               <h3 className="text-sm font-semibold text-gray-900">
@@ -466,7 +466,7 @@ export default function TreasuryPanel() {
           <select
             value={selectedAccount ?? ''}
             onChange={(e) => setSelectedAccount(e.target.value || null)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 bg-white text-gray-700"
+            className="px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/20 bg-white text-gray-700"
           >
             <option value="">Seleccionar cuenta...</option>
             {ACCOUNTS.map((a) => (
@@ -491,7 +491,7 @@ export default function TreasuryPanel() {
         {/* Loading movements */}
         {selectedAccount && movementsLoading && (
           <div className="flex items-center justify-center py-16 gap-3 text-gray-400">
-            <svg className="w-5 h-5 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 animate-spin text-admin-blue" fill="none" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={3} opacity={0.3} />
               <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
             </svg>

@@ -53,3 +53,11 @@ export interface PayoutSummaryResponseDTO {
     scheduledAt: string;
     paidAt: string;
 }
+
+export interface KeyWalletResponseDTO {
+    purchaseKeysCents: number;
+    blockedPurchaseKeysCents: number;
+    connectivityKeysCents: number;
+    blockedConnectivityKeysCents: number;
+    updatedAt: string;
+}
