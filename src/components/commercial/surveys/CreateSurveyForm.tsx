@@ -16,12 +16,14 @@ import {
   Info,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCreateSurvey, useSurveyConfigs } from '@/hooks/surveys/useCommercialSurvey';
+import { useCreateSurvey, useSurveyConfigs, useCommercialSurveys } from '@/hooks/surveys/useCommercialSurvey';
 import { useSurveyForm, MAX_QUESTIONS, MAX_OPTIONS_PER_QUESTION, MAX_QUESTION_TEXT_LENGTH } from '@/hooks/surveys/useSurveyForm';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { QUESTION_TYPE_LABELS, GENDER_LABELS } from '@/hooks/surveys/surveyUtils';
 import type { QuestionType, TargetGender, CreateSurveyRequest } from '@/types/survey.types';
+import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
+import { LimitReachedBlock, isLimitReached } from '@/components/commercial/plans/LimitReached';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -52,6 +54,8 @@ function getMultiplesFrom(min: number, count = 8, step = 10): number[] {
 export default function SurveyFormModal() {
   const router = useRouter();
   const createMutation = useCreateSurvey();
+  const { planState, loadingPlan } = usePlanState();
+  const { data: allSurveysData, isLoading: loadingSurveysCount } = useCommercialSurveys(0, 1);
 
   const {
     form, errors, touched,
@@ -202,6 +206,28 @@ export default function SurveyFormModal() {
   const step3Errors = questionErrors + (touched.has('questions') && errors.questions ? 1 : 0);
 
   // ─── Render ──────────────────────────────────────────────────────────────
+
+  const totalSurveysCount = allSurveysData?.meta.totalElements ?? 0;
+  const surveysLimitReached = planState != null && isLimitReached(totalSurveysCount, planState.maxSurveys);
+
+  if (loadingPlan || loadingSurveysCount) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (surveysLimitReached) {
+    return (
+      <LimitReachedBlock
+        resourceLabel="encuestas"
+        max={planState!.maxSurveys}
+        backHref="/commercial/surveys"
+        backLabel="Volver a encuestas"
+      />
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-5 pb-16">
