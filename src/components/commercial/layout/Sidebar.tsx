@@ -15,6 +15,7 @@ import {
   Lock,
   Sparkles,
   Palette,
+  Handshake,
 } from 'lucide-react';
 import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { useLogout } from '@/hooks/useLogout';
@@ -65,6 +66,11 @@ const menuItems: MenuItem[] = [
   },
   {
     href: '/commercial/pets', icon: PawPrint, label: 'Mascotas',
+    requiredPlans: [PlanCode.PREMIUM],
+    lockIfUnavailable: true,
+  },
+  {
+    href: '/commercial/allies', icon: Handshake, label: 'Aliados',
     requiredPlans: [PlanCode.PREMIUM],
     lockIfUnavailable: true,
   },
@@ -123,7 +129,7 @@ export function Sidebar({
   };
 
   return (
-    <div className="bg-[#0f1117] text-white w-64 h-screen flex flex-col border-r border-white/6">
+    <div className="bg-[#041521] text-white w-64 h-screen flex flex-col border-r border-white/6">
 
       {/* ── Header ── */}
       <div className="px-4 py-4 border-b border-white/[0.07]">
@@ -131,18 +137,18 @@ export function Sidebar({
           <div className="flex items-center gap-2.5">
             <img
               src="/logos/logoDorado.png"
-              alt="VerYGana"
+              alt="VERyGANA"
               className="w-9 h-9 object-contain shrink-0"
             />
             <div className="leading-tight">
-              <p className="text-base font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-base font-extrabold text-white tracking-tight">VERyGANA</p>
               <p className="text-[10px] text-white/40 font-medium tracking-wide">Activación de ventas</p>
             </div>
           </div>
           {onClose && (
             <button
               onClick={onClose}
-              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors"
+              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -174,17 +180,17 @@ export function Sidebar({
                   className={`
                     flex items-center px-3 py-2.5 rounded-lg transition-colors duration-100 group
                     ${active
-                      ? 'bg-[#00a4ff]/15 text-[#00a4ff] border border-[#00a4ff]/25'
+                      ? 'bg-admin-blue/15 text-admin-blue border border-admin-blue/25'
                       : 'text-slate-400 hover:bg-white/6 hover:text-white border border-transparent'
                     }
                   `}
                 >
                   <Icon className={`w-4 h-4 mr-3 shrink-0 transition-colors ${
-                    active ? 'text-[#00a4ff]' : 'text-slate-500 group-hover:text-slate-300'
+                    active ? 'text-admin-blue' : 'text-slate-500 group-hover:text-slate-300'
                   }`} />
                   <span className="text-sm font-medium">{item.label}</span>
                   {item.href === '/plans' && (
-                    <span className="ml-auto text-[9px] font-bold bg-linear-to-r from-[#03548C] to-[#00a4ff] text-white px-1.5 py-0.5 rounded-full">
+                    <span className="ml-auto text-[9px] font-bold bg-linear-to-r from-admin-midnight to-admin-blue text-white px-1.5 py-0.5 rounded-full">
                       NEW
                     </span>
                   )}

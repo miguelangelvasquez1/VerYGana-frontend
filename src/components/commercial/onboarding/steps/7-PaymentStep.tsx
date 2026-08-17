@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CreditCard, Loader2, RefreshCw } from "lucide-react";
 import type { OnboardingContract } from "@/services/commercial/OnboardingService";
 import { ONBOARDING_PAYMENT_REFERENCE_KEY, StepButton } from "../onboarding.shared";
@@ -16,7 +16,6 @@ interface Props {
 export function PaymentStep({ contract, submitting, onPay, onRefresh }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [autoChecking, setAutoChecking] = useState(false);
-  const hasAutoPolledRef = useRef(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -33,10 +32,8 @@ export function PaymentStep({ contract, submitting, onPay, onRefresh }: Props) {
   // confirmar el pago. Si nunca se completa, se limpia la marca y el usuario
   // se queda en este paso con el botón manual disponible.
   useEffect(() => {
-    if (hasAutoPolledRef.current) return;
     const reference = sessionStorage.getItem(ONBOARDING_PAYMENT_REFERENCE_KEY);
     if (!reference) return;
-    hasAutoPolledRef.current = true;
 
     let cancelled = false;
     let tries = 0;
@@ -97,16 +94,6 @@ export function PaymentStep({ contract, submitting, onPay, onRefresh }: Props) {
           onClick={onPay}
           label="Pagar ahora"
         />
-
-        <button
-          type="button"
-          onClick={handleRefresh}
-          disabled={refreshing || autoChecking || submitting}
-          className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50"
-        >
-          {refreshing || autoChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-          Ya pagué, verificar estado
-        </button>
       </div>
     </div>
   );

@@ -95,7 +95,7 @@ export default function AuditLogPanel() {
       {/* ═══ Historial de un boleto ═══ */}
       <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
         <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2">
-          <Search size={16} className="text-purple-600" />
+          <Search size={16} className="text-admin-blue" />
           Historial de un boleto
         </h3>
         <div className="flex flex-wrap items-end gap-3">
@@ -112,7 +112,7 @@ export default function AuditLogPanel() {
           <button
             onClick={handleSearchTicket}
             disabled={!ticketId || loadingTicket}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 disabled:opacity-50 cursor-pointer"
+            className="px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark disabled:opacity-50 cursor-pointer"
           >
             {loadingTicket ? "Buscando..." : "Buscar"}
           </button>
@@ -130,7 +130,7 @@ export default function AuditLogPanel() {
       {/* ═══ Historial general ═══ */}
       <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
         <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2">
-          <History size={16} className="text-purple-600" />
+          <History size={16} className="text-admin-blue" />
           Historial general
         </h3>
         <div className="flex flex-wrap items-end gap-3">
@@ -155,7 +155,7 @@ export default function AuditLogPanel() {
           <button
             onClick={() => loadLogs(0)}
             disabled={!from || !to || loadingLogs}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 disabled:opacity-50 cursor-pointer"
+            className="px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark disabled:opacity-50 cursor-pointer"
           >
             {loadingLogs ? "Cargando..." : "Consultar"}
           </button>
@@ -198,7 +198,7 @@ export default function AuditLogPanel() {
       {/* ═══ Actividad sospechosa ═══ */}
       <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
         <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2">
-          <ShieldAlert size={16} className="text-purple-600" />
+          <ShieldAlert size={16} className="text-admin-blue" />
           Actividad sospechosa
         </h3>
         <div className="flex flex-wrap items-end gap-3">
@@ -224,7 +224,7 @@ export default function AuditLogPanel() {
           <button
             onClick={loadSuspicious}
             disabled={!since || loadingSuspicious}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 disabled:opacity-50 cursor-pointer"
+            className="px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark disabled:opacity-50 cursor-pointer"
           >
             {loadingSuspicious ? "Cargando..." : "Consultar"}
           </button>

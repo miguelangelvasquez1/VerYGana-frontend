@@ -122,7 +122,7 @@ export default function CommercialPayoutsList({ year, month }: Props) {
             <button
               disabled={!data.meta.hasPrevious}
               onClick={() => setPage((p) => p - 1)}
-              className="text-sm px-3 py-1 rounded border disabled:opacity-40"
+              className="text-sm px-3 py-1 rounded border disabled:opacity-40 cursor-pointer"
             >
               Anterior
             </button>
@@ -134,7 +134,7 @@ export default function CommercialPayoutsList({ year, month }: Props) {
             <button
               disabled={!data.meta.hasNext}
               onClick={() => setPage((p) => p + 1)}
-              className="text-sm px-3 py-1 rounded border disabled:opacity-40"
+              className="text-sm px-3 py-1 rounded border disabled:opacity-40 cursor-pointer"
             >
               Siguiente
             </button>

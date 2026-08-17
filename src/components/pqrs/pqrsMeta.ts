@@ -17,16 +17,16 @@ export const pqrsStatusLabel: Record<PqrsStatus, string> = {
 
 export const pqrsStatusColor: Record<PqrsStatus, string> = {
   [PqrsStatus.PENDIENTE_ASIGNACION]: "text-amber-600 bg-amber-50",
-  [PqrsStatus.RECIBIDA]: "text-[#03548C] bg-[#03548C]/10",
-  [PqrsStatus.EN_REVISION]: "text-blue-600 bg-blue-50",
+  [PqrsStatus.RECIBIDA]: "text-admin-midnight bg-admin-midnight/10",
+  [PqrsStatus.EN_REVISION]: "text-admin-blue bg-admin-blue/10",
   [PqrsStatus.RESUELTA]: "text-green-600 bg-green-50",
   [PqrsStatus.CERRADA]: "text-gray-600 bg-gray-100",
 };
 
 export const pqrsStatusDot: Record<PqrsStatus, string> = {
   [PqrsStatus.PENDIENTE_ASIGNACION]: "bg-amber-500",
-  [PqrsStatus.RECIBIDA]: "bg-[#03548C]",
-  [PqrsStatus.EN_REVISION]: "bg-blue-500",
+  [PqrsStatus.RECIBIDA]: "bg-admin-midnight",
+  [PqrsStatus.EN_REVISION]: "bg-admin-blue",
   [PqrsStatus.RESUELTA]: "bg-green-500",
   [PqrsStatus.CERRADA]: "bg-gray-400",
 };

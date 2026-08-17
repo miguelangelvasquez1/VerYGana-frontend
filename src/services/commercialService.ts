@@ -1,6 +1,7 @@
 import apiClient from "@/lib/api/client";
 import { CommercialInitialDataResponseDTO } from "@/types/ads/commercial";
-import { CommercialProfileResponseDTO, MonthlyReportResponseDTO } from "@/types/Commercial.types";
+import { CommercialProfileResponseDTO, DailySaleResponseDTO, MonthlyReportResponseDTO, SalesReportResponseDTO } from "@/types/Commercial.types";
+import { PagedResponse } from "@/types/Generic.types";
 import { PayoutReportResponseDTO } from "@/types/Payout.types";
 
 // ============================================
@@ -134,18 +135,27 @@ export const getPayoutReports = async (year: number): Promise<PayoutReportRespon
   return response.data;
 };
 
-export const getSalesReport = async (year: number, month: number): Promise<MonthlyReportResponseDTO> => {
-  const response = await apiClient.get(`/commercials/report/sales`, {
+export const getAnuallySalesReport = async (year: number): Promise<SalesReportResponseDTO[]> => {
+  const response = await apiClient.get(`/commercials/report/sales/anually`, {
     params: {
-      year,
-      month
+      year
     }
   });
   return response.data;
 };
 
-export const getDailySales = async (startDate: string, endDate: string, page: number, size: number): Promise<MonthlyReportResponseDTO> => {
-  const response = await apiClient.get(`/commercials/report/sales`, {
+export const getSalesCountByDateRange = async (startDate: string, endDate: string): Promise<number> => {
+  const response = await apiClient.get(`/commercials/report/sales/count`, {
+    params: {
+      startDate,
+      endDate
+    }
+  });
+  return response.data;
+};
+
+export const getDailySales = async (startDate: string, endDate: string, page: number, size: number): Promise<PagedResponse<DailySaleResponseDTO>> => {
+  const response = await apiClient.get(`/commercials/report/sales/daily`, {
     params: {
       startDate,
       endDate,

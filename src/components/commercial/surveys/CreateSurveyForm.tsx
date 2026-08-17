@@ -305,7 +305,7 @@ export default function SurveyFormModal() {
                         key={val}
                         type="button"
                         onClick={() => setPricePerQuestion(val)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${
+                        className={`cursor-pointer px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${
                           pricePerQuestion === val
                             ? 'border-[#03548C] bg-[#03548C] text-white shadow-sm'
                             : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40 hover:text-[#03548C]'
@@ -323,7 +323,7 @@ export default function SurveyFormModal() {
                     type="button"
                     onClick={() => setPricePerQuestion((p) => Math.max(minPrice, p - 5))}
                     disabled={loadingCost || pricePerQuestion <= minPrice}
-                    className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
+                    className="cursor-pointer w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
                   >
                     <ChevronDown className="w-4 h-4" />
                   </button>
@@ -339,7 +339,7 @@ export default function SurveyFormModal() {
                     type="button"
                     onClick={() => setPricePerQuestion((p) => p + 5)}
                     disabled={loadingCost}
-                    className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
+                    className="cursor-pointer w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
                   >
                     <ChevronUp className="w-4 h-4" />
                   </button>
@@ -594,14 +594,14 @@ export default function SurveyFormModal() {
                       <button
                         type="button" disabled={idx === 0}
                         onClick={() => moveQuestion(idx, idx - 1)}
-                        className="hover:text-gray-500 disabled:opacity-30"
+                        className="cursor-pointer hover:text-gray-500 disabled:opacity-30"
                       >
                         <ChevronUp className="h-3.5 w-3.5" />
                       </button>
                       <button
                         type="button" disabled={idx === form.questions.length - 1}
                         onClick={() => moveQuestion(idx, idx + 1)}
-                        className="hover:text-gray-500 disabled:opacity-30"
+                        className="cursor-pointer hover:text-gray-500 disabled:opacity-30"
                       >
                         <ChevronDown className="h-3.5 w-3.5" />
                       </button>
@@ -656,7 +656,7 @@ export default function SurveyFormModal() {
                           <button
                             type="button"
                             onClick={() => removeQuestion(q.id)}
-                            className="ml-auto rounded-lg p-1 text-red-400 hover:bg-red-50"
+                            className="cursor-pointer ml-auto rounded-lg p-1 text-red-400 hover:bg-red-50"
                             title="Eliminar pregunta"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -704,7 +704,7 @@ export default function SurveyFormModal() {
                               <button
                                 type="button"
                                 onClick={() => removeOption(q.id, oi)}
-                                className="text-gray-300 hover:text-red-400"
+                                className="cursor-pointer text-gray-300 hover:text-red-400"
                               >
                                 <X className="h-3.5 w-3.5" />
                               </button>
@@ -716,7 +716,7 @@ export default function SurveyFormModal() {
                         <button
                           type="button"
                           onClick={() => addOption(q.id)}
-                          className="text-xs font-medium text-[#03548C] hover:text-[#03548C]"
+                          className="cursor-pointer text-xs font-medium text-[#03548C] hover:text-[#03548C]"
                         >
                           + Agregar opción ({q.options.length}/{MAX_OPTIONS_PER_QUESTION})
                         </button>
@@ -734,7 +734,7 @@ export default function SurveyFormModal() {
                 <button
                   type="button"
                   onClick={addQuestion}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-500 hover:border-[#03548C]/40 hover:text-[#03548C] transition-colors"
+                  className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-500 hover:border-[#03548C]/40 hover:text-[#03548C] transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Agregar pregunta ({form.questions.length}/{MAX_QUESTIONS})
@@ -863,7 +863,7 @@ function Field({
               onMouseLeave={() => setShowTip(false)}
               onFocus={() => setShowTip(true)}
               onBlur={() => setShowTip(false)}
-              className="text-gray-400 hover:text-[#03548C] transition-colors"
+              className="cursor-pointer text-gray-400 hover:text-[#03548C] transition-colors"
               aria-label={`Ayuda para: ${label}`}
             >
               <HelpCircle className="h-3.5 w-3.5" />
@@ -902,7 +902,7 @@ function StepAccordion({
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-3 px-6 py-4 text-left hover:bg-gray-50 transition-colors"
+        className="cursor-pointer flex w-full items-center gap-3 px-6 py-4 text-left hover:bg-gray-50 transition-colors"
       >
         <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white transition-colors ${
           errorCount > 0 ? 'bg-red-500' : 'bg-[#03548C]'

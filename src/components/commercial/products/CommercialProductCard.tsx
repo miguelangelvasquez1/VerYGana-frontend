@@ -234,7 +234,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
           >
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-gray-900">Acciones del producto</h3>
-              <button onClick={() => setShowHelp(false)} className="text-gray-400 hover:text-gray-600 transition">
+              <button onClick={() => setShowHelp(false)} className="text-gray-400 hover:text-gray-600 transition cursor-pointer">
                 <X className="w-5 h-5 cursor-pointer" />
               </button>
             </div>

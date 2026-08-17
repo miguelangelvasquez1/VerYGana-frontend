@@ -15,7 +15,7 @@ interface Props {
 }
 
 const inputCls = (error?: string) =>
-  `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+  `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
     error ? "border-red-400 bg-red-50" : "border-gray-300"
   }`;
 
@@ -130,7 +130,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel }: Props) {
           name="raffleType"
           value={formData.raffleType}
           onChange={handleChange}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors bg-white"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white"
         >
           <option value={RaffleType.STANDARD}>Estándar</option>
           <option value={RaffleType.PREMIUM}>Premium</option>
@@ -150,7 +150,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel }: Props) {
               onChange={(date: Date | null) =>
                 setFormData((prev) => ({ ...prev, startDate: date ? date.toISOString() : "" }))
               }
-              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
                 errors.startDate ? "border-red-400 bg-red-50" : "border-gray-300"
               }`}
             />
@@ -170,7 +170,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel }: Props) {
               onChange={(date: Date | null) =>
                 setFormData((prev) => ({ ...prev, endDate: date ? date.toISOString() : "" }))
               }
-              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
                 errors.endDate ? "border-red-400 bg-red-50" : "border-gray-300"
               }`}
             />
@@ -210,7 +210,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel }: Props) {
           />
           <div
             className={`w-10 h-6 rounded-full transition-colors duration-200 ${
-              formData.requiresPet ? "bg-purple-600" : "bg-gray-300"
+              formData.requiresPet ? "bg-admin-blue" : "bg-gray-300"
             }`}
           />
           <div
@@ -234,7 +234,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 rounded-xl font-semibold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="cursor-pointer flex-1 bg-admin-gradient hover:opacity-90 text-white py-3 rounded-xl font-semibold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {loading ? "Guardando..." : "Guardar cambios"}
         </button>
@@ -242,7 +242,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel }: Props) {
           type="button"
           onClick={onCancel}
           disabled={loading}
-          className="flex-1 border border-gray-300 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition disabled:opacity-40"
+          className="cursor-pointer flex-1 border border-gray-300 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition disabled:opacity-40"
         >
           Cancelar
         </button>

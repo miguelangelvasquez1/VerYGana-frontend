@@ -70,7 +70,7 @@ export const AdCard: React.FC<AdCardProps> = ({
           <span className="flex items-center gap-1.5">
             <span className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden inline-block align-middle">
               <span
-                className="block h-full bg-blue-500 rounded-full"
+                className="block h-full bg-admin-gradient rounded-full"
                 style={{ width: `${Math.min(ad.completionPercentage, 100)}%` }}
               />
             </span>
@@ -104,7 +104,7 @@ export const AdCard: React.FC<AdCardProps> = ({
         <button
           onClick={() => onViewDetail(ad)}
           title="Ver detalle completo"
-          className="cursor-pointer p-2 rounded-lg border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
+          className="cursor-pointer p-2 rounded-lg border border-gray-200 text-gray-500 hover:border-admin-blue/40 hover:text-admin-blue hover:bg-admin-blue/10 transition-all"
         >
           <Info className="w-4 h-4" />
         </button>

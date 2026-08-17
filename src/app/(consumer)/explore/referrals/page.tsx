@@ -99,7 +99,7 @@ export default function ReferralsPage() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-3">
-            Sistema de Referidos
+            Referidos
           </h1>
 
           {info ? (
@@ -136,7 +136,7 @@ export default function ReferralsPage() {
           <p className="text-sm text-gray-400">{error}</p>
           <button
             onClick={fetchInfo}
-            className="px-6 py-2.5 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold rounded-xl transition-colors"
+            className="px-6 py-2.5 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold rounded-xl transition-colors cursor-pointer"
           >
             Reintentar
           </button>

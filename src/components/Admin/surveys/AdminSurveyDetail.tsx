@@ -86,7 +86,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
       {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-admin-blue" />
         </div>
       )}
 
@@ -140,7 +140,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
                     key={t.next}
                     onClick={() => setPendingTransition(t)}
                     disabled={updateStatus.isPending}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all disabled:opacity-50 active:scale-95 ${t.btnClass}`}
+                    className={`cursor-pointer flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all disabled:opacity-50 active:scale-95 ${t.btnClass}`}
                   >
                     {updateStatus.isPending && updateStatus.variables?.status === t.next
                       ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -176,7 +176,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
           {/* ── Stats ───────────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <StatCard
-              icon={<Users className="h-4 w-4 text-indigo-400" />}
+              icon={<Users className="h-4 w-4 text-admin-blue" />}
               label="Respuestas"
               value={
                 survey.maxResponses
@@ -185,12 +185,12 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
               }
             />
             <StatCard
-              icon={<Award className="h-4 w-4 text-indigo-400" />}
+              icon={<Award className="h-4 w-4 text-admin-gold" />}
               label="Recompensa por pregunta"
               value={formatReward(survey.rewardAmountPerQuestionCents / 100)}
             />
             <StatCard
-              icon={<Coins className="h-4 w-4 text-indigo-400" />}
+              icon={<Coins className="h-4 w-4 text-admin-midnight" />}
               label="Recompensa por responder la encuesta"
               value={
                 survey.maxResponses != null
@@ -199,7 +199,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
               }
             />
             <StatCard
-              icon={<Wallet className="h-4 w-4 text-indigo-400" />}
+              icon={<Wallet className="h-4 w-4 text-admin-navy" />}
               label="Pagado"
               value={
                 survey.totalBudgetCents != null
@@ -208,7 +208,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
               }
             />
             <StatCard
-              icon={<FileEdit className="h-4 w-4 text-indigo-400" />}
+              icon={<FileEdit className="h-4 w-4 text-admin-blue-dark" />}
               label="Preguntas"
               value={String(survey.totalQuestions)}
             />
@@ -219,13 +219,13 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
             <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
               <div className="mb-1.5 flex items-center justify-between text-xs">
                 <span className="font-medium text-gray-600">Progreso de respuestas</span>
-                <span className="font-bold text-indigo-600">
+                <span className="font-bold text-admin-blue">
                   {getResponseProgress(survey.responseCount, survey.maxResponses)}%
                 </span>
               </div>
               <div className="h-2.5 overflow-hidden rounded-full bg-gray-100">
                 <div
-                  className="h-full rounded-full bg-indigo-500 transition-all"
+                  className="h-full rounded-full bg-admin-gradient transition-all"
                   style={{ width: `${getResponseProgress(survey.responseCount, survey.maxResponses)}%` }}
                 />
               </div>
@@ -311,7 +311,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
                     className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
                   >
                     <div className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-600">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-admin-blue/10 text-xs font-bold text-admin-blue">
                         {i + 1}
                       </span>
                       <div className="flex-1 min-w-0">

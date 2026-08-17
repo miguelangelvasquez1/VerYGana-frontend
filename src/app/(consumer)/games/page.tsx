@@ -103,7 +103,7 @@ const GamesPanelPage = () => {
             </div>
             <button
               onClick={handleSponsoredPlay}
-              className="relative flex items-center gap-3 rounded-2xl bg-linear-to-r from-yellow-400 via-amber-400 to-yellow-500 px-14 py-6 text-xl font-extrabold text-[#0b1440] shadow-2xl shadow-amber-500/40 ring-4 ring-yellow-300/40 hover:scale-105 hover:shadow-amber-500/60 active:scale-95 transition-all"
+              className="relative flex items-center gap-3 rounded-2xl bg-linear-to-r from-yellow-400 via-amber-400 to-yellow-500 px-14 py-6 text-xl font-extrabold text-[#0b1440] shadow-2xl shadow-amber-500/40 ring-4 ring-yellow-300/40 hover:scale-105 hover:shadow-amber-500/60 active:scale-95 transition-all cursor-pointer"
             >
               <Gamepad2 className="h-7 w-7" />
               ¡Jugar ahora!

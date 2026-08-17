@@ -89,7 +89,7 @@ const AdminPqrsPanel: React.FC = () => {
               onClick={() => { setStatusFilter(f.value); setPage(0); }}
               className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
                 statusFilter === f.value
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-admin-blue text-white'
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -112,7 +112,7 @@ const AdminPqrsPanel: React.FC = () => {
       {/* Content */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-admin-blue border-t-transparent rounded-full animate-spin" />
         </div>
       ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">

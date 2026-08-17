@@ -29,7 +29,7 @@ export function TermsStep({
       <div>
         <h3 className="text-lg font-bold text-gray-900 mb-1">Términos y Condiciones</h3>
         <p className="text-sm text-gray-500">
-          Antes de continuar, revisa y acepta los términos y condiciones para comerciantes de VerYGana.
+          Antes de continuar, revisa y acepta los términos y condiciones para comerciantes de VERyGANA.
         </p>
       </div>
 
@@ -40,7 +40,7 @@ export function TermsStep({
           <button
             type="button"
             onClick={onRetry}
-            className="text-xs text-[#03548C] hover:underline font-medium"
+            className="text-xs text-[#03548C] hover:underline font-medium cursor-pointer"
           >
             Reintentar
           </button>
@@ -86,7 +86,7 @@ export function TermsStep({
               className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#03548C] focus:ring-[#03548C]/40 shrink-0"
             />
             <span className="text-sm text-gray-700 leading-snug">
-              He leído y acepto los Términos y Condiciones para comerciantes de VerYGana.
+              He leído y acepto los Términos y Condiciones para comerciantes de VERyGANA.
             </span>
           </label>
 

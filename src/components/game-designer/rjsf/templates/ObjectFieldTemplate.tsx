@@ -80,7 +80,7 @@ export default function CustomObjectFieldTemplate({
         <button
           type="button"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`w-full px-6 py-4 flex items-center justify-between ${colors.hover} transition-colors`}
+          className={`w-full px-6 py-4 flex items-center justify-between cursor-pointer ${colors.hover} transition-colors`}
         >
           <div className="flex items-center gap-3">
             <div className={`${colors.bg} p-2.5 rounded-lg`}>

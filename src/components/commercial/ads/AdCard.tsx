@@ -311,7 +311,7 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
         >
           <button
             onClick={() => setShowMediaModal(false)}
-            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
           >
             <X className="w-6 h-6 text-white" />
           </button>

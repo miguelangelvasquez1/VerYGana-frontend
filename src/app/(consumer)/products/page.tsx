@@ -275,7 +275,7 @@ export default function ProductsPage() {
           <div className="lg:hidden flex items-center gap-2 mb-4">
             <button
               onClick={() => setShowMobileFilters(true)}
-              className="relative flex items-center gap-1.5 px-3 py-2 border-2 rounded-xl text-sm font-semibold border-gray-200 bg-white text-gray-600 hover:border-gray-300 transition shrink-0"
+              className="cursor-pointer relative flex items-center gap-1.5 px-3 py-2 border-2 rounded-xl text-sm font-semibold border-gray-200 bg-white text-gray-600 hover:border-gray-300 transition shrink-0"
             >
               <SlidersHorizontal className="w-4 h-4" />
               Filtrar
@@ -316,7 +316,7 @@ export default function ProductsPage() {
                     <li>
                       <button
                         onClick={() => setSelectedCategoryId(null)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 transition hover:bg-gray-50 ${
+                        className={`cursor-pointer w-full flex items-center gap-3 px-4 py-3 transition hover:bg-gray-50 ${
                           selectedCategoryId === null
                             ? "text-[#014C92] font-semibold bg-blue-50/70"
                             : "text-gray-700"
@@ -339,7 +339,7 @@ export default function ProductsPage() {
                               selectedCategoryId === cat.id ? null : cat.id
                             )
                           }
-                          className={`w-full flex items-center gap-3 px-4 py-3 transition hover:bg-gray-50 ${
+                          className={`cursor-pointer w-full flex items-center gap-3 px-4 py-3 transition hover:bg-gray-50 ${
                             selectedCategoryId === cat.id
                               ? "text-[#014C92] font-semibold bg-blue-50/70"
                               : "text-gray-700"
@@ -402,7 +402,7 @@ export default function ProductsPage() {
                     <button
                       onClick={applyFilters}
                       disabled={!hasPendingChanges}
-                      className="w-full py-3 rounded-xl text-white text-sm font-bold transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="cursor-pointer w-full py-3 rounded-xl text-white text-sm font-bold transition disabled:opacity-40 disabled:cursor-not-allowed"
                       style={{ background: "linear-gradient(135deg, #014C92, #1EA5BD)" }}
                     >
                       Aplicar filtros
@@ -410,7 +410,7 @@ export default function ProductsPage() {
                     {hasAnyFilters && (
                       <button
                         onClick={clearFilters}
-                        className="w-full py-2.5 rounded-xl text-sm font-semibold text-red-600 border-2 border-red-200 hover:bg-red-50 transition"
+                        className="cursor-pointer w-full py-2.5 rounded-xl text-sm font-semibold text-red-600 border-2 border-red-200 hover:bg-red-50 transition"
                       >
                         Limpiar filtros
                       </button>
@@ -482,7 +482,7 @@ export default function ProductsPage() {
               <h3 className="font-bold text-gray-900">Filtros</h3>
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="p-2 rounded-full hover:bg-gray-100 transition"
+                className="cursor-pointer p-2 rounded-full hover:bg-gray-100 transition"
               >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
@@ -493,7 +493,7 @@ export default function ProductsPage() {
 
               <button
                 onClick={applyFilters}
-                className="mt-6 w-full py-3 rounded-xl text-white font-bold text-sm transition"
+                className="cursor-pointer mt-6 w-full py-3 rounded-xl text-white font-bold text-sm transition"
                 style={{ background: "linear-gradient(135deg, #014C92, #1EA5BD)" }}
               >
                 Aplicar filtros
@@ -502,7 +502,7 @@ export default function ProductsPage() {
               {hasAnyFilters && (
                 <button
                   onClick={clearFilters}
-                  className="mt-2 w-full py-2.5 rounded-xl text-sm font-semibold text-red-600 border-2 border-red-200 hover:bg-red-50 transition"
+                  className="cursor-pointer mt-2 w-full py-2.5 rounded-xl text-sm font-semibold text-red-600 border-2 border-red-200 hover:bg-red-50 transition"
                 >
                   Limpiar filtros
                 </button>

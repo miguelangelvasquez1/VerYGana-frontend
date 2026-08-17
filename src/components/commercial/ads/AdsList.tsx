@@ -97,7 +97,7 @@ export function AdsList() {
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
         >
           Reintentar
         </button>
@@ -224,7 +224,7 @@ export function AdsList() {
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 0}
-                  className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                  className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -232,7 +232,7 @@ export function AdsList() {
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage >= totalPages - 1}
-                  className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                  className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>

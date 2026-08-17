@@ -167,13 +167,13 @@ export default function HomePage() {
 
               <div className="flex flex-wrap gap-3">
                 <Link href="/ads">
-                  <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all">
+                  <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer">
                     Empezar a ganar
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </Link>
                 <Link href="/explore/profile">
-                  <button className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-6 py-3 rounded-full transition-all">
+                  <button className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-6 py-3 rounded-full transition-all cursor-pointer">
                     Ver mi perfil
                   </button>
                 </Link>
@@ -182,17 +182,17 @@ export default function HomePage() {
 
             {/* Right stats cards */}
             <div
-              className={`flex-shrink-0 w-full lg:w-80 transition-all duration-700 delay-200 ${
+              className={`w-full flex-shrink-0 lg:ml-auto lg:mr-8 lg:w-[360px] transition-all duration-700 delay-200 ${
                 animateHero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
             >
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid w-full grid-cols-2 gap-4">
                 {STATS.map(({ value, label, icon }) => (
                   <div
                     key={label}
-                    className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-white"
+                    className="rounded-2xl border border-white/20 bg-white/10 p-4 text-white backdrop-blur-sm"
                   >
-                    <div className="flex items-center gap-2 text-blue-200 mb-2">
+                    <div className="mb-2 flex items-center gap-2 text-blue-200">
                       {icon}
                       <span className="text-xs">{label}</span>
                     </div>

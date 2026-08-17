@@ -175,7 +175,7 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
         <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <PhoneCall className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-800">
-            Por tu ruta comercial, un asesor de VerYGana se pondrá en contacto contigo para
+            Por tu ruta comercial, un asesor de VERyGANA se pondrá en contacto contigo para
             confirmar las condiciones finales, sin importar el plan que elijas. Puedes continuar
             de todas formas.
           </p>
@@ -194,7 +194,7 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
                     <button
                       type="button"
                       onClick={() => onSelectPlan(plan.planCode)}
-                      className={`w-full flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition ${
+                      className={`w-full flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition cursor-pointer ${
                         isSelected
                           ? "border-[#03548C] bg-[#03548C]/5"
                           : "border-gray-200 bg-white hover:border-gray-300"
@@ -352,7 +352,7 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
             <p className="text-xs text-gray-400 mt-1">{specialNegotiationDetails.length}/1000</p>
             <p className="text-xs text-amber-700 mt-2 flex items-start gap-1.5">
               <PhoneCall className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              Un asesor de VerYGana se pondrá en contacto contigo para ajustar las condiciones finales.
+              Un asesor de VERyGANA se pondrá en contacto contigo para ajustar las condiciones finales.
             </p>
           </div>
         )}

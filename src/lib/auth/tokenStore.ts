@@ -13,12 +13,30 @@ let isReady = false;
 let resolveReady: (() => void) | null = null;
 const readyPromise = new Promise<void>((resolve) => { resolveReady = resolve; });
 
+const subscribers = new Set<(token: string | null) => void>();
+
 export function setAccessToken(token: string | null): void {
+  const changed = currentToken !== token;
   currentToken = token;
   if (!isReady) {
     isReady = true;
     resolveReady?.();
   }
+  if (changed) subscribers.forEach((fn) => fn(token));
+}
+
+/**
+ * Notifies on every token change (login, refresh, logout).
+ *
+ * Used by the pet game: it runs in a cross-origin iframe and grabs its JWT once
+ * at startup, so it never sees later refreshes. The host page has to push the
+ * new token in, and this is how it finds out there is one.
+ *
+ * Returns the unsubscribe function.
+ */
+export function onAccessTokenChange(fn: (token: string | null) => void): () => void {
+  subscribers.add(fn);
+  return () => { subscribers.delete(fn); };
 }
 
 export function getAccessToken(): string | null {

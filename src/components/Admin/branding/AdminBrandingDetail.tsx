@@ -91,7 +91,7 @@ const SectionCard: React.FC<{ title: string; children: React.ReactNode }> = ({ t
 );
 
 const fieldCls =
-  'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none';
+  'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue resize-none';
 
 // ─── Designer Selector ────────────────────────────────────────────────────────
 
@@ -128,7 +128,7 @@ const DesignerSelector: React.FC<{
           key={d.userId}
           className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors select-none ${
             selectedUserId === d.userId
-              ? 'border-blue-500 bg-blue-50'
+              ? 'border-admin-blue bg-admin-blue/10'
               : 'border-gray-200 hover:bg-gray-50'
           }`}
         >
@@ -137,7 +137,7 @@ const DesignerSelector: React.FC<{
             name="designer"
             checked={selectedUserId === d.userId}
             onChange={() => onSelect(d.userId)}
-            className="text-blue-600 shrink-0"
+            className="text-admin-blue shrink-0"
           />
           <div className="min-w-0">
             <p className="text-sm font-medium text-gray-900">
@@ -352,7 +352,7 @@ const ReassignModal: React.FC<{
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <UserCog size={18} className="text-blue-600" />
+            <UserCog size={18} className="text-admin-blue" />
             <h2 className="text-base font-semibold text-gray-900">Reasignar diseñador</h2>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
@@ -383,7 +383,7 @@ const ReassignModal: React.FC<{
             <button
               type="submit"
               disabled={submitting || !selectedUserId}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               Reasignar
@@ -439,7 +439,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin text-blue-600" size={32} />
+        <Loader2 className="animate-spin text-admin-blue" size={32} />
       </div>
     );
   }
@@ -512,7 +512,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
           {canReassign && (
             <button
               onClick={() => setModal('reassign')}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors cursor-pointer"
             >
               <UserCog size={15} /> Reasignar diseñador
             </button>
@@ -591,7 +591,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
                   href={detail.targetUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-blue-600 hover:underline break-all"
+                  className="flex items-center gap-1 text-admin-midnight hover:text-admin-blue hover:underline break-all"
                 >
                   <Globe size={13} className="shrink-0" />
                   {detail.targetUrl}
@@ -610,9 +610,9 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
             <p className="text-base font-bold text-green-800 mt-1">{formatCOP(detail.budgetCents)}</p>
           </div>
           {detail.estimatedSessions != null && (
-            <div className="bg-blue-50 rounded-lg p-3 text-center">
-              <p className="text-[11px] text-blue-700 font-semibold uppercase tracking-wide">Ses. estimadas</p>
-              <p className="text-base font-bold text-blue-800 mt-1">
+            <div className="bg-admin-blue/10 rounded-lg p-3 text-center">
+              <p className="text-[11px] text-admin-blue font-semibold uppercase tracking-wide">Ses. estimadas</p>
+              <p className="text-base font-bold text-admin-blue-dark mt-1">
                 ~{detail.estimatedSessions.toLocaleString('es-CO')}
               </p>
             </div>
@@ -671,7 +671,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
                 {detail.categories.map(c => (
                   <span
                     key={c.id}
-                    className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium"
+                    className="px-2 py-0.5 bg-admin-blue/10 text-admin-blue text-xs rounded-full font-medium"
                   >
                     {c.name}
                   </span>

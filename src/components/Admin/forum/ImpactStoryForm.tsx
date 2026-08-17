@@ -34,7 +34,7 @@ const inputCls = (err?: string) =>
    outline-none transition-all duration-150
    ${err
      ? 'border-red-400 focus:ring-2 focus:ring-red-200'
-     : 'border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100'
+     : 'border-gray-200 focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/20'
    }
    disabled:opacity-50 disabled:cursor-not-allowed placeholder:font-normal placeholder:text-gray-400`;
 
@@ -158,14 +158,14 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-admin-blue/5 to-slate-100 py-8 px-4">
       <div className="max-w-3xl mx-auto">
 
         {/* ── Header card ── */}
-        <div className="bg-gradient-to-r from-emerald-800 to-emerald-600 rounded-2xl p-6 mb-1 shadow-lg shadow-emerald-900/20">
+        <div className="bg-admin-navy-gradient rounded-2xl p-6 mb-1 shadow-lg shadow-admin-navy/20">
           <div className="flex items-center gap-4">
             <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-emerald-200" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-admin-gold" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
               </svg>
             </div>
@@ -173,14 +173,14 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
               <h1 className="text-xl font-bold text-white tracking-tight">
                 {isEditing ? 'Editar Historia de Impacto' : 'Nueva Historia de Impacto'}
               </h1>
-              <p className="text-emerald-200 text-sm mt-0.5">Comparte el impacto real de tu organización</p>
+              <p className="text-white/70 text-sm mt-0.5">Comparte el impacto real de tu organización</p>
             </div>
           </div>
 
           {/* Progress bar */}
           {isBusy && (
             <div className="mt-4">
-              <div className="flex justify-between text-xs text-emerald-200 mb-1.5">
+              <div className="flex justify-between text-xs text-white/70 mb-1.5">
                 <span>
                   {submitState.status === 'uploading_media' && `Subiendo archivos...`}
                   {submitState.status === 'creating' && 'Guardando historia...'}
@@ -189,7 +189,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
               </div>
               <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-emerald-300 rounded-full transition-all duration-300"
+                  className="h-full bg-admin-gold rounded-full transition-all duration-300"
                   style={{ width: `${submitState.progress}%` }}
                 />
               </div>
@@ -279,10 +279,10 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
           <Section num="02" title="Métricas de Impacto">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Beneficiados */}
-              <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-4">
+              <div className="bg-admin-blue/5 border border-admin-blue/20 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <div className="w-8 h-8 rounded-lg bg-admin-blue/10 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-admin-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                       <circle cx="9" cy="7" r="4"/>
                       <path strokeLinecap="round" d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -302,10 +302,10 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
               </div>
 
               {/* Inversión */}
-              <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-4">
+              <div className="bg-admin-gold/10 border border-admin-gold/20 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <div className="w-8 h-8 rounded-lg bg-admin-gold/20 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-admin-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <line x1="12" y1="1" x2="12" y2="23" strokeLinecap="round"/>
                       <path strokeLinecap="round" d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                     </svg>
@@ -314,9 +314,9 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
                 </div>
                 <div className="flex gap-2">
                   <select
-                    className={`w-24 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 
-                                shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 
-                                focus:border-blue-400 transition-colors disabled:opacity-50 cursor-pointer`}
+                    className={`w-24 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700
+                                shadow-sm focus:outline-none focus:ring-2 focus:ring-admin-blue
+                                focus:border-admin-blue transition-colors disabled:opacity-50 cursor-pointer`}
                     value={values.investedCurrency}
                     onChange={(e) => set('investedCurrency', e.target.value)}
                     disabled={isBusy}
@@ -351,7 +351,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
               className={`
                 border-2 border-dashed rounded-xl py-10 px-4 text-center cursor-pointer
                 transition-all duration-200 mb-4
-                ${dragOver ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 bg-gray-50/60 hover:border-emerald-400 hover:bg-emerald-50/50'}
+                ${dragOver ? 'border-admin-blue bg-admin-blue/10' : 'border-gray-200 bg-gray-50/60 hover:border-admin-blue/40 hover:bg-admin-blue/5'}
                 ${isBusy ? 'pointer-events-none opacity-50' : ''}
               `}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -422,7 +422,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
           <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100 flex-wrap">
             <button
               type="button"
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40"
+              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40 cursor-pointer"
               disabled={isBusy}
               onClick={onCancel}
             >
@@ -430,7 +430,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 bg-white border border-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-40"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-admin-midnight bg-white border border-admin-midnight hover:bg-admin-midnight/10 transition-colors disabled:opacity-40 cursor-pointer"
               disabled={isBusy}
               onClick={() => handleSubmit('DRAFT')}
             >
@@ -438,7 +438,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors disabled:opacity-40 flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark transition-colors disabled:opacity-40 flex items-center gap-2 cursor-pointer"
               disabled={isBusy}
               onClick={() => handleSubmit('PUBLISHED')}
             >
@@ -467,7 +467,7 @@ function Section({ num, title, children }: { num: string; title: string; childre
   return (
     <div className="px-6 py-5 border-b border-gray-100 last:border-b-0">
       <h2 className="flex items-center gap-2.5 text-sm font-bold text-gray-800 mb-4">
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold">
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-admin-blue/10 text-admin-blue text-xs font-bold">
           {num}
         </span>
         {title}
@@ -490,13 +490,13 @@ function MediaCard({ media, disabled, onRemove, onSetCover, onAltText }: {
   return (
     <div className={`
       relative rounded-xl border overflow-hidden bg-white transition-shadow
-      ${media.isCover ? 'border-emerald-500 ring-2 ring-emerald-200' : 'border-gray-200'}
+      ${media.isCover ? 'border-admin-blue ring-2 ring-admin-blue/20' : 'border-gray-200'}
       ${hasError ? 'border-red-300' : ''}
       hover:shadow-md
     `}>
       {/* Cover badge */}
       {media.isCover && (
-        <span className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wider">
+        <span className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full bg-admin-blue text-white text-[10px] font-bold uppercase tracking-wider">
           Portada
         </span>
       )}
@@ -547,7 +547,7 @@ function MediaCard({ media, disabled, onRemove, onSetCover, onAltText }: {
           {hasError && <span className="text-red-500 font-semibold">✕</span>}
         </p>
         <input
-          className="w-full px-2 py-1 text-[11px] rounded-lg border border-gray-200 outline-none focus:border-emerald-400 bg-gray-50 placeholder:text-gray-300 disabled:opacity-50"
+          className="w-full px-2 py-1 text-[11px] rounded-lg border border-gray-200 outline-none focus:border-admin-blue bg-gray-50 placeholder:text-gray-300 disabled:opacity-50"
           placeholder="Texto alternativo"
           value={media.altText}
           onChange={(e) => onAltText(e.target.value)}
@@ -560,7 +560,7 @@ function MediaCard({ media, disabled, onRemove, onSetCover, onAltText }: {
         {!media.isCover && (
           <button
             type="button"
-            className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-40"
+            className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-admin-blue/40 hover:text-admin-blue hover:bg-admin-blue/10 transition-colors disabled:opacity-40 cursor-pointer"
             onClick={onSetCover} disabled={disabled} title="Usar como portada"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -570,7 +570,7 @@ function MediaCard({ media, disabled, onRemove, onSetCover, onAltText }: {
         )}
         <button
           type="button"
-          className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
+          className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 cursor-pointer"
           onClick={onRemove} disabled={disabled} title="Eliminar"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

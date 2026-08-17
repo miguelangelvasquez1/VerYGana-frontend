@@ -99,7 +99,7 @@ export default function MyParticipationsPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setMainTab("BOLETOS")}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-sm ${
+                className={`cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-sm ${
                   mainTab === "BOLETOS"
                     ? "bg-white text-[#03548C] shadow-md"
                     : "bg-white/15 text-white hover:bg-white/25"
@@ -109,7 +109,7 @@ export default function MyParticipationsPage() {
               </button>
               <button
                 onClick={() => setMainTab("PRIZES")}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-sm ${
+                className={`cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-sm ${
                   mainTab === "PRIZES"
                     ? "bg-white text-[#03548C] shadow-md"
                     : "bg-white/15 text-white hover:bg-white/25"
@@ -276,7 +276,7 @@ function TicketsModal({ raffleId, onClose }: { raffleId: number; onClose: () => 
       >
         <div className="flex justify-between items-center px-5 py-4 border-b border-gray-100">
           <h2 className="text-lg font-bold text-gray-900">🎟️ Mis boletos</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button onClick={onClose} className="cursor-pointer text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
         <div className="overflow-y-auto p-4 md:p-6">
@@ -375,7 +375,7 @@ function RaffleCard({
 
           <button
             onClick={() => onViewTickets(raffle.id)}
-            className="self-start bg-[#03548C] hover:bg-[#0b1440] active:scale-95 transition text-white text-xs font-semibold px-4 py-2 rounded-lg"
+            className="cursor-pointer self-start bg-[#03548C] hover:bg-[#0b1440] active:scale-95 transition text-white text-xs font-semibold px-4 py-2 rounded-lg"
           >
             Ver mis boletos
           </button>
@@ -482,7 +482,7 @@ function PrizeCard({
             <div className="flex justify-end mt-1">
               <button
                 onClick={onClaim}
-                className="bg-[#03548C] hover:bg-[#0b1440] active:scale-95 transition text-white text-xs font-semibold px-4 py-2 rounded-lg"
+                className="cursor-pointer bg-[#03548C] hover:bg-[#0b1440] active:scale-95 transition text-white text-xs font-semibold px-4 py-2 rounded-lg"
               >
                 Reclamar premio →
               </button>
@@ -500,7 +500,7 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+      className={`cursor-pointer px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
         active
           ? "bg-[#03548C] text-white"
           : "bg-gray-100 text-gray-600 hover:bg-gray-200"

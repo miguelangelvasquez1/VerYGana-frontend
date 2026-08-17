@@ -106,7 +106,7 @@ export default function LiveRafflesCarousel() {
       {/* Fullscreen button */}
       <button
         onClick={() => setShowFullImage(true)}
-        className="absolute top-3 right-3 z-20 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-lg transition"
+        className="absolute top-3 right-3 z-20 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-lg transition cursor-pointer"
       >
         <Maximize2 className="w-3.5 h-3.5" />
       </button>
@@ -274,7 +274,7 @@ export default function LiveRafflesCarousel() {
           >
             <button
               onClick={() => setShowFullImage(false)}
-              className="absolute -top-10 right-0 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition"
+              className="absolute -top-10 right-0 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
               Cerrar

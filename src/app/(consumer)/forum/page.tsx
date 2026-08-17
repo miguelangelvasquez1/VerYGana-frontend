@@ -57,7 +57,7 @@ export default function ForumPage() {
         <div className={`relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 transition-all duration-700 ${animateHero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
-              ❤️ Comunidad VerYGana
+              ❤️ Comunidad VERyGANA
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4 leading-tight">
               Historias de <span className="text-yellow-300">Impacto</span>

@@ -85,15 +85,15 @@ export function ConfirmDialog({ from, transition, loading, onConfirm, onCancel }
         <div className="mt-6 flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            className="cursor-pointer flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 ${
-              isCritical ? 'bg-red-500 hover:bg-red-400' : 'bg-indigo-600 hover:bg-indigo-500'
+            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 ${
+              isCritical ? 'bg-red-500 hover:bg-red-400' : 'bg-admin-blue hover:bg-admin-blue-dark'
             }`}
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}

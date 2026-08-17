@@ -92,7 +92,7 @@ export default function SurveyTable({
           {errorMsg}
           <button
             onClick={() => setErrorMsg(null)}
-            className="ml-auto text-red-400 hover:text-red-600"
+            className="cursor-pointer ml-auto text-red-400 hover:text-red-600"
           >
             ✕
           </button>
@@ -147,14 +147,14 @@ export default function SurveyTable({
               <button
                 disabled={page === 0}
                 onClick={() => onPageChange(page - 1)}
-                className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 disabled={page >= totalPages - 1}
                 onClick={() => onPageChange(page + 1)}
-                className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -326,7 +326,7 @@ function ActionBtn({
       title={tooltip}
       onClick={onClick}
       disabled={loading}
-      className={`rounded-lg p-1.5 transition-colors disabled:opacity-50 ${className}`}
+      className={`cursor-pointer rounded-lg p-1.5 transition-colors disabled:opacity-50 ${className}`}
     >
       {loading ? (
         <Loader2 className="h-3.5 w-3.5 animate-spin" />

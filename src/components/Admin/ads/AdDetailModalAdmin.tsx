@@ -33,7 +33,7 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onClose }) => 
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -78,7 +78,7 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onClose }) => 
                 href={ad.targetUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-blue-600 hover:underline truncate"
+                className="flex items-center gap-1.5 text-admin-midnight hover:text-admin-blue hover:underline truncate"
               >
                 <LinkIcon className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">{ad.targetUrl}</span>
@@ -106,9 +106,9 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onClose }) => 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { icon: DollarSign, label: 'Presupuesto total', value: formatCurrency(ad.totalBudget), color: 'text-gray-700' },
-                { icon: TrendingUp, label: 'Gastado', value: formatCurrency(ad.spentBudget), color: 'text-blue-600' },
+                { icon: TrendingUp, label: 'Gastado', value: formatCurrency(ad.spentBudget), color: 'text-admin-blue' },
                 { icon: DollarSign, label: 'Restante', value: formatCurrency(ad.remainingBudget), color: 'text-emerald-600' },
-                { icon: Heart, label: 'Likes', value: `${ad.currentLikes} / ${ad.maxLikes}`, color: 'text-pink-600' },
+                { icon: Heart, label: 'Likes', value: `${ad.currentLikes} / ${ad.maxLikes}`, color: 'text-admin-gold' },
               ].map(({ icon: Icon, label, value, color }) => (
                 <div key={label} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                   <Icon className={`w-4 h-4 ${color} mb-1`} />
@@ -126,7 +126,7 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onClose }) => 
               </div>
               <div className="w-full bg-gray-100 rounded-full h-2">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all"
+                  className="bg-admin-gradient h-2 rounded-full transition-all"
                   style={{ width: `${Math.min(ad.completionPercentage, 100)}%` }}
                 />
               </div>
@@ -186,7 +186,7 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onClose }) => 
                 {ad.categories.map((cat) => (
                   <span
                     key={cat.id}
-                    className="px-3 py-1 bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold rounded-full"
+                    className="px-3 py-1 bg-admin-blue/10 border border-admin-blue/20 text-admin-blue text-xs font-semibold rounded-full"
                   >
                     {cat.name}
                   </span>

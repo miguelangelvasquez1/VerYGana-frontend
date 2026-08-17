@@ -23,7 +23,7 @@ const ProductDetailConsumer: React.FC<Props> = ({ product }) => {
     role === "CONSUMER" ? (
       <button
         onClick={() => toggleFavorite(product.id)}
-        className="absolute top-4 right-4 bg-white p-3 rounded-full shadow-md hover:scale-110 transition"
+        className="absolute top-4 right-4 bg-white p-3 rounded-full shadow-md hover:scale-110 transition cursor-pointer"
       >
         <Heart
           className={`w-6 h-6 ${
@@ -46,7 +46,7 @@ const ProductDetailConsumer: React.FC<Props> = ({ product }) => {
           >
             <button
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              className="p-2 hover:bg-blue-50 transition"
+              className="p-2 hover:bg-blue-50 transition cursor-pointer"
               style={{ color: "#014C92" }}
             >
               <Minus className="w-4 h-4" />
@@ -59,7 +59,7 @@ const ProductDetailConsumer: React.FC<Props> = ({ product }) => {
             </span>
             <button
               onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-              className="p-2 hover:bg-blue-50 transition"
+              className="p-2 hover:bg-blue-50 transition cursor-pointer"
               style={{ color: "#014C92" }}
             >
               <Plus className="w-4 h-4" />

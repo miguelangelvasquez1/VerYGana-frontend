@@ -70,7 +70,7 @@ function MediaSlide({
         <button
           onClick={() => setPlaying(true)}
           aria-label="Reproducir video"
-          className="absolute inset-0 flex items-center justify-center group"
+          className="absolute inset-0 flex items-center justify-center group cursor-pointer"
         >
           <div className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl group-hover:scale-110 group-active:scale-95 transition-transform duration-150">
             <Play className="w-7 h-7 text-emerald-700 ml-1" fill="currentColor" />
@@ -170,7 +170,7 @@ function MediaCarousel({
             className="absolute left-2 top-1/2 -translate-y-1/2 z-10
               w-9 h-9 rounded-full bg-black/40 hover:bg-black/65 active:scale-95
               flex items-center justify-center text-white backdrop-blur-sm
-              transition-all duration-150 shadow-md"
+              transition-all duration-150 shadow-md cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -180,7 +180,7 @@ function MediaCarousel({
             className="absolute right-2 top-1/2 -translate-y-1/2 z-10
               w-9 h-9 rounded-full bg-black/40 hover:bg-black/65 active:scale-95
               flex items-center justify-center text-white backdrop-blur-sm
-              transition-all duration-150 shadow-md"
+              transition-all duration-150 shadow-md cursor-pointer"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -197,7 +197,7 @@ function MediaCarousel({
                 key={i}
                 onClick={() => setIndex(i)}
                 aria-label={`Ir a imagen ${i + 1}`}
-                className={`rounded-full transition-all duration-200 ${
+                className={`rounded-full transition-all duration-200 cursor-pointer ${
                   i === index
                     ? 'w-5 h-2 bg-white'
                     : 'w-2 h-2 bg-white/50 hover:bg-white/80'
@@ -295,7 +295,7 @@ export default function CharityPost({ story }: CharityPostProps) {
           </p>
           {isLongDesc && (
             <button
-              className="mt-1.5 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] transition-colors"
+              className="mt-1.5 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] transition-colors cursor-pointer"
               onClick={() => setDescExpanded((v) => !v)}
             >
               {descExpanded ? 'Ver menos ↑' : 'Ver más ↓'}

@@ -17,7 +17,7 @@ export const formatCOP = (cents: number | null | undefined): string => {
   }).format(cents / 100);
 };
 
-// Recuerda el último rechazo de VerYGana que el usuario ya vio (modal
+// Recuerda el último rechazo de VERyGANA que el usuario ya vio (modal
 // bloqueante), para no repetirlo en cada visita mientras siga siendo el
 // mismo rechazo — solo se re-muestra si `rejectedAt` cambia.
 const LAST_SEEN_REJECTION_KEY = "onboarding_last_seen_rejection";
@@ -132,7 +132,7 @@ export function BoolToggle({
           key={String(opt.v)}
           type="button"
           onClick={() => onChange(opt.v)}
-          className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition
+          className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition cursor-pointer
             ${
               value === opt.v
                 ? "border-blue-500 bg-blue-50 text-blue-700"

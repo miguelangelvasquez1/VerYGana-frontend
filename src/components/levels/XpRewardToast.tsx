@@ -6,6 +6,7 @@ import {
   TrendingUp, ClipboardList, Tv2, Gamepad2,
   Users, ShoppingBag, Medal, Star, Trophy, Crown, Diamond,
 } from 'lucide-react'
+import { BRAND, levelTheme, activityTheme, levelSheen, MEDALLION_BEVEL } from './levelTheme'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -26,22 +27,24 @@ interface Props {
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
+// Colores y etiquetas viven en ./levelTheme (paleta de marca). Aquí sólo
+// asociamos cada actividad/nivel con su ícono lucide.
 
-const ACTIVITY_CONFIG = {
-  SURVEY_COMPLETED: { label: 'Encuesta completada', Icon: ClipboardList, color: '#7c3aed', bg: '#ede9fe' },
-  VIDEO_WATCHED:    { label: 'Video visto',          Icon: Tv2,           color: '#1d4ed8', bg: '#dbeafe' },
-  GAME_PLAYED:      { label: 'Partida jugada',       Icon: Gamepad2,      color: '#15803d', bg: '#dcfce7' },
-  REFERRAL_ACTIVE:  { label: 'Referido activo',      Icon: Users,         color: '#b45309', bg: '#fef3c7' },
-  PURCHASE:         { label: 'Compra realizada',     Icon: ShoppingBag,   color: '#be123c', bg: '#ffe4e6' },
-} as const
+const ACTIVITY_ICON: Record<string, React.ComponentType<{ style?: React.CSSProperties }>> = {
+  SURVEY_COMPLETED: ClipboardList,
+  VIDEO_WATCHED:    Tv2,
+  GAME_PLAYED:      Gamepad2,
+  REFERRAL_ACTIVE:  Users,
+  PURCHASE:         ShoppingBag,
+}
 
-const LEVEL_CONFIG: Record<string, { bar: string; label: string; Icon: React.ComponentType<{ style?: React.CSSProperties }> }> = {
-  BRONCE:    { bar: '#d97706', label: 'Bronce',    Icon: Medal   },
-  PLATA:     { bar: '#9ca3af', label: 'Plata',     Icon: Star    },
-  ORO:       { bar: '#fbbf24', label: 'Oro',       Icon: Trophy  },
-  RUBI:      { bar: '#f43f5e', label: 'Rubí',      Icon: Diamond },
-  ESMERALDA: { bar: '#10b981', label: 'Esmeralda', Icon: Star    },
-  DIAMANTE:  { bar: '#60a5fa', label: 'Diamante',  Icon: Crown   },
+const LEVEL_ICON: Record<string, React.ComponentType<{ style?: React.CSSProperties }>> = {
+  BRONCE:    Medal,
+  PLATA:     Star,
+  ORO:       Trophy,
+  RUBI:      Diamond,
+  ESMERALDA: Star,
+  DIAMANTE:  Crown,
 }
 
 // ─── Hook: detectar reduced-motion (dispositivos de pocos recursos) ───────────
@@ -209,13 +212,14 @@ export function XpRewardToast({ data, onDismiss }: Props) {
 
   if (!data || !mounted) return null
 
-  const act     = ACTIVITY_CONFIG[data.activityType] ?? ACTIVITY_CONFIG.SURVEY_COMPLETED
-  const lv      = LEVEL_CONFIG[data.currentLevel]    ?? LEVEL_CONFIG.BRONCE
-  const ActIcon = act.Icon
-  const newLv   = data.newLevel ? (LEVEL_CONFIG[data.newLevel] ?? LEVEL_CONFIG.BRONCE) : null
+  const act     = activityTheme(data.activityType)
+  const lv      = levelTheme(data.currentLevel)
+  const ActIcon = ACTIVITY_ICON[data.activityType] ?? ClipboardList
+  const newLv   = data.newLevel ? levelTheme(data.newLevel) : null
+  const NewLvIcon = data.newLevel ? (LEVEL_ICON[data.newLevel] ?? Star) : null
 
   // Al subir de nivel, la barra se llena al 100% y adopta el color del nuevo nivel
-  const barColor = (data.leveledUp && newLv && showLevelUp) ? newLv.bar : lv.bar
+  const barColor = (data.leveledUp && newLv && showLevelUp) ? newLv.accent : lv.accent
 
   return createPortal(
     <>
@@ -312,11 +316,12 @@ export function XpRewardToast({ data, onDismiss }: Props) {
               </span>
               <span style={{
                 fontSize:  15,
-                fontWeight: 700,
-                color:     act.color,
+                fontWeight: 800,
+                color:     BRAND.xp,
                 marginLeft: 8,
                 flexShrink: 0,
                 display:   'inline-block',
+                fontVariantNumeric: 'tabular-nums',
                 animation: reduceMotion ? undefined : 'xp-amount-in 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.18s both',
               }}>
                 +{xpDisplayed} XP
@@ -352,25 +357,26 @@ export function XpRewardToast({ data, onDismiss }: Props) {
         </div>
 
         {/* ── Tarjeta level-up ─────────────────────────────────────────── */}
-        {showLevelUp && data.leveledUp && data.newLevel && newLv && (
+        {showLevelUp && data.leveledUp && data.newLevel && newLv && NewLvIcon && (
           <div
             key={`lvl-${animKey}`}
             style={{
               position:     'relative',
               width:        '100%',
-              background:   'white',
-              border:       `2px solid ${newLv.bar}`,
+              background:   levelSheen(data.newLevel),
+              border:       `1px solid ${newLv.grad[1]}`,
               borderRadius: 18,
               padding:      '12px 16px',
               display:      'flex',
               alignItems:   'center',
               gap:          12,
-              boxShadow:    `0 8px 40px ${newLv.bar}44`,
+              boxShadow:    `0 10px 34px ${newLv.accent}44`,
               overflow:     'hidden',
+              color:        newLv.onGrad,
               animation:    reduceMotion ? undefined : 'xp-levelup-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
             }}
           >
-            {/* Shimmer sweep — omitido en reduced-motion */}
+            {/* Shimmer sweep dorado — omitido en reduced-motion */}
             {!reduceMotion && (
               <div style={{
                 position:   'absolute',
@@ -378,26 +384,33 @@ export function XpRewardToast({ data, onDismiss }: Props) {
                 left:       0,
                 width:      '60%',
                 height:     '100%',
-                background: `linear-gradient(90deg, transparent 0%, ${newLv.bar}30 50%, transparent 100%)`,
+                background: `linear-gradient(90deg, transparent 0%, ${BRAND.amarillo}55 50%, transparent 100%)`,
                 animation:  'xp-shimmer 0.9s ease-in-out 0.1s both',
                 pointerEvents: 'none',
               }} />
             )}
 
-            {/* Partículas — omitidas en reduced-motion */}
-            {!reduceMotion && <LevelUpParticles color={newLv.bar} />}
+            {/* Partículas doradas — omitidas en reduced-motion */}
+            {!reduceMotion && <LevelUpParticles color={BRAND.amarillo} />}
 
-            <TrendingUp style={{ width: 18, height: 18, color: newLv.bar, flexShrink: 0 }} />
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#111' }}>¡Subiste de nivel! </span>
-              <span style={{ fontSize: 13, color: '#6b7280' }}>
-                {LEVEL_CONFIG[data.currentLevel]?.label} →{' '}
-                <span style={{ fontWeight: 700, color: newLv.bar }}>{newLv.label}</span>
-              </span>
+            <div style={{
+              width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+              background: 'rgba(255,255,255,0.16)',
+              boxShadow: MEDALLION_BEVEL,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <NewLvIcon style={{ width: 20, height: 20, color: newLv.onGrad, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.25))' }} />
             </div>
 
-            <newLv.Icon style={{ width: 26, height: 26, color: newLv.bar, flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <TrendingUp style={{ width: 14, height: 14, color: newLv.onGrad }} />
+                <span style={{ fontSize: 13, fontWeight: 800, color: newLv.onGrad }}>¡Subiste de nivel!</span>
+              </div>
+              <span style={{ fontSize: 12, color: newLv.onGrad, opacity: 0.85 }}>
+                {levelTheme(data.currentLevel).label} → <span style={{ fontWeight: 800, opacity: 1 }}>{newLv.label}</span>
+              </span>
+            </div>
           </div>
         )}
       </div>

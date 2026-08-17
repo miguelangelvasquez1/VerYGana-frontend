@@ -112,7 +112,7 @@ function RejectionBanner({ reason }: { reason: string }) {
 // (incluida la pantalla de "cuenta en revisión"). Los datos salen de env
 // para poder cambiarlos sin tocar código.
 function ContactBar() {
-  const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "soporte@VerYGana.com";
+  const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "soporte@verygana.com";
   const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || "+57 (300) 123-4567";
   const year = process.env.NEXT_PUBLIC_CONTACT_COPYRIGHT_YEAR || "2026";
   return (
@@ -120,7 +120,7 @@ function ContactBar() {
       <p className="text-xs text-gray-500">
         Email: {email} · Tel: {phone}
       </p>
-      <p className="text-[11px] text-gray-400">© {year} VerYGana. Todos los derechos reservados.</p>
+      <p className="text-[11px] text-gray-400">© {year} VERyGANA. Todos los derechos reservados.</p>
     </div>
   );
 }
@@ -153,7 +153,7 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   const [rejectionNotes, setRejectionNotes] = useState<string | null>(null);
   const [underReview, setUnderReview] = useState(false);
 
-  // Rechazo de VerYGana a nivel de status (distinto del rechazo a nivel de
+  // Rechazo de VERyGANA a nivel de status (distinto del rechazo a nivel de
   // contrato de arriba) — documentsCompleted decide si hay autoservicio
   // (corregir documentos) o no (currentStep se queda en VERYGANA_REVIEW_PENDING).
   const [contractStatus, setContractStatus] = useState<ContractStatus | null>(initialStatus.contractStatus);
@@ -297,7 +297,7 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   }, [step, contract]);
 
   // Si recargamos justo en CONTRACT_PENDING con un contrato ya generado
-  // antes (contractGenerated === true), puede ser porque VerYGana rechazó
+  // antes (contractGenerated === true), puede ser porque VERyGANA rechazó
   // esa versión anterior — traemos el contrato previo en silencio para
   // mostrar el motivo. Si nunca se generó un contrato (caso normal al llegar
   // por primera vez desde documentos), no hay nada que pedir todavía.
@@ -626,7 +626,7 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
 
   // Ruta D: el diagnóstico ya se clasificó y ahí se detiene todo dentro de la
   // plataforma — plan, documentos, contrato, firma y pago se coordinan
-  // manualmente cuando un asesor de VerYGana se contacte. Pantalla completa,
+  // manualmente cuando un asesor de VERyGANA se contacte. Pantalla completa,
   // sin stepper, igual que `underReview` arriba.
   if (step === "ADVISOR_CONTACT_PENDING") {
     return (
@@ -640,7 +640,7 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
               <h2 className="text-xl font-bold text-gray-900 mb-2">Un asesor te contactará</h2>
               <p className="text-gray-600 text-sm leading-relaxed max-w-sm">
                 {classification?.explanation ||
-                  "Tu negocio requiere integración técnica personalizada. Un asesor de VerYGana se pondrá en contacto contigo para coordinar los siguientes pasos."}
+                  "Tu negocio requiere integración técnica personalizada. Un asesor de VERyGANA se pondrá en contacto contigo para coordinar los siguientes pasos."}
               </p>
             </div>
           </div>

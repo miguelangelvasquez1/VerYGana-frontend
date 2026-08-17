@@ -191,13 +191,13 @@ function ResultScreen({ icon, glow, title, subtitle, detail, cta, secondary }: R
         <div className="flex flex-col gap-3">
           <button onClick={cta.action}
             className="w-full py-3.5 bg-white text-slate-900 rounded-xl font-bold text-sm
-              flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors active:scale-[0.98]">
+              flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors active:scale-[0.98] cursor-pointer">
             {cta.label} <ArrowRight className="w-4 h-4" />
           </button>
           {secondary && (
             <button onClick={secondary.action}
               className="w-full py-3 bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10
-                rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-colors">
+                rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer">
               <RefreshCw className="w-4 h-4" /> {secondary.label}
             </button>
           )}

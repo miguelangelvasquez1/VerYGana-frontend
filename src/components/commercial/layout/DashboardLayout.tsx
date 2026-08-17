@@ -24,6 +24,7 @@ const PROTECTED_ROUTES: { path: string; requiredPlans: PlanCode[] }[] = [
   { path: '/commercial/branding',  requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/surveys',   requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/pets',      requiredPlans: [PlanCode.PREMIUM] },
+  { path: '/commercial/allies',    requiredPlans: [PlanCode.PREMIUM] },
   { path: '/commercial/analytics', requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/billing',   requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
 ];
@@ -90,7 +91,7 @@ function OnboardingErrorState({ onRetry }: { onRetry: () => void }) {
       </p>
       <button
         onClick={onRetry}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors cursor-pointer"
       >
         Reintentar
       </button>
@@ -182,6 +183,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       { match: '/commercial/pets/create', title: 'Crear Mascotas' },
       { match: '/commercial/pets', title: 'Mascotas' },
+
+      { match: '/commercial/allies', title: 'Aliados' },
 
       { match: '/commercial/branding/campaigns', title: 'Campañas' },
       { match: '/commercial/branding/requests', title: 'Solicitudes de Marca' },

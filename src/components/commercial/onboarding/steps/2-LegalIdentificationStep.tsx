@@ -57,7 +57,7 @@ export function LegalIdentificationStep({ form, errors, submitting, onChange, on
               key={opt.value}
               type="button"
               onClick={() => onChange("personType", opt.value)}
-              className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition
+              className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition cursor-pointer
                 ${
                   form.personType === opt.value
                     ? "border-blue-500 bg-blue-50 text-blue-700"

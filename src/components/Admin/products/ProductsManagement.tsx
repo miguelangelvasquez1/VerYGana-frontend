@@ -415,7 +415,7 @@ export default function AdminProductsPage() {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium transition border-b-2 -mb-px cursor-pointer ${activeTab === tab
-                ? "border-violet-600 text-violet-600"
+                ? "border-admin-blue text-admin-blue"
                 : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
           >
@@ -435,8 +435,8 @@ export default function AdminProductsPage() {
             <button
               onClick={() => handleStatusFilterChange(undefined)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer ${statusFilter === undefined
-                  ? "bg-violet-600 text-white border-violet-600"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-violet-400"
+                  ? "bg-admin-blue text-white border-admin-blue"
+                  : "bg-white text-gray-600 border-gray-300 hover:border-admin-blue/40"
                 }`}
             >
               Todos
@@ -446,8 +446,8 @@ export default function AdminProductsPage() {
                 key={status}
                 onClick={() => handleStatusFilterChange(status)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer ${statusFilter === status
-                    ? "bg-violet-600 text-white border-violet-600"
-                    : "bg-white text-gray-600 border-gray-300 hover:border-violet-400"
+                    ? "bg-admin-blue text-white border-admin-blue"
+                    : "bg-white text-gray-600 border-gray-300 hover:border-admin-blue/40"
                   }`}
               >
                 {STATUS_LABELS[status]}
@@ -495,7 +495,7 @@ export default function AdminProductsPage() {
                           )}
                           <button
                             onClick={() => openDetail(p)}
-                            className="font-medium text-gray-800 hover:text-violet-600 text-left transition cursor-pointer"
+                            className="font-medium text-gray-800 hover:text-admin-blue text-left transition cursor-pointer"
                           >
                             {p.name}
                           </button>
@@ -591,7 +591,7 @@ export default function AdminProductsPage() {
             </button>
             <button
               onClick={() => setShowCreateForm((v) => !v)}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+              className="flex items-center gap-2 bg-admin-blue hover:bg-admin-blue-dark text-white px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
             >
               <span className="text-lg leading-none">+</span>
               Nueva categoría
@@ -612,7 +612,7 @@ export default function AdminProductsPage() {
                       placeholder="Ej: Videojuegos, Software..."
                       required
                       disabled={isCreatingCat}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue disabled:opacity-50"
                     />
                   </div>
                   <div>
@@ -644,7 +644,7 @@ export default function AdminProductsPage() {
                   <div className="space-y-1">
                     <div className="w-full bg-gray-100 rounded-full h-1.5">
                       <div
-                        className="bg-violet-600 h-1.5 rounded-full transition-all duration-300"
+                        className="bg-admin-gradient h-1.5 rounded-full transition-all duration-300"
                         style={{ width: `${createCatState.progress}%` }}
                       />
                     </div>
@@ -672,7 +672,7 @@ export default function AdminProductsPage() {
                   <button
                     type="submit"
                     disabled={isCreatingCat || !catName || !image}
-                    className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className="px-4 py-2 text-sm bg-admin-blue hover:bg-admin-blue-dark text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {isCreatingCat ? catStatusLabel[createCatState.status] : "Crear categoría"}
                   </button>
@@ -694,7 +694,7 @@ export default function AdminProductsPage() {
             ) : categories.length === 0 ? (
               <div className="py-16 text-center">
                 <p className="text-gray-400 text-sm">No hay categorías registradas aún.</p>
-                <button onClick={() => setShowCreateForm(true)} className="mt-3 text-violet-600 text-sm hover:underline cursor-pointer">
+                <button onClick={() => setShowCreateForm(true)} className="mt-3 text-admin-midnight text-sm hover:text-admin-blue hover:underline cursor-pointer">
                   Crear la primera
                 </button>
               </div>
@@ -904,7 +904,7 @@ export default function AdminProductsPage() {
 
                 <button
                   onClick={() => openReviews(detailState.product!.id)}
-                  className="w-full flex items-center justify-center gap-2 text-sm border border-gray-300 text-gray-700 hover:border-violet-400 hover:text-violet-600 py-2 rounded-lg transition cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 text-sm border border-gray-300 text-gray-700 hover:border-admin-blue/40 hover:text-admin-blue py-2 rounded-lg transition cursor-pointer"
                 >
                   <Star size={14} />
                   Ver reseñas ({detailState.product.reviewCount})
@@ -977,7 +977,7 @@ export default function AdminProductsPage() {
                             <Star
                               key={i}
                               size={13}
-                              className={i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}
+                              className={i < review.rating ? "fill-admin-yellow text-admin-yellow" : "text-gray-200"}
                             />
                           ))}
                         </div>
@@ -1039,7 +1039,7 @@ export default function AdminProductsPage() {
                   placeholder="Explica al comerciante el motivo..."
                   rows={3}
                   disabled={actionState.loading}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none disabled:opacity-50"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue resize-none disabled:opacity-50"
                 />
               </div>
             )}

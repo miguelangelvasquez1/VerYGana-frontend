@@ -364,7 +364,7 @@ export default function RegisterForm() {
         <div className="grid gap-4">
           <button
             onClick={() => setRole("BENEFICIARIO")}
-            className="group flex items-center gap-4 p-5 border-2 border-blue-200 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+            className="group flex items-center gap-4 p-5 border-2 border-blue-200 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left cursor-pointer"
           >
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-blue-200 transition">
               🛍
@@ -377,7 +377,7 @@ export default function RegisterForm() {
 
           <button
             onClick={() => setRole("COMERCIANTE")}
-            className="group flex items-center gap-4 p-5 border-2 border-[#03548C]/30 rounded-2xl hover:border-[#03548C] hover:bg-blue-50 transition-all text-left"
+            className="group flex items-center gap-4 p-5 border-2 border-[#03548C]/30 rounded-2xl hover:border-[#03548C] hover:bg-blue-50 transition-all text-left cursor-pointer"
           >
             <div className="w-12 h-12 bg-[#03548C]/10 rounded-xl flex items-center justify-center text-2xl group-hover:bg-[#03548C]/20 transition">
               📢
@@ -512,7 +512,7 @@ export default function RegisterForm() {
                           setFormData((prev: any) => ({ ...prev, gender: opt.value }));
                           if (fieldErrors["gender"]) setFieldErrors((p) => { const n = { ...p }; delete n["gender"]; return n; });
                         }}
-                        className={`py-2.5 px-2 rounded-xl border-2 text-xs font-semibold transition flex flex-col items-center gap-1
+                        className={`py-2.5 px-2 rounded-xl border-2 text-xs font-semibold transition flex flex-col items-center gap-1 cursor-pointer
                           ${formData.gender === opt.value
                             ? "border-blue-500 bg-blue-50 text-blue-700"
                             : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:bg-gray-100"
@@ -677,7 +677,7 @@ export default function RegisterForm() {
                         key={cat.id}
                         type="button"
                         onClick={() => handleCheckboxChange(cat)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all cursor-pointer
                           ${selected
                             ? "bg-[#03548C] border-[#03548C] text-white shadow-sm shadow-blue-200"
                             : "bg-white border-gray-200 text-gray-600 hover:border-[#03548C]/50 hover:text-[#03548C]"
@@ -786,7 +786,7 @@ export default function RegisterForm() {
             className={`w-full py-3.5 rounded-xl font-bold text-sm tracking-wide shadow-md transition-all
               ${isSubmitting
                 ? "bg-[#c9a227]/60 text-gray-700 cursor-not-allowed"
-                : "bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 active:scale-[0.98] text-gray-900 shadow-yellow-200"
+                : "bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 active:scale-[0.98] text-gray-900 shadow-yellow-200 cursor-pointer"
               }`}
           >
             {isSubmitting ? (
@@ -806,7 +806,7 @@ export default function RegisterForm() {
             type="button"
             onClick={() => { setRole(null); setFieldErrors({}); }}
             disabled={isSubmitting}
-            className="w-full text-sm text-gray-400 hover:text-gray-600 hover:underline transition py-1"
+            className="w-full text-sm text-gray-400 hover:text-gray-600 hover:underline transition py-1 cursor-pointer"
           >
             ← Volver a selección de rol
           </button>

@@ -112,9 +112,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between px-6 py-2">
           {/* LOGO */}
           <div className="flex items-center gap-3">
-            <Image src="/logos/logoDorado.png" alt="VerYGana" width={52} height={52} className="object-contain shrink-0" />
+            <Image src="/logos/logoDorado.png" alt="VERyGANA" width={52} height={52} className="object-contain shrink-0" />
             <div className="leading-tight">
-              <p className="text-base font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-base font-extrabold text-white tracking-tight">VERyGANA</p>
               <p className="text-[10px] text-white/50 font-medium tracking-wide">La alegria de ganar</p>
             </div>
           </div>
@@ -136,11 +136,24 @@ export default function Navbar() {
             {/* CART BUTTON */}
             <CartButton />
 
+            {/* NOTIFICATIONS */}
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              loading={loading}
+              hasMore={hasMore}
+              isOpen={isNotificationsOpen}
+              onToggle={() => setIsNotificationsOpen((v) => !v)}
+              onMarkAllAsRead={markAllAsRead}
+              onLoadMore={loadMore}
+              menuRef={notificationsMenuRefDesktop}
+            />
+
             {/* KEY WALLET */}
-            <div className="relative" ref={keyWalletMenuRefDesktop}>
+            <div className="relative order-first" ref={keyWalletMenuRefDesktop}>
               <button
                 onClick={() => setIsKeyWalletOpen((v) => !v)}
-                className="group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/10 hover:bg-white/20 hover:scale-105 transition-all"
+                className="cursor-pointer group flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/10 hover:bg-white/20 hover:scale-105 transition-all"
               >
                 <Image
                   src="/logos/llave.png"
@@ -285,23 +298,11 @@ export default function Navbar() {
               </div>
             </div>
 
-            <NotificationPanel
-              notifications={notifications}
-              unreadCount={unreadCount}
-              loading={loading}
-              hasMore={hasMore}
-              isOpen={isNotificationsOpen}
-              onToggle={() => setIsNotificationsOpen((v) => !v)}
-              onMarkAllAsRead={markAllAsRead}
-              onLoadMore={loadMore}
-              menuRef={notificationsMenuRefDesktop}
-            />
-
             {/* PROFILE MENU */}
             <div className="relative" ref={profileMenuRef}>
               <button
                 onClick={() => setOpenMenu((v) => !v)}
-                className="flex items-center gap-3 hover:bg-white/10 px-3 py-2 rounded-full transition-all"
+                className="cursor-pointer flex items-center gap-3 hover:bg-white/10 px-3 py-2 rounded-full transition-all"
               >
                 <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden flex items-center justify-center">
                   {consumer?.avatarUrl ? (
@@ -428,20 +429,34 @@ export default function Navbar() {
       <div className="lg:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
-            <Image src="/logos/logoDorado.png" alt="VerYGana" width={42} height={42} className="object-contain shrink-0" />
+            <Image src="/logos/logoDorado.png" alt="VERyGANA" width={42} height={42} className="object-contain shrink-0" />
             <div className="leading-tight">
-              <p className="text-sm font-extrabold text-white tracking-tight">VerYGana</p>
+              <p className="text-sm font-extrabold text-white tracking-tight">VERyGANA</p>
               <p className="text-[9px] text-white/50 font-medium tracking-wide">La alegria de ganar</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {/* CART */}
             <CartButton />
+
+            {/* NOTIFICATIONS */}
+            <NotificationPanel
+              notifications={notifications}
+              unreadCount={unreadCount}
+              loading={loading}
+              hasMore={hasMore}
+              isOpen={isNotificationsOpen}
+              onToggle={() => setIsNotificationsOpen((v) => !v)}
+              onMarkAllAsRead={markAllAsRead}
+              onLoadMore={loadMore}
+              menuRef={notificationsMenuRefMobile}
+            />
+
             {/* KEY WALLET */}
-            <div className="relative" ref={keyWalletMenuRefMobile}>
+            <div className="relative order-first" ref={keyWalletMenuRefMobile}>
               <button
                 onClick={() => setIsKeyWalletOpen((v) => !v)}
-                className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-2xl border border-white/10"
+                className="cursor-pointer flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-2xl border border-white/10"
               >
                 <Image
                   src="/logos/llave.png"
@@ -577,18 +592,6 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* NOTIFICATIONS */}
-            <NotificationPanel
-              notifications={notifications}
-              unreadCount={unreadCount}
-              loading={loading}
-              hasMore={hasMore}
-              isOpen={isNotificationsOpen}
-              onToggle={() => setIsNotificationsOpen((v) => !v)}
-              onMarkAllAsRead={markAllAsRead}
-              onLoadMore={loadMore}
-              menuRef={notificationsMenuRefMobile}
-            />
           </div>
         </div>
       </div>
@@ -628,12 +631,12 @@ export default function Navbar() {
           </Link>
 
           {/* MASCOTA */}
-          <Link href="/mascota" className="flex flex-col items-center justify-center">
+          <Link href="/pet" className="flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/mascota" ? "bg-white/20" : ""}`}>
-                <PawPrint className={`w-5 h-5 transition-all duration-200 ${pathname === "/mascota" ? "text-[#00a4ff]" : "text-white/70"}`} />
+              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/pet" ? "bg-white/20" : ""}`}>
+                <PawPrint className={`w-5 h-5 transition-all duration-200 ${pathname === "/pet" ? "text-[#00a4ff]" : "text-white/70"}`} />
               </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/mascota" ? "text-[#00a4ff]" : "text-white/70"}`}>Mascota</span>
+              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/pet" ? "text-[#00a4ff]" : "text-white/70"}`}>Mascota</span>
             </div>
           </Link>
 
@@ -648,7 +651,7 @@ export default function Navbar() {
           </Link>
 
           {/* PERFIL */}
-          <button onClick={() => setOpenMenu((v) => !v)} className="flex flex-col items-center justify-center">
+          <button onClick={() => setOpenMenu((v) => !v)} className="cursor-pointer flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-0.5">
               <div className={`p-1.5 rounded-full transition-all duration-200 ${openMenu ? "bg-white/20" : ""}`}>
                 <User className={`w-5 h-5 transition-all duration-200 ${openMenu ? "text-[#00a4ff]" : "text-white/70"}`} />

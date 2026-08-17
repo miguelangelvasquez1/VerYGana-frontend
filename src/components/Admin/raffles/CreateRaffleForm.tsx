@@ -36,7 +36,7 @@ interface Props {
 /* ================= SHARED STYLES ================= */
 
 const inputCls = (error?: string) =>
-  `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+  `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
     error ? "border-red-400 bg-red-50" : "border-gray-300"
   }`;
 
@@ -257,9 +257,9 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
       {/* ═══════════════ DATOS BÁSICOS ═══════════════ */}
 
       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-linear-to-r from-purple-50 to-white px-6 py-4 border-b border-gray-100">
+        <div className="bg-linear-to-r from-admin-blue/10 to-white px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-sm flex items-center justify-center shrink-0">
+            <span className="w-8 h-8 rounded-full bg-admin-blue text-white font-bold text-sm flex items-center justify-center shrink-0">
               1
             </span>
             <h2 className="text-lg font-bold text-gray-800">Datos Básicos</h2>
@@ -307,7 +307,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                 name="raffleType"
                 value={formData.raffleType}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors bg-white"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white"
               >
                 <option value="STANDARD">Estándar</option>
                 <option value="PREMIUM">Premium</option>
@@ -319,7 +319,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                 name="drawMethod"
                 value={formData.drawMethod}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors bg-white"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white"
               >
                 <option value="SYSTEM_RANDOM">Sistema interno</option>
                 <option value="RANDOM_ORG">Random.org</option>
@@ -348,7 +348,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                         startDate: date ? date.toISOString() : "",
                       }))
                     }
-                    className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                    className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
                       errors.startDate ? "border-red-400 bg-red-50" : "border-gray-300"
                     }`}
                   />
@@ -373,7 +373,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                         endDate: date ? date.toISOString() : "",
                       }))
                     }
-                    className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                    className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
                       errors.endDate ? "border-red-400 bg-red-50" : "border-gray-300"
                     }`}
                   />
@@ -459,7 +459,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
               />
               <div
                 className={`w-10 h-6 rounded-full transition-colors duration-200 ${
-                  formData.requiresPet ? "bg-purple-600" : "bg-gray-300"
+                  formData.requiresPet ? "bg-admin-blue" : "bg-gray-300"
                 }`}
               />
               <div
@@ -504,7 +504,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
       {/* ═══════════════ IMAGEN RIFA ═══════════════ */}
 
       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-linear-to-r from-blue-50 to-white px-6 py-4 border-b border-gray-100">
+        <div className="bg-linear-to-r from-admin-blue/10 to-white px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <span className="text-xl">🖼️</span>
             <h2 className="text-lg font-bold text-gray-800">Imagen de la Rifa</h2>
@@ -512,7 +512,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
         </div>
 
         <div className="p-6">
-          <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-8 cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all group">
+          <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-8 cursor-pointer hover:border-admin-blue hover:bg-admin-blue/5 transition-all group">
             {raffleImageFile ? (
               <div className="text-center">
                 <img
@@ -525,7 +525,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
             ) : (
               <div className="text-gray-400 text-center">
                 <div className="text-4xl mb-3">📸</div>
-                <p className="font-semibold text-gray-600 group-hover:text-purple-600 transition-colors">
+                <p className="font-semibold text-gray-600 group-hover:text-admin-blue transition-colors">
                   Inserta la imagen principal
                 </p>
                 <p className="text-sm mt-1">PNG, JPG o WEBP</p>
@@ -544,10 +544,10 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
       {/* ═══════════════ PREMIOS ═══════════════ */}
 
       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-linear-to-r from-purple-50 to-white px-6 py-4 border-b border-gray-100">
+        <div className="bg-linear-to-r from-admin-gold/10 to-white px-6 py-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-sm flex items-center justify-center shrink-0">
+              <span className="w-8 h-8 rounded-full bg-admin-gold text-white font-bold text-sm flex items-center justify-center shrink-0">
                 2
               </span>
               <h2 className="text-lg font-bold text-gray-800">Premios</h2>
@@ -555,7 +555,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
             <button
               type="button"
               onClick={addPrize}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-2 items-center transition-colors"
+              className="cursor-pointer bg-admin-gold hover:opacity-90 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-2 items-center transition-colors"
             >
               <Plus size={15} />
               Agregar Premio
@@ -576,7 +576,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
               {/* Prize header */}
               <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-200">
                 <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-xs font-bold flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-full bg-admin-gold/10 text-admin-gold text-xs font-bold flex items-center justify-center">
                     {index + 1}
                   </span>
                   <span className="text-sm font-semibold text-gray-700">
@@ -586,7 +586,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                 <button
                   type="button"
                   onClick={() => removePrize(index)}
-                  className="text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
+                  className="cursor-pointer text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
                 >
                   <Trash2 size={14} />
                   Eliminar
@@ -632,7 +632,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                     <select
                       value={prize.prizeType}
                       onChange={(e) => handlePrizeChange(index, "prizeType", e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors bg-white"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white"
                     >
                       <option value="PHYSICAL">Físico</option>
                       <option value="DIGITAL">Digital</option>
@@ -687,7 +687,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
 
                 <div>
                   <label className={`${labelCls} mb-2`}>Imagen del Premio</label>
-                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all group">
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 cursor-pointer hover:border-admin-blue hover:bg-admin-blue/5 transition-all group">
                     {prize.imageFile ? (
                       <div className="text-center">
                         <img
@@ -700,7 +700,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                     ) : (
                       <div className="text-gray-400 text-center">
                         <p className="text-2xl mb-1">📸</p>
-                        <p className="text-sm font-medium group-hover:text-purple-600 transition-colors">
+                        <p className="text-sm font-medium group-hover:text-admin-blue transition-colors">
                           Subir imagen del premio
                         </p>
                         <p className="text-xs mt-0.5">PNG, JPG o WEBP</p>
@@ -749,10 +749,10 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
       {/* ═══════════════ REGLAS ═══════════════ */}
 
       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-linear-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-100">
+        <div className="bg-linear-to-r from-admin-midnight/10 to-white px-6 py-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0">
+              <span className="w-8 h-8 rounded-full bg-admin-midnight text-white font-bold text-sm flex items-center justify-center shrink-0">
                 3
               </span>
               <h2 className="text-lg font-bold text-gray-800">Reglas</h2>
@@ -760,7 +760,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
             <button
               type="button"
               onClick={addRule}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-2 items-center transition-colors"
+              className="cursor-pointer bg-admin-midnight hover:opacity-90 text-white px-4 py-2 rounded-lg text-sm font-medium flex gap-2 items-center transition-colors"
             >
               <Plus size={15} />
               Agregar Regla
@@ -779,7 +779,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
           {formData.rules.map((rule, index) => (
             <div key={index} className="border border-gray-200 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
-                <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full bg-admin-midnight/10 text-admin-midnight text-xs font-bold flex items-center justify-center">
                   {index + 1}
                 </span>
                 <span className="text-sm font-semibold text-gray-700">Regla #{index + 1}</span>
@@ -793,7 +793,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                     onChange={(e) =>
                       handleRuleChange(index, "ticketEarningRuleId", Number(e.target.value))
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors bg-white"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white"
                     required
                   >
                     <option value="">Seleccionar regla</option>
@@ -814,7 +814,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
                       handleRuleChange(index, "maxTicketsBySource", Number(e.target.value))
                     }
                     min={1}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors"
                     required
                   />
                 </div>
@@ -823,7 +823,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
               <button
                 type="button"
                 onClick={() => removeRule(index)}
-                className="text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
+                className="cursor-pointer text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
               >
                 <Trash2 size={14} />
                 Eliminar regla
@@ -838,7 +838,7 @@ export default function CreateRaffleForm({ onSubmit }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 rounded-xl font-semibold text-base shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        className="cursor-pointer w-full bg-admin-gradient hover:opacity-90 text-white py-4 rounded-xl font-semibold text-base shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
         {loading ? "Creando rifa..." : "✓ Crear Rifa"}
       </button>

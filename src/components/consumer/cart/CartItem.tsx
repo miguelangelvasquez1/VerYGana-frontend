@@ -83,7 +83,7 @@ export function CartItem({ item }: CartItemProps) {
             <button
               onClick={handleDecrement}
               disabled={isUpdating}
-              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 cursor-pointer"
               aria-label="Decrease quantity"
             >
               <Minus className="w-4 h-4" />
@@ -96,7 +96,7 @@ export function CartItem({ item }: CartItemProps) {
             <button
               onClick={handleIncrement}
               disabled={isUpdating || item.quantity >= item.stock}
-              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 cursor-pointer"
               aria-label="Increase quantity"
             >
               <Plus className="w-4 h-4" />
@@ -112,7 +112,7 @@ export function CartItem({ item }: CartItemProps) {
 
           <button
             onClick={handleRemove}
-            className="text-red-600 hover:text-red-700 p-1"
+            className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
             aria-label="Remove item"
           >
             <Trash2 className="w-4 h-4" />

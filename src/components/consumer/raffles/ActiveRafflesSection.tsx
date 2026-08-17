@@ -185,7 +185,7 @@ export default function ActiveRafflesSection() {
           <button
             disabled={page === 0}
             onClick={() => setPage((prev) => prev - 1)}
-            className="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-40 font-semibold transition"
+            className="cursor-pointer px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-40 font-semibold transition"
           >
             ←
           </button>
@@ -194,7 +194,7 @@ export default function ActiveRafflesSection() {
             <button
               key={i}
               onClick={() => setPage(i)}
-              className={`w-9 h-9 rounded-lg font-semibold text-sm transition ${
+              className={`cursor-pointer w-9 h-9 rounded-lg font-semibold text-sm transition ${
                 page === i
                   ? "text-gray-900 shadow-md shadow-yellow-200 bg-[#FFD700]"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -207,7 +207,7 @@ export default function ActiveRafflesSection() {
           <button
             disabled={page === totalPages - 1}
             onClick={() => setPage((prev) => prev + 1)}
-            className="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-40 font-semibold transition"
+            className="cursor-pointer px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-40 font-semibold transition"
           >
             →
           </button>

@@ -157,14 +157,14 @@ function Pagination({ meta, page, onPageChange }: { meta: Meta; page: number; on
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={!meta.hasPrevious}
-          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={!meta.hasNext}
-          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -192,7 +192,7 @@ function ErrorMessage({ onRetry }: { onRetry?: () => void }) {
     <div className="py-8 text-center space-y-2">
       <p className="text-sm text-red-500">Error al cargar los datos.</p>
       {onRetry && (
-        <button onClick={onRetry} className="text-sm text-[#03548C] hover:underline">
+        <button onClick={onRetry} className="text-sm text-[#03548C] hover:underline cursor-pointer">
           Reintentar
         </button>
       )}
@@ -384,7 +384,7 @@ export function BillingDashboard() {
       {/* ── Tabla de payouts ── */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">Pagos (Payouts)</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Pagos recibidos</h3>
           <YearMonthFilter filters={payoutFilters} onChange={setPayoutFilters} />
         </div>
 

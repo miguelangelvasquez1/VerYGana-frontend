@@ -54,7 +54,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
         label="¿Necesitas integración técnica especial?"
         error={errors["techIntegrationNeeds"]}
         hint="Opcional — selecciona las que apliquen"
-        tooltip="Selecciona esta opción si tu negocio requiere integrarse técnicamente con VerYGana: conectar tu sistema por API, conciliar pagos automáticamente o activar servicios sin intervención manual. Si marcas alguna, te clasificamos directo en la Ruta D y el resto del diagnóstico no aplica — un asesor comercial define las condiciones contigo."
+        tooltip="Selecciona esta opción si tu negocio requiere integrarse técnicamente con VERyGANA: conectar tu sistema por API, conciliar pagos automáticamente o activar servicios sin intervención manual. Si marcas alguna, te clasificamos directo en la Ruta D y el resto del diagnóstico no aplica — un asesor comercial define las condiciones contigo."
       >
         <div className="flex flex-wrap gap-2">
           {TECH_NEEDS_OPTIONS.map((opt) => {
@@ -64,7 +64,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
                 key={opt.value}
                 type="button"
                 onClick={() => toggleTechNeed(opt.value)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all cursor-pointer
                   ${
                     selected
                       ? "bg-[#03548C] border-[#03548C] text-white shadow-sm shadow-blue-200"
@@ -100,7 +100,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
             <PhoneCall className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
             <p className="text-xs text-blue-700 leading-relaxed">
               Con esta respuesta ya podemos clasificar tu cuenta — el resto de las preguntas de este
-              diagnóstico no aplican. Un asesor de VerYGana definirá las condiciones contigo.
+              diagnóstico no aplican. Un asesor de VERyGANA definirá las condiciones contigo.
             </p>
           </div>
         </>
@@ -112,7 +112,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
             label="¿Cuál es tu objetivo principal?"
             required
             error={errors["primaryGoal"]}
-            tooltip="Indica si usarás VerYGana principalmente para vender tus productos, para hacer publicidad de tu marca, o ambas cosas. Esto influye en la ruta comercial y el plan que te recomendamos."
+            tooltip="Indica si usarás VERyGANA principalmente para vender tus productos, para hacer publicidad de tu marca, o ambas cosas. Esto influye en la ruta comercial y el plan que te recomendamos."
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {PRIMARY_GOAL_OPTIONS.map((opt) => (
@@ -120,7 +120,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
                   key={opt.value}
                   type="button"
                   onClick={() => onChange("primaryGoal", opt.value)}
-                  className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition text-left
+                  className={`py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition text-left cursor-pointer
                     ${
                       form.primaryGoal === opt.value
                         ? "border-blue-500 bg-blue-50 text-blue-700"
@@ -137,7 +137,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
             label="¿Buscas una tarifa fija?"
             required
             error={errors["wantsFixedFee"]}
-            tooltip="Una tarifa fija es un monto mensual constante que pagas a VerYGana, independiente de tus ventas. Si prefieres pagar solo cuando vendes, responde 'No'."
+            tooltip="Una tarifa fija es un monto mensual constante que pagas a VERyGANA, independiente de tus ventas. Si prefieres pagar solo cuando vendes, responde 'No'."
           >
             <BoolToggle value={form.wantsFixedFee} onChange={(v) => onChange("wantsFixedFee", v)} error={errors["wantsFixedFee"]} />
           </FieldWrapper>
@@ -155,7 +155,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
             label="¿Requieres mascotas?"
             required
             error={errors["requiresPets"]}
-            tooltip="Indica si tu negocio necesita la funcionalidad de mascotas dentro de la plataforma VerYGana."
+            tooltip="Indica si tu negocio necesita la funcionalidad de mascotas dentro de la plataforma VERyGANA."
           >
             <BoolToggle value={form.requiresPets} onChange={(v) => onChange("requiresPets", v)} error={errors["requiresPets"]} />
           </FieldWrapper>
@@ -164,7 +164,7 @@ export function DiagnosticStep({ form, errors, submitting, onChange, onNext }: D
             label="¿Requieres encuestas?"
             required
             error={errors["requiresSurveys"]}
-            tooltip="Indica si tu negocio necesita crear encuestas para tus clientes dentro de la plataforma VerYGana."
+            tooltip="Indica si tu negocio necesita crear encuestas para tus clientes dentro de la plataforma VERyGANA."
           >
             <BoolToggle value={form.requiresSurveys} onChange={(v) => onChange("requiresSurveys", v)} error={errors["requiresSurveys"]} />
           </FieldWrapper>
@@ -188,7 +188,7 @@ export function ClassificationStep({ classification, submitting, onConfirm }: Cl
       <div>
         <h3 className="text-lg font-bold text-gray-900 mb-1">Tu ruta comercial</h3>
         <p className="text-sm text-gray-500">
-          Con base en tus respuestas, te asignamos la siguiente ruta comercial en VerYGana.
+          Con base en tus respuestas, te asignamos la siguiente ruta comercial en VERyGANA.
         </p>
       </div>
 

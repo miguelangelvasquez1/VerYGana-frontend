@@ -1,23 +1,55 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Loader2, AlertTriangle, ChevronLeft, ChevronRight, SlidersHorizontal, CheckCircle2, XCircle } from 'lucide-react';
+/**
+ * Logs de auditoría.
+ *
+ * El registro inmutable de lo que pasó. No se decide nada aquí: se busca.
+ * Todo lo que se compara —id, usuario, marca de tiempo— va en monoespaciada
+ * con cifras tabulares, y el nivel se lee en el borde de la fila.
+ */
+
+import { useCallback, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { ChevronRight, FileSearch, Search, SlidersHorizontal } from 'lucide-react';
 import {
   getAuditLogs,
   getCriticalAuditLogs,
   type AuditLog,
-  type PageResponse,
   type AuditLogFilters,
+  type PageResponse,
 } from '@/services/ComplianceService';
 import { dateToZonedIsoStart, dateToZonedIsoEnd } from '@/lib/utils/dateTime';
-
-const LEVEL_STYLE: Record<string, string> = {
-  INFO: 'bg-indigo-100 text-indigo-700',
-  WARNING: 'bg-amber-100 text-amber-700',
-  CRITICAL: 'bg-red-100 text-red-700',
-};
+import {
+  Btn,
+  EmptyState,
+  ErrorState,
+  Field,
+  Ledger,
+  LedgerBody,
+  LedgerHead,
+  LedgerRow,
+  LedgerTable,
+  Pager,
+  PanelHeader,
+  Ref,
+  SkeletonRows,
+  StatusTag,
+  Tabs,
+  Td,
+  Th,
+  ThSpine,
+  inputClass,
+  type Tone,
+} from '@/components/compliance/ui/primitives';
 
 const PAGE_SIZE = 20;
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+
+const LEVEL: Record<AuditLog['level'], { tone: Tone; label: string }> = {
+  INFO: { tone: 'info', label: 'Info' },
+  WARNING: { tone: 'hold', label: 'Alerta' },
+  CRITICAL: { tone: 'flag', label: 'Crítico' },
+};
 
 const emptyFilters: AuditLogFilters = {
   userId: undefined,
@@ -29,6 +61,96 @@ const emptyFilters: AuditLogFilters = {
   to: '',
 };
 
+const countActive = (f: AuditLogFilters) =>
+  [f.userId, f.action, f.level, f.category, f.success, f.from, f.to].filter(
+    (v) => v !== undefined && v !== ''
+  ).length;
+
+/* ── Fila expandible ─────────────────────────────────────────────────── */
+
+function LogRow({ log, index }: { log: AuditLog; index: number }) {
+  const [open, setOpen] = useState(false);
+  const reduce = useReducedMotion();
+  const level = LEVEL[log.level] ?? { tone: 'neutral' as Tone, label: log.level };
+
+  return (
+    <>
+      <LedgerRow index={index} tone={level.tone}>
+        <Td className="cmp-mono text-[11px] text-cmp-mute">{log.id}</Td>
+        <Td>
+          {log.userId ? <Ref muted>#{log.userId}</Ref> : <span className="text-cmp-rule">—</span>}
+        </Td>
+        <Td className="font-medium text-cmp-ink">{log.action}</Td>
+        <Td>
+          <StatusTag tone={level.tone}>{level.label}</StatusTag>
+        </Td>
+        <Td className="text-cmp-slate">{log.category}</Td>
+        <Td>
+          <span
+            className={`cmp-label ${log.success ? 'text-cmp-clear' : 'text-cmp-flag'}`}
+          >
+            {log.success ? 'Exitoso' : 'Fallido'}
+          </span>
+        </Td>
+        <Td className="cmp-mono whitespace-nowrap text-[11px] text-cmp-mute">
+          {new Date(log.createdAt).toLocaleString('es-CO', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </Td>
+        <Td align="right">
+          {log.details && (
+            <button
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-label={open ? 'Ocultar detalle' : 'Ver detalle'}
+              className="cursor-pointer rounded-lg p-1.5 text-cmp-mute hover:bg-cmp-rule-soft hover:text-cmp-ink"
+            >
+              <ChevronRight
+                className={`h-4 w-4 transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
+                style={{ transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)' }}
+              />
+            </button>
+          )}
+        </Td>
+      </LedgerRow>
+
+      {/* La fila misma es el elemento animado: si el <tr> se desmontara de
+          inmediato, el cierre no se vería nunca. */}
+      <AnimatePresence initial={false}>
+        {open && log.details && (
+          <motion.tr
+            key="details"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: EASE_OUT }}
+          >
+            <td colSpan={9} className="p-0">
+              <motion.div
+                initial={reduce ? false : { height: 0 }}
+                animate={reduce ? {} : { height: 'auto' }}
+                exit={reduce ? {} : { height: 0 }}
+                transition={{ duration: 0.22, ease: EASE_OUT }}
+                className="overflow-hidden bg-cmp-rule-soft/40"
+              >
+                <pre className="cmp-mono overflow-x-auto px-4 py-3 text-[11px] leading-relaxed text-cmp-slate">
+                  {log.details}
+                </pre>
+              </motion.div>
+            </td>
+          </motion.tr>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+/* ── Panel ───────────────────────────────────────────────────────────── */
+
 export default function AuditLogsPanel() {
   const [tab, setTab] = useState<'all' | 'critical'>('all');
   const [filters, setFilters] = useState<AuditLogFilters>(emptyFilters);
@@ -37,28 +159,28 @@ export default function AuditLogsPanel() {
   const [data, setData] = useState<PageResponse<AuditLog> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const reduce = useReducedMotion();
 
-  const fetchLogs = useCallback(async (
-    activeTab: 'all' | 'critical',
-    activeFilters: AuditLogFilters,
-    page: number
-  ) => {
-    setLoading(true);
-    setError(false);
-    try {
-      const from = dateToZonedIsoStart(activeFilters.from);
-      const to = dateToZonedIsoEnd(activeFilters.to);
-      if (activeTab === 'critical') {
-        setData(await getCriticalAuditLogs(from, to, page, PAGE_SIZE));
-      } else {
-        setData(await getAuditLogs({ ...activeFilters, from, to, page, size: PAGE_SIZE }));
+  const fetchLogs = useCallback(
+    async (activeTab: 'all' | 'critical', activeFilters: AuditLogFilters, page: number) => {
+      setLoading(true);
+      setError(false);
+      try {
+        const from = dateToZonedIsoStart(activeFilters.from);
+        const to = dateToZonedIsoEnd(activeFilters.to);
+        if (activeTab === 'critical') {
+          setData(await getCriticalAuditLogs(from, to, page, PAGE_SIZE));
+        } else {
+          setData(await getAuditLogs({ ...activeFilters, from, to, page, size: PAGE_SIZE }));
+        }
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   const handleSearch = () => {
     setCurrentPage(0);
@@ -78,224 +200,208 @@ export default function AuditLogsPanel() {
 
   const logs = data?.content ?? [];
   const totalPages = data?.totalPages ?? 1;
+  const activeFilters = countActive(filters);
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Logs de Auditoría</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Trazabilidad de acciones sensibles dentro de la plataforma.</p>
-        </div>
-        <button
-          onClick={() => setFiltersOpen((v) => !v)}
-          className="cursor-pointer flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition"
-        >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
-          Filtros
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-        {(['all', 'critical'] as const).map((t) => (
+    <div className="space-y-6">
+      <PanelHeader
+        eyebrow="Registro inmutable"
+        title="Logs de auditoría"
+        description="Toda acción sensible del sistema, con su autor y su resultado."
+        count={data?.totalElements ?? 0}
+        countLabel="Registros"
+        actions={
           <button
-            key={t}
-            onClick={() => handleTabChange(t)}
-            className={`cursor-pointer px-4 py-1.5 rounded-lg text-xs font-semibold transition ${
-              tab === t ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium ${
+              filtersOpen || activeFilters
+                ? 'border-cmp-azul/30 bg-[#E8F1FA] text-cmp-azul'
+                : 'border-cmp-rule bg-white text-cmp-slate hover:border-cmp-mute hover:text-cmp-ink'
             }`}
           >
-            {t === 'all' ? 'Todos' : 'Solo Críticos'}
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            Filtros
+            {activeFilters > 0 && (
+              <span className="cmp-mono rounded bg-cmp-azul px-1.5 py-0.5 text-[10px] text-white">
+                {activeFilters}
+              </span>
+            )}
           </button>
-        ))}
-      </div>
+        }
+      />
 
-      {/* Filters panel */}
-      {filtersOpen && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Usuario ID</label>
-              <input
-                type="number"
-                placeholder="ej. 42"
-                value={filters.userId ?? ''}
-                onChange={(e) => setFilters((f) => ({ ...f, userId: e.target.value ? Number(e.target.value) : undefined }))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Acción</label>
-              <input
-                placeholder="ej. LOGIN"
-                value={filters.action ?? ''}
-                onChange={(e) => setFilters((f) => ({ ...f, action: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Nivel</label>
-              <select
-                value={filters.level ?? ''}
-                onChange={(e) => setFilters((f) => ({ ...f, level: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                <option value="">Todos</option>
-                <option value="INFO">INFO</option>
-                <option value="WARNING">WARNING</option>
-                <option value="CRITICAL">CRITICAL</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Categoría</label>
-              <input
-                placeholder="ej. AUTH"
-                value={filters.category ?? ''}
-                onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Resultado</label>
-              <select
-                value={filters.success === undefined ? '' : String(filters.success)}
-                onChange={(e) => setFilters((f) => ({ ...f, success: e.target.value === '' ? undefined : e.target.value === 'true' }))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                <option value="">Todos</option>
-                <option value="true">Exitoso</option>
-                <option value="false">Fallido</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Desde</label>
-                <input
-                  type="date"
-                  value={filters.from ?? ''}
-                  onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Hasta</label>
-                <input
-                  type="date"
-                  value={filters.to ?? ''}
-                  onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3 mt-4">
-            <button
-              onClick={() => { setFilters(emptyFilters); setCurrentPage(0); fetchLogs(tab, emptyFilters, 0); }}
-              className="cursor-pointer px-4 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
-            >
-              Limpiar
-            </button>
-            <button
-              onClick={handleSearch}
-              className="cursor-pointer px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition"
-            >
-              Buscar
-            </button>
-          </div>
-        </div>
-      )}
+      <Tabs
+        layoutId="cmp-audit-tab"
+        options={[
+          { value: 'all' as const, label: 'Todos' },
+          { value: 'critical' as const, label: 'Solo críticos' },
+        ]}
+        value={tab}
+        onChange={handleTabChange}
+      />
 
-      {/* Table */}
+      <AnimatePresence initial={false}>
+        {filtersOpen && (
+          <motion.div
+            initial={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            animate={reduce ? { opacity: 1 } : { height: 'auto', opacity: 1 }}
+            exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={{ duration: 0.26, ease: EASE_OUT }}
+            className="overflow-hidden"
+          >
+            <div className="rounded-xl border border-cmp-rule bg-white p-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <Field label="Usuario ID">
+                  <input
+                    type="number"
+                    placeholder="42"
+                    value={filters.userId ?? ''}
+                    onChange={(e) =>
+                      setFilters((f) => ({
+                        ...f,
+                        userId: e.target.value ? Number(e.target.value) : undefined,
+                      }))
+                    }
+                    className={`${inputClass} cmp-mono`}
+                  />
+                </Field>
+                <Field label="Acción">
+                  <input
+                    placeholder="LOGIN"
+                    value={filters.action ?? ''}
+                    onChange={(e) => setFilters((f) => ({ ...f, action: e.target.value }))}
+                    className={`${inputClass} cmp-mono`}
+                  />
+                </Field>
+                <Field label="Nivel">
+                  <select
+                    value={filters.level ?? ''}
+                    onChange={(e) => setFilters((f) => ({ ...f, level: e.target.value }))}
+                    className={inputClass}
+                  >
+                    <option value="">Todos</option>
+                    <option value="INFO">Info</option>
+                    <option value="WARNING">Alerta</option>
+                    <option value="CRITICAL">Crítico</option>
+                  </select>
+                </Field>
+                <Field label="Categoría">
+                  <input
+                    placeholder="AUTH"
+                    value={filters.category ?? ''}
+                    onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
+                    className={`${inputClass} cmp-mono`}
+                  />
+                </Field>
+                <Field label="Resultado">
+                  <select
+                    value={filters.success === undefined ? '' : String(filters.success)}
+                    onChange={(e) =>
+                      setFilters((f) => ({
+                        ...f,
+                        success: e.target.value === '' ? undefined : e.target.value === 'true',
+                      }))
+                    }
+                    className={inputClass}
+                  >
+                    <option value="">Todos</option>
+                    <option value="true">Exitoso</option>
+                    <option value="false">Fallido</option>
+                  </select>
+                </Field>
+                <div className="grid grid-cols-2 gap-2">
+                  <Field label="Desde">
+                    <input
+                      type="date"
+                      value={filters.from ?? ''}
+                      onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Hasta">
+                    <input
+                      type="date"
+                      value={filters.to ?? ''}
+                      onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end gap-2 border-t border-cmp-rule-soft pt-4">
+                <Btn
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setFilters(emptyFilters);
+                    setCurrentPage(0);
+                    fetchLogs(tab, emptyFilters, 0);
+                  }}
+                >
+                  Limpiar
+                </Btn>
+                <Btn size="sm" variant="primary" icon={Search} onClick={handleSearch}>
+                  Buscar
+                </Btn>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {!data && !loading && !error ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <p className="text-sm text-gray-400">Aplica filtros y presiona <span className="font-semibold">Buscar</span> para cargar logs.</p>
+        <div className="rounded-xl border border-dashed border-cmp-rule bg-white/60 px-6 py-16 text-center">
+          <FileSearch className="mx-auto h-7 w-7 text-cmp-mute" />
+          <p className="mt-3 text-sm font-semibold text-cmp-ink">El registro está esperando</p>
+          <p className="mt-1 text-sm text-cmp-slate">
+            Ajusta los filtros y presiona Buscar para traer los movimientos.
+          </p>
+          <div className="mt-5 flex justify-center">
+            <Btn size="sm" variant="primary" icon={Search} onClick={handleSearch}>
+              Buscar
+            </Btn>
+          </div>
         </div>
       ) : loading ? (
-        <div className="flex justify-center items-center h-60">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-        </div>
+        <SkeletonRows rows={8} cols={7} />
       ) : error ? (
-        <div className="flex flex-col items-center gap-3 py-16 text-red-500">
-          <AlertTriangle className="w-8 h-8" />
-          <p className="text-sm font-medium">Error al cargar los logs.</p>
-          <button onClick={handleSearch} className="cursor-pointer text-xs text-indigo-600 hover:underline">Reintentar</button>
-        </div>
+        <ErrorState message="No se pudieron cargar los logs." onRetry={handleSearch} />
       ) : logs.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <p className="text-sm text-gray-500">No se encontraron logs con los filtros aplicados.</p>
-        </div>
+        <EmptyState
+          icon={FileSearch}
+          title="Ningún movimiento coincide"
+          hint="Amplía el rango de fechas o quita algún filtro."
+        />
       ) : (
         <>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">ID</th>
-                    <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Usuario</th>
-                    <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Acción</th>
-                    <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Nivel</th>
-                    <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Categoría</th>
-                    <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Resultado</th>
-                    <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-gray-50/80 transition-colors">
-                      <td className="px-4 py-3 text-gray-400 text-xs font-mono">{log.id}</td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {log.userId ? <span className="font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded">#{log.userId}</span> : <span className="text-gray-300">—</span>}
-                      </td>
-                      <td className="px-4 py-3 font-medium text-gray-800">{log.action}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${LEVEL_STYLE[log.level] ?? 'bg-gray-100 text-gray-600'}`}>
-                          {log.level}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">{log.category}</td>
-                      <td className="px-4 py-3">
-                        {log.success ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-red-400" />
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">
-                        {new Date(log.createdAt).toLocaleString('es-CO', {
-                          day: '2-digit', month: 'short', year: 'numeric',
-                          hour: '2-digit', minute: '2-digit',
-                        })}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <Ledger>
+            <LedgerTable>
+              <LedgerHead>
+                <ThSpine />
+                <Th>ID</Th>
+                <Th>Usuario</Th>
+                <Th>Acción</Th>
+                <Th>Nivel</Th>
+                <Th>Categoría</Th>
+                <Th>Resultado</Th>
+                <Th>Fecha</Th>
+                <Th align="right">Detalle</Th>
+              </LedgerHead>
+              <LedgerBody>
+                {logs.map((log, i) => (
+                  <LogRow key={log.id} log={log} index={i} />
+                ))}
+              </LedgerBody>
+            </LedgerTable>
+          </Ledger>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between pt-2">
-            <p className="text-xs text-gray-500">
-              {data?.totalElements ?? 0} resultado{(data?.totalElements ?? 0) !== 1 ? 's' : ''} — Página {currentPage + 1} de {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
-                disabled={currentPage === 0}
-                className="cursor-pointer p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
-                disabled={currentPage >= totalPages - 1}
-                className="cursor-pointer p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          <Pager
+            page={currentPage}
+            totalPages={totalPages}
+            total={data?.totalElements}
+            onChange={handlePageChange}
+          />
         </>
       )}
     </div>

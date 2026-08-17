@@ -38,11 +38,6 @@ export const deleteRaffle = async (raffleId: number): Promise<void> => {
     await apiClient.delete(`/api/admin/raffles/${raffleId}`);
 }
 
-export const getRaffleById = async (raffleId: number): Promise<RaffleResponseDTO> => {
-    const response = await apiClient.get(`/api/admin/raffles/${raffleId}`);
-    return response.data;
-}
-
 export const conductDraw = async (raffleId: number): Promise<DrawResultResponseDTO> => {
     const response = await apiClient.post(`/api/admin/raffles/${raffleId}/draw`);
     return response.data;
