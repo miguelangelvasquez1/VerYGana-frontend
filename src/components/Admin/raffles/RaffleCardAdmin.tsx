@@ -123,9 +123,9 @@ export default function RaffleCard({
                         <th className="p-4">Título</th>
                         <th className="p-4">Tipo</th>
                         <th className="p-4">Estado</th>
-                        <th className="p-4">Tickets</th>
-                        <th className="p-4">Participantes</th>
-                        <th className="p-4">Premios</th>
+                        <th className="p-4 text-center">Tickets</th>
+                        <th className="p-4 text-center">Participantes</th>
+                        <th className="p-4 text-center">Premios</th>
                         <th className="p-4 text-right">Acciones</th>
                     </tr>
                     </thead>
@@ -142,13 +142,13 @@ export default function RaffleCard({
                                 {raffle.raffleType}
                             </td>
                             <td className="p-4">{getStatusBadge(raffle.raffleStatus)}</td>
-                            <td className="p-4 text-gray-600">
+                            <td className="p-4 text-center text-gray-600">
                                 {raffle.totalTicketsIssued}
                             </td>
-                            <td className="p-4 text-gray-600">
+                            <td className="p-4 text-center text-gray-600">
                                 {raffle.totalParticipants}
                             </td>
-                            <td className="p-4 text-gray-600">{raffle.prizeCount}</td>
+                            <td className="p-4 text-center text-gray-600">{raffle.prizeCount}</td>
 
                             <td className="p-4 text-right">
                                 <div className="inline-flex items-center justify-end gap-1.5">
