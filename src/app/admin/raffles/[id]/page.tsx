@@ -139,6 +139,7 @@ export default function RaffleDetailPage() {
             <div className="max-w-6xl mx-auto">
                 <RaffleDetailCard
                     raffle={raffle}
+                    onClose={() => router.push("/admin/raffles")}
                     onDraw={handleDraw}
                     onCancel={handleCancel}
                     onUpdate={handleUpdate}
