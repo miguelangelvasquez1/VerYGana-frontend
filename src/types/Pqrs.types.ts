@@ -9,8 +9,21 @@ export enum PqrsStatus {
     PENDIENTE_ASIGNACION = 'PENDIENTE_ASIGNACION',
     RECIBIDA = 'RECIBIDA',
     EN_REVISION = 'EN_REVISION',
+    PENDIENTE_PAGO_REEMBOLSO = 'PENDIENTE_PAGO_REEMBOLSO',
     RESUELTA = 'RESUELTA',
     CERRADA = 'CERRADA'
+}
+
+export enum MarketPlaceIssueReason {
+    CODE_INVALID = 'CODE_INVALID',
+    NOT_DELIVERED = 'NOT_DELIVERED',
+    NOT_AS_DESCRIBED = 'NOT_AS_DESCRIBED',
+    OTHER = 'OTHER'
+}
+
+export enum PqrsResolutionAction {
+    DISMISS = 'DISMISS',
+    REFUND = 'REFUND'
 }
 
 export interface CreatePqrsRequestDTO {
@@ -30,6 +43,9 @@ export interface PqrsResponseDTO {
     dueDate: string;
     createdAt: string;
     resolvedAt: string | null;
+    purchaseItemId: number | null;
+    reasonCode : MarketPlaceIssueReason;
+    action: PqrsResolutionAction | null;
 }
 
 export interface PqrsAdminDetailDTO {
@@ -47,8 +63,12 @@ export interface PqrsAdminDetailDTO {
     requesterName: string;
     requesterEmail: string;
     requesterPhone: string;
+    purchaseItemId: number | null;
+    reasonCode: MarketPlaceIssueReason | null;
+    action : PqrsResolutionAction;
 }
 
 export interface RespondPqrsRequestDTO {
     response: string;
+    action : PqrsResolutionAction | null;
 }

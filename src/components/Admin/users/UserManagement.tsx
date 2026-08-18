@@ -1,4 +1,3 @@
-// components/admin/users/UserManagement.tsx
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -58,9 +57,9 @@ const ROLE_TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
 
 const STAT_CARDS: { role: Role; label: string; icon: React.ElementType }[] = [
   { role: Role.CONSUMER, label: 'Consumidores activos', icon: Users },
-  { role: Role.COMMERCIAL, label: 'Comerciales activos', icon: Briefcase },
+  { role: Role.COMMERCIAL, label: 'Empresarios activos', icon: Briefcase },
   { role: Role.ADMIN, label: 'Administradores activos', icon: ShieldAlert },
-  { role: Role.GAME_DESIGNER, label: 'Game Designers activos', icon: Gamepad2 },
+  { role: Role.GAME_DESIGNER, label: 'Diseñadores activos', icon: Gamepad2 },
   { role: Role.COMPLIANCE_OFFICER, label: 'Oficiales activos', icon: ShieldCheck },
 ];
 
@@ -99,7 +98,7 @@ const UserManagement: React.FC = () => {
   const [notifyTarget, setNotifyTarget] = useState<{ publicIds: string[]; recipientsLabel: string } | null>(null);
 
   const searchPlaceholder = activeTab === 'RECENT'
-    ? 'Búsqueda no disponible para nuevos registros'
+    ? 'Buscar nuevos usuarios por email...'
     : `Buscar ${roleLabel[activeTab as Role].toLowerCase()} por email...`;
   const { searchTerm } = useAdminSectionSearch(searchPlaceholder);
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -135,7 +134,7 @@ const UserManagement: React.FC = () => {
     setError(null);
     try {
       if (activeTab === 'RECENT') {
-        const res = await getNewUsers(startDate, endDate, undefined, page, PAGE_SIZE);
+        const res = await getNewUsers(startDate, endDate, debouncedSearch || undefined, page, PAGE_SIZE);
         setItems(res.data);
         setMeta(res.meta);
       } else if (activeTab === Role.CONSUMER) {
@@ -253,7 +252,6 @@ const UserManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Gestión de Usuarios</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {statsLoading ? 'Calculando usuarios activos...' : `${totalActive} usuarios activos en total`}
           </p>

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useProductCreation } from "@/hooks/products/useProductCreation";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
-import { CreateProductRequestDTO } from "@/types/products/Product.types";
+import { CreateProductRequestDTO, ProductType } from "@/types/products/Product.types";
 import { ProductStockRequestDTO } from "@/types/products/ProductStock.types";
 import { OptionalTargetAudienceDTO } from "@/types/TargetAudience.types";
 import StockInputSection, { StockItemForm } from "./stock/StockInputSection";
@@ -22,7 +22,13 @@ interface ProductFormState {
   productCategoryId: string;
   price: string;
   stockItems: StockItemForm[];
+  productType: ProductType | '';
 }
+
+const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  [ProductType.DIGITAL]: 'Digital',
+  [ProductType.PHYSICAL]: 'Físico',
+};
 
 interface Category {
   id: number;
@@ -44,6 +50,7 @@ const initialForm: ProductFormState = {
   productCategoryId: '',
   price: '',
   stockItems: [],
+  productType: '',
 };
 
 
@@ -99,6 +106,7 @@ export default function CreateProductForm() {
 
     if (!image) return toast.error('Selecciona una imagen');
     if (!form.productCategoryId) return toast.error('Debes seleccionar una categoría');
+    if (!form.productType) return toast.error('Debes seleccionar un tipo de producto');
 
     const price = parseFloat(form.price);
     if (!price || price <= 0) return toast.error('El precio debe ser mayor a 0');
@@ -121,6 +129,7 @@ export default function CreateProductForm() {
       productCategoryId: parseInt(form.productCategoryId),
       price,
       stockItems,
+      productType: form.productType as ProductType,
       targeting,
     };
 
@@ -237,6 +246,25 @@ export default function CreateProductForm() {
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Tipo de producto *</label>
+          <select
+            name="productType"
+            value={form.productType}
+            onChange={handleChange}
+            className="w-full border border-gray-200 p-2 rounded-lg"
+            required
+            disabled={isSubmitting}
+          >
+            <option value="">Selecciona un tipo</option>
+            {Object.values(ProductType).map((type) => (
+              <option key={type} value={type}>
+                {PRODUCT_TYPE_LABELS[type]}
               </option>
             ))}
           </select>

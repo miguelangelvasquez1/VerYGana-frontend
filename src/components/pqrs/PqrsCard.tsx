@@ -12,6 +12,7 @@ const PqrsCard = ({ pqrs, onClick }: Props) => {
   const isOverdue =
     pqrs.status !== PqrsStatus.RESUELTA &&
     pqrs.status !== PqrsStatus.CERRADA &&
+    pqrs.status !== PqrsStatus.PENDIENTE_PAGO_REEMBOLSO &&
     new Date(pqrs.dueDate).getTime() < Date.now();
 
   return (

@@ -202,7 +202,7 @@ export default function CommercialProfilePremium() {
       {/* ── ALIADOS ── */}
       <AlliesSummarySection
         title="Mis aliados"
-        description="Comerciales cuyos productos estás promocionando en el pop up final de tus juegos."
+        description="Empresarios cuyos productos estás promocionando en el pop up final de tus juegos."
         allies={allies}
         loading={alliesLoading}
         emptyText="Aún no promocionas productos de ningún aliado. Ve a la sección Aliados para elegir el primero."

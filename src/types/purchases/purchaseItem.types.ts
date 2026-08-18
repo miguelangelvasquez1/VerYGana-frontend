@@ -1,7 +1,11 @@
+import { MarketPlaceIssueReason } from "../Pqrs.types";
+
 export enum PurchaseItemStatus {
     PENDING = "PENDING",
-    DELIVERED = "DELIVERED",
-    FAILED = "FAILED"
+    CLAIMED = "CLAIMED",
+    EXPIRED_UNCLAIMED = "EXPIRED_UNCLAIMED",
+    REFUNDED = "REFUNDED",
+    CANCELLED = "CANCELLED"
 }
 
 export interface CreatePurchaseItemRequestDTO {
@@ -34,4 +38,13 @@ export interface FeaturedProductResponseDTO {
     price: number;
     averageRate: number;
     totalSales: number;
+}
+
+export interface ClaimPurchaseItemRequestDTO {
+    pin: string;
+}
+
+export interface ReportPurchaseItemRequestDTO {
+    reason : MarketPlaceIssueReason;
+    description: string;
 }

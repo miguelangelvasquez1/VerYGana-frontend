@@ -6,6 +6,7 @@ import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { useProductImageUpdate } from "@/hooks/products/useProductImageUpdate";
 import {
   ProductEditInfoResponseDTO,
+  ProductType,
   UpdateProductRequestDTO,
 } from "@/types/products/Product.types";
 import { ProductStockResponseDTO, ProductStockRequestDTO } from "@/types/products/ProductStock.types";
@@ -48,6 +49,11 @@ const STATUS_COLORS: Record<StockStatus, string> = {
   INVALID: 'bg-red-100 text-red-600',
 };
 
+const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  [ProductType.DIGITAL]: 'Digital',
+  [ProductType.PHYSICAL]: 'Físico',
+};
+
 const buildExpirationDate = (date: string, time: string): string | null => {
   if (!date) return null;
   return `${date}T${time || '00:00'}:00`;
@@ -72,6 +78,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
     totalStockItems: 0,
     availableStockItems: 0,
     targeting: null,
+    productType: ProductType.PHYSICAL,
   });
   const [targeting, setTargeting] = useState<OptionalTargetAudienceDTO>({});
 
@@ -458,6 +465,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
           <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 grid grid-cols-2 gap-2">
             <p>Total registrados: <strong>{form.totalStockItems}</strong></p>
             <p>Disponibles: <strong>{form.availableStockItems}</strong></p>
+            <p>Tipo de producto: <strong>{PRODUCT_TYPE_LABELS[form.productType]}</strong></p>
           </div>
 
           <TargetAudienceFields

@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { ConsumerPurchaseItemResponseDTO, PurchaseItemStatus } from "@/types/purchases/purchaseItem.types";
-import { createProductReview } from "@/services/ProductReviewService";
+import { MarketPlaceIssueReason } from "@/types/Pqrs.types";
+import { reportIssue } from "@/services/PurchaseItemService";
+import { marketPlaceIssueReasonLabel } from "@/components/pqrs/pqrsMeta";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -11,71 +13,49 @@ interface Props {
   items: ConsumerPurchaseItemResponseDTO[];
 }
 
-// Solo un item entregado (CLAIMED) puede reseñarse: si aún no llega, se
-// reembolsó o se canceló, no hay producto que calificar.
-export const canReviewPurchaseItem = (item: ConsumerPurchaseItemResponseDTO) =>
-  item.status === PurchaseItemStatus.CLAIMED && item.canBeReviewed;
+// Un item ya resuelto (reembolsado o cancelado) ya no puede reportarse: el
+// inconveniente ya fue atendido por esa vía.
+export const canReportPurchaseItem = (item: ConsumerPurchaseItemResponseDTO) =>
+  item.status !== PurchaseItemStatus.REFUNDED && item.status !== PurchaseItemStatus.CANCELLED;
 
-function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          onClick={() => onChange(star)}
-          className={`text-2xl transition-colors cursor-pointer ${star <= value ? "text-yellow-400" : "text-gray-300"}`}
-        >
-          ★
-        </button>
-      ))}
-    </div>
-  );
-}
-
-export default function LeaveReviewModal({ open, onClose, items }: Props) {
-  const reviewable = items.filter(canReviewPurchaseItem);
-
+export default function ReportIssueModal({ open, onClose, items }: Props) {
   const [selected, setSelected] = useState<ConsumerPurchaseItemResponseDTO | null>(null);
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
+  const [reason, setReason] = useState<MarketPlaceIssueReason | "">("");
+  const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [reviewed, setReviewed] = useState<Set<number>>(new Set());
+  const [reported, setReported] = useState<Set<number>>(new Set());
 
   if (!open) return null;
 
   const handleClose = () => {
     setSelected(null);
-    setRating(0);
-    setComment("");
+    setReason("");
+    setDescription("");
     onClose();
   };
 
   const handleBack = () => {
     setSelected(null);
-    setRating(0);
-    setComment("");
+    setReason("");
+    setDescription("");
   };
 
   const handleSubmit = async () => {
-    if (!selected || rating === 0) return;
+    if (!selected || !reason || !description.trim()) return;
     setSubmitting(true);
     try {
-      await createProductReview({
-        purchaseItemId: selected.id,
-        rating,
-        comment,
-      });
-      setReviewed((prev) => new Set(prev).add(selected.id));
+      await reportIssue(selected.id, { reason, description: description.trim() });
+      toast.success("Hemos recibido tu reporte. Un administrador lo revisará pronto.");
+      setReported((prev) => new Set(prev).add(selected.id));
       handleBack();
     } catch (e: any) {
-      toast.error(e?.response?.data?.message || "Error al enviar la reseña");
+      toast.error(e?.response?.data?.message || "Error al enviar el reporte");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const pendingItems = reviewable.filter((i) => !reviewed.has(i.id));
+  const pendingItems = items.filter((i) => canReportPurchaseItem(i) && !reported.has(i.id));
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -90,7 +70,7 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
               </button>
             )}
             <h2 className="text-lg font-semibold">
-              {selected ? selected.productName : "Dejar una reseña"}
+              {selected ? selected.productName : "Reportar un problema"}
             </h2>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-700 text-lg leading-none cursor-pointer">
@@ -103,7 +83,7 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
           <>
             {pendingItems.length === 0 && (
               <p className="text-gray-500 text-sm">
-                Ya has dejado reseña a todos los productos de esta compra.
+                No hay productos disponibles para reportar en esta compra.
               </p>
             )}
             <div className="space-y-3">
@@ -128,7 +108,7 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
           </>
         )}
 
-        {/* Formulario de reseña */}
+        {/* Formulario de reporte */}
         {selected && (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -137,25 +117,46 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
                 alt={selected.productName}
                 className="w-14 h-14 object-cover rounded-lg"
               />
-              <p className="text-sm text-gray-500">¿Cómo calificarías este producto?</p>
+              <p className="text-sm text-gray-500">¿Qué problema tuviste con este producto?</p>
             </div>
 
-            <StarRating value={rating} onChange={setRating} />
+            <div>
+              <label className="block text-sm font-medium mb-1">Motivo *</label>
+              <select
+                value={reason}
+                onChange={(e) => setReason(e.target.value as MarketPlaceIssueReason)}
+                className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+              >
+                <option value="">Selecciona un motivo</option>
+                {Object.values(MarketPlaceIssueReason).map((r) => (
+                  <option key={r} value={r}>
+                    {marketPlaceIssueReasonLabel[r]}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Escribe tu reseña (opcional)"
-              rows={3}
-              className="w-full border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-300"
-            />
+            <div>
+              <label className="block text-sm font-medium mb-1">Descripción *</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Cuéntanos qué sucedió con más detalle"
+                rows={3}
+                className="w-full border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-300"
+              />
+            </div>
+
+            <p className="text-xs text-gray-400">
+              Al enviar este reporte se creará una solicitud PQRS que será revisada por un administrador.
+            </p>
 
             <button
               onClick={handleSubmit}
-              disabled={rating === 0 || submitting}
+              disabled={!reason || !description.trim() || submitting}
               className="w-full bg-gray-900 text-white rounded-full py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
-              {submitting ? "Enviando..." : "Enviar reseña"}
+              {submitting ? "Enviando..." : "Enviar reporte"}
             </button>
           </div>
         )}

@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { getMyPqrsById } from "@/services/PqrsService";
-import { PqrsResponseDTO } from "@/types/Pqrs.types";
+import { PqrsResponseDTO, PqrsStatus } from "@/types/Pqrs.types";
 import PqrsStatusBadge from "./PqrsStatusBadge";
 import { formatPqrsDate, pqrsTypeLabel } from "./pqrsMeta";
+import RefundBankDetailsForm from "./RefundBankDetailsForm";
 
 interface Props {
   pqrsId: number;
@@ -105,6 +106,11 @@ const PqrsDetailModal = ({ pqrsId, onClose }: Props) => {
                   </p>
                 </div>
               )}
+
+              {pqrs.purchaseItemId != null &&
+                pqrs.status === PqrsStatus.PENDIENTE_PAGO_REEMBOLSO && (
+                  <RefundBankDetailsForm purchaseItemId={pqrs.purchaseItemId} />
+                )}
             </div>
           )}
         </div>

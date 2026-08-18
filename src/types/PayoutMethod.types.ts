@@ -15,7 +15,6 @@ export enum DocType {
     NIT = 'NIT',
     PP = 'PP',
     TI = 'TI',
-    DNI = 'DNI'
 }
 
 export enum VerificationStatus {
