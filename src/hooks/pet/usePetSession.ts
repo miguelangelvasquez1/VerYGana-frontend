@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import apiClient from '@/lib/api/client';
-import { getAccessToken, whenTokenReady } from '@/lib/auth/tokenStore';
+import { getAccessToken, onAccessTokenChange, whenTokenReady } from '@/lib/auth/tokenStore';
+import { refreshAccessToken } from '@/lib/auth/tokenRefresh';
+import { parseJwt } from '@/lib/utils/parseJwt';
 import type { PetSessionParams, PetSessionResponse } from '@/types/pet/petSession.types';
 
 /**
@@ -67,6 +69,31 @@ export function usePetSession() {
   // pet_session, así que la primera corrida se queda con el turno.
   const initStarted = useRef(false);
 
+  // El iframe vive en otro origen, así que no podemos tocar su unityInstance:
+  // el puente de index.html traduce estos mensajes a SendMessage.
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  // session_token/user_hash de la sesión activa: el juego los necesita junto al
+  // JWT en cada inyección, y no se pueden releer de la URL del iframe.
+  const sessionParams = useRef<PetSessionParams | null>(null);
+
+  const pushAuth = useCallback((bearerToken: string | null) => {
+    const target = iframeRef.current?.contentWindow;
+    const params = sessionParams.current;
+    if (!target || !params || !bearerToken) return;
+
+    target.postMessage(
+      {
+        type: 'PET_SET_AUTH',
+        payload: {
+          bearerToken,
+          sessionToken: params.sessionToken,
+          userHash: params.userHash,
+        },
+      },
+      '*',
+    );
+  }, []);
+
   const initSession = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -85,6 +112,7 @@ export function usePetSession() {
         return;
       }
 
+      sessionParams.current = params;
       setIframeUrl(buildIframeUrl(GAME_BASE_URL ?? base, params, getAccessToken()));
     } catch {
       setError('No pudimos iniciar tu mascota. Intenta de nuevo.');
@@ -99,10 +127,93 @@ export function usePetSession() {
     initSession();
   }, [initSession]);
 
+  // Empuje preventivo: cada refresh de AuthProvider viaja al juego, que si no
+  // seguiría usando el JWT que capturó al arrancar (vida útil: 15 min).
+  useEffect(() => onAccessTokenChange(pushAuth), [pushAuth]);
+
+  /**
+   * Proactivo: renueva el JWT antes de que venza, en vez de esperar al 401.
+   *
+   * El camino reactivo funciona, pero el usuario paga el costo: la petición que
+   * dispara el 401 se pierde y tiene que volver a hacer clic. Renovando al 80%
+   * de la vida útil, la ventana de token muerto prácticamente no se abre.
+   *
+   * Se reprograma con cada token nuevo (venga de donde venga), así que la cadena
+   * se mantiene sola mientras la pestaña esté abierta.
+   */
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
+
+    const renew = async () => {
+      try {
+        pushAuth(await refreshAccessToken());
+      } catch {
+        // Refresh caído: el 401 y el interceptor de apiClient siguen de red.
+      }
+    };
+
+    const schedule = (token: string | null) => {
+      clearTimeout(timer);
+      if (cancelled || !token) return;
+
+      const exp = parseJwt(token)?.exp;
+      if (typeof exp !== 'number') return;
+
+      // 80% de lo que le queda, con piso de 5 s para no entrar en bucle si el
+      // token ya viene vencido o casi.
+      const msLeft = exp * 1000 - Date.now();
+      timer = setTimeout(renew, Math.max(msLeft * 0.8, 5_000));
+    };
+
+    // Las pestañas en segundo plano tienen los timers estrangulados, así que al
+    // volver puede haber vencido sin que el timeout llegara a dispararse.
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const token = getAccessToken();
+      const exp = token ? parseJwt(token)?.exp : undefined;
+      if (typeof exp === 'number' && exp * 1000 - Date.now() < 30_000) renew();
+      else schedule(token);
+    };
+
+    const unsubscribe = onAccessTokenChange(schedule);
+    document.addEventListener('visibilitychange', onVisible);
+    schedule(getAccessToken());
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      unsubscribe();
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [pushAuth]);
+
+  // Reactivo: el juego avisa por el puente cuando le devuelven un 401. Se queda
+  // como red de seguridad por si la renovación proactiva llega tarde.
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data?.type === 'PET_GAME_READY') {
+        pushAuth(getAccessToken());
+        return;
+      }
+      if (event.data?.type !== 'PET_AUTH_EXPIRED') return;
+
+      try {
+        pushAuth(await refreshAccessToken());
+      } catch {
+        // El refresh falló: la sesión venció de verdad. El interceptor de
+        // apiClient ya maneja el signOut en ese caso; acá no hay nada que hacer.
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [pushAuth]);
+
   const retry = useCallback(() => {
     initStarted.current = true;
     return initSession();
   }, [initSession]);
 
-  return { iframeUrl, loading, error, retry };
+  return { iframeUrl, loading, error, retry, iframeRef };
 }

@@ -10,6 +10,8 @@ import StockInputSection, { StockItemForm } from "./stock/StockInputSection";
 import TargetAudienceFields, {
   isTargetAudienceValid,
 } from "@/components/shared/targeting/TargetAudienceFields";
+import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
+import { LimitReachedBlock, isLimitReached } from "@/components/commercial/plans/LimitReached";
 import toast from "react-hot-toast";
 
 // ============================================================
@@ -64,9 +66,11 @@ export default function CreateProductForm() {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [totalProducts, setTotalProducts] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { state, createProduct, reset } = useProductCreation();
+  const { planState, loadingPlan } = usePlanState();
 
   const isSubmitting = ['preparing', 'uploading', 'creating'].includes(state.status);
 
@@ -75,6 +79,13 @@ export default function CreateProductForm() {
     getActiveProductCategories()
       .then(setCategories)
       .catch((err) => console.error('Error cargando categorías:', err));
+  }, []);
+
+  // ── Cargar cantidad de productos actuales (para validar el límite del plan) ──
+  useEffect(() => {
+    getMyProducts(0)
+      .then((res) => setTotalProducts(res.meta?.totalElements ?? res.data?.length ?? 0))
+      .catch(() => setTotalProducts(0));
   }, []);
 
   // ── Limpiar URL de preview al desmontar ────────────────────
@@ -159,6 +170,25 @@ export default function CreateProductForm() {
   // ============================================================
   // RENDER
   // ============================================================
+
+  if (loadingPlan || totalProducts === null) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (planState != null && isLimitReached(totalProducts, planState.maxProducts)) {
+    return (
+      <LimitReachedBlock
+        resourceLabel="productos"
+        max={planState.maxProducts}
+        backHref="/commercial/products"
+        backLabel="Volver a productos"
+      />
+    );
+  }
 
   return (
     <form

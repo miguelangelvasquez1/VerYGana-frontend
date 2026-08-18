@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 
 interface ConfirmDialogProps {
@@ -18,19 +19,24 @@ interface ConfirmDialogProps {
 }
 
 export default function ConfirmDialog({
-  isOpen,
-  title,
-  description,
-  confirmText = "Confirmar",
-  cancelText = "Cancelar",
-  variant = "danger",
-  requireTextConfirmation = false,
-  confirmationText,
-  onConfirm,
-  onClose,
-}: ConfirmDialogProps) {
+                                        isOpen,
+                                        title,
+                                        description,
+                                        confirmText = "Confirmar",
+                                        cancelText = "Cancelar",
+                                        variant = "danger",
+                                        requireTextConfirmation = false,
+                                        confirmationText,
+                                        onConfirm,
+                                        onClose,
+                                      }: ConfirmDialogProps) {
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -39,11 +45,11 @@ export default function ConfirmDialog({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const isTextValid =
-    !requireTextConfirmation ||
-    (confirmationText && inputValue === confirmationText);
+      !requireTextConfirmation ||
+      (confirmationText && inputValue === confirmationText);
 
   const handleConfirm = async () => {
     if (!isTextValid) {
@@ -57,7 +63,7 @@ export default function ConfirmDialog({
       onClose();
     } catch (err: any) {
       toast.error(
-        err?.response?.data?.message ||
+          err?.response?.data?.message ||
           "Ocurrió un error al ejecutar la acción"
       );
     } finally {
@@ -76,56 +82,57 @@ export default function ConfirmDialog({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 space-y-6">
-        {/* Title */}
-        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+  return createPortal(
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
+        <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 space-y-6">
+          {/* Title */}
+          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
 
-        {/* Description */}
-        {description && (
-          <p className="text-sm text-gray-600">{description}</p>
-        )}
+          {/* Description */}
+          {description && (
+              <p className="text-sm text-gray-600">{description}</p>
+          )}
 
-        {/* Critical confirmation input */}
-        {requireTextConfirmation && confirmationText && (
-          <div className="space-y-2">
-            <p className="text-sm text-gray-700">
-              Para confirmar, escribe:
-              <span className="ml-1 font-semibold text-red-600">
+          {/* Critical confirmation input */}
+          {requireTextConfirmation && confirmationText && (
+              <div className="space-y-2">
+                <p className="text-sm text-gray-700">
+                  Para confirmar, escribe:
+                  <span className="ml-1 font-semibold text-red-600">
                 {confirmationText}
               </span>
-            </p>
+                </p>
 
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-              placeholder="Escribe aquí..."
-            />
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="Escribe aquí..."
+                />
+              </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3">
+            <button
+                onClick={onClose}
+                disabled={loading}
+                className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
+            >
+              {cancelText}
+            </button>
+
+            <button
+                onClick={handleConfirm}
+                disabled={loading || !isTextValid}
+                className={`px-4 py-2 rounded-lg text-white transition focus:ring-2 cursor-pointer ${getButtonStyle()} disabled:opacity-50`}
+            >
+              {loading ? "Procesando..." : confirmText}
+            </button>
           </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
-          >
-            {cancelText}
-          </button>
-
-          <button
-            onClick={handleConfirm}
-            disabled={loading || !isTextValid}
-            className={`px-4 py-2 rounded-lg text-white transition focus:ring-2 cursor-pointer ${getButtonStyle()} disabled:opacity-50`}
-          >
-            {loading ? "Procesando..." : confirmText}
-          </button>
         </div>
-      </div>
-    </div>
+      </div>,
+      document.body
   );
 }

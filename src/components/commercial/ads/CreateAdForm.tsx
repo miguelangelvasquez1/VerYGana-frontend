@@ -15,6 +15,8 @@ import { useRouter } from 'next/navigation';
 import { AdDetails } from '@/types/ads/commercial';
 import toast from 'react-hot-toast';
 import { usePlanState } from '../layout/DashboardLayout';
+import { useAds } from '@/hooks/ads/querys';
+import { LimitReachedBlock, isLimitReached } from '../plans/LimitReached';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -86,7 +88,8 @@ function InfoNote({ children }: { children: React.ReactNode }) {
 
 export function CreateAdForm() {
   const router = useRouter();
-  const { refreshPlanState } = usePlanState();
+  const { planState, loadingPlan, refreshPlanState } = usePlanState();
+  const { data: adsCountData, isLoading: loadingAdsCount } = useAds(0, 1);
 
   const [step, setStep] = useState<FormStep>('file');
   const [formData, setFormData] = useState<CreateAdFormData>({
@@ -256,6 +259,28 @@ export function CreateAdForm() {
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
+
+  const totalAdsCount = adsCountData?.totalElements ?? 0;
+  const adsLimitReached = planState != null && isLimitReached(totalAdsCount, planState.maxAds);
+
+  if (loadingPlan || loadingAdsCount) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (adsLimitReached) {
+    return (
+      <LimitReachedBlock
+        resourceLabel="anuncios"
+        max={planState!.maxAds}
+        backHref="/commercial/ads"
+        backLabel="Volver a anuncios"
+      />
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-5 pb-16">

@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { AdResponseDTO } from '@/types/ads/commercial';
 import { useAds } from '@/hooks/ads/querys';
 import { usePauseAd, useResumeAd, useDeleteAd } from '@/hooks/ads/mutations';
+import { usePlanState } from '../layout/DashboardLayout';
+import { LimitReachedBanner, isLimitReached } from '../plans/LimitReached';
 import toast from 'react-hot-toast';
 
 export function AdsList() {
@@ -17,16 +19,19 @@ export function AdsList() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(12);
   const [editingAd, setEditingAd] = useState<AdResponseDTO | null>(null);
-  
+
   // React Query hooks
   const { data, isLoading, error } = useAds(currentPage, pageSize);
   const pauseAdMutation = usePauseAd();
   const resumeAdMutation = useResumeAd();
   const deleteAdMutation = useDeleteAd();
+  const { planState } = usePlanState();
 
   const ads = data?.content || [];
   const totalPages = data?.totalPages || 0;
   const totalElements = data?.totalElements || 0;
+
+  const adsLimitReached = planState != null && isLimitReached(totalElements, planState.maxAds);
 
   const filteredAds = ads.filter(ad => {
     const matchesSearch = ad.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -139,15 +144,31 @@ export function AdsList() {
             </div>
 
             {/* Botón crear anuncio */}
-            <Link
-              href="/commercial/ads/create"
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              Crear Anuncio
-            </Link>
+            {adsLimitReached ? (
+              <button
+                type="button"
+                disabled
+                title={`Alcanzaste el máximo de ${planState?.maxAds} anuncios de tu plan`}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
+              >
+                <Plus className="h-4 w-4" />
+                Crear Anuncio
+              </button>
+            ) : (
+              <Link
+                href="/commercial/ads/create"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
+              >
+                <Plus className="h-4 w-4" />
+                Crear Anuncio
+              </Link>
+            )}
           </div>
         </div>
+
+        {adsLimitReached && (
+          <LimitReachedBanner resourceLabel="anuncios" max={planState!.maxAds} />
+        )}
 
         {/* Resumen de estadísticas */}
         {ads.length > 0 && (
@@ -227,13 +248,25 @@ export function AdsList() {
                 : 'No se encontraron anuncios'
               }
             </p>
-            <Link
-              href="/commercial/ads/create"
-              className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              Crear Anuncio
-            </Link>
+            {adsLimitReached ? (
+              <button
+                type="button"
+                disabled
+                title={`Alcanzaste el máximo de ${planState?.maxAds} anuncios de tu plan`}
+                className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
+              >
+                <Plus className="h-4 w-4" />
+                Crear Anuncio
+              </button>
+            ) : (
+              <Link
+                href="/commercial/ads/create"
+                className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
+              >
+                <Plus className="h-4 w-4" />
+                Crear Anuncio
+              </Link>
+            )}
           </div>
         )}
       </div>

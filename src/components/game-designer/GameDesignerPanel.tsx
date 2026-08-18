@@ -10,6 +10,8 @@ import {
   LogOut,
   Menu,
   X,
+  PawPrint,
+  Layers,
 } from 'lucide-react';
 import {
   getDesignerRequests,
@@ -19,6 +21,8 @@ import { useLogout } from '@/hooks/useLogout';
 import type { BrandingStatus } from '@/services/BrandingRequestService';
 import { DesignerRequestDetail } from './DesignerRequestDetail';
 import { DesignerProfile } from './DesignerProfile';
+import PetRequestsInbox from './pet/PetRequestsInbox';
+import PetScenesEditor from './pet/PetScenesEditor';
 import { NotificationPanel } from '@/components/notifications/NotificationsPanel';
 import { useNotifications } from '@/hooks/useNotifications';
 
@@ -37,7 +41,7 @@ const formatDate = (iso: string) =>
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type View = 'requests' | 'detail' | 'profile';
+type View = 'requests' | 'detail' | 'pets' | 'scenes' | 'profile';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -113,6 +117,8 @@ export const GameDesignerPanel: React.FC = () => {
 
   const navItems: { label: string; icon: React.ElementType; value: View }[] = [
     { label: 'Mis solicitudes', icon: Palette, value: 'requests' },
+    { label: 'Mascotas', icon: PawPrint, value: 'pets' },
+    { label: 'Escenas', icon: Layers, value: 'scenes' },
     { label: 'Mi perfil', icon: User, value: 'profile' },
   ];
 
@@ -139,16 +145,18 @@ export const GameDesignerPanel: React.FC = () => {
       <nav className="flex-1 mt-4 space-y-1 px-2">
         {navItems.map(item => {
           const Icon = item.icon;
+          const cls = (active: boolean) =>
+            `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer text-left ${
+              active ? 'bg-violet-50 text-violet-700 font-semibold' : 'text-gray-600 hover:bg-gray-50'
+            }`;
+
           const active = view === item.value || (item.value === 'requests' && view === 'detail');
           return (
             <button
               key={item.value}
               onClick={() => { setView(item.value); if (item.value === 'requests') { setSelectedId(null); } }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer text-left ${
-                active
-                  ? 'bg-violet-50 text-violet-700 font-semibold'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
+              title={sidebarOpen ? undefined : item.label}
+              className={cls(active)}
             >
               <Icon size={18} className={active ? 'text-violet-600' : 'text-gray-400'} />
               {sidebarOpen && <span className="text-sm">{item.label}</span>}
@@ -176,6 +184,10 @@ export const GameDesignerPanel: React.FC = () => {
 
   if (view === 'detail' && selectedId !== null) {
     content = <DesignerRequestDetail requestId={selectedId} onBack={handleBack} />;
+  } else if (view === 'pets') {
+    content = <PetRequestsInbox />;
+  } else if (view === 'scenes') {
+    content = <PetScenesEditor />;
   } else if (view === 'profile') {
     content = <DesignerProfile />;
   } else {
