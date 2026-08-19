@@ -6,23 +6,11 @@ import toast from "react-hot-toast";
 import { submitCashRefundBankDetails } from "@/services/PurchaseItemService";
 import { SubmitCashRefundBankDetailsRequestDTO } from "@/types/finance/Treasury.types";
 import { BankAccountType, DocType } from "@/types/PayoutMethod.types";
+import { bankAccountTypeLabel, docTypeLabel } from "@/utils/bankDetailsMeta";
 
 interface Props {
   purchaseItemId: number;
 }
-
-const DOC_TYPE_LABELS: Record<DocType, string> = {
-  [DocType.CC]: "Cédula de ciudadanía",
-  [DocType.CE]: "Cédula de extranjería",
-  [DocType.NIT]: "NIT",
-  [DocType.PP]: "Pasaporte",
-  [DocType.TI]: "Tarjeta de identidad",
-};
-
-const ACCOUNT_TYPE_LABELS: Record<BankAccountType, string> = {
-  [BankAccountType.SAVINGS]: "Ahorros",
-  [BankAccountType.CHECKING]: "Corriente",
-};
 
 const initialForm: SubmitCashRefundBankDetailsRequestDTO = {
   accountHolderName: "",
@@ -108,7 +96,7 @@ const RefundBankDetailsForm = ({ purchaseItemId }: Props) => {
               className="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             >
               {Object.values(DocType).map((t) => (
-                <option key={t} value={t}>{DOC_TYPE_LABELS[t]}</option>
+                <option key={t} value={t}>{docTypeLabel[t]}</option>
               ))}
             </select>
           </div>
@@ -148,7 +136,7 @@ const RefundBankDetailsForm = ({ purchaseItemId }: Props) => {
               className="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             >
               {Object.values(BankAccountType).map((t) => (
-                <option key={t} value={t}>{ACCOUNT_TYPE_LABELS[t]}</option>
+                <option key={t} value={t}>{bankAccountTypeLabel[t]}</option>
               ))}
             </select>
           </div>

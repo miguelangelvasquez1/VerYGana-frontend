@@ -1,3 +1,6 @@
+import { FileUploadPermissionDTO } from "./Generic.types";
+import { ProductType } from "./products/Product.types";
+
 export enum PqrsType {
     PETICION = 'PETICION',
     QUEJA = 'QUEJA',
@@ -26,10 +29,70 @@ export enum PqrsResolutionAction {
     REFUND = 'REFUND'
 }
 
+export enum MediaType {
+    IMAGE = 'IMAGE',
+    VIDEO = 'VIDEO'
+}
+
+export enum SupportedMimeType {
+    IMAGE_PNG = 'IMAGE_PNG',
+    IMAGE_JPEG = 'IMAGE_JPEG',
+    IMAGE_JPG = 'IMAGE_JPG',
+    IMAGE_WEBP = 'IMAGE_WEBP',
+    VIDEO_MP4 = 'VIDEO_MP4',
+    VIDEO_QUICK_TIME = 'VIDEO_QUICK_TIME'
+}
+
+export interface PqrsProductContextDTO {
+    id : number;
+    name : string;
+    description : string;
+    categoryName : string;
+    priceCents : number;
+    productType : ProductType;
+    imageUrl : string;
+    averageRate : number;
+    reviewCount : number;
+}
+
+export interface PqrsCommercialContextDTO {
+    commercialUserId : number;
+    companyName : string;
+    nit : string;
+    municipalityName : string;
+    departmentName : string;
+    contactEmail : string;
+    contactPhone : string;
+    currentPlanName : string;
+}
+
+export interface PreparePqrsAssetRequestDTO {
+    originalFileName : string;
+    contentType : string;
+    sizeBytes : number;
+}
+
+export interface PqrsAssetUploadPermissionDTO {
+    assetId : number;
+    permission : FileUploadPermissionDTO;
+}
+
+export interface PqrsAssetResponseDTO {
+    id : number;
+    originalFileName: string;
+    mediaType : MediaType;
+    mimeType : SupportedMimeType;
+    sizeBytes : number;
+    createdAt : string;
+    /** Ruta relativa a la propia API (no una URL firmada externa) — requiere anteponer el base URL y autenticar, ver usePqrsAssetSrc. */
+    viewUrl : string;
+}
+
 export interface CreatePqrsRequestDTO {
     type: PqrsType;
     subject: string;
     description: string;
+    assetIds?: number[];
 }
 
 export interface PqrsResponseDTO {
@@ -46,6 +109,7 @@ export interface PqrsResponseDTO {
     purchaseItemId: number | null;
     reasonCode : MarketPlaceIssueReason;
     action: PqrsResolutionAction | null;
+    assets: PqrsAssetResponseDTO[] | null;
 }
 
 export interface PqrsAdminDetailDTO {
@@ -66,7 +130,10 @@ export interface PqrsAdminDetailDTO {
     purchaseItemId: number | null;
     reasonCode: MarketPlaceIssueReason | null;
     action : PqrsResolutionAction;
-}
+    assets : PqrsAssetResponseDTO[] | null;
+    product : PqrsProductContextDTO | null;
+    commercial : PqrsCommercialContextDTO | null;
+}   
 
 export interface RespondPqrsRequestDTO {
     response: string;

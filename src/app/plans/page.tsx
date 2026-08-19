@@ -4,15 +4,18 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Check, X, Zap, Rocket, Star, ArrowRight, Sparkles,
-  Shield, Package, Megaphone, Gamepad2,
+  Package, Megaphone, Gamepad2, Layers, TrendingUp,
   PawPrint, ClipboardList, BadgePercent, Loader2,
-  AlertCircle, ArrowLeft
+  AlertCircle, ArrowLeft, Handshake, BarChart3, Eye,
+  ShoppingBag, FileText
 } from 'lucide-react';
 import { initiatePayment } from '@/services/planService';
 import { PlanCode, PlanPaymentRequestDTO } from '@/types/finance/plans/Plan.types';
 import { WompiCheckoutResponseDTO } from '@/types/finance/wompi/Wompi.types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
+
+const NA = 'No aplica';
 
 const PLAN_RANGES = {
   [PlanCode.STANDARD]: { min: 1_000_000, max: 9_999_999, label: '$1.000.000 – $9.999.999 COP' },
@@ -32,62 +35,114 @@ const formatInput = (raw: string) => {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface PlanFeatureRow {
+type FeatureValue = boolean | string;
+
+interface FeatureRow {
   label: string;
   icon: React.ReactNode;
-  basic: string | boolean;
-  standard: string | boolean;
-  premium: string | boolean;
+  basic: FeatureValue;
+  standard: FeatureValue;
+  premium: FeatureValue;
+}
+
+interface FeatureCategory {
+  title: string;
+  rows: FeatureRow[];
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
+// Basado en la Tabla comparativa de planes VERYGANA (aprobación de dirección, 22 jul 2026)
 
-const features: PlanFeatureRow[] = [
-  { label: 'Venta de productos',       icon: <Package className="w-4 h-4" />,      basic: 'comisión 15%',  standard: 'comisión 10%',  premium: 'comisión 5%' },
-  { label: 'Pago con llaves',          icon: <BadgePercent className="w-4 h-4" />,  basic: 'hasta 20%',     standard: 'hasta 35%',     premium: 'hasta 50%' },
-  { label: 'Juegos branded',           icon: <Gamepad2 className="w-4 h-4" />,      basic: false,           standard: true,            premium: true },
-  { label: 'Publicar anuncios',        icon: <Megaphone className="w-4 h-4" />,     basic: false,           standard: true,            premium: true },
-  { label: 'Encuestas personalizadas', icon: <ClipboardList className="w-4 h-4" />, basic: false,           standard: true,            premium: true },
-  { label: 'Sección de mascotas',      icon: <PawPrint className="w-4 h-4" />,      basic: false,           standard: false,           premium: true },
-  { label: 'Soporte prioritario',      icon: <Shield className="w-4 h-4" />,        basic: false,           standard: false,           premium: true },
+const categories: FeatureCategory[] = [
+  {
+    title: 'Económico y ventas',
+    rows: [
+      { label: 'Venta directa en la plataforma',            icon: <Package className="w-4 h-4" />,      basic: true,   standard: true,               premium: false },
+      { label: 'Comisión sobre ventas propias',              icon: <BadgePercent className="w-4 h-4" />, basic: '20%',  standard: '10%',              premium: NA },
+      { label: '% máximo de Llaves en compra propia',        icon: <BadgePercent className="w-4 h-4" />, basic: '20%',  standard: '50%',              premium: NA },
+      { label: 'Límite de productos activos en marketplace', icon: <Layers className="w-4 h-4" />,        basic: '10 productos', standard: '50 productos', premium: NA },
+    ],
+  },
+  {
+    title: 'Publicidad, juegos y visibilidad',
+    rows: [
+      { label: 'Publicar anuncios (Ads)',              icon: <Megaphone className="w-4 h-4" />,     basic: false, standard: 'Hasta 10 activos', premium: 'Hasta 50 activos' },
+      { label: 'Juegos brandeados (Campañas)',          icon: <Gamepad2 className="w-4 h-4" />,      basic: false, standard: 'Hasta 5 activos',  premium: 'Hasta 20 activos' },
+      { label: 'Encuestas',                             icon: <ClipboardList className="w-4 h-4" />, basic: false, standard: 'Hasta 10 activas', premium: 'Hasta 50 activas' },
+      { label: 'Boost de prioridad en visibilidad',     icon: <TrendingUp className="w-4 h-4" />,    basic: '0%',  standard: '30%',              premium: '70%' },
+      { label: 'Patrocinio en mascotas/avatares',       icon: <PawPrint className="w-4 h-4" />,      basic: false, standard: false,              premium: true },
+    ],
+  },
+  {
+    title: 'Aliados y recomendaciones patrocinadas',
+    rows: [
+      { label: 'Puede ser recomendado como aliado',                                  icon: <Handshake className="w-4 h-4" />, basic: true,  standard: true,  premium: NA },
+      { label: 'Promociona productos de aliados en el pop up final de sus juegos',    icon: <Sparkles className="w-4 h-4" />,  basic: false, standard: false, premium: true },
+    ],
+  },
+  {
+    title: 'Métricas',
+    rows: [
+      { label: 'Estadísticas de ventas',                              icon: <BarChart3 className="w-4 h-4" />,     basic: true,  standard: true,  premium: NA },
+      { label: 'Estadísticas de anuncios',                            icon: <Megaphone className="w-4 h-4" />,     basic: false, standard: true,  premium: true },
+      { label: 'Estadísticas de encuestas',                           icon: <ClipboardList className="w-4 h-4" />, basic: false, standard: true,  premium: true },
+      { label: 'Estadísticas de juegos',                              icon: <Gamepad2 className="w-4 h-4" />,      basic: false, standard: true,  premium: true },
+      { label: 'Métricas de remisión (impresiones y clics)',          icon: <Eye className="w-4 h-4" />,           basic: false, standard: false, premium: true },
+      { label: 'Visualizaciones a página oficial del empresario',     icon: <Eye className="w-4 h-4" />,           basic: false, standard: false, premium: true },
+      { label: 'Consumos en tienda de mascotas por producto patrocinado', icon: <ShoppingBag className="w-4 h-4" />, basic: false, standard: false, premium: true },
+      { label: 'Reporte ejecutivo exportable (PDF)',                  icon: <FileText className="w-4 h-4" />,      basic: false, standard: false, premium: true },
+    ],
+  },
 ];
 
 const plans = [
   {
     key: PlanCode.BASIC,
-    name: 'Personal',
+    name: 'Básico',
     price: '200.000',
     unit: 'COP / mes',
     billing: 'cobro mensual',
-    description: 'Para empezar a vender sin complicaciones',
+    description: 'Vende tus productos y comienza a crecer',
     icon: <Star className="w-8 h-8" />,
     cta: 'Comenzar ahora',
     highlight: false,
-    featuresLabel: 'Incluye:',
+    highlights: [
+      { icon: <BadgePercent className="w-3.5 h-3.5" />, text: 'Comisión del 20% por venta propia' },
+      { icon: <Layers className="w-3.5 h-3.5" />,        text: 'Hasta 10 productos activos' },
+      { icon: <Handshake className="w-3.5 h-3.5" />,     text: 'Puede ser recomendado como aliado' },
+    ],
   },
   {
     key: PlanCode.STANDARD,
     name: 'Estándar',
     price: '1.000.000',
     unit: 'COP mín.',
-    billing: 'inversión única',
-    description: 'Escala tu marca con anuncios y juegos',
+    billing: 'inversión mensual',
+    description: 'Vende con menor comisión y gana visibilidad con anuncios, juegos y encuestas',
     icon: <Zap className="w-8 h-8" />,
     cta: 'Activar plan',
     highlight: true,
-    featuresLabel: 'Todo lo de Personal, más:',
+    highlights: [
+      { icon: <BadgePercent className="w-3.5 h-3.5" />, text: 'Comisión reducida al 10%' },
+      { icon: <Megaphone className="w-3.5 h-3.5" />,     text: 'Anuncios, juegos y encuestas activos' },
+      { icon: <BarChart3 className="w-3.5 h-3.5" />,     text: 'Estadísticas de ventas, anuncios y juegos' },
+    ],
   },
   {
     key: PlanCode.PREMIUM,
     name: 'Premium',
     price: '10.000.000',
     unit: 'COP mín.',
-    billing: 'inversión única',
-    description: 'Máxima visibilidad y alcance total',
+    billing: 'inversión mensual',
+    description: 'Máxima visibilidad, patrocinios y métricas — sin venta directa',
     icon: <Rocket className="w-8 h-8" />,
     cta: 'Ir a Premium',
     highlight: false,
-    featuresLabel: 'Todo lo de Estándar, más:',
+    highlights: [
+      { icon: <TrendingUp className="w-3.5 h-3.5" />,  text: '70% de boost de prioridad en visibilidad' },
+      { icon: <PawPrint className="w-3.5 h-3.5" />,    text: 'Patrocinio en mascotas y recomendaciones de aliados' },
+      { icon: <FileText className="w-3.5 h-3.5" />,    text: 'Métricas de remisión y reporte ejecutivo PDF' },
+    ],
   },
 ];
 
@@ -172,8 +227,10 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
 
         <div className="bg-white/3 border border-white/6 rounded-xl p-3 mb-4">
           <p className="text-slate-400 text-sm leading-relaxed">
-            Este monto se acreditará en tu presupuesto publicitario. La comisión por venta es del{' '}
-            <strong className="text-white">{plan.key === PlanCode.STANDARD ? '10%' : '5%'}</strong>.
+            {plan.key === PlanCode.STANDARD
+              ? <>Este monto se acredita en tu presupuesto de anuncios, juegos y encuestas. Tu comisión por venta directa en el marketplace es del <strong className="text-white">10%</strong>.</>
+              : <>Este monto impulsa tus anuncios, campañas y patrocinios. El plan Premium no vende productos directamente en el marketplace.</>
+            }
           </p>
         </div>
 
@@ -194,6 +251,23 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
         </button>
       </div>
     </div>
+  );
+}
+
+// ─── Cell renderer (table view) ────────────────────────────────────────────────
+
+function FeatureCell({ val, tinted }: { val: FeatureValue; tinted: boolean }) {
+  return (
+    <td className={`px-5 py-3 text-center ${tinted ? 'bg-blue-600/5' : ''}`}>
+      {val === true
+        ? <Check className="w-4 h-4 text-emerald-500 mx-auto" strokeWidth={2.5} />
+        : val === false
+          ? <X className="w-4 h-4 text-slate-600 mx-auto" strokeWidth={2} />
+          : val === NA
+            ? <span className="text-xs text-slate-600 italic">No aplica</span>
+            : <span className="text-sm text-slate-300 font-medium">{val}</span>
+      }
+    </td>
   );
 }
 
@@ -244,7 +318,7 @@ export default function PlansPage() {
   }, [modalPlan]);
 
   return (
-    <div className="h-screen overflow-hidden bg-[#111318] text-white font-sans flex flex-col">
+    <div className="min-h-screen bg-[#111318] text-white font-sans flex flex-col">
       {/* Ambient */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-15%] left-[15%] w-125 h-125 rounded-full bg-blue-700/8 blur-[140px]" />
@@ -263,7 +337,7 @@ export default function PlansPage() {
       </div>
 
       <div
-        className="relative flex-1 flex flex-col justify-center max-w-4xl w-full mx-auto px-6"
+        className="relative flex-1 flex flex-col max-w-6xl w-full mx-auto px-6 py-6"
         style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease' }}
       >
         {/* Header */}
@@ -276,8 +350,8 @@ export default function PlansPage() {
             <span className="text-white">Planes y </span>
             <span className="bg-linear-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">Precios</span>
           </h1>
-          <p className="text-slate-400 text-xs max-w-md mx-auto mt-1.5">
-            Desde tu primera venta hasta escalar con anuncios y experiencias gamificadas.
+          <p className="text-slate-400 text-xs max-w-lg mx-auto mt-1.5">
+            Desde tu primera venta hasta escalar con anuncios, juegos y patrocinios de máxima visibilidad.
           </p>
         </div>
 
@@ -299,11 +373,6 @@ export default function PlansPage() {
         {activeTab === 'cards' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
             {plans.map((plan, i) => {
-              const planFeatures = features.filter(f => {
-                const val = f[plan.key.toLowerCase() as keyof typeof f];
-                return val !== false;
-              });
-
               return (
                 <div
                   key={plan.key}
@@ -360,27 +429,22 @@ export default function PlansPage() {
                     </button>
                   </div>
 
-                  {/* Features section */}
+                  {/* Highlights */}
                   <div className="px-4 py-3 bg-[#13151b] border-t border-white/6">
-                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide mb-2">
-                      {plan.featuresLabel}
-                    </p>
-                    <ul className="space-y-1.5">
-                      {planFeatures.map(f => {
-                        const val = f[plan.key.toLowerCase() as keyof typeof f] as string | boolean;
-                        return (
-                          <li key={f.label} className="flex items-center gap-2 text-xs text-slate-300">
-                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" strokeWidth={2.5} />
-                            <span>
-                              {f.label}
-                              {typeof val === 'string' && (
-                                <span className="text-slate-500 ml-1">({val})</span>
-                              )}
-                            </span>
-                          </li>
-                        );
-                      })}
+                    <ul className="space-y-2">
+                      {plan.highlights.map(h => (
+                        <li key={h.text} className="flex items-center gap-2.5 text-xs text-slate-300">
+                          <span className={`shrink-0 ${plan.highlight ? 'text-blue-400' : 'text-slate-500'}`}>{h.icon}</span>
+                          <span>{h.text}</span>
+                        </li>
+                      ))}
                     </ul>
+                    <button
+                      onClick={() => setActiveTab('table')}
+                      className="mt-3 text-xs text-slate-500 hover:text-white transition-colors cursor-pointer underline underline-offset-2"
+                    >
+                      Ver todos los detalles
+                    </button>
                   </div>
                 </div>
               );
@@ -390,8 +454,8 @@ export default function PlansPage() {
 
         {/* ── Table view ── */}
         {activeTab === 'table' && (
-          <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.4s' }}>
-            <table className="w-full">
+          <div className="rounded-2xl border border-white/10 overflow-x-auto" style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.4s' }}>
+            <table className="w-full min-w-[720px]">
               <thead>
                 <tr className="border-b border-white/10 bg-white/2">
                   <th className="text-left px-5 py-4 text-slate-400 font-medium text-sm w-[38%]">Funcionalidad</th>
@@ -407,29 +471,28 @@ export default function PlansPage() {
                 </tr>
               </thead>
               <tbody>
-                {features.map((row, i) => (
-                  <tr key={row.label}
-                    className={`border-b border-white/6 transition-colors hover:bg-white/2 ${i % 2 === 0 ? '' : 'bg-white/1'}`}>
-                    <td className="px-5 py-3 text-slate-300">
-                      <div className="flex items-center gap-2.5 text-sm">
-                        <span className="text-slate-500">{row.icon}</span>
-                        {row.label}
-                      </div>
-                    </td>
-                    {(['basic', 'standard', 'premium'] as const).map((key, ci) => {
-                      const val = row[key];
-                      return (
-                        <td key={key} className={`px-5 py-3 text-center ${ci === 1 ? 'bg-blue-600/5' : ''}`}>
-                          {val === true
-                            ? <Check className="w-4 h-4 text-emerald-500 mx-auto" strokeWidth={2.5} />
-                            : val === false
-                              ? <X className="w-4 h-4 text-slate-600 mx-auto" strokeWidth={2} />
-                              : <span className="text-sm text-slate-300 font-medium">{val as string}</span>
-                          }
+                {categories.map(cat => (
+                  <React.Fragment key={cat.title}>
+                    <tr className="bg-white/4">
+                      <td colSpan={4} className="px-5 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                        {cat.title}
+                      </td>
+                    </tr>
+                    {cat.rows.map((row, i) => (
+                      <tr key={row.label}
+                        className={`border-b border-white/6 transition-colors hover:bg-white/2 ${i % 2 === 0 ? '' : 'bg-white/1'}`}>
+                        <td className="px-5 py-3 text-slate-300">
+                          <div className="flex items-center gap-2.5 text-sm">
+                            <span className="text-slate-500">{row.icon}</span>
+                            {row.label}
+                          </div>
                         </td>
-                      );
-                    })}
-                  </tr>
+                        {(['basic', 'standard', 'premium'] as const).map((key, ci) => (
+                          <FeatureCell key={key} val={row[key]} tinted={ci === 1} />
+                        ))}
+                      </tr>
+                    ))}
+                  </React.Fragment>
                 ))}
                 <tr className="bg-white/2">
                   <td className="px-5 py-4" />

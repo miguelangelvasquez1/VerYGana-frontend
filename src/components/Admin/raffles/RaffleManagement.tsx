@@ -281,7 +281,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
           </div>
           <button
               onClick={() => setShowCreateRaffle(true)}
-              className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs transition-all"
+              className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark rounded-lg shadow-xs transition-all"
           >
             <Plus size={18} />
             Crear Rifa

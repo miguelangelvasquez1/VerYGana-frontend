@@ -5,6 +5,8 @@ import { ConsumerPurchaseItemResponseDTO, PurchaseItemStatus } from "@/types/pur
 import { MarketPlaceIssueReason } from "@/types/Pqrs.types";
 import { reportIssue } from "@/services/PurchaseItemService";
 import { marketPlaceIssueReasonLabel } from "@/components/pqrs/pqrsMeta";
+import PqrsEvidenceUploader from "@/components/pqrs/PqrsEvidenceUploader";
+import { usePqrsEvidenceUpload } from "@/hooks/pqrs/usePqrsEvidenceUpload";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -14,9 +16,13 @@ interface Props {
 }
 
 // Un item ya resuelto (reembolsado o cancelado) ya no puede reportarse: el
-// inconveniente ya fue atendido por esa vía.
+// inconveniente ya fue atendido por esa vía. Uno en IN_REVIEW tampoco: ya
+// tiene un reporte abierto y hay que esperar la retroalimentación del admin
+// antes de dejar reportar otro.
 export const canReportPurchaseItem = (item: ConsumerPurchaseItemResponseDTO) =>
-  item.status !== PurchaseItemStatus.REFUNDED && item.status !== PurchaseItemStatus.CANCELLED;
+  item.status !== PurchaseItemStatus.REFUNDED &&
+  item.status !== PurchaseItemStatus.CANCELLED &&
+  item.status !== PurchaseItemStatus.IN_REVIEW;
 
 export default function ReportIssueModal({ open, onClose, items }: Props) {
   const [selected, setSelected] = useState<ConsumerPurchaseItemResponseDTO | null>(null);
@@ -24,6 +30,7 @@ export default function ReportIssueModal({ open, onClose, items }: Props) {
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [reported, setReported] = useState<Set<number>>(new Set());
+  const evidence = usePqrsEvidenceUpload();
 
   if (!open) return null;
 
@@ -31,6 +38,7 @@ export default function ReportIssueModal({ open, onClose, items }: Props) {
     setSelected(null);
     setReason("");
     setDescription("");
+    evidence.clear();
     onClose();
   };
 
@@ -38,13 +46,18 @@ export default function ReportIssueModal({ open, onClose, items }: Props) {
     setSelected(null);
     setReason("");
     setDescription("");
+    evidence.clear();
   };
 
   const handleSubmit = async () => {
-    if (!selected || !reason || !description.trim()) return;
+    if (!selected || !reason || !description.trim() || evidence.busy) return;
     setSubmitting(true);
     try {
-      await reportIssue(selected.id, { reason, description: description.trim() });
+      await reportIssue(selected.id, {
+        reason,
+        description: description.trim(),
+        assetIds: evidence.assetIds,
+      });
       toast.success("Hemos recibido tu reporte. Un administrador lo revisará pronto.");
       setReported((prev) => new Set(prev).add(selected.id));
       handleBack();
@@ -147,13 +160,15 @@ export default function ReportIssueModal({ open, onClose, items }: Props) {
               />
             </div>
 
+            <PqrsEvidenceUploader evidence={evidence} />
+
             <p className="text-xs text-gray-400">
               Al enviar este reporte se creará una solicitud PQRS que será revisada por un administrador.
             </p>
 
             <button
               onClick={handleSubmit}
-              disabled={!reason || !description.trim() || submitting}
+              disabled={!reason || !description.trim() || submitting || evidence.busy}
               className="w-full bg-gray-900 text-white rounded-full py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               {submitting ? "Enviando..." : "Enviar reporte"}

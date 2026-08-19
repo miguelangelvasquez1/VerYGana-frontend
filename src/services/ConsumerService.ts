@@ -29,6 +29,7 @@ export const registerConsumer = async (data: {
   occupation?: string;
   incomeRange?: IncomeRange;
   isPEP: boolean;
+  recaptchaToken: string;
 }): Promise<any> => {
   const payload: RegisterConsumerDTO = {
     email: data.email,
@@ -49,9 +50,14 @@ export const registerConsumer = async (data: {
     occupation: data.occupation || undefined,
     incomeRange: data.incomeRange || undefined,
     isPEP: data.isPEP,
+    recaptchaToken: data.recaptchaToken,
   };
 
-  const response = await apiClient.post('/auth/register/consumer', payload);
+  const response = await apiClient.post(
+      "/auth/register/consumer",
+      payload
+  );
+
   return response.data;
 };
 

@@ -27,6 +27,7 @@ export interface RegisterConsumerDTO {
   occupation?: string;
   incomeRange?: IncomeRange;
   isPEP: boolean;
+  recaptchaToken: string;
 }
 
 export type Gender = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";

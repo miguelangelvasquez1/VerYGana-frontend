@@ -5,6 +5,7 @@ import { useProductCreation } from "@/hooks/products/useProductCreation";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { CreateProductRequestDTO, ProductType } from "@/types/products/Product.types";
 import { ProductStockRequestDTO } from "@/types/products/ProductStock.types";
+import { getMyProducts } from "@/services/ProductService";
 import { OptionalTargetAudienceDTO } from "@/types/TargetAudience.types";
 import StockInputSection, { StockItemForm } from "./stock/StockInputSection";
 import TargetAudienceFields, {

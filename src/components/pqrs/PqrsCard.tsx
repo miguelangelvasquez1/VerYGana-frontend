@@ -1,4 +1,4 @@
-import { MessageSquareText } from "lucide-react";
+import { MessageSquareText, Paperclip } from "lucide-react";
 import { PqrsResponseDTO, PqrsStatus } from "@/types/Pqrs.types";
 import PqrsStatusBadge from "./PqrsStatusBadge";
 import { formatPqrsDate, pqrsTypeLabel } from "./pqrsMeta";
@@ -41,12 +41,20 @@ const PqrsCard = ({ pqrs, onClick }: Props) => {
             {isOverdue ? "Vencida · " : "Vence "}
             {formatPqrsDate(pqrs.dueDate)}
           </span>
-          {pqrs.response && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-[#03548C]">
-              <MessageSquareText className="w-3.5 h-3.5" />
-              Con respuesta
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {pqrs.assets && pqrs.assets.length > 0 && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-400">
+                <Paperclip className="w-3.5 h-3.5" />
+                {pqrs.assets.length}
+              </span>
+            )}
+            {pqrs.response && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-[#03548C]">
+                <MessageSquareText className="w-3.5 h-3.5" />
+                Con respuesta
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </button>

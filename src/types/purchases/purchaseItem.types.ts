@@ -3,6 +3,7 @@ import { MarketPlaceIssueReason } from "../Pqrs.types";
 export enum PurchaseItemStatus {
     PENDING = "PENDING",
     CLAIMED = "CLAIMED",
+    IN_REVIEW = "IN_REVIEW",
     EXPIRED_UNCLAIMED = "EXPIRED_UNCLAIMED",
     REFUNDED = "REFUNDED",
     CANCELLED = "CANCELLED"
@@ -47,4 +48,5 @@ export interface ClaimPurchaseItemRequestDTO {
 export interface ReportPurchaseItemRequestDTO {
     reason : MarketPlaceIssueReason;
     description: string;
+    assetIds?: number[];
 }

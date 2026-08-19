@@ -44,8 +44,10 @@ export interface CashRefundResponseDTO {
     accountHolderName : string;
     accountHolderDoc : string;
     accountHolderDocType : DocType;
+    bankName : string;
+    accountNumber : string;
     accountType : BankAccountType;
     createdAt : string;
     bankDetailsSubmittedAt : string;
-    paidAt : string;
+    paidAt : string | null;
 }

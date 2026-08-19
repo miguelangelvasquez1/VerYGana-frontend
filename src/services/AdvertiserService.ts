@@ -12,6 +12,7 @@ export interface RegisterCommercialDTO {
   email: string;
   password: string;
   phoneNumber: string;
+  recaptchaToken: string;
 }
 
 export interface CommercialProfile {
@@ -55,6 +56,7 @@ export const registerCommercial = async (data: RegisterCommercialDTO): Promise<{
     email: data.email,
     password: data.password,
     phoneNumber: data.phoneNumber,
+    recaptchaToken: data.recaptchaToken,
   };
 
   const response = await apiClient.post('/auth/register/commercial', payload);
