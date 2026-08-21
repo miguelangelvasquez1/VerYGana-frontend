@@ -18,6 +18,8 @@ import {
   ACCEPT_ATTR,
 } from '@/hooks/pets/usePetImageUpload';
 import { PetCommentsPanel } from '@/components/shared/PetCommentsPanel';
+import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
+import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
 
 // ── Paleta de marca ───────────────────────────────────────────────────────────
 
@@ -522,6 +524,8 @@ function NewRequestDialog({ onClose, onCreated }: { onClose: () => void; onCreat
 // ── Página ────────────────────────────────────────────────────────────────────
 
 export default function PetsPage() {
+  const { planState } = usePlanState();
+  const walletExhausted = isWalletExhausted(planState);
   const [requests, setRequests] = useState<PetRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -567,15 +571,32 @@ export default function PetsPage() {
               clientes pueden usar con su mascota virtual.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setDialogOpen(true)}
-            className="flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:opacity-90"
-            style={{ background: `linear-gradient(135deg, ${AZUL}, ${AZUL_D})` }}
-          >
-            <Plus className="h-4 w-4" /> Nueva solicitud
-          </button>
+          {walletExhausted ? (
+            <button
+              type="button"
+              disabled
+              title={WALLET_EXHAUSTED_TOOLTIP}
+              className="flex items-center gap-2 rounded-xl bg-gray-200 px-5 py-2.5 text-sm font-bold text-gray-400 cursor-not-allowed"
+            >
+              <Plus className="h-4 w-4" /> Nueva solicitud
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setDialogOpen(true)}
+              className="flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:opacity-90"
+              style={{ background: `linear-gradient(135deg, ${AZUL}, ${AZUL_D})` }}
+            >
+              <Plus className="h-4 w-4" /> Nueva solicitud
+            </button>
+          )}
         </header>
+
+        {walletExhausted && (
+          <div className="mb-6">
+            <WalletExhaustedBanner />
+          </div>
+        )}
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
 
@@ -613,14 +634,25 @@ export default function PetsPage() {
                     Empieza por el que más vendes. Con una foto y una descripción corta basta.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setDialogOpen(true)}
-                  className="cursor-pointer rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-                  style={{ background: `linear-gradient(135deg, ${AZUL}, ${AZUL_D})` }}
-                >
-                  Crear la primera
-                </button>
+                {walletExhausted ? (
+                  <button
+                    type="button"
+                    disabled
+                    title={WALLET_EXHAUSTED_TOOLTIP}
+                    className="rounded-xl bg-gray-200 px-5 py-2.5 text-sm font-bold text-gray-400 cursor-not-allowed"
+                  >
+                    Crear la primera
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setDialogOpen(true)}
+                    className="cursor-pointer rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+                    style={{ background: `linear-gradient(135deg, ${AZUL}, ${AZUL_D})` }}
+                  >
+                    Crear la primera
+                  </button>
+                )}
               </div>
             ) : (
               <div className="flex flex-col gap-3">

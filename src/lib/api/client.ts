@@ -1,4 +1,5 @@
 import axios from 'axios';
+import React from 'react';
 import { getSession, signOut } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import { getAccessToken, whenTokenReady } from '@/lib/auth/tokenStore';
@@ -84,6 +85,40 @@ apiClient.interceptors.response.use((response) => response, async (error) => {
   }
 
   /*
+   * SALDO PUBLICITARIO AGOTADO (walletStatus EXHAUSTED)
+   *
+   * Distinto de un 400 genérico de "tu plan no incluye esto" (ese lleva a
+   * upgrade de plan) — un 402 significa específicamente que hay que
+   * recargar saldo. Es un aviso pasivo global adicional: los botones de
+   * creación ya deberían estar deshabilitados en la mayoría de los casos,
+   * esto cubre acciones forzadas (ej. un formulario ya abierto).
+   */
+  if (status === 402 && typeof window !== 'undefined' && canShow402Toast()) {
+    toast.error(
+      (t) =>
+        React.createElement(
+          'span',
+          { className: 'flex flex-col gap-1.5' },
+          React.createElement(
+            'span',
+            null,
+            message || 'Tu saldo publicitario está agotado. Recarga tu billetera para continuar.'
+          ),
+          React.createElement(
+            'a',
+            {
+              href: '/commercial/balance',
+              onClick: () => toast.dismiss(t.id),
+              className: 'text-xs font-bold underline self-start',
+            },
+            'Recargar ahora'
+          )
+        ),
+      { duration: 6000 }
+    );
+  }
+
+  /*
    * TOKEN EXPIRADO / SESIÓN INVÁLIDA
    *
    * Un 401 no siempre significa "sesión inválida" — la causa más común es
@@ -133,6 +168,18 @@ async function handleUnauthorized() {
  * fallan al mismo tiempo
  */
 let last503Toast = 0;
+let last402Toast = 0;
+
+function canShow402Toast(): boolean {
+  const now = Date.now();
+
+  if (now - last402Toast < 8000) {
+    return false;
+  }
+
+  last402Toast = now;
+  return true;
+}
 
 function canShow503Toast(): boolean {
   const now = Date.now();

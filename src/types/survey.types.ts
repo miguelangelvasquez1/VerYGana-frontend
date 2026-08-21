@@ -1,6 +1,14 @@
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-export type SurveyStatus = 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'CLOSED' | 'SUSPENDED' | 'COMPLETED';
+export type SurveyStatus =
+  | 'DRAFT'
+  | 'PENDING_REVIEW'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'ACTIVE'
+  | 'PAUSED'
+  | 'SUSPENDED'
+  | 'COMPLETED';
 
 export type RewardStatus = 'PENDING' | 'PROCESSED' | 'FAILED';
 
@@ -49,6 +57,7 @@ export interface SurveyResponse {
   maxAge: number | null;
   targetGender: TargetGender | null;
   questions: QuestionResponse[];
+  rejectionReason: string | null;
 }
 
 export interface SurveySummary {
@@ -297,6 +306,9 @@ export interface SurveyAdminDetailDTO {
   spentCents: number;
   /** completedSessions / maxResponses × 100 (or over totalSessions when open-ended) */
   completionRate: number;
+
+  /** Motivo del rechazo — solo presente cuando status === 'REJECTED' */
+  rejectionReason: string | null;
 }
 
 // ─── Commercial Detail ────────────────────────────────────────────────────────
@@ -319,6 +331,8 @@ export interface SurveyCommercialDetailDTO {
   questions: QuestionResponse[];
   // Budget
   totalBudgetCents: number | null;
+  /** Motivo del rechazo — solo presente cuando status === 'REJECTED' */
+  rejectionReason: string | null;
 }
 
 // ─── Update Request ───────────────────────────────────────────────────────────

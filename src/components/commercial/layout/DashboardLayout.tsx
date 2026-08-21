@@ -13,6 +13,7 @@ import { getCommercialInitialData } from '@/services/commercialService';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
 import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
 import { WalletStatus } from '@/types/finance/Wallet.types';
+import { isWalletExhausted, isWalletLow, WalletExhaustedBanner, WalletLowBalanceBanner } from '../plans/WalletBudgetAlerts';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
@@ -334,7 +335,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               }
               const access = getRouteAccess(currentPath, planState);
               if (!access.ok) return <LockedPage requiredPlans={access.requiredPlans!} />;
-              return children;
+              // No repetir el aviso dentro del propio flujo de recarga.
+              const showBudgetBanner = !currentPath.startsWith('/commercial/balance');
+              return (
+                <>
+                  {showBudgetBanner && isWalletExhausted(planState) && (
+                    <div className="mb-4"><WalletExhaustedBanner /></div>
+                  )}
+                  {showBudgetBanner && !isWalletExhausted(planState) && isWalletLow(planState) && (
+                    <div className="mb-4"><WalletLowBalanceBanner /></div>
+                  )}
+                  {children}
+                </>
+              );
             })()}
           </main>
         </div>

@@ -9,8 +9,11 @@ import SurveyTable from './SurveyTable';
 import type { SurveyStatus } from '@/types/survey.types';
 import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
 import { LimitReachedBanner, isLimitReached } from '@/components/commercial/plans/LimitReached';
+import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
 
-const ALL_STATUSES: SurveyStatus[] = ['DRAFT', 'ACTIVE', 'PAUSED', 'SUSPENDED', 'COMPLETED', 'CLOSED'];
+const ALL_STATUSES: SurveyStatus[] = [
+  'DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED', 'ACTIVE', 'PAUSED', 'SUSPENDED', 'COMPLETED',
+];
 
 export default function SurveyManagement() {
   const router = useRouter();
@@ -31,6 +34,11 @@ export default function SurveyManagement() {
 
   const surveysLimitReached = planState != null
     && isLimitReached(allSurveysData?.meta.totalElements ?? 0, planState.maxSurveys);
+  const walletExhausted = isWalletExhausted(planState);
+  const createBlocked = surveysLimitReached || walletExhausted;
+  const createBlockedTitle = walletExhausted
+    ? WALLET_EXHAUSTED_TOOLTIP
+    : `Alcanzaste el máximo de ${planState?.maxSurveys} encuestas de tu plan`;
 
   return (
     <div className="space-y-6">
@@ -71,11 +79,11 @@ export default function SurveyManagement() {
           </div>
 
           {/* Botón crear encuesta */}
-          {surveysLimitReached ? (
+          {createBlocked ? (
             <button
               type="button"
               disabled
-              title={`Alcanzaste el máximo de ${planState?.maxSurveys} encuestas de tu plan`}
+              title={createBlockedTitle}
               className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
             >
               <Plus className="h-4 w-4" />
@@ -93,9 +101,11 @@ export default function SurveyManagement() {
         </div>
       </div>
 
-      {surveysLimitReached && (
+      {surveysLimitReached ? (
         <LimitReachedBanner resourceLabel="encuestas" max={planState!.maxSurveys} />
-      )}
+      ) : walletExhausted ? (
+        <WalletExhaustedBanner />
+      ) : null}
 
       {/* ── Table ──────────────────────────────────────────────────────────── */}
       {isError ? (

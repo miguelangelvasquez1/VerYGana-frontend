@@ -54,7 +54,7 @@ function getMultiplesFrom(min: number, count = 8, step = 10): number[] {
 export default function SurveyFormModal() {
   const router = useRouter();
   const createMutation = useCreateSurvey();
-  const { planState, loadingPlan } = usePlanState();
+  const { planState, loadingPlan, refreshPlanState } = usePlanState();
   const { data: allSurveysData, isLoading: loadingSurveysCount } = useCommercialSurveys(0, 1);
 
   const {
@@ -177,6 +177,7 @@ export default function SurveyFormModal() {
 
     try {
       await createMutation.mutateAsync(payload);
+      await refreshPlanState();
       router.push('/commercial/surveys');
     } catch {
       // error surfaced via createMutation.isError

@@ -132,6 +132,16 @@ export const submitBrandingRequest = async (requestId: number, notes?: string): 
   await apiClient.post(`/branding-requests/${requestId}/submit`, notes ? { notes } : undefined);
 };
 
+/**
+ * POST /branding-requests/:id/cancel (rol COMMERCIAL)
+ * Solo funciona si la solicitud está en DRAFT (400 en cualquier otro estado).
+ * Devuelve el budgetCents completo a la wallet y borra los corporate
+ * resources ya subidos (CDN + BD).
+ */
+export const cancelBrandingRequest = async (requestId: number): Promise<void> => {
+  await apiClient.post(`/branding-requests/${requestId}/cancel`);
+};
+
 export interface BrandingCategory {
   id: number;
   name: string;

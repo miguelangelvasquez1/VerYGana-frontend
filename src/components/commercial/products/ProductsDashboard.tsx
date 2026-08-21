@@ -11,6 +11,7 @@ import CreateProductForm from "@/components/commercial/products/CreateProductFor
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
 import { LimitReachedBanner, isLimitReached } from "@/components/commercial/plans/LimitReached";
+import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from "@/components/commercial/plans/WalletBudgetAlerts";
 
 // Servicios
 import * as productService from "@/services/ProductService";
@@ -206,6 +207,11 @@ export default function ProductsDashboard() {
   // ================== UI ==================
 
   const productsLimitReached = planState != null && isLimitReached(totalProducts, planState.maxProducts);
+  const walletExhausted = isWalletExhausted(planState);
+  const createBlocked = productsLimitReached || walletExhausted;
+  const createBlockedTitle = walletExhausted
+    ? WALLET_EXHAUSTED_TOOLTIP
+    : `Alcanzaste el máximo de ${planState?.maxProducts} productos de tu plan`;
 
   const renderProducts = () => {
     return (
@@ -214,11 +220,11 @@ export default function ProductsDashboard() {
       <h2 className="text-3xl font-bold text-gray-900">
         Todos tus productos
       </h2>
-      {productsLimitReached ? (
+      {createBlocked ? (
         <button
           type="button"
           disabled
-          title={`Alcanzaste el máximo de ${planState?.maxProducts} productos de tu plan`}
+          title={createBlockedTitle}
           className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 rounded-xl font-semibold text-sm cursor-not-allowed"
         >
           <PlusCircle className="w-4 h-4" />
@@ -235,9 +241,11 @@ export default function ProductsDashboard() {
       )}
       </div>
 
-      {productsLimitReached && (
+      {productsLimitReached ? (
         <LimitReachedBanner resourceLabel="productos" max={planState!.maxProducts} />
-      )}
+      ) : walletExhausted ? (
+        <WalletExhaustedBanner />
+      ) : null}
 
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex-1 relative">

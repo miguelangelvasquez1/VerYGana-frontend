@@ -7,8 +7,6 @@ import {
   RefreshCw,
   Play,
   Pause,
-  XCircle,
-  X,
   DollarSign,
   BarChart2,
   Target,
@@ -65,7 +63,6 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
   const [savingAudience, setSavingAudience] = useState(false);
 
   const [statusUpdating, setStatusUpdating] = useState(false);
-  const [confirmCancel, setConfirmCancel] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
 
   const loadCampaign = async (signal?: AbortSignal) => {
@@ -139,10 +136,7 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
     setStatusUpdating(true);
     try {
       await updateCampaignStatus(campaign.id, status);
-      toast.success(
-        status === 'ACTIVE' ? '¡Campaña activada!' : status === 'PAUSED' ? 'Campaña pausada' : 'Campaña cancelada'
-      );
-      setConfirmCancel(false);
+      toast.success(status === 'ACTIVE' ? '¡Campaña activada!' : 'Campaña pausada');
       await loadCampaign();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Error al actualizar el estado de la campaña');
@@ -264,16 +258,6 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
                 Pausar
               </button>
             )}
-            {validTargets.includes('CANCELLED') && (
-              <button
-                onClick={() => setConfirmCancel(true)}
-                disabled={statusUpdating}
-                className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                <XCircle size={14} />
-                Cancelar
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -317,42 +301,6 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
           />
         )}
       </div>
-
-      {/* ── Modal: Confirm Cancel ── */}
-      {confirmCancel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h2 className="text-base font-semibold text-gray-900">Cancelar campaña</h2>
-              <button onClick={() => setConfirmCancel(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              <p className="text-sm text-gray-600 leading-relaxed">
-                La campaña dejará de mostrarse a los jugadores y no podrá reactivarse. Esta acción no se puede deshacer.
-              </p>
-              <div className="flex gap-3 pt-1">
-                <button
-                  onClick={() => setConfirmCancel(false)}
-                  disabled={statusUpdating}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-60 cursor-pointer"
-                >
-                  Volver
-                </button>
-                <button
-                  onClick={() => handleStatusChange('CANCELLED')}
-                  disabled={statusUpdating}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  {statusUpdating && <Loader2 size={14} className="animate-spin" />}
-                  Sí, cancelar campaña
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

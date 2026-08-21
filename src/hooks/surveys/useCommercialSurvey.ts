@@ -52,10 +52,34 @@ export function useCreateSurvey() {
   });
 }
 
+// ─── Submit survey for review ─────────────────────────────────────────────────
+
+/**
+ * Sends a DRAFT survey to admin review: DRAFT → PENDING_REVIEW.
+ * Cache strategy identical to usePublishSurvey.
+ */
+export function useSubmitSurveyForReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (surveyId: number) =>
+      surveyAdminService.submitForReview(surveyId),
+
+    onSuccess: (updatedSurvey) => {
+      queryClient.setQueryData(
+        surveyKeys.adminDetail(updatedSurvey.id),
+        updatedSurvey,
+      );
+      queryClient.invalidateQueries({ queryKey: surveyKeys.adminLists() });
+    },
+  });
+}
+
 // ─── Publish survey ───────────────────────────────────────────────────────────
 
 /**
- * Transitions a DRAFT survey to ACTIVE.
+ * Transitions an APPROVED survey to ACTIVE. Responds 400 if the survey
+ * isn't APPROVED (it no longer works directly from DRAFT).
  *
  * Cache strategy:
  *  - Immediately writes the updated survey into the detail cache (no extra fetch).
@@ -81,10 +105,9 @@ export function usePublishSurvey() {
 // ─── Update survey status ─────────────────────────────────────────────────────
 
 /**
- * Freely changes a survey's status:
+ * Freely changes a published survey's status:
  *   ACTIVE  → PAUSED
  *   PAUSED  → ACTIVE
- *   any     → CLOSED
  *
  * Cache strategy identical to usePublishSurvey.
  */

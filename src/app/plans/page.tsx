@@ -2,15 +2,23 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import {
   Check, X, Zap, Rocket, Star, ArrowRight, Sparkles,
   Shield, Package, Megaphone, Gamepad2,
   PawPrint, ClipboardList, BadgePercent, Loader2,
   AlertCircle, ArrowLeft
 } from 'lucide-react';
-import { initiatePayment } from '@/services/planService';
-import { PlanCode, PlanPaymentRequestDTO } from '@/types/finance/plans/Plan.types';
+import { initiatePayment, getEffectivePlanState } from '@/services/planService';
+import { requestPlanChange } from '@/services/planChangeService';
+import { PlanCode, PlanPaymentRequestDTO, EffectivePlanStateResponseDTO } from '@/types/finance/plans/Plan.types';
 import { WompiCheckoutResponseDTO } from '@/types/finance/wompi/Wompi.types';
+import { PLANCHANGE_CONTRACT_DOWNLOAD_URL_KEY } from '@/components/commercial/planChange/planChange.shared';
+
+function apiErrorMessage(err: unknown, fallback: string): string {
+  const data = (err as { response?: { data?: { message?: string } } })?.response?.data;
+  return data?.message || fallback;
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -165,14 +173,15 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
           )}
           {amount > 0 && !error && (
             <p className="text-slate-400 text-sm mt-2">
-              Depositas: <span className="text-white font-semibold">{formatCOP(amount)}</span>
+              Inviertes: <span className="text-white font-semibold">{formatCOP(amount)}</span>
             </p>
           )}
         </div>
 
         <div className="bg-white/3 border border-white/6 rounded-xl p-3 mb-4">
           <p className="text-slate-400 text-sm leading-relaxed">
-            Este monto se acreditará en tu presupuesto publicitario. La comisión por venta es del{' '}
+            Generaremos un otrosí para tu cambio de plan con este monto de inversión. Deberás aprobarlo y esperar la
+            revisión de VERyGANA antes de que se aplique. La comisión por venta es del{' '}
             <strong className="text-white">{plan.key === PlanCode.STANDARD ? '10%' : '5%'}</strong>.
           </p>
         </div>
@@ -188,8 +197,8 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
             }`}
         >
           {loading
-            ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando checkout...</>
-            : <>Ir a pagar <ArrowRight className="w-4 h-4" /></>
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando solicitud...</>
+            : <>Solicitar cambio de plan <ArrowRight className="w-4 h-4" /></>
           }
         </button>
       </div>
@@ -204,13 +213,24 @@ export default function PlansPage() {
   const [modalPlan, setModalPlan] = useState<typeof plans[number] | null>(null);
   const [loading, setLoading] = useState<PlanCode | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [effectivePlanState, setEffectivePlanState] = useState<EffectivePlanStateResponseDTO | null>(null);
+  const [loadingEffectivePlan, setLoadingEffectivePlan] = useState(true);
   const router = useRouter();
 
   useEffect(() => { setMounted(true); }, []);
 
-  const handlePlanClick = useCallback(async (plan: typeof plans[number]) => {
+  useEffect(() => {
+    getEffectivePlanState()
+      .then(setEffectivePlanState)
+      .catch(() => setEffectivePlanState(null))
+      .finally(() => setLoadingEffectivePlan(false));
+  }, []);
+
+  // Renovar el plan que ya se tiene: BASIC sigue usando /plans/checkout,
+  // STANDARD/PREMIUM ahora requiere el flujo de recarga con contrato.
+  const handleRenewCurrentPlan = useCallback(async (plan: typeof plans[number]) => {
     if (plan.key !== PlanCode.BASIC) {
-      setModalPlan(plan);
+      router.push('/commercial/balance');
       return;
     }
     setLoading(PlanCode.BASIC);
@@ -221,27 +241,54 @@ export default function PlansPage() {
       sessionStorage.setItem('vg_payment_plan', PlanCode.BASIC);
       window.location.href = checkout.checkoutUrl;
     } catch (err) {
-      console.error('Error iniciando pago:', err);
+      toast.error(apiErrorMessage(err, 'No se pudo iniciar el pago. Intenta de nuevo.'));
       setLoading(null);
     }
-  }, []);
+  }, [router]);
 
-  const handleDepositConfirm = useCallback(async (amountCents: number) => {
-    if (!modalPlan) return;
-    const planKey = modalPlan.key;
-    setLoading(planKey);
+  // Cambiar a un plan distinto al actual (incluye bajar a BASIC) — pasa por
+  // el pipeline de solicitud de cambio de plan, no por /plans/checkout.
+  const handleRequestPlanChange = useCallback(async (targetPlanCode: PlanCode, amountCents?: number) => {
+    setLoading(targetPlanCode);
     try {
-      const request: PlanPaymentRequestDTO = { planCode: planKey, amountCents };
-      const checkout: WompiCheckoutResponseDTO = await initiatePayment(request);
-      sessionStorage.setItem('vg_payment_reference', checkout.reference);
-      sessionStorage.setItem('vg_payment_plan', planKey);
-      window.location.href = checkout.checkoutUrl;
+      const result = await requestPlanChange({
+        targetPlanCode,
+        intendedInvestmentAmountCents: amountCents,
+      });
+      if (result.contract?.downloadUrl) {
+        sessionStorage.setItem(PLANCHANGE_CONTRACT_DOWNLOAD_URL_KEY, result.contract.downloadUrl);
+      }
+      router.push('/commercial/plan-change');
     } catch (err) {
-      console.error('Error iniciando pago:', err);
+      toast.error(apiErrorMessage(err, 'No se pudo crear la solicitud de cambio de plan.'));
       setLoading(null);
       setModalPlan(null);
     }
-  }, [modalPlan]);
+  }, [router]);
+
+  const handlePlanClick = useCallback((plan: typeof plans[number]) => {
+    if (loadingEffectivePlan) return;
+    const isCurrentPlan = effectivePlanState?.hasActivePlan && effectivePlanState.effectivePlan === plan.key;
+
+    if (isCurrentPlan) {
+      handleRenewCurrentPlan(plan);
+      return;
+    }
+
+    if (plan.key === PlanCode.BASIC) {
+      // Bajar a BASIC no requiere monto de inversión.
+      handleRequestPlanChange(plan.key);
+      return;
+    }
+
+    // Cambiar a STANDARD/PREMIUM: pedir el monto de inversión antes de crear la solicitud.
+    setModalPlan(plan);
+  }, [loadingEffectivePlan, effectivePlanState, handleRenewCurrentPlan, handleRequestPlanChange]);
+
+  const handleDepositConfirm = useCallback((amountCents: number) => {
+    if (!modalPlan) return;
+    handleRequestPlanChange(modalPlan.key, amountCents);
+  }, [modalPlan, handleRequestPlanChange]);
 
   return (
     <div className="h-screen overflow-hidden bg-[#111318] text-white font-sans flex flex-col">

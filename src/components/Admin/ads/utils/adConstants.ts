@@ -34,6 +34,17 @@ export const STAT_CARDS_CONFIG = [
   { key: 'completed', label: 'Completados', color: 'purple', icon: CheckCircle },
 ] as const;
 
+// Clases estáticas (Tailwind no genera clases construidas dinámicamente como `border-${color}-500`)
+export const STAT_CARD_COLORS: Record<string, { badge: string; value: string }> = {
+  gray: { badge: 'bg-gray-100 text-gray-600', value: 'text-gray-900' },
+  yellow: { badge: 'bg-yellow-100 text-yellow-600', value: 'text-yellow-700' },
+  green: { badge: 'bg-green-100 text-green-600', value: 'text-green-700' },
+  blue: { badge: 'bg-blue-100 text-blue-600', value: 'text-blue-700' },
+  orange: { badge: 'bg-orange-100 text-orange-600', value: 'text-orange-700' },
+  red: { badge: 'bg-red-100 text-red-600', value: 'text-red-700' },
+  purple: { badge: 'bg-purple-100 text-purple-600', value: 'text-purple-700' },
+};
+
 export const STATUS_FILTER_OPTIONS = [
   { value: 'all', label: 'Todos los estados' },
   { value: 'pending', label: 'Pendientes' },

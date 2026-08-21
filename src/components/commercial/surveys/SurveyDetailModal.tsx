@@ -94,6 +94,14 @@ function SurveyContent({ survey }: { survey: SurveyCommercialDetailDTO }) {
 
   return (
     <div className="space-y-6 p-6">
+      {/* Rejection reason */}
+      {survey.status === 'REJECTED' && survey.rejectionReason && (
+        <div className="p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg text-sm text-red-800">
+          <strong className="block mb-1">Motivo del rechazo:</strong>
+          {survey.rejectionReason}
+        </div>
+      )}
+
       {/* Live progress */}
       <div className="grid grid-cols-1 gap-4">
         <StatCard

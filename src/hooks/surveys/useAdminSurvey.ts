@@ -60,17 +60,18 @@ export function useAdminSurveyDetail(surveyId: number) {
 // ─── useAdminUpdateStatus ─────────────────────────────────────────────────────
 
 /**
- * Changes the survey status.
- * On success invalidates both the detail and the list so they refetch.
+ * Changes the survey status (admin moderation only: SUSPENDED / PAUSED-to-
+ * revert-a-suspension). On success invalidates both the detail and the
+ * list so they refetch.
  *
- * Note: `publishSurvey`/`updateStatus` return the lighter `SurveyResponse`
- * shape, not the full `SurveyAdminDetailDTO` that the detail page uses
- * (which has `totalQuestions`, `totalBudgetCents`, etc.). Writing that
- * response straight into the detail cache via `setQueryData` used to
- * corrupt it — the detail page would render `undefined`/`NaN` for the
- * fields the mutation response doesn't have until a full page reload
- * bypassed the stale cache. Invalidating instead forces a real refetch
- * with the correct shape.
+ * Note: `updateStatus` returns the lighter `SurveyResponse` shape, not the
+ * full `SurveyAdminDetailDTO` that the detail page uses (which has
+ * `totalQuestions`, `totalBudgetCents`, etc.). Writing that response
+ * straight into the detail cache via `setQueryData` used to corrupt it —
+ * the detail page would render `undefined`/`NaN` for the fields the
+ * mutation response doesn't have until a full page reload bypassed the
+ * stale cache. Invalidating instead forces a real refetch with the
+ * correct shape.
  */
 export function useAdminUpdateStatus() {
   const queryClient = useQueryClient();
@@ -82,10 +83,40 @@ export function useAdminUpdateStatus() {
     }: {
       surveyId: number;
       status: SurveyStatus;
-    }) =>
-      status === 'ACTIVE'
-        ? surveyAdminService.publishSurvey(surveyId)
-        : surveyAdminService.updateStatus(surveyId, status),
+    }) => surveyAdminService.updateStatus(surveyId, status),
+
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: adminSurveyKeys.detail(updated.id) });
+      queryClient.invalidateQueries({ queryKey: adminSurveyKeys.lists() });
+    },
+  });
+}
+
+// ─── useAdminApproveSurvey ────────────────────────────────────────────────────
+
+/** PENDING_REVIEW → APPROVED. */
+export function useAdminApproveSurvey() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (surveyId: number) => surveyAdminService.approveSurvey(surveyId),
+
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: adminSurveyKeys.detail(updated.id) });
+      queryClient.invalidateQueries({ queryKey: adminSurveyKeys.lists() });
+    },
+  });
+}
+
+// ─── useAdminRejectSurvey ─────────────────────────────────────────────────────
+
+/** PENDING_REVIEW → REJECTED. Devuelve el presupuesto completo a la wallet del comercial. */
+export function useAdminRejectSurvey() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ surveyId, reason }: { surveyId: number; reason: string }) =>
+      surveyAdminService.rejectSurvey(surveyId, reason),
 
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: adminSurveyKeys.detail(updated.id) });
