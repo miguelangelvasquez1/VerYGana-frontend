@@ -279,7 +279,9 @@ export default function RegisterForm() {
 
     // ── Envío ────────────────────────────────────────────────────────────────
     try {
-      const recaptchaToken = await executeRecaptcha("register");
+      const recaptchaAction =
+          role === "COMERCIANTE" ? "register_commercial" : "register_consumer";
+      const recaptchaToken = await executeRecaptcha(recaptchaAction);
 
       if (!recaptchaToken) {
         toast.error("No se pudo completar la verificación de seguridad. Inténtalo nuevamente.");
