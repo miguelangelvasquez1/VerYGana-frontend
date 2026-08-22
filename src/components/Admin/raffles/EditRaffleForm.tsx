@@ -9,6 +9,7 @@ import {
   RaffleType,
   UpdateRaffleRequestDTO,
 } from "@/types/raffles/raffle.types";
+import { OptionalTargetAudienceDTO } from "@/types/TargetAudience.types";
 import TargetAudienceFields, {
   isTargetAudienceValid,
 } from "@/components/shared/targeting/TargetAudienceFields";
@@ -57,19 +58,19 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
   };
 
   /* ================== SANITIZADOR DE EDADES ================== */
-  const handleTargetingChange = (newTargeting: Record<string, unknown>) => {
-    const sanitizeAge = (val: unknown, fallback?: number) => {
+  const handleTargetingChange = (newTargeting: OptionalTargetAudienceDTO) => {
+    const sanitizeAge = (val: unknown, fallback?: number): number | undefined => {
       if (val === "" || val === undefined || val === null) {
-        return fallback !== undefined ? fallback : "";
+        return fallback;
       }
       const num = parseInt(String(val), 10);
-      if (isNaN(num)) return fallback !== undefined ? fallback : "";
+      if (isNaN(num)) return fallback;
       if (num > 100) return 100;
       if (num < 0) return 0;
       return num;
     };
 
-    const cleanedTargeting = {
+    const cleanedTargeting: OptionalTargetAudienceDTO = {
       ...newTargeting,
       minAge: sanitizeAge(newTargeting?.minAge, 18),
       maxAge: sanitizeAge(newTargeting?.maxAge),
@@ -130,8 +131,8 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
     const minAgeRaw = formData.targeting?.minAge;
     const maxAgeRaw = formData.targeting?.maxAge;
 
-    const hasMinAge = minAgeRaw !== undefined && minAgeRaw !== null && minAgeRaw !== "";
-    const hasMaxAge = maxAgeRaw !== undefined && maxAgeRaw !== null && maxAgeRaw !== "";
+    const hasMinAge = minAgeRaw !== undefined && minAgeRaw !== null;
+    const hasMaxAge = maxAgeRaw !== undefined && maxAgeRaw !== null;
 
     const numMin = hasMinAge ? Number(minAgeRaw) : NaN;
     const numMax = hasMaxAge ? Number(maxAgeRaw) : NaN;
@@ -401,14 +402,14 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
             <TargetAudienceFields
                 value={formData.targeting}
                 onChange={handleTargetingChange}
-                onBlurMinAge={() => markTouched("minAge")}
-                onBlurMaxAge={() => markTouched("maxAge")}
-                errors={{
-                  minAge: showError("minAge") ? errors.minAge : undefined,
-                  maxAge: showError("maxAge") ? errors.maxAge : undefined,
-                }}
                 mode="restriction"
             />
+            {showError("minAge") && (
+                <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.minAge}</p>
+            )}
+            {showError("maxAge") && (
+                <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.maxAge}</p>
+            )}
             {showError("targeting") && (
                 <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.targeting}</p>
             )}

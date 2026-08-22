@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminPqrsPanel from '@/components/admin/pqrs/AdminPqrsPanel';
 import AdminRefundsPanel from '@/components/admin/pqrs/AdminRefundsPanel';
+import AdminPayoutMethodsPanel from '@/components/admin/pqrs/AdminPayoutMethodsPanel';
 
-type Tab = 'pqrs' | 'refunds';
+type Tab = 'pqrs' | 'refunds' | 'payout-methods';
 
 export default function AdminPqrsPage() {
   const [tab, setTab] = useState<Tab>('pqrs');
@@ -17,6 +18,7 @@ export default function AdminPqrsPage() {
           {([
             { value: 'pqrs', label: 'PQRS' },
             { value: 'refunds', label: 'Reembolsos' },
+            { value: 'payout-methods', label: 'Métodos de pago' },
           ] as { value: Tab; label: string }[]).map(({ value, label }) => (
             <button
               key={value}
@@ -32,7 +34,7 @@ export default function AdminPqrsPage() {
           ))}
         </div>
 
-        {tab === 'pqrs' ? <AdminPqrsPanel /> : <AdminRefundsPanel />}
+        {tab === 'pqrs' ? <AdminPqrsPanel /> : tab === 'refunds' ? <AdminRefundsPanel /> : <AdminPayoutMethodsPanel />}
       </div>
     </AdminLayout>
   );

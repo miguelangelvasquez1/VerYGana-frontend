@@ -1,4 +1,5 @@
 import RegisterForm from "@/components/auth/RegisterForm"
+import RecaptchaProvider from "@/components/auth/RecaptchaProvider";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
@@ -98,7 +99,9 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="bg-white shadow-xl shadow-gray-200/50 rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-100">
-                  <RegisterForm />
+                  <RecaptchaProvider>
+                    <RegisterForm />
+                  </RecaptchaProvider>
                 </div>
               </div>
             </div>

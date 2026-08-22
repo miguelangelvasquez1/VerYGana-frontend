@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useProductCreation } from "@/hooks/products/useProductCreation";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { CreateProductRequestDTO, ProductType } from "@/types/products/Product.types";
 import { ProductStockRequestDTO } from "@/types/products/ProductStock.types";
 import { getMyProducts } from "@/services/ProductService";
+import { getAll as getPayoutMethods } from "@/services/commercial/PayoutMethodService";
+import { VerificationStatus } from "@/types/PayoutMethod.types";
 import { OptionalTargetAudienceDTO } from "@/types/TargetAudience.types";
 import StockInputSection, { StockItemForm } from "./stock/StockInputSection";
 import TargetAudienceFields, {
@@ -13,7 +16,12 @@ import TargetAudienceFields, {
 } from "@/components/shared/targeting/TargetAudienceFields";
 import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
 import { LimitReachedBlock, isLimitReached } from "@/components/commercial/plans/LimitReached";
+import { PayoutMethodRequiredBlock } from "@/components/commercial/payout-methods/PayoutMethodRequiredBlock";
 import toast from "react-hot-toast";
+
+// El backend valida lo mismo del lado del servidor; este patrón detecta ese
+// mensaje puntual para mostrar el CTA en vez del toast genérico de error.
+const PAYOUT_METHOD_REQUIRED_PATTERN = /m[eé]todo de pago/i;
 
 // ============================================================
 // TIPOS LOCALES
@@ -62,12 +70,14 @@ const initialForm: ProductFormState = {
 // ============================================================
 
 export default function CreateProductForm() {
+  const router = useRouter();
   const [form, setForm] = useState<ProductFormState>(initialForm);
   const [targeting, setTargeting] = useState<OptionalTargetAudienceDTO>({});
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [totalProducts, setTotalProducts] = useState<number | null>(null);
+  const [hasVerifiedPayoutMethod, setHasVerifiedPayoutMethod] = useState<boolean | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { state, createProduct, reset } = useProductCreation();
@@ -88,6 +98,17 @@ export default function CreateProductForm() {
       .then((res) => setTotalProducts(res.meta?.totalElements ?? res.data?.length ?? 0))
       .catch(() => setTotalProducts(0));
   }, []);
+
+  // ── Si es su primer producto, exige un método de pago ya verificado ──
+  // (evita payouts retrasados/errados). El backend valida lo mismo — si
+  // este chequeo falla en el cliente, se deja pasar y se confía en esa
+  // validación reactiva al confirmar la creación.
+  useEffect(() => {
+    if (totalProducts !== 0) return;
+    getPayoutMethods(0, 20)
+      .then((res) => setHasVerifiedPayoutMethod(res.data.some((m) => m.verificationStatus === VerificationStatus.VERIFIED)))
+      .catch(() => setHasVerifiedPayoutMethod(true));
+  }, [totalProducts]);
 
   // ── Limpiar URL de preview al desmontar ────────────────────
   useEffect(() => {
@@ -156,6 +177,9 @@ export default function CreateProductForm() {
       setImage(null);
       setImagePreview(null);
       reset();
+    } else if (PAYOUT_METHOD_REQUIRED_PATTERN.test(result.errorMsg ?? '')) {
+      toast.error('Antes de crear tu primer producto debes registrar y verificar un método de pago. Te llevamos a esa sección.');
+      router.push('/commercial/billing');
     } else {
       toast.error(result.errorMsg ?? 'No se pudo crear el producto');
     }
@@ -172,11 +196,20 @@ export default function CreateProductForm() {
   // RENDER
   // ============================================================
 
-  if (loadingPlan || totalProducts === null) {
+  if (loadingPlan || totalProducts === null || (totalProducts === 0 && hasVerifiedPayoutMethod === null)) {
     return (
       <div className="flex items-center justify-center h-48">
         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
+    );
+  }
+
+  if (totalProducts === 0 && hasVerifiedPayoutMethod === false) {
+    return (
+      <PayoutMethodRequiredBlock
+        backHref="/commercial/products"
+        backLabel="Volver a productos"
+      />
     );
   }
 

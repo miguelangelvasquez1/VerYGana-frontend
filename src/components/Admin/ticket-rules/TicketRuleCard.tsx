@@ -35,7 +35,7 @@ const TicketRuleCard: React.FC<TicketRuleCardProps> = ({
     try {
       setLoading(true);
 
-      if (rule.active) {
+      if (rule.isActive) {
         await deactivateTicketEarningRule(rule.id);
         toast.success("Regla desactivada");
       } else {
@@ -83,17 +83,10 @@ const TicketRuleCard: React.FC<TicketRuleCardProps> = ({
           </p>
         );
 
-      case "ADS_WATCHED":
+      case "DAILY_LOGIN":
         return (
           <p>
-            <strong>Anuncios mínimos visualizados:</strong> {rule.minAdsWatched}
-          </p>
-        );
-
-      case "GAME_ACHIEVEMENT":
-        return (
-          <p>
-            <strong>Tipo de logro:</strong> {rule.achievementType}
+            <strong>Condición:</strong> Inicio de sesión diario
           </p>
         );
 
@@ -123,12 +116,12 @@ const TicketRuleCard: React.FC<TicketRuleCardProps> = ({
 
         <span
           className={`px-3 py-1 text-xs rounded-full ${
-            rule.active
+            rule.isActive
               ? "bg-green-100 text-green-700"
               : "bg-gray-200 text-gray-600"
           }`}
         >
-          {rule.active ? "Activa" : "Inactiva"}
+          {rule.isActive ? "Activa" : "Inactiva"}
         </span>
       </div>
 
@@ -166,7 +159,7 @@ const TicketRuleCard: React.FC<TicketRuleCardProps> = ({
           disabled={loading}
           className="px-4 py-2 bg-admin-blue text-white rounded hover:bg-admin-blue-dark cursor-pointer"
         >
-          {rule.active ? "Desactivar" : "Activar"}
+          {rule.isActive ? "Desactivar" : "Activar"}
         </button>
 
         <button

@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
-import * as purchaseItemService from "@/services/PurchaseItemService";
 import * as commercialService from "@/services/commercialService";
 
 import { MonthlyReportResponseDTO } from "@/types/Commercial.types";
+
+const toIsoDate = (date: Date) => date.toISOString().slice(0, 10);
 
 const MONTHS_MAP: Record<number, string> = {
   1: "Enero",
@@ -41,8 +42,11 @@ export default function MonthlyEarningsModal({
   useEffect(() => {
     const loadData = async () => {
       try {
+        const monthStart = toIsoDate(new Date(year, month - 1, 1));
+        const monthEnd = toIsoDate(new Date(year, month, 0));
+
         const [sales, monthlyReport] = await Promise.all([
-          purchaseItemService.getTotalCommercialSalesByMonth(year, month),
+          commercialService.getSalesCountByDateRange(monthStart, monthEnd),
           commercialService.getMonthlyReport(year, month),
         ]);
 
