@@ -370,32 +370,6 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
             )}
           </div>
 
-          {/* ===== SWITCH MASCOTA ===== */}
-          <label className="flex items-center gap-3 cursor-pointer group w-fit">
-            <div className="relative shrink-0">
-              <input
-                  type="checkbox"
-                  name="requiresPet"
-                  checked={formData.requiresPet}
-                  onChange={handleChange}
-                  className="sr-only"
-              />
-              <div
-                  className={`w-10 h-6 rounded-full transition-colors duration-200 ${
-                      formData.requiresPet ? "bg-admin-blue" : "bg-gray-300"
-                  }`}
-              />
-              <div
-                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                      formData.requiresPet ? "translate-x-5" : "translate-x-1"
-                  }`}
-              />
-            </div>
-            <span className="text-sm font-medium text-gray-700 select-none">
-            Requiere mascota registrada
-          </span>
-          </label>
-
           {/* ===== RESTRICCIONES DE AUDIENCIA ===== */}
           <div>
             <TargetAudienceFields

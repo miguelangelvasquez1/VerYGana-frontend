@@ -11,6 +11,7 @@ import {
     verifyDrawIntegrity,
 } from "@/services/admin/AdminRaffleService";
 import { RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
+import { getFriendlyErrorMessage } from "@/utils/errorMessages";
 import { useRouter } from "next/navigation";
 import {
     Eye,
@@ -82,9 +83,7 @@ export default function RaffleCard({
                     break;
             }
         } catch (err: any) {
-            toast.error(
-                err?.response?.data?.message || "Error al procesar la acción"
-            );
+            toast.error(getFriendlyErrorMessage(err));
         } finally {
             closeDialog();
             await onRefresh();
