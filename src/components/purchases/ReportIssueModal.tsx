@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ConsumerPurchaseItemResponseDTO, PurchaseItemStatus } from "@/types/purchases/purchaseItem.types";
 import { MarketPlaceIssueReason } from "@/types/Pqrs.types";
 import { reportIssue } from "@/services/PurchaseItemService";
 import { marketPlaceIssueReasonLabel } from "@/components/pqrs/pqrsMeta";
 import PqrsEvidenceUploader from "@/components/pqrs/PqrsEvidenceUploader";
 import { usePqrsEvidenceUpload } from "@/hooks/pqrs/usePqrsEvidenceUpload";
+import { formatCountdown, getMsUntilReportDeadline, isReportDeadlinePassed } from "@/utils/reportDeadline";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -19,10 +20,24 @@ interface Props {
 // inconveniente ya fue atendido por esa vía. Uno en IN_REVIEW tampoco: ya
 // tiene un reporte abierto y hay que esperar la retroalimentación del admin
 // antes de dejar reportar otro.
-export const canReportPurchaseItem = (item: ConsumerPurchaseItemResponseDTO) =>
-  item.status !== PurchaseItemStatus.REFUNDED &&
-  item.status !== PurchaseItemStatus.CANCELLED &&
-  item.status !== PurchaseItemStatus.IN_REVIEW;
+export const canReportPurchaseItem = (item: ConsumerPurchaseItemResponseDTO) => {
+  if (
+    item.status === PurchaseItemStatus.REFUNDED ||
+    item.status === PurchaseItemStatus.CANCELLED ||
+    item.status === PurchaseItemStatus.IN_REVIEW
+  ) {
+    return false;
+  }
+
+  // Un producto CLAIMED solo puede reportarse antes del payout diario (11 PM
+  // hora Colombia) siguiente a su entrega: pasado ese corte el pago al
+  // vendedor ya salió y reportarlo implicaría reversarlo.
+  if (item.status === PurchaseItemStatus.CLAIMED) {
+    return !!item.deliveredAt && !isReportDeadlinePassed(item.deliveredAt);
+  }
+
+  return true;
+};
 
 export default function ReportIssueModal({ open, onClose, items }: Props) {
   const [selected, setSelected] = useState<ConsumerPurchaseItemResponseDTO | null>(null);
@@ -30,7 +45,17 @@ export default function ReportIssueModal({ open, onClose, items }: Props) {
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [reported, setReported] = useState<Set<number>>(new Set());
+  const [now, setNow] = useState(() => new Date());
   const evidence = usePqrsEvidenceUpload();
+
+  // Recalcula cada segundo para que el badge de cada item y la lista de
+  // items reportables (algunos pueden vencer mientras el modal está abierto)
+  // se mantengan al día.
+  useEffect(() => {
+    if (!open) return;
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, [open]);
 
   if (!open) return null;
 
@@ -70,9 +95,18 @@ export default function ReportIssueModal({ open, onClose, items }: Props) {
 
   const pendingItems = items.filter((i) => canReportPurchaseItem(i) && !reported.has(i.id));
 
+  // El corte puede vencer mientras el usuario está llenando el formulario;
+  // en ese caso se bloquea el envío en vez de dejar pasar un reporte fuera
+  // de la ventana permitida.
+  const selectedExpired =
+    !!selected &&
+    selected.status === PurchaseItemStatus.CLAIMED &&
+    !!selected.deliveredAt &&
+    isReportDeadlinePassed(selected.deliveredAt, now);
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-lg p-6">
+      <div className="bg-white w-full max-w-lg rounded-2xl shadow-lg p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
@@ -104,17 +138,24 @@ export default function ReportIssueModal({ open, onClose, items }: Props) {
                 <button
                   key={item.id}
                   onClick={() => setSelected(item)}
-                  className="w-full flex items-center justify-between border rounded-xl p-3 hover:bg-gray-50 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center justify-between gap-2 border rounded-xl p-3 hover:bg-gray-50 transition-colors text-left cursor-pointer"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <img
                       src={item.imageUrl}
                       alt={item.productName}
-                      className="w-14 h-14 object-cover rounded-lg"
+                      className="w-14 h-14 object-cover rounded-lg shrink-0"
                     />
-                    <p className="text-sm font-medium">{item.productName}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{item.productName}</p>
+                      {item.status === PurchaseItemStatus.CLAIMED && item.deliveredAt && (
+                        <p className="text-xs font-mono font-semibold text-red-600 mt-0.5">
+                          Quedan {formatCountdown(getMsUntilReportDeadline(item.deliveredAt, now))} para reportar
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-gray-400 text-lg">›</span>
+                  <span className="text-gray-400 text-lg shrink-0">›</span>
                 </button>
               ))}
             </div>
@@ -132,6 +173,15 @@ export default function ReportIssueModal({ open, onClose, items }: Props) {
               />
               <p className="text-sm text-gray-500">¿Qué problema tuviste con este producto?</p>
             </div>
+
+            {selected.status === PurchaseItemStatus.CLAIMED && selected.deliveredAt && (
+              <div className="flex items-center justify-between gap-2 flex-wrap bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+                <span className="text-xs sm:text-sm text-red-700">Tiempo restante para reportar</span>
+                <span className="text-sm sm:text-base font-mono font-bold text-red-700">
+                  {formatCountdown(getMsUntilReportDeadline(selected.deliveredAt, now))}
+                </span>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium mb-1">Motivo *</label>
@@ -162,13 +212,20 @@ export default function ReportIssueModal({ open, onClose, items }: Props) {
 
             <PqrsEvidenceUploader evidence={evidence} />
 
-            <p className="text-xs text-gray-400">
-              Al enviar este reporte se creará una solicitud PQRS que será revisada por un administrador.
-            </p>
+            {selectedExpired ? (
+              <p className="text-xs text-red-600 font-medium">
+                Se venció el tiempo para reportar este producto. El pago ya fue procesado y no es posible enviar el
+                reporte.
+              </p>
+            ) : (
+              <p className="text-xs text-gray-400">
+                Al enviar este reporte se creará una solicitud PQRS que será revisada por un administrador.
+              </p>
+            )}
 
             <button
               onClick={handleSubmit}
-              disabled={!reason || !description.trim() || submitting || evidence.busy}
+              disabled={!reason || !description.trim() || submitting || evidence.busy || selectedExpired}
               className="w-full bg-gray-900 text-white rounded-full py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               {submitting ? "Enviando..." : "Enviar reporte"}
