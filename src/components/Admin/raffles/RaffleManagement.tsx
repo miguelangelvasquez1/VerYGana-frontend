@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+import {
+  X,
+  Plus,
+  FileEdit,
+  PlayCircle,
+  Radio,
+  Lock,
+  CheckCircle2,
+  RotateCcw
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 import { RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
@@ -87,12 +96,12 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
 
     try {
       const response = await getRafflesByFilters(
-        statusFilter || undefined,
-        debouncedSearch || undefined,
-        drawDateFilter || undefined,
-        typeFilter || undefined,
-        PAGE_SIZE,
-        page
+          statusFilter || undefined,
+          debouncedSearch || undefined,
+          drawDateFilter || undefined,
+          typeFilter || undefined,
+          PAGE_SIZE,
+          page
       );
 
       setRaffles(response?.data ?? []);
@@ -117,52 +126,50 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
     loadRaffles();
   }, [statusFilter, typeFilter, drawDateFilter, debouncedSearch, page]);
 
+  /* ================== RESET FILTERS ================== */
+
+  const handleResetFilters = () => {
+    setStatusFilter("");
+    setTypeFilter("");
+    setDrawDateFilter("");
+    setPage(0);
+  };
+
   /* ================== ORQUESTADOR CREATE RAFFLE ================== */
   const handleCreateRaffle = async (
-    payload: CreateRaffleFormSubmitPayload
+      payload: CreateRaffleFormSubmitPayload
   ) => {
     const loadingToast = toast.loading("Creando rifa...");
 
     try {
       const { raffleData, raffleImageFile, prizeImageFiles } = payload;
 
-      // 🔹 STEP 1 — PREPARE
       const prepareRequest = {
         raffleData,
         raffleImageMetadata: buildFileMetadata(raffleImageFile),
         prizeImageMetadataList: prizeImageFiles.map(buildFileMetadata),
       };
 
-      const prepareResponse = await prepareRaffleCreation(
-        prepareRequest
-      );
+      const prepareResponse = await prepareRaffleCreation(prepareRequest);
 
-      // En handleCreateRaffle, antes del STEP 2
-      console.log('raffleImageFile size:', raffleImageFile.size);
-      prizeImageFiles.forEach((f, i) =>
-        console.log(`prize[${i}] size:`, f.size, 'type:', f.type)
-      );
-
-      // 🔹 STEP 2 — UPLOADS
       await Promise.all([
         fileUploadService.uploadToR2(
-          prepareResponse.raffleImagePermission.uploadUrl,
-          raffleImageFile
+            prepareResponse.raffleImagePermission.uploadUrl,
+            raffleImageFile
         ),
         ...prepareResponse.prizeUploadSlots.map((slot) =>
-          fileUploadService.uploadToR2(
-            slot.permission.uploadUrl,
-            prizeImageFiles[slot.prizeIndex]
-          )
+            fileUploadService.uploadToR2(
+                slot.permission.uploadUrl,
+                prizeImageFiles[slot.prizeIndex]
+            )
         ),
       ]);
 
-      // 🔹 STEP 3 — CONFIRM
       const confirmRequest = {
         raffleAssetId: prepareResponse.raffleAssetId,
         prizeAssetIds: prepareResponse.prizeUploadSlots
-          .sort((a, b) => a.prizeIndex - b.prizeIndex)
-          .map((s) => s.prizeAssetId),
+            .sort((a, b) => a.prizeIndex - b.prizeIndex)
+            .map((s) => s.prizeAssetId),
         raffleData,
       };
 
@@ -190,221 +197,249 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
     sizeBytes: file.size,
   });
 
+  const cards = [
+    {
+      label: "Borradores",
+      count: stats.draftRaffles,
+      icon: FileEdit,
+      borderColor: "border-t-amber-500",
+      iconBg: "bg-amber-50 text-amber-600",
+      badgeColor: null,
+      isLive: false,
+    },
+    {
+      label: "Rifas Activas",
+      count: stats.activeRaffles,
+      icon: PlayCircle,
+      borderColor: "border-t-emerald-500",
+      iconBg: "bg-emerald-50 text-emerald-600",
+      badgeColor: null,
+      isLive: false,
+    },
+    {
+      label: "Rifas En Vivo",
+      count: stats.liveRaffles,
+      icon: Radio,
+      borderColor: "border-t-red-600",
+      iconBg: "bg-red-50 text-red-600",
+      badgeColor: "bg-red-500 text-white animate-pulse",
+      isLive: true,
+    },
+    {
+      label: "Rifas Cerradas",
+      count: stats.closedRaffles,
+      icon: Lock,
+      borderColor: "border-t-blue-500",
+      iconBg: "bg-blue-50 text-blue-600",
+      badgeColor: null,
+      isLive: false,
+    },
+    {
+      label: "Finalizadas",
+      count: stats.completedRaffles,
+      icon: CheckCircle2,
+      borderColor: "border-t-slate-400",
+      iconBg: "bg-slate-100 text-slate-600",
+      badgeColor: null,
+      isLive: false,
+    },
+  ];
+
   /* ================== RENDER ================== */
 
   if (isLoading && raffles.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-16 h-16 border-4 border-admin-blue border-t-transparent rounded-full animate-spin"></div>
-      </div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-        <p className="text-red-600">{error}</p>
-        <button
-          onClick={loadRaffles}
-          className="cursor-pointer mt-4 px-4 py-2 bg-red-600 text-white rounded-lg"
-        >
-          Reintentar
-        </button>
-      </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <p className="text-red-600 font-medium">{error}</p>
+          <button
+              onClick={loadRaffles}
+              className="cursor-pointer mt-4 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
     );
   }
 
   return (
-    <div className="space-y-8 relative">
-      <div className="flex justify-between items-center">
-        <button
-          onClick={() => setShowCreateRaffle(true)}
-          className="cursor-pointer bg-admin-blue text-white px-4 py-2 rounded-lg hover:bg-admin-blue-dark flex items-center gap-2"
-        >
-          <Plus size={18} />
-          Crear Rifa
-        </button>
-      </div>
-
-      {/* ===== Stats ===== */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard
-          label="Borradores"
-          value={stats.draftRaffles}
-          color="yellow"
-        />
-        <StatCard
-          label="Rifas activas"
-          value={stats.activeRaffles}
-          color="green"
-        />
-        <StatCard
-          label="Rifas en vivo"
-          value={stats.liveRaffles}
-          color="red"
-        />
-        <StatCard
-          label="Rifas cerradas"
-          value={stats.closedRaffles}
-          color="blue"
-        />
-        <StatCard
-          label="Finalizadas"
-          value={stats.completedRaffles}
-          color="gray"
-        />
-      </div>
-
-      <div className="flex gap-4 flex-wrap">
-        <div>
-          <p className="text-sm font-medium text-gray-700 mb-1">Estado</p>
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setPage(0);
-            }}
-            className="border px-3 py-1 rounded-lg"
+      <div className="space-y-6 relative">
+        {/* ===== CABECERA Y ACCIÓN PRINCIPAL ===== */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Gestión de Rifas</h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Administra el ciclo de vida y estado de los sorteos
+            </p>
+          </div>
+          <button
+              onClick={() => setShowCreateRaffle(true)}
+              className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark rounded-lg shadow-xs transition-all"
           >
-            <option value="">Todos</option>
-            <option value="DRAFT">Borradores</option>
-            <option value="ACTIVE">Activas</option>
-            <option value="CLOSED">Cerradas</option>
-            <option value="LIVE">En vivo</option>
-            <option value="COMPLETED">Completadas</option>
-            <option value="CANCELLED">Canceladas</option>
-            <option value="MISSED_DRAW">Sorteo no realizado</option>
-          </select>
+            <Plus size={18} />
+            Crear Rifa
+          </button>
         </div>
 
-        <div>
-          <p className="text-sm font-medium text-gray-700 mb-1">Tipo</p>
-          <select
-            value={typeFilter}
-            onChange={(e) => {
-              setTypeFilter(e.target.value);
-              setPage(0);
-            }}
-            className="border px-3 py-2 rounded-lg"
-          >
-            <option value="">Todos</option>
-            <option value="STANDARD">Estándar</option>
-            <option value="PREMIUM">Premium</option>
-          </select>
+        {/* ===== TARJETAS DE ESTADÍSTICAS ===== */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {cards.map((card, i) => {
+            const Icon = card.icon;
+            return (
+                <div
+                    key={i}
+                    className={`bg-white p-4.5 rounded-xl border border-gray-200/90 border-t-4 ${card.borderColor} shadow-xs hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  {card.label}
+                </span>
+                    <div className={`p-2 rounded-lg ${card.iconBg}`}>
+                      <Icon size={18} />
+                    </div>
+                  </div>
+
+                  <div className="flex items-baseline justify-between">
+                <span className="text-3xl font-extrabold text-gray-900">
+                  {card.count}
+                </span>
+                    {card.isLive && (
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${card.badgeColor}`}>
+                    ● LIVE
+                  </span>
+                    )}
+                  </div>
+                </div>
+            );
+          })}
         </div>
 
-        <div>
-          <p className="text-sm font-medium text-gray-700 mb-1">Fecha de sorteo</p>
+        {/* ===== BARRA DE FILTROS INTEGRADA ===== */}
+        <div className="bg-white p-3.5 rounded-xl border border-gray-200/80 shadow-2xs flex flex-wrap items-center gap-4">
+          {/* Filtro Estado */}
           <div className="flex items-center gap-2">
-            <input
-              type="date"
-              value={drawDateFilter}
-              onChange={(e) => {
-                setDrawDateFilter(e.target.value);
-                setPage(0);
-              }}
-              className="border px-3 py-1 rounded-lg"
-            />
-            {drawDateFilter && (
-              <button
-                onClick={() => {
-                  setDrawDateFilter("");
+            <label className="text-sm font-medium text-gray-600">Estado:</label>
+            <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
                   setPage(0);
                 }}
-                className="cursor-pointer text-xs text-gray-500 hover:text-gray-800 underline"
+                className="py-1.5 px-3 text-sm bg-gray-50/50 border border-gray-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-gray-700 cursor-pointer font-medium"
+            >
+              <option value="">Todos</option>
+              <option value="DRAFT">Borradores</option>
+              <option value="ACTIVE">Activas</option>
+              <option value="CLOSED">Cerradas</option>
+              <option value="LIVE">En vivo</option>
+              <option value="COMPLETED">Completadas</option>
+              <option value="CANCELLED">Canceladas</option>
+              <option value="MISSED_DRAW">Sorteo no realizado</option>
+            </select>
+          </div>
+
+          {/* Filtro Tipo */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-600">Tipo:</label>
+            <select
+                value={typeFilter}
+                onChange={(e) => {
+                  setTypeFilter(e.target.value);
+                  setPage(0);
+                }}
+                className="py-1.5 px-3 text-sm bg-gray-50/50 border border-gray-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-gray-700 cursor-pointer font-medium"
+            >
+              <option value="">Todos</option>
+              <option value="STANDARD">Estándar</option>
+              <option value="PREMIUM">Premium</option>
+            </select>
+          </div>
+
+          {/* Filtro Fecha */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-600">Sorteo:</label>
+            <input
+                type="date"
+                value={drawDateFilter}
+                onChange={(e) => {
+                  setDrawDateFilter(e.target.value);
+                  setPage(0);
+                }}
+                className="py-1.5 px-2.5 text-sm bg-gray-50/50 border border-gray-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-gray-700 cursor-pointer font-medium"
+            />
+          </div>
+
+          {/* Botón Reset */}
+          {(statusFilter || typeFilter || drawDateFilter) && (
+              <button
+                  onClick={handleResetFilters}
+                  className="cursor-pointer p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ml-auto"
+                  title="Limpiar filtros"
               >
-                Limpiar
+                <RotateCcw size={16} />
               </button>
-            )}
-          </div>
+          )}
         </div>
-      </div>
 
-      {/* ===== RaffleCard ===== */}
-      <RaffleCard raffles={raffles} onRefresh={loadDashboardData} onViewStats={onViewStats} />
+        {/* ===== LISTA DE RIFAS ===== */}
+        <RaffleCard
+            raffles={raffles}
+            onRefresh={loadDashboardData}
+            onViewStats={onViewStats}
+        />
 
-      {/* ===== Paginador ===== */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">
-            Página {page + 1} de {totalPages}
+        {/* ===== PAGINADOR ===== */}
+        {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+          <span className="text-sm text-gray-500">
+            Página <strong className="text-gray-800">{page + 1}</strong> de{" "}
+            <strong className="text-gray-800">{totalPages}</strong>
           </span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setPage((p) => p - 1)}
-              disabled={page === 0}
-              className="cursor-pointer text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= totalPages - 1}
-              className="cursor-pointer text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-      )}
+              <div className="flex gap-2">
+                <button
+                    onClick={() => setPage((p) => p - 1)}
+                    disabled={page === 0}
+                    className="cursor-pointer text-sm px-3.5 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition font-medium text-gray-700"
+                >
+                  Anterior
+                </button>
+                <button
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page >= totalPages - 1}
+                    className="cursor-pointer text-sm px-3.5 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition font-medium text-gray-700"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+        )}
 
-      {/* ===== MODAL ===== */}
-      {showCreateRaffle && (
-        <Modal onClose={() => setShowCreateRaffle(false)}>
-          <CreateRaffleForm onSubmit={handleCreateRaffle} />
-        </Modal>
-      )}
-    </div>
-  );
-}
-
-/* ================== MODAL ================== */
-
-function Modal({
-  children,
-  onClose,
-}: {
-  children: React.ReactNode;
-  onClose: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 max-w-2xl w-full relative shadow-lg overflow-y-auto max-h-[90vh]">
-        <button
-          onClick={onClose}
-          className="cursor-pointer absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-        >
-          <X />
-        </button>
-        {children}
+        {/* ===== MODAL ===== */}
+        {showCreateRaffle && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+              <div className="bg-white rounded-2xl max-w-2xl w-full relative shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-slate-100 animate-in zoom-in-95 duration-200">
+                <button
+                    type="button"
+                    onClick={() => setShowCreateRaffle(false)}
+                    className="cursor-pointer absolute top-4 right-4 z-50 p-2 text-slate-400 hover:text-slate-700 bg-white/80 hover:bg-slate-100 rounded-xl transition-all"
+                    aria-label="Cerrar creación"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <CreateRaffleForm
+                    onSubmit={handleCreateRaffle}
+                    onCancel={() => setShowCreateRaffle(false)}
+                />
+              </div>
+            </div>
+        )}
       </div>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: "blue" | "green" | "red" | "yellow" | "gray";
-}) {
-  const colors = {
-    blue: "from-blue-500 to-blue-600",
-    green: "from-green-500 to-green-600",
-    red: "from-red-500 to-red-600",
-    yellow: "from-yellow-500 to-yellow-600",
-    gray: "from-gray-600 to-gray-700",
-  };
-
-  return (
-    <div
-      className={`bg-gradient-to-br ${colors[color]} rounded-xl p-6 text-white`}
-    >
-      <p className="text-sm opacity-90">{label}</p>
-      <p className="text-3xl font-bold mt-2">{value}</p>
-    </div>
   );
 }

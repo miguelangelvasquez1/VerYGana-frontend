@@ -45,8 +45,7 @@ export function PremiumExtrasSection({ dateRange }: PremiumExtrasSectionProps) {
           {/* Explícito a propósito: quien abre un panel de métricas asume que mide
               alcance, y aquí no hay impresiones porque el juego no las reporta. */}
           <p className="text-sm text-gray-500">
-            Estas cifras miden ventas, no visualizaciones: el juego todavía no reporta
-            cuántas veces se mostró cada producto en la tienda.
+            Estas cifras miden ventas, no visualizaciones.
           </p>
         </div>
         <PetStoreMetrics dateRange={dateRange} />

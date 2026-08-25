@@ -9,6 +9,8 @@ import { DashboardStats } from "@/types/Commercial.types";
 import CommercialProductCard from "@/components/commercial/products/CommercialProductCard";
 import CreateProductForm from "@/components/commercial/products/CreateProductForm";
 import { useRouter, useSearchParams } from "next/navigation";
+import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
+import { LimitReachedBanner, isLimitReached } from "@/components/commercial/plans/LimitReached";
 
 // Servicios
 import * as productService from "@/services/ProductService";
@@ -20,11 +22,13 @@ export default function ProductsDashboard() {
   const searchParams = useSearchParams();
   const section = searchParams.get("section") ?? "dashboard";
   const { isAuthenticated } = useAuth();
+  const { planState } = usePlanState();
 
   const hasLoaded = useRef(false);
 
   // ================== Estados ==================
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [stats, setStats] = useState<DashboardStats>({
     totalPendingProducts: 0,
     totalActiveProducts: 0,
@@ -80,6 +84,7 @@ export default function ProductsDashboard() {
       // ===== Productos =====
       if (productsRes.status === "fulfilled") {
         const content = productsRes.value?.data ?? [];
+        setTotalProducts(productsRes.value?.meta?.totalElements ?? content.length);
 
         if (process.env.NODE_ENV === "development") {
           console.log("📦 Products:", content);
@@ -200,6 +205,8 @@ export default function ProductsDashboard() {
 
   // ================== UI ==================
 
+  const productsLimitReached = planState != null && isLimitReached(totalProducts, planState.maxProducts);
+
   const renderProducts = () => {
     return (
     <div className="space-y-6">
@@ -207,14 +214,30 @@ export default function ProductsDashboard() {
       <h2 className="text-3xl font-bold text-gray-900">
         Todos tus productos
       </h2>
-      <button
-        onClick={() => setShowCreateForm(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition cursor-pointer"
-      >
-        <PlusCircle className="w-4 h-4" />
-        Crear producto
-      </button>
+      {productsLimitReached ? (
+        <button
+          type="button"
+          disabled
+          title={`Alcanzaste el máximo de ${planState?.maxProducts} productos de tu plan`}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 rounded-xl font-semibold text-sm cursor-not-allowed"
+        >
+          <PlusCircle className="w-4 h-4" />
+          Crear producto
+        </button>
+      ) : (
+        <button
+          onClick={() => setShowCreateForm(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition cursor-pointer"
+        >
+          <PlusCircle className="w-4 h-4" />
+          Crear producto
+        </button>
+      )}
       </div>
+
+      {productsLimitReached && (
+        <LimitReachedBanner resourceLabel="productos" max={planState!.maxProducts} />
+      )}
 
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex-1 relative">

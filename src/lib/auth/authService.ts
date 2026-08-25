@@ -92,12 +92,12 @@ async function parseAuthBody(response: Response): Promise<{ message: string }> {
 export const authService = {
 
   // Login directo para guardar refresh token en cookie HttpOnly cliente
-  async login(identifier: string, password: string): Promise<LoginResponse> {
+  async login(identifier: string, password: string, recaptchaToken: string): Promise<LoginResponse> {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ identifier, password }),
+      body: JSON.stringify({ identifier, password,recaptchaToken }),
     });
 
     if (!response.ok) {
