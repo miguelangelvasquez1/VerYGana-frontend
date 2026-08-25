@@ -77,6 +77,12 @@ export interface PetImageUploadPermission {
   objectKey: string;
   uploadUrl: string;
   expiresInSeconds: number;
+  /**
+   * Dónde quedará el archivo una vez subido. Llega desde el paso 1 para poder
+   * pintarlo sin haber guardado: la url de los listados solo existe cuando la
+   * entidad ya está persistida.
+   */
+  publicUrl: string;
 }
 
 export interface PetDesigner {
@@ -306,6 +312,39 @@ export const deletePetScene = async (id: number): Promise<void> => {
   await apiClient.delete(`/game-designer/pet/scenes/${id}`);
 };
 
+/**
+ * Sistema de coordenadas del área de juego. Lo necesita el lienzo del editor:
+ * unas x/y en píxeles no se pueden situar sin saber contra qué tamaño van ni
+ * hacia dónde crece la Y.
+ */
+export interface PetSceneCanvas {
+  width: number;
+  height: number;
+  /** DOWN = 0 arriba (convención de UI) · UP = 0 abajo (nativa de Unity). */
+  yAxis: 'DOWN' | 'UP';
+  /**
+   * Qué punto del objeto marcan x/y: su esquina más cercana al origen
+   * (`TOP_LEFT`) o su centro (`CENTER`).
+   */
+  anchor: 'TOP_LEFT' | 'CENTER';
+}
+
+/**
+ * Defecto si el endpoint falla: mejor un lienzo aproximado que ninguno.
+ * Son los valores verificados contra el juego, los mismos que sirve el backend.
+ */
+export const DEFAULT_SCENE_CANVAS: PetSceneCanvas = {
+  width: 1920,
+  height: 1080,
+  yAxis: 'UP',
+  anchor: 'CENTER',
+};
+
+export const getPetSceneCanvas = async (signal?: AbortSignal): Promise<PetSceneCanvas> => {
+  const { data } = await apiClient.get('/game-designer/pet/scenes/canvas', { signal });
+  return data;
+};
+
 // ── Commercial ────────────────────────────────────────────────────────────────
 
 /**
@@ -329,5 +368,60 @@ export const submitPetRequest = async (
 
 export const getMyPetRequests = async (): Promise<PetRequest[]> => {
   const { data } = await apiClient.get('/commercial/pet/requests');
+  return data;
+};
+
+// ── Métricas del comercial ────────────────────────────────────────────────────
+
+/**
+ * Rendimiento de un producto del comercial dentro del juego.
+ *
+ * Mide VENTAS, no exposición: el juego no reporta cuántas veces se mostró el
+ * producto en la tienda, así que no hay impresiones ni tasa de conversión. No
+ * etiquetar estas cifras como "alcance".
+ */
+export interface PetProductMetrics {
+  catalogItemId: number;
+  externalId: number | null;
+  productName: string;
+  priceKeys: number | null;
+  active: boolean;
+  unitsSold: number;
+  keysSpent: number;
+  revenueCents: number;
+  uniqueBuyers: number;
+  repeatBuyers: number;
+  firstSale: string | null;
+  lastSale: string | null;
+}
+
+/** Un día de la serie. Los días sin ventas vienen en cero, no se omiten. */
+export interface PetSalesPoint {
+  date: string;
+  unitsSold: number;
+  keysSpent: number;
+  revenueCents: number;
+}
+
+/** Requiere plan con CAN_HAVE_PETS; sin él el backend responde 403. */
+export const getMyPetProductMetrics = async (
+  range?: { startDate: string; endDate: string },
+  signal?: AbortSignal,
+): Promise<PetProductMetrics[]> => {
+  const { data } = await apiClient.get('/commercial/pet/requests/metrics', {
+    params: range ? { from: range.startDate, to: range.endDate } : undefined,
+    signal,
+  });
+  return data;
+};
+
+export const getMyPetDailySales = async (
+  range?: { startDate: string; endDate: string },
+  signal?: AbortSignal,
+): Promise<PetSalesPoint[]> => {
+  const { data } = await apiClient.get('/commercial/pet/requests/metrics/daily', {
+    params: range ? { from: range.startDate, to: range.endDate } : undefined,
+    signal,
+  });
   return data;
 };
