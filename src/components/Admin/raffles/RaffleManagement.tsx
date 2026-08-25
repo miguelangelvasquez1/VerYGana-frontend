@@ -423,34 +423,23 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
 
         {/* ===== MODAL ===== */}
         {showCreateRaffle && (
-            <Modal onClose={() => setShowCreateRaffle(false)}>
-              <CreateRaffleForm onSubmit={handleCreateRaffle} />
-            </Modal>
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+              <div className="bg-white rounded-2xl max-w-2xl w-full relative shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-slate-100 animate-in zoom-in-95 duration-200">
+                <button
+                    type="button"
+                    onClick={() => setShowCreateRaffle(false)}
+                    className="cursor-pointer absolute top-4 right-4 z-50 p-2 text-slate-400 hover:text-slate-700 bg-white/80 hover:bg-slate-100 rounded-xl transition-all"
+                    aria-label="Cerrar creación"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <CreateRaffleForm
+                    onSubmit={handleCreateRaffle}
+                    onCancel={() => setShowCreateRaffle(false)}
+                />
+              </div>
+            </div>
         )}
-      </div>
-  );
-}
-
-/* ================== MODAL ================== */
-
-function Modal({
-                 children,
-                 onClose,
-               }: {
-  children: React.ReactNode;
-  onClose: () => void;
-}) {
-  return (
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl p-6 max-w-2xl w-full relative shadow-lg overflow-y-auto max-h-[90vh]">
-          <button
-              onClick={onClose}
-              className="cursor-pointer absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-          >
-            <X size={20} />
-          </button>
-          {children}
-        </div>
       </div>
   );
 }
