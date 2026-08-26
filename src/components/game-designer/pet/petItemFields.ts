@@ -10,6 +10,9 @@ import type { PetItemDraft } from '@/services/PetRequestService';
  *     (El resto del repo usa centavos: `budgetCents`, `keysValueCents`.)
  *   · `spriteUrl` no se manda nunca. Existe en el DTO de respuesta, pero al
  *     escribir el backend lo ignora y lo arma a partir de `spriteObjectKey`.
+ *   · `externalId` NO se pide: lo asigna el servidor al publicar, desde 1000 hacia
+ *     arriba. Lo tecleaba el diseñador y nada impedía repetir un número; dos ítems
+ *     con el mismo id hacen fallar toda compra de ese ítem con un 500.
  */
 
 export type PetFieldKind = 'text' | 'textarea' | 'int' | 'bool' | 'asset';
@@ -32,15 +35,6 @@ export interface PetItemField {
 
 export const PET_ITEM_FIELDS: PetItemField[] = [
   // ── Obligatorios ───────────────────────────────────────────────────────────
-  {
-    key: 'externalId',
-    label: 'ID externo',
-    kind: 'int',
-    required: true,
-    min: 1000,
-    group: 'identidad',
-    help: 'Identificador con el que el juego reconoce el ítem. Desde 1000: los números menores están reservados.',
-  },
   {
     key: 'name',
     label: 'Nombre',

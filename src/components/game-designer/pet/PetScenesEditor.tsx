@@ -1,17 +1,21 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Loader2, RefreshCw, AlertTriangle, Plus, Trash2, Save, Layers,
   ChevronUp, ChevronDown, X, Copy, Upload, CheckCircle2, Play,
+  ChevronRight, Eye, EyeOff, Film, ImageOff,
 } from 'lucide-react';
 import {
   getPetScenes,
   createPetScene,
   updatePetScene,
   deletePetScene,
+  getPetSceneCanvas,
+  DEFAULT_SCENE_CANVAS,
   type PetScene,
   type PetSceneObject,
+  type PetSceneCanvas as SceneCanvasConfig,
 } from '@/services/PetRequestService';
 import { apiErrorMessage } from '@/hooks/pets/usePetImageUpload';
 import {
@@ -20,6 +24,7 @@ import {
 } from '@/hooks/pets/usePetSceneAssetUpload';
 import { splitBackendErrors } from './petItemFields';
 import { ScenePreviewModal } from './ScenePreviewModal';
+import { SceneCanvas, SceneThumb, objectBox, isOutside } from './SceneCanvas';
 
 const INK = '#0b1440';
 const DEEP = '#03548C';
@@ -81,8 +86,10 @@ function normalizeScene(scene: PetScene): PetScene {
 function validateScene(scene: PetScene): string[] {
   const errs: string[] = [];
 
-  if (!Number.isInteger(scene.sceneId) || scene.sceneId < 0) {
-    errs.push('El ID de escena tiene que ser un entero mayor o igual a 0.');
+  // Sin cota inferior: el número de escena lo elige el equipo del juego y usa
+  // negativos para escenas especiales. Solo se exige que sea entero.
+  if (!Number.isInteger(scene.sceneId)) {
+    errs.push('El número de escena tiene que ser un entero.');
   }
   if (scene.objects.length === 0) {
     errs.push('La escena necesita al menos un objeto.');
@@ -111,6 +118,21 @@ function validateScene(scene: PetScene): string[] {
   return errs;
 }
 
+/**
+ * Avisos que NO impiden guardar: un objeto fuera del área es válido para el
+ * schema y puede ser intencional (algo que entra animándose), pero casi siempre
+ * es una coordenada mal puesta y sin lienzo no se notaba hasta abrir el juego.
+ */
+function outOfFrameWarnings(scene: PetScene, canvas: SceneCanvasConfig): string[] {
+  return scene.objects
+    .map((o, i) =>
+      isOutside(objectBox(o, canvas), canvas)
+        ? `${o.objectId || `Objeto ${i + 1}`} queda fuera del área de ${canvas.width}×${canvas.height}.`
+        : null,
+    )
+    .filter((w): w is string => w !== null);
+}
+
 // ── Editor ────────────────────────────────────────────────────────────────────
 
 export default function PetScenesEditor() {
@@ -129,6 +151,29 @@ export default function PetScenesEditor() {
   // abrir una escena incompleta recibe con un panel rojo sin haber tocado nada.
   const [attempted, setAttempted] = useState(false);
 
+  // Objeto activo: lo comparten el lienzo y el formulario. Es lo que hace que
+  // arrastrar una caja abra su fila y viceversa.
+  const [selected, setSelected] = useState<number | null>(null);
+  const [showCanvas, setShowCanvas] = useState(true);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  /**
+   * Sistema de coordenadas del juego. Sale entero de `pets.scene-canvas.*` y no
+   * hay forma de tocarlo desde acá a propósito: es una propiedad del build, igual
+   * para todo el equipo. Si el diseñador pudiera ajustarlo se colocarían objetos
+   * contra un lienzo que solo existe en su navegador.
+   *
+   * Se pide una vez y, si el endpoint falla, se sigue con el defecto —que son los
+   * mismos valores verificados— porque quedarse sin referencia visual sería peor.
+   */
+  const [canvas, setCanvas] = useState<SceneCanvasConfig>(DEFAULT_SCENE_CANVAS);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    getPetSceneCanvas(ctrl.signal).then(setCanvas).catch(() => {});
+    return () => ctrl.abort();
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setLoadError(false);
@@ -146,20 +191,40 @@ export default function PetScenesEditor() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Al seleccionar desde el lienzo, traer la fila a la vista. `nearest` para que
+  // no dé un salto de página cuando la fila ya se estaba viendo.
+  useEffect(() => {
+    if (selected == null) return;
+    rowRefs.current[selected]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [selected]);
+
   const issues = useMemo(() => (editing ? validateScene(editing) : []), [editing]);
+  const warnings = useMemo(
+    () => (editing ? outOfFrameWarnings(editing, canvas) : []),
+    [editing, canvas],
+  );
 
   const patchScene = (patch: Partial<PetScene>) =>
     setEditing(s => (s ? { ...s, ...patch } : s));
 
-  const patchObject = (index: number, patch: Partial<PetSceneObject>) =>
+  const patchObject = useCallback((index: number, patch: Partial<PetSceneObject>) =>
     setEditing(s => s
       ? { ...s, objects: s.objects.map((o, i) => (i === index ? { ...o, ...patch } : o)) }
-      : s);
+      : s), []);
 
-  const addObject = () =>
+  // La selección se mueve con el objeto: si no, tras duplicar o reordenar el
+  // lienzo seguiría marcando la caja de al lado. Se actualiza fuera del updater
+  // de `setEditing` a propósito —un setState dentro de otro se ejecuta dos veces
+  // en StrictMode.
+  const addObject = () => {
+    if (!editing) return;
+    setSelected(editing.objects.length);
     setEditing(s => (s ? { ...s, objects: [...s.objects, emptyObject()] } : s));
+  };
 
-  const duplicateObject = (index: number) =>
+  const duplicateObject = (index: number) => {
+    if (!editing) return;
+    setSelected(index + 1);
     setEditing(s => {
       if (!s) return s;
       const copy = { ...s.objects[index], objectId: '' };
@@ -167,19 +232,32 @@ export default function PetScenesEditor() {
       objects.splice(index + 1, 0, copy);
       return { ...s, objects };
     });
+  };
 
-  const removeObject = (index: number) =>
+  const removeObject = (index: number) => {
+    setSelected(null);
     setEditing(s => (s ? { ...s, objects: s.objects.filter((_, i) => i !== index) } : s));
+  };
 
-  const moveObject = (index: number, dir: -1 | 1) =>
+  const moveObject = (index: number, dir: -1 | 1) => {
+    if (!editing) return;
+    const target = index + dir;
+    if (target < 0 || target >= editing.objects.length) return;
+    setSelected(target);
     setEditing(s => {
       if (!s) return s;
-      const target = index + dir;
-      if (target < 0 || target >= s.objects.length) return s;
       const objects = [...s.objects];
       [objects[index], objects[target]] = [objects[target], objects[index]];
       return { ...s, objects };
     });
+  };
+
+  const openEditor = (scene: PetScene | null) => {
+    setEditing(scene ?? emptyScene());
+    setIsNew(scene === null);
+    setSelected(null);
+    setError(''); setErrorList([]); setAttempted(false);
+  };
 
   const save = async () => {
     if (!editing) return;
@@ -228,7 +306,7 @@ export default function PetScenesEditor() {
               {isNew ? 'Nueva escena' : `Escena ${editing.sceneId}`}
             </h2>
             <p className="mt-0.5 text-sm text-gray-500">
-              El juego agrupa los objetos por el ID de escena.
+              Coloca los objetos en el lienzo; el detalle de cada uno está a la derecha.
             </p>
           </div>
           <button
@@ -241,27 +319,44 @@ export default function PetScenesEditor() {
           </button>
         </div>
 
+        {/* Dos columnas: a la izquierda la escena y su lienzo —que se queda fijo al
+            desplazar—, a la derecha los objetos. En una sola columna el lienzo se
+            perdía de vista justo cuando se editaban las coordenadas. */}
+        <div className="grid items-start gap-5 lg:grid-cols-2">
+        <div className="flex flex-col gap-5 lg:sticky lg:top-4">
+
         {/* Cabecera de la escena */}
-        <div className="grid gap-4 rounded-2xl border border-gray-200/80 bg-white p-5 sm:grid-cols-2">
+        <div className="flex flex-col gap-4 rounded-2xl border border-gray-200/80 bg-white p-5">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="sceneId" className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-              ID de escena <span className="text-red-500">*</span>
+              Número de escena <span className="text-red-500">*</span>
             </label>
             <input
               id="sceneId"
               type="number"
               step={1}
-              min={0}
               value={Number.isFinite(editing.sceneId) ? editing.sceneId : ''}
               onChange={e => patchScene({ sceneId: e.target.value === '' ? NaN : Number(e.target.value) })}
               disabled={!isNew}
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:ring-2 disabled:bg-gray-50 disabled:text-gray-500"
               style={{ '--tw-ring-color': AZUL } as React.CSSProperties}
             />
-            {!isNew && <p className="text-xs text-gray-400">No se puede cambiar en una escena existente.</p>}
+            {/* Los dos números se confundían constantemente. El de arriba lo elige
+                el equipo del juego y admite negativos; el de la fila lo pone la
+                base de datos y es el que va en la ruta al guardar. */}
+            <p className="text-xs text-gray-400">
+              Con este número el juego agrupa los objetos. Admite negativos.
+              {!isNew && ' No se puede cambiar en una escena existente.'}
+            </p>
+            {editing.id != null && (
+              <p className="text-xs text-gray-400">
+                Registro en base de datos: <span className="font-mono">#{editing.id}</span> — es otro número,
+                interno, y no se lo pasa al juego.
+              </p>
+            )}
           </div>
 
-          <label className="flex h-fit cursor-pointer items-start gap-2.5 self-end rounded-xl border border-gray-200 px-3 py-2.5 hover:bg-gray-50">
+          <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-gray-200 px-3 py-2.5 hover:bg-gray-50">
             <input
               type="checkbox"
               checked={editing.active !== false}
@@ -277,12 +372,71 @@ export default function PetScenesEditor() {
           </label>
         </div>
 
+        {/* Lienzo de referencia */}
+        <div className="rounded-2xl border border-gray-200/80 bg-white p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-bold" style={{ color: DEEP }}>Lienzo de referencia</h3>
+              <p className="mt-0.5 text-xs text-gray-500">
+                Arrastra para colocar, tira de la esquina para redimensionar. Flechas para
+                ajustar de a 1, con Shift de a 10.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCanvas(v => !v)}
+              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+            >
+              {showCanvas ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {showCanvas ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </div>
+
+          {showCanvas && (
+            <>
+              <div className="w-full">
+                <SceneCanvas
+                  objects={editing.objects}
+                  canvas={canvas}
+                  selected={selected}
+                  onSelect={setSelected}
+                  onChange={patchObject}
+                />
+              </div>
+
+              <p className="mt-2 text-center text-[11px] text-gray-400">
+                Área de {canvas.width}×{canvas.height} · Y hacia {canvas.yAxis === 'UP' ? 'arriba' : 'abajo'} ·
+                x/y en {canvas.anchor === 'CENTER' ? 'el centro' : 'la esquina'} del objeto.
+                Es una aproximación: no dibuja la mascota ni las animaciones. Usa
+                «Previsualizar» para verlo en el juego.
+              </p>
+            </>
+          )}
+
+          {warnings.length > 0 && (
+            <ul className="mt-3 space-y-1 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs text-amber-800">
+              {warnings.map((w, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <AlertTriangle className="mt-px h-3.5 w-3.5 shrink-0" /> {w}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        </div>{/* fin de la columna del lienzo */}
+
         {/* Objetos */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold" style={{ color: DEEP }}>
-              Objetos ({editing.objects.length})
-            </h3>
+            <div>
+              <h3 className="text-sm font-bold" style={{ color: DEEP }}>
+                Objetos ({editing.objects.length})
+              </h3>
+              <p className="mt-0.5 text-xs text-gray-400">
+                Se dibujan en este orden: el primero queda al fondo.
+              </p>
+            </div>
             <button
               type="button"
               onClick={addObject}
@@ -295,9 +449,12 @@ export default function PetScenesEditor() {
           {editing.objects.map((obj, i) => (
             <ObjectRow
               key={i}
+              ref={el => { rowRefs.current[i] = el; }}
               index={i}
               total={editing.objects.length}
               obj={obj}
+              open={selected === i}
+              onToggle={() => setSelected(s => (s === i ? null : i))}
               onChange={patch => patchObject(i, patch)}
               onMove={dir => moveObject(i, dir)}
               onDuplicate={() => duplicateObject(i)}
@@ -311,6 +468,8 @@ export default function PetScenesEditor() {
             </p>
           )}
         </div>
+
+        </div>{/* fin de las dos columnas */}
 
         {(error || (attempted && issues.length > 0)) && (
           <div className="rounded-xl border border-red-100 bg-red-50 p-4">
@@ -383,11 +542,7 @@ export default function PetScenesEditor() {
           </button>
           <button
             type="button"
-            onClick={() => {
-              setEditing(emptyScene());
-              setIsNew(true);
-              setError(''); setErrorList([]); setAttempted(false);
-            }}
+            onClick={() => openEditor(null)}
             className="flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
             style={{ background: `linear-gradient(135deg, ${AZUL}, ${DEEP})` }}
           >
@@ -430,11 +585,19 @@ export default function PetScenesEditor() {
               key={scene.id ?? scene.sceneId}
               className="flex flex-col gap-3 rounded-2xl border border-gray-200/80 bg-white p-4"
             >
+              {/* Miniatura antes que el texto: distinguir dos escenas por el nombre
+                  y el número de objetos obligaba a abrirlas una por una. */}
+              <SceneThumb objects={scene.objects} canvas={canvas} />
+
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="font-bold" style={{ color: INK }}>Escena {scene.sceneId}</p>
                   <p className="mt-0.5 text-xs text-gray-500">
                     {scene.objects.length} objeto{scene.objects.length === 1 ? '' : 's'}
+                    {/* El número de registro, en gris y detrás: se enseña porque es
+                        lo que hay que citar al reportar un problema, pero no es el
+                        número con el que se habla de la escena. */}
+                    {scene.id != null && <span className="ml-1.5 font-mono text-gray-300">#{scene.id}</span>}
                   </p>
                 </div>
                 <span
@@ -467,13 +630,9 @@ export default function PetScenesEditor() {
               <div className="mt-auto flex gap-2 border-t border-gray-100 pt-3">
                 <button
                   type="button"
-                  onClick={() => {
-                    // Ya viene normalizada de `load`; se clona para no editar
-                    // en sitio el objeto de la lista.
-                    setEditing(structuredClone(scene));
-                    setIsNew(false);
-                    setError(''); setErrorList([]); setAttempted(false);
-                  }}
+                  // Ya viene normalizada de `load`; se clona para no editar
+                  // en sitio el objeto de la lista.
+                  onClick={() => openEditor(structuredClone(scene))}
                   className="flex-1 cursor-pointer rounded-lg border border-gray-200 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
                 >
                   Editar
@@ -512,19 +671,18 @@ export default function PetScenesEditor() {
 // ── Fila de objeto ────────────────────────────────────────────────────────────
 
 /**
- * Sube el archivo y deja la `objectKey` que devuelve el backend. El campo de
- * texto queda editable para pegar una clave existente, pero ya no hace falta
- * adivinarla.
+ * Sube el archivo y deja la `objectKey` que devuelve el backend, junto con la
+ * url pública donde quedará. El campo de texto queda editable para pegar una
+ * clave existente, pero ya no hace falta adivinarla.
  */
 function AssetField({
   objectKey,
   url,
-  onKey,
+  onAsset,
 }: {
   objectKey: string;
-  /** Sólo de lo ya guardado; una clave recién pegada todavía no la tiene. */
   url?: string;
-  onKey: (key: string) => void;
+  onAsset: (objectKey: string, url?: string) => void;
 }) {
   const upload = usePetSceneAssetUpload('SCENE_OBJECT');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -533,12 +691,12 @@ function AssetField({
   const pick = async (files: FileList | null) => {
     const file = files?.[0];
     if (!file) return;
-    const key = await select(file);
-    if (key) onKey(key);
+    const asset = await select(file);
+    if (asset) onAsset(asset.objectKey, asset.publicUrl);
   };
 
-  // Sólo vale para lo ya guardado: si la clave cambió sin guardar, la miniatura
-  // apuntaría al asset anterior y engañaría más de lo que ayuda.
+  // Sólo si la url corresponde a la clave actual: si se pegó otra clave a mano,
+  // la miniatura apuntaría al asset anterior y engañaría más de lo que ayuda.
   const thumb = url && objectKey ? url : null;
 
   return (
@@ -554,7 +712,8 @@ function AssetField({
         )}
         <input
           value={objectKey}
-          onChange={e => onKey(e.target.value)}
+          // Al escribir la clave a mano se pierde la url: es de la anterior.
+          onChange={e => onAsset(e.target.value, undefined)}
           placeholder="Sube un archivo o pega una clave existente"
           className="w-full rounded-lg border border-gray-200 px-2.5 py-2 font-mono text-sm outline-none focus:ring-2"
           style={{ '--tw-ring-color': AZUL } as React.CSSProperties}
@@ -600,7 +759,10 @@ function AssetField({
           {canRetry && (
             <button
               type="button"
-              onClick={async () => { const k = await retry(); if (k) onKey(k); }}
+              onClick={async () => {
+                const asset = await retry();
+                if (asset) onAsset(asset.objectKey, asset.publicUrl);
+              }}
               className="ml-1 shrink-0 cursor-pointer font-semibold underline"
             >
               Reintentar
@@ -616,27 +778,72 @@ function AssetField({
   );
 }
 
-function ObjectRow({
-  index, total, obj, onChange, onMove, onDuplicate, onRemove,
-}: {
+/**
+ * Fila plegable. Antes todas estaban abiertas a la vez y una escena de seis
+ * objetos era una pared de cuarenta campos; ahora la cabecera resume el objeto
+ * y solo se despliega el que se está tocando, que además es el que el lienzo
+ * marca como seleccionado.
+ */
+const ObjectRow = React.forwardRef<HTMLDivElement, {
   index: number;
   total: number;
   obj: PetSceneObject;
+  open: boolean;
+  onToggle: () => void;
   onChange: (patch: Partial<PetSceneObject>) => void;
   onMove: (dir: -1 | 1) => void;
   onDuplicate: () => void;
   onRemove: () => void;
-}) {
+}>(function ObjectRow(
+  { index, total, obj, open, onToggle, onChange, onMove, onDuplicate, onRemove },
+  ref,
+) {
   const ring = { '--tw-ring-color': AZUL } as React.CSSProperties;
   const input = 'w-full rounded-lg border border-gray-200 px-2.5 py-2 text-sm outline-none focus:ring-2';
   const label = 'text-[10px] font-semibold uppercase tracking-wide text-gray-500';
   const int = (v: string) => (v === '' ? NaN : Number(v));
+  const video = obj.type?.toLowerCase().includes('video');
 
   return (
-    <div className="rounded-2xl border border-gray-200/80 bg-white p-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <span className="text-xs font-bold text-gray-400">#{index + 1}</span>
-        <div className="flex items-center gap-1">
+    <div
+      ref={ref}
+      className={`rounded-2xl border bg-white transition ${
+        open ? 'border-[#00a4ff] shadow-sm' : 'border-gray-200/80'
+      }`}
+    >
+      <div className="flex items-center gap-2 p-3">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left"
+        >
+          <ChevronRight
+            className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${open ? 'rotate-90' : ''}`}
+          />
+          {/* Miniatura en la cabecera: es lo que permite reconocer el objeto sin
+              desplegarlo ni cruzarlo con el lienzo. */}
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+            {obj.url && !video ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={obj.url} alt="" className="h-full w-full object-contain" />
+            ) : video ? (
+              <Film className="h-4 w-4 text-violet-400" />
+            ) : (
+              <ImageOff className="h-4 w-4 text-gray-300" />
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate font-mono text-sm text-gray-800">
+              {obj.objectId || <span className="text-gray-400">#{index + 1} sin identificador</span>}
+            </span>
+            <span className="block truncate text-[11px] text-gray-400">
+              {obj.type || 'sin tipo'} · {obj.x},{obj.y} · {obj.width}×{obj.height}
+              {obj.scaleMultiplier != null && obj.scaleMultiplier !== 1 ? ` · ×${obj.scaleMultiplier}` : ''}
+            </span>
+          </span>
+        </button>
+
+        <div className="flex shrink-0 items-center gap-1">
           <button
             type="button" onClick={() => onMove(-1)} disabled={index === 0}
             title="Subir"
@@ -666,71 +873,98 @@ function ObjectRow({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="flex flex-col gap-1 lg:col-span-2">
-          <label className={label}>Identificador *</label>
-          <input
-            value={obj.objectId}
-            onChange={e => onChange({ objectId: e.target.value.slice(0, 100) })}
-            placeholder="background_main"
-            className={`${input} font-mono`}
-            style={ring}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className={label}>Tipo *</label>
-          {/* Campo libre con sugerencias: el backend no restringe los valores. */}
-          <input
-            value={obj.type}
-            onChange={e => onChange({ type: e.target.value })}
-            list="pet-scene-types"
-            className={input}
-            style={ring}
-          />
-          <datalist id="pet-scene-types">
-            {KNOWN_TYPES.map(t => <option key={t} value={t} />)}
-          </datalist>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className={label}>Escala</label>
-          <input
-            type="number" step="0.1" min="0.1"
-            value={obj.scaleMultiplier ?? ''}
-            onChange={e => onChange({ scaleMultiplier: e.target.value === '' ? null : Number(e.target.value) })}
-            placeholder="1.0"
-            className={input}
-            style={ring}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1 sm:col-span-2 lg:col-span-4">
-          <label className={label}>Asset *</label>
-          <AssetField
-            objectKey={obj.objectKey}
-            url={obj.url}
-            onKey={key => onChange({ objectKey: key })}
-          />
-        </div>
-
-        {([
-          ['x', 'X'], ['y', 'Y'], ['width', 'Ancho'], ['height', 'Alto'],
-        ] as const).map(([key, text]) => (
-          <div key={key} className="flex flex-col gap-1">
-            <label className={label}>{text} *</label>
+      {open && (
+        <div className="flex flex-col gap-3 border-t border-gray-100 p-4">
+          <div className="flex flex-col gap-1">
+            <label className={label}>Identificador *</label>
             <input
-              type="number"
-              step={1}
-              min={key === 'width' || key === 'height' ? 1 : undefined}
-              value={Number.isFinite(obj[key]) ? obj[key] : ''}
-              onChange={e => onChange({ [key]: int(e.target.value) } as Partial<PetSceneObject>)}
-              className={input}
+              value={obj.objectId}
+              onChange={e => onChange({ objectId: e.target.value.slice(0, 100) })}
+              placeholder="background_main"
+              className={`${input} font-mono`}
               style={ring}
             />
           </div>
-        ))}
-      </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1">
+              <label className={label}>Tipo *</label>
+              {/* Campo libre con sugerencias: el backend no restringe los valores. */}
+              <input
+                value={obj.type}
+                onChange={e => onChange({ type: e.target.value })}
+                list="pet-scene-types"
+                className={input}
+                style={ring}
+              />
+              <datalist id="pet-scene-types">
+                {KNOWN_TYPES.map(t => <option key={t} value={t} />)}
+              </datalist>
+              {/* Aviso, no bloqueo: la lista completa de tipos no está confirmada,
+                  así que un valor raro puede ser legítimo. Pero un `imagen` en vez
+                  de `image` no lo dibuja nadie y así no se descubre en el juego. */}
+              {obj.type.trim() !== '' && !KNOWN_TYPES.includes(obj.type.trim()) && (
+                <p className="text-[11px] text-amber-600">
+                  El juego solo dibuja {KNOWN_TYPES.join(', ')}. Revisa que no sea un error de escritura.
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className={label}>Escala</label>
+              <input
+                type="number" step="0.1" min="0.1"
+                value={obj.scaleMultiplier ?? ''}
+                onChange={e => onChange({ scaleMultiplier: e.target.value === '' ? null : Number(e.target.value) })}
+                placeholder="1.0"
+                className={input}
+                style={ring}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className={label}>Asset *</label>
+            <AssetField
+              objectKey={obj.objectKey}
+              url={obj.url}
+              onAsset={(objectKey, url) => onChange({ objectKey, url })}
+            />
+          </div>
+
+          {/* Posición y tamaño agrupados: sueltos en una cuadrícula de cuatro,
+              X/Y y ancho/alto se leían como cuatro campos sin relación y era fácil
+              escribir el ancho en la Y. */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {([
+              ['Posición', [['x', 'X'], ['y', 'Y']]],
+              ['Tamaño', [['width', 'Ancho'], ['height', 'Alto']]],
+            ] as const).map(([group, fields]) => (
+              <fieldset key={group} className="rounded-xl border border-gray-100 p-3">
+                <legend className="px-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                  {group}
+                </legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {fields.map(([key, text]) => (
+                    <div key={key} className="flex flex-col gap-1">
+                      <label className={label}>{text} *</label>
+                      <input
+                        type="number"
+                        step={1}
+                        min={key === 'width' || key === 'height' ? 1 : undefined}
+                        value={Number.isFinite(obj[key]) ? obj[key] : ''}
+                        onChange={e => onChange({ [key]: int(e.target.value) } as Partial<PetSceneObject>)}
+                        className={input}
+                        style={ring}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+});
