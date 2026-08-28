@@ -8,6 +8,7 @@ import { ProductStatus, ProductSummaryResponseDTO } from "@/types/products/Produ
 import { DashboardStats } from "@/types/Commercial.types";
 import CommercialProductCard from "@/components/commercial/products/CommercialProductCard";
 import CreateProductForm from "@/components/commercial/products/CreateProductForm";
+import PendingClaimsPanel from "@/components/commercial/products/PendingClaimsPanel";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
 import { LimitReachedBanner, isLimitReached } from "@/components/commercial/plans/LimitReached";
@@ -322,13 +323,36 @@ export default function ProductsDashboard() {
 
   const renderSection = () => {
     switch (section) {
+      case "claims":
+        return <PendingClaimsPanel />;
       default:
         return renderDashboard();
     }
   };
 
+  const tabs = [
+    { key: "dashboard", label: "Catálogo" },
+    { key: "claims", label: "Entregas pendientes" },
+  ];
+
   return (
     <>
+      <div className="mb-6 flex gap-2 border-b border-gray-200">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => router.push(`/commercial/products?section=${tab.key}`)}
+            className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors cursor-pointer ${
+              section === tab.key
+                ? "border-[#03548C] text-[#03548C]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {renderSection()}
 
       {showCreateForm && (

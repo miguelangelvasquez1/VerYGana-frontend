@@ -1,4 +1,5 @@
 import { MarketPlaceIssueReason } from "../Pqrs.types";
+import { DocumentType } from "../User.types";
 
 export enum PurchaseItemStatus {
     PENDING = "PENDING",
@@ -43,6 +44,18 @@ export interface FeaturedProductResponseDTO {
 
 export interface ClaimPurchaseItemRequestDTO {
     pin: string;
+}
+
+export interface CommercialPendingClaimResponseDTO {
+    id: number;
+    productId: number;
+    productName: string;
+    imageUrl: string;
+    unitPriceCents: number;
+    buyerName: string;
+    documentType : DocumentType;
+    documentNumber : string
+    purchasedAt: string;
 }
 
 export interface ReportPurchaseItemRequestDTO {

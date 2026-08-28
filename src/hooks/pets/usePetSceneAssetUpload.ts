@@ -48,7 +48,15 @@ export interface SceneAssetState {
   progress: number;
   error: string;
   objectKey: string | null;
+  /** Url pública del archivo recién subido, para pintarlo antes de guardar. */
+  publicUrl: string | null;
   fileName: string;
+}
+
+/** Lo que hace falta para usar el asset: la clave que se guarda y dónde mirarlo. */
+export interface UploadedAsset {
+  objectKey: string;
+  publicUrl: string;
 }
 
 const EMPTY: SceneAssetState = {
@@ -56,6 +64,7 @@ const EMPTY: SceneAssetState = {
   progress: 0,
   error: '',
   objectKey: null,
+  publicUrl: null,
   fileName: '',
 };
 
@@ -98,7 +107,7 @@ export function usePetSceneAssetUpload(kind: DesignerAssetKind = 'SCENE_OBJECT')
   }, []);
 
   const select = useCallback(
-    async (file: File): Promise<string | null> => {
+    async (file: File): Promise<UploadedAsset | null> => {
       const invalid = validate(file, kind);
       if (invalid) {
         fileRef.current = null;
@@ -123,14 +132,22 @@ export function usePetSceneAssetUpload(kind: DesignerAssetKind = 'SCENE_OBJECT')
           setState(s => (s.status === 'uploading' ? { ...s, progress: pct } : s)),
         );
 
-        setState(s => ({ ...s, status: 'ready', progress: 100, objectKey: permission.objectKey }));
-        return permission.objectKey;
+        setState(s => ({
+          ...s,
+          status: 'ready',
+          progress: 100,
+          objectKey: permission.objectKey,
+          publicUrl: permission.publicUrl ?? null,
+        }));
+        return { objectKey: permission.objectKey, publicUrl: permission.publicUrl ?? '' };
       } catch (err: unknown) {
         const message =
           (err as { message?: string })?.message === 'Network error during upload'
             ? 'No se pudo subir el archivo al almacenamiento. Reintenta en un momento.'
             : apiErrorMessage(err, 'No se pudo subir el archivo.');
-        setState(s => ({ ...s, status: 'error', progress: 0, error: message, objectKey: null }));
+        setState(s => ({
+          ...s, status: 'error', progress: 0, error: message, objectKey: null, publicUrl: null,
+        }));
         return null;
       }
     },

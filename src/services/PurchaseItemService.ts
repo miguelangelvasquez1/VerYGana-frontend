@@ -2,7 +2,8 @@ import apiClient from "@/lib/api/client";
 import { SubmitCashRefundBankDetailsRequestDTO } from "@/types/finance/Treasury.types";
 import { PagedResponse } from "@/types/Generic.types";
 import { PqrsResponseDTO } from "@/types/Pqrs.types";
-import { ClaimPurchaseItemRequestDTO, FeaturedProductResponseDTO, ReportPurchaseItemRequestDTO } from "@/types/purchases/purchaseItem.types";
+import { ClaimPurchaseItemRequestDTO, CommercialPendingClaimResponseDTO, FeaturedProductResponseDTO, ReportPurchaseItemRequestDTO } from "@/types/purchases/purchaseItem.types";
+import { DocumentType } from "@/types/User.types";
 
 
 const BASE_URL = "/purchaseItems" 
@@ -30,9 +31,17 @@ export const getDeliveredCode = async (purchaseItemId : number) : Promise<string
 
 //Commercial
 export const claimPhysicalItem = async (purchaseItemId : number, request : ClaimPurchaseItemRequestDTO ) : Promise<void> => {
-    const response = await apiClient.post(BASE_URL + `/${purchaseItemId}/claim`, null, {
+    const response = await apiClient.post(BASE_URL + `/${purchaseItemId}/claim`, request);
+    return response.data;
+}
+
+export const getPendingClaims = async (documentType? : DocumentType, documentNumber? : string, page? : number, size? : number) : Promise<PagedResponse<CommercialPendingClaimResponseDTO>> => {
+    const response = await apiClient.get(BASE_URL + "/pending-claims", {
         params: {
-           request 
+            documentType,
+            documentNumber,
+            page,
+            size
         }
     });
     return response.data;

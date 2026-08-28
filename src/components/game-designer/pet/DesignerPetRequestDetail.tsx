@@ -41,8 +41,9 @@ const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? Strin
  * el backend siembra el segundo con el primero al aprobar, y el diseñador puede
  * reemplazarlo. Acá se replica ese sembrado por si el borrador llega vacío.
  *
- * `externalId` y `price` quedan sin valor a propósito: no hay nada en la
- * solicitud de donde deducirlos y un default inventado se publicaría tal cual.
+ * `price` queda sin valor a propósito: no hay nada en la solicitud de donde
+ * deducirlo y un default inventado se publicaría tal cual. `externalId` ya no
+ * aparece: lo asigna el servidor al publicar.
  */
 function seedDraft(req: PetRequestDetail): PetItemDraft {
   return {
@@ -579,9 +580,9 @@ function AssetField({
     const url = URL.createObjectURL(file);
     setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
 
-    const objectKey = await select(file);
+    const asset = await select(file);
     // Solo se toca el borrador si R2 confirmó: si falla, el sprite anterior sigue.
-    if (objectKey) onChange(f.key, objectKey);
+    if (asset) onChange(f.key, asset.objectKey);
   };
 
   const clear = () => {

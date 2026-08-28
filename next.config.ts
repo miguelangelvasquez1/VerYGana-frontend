@@ -47,6 +47,20 @@ const nextConfig: NextConfig = {
         source: '/pet-game/:path*',
         destination: 'https://pub-4c0bac3292364531a816300210b54c05.r2.dev/:path*',
       },
+      /**
+       * Los assets de las escenas, por el mismo motivo pero por otra vía: el juego
+       * los pide con fetch y r2.dev contesta 200 sin `Access-Control-Allow-Origin`,
+       * así que el navegador los descarta y la escena sale vacía. Servidos desde
+       * acá son mismo-origen que la página del juego (que también cuelga de
+       * localhost:3000) y no hay CORS que valga.
+       *
+       * Para que el backend emita estas URLs hay que ponerle
+       * PETS_ASSET_BASE_URL=http://localhost:3000/pet-assets
+       */
+      {
+        source: '/pet-assets/:path*',
+        destination: 'https://pub-4c0bac3292364531a816300210b54c05.r2.dev/:path*',
+      },
     ];
   },
   async headers() {
