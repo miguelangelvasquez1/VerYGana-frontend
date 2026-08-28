@@ -9,7 +9,8 @@ export type ContractStatus =
   | "APPROVED"
   | "PENDING_SIGNATURE"
   | "SIGNED"
-  | "REJECTED";
+  | "REJECTED"
+  | "CANCELLED";
 
 export interface ContractSummaryResponseDTO {
   contractId: number;

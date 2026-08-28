@@ -1,24 +1,51 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { CreditCard, Loader2, Mail, RefreshCw, CheckCircle2, XCircle, Lock } from 'lucide-react';
+import { CreditCard, Loader2, Mail, RefreshCw, CheckCircle2, XCircle, Lock, ArrowRightLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { usePlanState } from '../layout/DashboardLayout';
-import { requestRecharge, getRechargeContract, rechargeCheckout } from '@/services/planRechargeService';
+import {
+  previewRecharge,
+  requestRecharge,
+  getRechargeContract,
+  rechargeCheckout,
+  cancelRecharge,
+} from '@/services/planRechargeService';
 import { getPaymentStatus } from '@/services/planService';
-import { ContractSummaryResponseDTO } from '@/types/finance/plans/Contract.types';
+import { getCurrentPlanChangeRequest, cancelPlanChangeRequest } from '@/services/planChangeService';
+import { ContractSummaryResponseDTO, ContractStatus } from '@/types/finance/plans/Contract.types';
 import { PlanCode } from '@/types/finance/plans/Plan.types';
+import { RechargePreviewResponseDTO } from '@/types/finance/plans/PlanRecharge.types';
+import { PlanChangeRequestResponseDTO } from '@/types/finance/plans/PlanChange.types';
 import { formatBudget, formatCents } from '@/utils/currency';
+import { PLAN_CHANGE_LABELS, isActivePlanChangeRequest, ChangePlanButton } from '../planChange/planChange.shared';
 import {
   RECHARGE_CONTRACT_ID_KEY,
   RECHARGE_PAYMENT_REFERENCE_KEY,
   RECHARGE_RANGES,
   extractApiError,
   WizardActionButton,
+  WizardConfirmModal,
 } from './balance.shared';
 
-type Step = 'loading' | 'ineligible' | 'amount' | 'signature' | 'payment' | 'confirming' | 'success' | 'declined';
+type Step =
+  | 'loading'
+  | 'ineligible'
+  | 'amount'
+  | 'plan_change_conflict'
+  | 'signature'
+  | 'payment'
+  | 'confirming'
+  | 'success'
+  | 'declined'
+  | 'cancelled';
+
+// El comercial solo puede autocancelar la recarga mientras el contrato siga
+// en un estado firmable/firmado y todavía no haya generado el pago. El backend
+// es la fuente de verdad (devuelve un message legible si ya no aplica); esto
+// solo decide si mostramos el botón.
+const RECHARGE_CANCELABLE_STATUSES: ContractStatus[] = ['APPROVED', 'PENDING_SIGNATURE', 'SIGNED'];
 
 const PAYMENT_MAX_POLLS = 8;
 const PAYMENT_POLL_INTERVAL_MS = 2500;
@@ -43,10 +70,16 @@ export function RechargeWizard() {
   const [step, setStep] = useState<Step>('loading');
   const [contract, setContract] = useState<ContractSummaryResponseDTO | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [showRechargeConfirm, setShowRechargeConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [amountError, setAmountError] = useState('');
   const [checking, setChecking] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  const [preview, setPreview] = useState<RechargePreviewResponseDTO | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [planChangeConflict, setPlanChangeConflict] = useState<PlanChangeRequestResponseDTO | null>(null);
 
   // Evita el doble llamado de React Strict Mode en dev — solo debe correr
   // una vez por montaje real.
@@ -140,13 +173,67 @@ export function RechargeWizard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  const handleSubmitAmount = async () => {
+  // ── Preview de la recarga — se recalcula en cada cambio de monto
+  // (debounce) y decide si el botón de confirmar queda habilitado.
+  useEffect(() => {
+    if (step !== 'amount') return;
+    const amount = parseCOP(inputValue);
+    if (!amount) {
+      setPreview(null);
+      setPreviewLoading(false);
+      return;
+    }
+    setPreviewLoading(true);
+    const timer = setTimeout(() => {
+      previewRecharge(amount * 100)
+        .then(setPreview)
+        .catch(() => setPreview(null))
+        .finally(() => setPreviewLoading(false));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [inputValue, step]);
+
+  // Intenta crear el contrato de recarga. Si el backend responde 422, puede
+  // ser porque hay un cambio de plan en curso que bloquea la recarga — en
+  // ese caso mostramos esa solicitud con opción de cancelarla y reintentar
+  // en vez de solo mostrar el error (rate limit u otro 422 cae al toast).
+  const attemptRequestRecharge = async (amountCents: number): Promise<'success' | 'conflict' | 'error'> => {
+    try {
+      const result = await requestRecharge(amountCents);
+      setContract(result);
+      sessionStorage.setItem(RECHARGE_CONTRACT_ID_KEY, String(result.contractId));
+      setStep('signature');
+      return 'success';
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 422) {
+        try {
+          const current = await getCurrentPlanChangeRequest();
+          if (isActivePlanChangeRequest(current)) {
+            setPlanChangeConflict(current);
+            setStep('plan_change_conflict');
+            return 'conflict';
+          }
+        } catch {
+          /* no se pudo confirmar el conflicto — cae al toast genérico */
+        }
+      }
+      const { message } = extractApiError(err);
+      toast.error(message);
+      return 'error';
+    }
+  };
+
+  // Valida el monto y abre el modal de confirmación — generar el contrato es
+  // una acción que el comercial solo puede hacer una vez al día.
+  const handleSubmitAmount = () => {
     if (submitting) return;
     const amount = parseCOP(inputValue);
     if (!amount) {
       setAmountError('Ingresa un monto');
       return;
     }
+    if (!preview?.eligible) return;
     if (range) {
       if (amount < range.min) {
         setAmountError(`El monto mínimo es ${formatBudget(range.min)}`);
@@ -158,12 +245,28 @@ export function RechargeWizard() {
       }
     }
     setAmountError('');
+    setShowRechargeConfirm(true);
+  };
+
+  const confirmGenerateRecharge = async () => {
+    const amount = parseCOP(inputValue);
+    if (!amount) return;
     setSubmitting(true);
     try {
-      const result = await requestRecharge(amount * 100);
-      setContract(result);
-      sessionStorage.setItem(RECHARGE_CONTRACT_ID_KEY, String(result.contractId));
-      setStep('signature');
+      await attemptRequestRecharge(amount * 100);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelPlanChangeAndRetry = async () => {
+    if (!planChangeConflict || submitting) return;
+    setSubmitting(true);
+    try {
+      await cancelPlanChangeRequest(planChangeConflict.id);
+      setPlanChangeConflict(null);
+      const outcome = await attemptRequestRecharge(parseCOP(inputValue) * 100);
+      if (outcome === 'error') setStep('amount');
     } catch (err) {
       const { message } = extractApiError(err);
       toast.error(message);
@@ -208,6 +311,51 @@ export function RechargeWizard() {
       setSubmitting(false);
     }
   };
+
+  // Autocancelación de la recarga en curso — desbloquea al comercial que dejó
+  // una recarga a medias y quiere en su lugar pedir un cambio de plan.
+  const canCancelRecharge =
+    !!contract &&
+    (step === 'signature' || step === 'payment') &&
+    RECHARGE_CANCELABLE_STATUSES.includes(contract.status);
+
+  const handleCancelRecharge = () => {
+    if (!contract || cancelling || submitting) return;
+    setShowCancelConfirm(true);
+  };
+
+  const confirmCancelRecharge = async () => {
+    if (!contract) return;
+    setCancelling(true);
+    try {
+      await cancelRecharge(contract.contractId);
+      sessionStorage.removeItem(RECHARGE_CONTRACT_ID_KEY);
+      sessionStorage.removeItem(RECHARGE_PAYMENT_REFERENCE_KEY);
+      setContract(null);
+      setInputValue('');
+      setPreview(null);
+      refreshPlanState();
+      toast.success('Recarga cancelada');
+      setStep('cancelled');
+    } catch (err) {
+      const { message } = extractApiError(err);
+      toast.error(message);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const cancelRechargeButton = canCancelRecharge ? (
+    <button
+      type="button"
+      onClick={handleCancelRecharge}
+      disabled={cancelling || submitting || checking}
+      className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold text-gray-500 hover:text-red-600 transition disabled:opacity-50 cursor-pointer"
+    >
+      {cancelling ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+      {cancelling ? 'Cancelando recarga...' : 'Cancelar recarga'}
+    </button>
+  ) : null;
 
   if (step === 'loading' || loadingPlan) {
     return (
@@ -276,13 +424,75 @@ export function RechargeWizard() {
               </div>
               {amountError && <p className="text-xs text-red-500 mt-1.5">{amountError}</p>}
             </div>
-            <div className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
-              <CreditCard className="w-5 h-5 text-[#03548C] shrink-0 mt-0.5" />
+
+            {previewLoading && (
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Loader2 className="w-4 h-4 animate-spin" /> Calculando...
+              </div>
+            )}
+
+            {!previewLoading && preview && (
+              <div
+                className={`rounded-xl border p-4 space-y-1.5 text-sm ${
+                  preview.eligible
+                    ? 'bg-blue-50 border-blue-200 text-blue-800'
+                    : 'bg-amber-50 border-amber-200 text-amber-800'
+                }`}
+              >
+                <p className="font-medium">{preview.message}</p>
+                {preview.eligible && (
+                  <div className="text-xs opacity-80 space-y-0.5">
+                    <p>
+                      Pagas {formatBudget(preview.requestedAmountPesos)}, se acreditan{' '}
+                      {formatBudget(preview.estimatedCreditedAmountPesos)} a tu saldo publicitario.
+                    </p>
+                    <p>Saldo resultante: {formatBudget(preview.resultingWalletBalancePesos)}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!preview && !previewLoading && (
+              <div className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                <CreditCard className="w-5 h-5 text-[#03548C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Generaremos un contrato de recarga por este monto. Deberás firmarlo electrónicamente antes de poder pagar.
+                </p>
+              </div>
+            )}
+
+            <WizardActionButton
+              submitting={submitting}
+              onClick={handleSubmitAmount}
+              label="Generar contrato de recarga"
+              disabled={!preview?.eligible}
+            />
+          </div>
+        )}
+
+        {step === 'plan_change_conflict' && planChangeConflict && (
+          <div className="space-y-6 text-center py-4">
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+              <ArrowRightLeft className="w-8 h-8 text-amber-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Tienes un cambio de plan en curso</h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                Generaremos un contrato de recarga por este monto. Deberás firmarlo electrónicamente antes de poder pagar.
+                Ya tienes una solicitud para cambiar a {PLAN_CHANGE_LABELS[planChangeConflict.toPlanCode]} en curso.
+                Debes cancelarla antes de poder recargar saldo.
               </p>
             </div>
-            <WizardActionButton submitting={submitting} onClick={handleSubmitAmount} label="Generar contrato de recarga" />
+            <WizardActionButton
+              submitting={submitting}
+              onClick={handleCancelPlanChangeAndRetry}
+              label="Cancelar cambio de plan y continuar"
+            />
+            <Link
+              href="/commercial/plan-change"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-700 hover:underline transition"
+            >
+              Ver detalle del cambio de plan
+            </Link>
           </div>
         )}
 
@@ -308,6 +518,7 @@ export function RechargeWizard() {
               {checking ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               Ya firmé, verificar estado
             </button>
+            {cancelRechargeButton}
           </div>
         )}
 
@@ -323,6 +534,7 @@ export function RechargeWizard() {
               </p>
             </div>
             <WizardActionButton submitting={submitting} onClick={handlePay} label="Pagar ahora" />
+            {cancelRechargeButton}
           </div>
         )}
 
@@ -351,6 +563,29 @@ export function RechargeWizard() {
           </div>
         )}
 
+        {step === 'cancelled' && (
+          <div className="space-y-6 text-center py-4">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+              <XCircle className="w-8 h-8 text-gray-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Recarga cancelada</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Cancelamos tu contrato de recarga. Puedes solicitar una recarga nueva cuando quieras o pedir un cambio de
+                plan.
+              </p>
+            </div>
+            <WizardActionButton
+              submitting={false}
+              onClick={() => {
+                setAmountError('');
+                setStep('amount');
+              }}
+              label="Solicitar nueva recarga"
+            />
+          </div>
+        )}
+
         {step === 'declined' && (
           <div className="space-y-6 text-center py-4">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
@@ -375,6 +610,33 @@ export function RechargeWizard() {
           </div>
         )}
       </div>
+
+      <div className="text-center">
+        <p className="text-sm text-gray-500 mb-2">¿Quieres cambiar de plan?</p>
+        <ChangePlanButton />
+      </div>
+
+      <WizardConfirmModal
+        isOpen={showRechargeConfirm}
+        title="Genera tu contrato de recarga"
+        description="Solo puedes generar una recarga de saldo una vez al día. Revisa que el monto sea correcto antes de continuar; si te equivocas tendrás que esperar hasta mañana para volver a intentarlo."
+        confirmLabel="Generar contrato"
+        cancelLabel="Revisar el monto"
+        tone="warning"
+        onConfirm={confirmGenerateRecharge}
+        onClose={() => setShowRechargeConfirm(false)}
+      />
+
+      <WizardConfirmModal
+        isOpen={showCancelConfirm}
+        title="Cancelar esta recarga"
+        description="Se anulará el contrato de recarga en curso. Tendrás que volver a solicitarla si cambias de opinión, y recuerda que solo puedes generar una recarga al día."
+        confirmLabel="Cancelar recarga"
+        cancelLabel="Volver"
+        tone="danger"
+        onConfirm={confirmCancelRecharge}
+        onClose={() => setShowCancelConfirm(false)}
+      />
     </div>
   );
 }

@@ -3,21 +3,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { CheckCircle2, Clock3, CreditCard, ExternalLink, Loader2, RefreshCw, XCircle } from 'lucide-react';
+import { ArrowRightLeft, CheckCircle2, Clock3, CreditCard, ExternalLink, Loader2, RefreshCw, XCircle } from 'lucide-react';
 import { usePlanState } from '../layout/DashboardLayout';
 import {
   getCurrentPlanChangeRequest,
   approvePlanChangeContract,
   cancelPlanChangeRequest,
+  acknowledgePlanChangeRejection,
   topUpCheckout,
 } from '@/services/planChangeService';
 import { getPaymentStatus } from '@/services/planService';
 import { PlanChangeRequestResponseDTO } from '@/types/finance/plans/PlanChange.types';
 import { formatBudget, formatCents } from '@/utils/currency';
-import { WizardActionButton } from '../balance/balance.shared';
+import { WizardActionButton, WizardConfirmModal } from '../balance/balance.shared';
 import {
   PLANCHANGE_TOPUP_REFERENCE_KEY,
-  PLANCHANGE_CONTRACT_DOWNLOAD_URL_KEY,
   PLAN_CHANGE_LABELS,
   extractApiError,
 } from './planChange.shared';
@@ -34,7 +34,6 @@ type Step =
   | 'rejected'
   | 'cancelled';
 
-const AWAIT_POLL_INTERVAL_MS = 5000;
 const PAYMENT_MAX_POLLS = 8;
 const PAYMENT_POLL_INTERVAL_MS = 2500;
 
@@ -55,9 +54,12 @@ export function PlanChangeWizard() {
   const { refreshPlanState } = usePlanState();
   const [step, setStep] = useState<Step>('loading');
   const [request, setRequest] = useState<PlanChangeRequestResponseDTO | null>(null);
-  const [contractDownloadUrl, setContractDownloadUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [reloadingDoc, setReloadingDoc] = useState(false);
+  const [reviewed, setReviewed] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const hasInitRef = useRef(false);
 
@@ -73,6 +75,23 @@ export function PlanChangeWizard() {
     return current;
   };
 
+  // El otrosí (contractDownloadUrl) tiene TTL corto — no se cachea; se
+  // re-obtiene con GET /current al abrir la vista o al pulsar "Recargar".
+  const contractDownloadUrl = request?.contractDownloadUrl ?? null;
+
+  const handleReloadDoc = async () => {
+    if (reloadingDoc) return;
+    setReloadingDoc(true);
+    try {
+      await loadCurrent();
+    } catch (err) {
+      const { message } = extractApiError(err);
+      toast.error(message);
+    } finally {
+      setReloadingDoc(false);
+    }
+  };
+
   useEffect(() => {
     if (hasInitRef.current) return;
     hasInitRef.current = true;
@@ -85,14 +104,6 @@ export function PlanChangeWizard() {
       return;
     }
 
-    // Disponible solo justo después de crear la solicitud desde /plans — se
-    // consume una sola vez.
-    const downloadUrl = sessionStorage.getItem(PLANCHANGE_CONTRACT_DOWNLOAD_URL_KEY);
-    if (downloadUrl) {
-      setContractDownloadUrl(downloadUrl);
-      sessionStorage.removeItem(PLANCHANGE_CONTRACT_DOWNLOAD_URL_KEY);
-    }
-
     loadCurrent().catch((err) => {
       const { message } = extractApiError(err);
       toast.error(message);
@@ -100,38 +111,8 @@ export function PlanChangeWizard() {
     });
   }, []);
 
-  // ── Espera de revisión de VerYGana / firma automática — polling.
-  useEffect(() => {
-    if (step !== 'awaiting_verygana') return;
-    let cancelled = false;
-
-    const poll = async () => {
-      if (cancelled) return;
-      try {
-        const current = await getCurrentPlanChangeRequest();
-        if (cancelled) return;
-        if (!current) {
-          setStep('empty');
-          return;
-        }
-        setRequest(current);
-        const next = deriveStep(current);
-        if (next !== 'awaiting_verygana') {
-          setStep(next);
-          return;
-        }
-      } catch {
-        /* silencioso — se reintenta en el próximo tick */
-      }
-      if (!cancelled) setTimeout(poll, AWAIT_POLL_INTERVAL_MS);
-    };
-
-    const timer = setTimeout(poll, AWAIT_POLL_INTERVAL_MS);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [step]);
+  // Mientras VerYGana revisa el otrosí no hacemos polling automático — el
+  // comercial actualiza el estado manualmente con "Verificar estado".
 
   // ── El cambio no requiere abono: el backend lo aplica solo apenas firma
   // — esperamos brevemente a que status pase a APPLIED.
@@ -212,8 +193,18 @@ export function PlanChangeWizard() {
     };
   }, [step]);
 
-  const handleApprove = async () => {
-    if (!request?.contractId || submitting) return;
+  // Cada solicitud nueva exige volver a leer el otrosí antes de aprobar.
+  useEffect(() => {
+    setReviewed(false);
+  }, [request?.id]);
+
+  const handleApprove = () => {
+    if (!request?.contractId || !reviewed || submitting) return;
+    setShowApproveConfirm(true);
+  };
+
+  const confirmApprove = async () => {
+    if (!request?.contractId) return;
     setSubmitting(true);
     try {
       await approvePlanChangeContract(request.contractId);
@@ -226,13 +217,34 @@ export function PlanChangeWizard() {
     }
   };
 
-  const handleCancel = async () => {
+  const handleCancel = () => {
     if (!request || submitting) return;
+    setShowCancelConfirm(true);
+  };
+
+  const confirmCancel = async () => {
+    if (!request) return;
     setSubmitting(true);
     try {
       const cancelled = await cancelPlanChangeRequest(request.id);
       setRequest(cancelled);
       setStep(deriveStep(cancelled));
+    } catch (err) {
+      const { message } = extractApiError(err);
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAcknowledgeRejection = async () => {
+    if (!request || submitting) return;
+    setSubmitting(true);
+    try {
+      await acknowledgePlanChangeRejection(request.id);
+      // /current ahora devuelve null -> loadCurrent deja el paso en 'empty'
+      // y el comercial puede iniciar una solicitud nueva desde cero.
+      await loadCurrent();
     } catch (err) {
       const { message } = extractApiError(err);
       toast.error(message);
@@ -310,39 +322,115 @@ export function PlanChangeWizard() {
 
       <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8">
         {step === 'review' && (
-          <div className="space-y-6 text-center py-4">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-              <ExternalLink className="w-8 h-8 text-[#03548C]" />
+          <div className="space-y-6 py-2">
+            <div className="text-center space-y-3">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                <ArrowRightLeft className="w-8 h-8 text-[#03548C]" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Revisa y aprueba el otrosí</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Lee el otrosí de tu cambio de plan. Al aprobarlo lo enviamos a revisión de VerYGana.
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Revisa el otrosí de tu cambio de plan</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Generamos el otrosí para pasar a {targetLabel}
-                {request.requiredTopUpAmountCents ? ` con un abono adicional de ${formatBudget(formatCents(request.requiredTopUpAmountCents))}` : ''}.
-                Revísalo y apruébalo para enviarlo a revisión de VerYGana.
-              </p>
+
+            <dl className="rounded-xl border border-gray-200 divide-y divide-gray-100 text-sm">
+              <div className="flex items-center justify-between px-4 py-3">
+                <dt className="text-gray-500">Plan actual</dt>
+                <dd className="font-semibold text-gray-900">
+                  {request.fromPlanCode ? PLAN_CHANGE_LABELS[request.fromPlanCode] : '—'}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between px-4 py-3">
+                <dt className="text-gray-500">Plan nuevo</dt>
+                <dd className="font-semibold text-gray-900">{targetLabel}</dd>
+              </div>
+              <div className="flex items-center justify-between px-4 py-3">
+                <dt className="text-gray-500">Abono a pagar</dt>
+                <dd className="font-semibold text-gray-900">
+                  {request.requiredTopUpAmountCents && request.requiredTopUpAmountCents > 0
+                    ? formatBudget(formatCents(request.requiredTopUpAmountCents))
+                    : 'Sin abono'}
+                </dd>
+              </div>
+            </dl>
+
+            {contractDownloadUrl ? (
+              <div className="space-y-2">
+                <iframe
+                  src={contractDownloadUrl}
+                  title="Otrosí del cambio de plan"
+                  className="w-full h-96 rounded-xl border border-gray-200 bg-gray-50"
+                />
+                <div className="flex items-center justify-between text-xs">
+                  <a
+                    href={contractDownloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 font-semibold text-[#03548C] hover:underline"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Abrir en una pestaña nueva
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleReloadDoc}
+                    disabled={reloadingDoc}
+                    className="inline-flex items-center gap-1.5 font-semibold text-gray-500 hover:text-gray-700 transition disabled:opacity-50 cursor-pointer"
+                  >
+                    {reloadingDoc ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                    Recargar documento
+                  </button>
+                </div>
+                <p className="text-[11px] text-gray-400">
+                  El enlace del documento caduca a los pocos minutos. Si no carga, pulsa &ldquo;Recargar documento&rdquo;.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-center space-y-3">
+                <p className="text-sm text-gray-600">El otrosí todavía se está generando.</p>
+                <button
+                  type="button"
+                  onClick={handleReloadDoc}
+                  disabled={reloadingDoc}
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-white transition disabled:opacity-50 cursor-pointer"
+                >
+                  {reloadingDoc ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                  Recargar
+                </button>
+              </div>
+            )}
+
+            <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={reviewed}
+                disabled={!contractDownloadUrl}
+                onChange={(e) => setReviewed(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-[#03548C] disabled:opacity-50"
+              />
+              <span>He revisado el otrosí de mi cambio de plan y estoy de acuerdo con sus términos.</span>
+            </label>
+
+            <div className="space-y-2">
+              <WizardActionButton
+                submitting={submitting}
+                onClick={handleApprove}
+                label="Aprobar otrosí"
+                disabled={!contractDownloadUrl || !reviewed}
+              />
+              {canCancel && (
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={submitting}
+                  className="w-full py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 hover:underline transition disabled:opacity-50 cursor-pointer"
+                >
+                  Cancelar solicitud
+                </button>
+              )}
             </div>
-            {contractDownloadUrl && (
-              <a
-                href={contractDownloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-[#03548C]/30 text-[#03548C] font-semibold text-sm rounded-xl hover:bg-[#03548C]/5 transition"
-              >
-                Ver otrosí
-              </a>
-            )}
-            <WizardActionButton submitting={submitting} onClick={handleApprove} label="Aprobar otrosí" />
-            {canCancel && (
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={submitting}
-                className="w-full py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 hover:underline transition disabled:opacity-50 cursor-pointer"
-              >
-                Cancelar solicitud
-              </button>
-            )}
           </div>
         )}
 
@@ -431,15 +519,36 @@ export function PlanChangeWizard() {
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Tu solicitud fue rechazada</h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                Nuestro equipo de VERyGANA revisó tu solicitud de cambio de plan y no fue aprobada.
+                Nuestro equipo de VERyGANA revisó tu solicitud de cambio de plan a {targetLabel} y no fue aprobada.
               </p>
             </div>
-            <Link
-              href="/plans"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
-            >
-              Ver planes
-            </Link>
+
+            {request.rejectionReason && (
+              <div className="text-left bg-red-50 border border-red-200 rounded-xl p-4">
+                <p className="text-xs font-bold text-red-700 uppercase tracking-wide mb-1">Motivo</p>
+                <p className="text-sm text-red-800 leading-relaxed whitespace-pre-line">{request.rejectionReason}</p>
+              </div>
+            )}
+
+            {request.status === 'REJECTED' ? (
+              <>
+                <WizardActionButton
+                  submitting={submitting}
+                  onClick={handleAcknowledgeRejection}
+                  label="Entendido"
+                />
+                <p className="text-xs text-gray-400">
+                  Al confirmar podrás iniciar una nueva solicitud de cambio de plan desde la página de planes.
+                </p>
+              </>
+            ) : (
+              <Link
+                href="/plans"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+              >
+                Ver planes
+              </Link>
+            )}
           </div>
         )}
 
@@ -461,6 +570,28 @@ export function PlanChangeWizard() {
           </div>
         )}
       </div>
+
+      <WizardConfirmModal
+        isOpen={showApproveConfirm}
+        title="Aprobar el otrosí"
+        description={`Al aprobar, tu cambio a ${targetLabel} pasa a revisión de VerYGana y ya no podrás cancelar la solicitud. Asegúrate de que los datos del cambio son correctos.`}
+        confirmLabel="Aprobar cambio"
+        cancelLabel="Revisar de nuevo"
+        tone="primary"
+        onConfirm={confirmApprove}
+        onClose={() => setShowApproveConfirm(false)}
+      />
+
+      <WizardConfirmModal
+        isOpen={showCancelConfirm}
+        title="Cancelar la solicitud de cambio de plan"
+        description={`Se anulará tu solicitud de cambio a ${targetLabel}. Si cambias de opinión tendrás que iniciar una nueva desde la página de planes.`}
+        confirmLabel="Cancelar solicitud"
+        cancelLabel="Volver"
+        tone="danger"
+        onConfirm={confirmCancel}
+        onClose={() => setShowCancelConfirm(false)}
+      />
     </div>
   );
 }

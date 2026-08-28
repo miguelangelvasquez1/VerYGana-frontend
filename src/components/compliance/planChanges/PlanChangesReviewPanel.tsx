@@ -73,6 +73,7 @@ const STATUS: Record<ContractStatus, { label: string; tone: Tone }> = {
   PENDING_SIGNATURE: { label: 'Pendiente de firma', tone: 'info' },
   SIGNED: { label: 'Firmado', tone: 'clear' },
   REJECTED: { label: 'Rechazado', tone: 'flag' },
+  CANCELLED: { label: 'Cancelado', tone: 'neutral' },
 };
 
 // Fallback defensivo, igual criterio que ContractsReviewPanel.tsx — status
