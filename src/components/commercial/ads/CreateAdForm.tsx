@@ -17,6 +17,8 @@ import toast from 'react-hot-toast';
 import { usePlanState } from '../layout/DashboardLayout';
 import { useAds } from '@/hooks/ads/querys';
 import { LimitReachedBlock, isLimitReached } from '../plans/LimitReached';
+import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
+import { PlanChangeInProgressBlock } from '../planChange/PlanChangeInProgress';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -90,6 +92,7 @@ export function CreateAdForm() {
   const router = useRouter();
   const { planState, loadingPlan, refreshPlanState } = usePlanState();
   const { data: adsCountData, isLoading: loadingAdsCount } = useAds(0, 1);
+  const { blockingRequest: planChangeRequest, isLoading: loadingPlanChange } = usePlanChangeRequest();
 
   const [step, setStep] = useState<FormStep>('file');
   const [formData, setFormData] = useState<CreateAdFormData>({
@@ -263,11 +266,21 @@ export function CreateAdForm() {
   const totalAdsCount = adsCountData?.totalElements ?? 0;
   const adsLimitReached = planState != null && isLimitReached(totalAdsCount, planState.maxAds);
 
-  if (loadingPlan || loadingAdsCount) {
+  if (loadingPlan || loadingAdsCount || loadingPlanChange) {
     return (
       <div className="flex items-center justify-center h-48">
         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
+    );
+  }
+
+  if (planChangeRequest) {
+    return (
+      <PlanChangeInProgressBlock
+        request={planChangeRequest}
+        backHref="/commercial/ads"
+        backLabel="Volver a anuncios"
+      />
     );
   }
 

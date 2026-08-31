@@ -33,6 +33,14 @@ export interface EffectivePlanStateResponseDTO {
   effectivePlan: PlanCode | null;
   hasActivePlan: boolean;
   remainingBudgetCents: number;       // en centavos
+  /**
+   * true cuando el plan no es BASIC y el saldo publicitario llegó a 0 → hay
+   * que bloquear la creación de activos nuevos que consumen presupuesto.
+   * Opcional: si el backend todavía no lo envía, se deriva de
+   * `walletStatus === EXHAUSTED && effectivePlan !== BASIC`
+   * (ver `isBudgetSuspended` en WalletBudgetAlerts).
+   */
+  budgetSuspended?: boolean;
   commissionRate: number;
   canAdvertise: boolean;
   canUseGames: boolean;

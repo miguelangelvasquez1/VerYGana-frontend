@@ -21,6 +21,10 @@ import {
   PLAN_CHANGE_LABELS,
   extractApiError,
 } from './planChange.shared';
+import {
+  canCancelPlanChangeRequest,
+  useInvalidatePlanChangeRequest,
+} from '@/hooks/planChange/usePlanChangeRequest';
 
 type Step =
   | 'loading'
@@ -52,6 +56,7 @@ function deriveStep(r: PlanChangeRequestResponseDTO): Step {
 
 export function PlanChangeWizard() {
   const { refreshPlanState } = usePlanState();
+  const invalidatePlanChangeRequest = useInvalidatePlanChangeRequest();
   const [step, setStep] = useState<Step>('loading');
   const [request, setRequest] = useState<PlanChangeRequestResponseDTO | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -130,6 +135,7 @@ export function PlanChangeWizard() {
           setRequest(current);
           if (current.status === 'APPLIED') {
             refreshPlanState();
+            invalidatePlanChangeRequest();
             setStep('success');
             return;
           }
@@ -229,6 +235,8 @@ export function PlanChangeWizard() {
       const cancelled = await cancelPlanChangeRequest(request.id);
       setRequest(cancelled);
       setStep(deriveStep(cancelled));
+      // Desbloquea la creación de activos en el resto del panel.
+      invalidatePlanChangeRequest();
     } catch (err) {
       const { message } = extractApiError(err);
       toast.error(message);
@@ -244,6 +252,7 @@ export function PlanChangeWizard() {
       await acknowledgePlanChangeRejection(request.id);
       // /current ahora devuelve null -> loadCurrent deja el paso en 'empty'
       // y el comercial puede iniciar una solicitud nueva desde cero.
+      invalidatePlanChangeRequest();
       await loadCurrent();
     } catch (err) {
       const { message } = extractApiError(err);
@@ -308,7 +317,10 @@ export function PlanChangeWizard() {
   if (!request) return null;
 
   const targetLabel = PLAN_CHANGE_LABELS[request.toPlanCode];
-  const canCancel = request.contractStatus !== 'SIGNED' && (step === 'review' || step === 'awaiting_verygana');
+  // Estados en los que el backend permite cancelar (REQUESTED /
+  // CONTRACT_PENDING_REVIEW) — es la vía de escape que desbloquea la
+  // creación de activos.
+  const canCancel = canCancelPlanChangeRequest(request);
 
   return (
     <div className="max-w-lg mx-auto space-y-6 pb-14">

@@ -25,9 +25,20 @@ interface AdCardProps {
   onPause: (adId: number) => void;
   onResume: (adId: number) => void;
   onDelete: (adId: number) => void;
+  /** false cuando hay una solicitud de cambio de plan en curso: reactivar consume plan/presupuesto y el backend lo rechaza. */
+  canReactivate?: boolean;
+  reactivateDisabledReason?: string;
 }
 
-export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps) {
+export function AdCard({
+  ad,
+  onEdit,
+  onPause,
+  onResume,
+  onDelete,
+  canReactivate = true,
+  reactivateDisabledReason,
+}: AdCardProps) {
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
@@ -260,14 +271,25 @@ export function AdCard({ ad, onEdit, onPause, onResume, onDelete }: AdCardProps)
             
             {/* Botón Reanudar - Solo visible si status es PAUSED */}
             {canResume && (
-              <button
-                onClick={() => onResume(ad.id)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm cursor-pointer"
-                title="Reanudar anuncio"
-              >
-                <PlayCircle className="w-4 h-4" />
-                Activar
-              </button>
+              canReactivate ? (
+                <button
+                  onClick={() => onResume(ad.id)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm cursor-pointer"
+                  title="Reanudar anuncio"
+                >
+                  <PlayCircle className="w-4 h-4" />
+                  Activar
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-300 text-gray-500 text-sm font-semibold rounded-lg cursor-not-allowed"
+                  title={reactivateDisabledReason ?? 'No disponible ahora'}
+                >
+                  <PlayCircle className="w-4 h-4" />
+                  Activar
+                </button>
+              )
             )}
 
             {/* Menú de más opciones */}

@@ -24,6 +24,8 @@ import { QUESTION_TYPE_LABELS, GENDER_LABELS } from '@/hooks/surveys/surveyUtils
 import type { QuestionType, TargetGender, CreateSurveyRequest } from '@/types/survey.types';
 import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
 import { LimitReachedBlock, isLimitReached } from '@/components/commercial/plans/LimitReached';
+import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
+import { PlanChangeInProgressBlock } from '@/components/commercial/planChange/PlanChangeInProgress';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -56,6 +58,7 @@ export default function SurveyFormModal() {
   const createMutation = useCreateSurvey();
   const { planState, loadingPlan, refreshPlanState } = usePlanState();
   const { data: allSurveysData, isLoading: loadingSurveysCount } = useCommercialSurveys(0, 1);
+  const { blockingRequest: planChangeRequest, isLoading: loadingPlanChange } = usePlanChangeRequest();
 
   const {
     form, errors, touched,
@@ -211,11 +214,21 @@ export default function SurveyFormModal() {
   const totalSurveysCount = allSurveysData?.meta.totalElements ?? 0;
   const surveysLimitReached = planState != null && isLimitReached(totalSurveysCount, planState.maxSurveys);
 
-  if (loadingPlan || loadingSurveysCount) {
+  if (loadingPlan || loadingSurveysCount || loadingPlanChange) {
     return (
       <div className="flex items-center justify-center h-48">
         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
+    );
+  }
+
+  if (planChangeRequest) {
+    return (
+      <PlanChangeInProgressBlock
+        request={planChangeRequest}
+        backHref="/commercial/surveys"
+        backLabel="Volver a encuestas"
+      />
     );
   }
 

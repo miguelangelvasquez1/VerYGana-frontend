@@ -38,6 +38,23 @@ export interface PlanChangeRequestResponseDTO {
   rejectionAcknowledgedAt: string | null;
 }
 
+// Tipos de activo del comercial que el preview del cambio de plan puede
+// reportar como excedidos respecto al plan destino.
+export type PlanChangeAssetType = "PRODUCTS" | "ADS" | "BRANDED_GAMES" | "SURVEYS";
+
+// Un activo que el comercial tiene por encima de lo que permite el plan
+// destino. Los activos NO se pueden eliminar: el comercial espera a que
+// finalicen o pide su cancelación al soporte de VerYGana. `message` viene
+// en español, listo para mostrar tal cual.
+export interface PlanChangeBlockerDTO {
+  assetType: PlanChangeAssetType;
+  assetLabel: string;          // "productos" | "anuncios" | "juegos brandeados" | "encuestas"
+  currentCount: number;        // cuántos tiene activos ahora
+  allowedByTargetPlan: number; // cuántos permite el plan destino (0 = no admite ese tipo)
+  excessCount: number;         // cuántos sobran (deben finalizar) para poder cambiar
+  message: string;             // texto de ayuda listo para mostrar
+}
+
 // OJO: pese al nombre histórico *Cents en otros DTO, GET
 // /plans/change-request/preview devuelve estos montos en PESOS colombianos
 // enteros, no en centavos (consistente con /plans/recharge/preview).
@@ -46,7 +63,11 @@ export interface PlanChangeRequestResponseDTO {
 export interface PlanChangePreviewResponseDTO {
   fromPlanCode: PlanCode | null;
   toPlanCode: PlanCode;
+  // `false` también cuando `blockers` no está vacío (activos que exceden el
+  // plan destino), además del caso de bajar a BASIC con saldo publicitario > 0.
   eligible: boolean;
+  // Describe TODO lo que falta ajustar cuando eligible=false (saldo y/o
+  // activos). Listo para mostrar tal cual.
   message: string;
   requiredTopUpAmountPesos: number | null;
   currentWalletBalancePesos: number;
@@ -54,4 +75,7 @@ export interface PlanChangePreviewResponseDTO {
   targetMinInvestmentPesos: number | null;
   targetMaxInvestmentPesos: number | null;
   targetSaleCommissionPct: number;
+  // Vacío cuando todos los activos caben en el plan destino. Una fila por
+  // tipo de activo excedido. Los activos NO se migran al nuevo plan.
+  blockers: PlanChangeBlockerDTO[];
 }

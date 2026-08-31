@@ -19,7 +19,7 @@ import {
 } from '@/hooks/pets/usePetImageUpload';
 import { PetCommentsPanel } from '@/components/shared/PetCommentsPanel';
 import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
-import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
+import { isWalletExhausted, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
 
 // ── Paleta de marca ───────────────────────────────────────────────────────────
 
@@ -591,12 +591,6 @@ export default function PetsPage() {
             </button>
           )}
         </header>
-
-        {walletExhausted && (
-          <div className="mb-6">
-            <WalletExhaustedBanner />
-          </div>
-        )}
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
 

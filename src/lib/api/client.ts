@@ -1,9 +1,10 @@
 import axios from 'axios';
-import React from 'react';
 import { getSession, signOut } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import { getAccessToken, whenTokenReady } from '@/lib/auth/tokenStore';
 import { refreshAccessToken } from '@/lib/auth/tokenRefresh';
+import { emitPaymentRequired } from '@/lib/api/paymentRequiredBus';
+import { emitPlanChangeBlocked, isPlanChangeBlockMessage } from '@/lib/api/planChangeBlockBus';
 
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -85,37 +86,32 @@ apiClient.interceptors.response.use((response) => response, async (error) => {
   }
 
   /*
-   * SALDO PUBLICITARIO AGOTADO (walletStatus EXHAUSTED)
+   * SALDO PUBLICITARIO AGOTADO (walletStatus EXHAUSTED / budgetSuspended)
    *
    * Distinto de un 400 genérico de "tu plan no incluye esto" (ese lleva a
    * upgrade de plan) — un 402 significa específicamente que hay que
-   * recargar saldo. Es un aviso pasivo global adicional: los botones de
-   * creación ya deberían estar deshabilitados en la mayoría de los casos,
-   * esto cubre acciones forzadas (ej. un formulario ya abierto).
+   * recargar saldo. Los botones de creación ya deberían estar
+   * deshabilitados en la mayoría de los casos; esto cubre acciones
+   * forzadas (ej. un formulario ya abierto). Se maneja globalmente con un
+   * modal ("Recarga tu billetera para continuar") con acción directa al
+   * checkout de recarga — sin desloguear ni redirigir a un error genérico.
    */
-  if (status === 402 && typeof window !== 'undefined' && canShow402Toast()) {
-    toast.error(
-      (t) =>
-        React.createElement(
-          'span',
-          { className: 'flex flex-col gap-1.5' },
-          React.createElement(
-            'span',
-            null,
-            message || 'Tu saldo publicitario está agotado. Recarga tu billetera para continuar.'
-          ),
-          React.createElement(
-            'a',
-            {
-              href: '/commercial/balance',
-              onClick: () => toast.dismiss(t.id),
-              className: 'text-xs font-bold underline self-start',
-            },
-            'Recargar ahora'
-          )
-        ),
-      { duration: 6000 }
-    );
+  if (status === 402 && typeof window !== 'undefined') {
+    emitPaymentRequired(message);
+  }
+
+  /*
+   * CREACIÓN DE ACTIVOS BLOQUEADA POR SOLICITUD DE CAMBIO DE PLAN
+   *
+   * El backend responde 400 con un mensaje específico cuando se intenta
+   * crear/activar un activo (anuncio, producto, encuesta, juego brandeado)
+   * teniendo una solicitud de cambio de plan abierta. Los CTA ya deberían
+   * estar deshabilitados; esto cubre carreras (otra pestaña) y formularios
+   * ya abiertos. Se muestra un modal con enlace a la solicitud, sin tratarlo
+   * como error genérico.
+   */
+  if (status === 400 && typeof window !== 'undefined' && isPlanChangeBlockMessage(message)) {
+    emitPlanChangeBlocked(message);
   }
 
   /*
@@ -168,18 +164,6 @@ async function handleUnauthorized() {
  * fallan al mismo tiempo
  */
 let last503Toast = 0;
-let last402Toast = 0;
-
-function canShow402Toast(): boolean {
-  const now = Date.now();
-
-  if (now - last402Toast < 8000) {
-    return false;
-  }
-
-  last402Toast = now;
-  return true;
-}
 
 function canShow503Toast(): boolean {
   const now = Date.now();

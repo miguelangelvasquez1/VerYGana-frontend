@@ -11,7 +11,9 @@ import { useAds } from '@/hooks/ads/querys';
 import { usePauseAd, useResumeAd, useDeleteAd } from '@/hooks/ads/mutations';
 import { usePlanState } from '../layout/DashboardLayout';
 import { LimitReachedBanner, isLimitReached } from '../plans/LimitReached';
-import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from '../plans/WalletBudgetAlerts';
+import { isWalletExhausted, WALLET_EXHAUSTED_TOOLTIP } from '../plans/WalletBudgetAlerts';
+import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
+import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from '../planChange/PlanChangeInProgress';
 import toast from 'react-hot-toast';
 
 export function AdsList() {
@@ -32,10 +34,15 @@ export function AdsList() {
   const totalPages = data?.totalPages || 0;
   const totalElements = data?.totalElements || 0;
 
+  const { blockingRequest: planChangeRequest } = usePlanChangeRequest();
+  const planChangeBlocked = planChangeRequest != null;
+
   const adsLimitReached = planState != null && isLimitReached(totalElements, planState.maxAds);
   const walletExhausted = isWalletExhausted(planState);
-  const createBlocked = adsLimitReached || walletExhausted;
-  const createBlockedTitle = walletExhausted
+  const createBlocked = adsLimitReached || walletExhausted || planChangeBlocked;
+  const createBlockedTitle = planChangeBlocked
+    ? PLAN_CHANGE_BLOCK_TOOLTIP
+    : walletExhausted
     ? WALLET_EXHAUSTED_TOOLTIP
     : `Alcanzaste el máximo de ${planState?.maxAds} anuncios de tu plan`;
 
@@ -172,11 +179,11 @@ export function AdsList() {
           </div>
         </div>
 
-        {adsLimitReached ? (
+        {adsLimitReached && (
           <LimitReachedBanner resourceLabel="anuncios" max={planState!.maxAds} />
-        ) : walletExhausted ? (
-          <WalletExhaustedBanner />
-        ) : null}
+        )}
+
+        {planChangeRequest && <PlanChangeInProgressBanner request={planChangeRequest} />}
 
         {/* Resumen de estadísticas */}
         {ads.length > 0 && (
@@ -218,6 +225,8 @@ export function AdsList() {
                   onPause={handlePause}
                   onResume={handleResume}
                   onDelete={handleDelete}
+                  canReactivate={!planChangeBlocked}
+                  reactivateDisabledReason={PLAN_CHANGE_BLOCK_TOOLTIP}
                 />
               ))}
             </div>

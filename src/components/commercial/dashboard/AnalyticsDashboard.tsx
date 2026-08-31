@@ -5,6 +5,7 @@ import { Calendar, Download, Lock } from "lucide-react";
 
 import { usePlanState } from "../layout/DashboardLayout";
 import { PlanCode } from "@/types/finance/plans/Plan.types";
+import { isBudgetSuspended, WALLET_EXHAUSTED_TOOLTIP } from "../plans/WalletBudgetAlerts";
 import { ANALYTICS_SECTIONS, SectionId, hasPlanAccess } from "../analytics/sections.config";
 import { PlanLockedSection } from "../analytics/PlanLockedSection";
 import type { DateRangeFilter } from "../analytics/analytics.types";
@@ -40,7 +41,15 @@ export function AnalyticsDashboard() {
   const [activeSection, setActiveSection] = useState<SectionId>("overview");
 
   const hasExportPlan = hasPlanAccess(effectivePlan, [PlanCode.PREMIUM]);
-  const canExportPdf = hasExportPlan;
+  // El export del reporte ejecutivo consume presupuesto — se bloquea con
+  // el saldo agotado, igual que crear anuncios/encuestas/campañas.
+  const budgetSuspended = isBudgetSuspended(planState);
+  const canExportPdf = hasExportPlan && !budgetSuspended;
+  const exportBlockedTitle = !hasExportPlan
+    ? "Disponible solo en el plan Premium"
+    : budgetSuspended
+    ? WALLET_EXHAUSTED_TOOLTIP
+    : undefined;
 
   const applyQuickRange = (days: number) => {
     const end = new Date();
@@ -143,7 +152,7 @@ export function AnalyticsDashboard() {
           <button
             type="button"
             disabled={!canExportPdf}
-            title={canExportPdf ? undefined : "Disponible solo en el plan Premium"}
+            title={exportBlockedTitle}
             className={`flex items-center px-4 py-2 rounded-md transition-colors cursor-pointer ${
               canExportPdf
                 ? "bg-[#03548C] text-white hover:bg-[#0b1440]"

@@ -1,20 +1,22 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import {
   Check, X, Zap, Rocket, Star, ArrowRight, Sparkles,
   Package, Megaphone, Gamepad2, Boxes, TrendingUp,
   PawPrint, ClipboardList, BadgePercent, Loader2,
-  AlertCircle, ArrowLeft
+  AlertCircle, ArrowLeft, RefreshCw
 } from 'lucide-react';
 import { initiatePayment, getPlanCatalog } from '@/services/planService';
 import { previewPlanChange, requestPlanChange, getCurrentPlanChangeRequest } from '@/services/planChangeService';
 import { getRechargeContract } from '@/services/planRechargeService';
+import { useInvalidatePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
 import { PlanCode, PlanPaymentRequestDTO } from '@/types/finance/plans/Plan.types';
 import { PlanCatalogOption, PlanCatalogResponseDTO } from '@/types/finance/plans/PlanCatalog.types';
-import { PlanChangePreviewResponseDTO } from '@/types/finance/plans/PlanChange.types';
+import { PlanChangeAssetType, PlanChangePreviewResponseDTO } from '@/types/finance/plans/PlanChange.types';
 import { WompiCheckoutResponseDTO } from '@/types/finance/wompi/Wompi.types';
 import { RECHARGE_CONTRACT_ID_KEY, isActiveRechargeContract } from '@/components/commercial/balance/balance.shared';
 
@@ -81,6 +83,15 @@ interface UIPlan {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const PLAN_ORDER: PlanCode[] = [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM];
+
+// Cada blocker del preview enlaza a la pantalla donde el comercial ve el
+// estado y la fecha de fin de ese tipo de activo.
+const BLOCKER_ASSET_ROUTES: Record<PlanChangeAssetType, { href: string; label: string }> = {
+  PRODUCTS:      { href: '/commercial/products',         label: 'Ir a Mis productos' },
+  ADS:           { href: '/commercial/ads',              label: 'Ir a Mis anuncios' },
+  BRANDED_GAMES: { href: '/commercial/branding/requests', label: 'Ir a Mis juegos' },
+  SURVEYS:       { href: '/commercial/surveys',          label: 'Ir a Mis encuestas' },
+};
 
 const PLAN_UI_META: Record<PlanCode, { icon: React.ReactNode; highlight: boolean; featuresLabel: string }> = {
   [PlanCode.BASIC]: { icon: <Star className="w-8 h-8" />, highlight: false, featuresLabel: 'Incluye:' },
@@ -172,7 +183,10 @@ function buildFeatureRows(catalog: PlanCatalogResponseDTO): PlanFeatureRow[] {
 
 interface PlanChangeModalProps {
   plan: UIPlan;
-  onConfirm: (amountCents?: number) => void;
+  // Devuelve un mensaje de error para mostrar en el modal (ej. 422 por
+  // carrera: el comercial agregó activos en otra pestaña), o void si se
+  // resolvió (navegación al detalle / conflicto de recarga).
+  onConfirm: (amountCents?: number) => Promise<string | void> | void;
   onClose: () => void;
   loading: boolean;
 }
@@ -188,12 +202,19 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
   const [error, setError] = useState('');
   const [preview, setPreview] = useState<PlanChangePreviewResponseDTO | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  // Se incrementa para re-verificar el preview: al volver a enfocar la
+  // ventana (los activos pudieron finalizar), al pulsar "Volver a verificar"
+  // y tras un 422 al crear la solicitud.
+  const [reloadKey, setReloadKey] = useState(0);
   const amount = parseCOP(inputValue);
 
   // El backend acota el abono al rango [min, max] del plan destino. Validamos
   // contra el preview (fuente de verdad); si aún no cargó, caemos al catálogo.
   const effMin = preview?.targetMinInvestmentPesos ?? minCOP;
   const effMax = preview?.targetMaxInvestmentPesos ?? maxCOP;
+
+  const revalidate = () => setReloadKey((k) => k + 1);
 
   useEffect(() => {
     if (!isBasic && !amount) {
@@ -209,7 +230,15 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
         .finally(() => setPreviewLoading(false));
     }, isBasic ? 0 : 500);
     return () => clearTimeout(timer);
-  }, [amount, isBasic, plan.key]);
+  }, [amount, isBasic, plan.key, reloadKey]);
+
+  // Re-verificar al volver a enfocar la ventana — el estado de los activos
+  // del comercial pudo haber cambiado (finalizaron, o soporte los canceló).
+  useEffect(() => {
+    const onFocus = () => setReloadKey((k) => k + 1);
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, []);
 
   const validate = () => {
     if (isBasic) return '';
@@ -219,24 +248,31 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
     return '';
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const err = validate();
     if (err) { setError(err); return; }
     if (!preview?.eligible) return;
-    onConfirm(isBasic ? undefined : amount * 100);
+    setSubmitError(null);
+    const result = await onConfirm(isBasic ? undefined : amount * 100);
+    if (typeof result === 'string') {
+      setSubmitError(result);
+      revalidate();
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(formatInput(e.target.value));
     setError('');
+    setSubmitError(null);
   };
 
+  const blockers = preview?.blockers ?? [];
   const confirmDisabled = loading || previewLoading || !preview?.eligible || (!isBasic && amount === 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-[#13151f] border border-white/10 rounded-2xl p-6 shadow-2xl">
+      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-[#13151f] border border-white/10 rounded-2xl p-6 shadow-2xl">
         <div className="flex items-center gap-3 mb-5">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
             plan.key === PlanCode.PREMIUM ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
@@ -296,6 +332,15 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
           {!previewLoading && preview && (
             <>
               <p className="leading-relaxed">{preview.message}</p>
+              {!preview.eligible && blockers.length === 0 && (
+                <button
+                  type="button"
+                  onClick={revalidate}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-200/90 hover:text-amber-100 cursor-pointer"
+                >
+                  <RefreshCw className="w-3 h-3" /> Volver a verificar
+                </button>
+              )}
               {preview.eligible && (
                 <ul className="text-xs opacity-80 space-y-1">
                   {isBasic && preview.targetMonthlyPricePesos != null && (
@@ -327,6 +372,70 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
             <p className="leading-relaxed">Ingresa un monto para ver el resumen del cambio de plan.</p>
           )}
         </div>
+
+        {blockers.length > 0 && (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 mb-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-amber-200">
+                  Debes esperar a que finalicen algunos activos antes de cambiar de plan
+                </p>
+                <p className="text-xs text-amber-100/80 leading-relaxed mt-0.5">
+                  Tus activos no se migran al plan {plan.name}. Espera a que finalicen los que sobran para poder cambiar.
+                </p>
+              </div>
+            </div>
+
+            <ul className="space-y-2">
+              {blockers.map((b) => {
+                const route = BLOCKER_ASSET_ROUTES[b.assetType];
+                return (
+                  <li key={b.assetType} className="rounded-lg border border-white/10 bg-white/5 p-2.5 space-y-1">
+                    <p className="text-sm font-semibold text-white capitalize">{b.assetLabel}</p>
+                    <p className="text-xs text-slate-300">
+                      Tienes {b.currentCount} activos ·{' '}
+                      {b.allowedByTargetPlan === 0
+                        ? `${plan.name} no permite ${b.assetLabel}`
+                        : `${plan.name} permite ${b.allowedByTargetPlan}`}
+                    </p>
+                    <p className="text-xs font-medium text-amber-200">Deben finalizar {b.excessCount}</p>
+                    {b.message && <p className="text-[11px] text-slate-400 leading-relaxed">{b.message}</p>}
+                    {route && (
+                      <Link
+                        href={route.href}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-300 hover:text-blue-200"
+                      >
+                        {route.label} <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+
+            <button
+              type="button"
+              onClick={revalidate}
+              disabled={previewLoading}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white disabled:opacity-50 cursor-pointer"
+            >
+              {previewLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              Volver a verificar
+            </button>
+
+            <p className="text-[11px] text-slate-400 leading-relaxed border-t border-white/10 pt-2">
+              Los activos no se pueden eliminar. Espera a que finalicen o contacta al soporte de VerYGana si necesitas
+              cancelarlos antes.
+            </p>
+          </div>
+        )}
+
+        {submitError && (
+          <p className="flex items-start gap-1.5 text-red-400 text-sm mb-3">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" /> {submitError}
+          </p>
+        )}
 
         <button
           onClick={handleSubmit}
@@ -403,6 +512,7 @@ export default function PlansPage() {
   const [catalogError, setCatalogError] = useState(false);
   const [rechargeConflict, setRechargeConflict] = useState(false);
   const router = useRouter();
+  const invalidatePlanChangeRequest = useInvalidatePlanChangeRequest();
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -440,15 +550,19 @@ export default function PlansPage() {
     }
   }, [router]);
 
-  // Intenta crear la solicitud de cambio de plan. Si el backend responde 422,
-  // puede ser porque hay una recarga en curso (guardada en sessionStorage
-  // desde el flujo de /commercial/balance) que bloquea el cambio — en ese
-  // caso se muestra ese contrato con opción de cancelarlo y reintentar
-  // (rate limit u otro 422 sin recarga guardada cae al toast genérico).
+  // Intenta crear la solicitud de cambio de plan. Devuelve un mensaje de
+  // error para mostrar en el modal, o `undefined` si se resolvió (navegación
+  // al detalle, o conflicto de recarga que abre su propio modal).
+  //
+  // El 422 puede ser: (a) recarga en curso (contractId guardado en
+  // sessionStorage desde /commercial/balance) → modal de conflicto de
+  // recarga; (b) activos que exceden el plan destino (carrera: el preview ya
+  // debería evitarlo) → se muestra el `message` del backend en el modal, que
+  // vuelve a verificar el preview.
   const attemptRequestPlanChange = useCallback(async (
     targetPlanCode: PlanCode,
     amountCents?: number
-  ): Promise<'success' | 'conflict' | 'error'> => {
+  ): Promise<string | void> => {
     // Si la última solicitud fue rechazada y el comercial aún no dio por
     // leído el motivo, /current la sigue devolviendo con status REJECTED.
     // El back aceptaría una solicitud nueva, pero por UX primero lo
@@ -459,7 +573,7 @@ export default function PlansPage() {
         toast.error('Primero revisa por qué se rechazó tu solicitud anterior.');
         setModalPlan(null);
         router.push('/commercial/plan-change');
-        return 'error';
+        return;
       }
     } catch {
       /* si /current falla seguimos con el flujo normal de creación */
@@ -471,10 +585,12 @@ export default function PlansPage() {
         targetPlanCode,
         intendedInvestmentAmountCents: amountCents,
       });
+      invalidatePlanChangeRequest();
       router.push('/commercial/plan-change');
-      return 'success';
+      return;
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status;
+      const msg = apiErrorMessage(err, 'No se pudo crear la solicitud de cambio de plan.');
       if (status === 422) {
         const contractId = sessionStorage.getItem(RECHARGE_CONTRACT_ID_KEY);
         if (contractId) {
@@ -483,25 +599,32 @@ export default function PlansPage() {
             if (isActiveRechargeContract(contract)) {
               setModalPlan(null);
               setRechargeConflict(true);
-              return 'conflict';
+              return;
             }
           } catch {
-            /* no se pudo confirmar el conflicto — cae al toast genérico */
+            /* no se pudo confirmar el conflicto de recarga */
           }
         }
+        // 422 por activos que exceden el plan destino (u otra causa):
+        // dejamos el modal abierto con el mensaje del backend.
+        return msg;
       }
-      toast.error(apiErrorMessage(err, 'No se pudo crear la solicitud de cambio de plan.'));
+      toast.error(msg);
       setModalPlan(null);
-      return 'error';
+      return;
     }
-  }, [router]);
+  }, [router, invalidatePlanChangeRequest]);
 
   // Cambiar a un plan distinto al actual (incluye bajar a BASIC) — pasa por
   // el pipeline de solicitud de cambio de plan, no por /plans/checkout.
-  const handleRequestPlanChange = useCallback(async (targetPlanCode: PlanCode, amountCents?: number) => {
+  const handleRequestPlanChange = useCallback(async (
+    targetPlanCode: PlanCode,
+    amountCents?: number
+  ): Promise<string | void> => {
     setLoading(targetPlanCode);
-    await attemptRequestPlanChange(targetPlanCode, amountCents);
+    const result = await attemptRequestPlanChange(targetPlanCode, amountCents);
     setLoading(null);
+    return result;
   }, [attemptRequestPlanChange]);
 
   // plan.currentPlan viene directo del catálogo — es el plan activo del
@@ -520,10 +643,13 @@ export default function PlansPage() {
     setModalPlan(plan);
   }, [loadingCatalog, handleRenewCurrentPlan]);
 
-  const handlePlanChangeConfirm = useCallback((amountCents?: number) => {
-    if (!modalPlan) return;
-    handleRequestPlanChange(modalPlan.key, amountCents);
-  }, [modalPlan, handleRequestPlanChange]);
+  const handlePlanChangeConfirm = useCallback(
+    (amountCents?: number): Promise<string | void> | void => {
+      if (!modalPlan) return;
+      return handleRequestPlanChange(modalPlan.key, amountCents);
+    },
+    [modalPlan, handleRequestPlanChange],
+  );
 
   return (
     <div className="h-screen overflow-hidden bg-[#111318] text-white font-sans flex flex-col">
