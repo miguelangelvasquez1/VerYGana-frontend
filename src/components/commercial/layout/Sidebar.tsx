@@ -7,6 +7,7 @@ import {
   CreditCard,
   FileImage,
   Headset,
+  LayoutDashboard,
   Package,
   ClipboardList,
   X,
@@ -43,6 +44,12 @@ interface SidebarProps {
 // ─── Menu items ───────────────────────────────────────────────────────────────
 
 const menuItems: MenuItem[] = [
+  {
+    href: '/commercial/dashboard', icon: LayoutDashboard, label: 'Inicio',
+    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
+    exactMatch: true,
+  },
   {
     href: '/commercial/products', icon: Package, label: 'Mis productos',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD],

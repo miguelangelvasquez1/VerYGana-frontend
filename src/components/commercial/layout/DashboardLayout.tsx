@@ -22,6 +22,7 @@ import { useSession } from 'next-auth/react';
 // ─── Route protection ─────────────────────────────────────────────────────────
 
 const PROTECTED_ROUTES: { path: string; requiredPlans: PlanCode[] }[] = [
+  { path: '/commercial/dashboard', requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/products',  requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD] },
   { path: '/commercial/ads',       requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/branding',  requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
@@ -174,7 +175,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
 
   useEffect(() => {
-    if (pathname === '/commercial') router.replace('/commercial/products');
+    if (pathname === '/commercial') router.replace('/commercial/dashboard');
   }, [pathname, router]);
   // Memoizamos el pathname actual para evitar renders inestables
   const currentPath = useMemo(() => pathname, [pathname]);
@@ -187,6 +188,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
     // 2️⃣ Partial match (ordenado por longitud)
     const routes = [
+      { match: '/commercial/dashboard', title: 'Inicio' },
+
       { match: '/commercial/ads/create', title: 'Crear Anuncio' },
       { match: '/commercial/ads', title: 'Mis Anuncios' },
 
@@ -391,6 +394,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 // config/pageTitles.ts
 export const PAGE_TITLES: Record<string, string> = {
   '/commercial': 'Dashboard',
+  '/commercial/dashboard': 'Inicio',
   '/commercial/products': 'Mis Productos',
   '/commercial/products/create': 'Crear Producto',
   '/commercial/ads': 'Mis Anuncios',
