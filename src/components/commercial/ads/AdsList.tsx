@@ -11,6 +11,7 @@ import { useAds } from '@/hooks/ads/querys';
 import { usePauseAd, useResumeAd, useDeleteAd } from '@/hooks/ads/mutations';
 import { usePlanState } from '../layout/DashboardLayout';
 import { LimitReachedBanner, isLimitReached } from '../plans/LimitReached';
+import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from '../plans/WalletBudgetAlerts';
 import toast from 'react-hot-toast';
 
 export function AdsList() {
@@ -32,6 +33,11 @@ export function AdsList() {
   const totalElements = data?.totalElements || 0;
 
   const adsLimitReached = planState != null && isLimitReached(totalElements, planState.maxAds);
+  const walletExhausted = isWalletExhausted(planState);
+  const createBlocked = adsLimitReached || walletExhausted;
+  const createBlockedTitle = walletExhausted
+    ? WALLET_EXHAUSTED_TOOLTIP
+    : `Alcanzaste el máximo de ${planState?.maxAds} anuncios de tu plan`;
 
   const filteredAds = ads.filter(ad => {
     const matchesSearch = ad.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -144,11 +150,11 @@ export function AdsList() {
             </div>
 
             {/* Botón crear anuncio */}
-            {adsLimitReached ? (
+            {createBlocked ? (
               <button
                 type="button"
                 disabled
-                title={`Alcanzaste el máximo de ${planState?.maxAds} anuncios de tu plan`}
+                title={createBlockedTitle}
                 className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
               >
                 <Plus className="h-4 w-4" />
@@ -166,9 +172,11 @@ export function AdsList() {
           </div>
         </div>
 
-        {adsLimitReached && (
+        {adsLimitReached ? (
           <LimitReachedBanner resourceLabel="anuncios" max={planState!.maxAds} />
-        )}
+        ) : walletExhausted ? (
+          <WalletExhaustedBanner />
+        ) : null}
 
         {/* Resumen de estadísticas */}
         {ads.length > 0 && (
@@ -248,11 +256,11 @@ export function AdsList() {
                 : 'No se encontraron anuncios'
               }
             </p>
-            {adsLimitReached ? (
+            {createBlocked ? (
               <button
                 type="button"
                 disabled
-                title={`Alcanzaste el máximo de ${planState?.maxAds} anuncios de tu plan`}
+                title={createBlockedTitle}
                 className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
               >
                 <Plus className="h-4 w-4" />

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Play, XCircle, Ban, Loader2 } from 'lucide-react';
+import { Play, Ban, Loader2 } from 'lucide-react';
 import { STATUS_LABELS } from '@/hooks/surveys/surveyUtils';
 import type { SurveyStatus } from '@/types/survey.types';
 
@@ -9,10 +9,13 @@ import type { SurveyStatus } from '@/types/survey.types';
 // lista y el detalle de encuestas para que ambas vistas se comporten igual.
 //
 // El admin ya no tiene un selector de estado libre — solo puede suspender
-// (moderación), cancelar (definitivo) o quitar una suspensión (que aterriza
-// en PAUSED y le devuelve el control al comercial, quien decide si reactiva).
-// Publicar / pausar / reactivar "normales" ya no pasan por este endpoint de
-// admin, son acciones del propio comercial desde su panel.
+// (moderación) o quitar una suspensión (que aterriza en PAUSED y le
+// devuelve el control al comercial, quien decide si reactiva). Ya no existe
+// forma de cancelar una encuesta (ni como admin ni como comercial).
+// Aprobar/rechazar (PENDING_REVIEW) se maneja aparte, no por esta tabla de
+// transiciones genérica. Publicar / pausar / reactivar "normales" tampoco
+// pasan por este endpoint de admin, son acciones del propio comercial desde
+// su panel.
 
 export interface Transition {
   label: string;
@@ -28,16 +31,7 @@ const suspend: Transition = {
   icon: <Ban className="h-4 w-4" />,
   btnClass: 'bg-purple-600 text-white hover:bg-purple-500',
   confirmMsg:
-    'La encuesta se suspende por moderación: deja de mostrarse a los usuarios y el comercial ya no podrá modificarla ni cambiar su estado hasta que un administrador quite la suspensión.',
-};
-
-const cancel: Transition = {
-  label: 'Cancelar encuesta',
-  next: 'CLOSED',
-  icon: <XCircle className="h-4 w-4" />,
-  btnClass: 'border border-red-200 bg-white text-red-600 hover:bg-red-50',
-  confirmMsg:
-    'Esta acción es DEFINITIVA: la encuesta quedará cancelada para siempre, ni tú ni el comercial podrán reactivarla ni recibir más respuestas.',
+    'La encuesta se suspende por moderación: deja de mostrarse a los usuarios y el comercial ya no podrá modificarla ni cambiar su estado hasta que un administrador quite la suspensión. El presupuesto no se reembolsa — la encuesta puede reactivarse más adelante.',
 };
 
 const unsuspend: Transition = {
@@ -50,12 +44,14 @@ const unsuspend: Transition = {
 };
 
 export const TRANSITIONS: Record<SurveyStatus, Transition[]> = {
-  DRAFT:     [suspend, cancel],
-  ACTIVE:    [suspend, cancel],
-  PAUSED:    [suspend, cancel],
-  COMPLETED: [suspend, cancel],
-  SUSPENDED: [unsuspend, cancel],
-  CLOSED:    [],
+  DRAFT:           [],
+  PENDING_REVIEW:  [],
+  APPROVED:        [suspend],
+  REJECTED:        [],
+  ACTIVE:          [suspend],
+  PAUSED:          [suspend],
+  COMPLETED:       [suspend],
+  SUSPENDED:       [unsuspend],
 };
 
 // ─── Confirm dialog ─────────────────────────────────────────────────────────
@@ -67,8 +63,6 @@ export function ConfirmDialog({ from, transition, loading, onConfirm, onCancel }
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-  const isCritical = transition.next === 'CLOSED';
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
@@ -92,9 +86,7 @@ export function ConfirmDialog({ from, transition, loading, onConfirm, onCancel }
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 ${
-              isCritical ? 'bg-red-500 hover:bg-red-400' : 'bg-admin-blue hover:bg-admin-blue-dark'
-            }`}
+            className="cursor-pointer flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 bg-admin-blue hover:bg-admin-blue-dark"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Confirmar

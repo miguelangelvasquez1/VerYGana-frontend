@@ -4,9 +4,11 @@ import type { SurveyStatus, QuestionType, TargetGender } from '@/types/survey.ty
 
 export const STATUS_LABELS: Record<SurveyStatus, string> = {
   DRAFT: 'Borrador',
+  PENDING_REVIEW: 'En revisión',
+  APPROVED: 'Aprobada',
+  REJECTED: 'Rechazada',
   ACTIVE: 'Activa',
   PAUSED: 'Pausada',
-  CLOSED: 'Cancelada',
   SUSPENDED: 'Suspendida',
   COMPLETED: 'Completada',
 };
@@ -28,12 +30,14 @@ export const GENDER_LABELS: Record<TargetGender, string> = {
 // ─── Status badge colors (Tailwind) ───────────────────────────────────────────
 
 export const STATUS_COLORS: Record<SurveyStatus, string> = {
-  DRAFT:     'bg-zinc-100 text-zinc-600',
-  ACTIVE:    'bg-emerald-50 text-emerald-700',
-  PAUSED:    'bg-amber-50 text-amber-700',
-  CLOSED:    'bg-red-50 text-red-600',
-  SUSPENDED: 'bg-purple-50 text-purple-700',
-  COMPLETED: 'bg-blue-50 text-blue-700',
+  DRAFT:           'bg-zinc-100 text-zinc-600',
+  PENDING_REVIEW:  'bg-yellow-50 text-yellow-700',
+  APPROVED:        'bg-teal-50 text-teal-700',
+  REJECTED:        'bg-red-50 text-red-600',
+  ACTIVE:          'bg-emerald-50 text-emerald-700',
+  PAUSED:          'bg-amber-50 text-amber-700',
+  SUSPENDED:       'bg-purple-50 text-purple-700',
+  COMPLETED:       'bg-blue-50 text-blue-700',
 };
 
 // ─── Error helpers ────────────────────────────────────────────────────────────

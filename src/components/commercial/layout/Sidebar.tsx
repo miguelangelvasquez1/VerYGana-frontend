@@ -13,7 +13,6 @@ import {
   LogOut,
   PawPrint,
   Lock,
-  Sparkles,
   Palette,
   Handshake,
 } from 'lucide-react';
@@ -85,7 +84,6 @@ const menuItems: MenuItem[] = [
     lockIfUnavailable: true,
   },
   { href: '/commercial/support', icon: Headset, label: 'Soporte' },
-  { href: '/plans', icon: Sparkles, label: 'Ver Planes' },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -189,11 +187,6 @@ export function Sidebar({
                     active ? 'text-admin-blue' : 'text-slate-500 group-hover:text-slate-300'
                   }`} />
                   <span className="text-sm font-medium">{item.label}</span>
-                  {item.href === '/plans' && (
-                    <span className="ml-auto text-[9px] font-bold bg-linear-to-r from-admin-midnight to-admin-blue text-white px-1.5 py-0.5 rounded-full">
-                      NEW
-                    </span>
-                  )}
                 </Link>
               )}
             </div>

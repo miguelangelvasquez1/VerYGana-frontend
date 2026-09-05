@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { getMyBrandingRequests, type BrandingRequest, type BrandingStatus } from '@/services/BrandingRequestService';
 import { CreateBrandingWizard } from './CreateBrandingWizard';
+import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
+import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -143,6 +145,8 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
 
 export const BrandingRequestPanel: React.FC = () => {
   const router = useRouter();
+  const { planState } = usePlanState();
+  const walletExhausted = isWalletExhausted(planState);
 
   const [view, setView] = useState<'list' | 'create'>('list');
   const [requests, setRequests] = useState<BrandingRequest[]>([]);
@@ -230,15 +234,29 @@ const filtered = requests.filter(r => {
             </div>
           </div>
           {/* New request button */}
-          <button
-            onClick={() => setView('create')}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-[#03548C] text-white text-sm font-semibold rounded-md hover:bg-[#0b1440] transition-colors cursor-pointer shadow-sm"
-          >
-            <Plus size={16} />
-            Nueva solicitud
-          </button>
+          {walletExhausted ? (
+            <button
+              type="button"
+              disabled
+              title={WALLET_EXHAUSTED_TOOLTIP}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 text-sm font-semibold rounded-md cursor-not-allowed"
+            >
+              <Plus size={16} />
+              Nueva solicitud
+            </button>
+          ) : (
+            <button
+              onClick={() => setView('create')}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-[#03548C] text-white text-sm font-semibold rounded-md hover:bg-[#0b1440] transition-colors cursor-pointer shadow-sm"
+            >
+              <Plus size={16} />
+              Nueva solicitud
+            </button>
+          )}
         </div>
       </div>
+
+      {walletExhausted && <WalletExhaustedBanner />}
 
       {/* Stats */}
       {requests.length > 0 && (
@@ -301,13 +319,25 @@ const filtered = requests.filter(r => {
               ? 'Prueba ajustando los filtros de búsqueda'
               : 'Crea tu primera solicitud para integrar tu marca en un videojuego'}
           </p>
-          <button
-            onClick={() => setView('create')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440] text-sm cursor-pointer"
-          >
-            <Plus size={16} />
-            Nueva solicitud
-          </button>
+          {walletExhausted ? (
+            <button
+              type="button"
+              disabled
+              title={WALLET_EXHAUSTED_TOOLTIP}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 rounded-md text-sm cursor-not-allowed"
+            >
+              <Plus size={16} />
+              Nueva solicitud
+            </button>
+          ) : (
+            <button
+              onClick={() => setView('create')}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440] text-sm cursor-pointer"
+            >
+              <Plus size={16} />
+              Nueva solicitud
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">

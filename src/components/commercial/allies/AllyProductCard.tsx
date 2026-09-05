@@ -12,6 +12,9 @@ interface AllyProductCardProps {
   isPromoted: boolean;
   isToggling: boolean;
   onTogglePromote: (productId: number) => void;
+  // Saldo agotado: bloquea iniciar promociones nuevas, pero quitar una ya
+  // activa (isPromoted) debe seguir funcionando.
+  blocked?: boolean;
 }
 
 const AllyProductCard: React.FC<AllyProductCardProps> = ({
@@ -19,8 +22,10 @@ const AllyProductCard: React.FC<AllyProductCardProps> = ({
   isPromoted,
   isToggling,
   onTogglePromote,
+  blocked,
 }) => {
   const router = useRouter();
+  const disablePromote = isToggling || (blocked && !isPromoted);
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col">
@@ -87,7 +92,8 @@ const AllyProductCard: React.FC<AllyProductCardProps> = ({
         <div className="mt-auto pt-2">
           <button
             onClick={() => onTogglePromote(product.id)}
-            disabled={isToggling}
+            disabled={disablePromote}
+            title={blocked && !isPromoted ? 'Recarga tu saldo para seguir creando' : undefined}
             className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer ${
               isPromoted
                 ? "bg-emerald-50 text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-100"

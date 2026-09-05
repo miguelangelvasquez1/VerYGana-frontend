@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import {
   Check, X, Zap, Rocket, Star, ArrowRight, Sparkles,
   Package, Megaphone, Gamepad2, Layers, TrendingUp,
@@ -9,21 +10,29 @@ import {
   AlertCircle, ArrowLeft, Handshake, BarChart3, Eye,
   ShoppingBag, FileText
 } from 'lucide-react';
-import { initiatePayment } from '@/services/planService';
+import { initiatePayment, getPlanCatalog } from '@/services/planService';
+import { previewPlanChange, requestPlanChange, getCurrentPlanChangeRequest } from '@/services/planChangeService';
+import { getRechargeContract } from '@/services/planRechargeService';
 import { PlanCode, PlanPaymentRequestDTO } from '@/types/finance/plans/Plan.types';
+import { PlanCatalogOption, PlanCatalogResponseDTO } from '@/types/finance/plans/PlanCatalog.types';
+import { PlanChangePreviewResponseDTO } from '@/types/finance/plans/PlanChange.types';
 import { WompiCheckoutResponseDTO } from '@/types/finance/wompi/Wompi.types';
+import { RECHARGE_CONTRACT_ID_KEY, isActiveRechargeContract } from '@/components/commercial/balance/balance.shared';
+
+function apiErrorMessage(err: unknown, fallback: string): string {
+  const data = (err as { response?: { data?: { message?: string } } })?.response?.data;
+  return data?.message || fallback;
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const NA = 'No aplica';
 
-const PLAN_RANGES = {
-  [PlanCode.STANDARD]: { min: 1_000_000, max: 9_999_999, label: '$1.000.000 – $9.999.999 COP' },
-  [PlanCode.PREMIUM]:  { min: 10_000_000, max: null,      label: 'Mínimo $10.000.000 COP' },
-};
-
 const formatCOP = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+
+// Solo el número con separador de miles (sin símbolo) — el JSX antepone el "$".
+const plainCOP = (cents: number) => new Intl.NumberFormat('es-CO').format(Math.round(cents / 100));
 
 const parseCOP = (raw: string) => parseInt(raw.replace(/\D/g, ''), 10) || 0;
 
@@ -31,6 +40,19 @@ const formatInput = (raw: string) => {
   const num = parseCOP(raw);
   if (!num) return '';
   return new Intl.NumberFormat('es-CO').format(num);
+};
+
+const limitOrUnlimited = (n: number) => (n === -1 ? 'Ilimitado' : `${n}`);
+const pctOrUnlimited = (n: number) => (n === -1 ? 'Ilimitado' : `hasta ${n}%`);
+
+// Combina el flag de capacidad (canAdvertise/canUseGames/canUseSurveys) con su
+// tope máximo: false oculta la fila en tarjetas y muestra la X en la tabla;
+// habilitado sin tope numérico útil cae en un simple check.
+const capacityLabel = (enabled: boolean, max: number): string | boolean => {
+  if (!enabled) return false;
+  if (max === -1) return 'Ilimitado';
+  if (max > 0) return `hasta ${max}`;
+  return true;
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -155,29 +177,61 @@ interface DepositModalProps {
   loading: boolean;
 }
 
-function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) {
+function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalProps) {
+  const isBasic = plan.key === PlanCode.BASIC;
+  const minCOP = plan.minInvestmentCents != null ? plan.minInvestmentCents / 100 : 0;
+  const maxCOP = plan.maxInvestmentCents != null ? plan.maxInvestmentCents / 100 : null;
+  const rangeLabel = maxCOP != null
+    ? `${formatCOP(minCOP)} – ${formatCOP(maxCOP)} COP`
+    : `Mínimo ${formatCOP(minCOP)} COP`;
   const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState('');
-  const range = PLAN_RANGES[plan.key as keyof typeof PLAN_RANGES];
+  const [preview, setPreview] = useState<PlanChangePreviewResponseDTO | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const amount = parseCOP(inputValue);
 
+  // El backend acota el abono al rango [min, max] del plan destino. Validamos
+  // contra el preview (fuente de verdad); si aún no cargó, caemos al catálogo.
+  const effMin = preview?.targetMinInvestmentPesos ?? minCOP;
+  const effMax = preview?.targetMaxInvestmentPesos ?? maxCOP;
+
+  useEffect(() => {
+    if (!isBasic && !amount) {
+      setPreview(null);
+      setPreviewLoading(false);
+      return;
+    }
+    setPreviewLoading(true);
+    const timer = setTimeout(() => {
+      previewPlanChange(plan.key, isBasic ? undefined : amount * 100)
+        .then(setPreview)
+        .catch(() => setPreview(null))
+        .finally(() => setPreviewLoading(false));
+    }, isBasic ? 0 : 500);
+    return () => clearTimeout(timer);
+  }, [amount, isBasic, plan.key]);
+
   const validate = () => {
+    if (isBasic) return '';
     if (!amount) return 'Ingresa un monto';
-    if (amount < range.min) return `El monto mínimo es ${formatCOP(range.min)}`;
-    if (range.max && amount > range.max) return `El monto máximo es ${formatCOP(range.max)}`;
+    if (amount < effMin) return `El monto mínimo es ${formatCOP(effMin)}`;
+    if (effMax != null && amount > effMax) return `El monto máximo es ${formatCOP(effMax)}`;
     return '';
   };
 
   const handleSubmit = () => {
     const err = validate();
     if (err) { setError(err); return; }
-    onConfirm(amount * 100);
+    if (!preview?.eligible) return;
+    onConfirm(isBasic ? undefined : amount * 100);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(formatInput(e.target.value));
     setError('');
   };
+
+  const confirmDisabled = loading || previewLoading || !preview?.eligible || (!isBasic && amount === 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -191,36 +245,52 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
           </div>
           <div>
             <h3 className="text-white font-bold text-base">Plan {plan.name}</h3>
-            <p className="text-slate-400 text-sm">{range.label}</p>
+            <p className="text-slate-400 text-sm">{isBasic ? `${plan.priceLabel} COP/mes` : rangeLabel}</p>
           </div>
           <button onClick={onClose} className="ml-auto text-slate-500 hover:text-white transition-colors cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm text-slate-400 mb-2">¿Cuánto quieres invertir?</label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={handleChange}
-              placeholder={`Ej: ${plan.key === PlanCode.STANDARD ? '2.500.000' : '15.000.000'}`}
-              className={`w-full bg-white/5 border rounded-xl py-3 pl-8 pr-16 text-white text-lg font-bold
-                placeholder:text-slate-600 outline-none transition-all
-                ${error ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-blue-500/60'}`}
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">COP</span>
+        {!isBasic && (
+          <div className="mb-4">
+            <label className="block text-sm text-slate-400 mb-2">¿Cuánto quieres invertir?</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+              <input
+                type="text"
+                value={inputValue}
+                onChange={handleChange}
+                placeholder={`Ej: ${plan.key === PlanCode.STANDARD ? '2.500.000' : '15.000.000'}`}
+                className={`w-full bg-white/5 border rounded-xl py-3 pl-8 pr-16 text-white text-lg font-bold
+                  placeholder:text-slate-600 outline-none transition-all
+                  ${error ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-blue-500/60'}`}
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">COP</span>
+            </div>
+            {error && (
+              <p className="flex items-center gap-1.5 text-red-400 text-sm mt-2">
+                <AlertCircle className="w-4 h-4" /> {error}
+              </p>
+            )}
+            {amount > 0 && !error && (
+              <p className="text-slate-400 text-sm mt-2">
+                Inviertes: <span className="text-white font-semibold">{formatCOP(amount)}</span>
+              </p>
+            )}
           </div>
-          {error && (
-            <p className="flex items-center gap-1.5 text-red-400 text-sm mt-2">
-              <AlertCircle className="w-4 h-4" /> {error}
-            </p>
-          )}
-          {amount > 0 && !error && (
-            <p className="text-slate-400 text-sm mt-2">
-              Depositas: <span className="text-white font-semibold">{formatCOP(amount)}</span>
+        )}
+
+        <div
+          className={`rounded-xl border p-3 mb-4 space-y-2 text-sm ${
+            preview && !preview.eligible
+              ? 'bg-amber-500/10 border-amber-500/30 text-amber-200'
+              : 'bg-white/3 border-white/6 text-slate-400'
+          }`}
+        >
+          {previewLoading && (
+            <p className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" /> Calculando...
             </p>
           )}
         </div>
@@ -236,7 +306,7 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
 
         <button
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={confirmDisabled}
           className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2
             transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed
             ${plan.key === PlanCode.PREMIUM
@@ -245,8 +315,8 @@ function DepositModal({ plan, onConfirm, onClose, loading }: DepositModalProps) 
             }`}
         >
           {loading
-            ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando checkout...</>
-            : <>Ir a pagar <ArrowRight className="w-4 h-4" /></>
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando solicitud...</>
+            : <>Solicitar cambio de plan <ArrowRight className="w-4 h-4" /></>
           }
         </button>
       </div>
@@ -275,47 +345,135 @@ function FeatureCell({ val, tinted }: { val: FeatureValue; tinted: boolean }) {
 
 export default function PlansPage() {
   const [activeTab, setActiveTab] = useState<'cards' | 'table'>('cards');
-  const [modalPlan, setModalPlan] = useState<typeof plans[number] | null>(null);
+  const [modalPlan, setModalPlan] = useState<UIPlan | null>(null);
   const [loading, setLoading] = useState<PlanCode | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [catalog, setCatalog] = useState<PlanCatalogResponseDTO | null>(null);
+  const [loadingCatalog, setLoadingCatalog] = useState(true);
+  const [catalogError, setCatalogError] = useState(false);
+  const [rechargeConflict, setRechargeConflict] = useState(false);
   const router = useRouter();
 
   useEffect(() => { setMounted(true); }, []);
 
-  const handlePlanClick = useCallback(async (plan: typeof plans[number]) => {
+  useEffect(() => {
+    getPlanCatalog()
+      .then(setCatalog)
+      .catch(() => setCatalogError(true))
+      .finally(() => setLoadingCatalog(false));
+  }, []);
+
+  const uiPlans = useMemo(() => (catalog ? buildUIPlans(catalog) : []), [catalog]);
+  const featureRows = useMemo(() => (catalog ? buildFeatureRows(catalog) : []), [catalog]);
+
+  // Renovar el plan que ya se tiene: BASIC sigue usando /plans/checkout,
+  // STANDARD/PREMIUM ahora requiere el flujo de recarga con contrato.
+  const handleRenewCurrentPlan = useCallback(async (plan: UIPlan) => {
     if (plan.key !== PlanCode.BASIC) {
-      setModalPlan(plan);
+      router.push('/commercial/balance');
+      return;
+    }
+    if (plan.monthlyFeeCents == null) {
+      toast.error('No se pudo determinar la tarifa del plan. Intenta de nuevo.');
       return;
     }
     setLoading(PlanCode.BASIC);
     try {
-      const request: PlanPaymentRequestDTO = { planCode: PlanCode.BASIC, amountCents: 20_000_000 };
+      const request: PlanPaymentRequestDTO = { planCode: PlanCode.BASIC, amountCents: plan.monthlyFeeCents };
       const checkout: WompiCheckoutResponseDTO = await initiatePayment(request);
       sessionStorage.setItem('vg_payment_reference', checkout.reference);
       sessionStorage.setItem('vg_payment_plan', PlanCode.BASIC);
       window.location.href = checkout.checkoutUrl;
     } catch (err) {
-      console.error('Error iniciando pago:', err);
+      toast.error(apiErrorMessage(err, 'No se pudo iniciar el pago. Intenta de nuevo.'));
       setLoading(null);
     }
-  }, []);
+  }, [router]);
 
-  const handleDepositConfirm = useCallback(async (amountCents: number) => {
-    if (!modalPlan) return;
-    const planKey = modalPlan.key;
-    setLoading(planKey);
+  // Intenta crear la solicitud de cambio de plan. Si el backend responde 422,
+  // puede ser porque hay una recarga en curso (guardada en sessionStorage
+  // desde el flujo de /commercial/balance) que bloquea el cambio — en ese
+  // caso se muestra ese contrato con opción de cancelarlo y reintentar
+  // (rate limit u otro 422 sin recarga guardada cae al toast genérico).
+  const attemptRequestPlanChange = useCallback(async (
+    targetPlanCode: PlanCode,
+    amountCents?: number
+  ): Promise<'success' | 'conflict' | 'error'> => {
+    // Si la última solicitud fue rechazada y el comercial aún no dio por
+    // leído el motivo, /current la sigue devolviendo con status REJECTED.
+    // El back aceptaría una solicitud nueva, pero por UX primero lo
+    // mandamos a leer el motivo del rechazo.
     try {
-      const request: PlanPaymentRequestDTO = { planCode: planKey, amountCents };
-      const checkout: WompiCheckoutResponseDTO = await initiatePayment(request);
-      sessionStorage.setItem('vg_payment_reference', checkout.reference);
-      sessionStorage.setItem('vg_payment_plan', planKey);
-      window.location.href = checkout.checkoutUrl;
-    } catch (err) {
-      console.error('Error iniciando pago:', err);
-      setLoading(null);
-      setModalPlan(null);
+      const current = await getCurrentPlanChangeRequest();
+      if (current?.status === 'REJECTED') {
+        toast.error('Primero revisa por qué se rechazó tu solicitud anterior.');
+        setModalPlan(null);
+        router.push('/commercial/plan-change');
+        return 'error';
+      }
+    } catch {
+      /* si /current falla seguimos con el flujo normal de creación */
     }
-  }, [modalPlan]);
+    try {
+      // El otrosí (contractDownloadUrl) llega en esta respuesta y también en
+      // GET /current, que es lo que consulta la vista de /commercial/plan-change.
+      await requestPlanChange({
+        targetPlanCode,
+        intendedInvestmentAmountCents: amountCents,
+      });
+      router.push('/commercial/plan-change');
+      return 'success';
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 422) {
+        const contractId = sessionStorage.getItem(RECHARGE_CONTRACT_ID_KEY);
+        if (contractId) {
+          try {
+            const contract = await getRechargeContract(Number(contractId));
+            if (isActiveRechargeContract(contract)) {
+              setModalPlan(null);
+              setRechargeConflict(true);
+              return 'conflict';
+            }
+          } catch {
+            /* no se pudo confirmar el conflicto — cae al toast genérico */
+          }
+        }
+      }
+      toast.error(apiErrorMessage(err, 'No se pudo crear la solicitud de cambio de plan.'));
+      setModalPlan(null);
+      return 'error';
+    }
+  }, [router]);
+
+  // Cambiar a un plan distinto al actual (incluye bajar a BASIC) — pasa por
+  // el pipeline de solicitud de cambio de plan, no por /plans/checkout.
+  const handleRequestPlanChange = useCallback(async (targetPlanCode: PlanCode, amountCents?: number) => {
+    setLoading(targetPlanCode);
+    await attemptRequestPlanChange(targetPlanCode, amountCents);
+    setLoading(null);
+  }, [attemptRequestPlanChange]);
+
+  // plan.currentPlan viene directo del catálogo — es el plan activo del
+  // comercial, así que su acción es recargar en vez de solicitar un cambio.
+  const handlePlanClick = useCallback((plan: UIPlan) => {
+    if (loadingCatalog) return;
+
+    if (plan.currentPlan) {
+      handleRenewCurrentPlan(plan);
+      return;
+    }
+
+    // Cualquier cambio de plan (incluida la bajada a BASIC) pasa por el
+    // preview del modal — bajar a BASIC con saldo publicitario > 0 no es
+    // elegible y el backend lo rechaza, así que no se salta la validación.
+    setModalPlan(plan);
+  }, [loadingCatalog, handleRenewCurrentPlan]);
+
+  const handlePlanChangeConfirm = useCallback((amountCents?: number) => {
+    if (!modalPlan) return;
+    handleRequestPlanChange(modalPlan.key, amountCents);
+  }, [modalPlan, handleRequestPlanChange]);
 
   return (
     <div className="min-h-screen bg-[#111318] text-white font-sans flex flex-col">
@@ -355,19 +513,30 @@ export default function PlansPage() {
           </p>
         </div>
 
-        {/* Tab toggle */}
-        <div className="flex justify-center mb-4">
-          <div className="bg-white/5 border border-white/10 rounded-xl p-1 flex gap-1">
-            {(['cards', 'table'] as const).map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
-                  activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-white'
-                }`}>
-                {tab === 'cards' ? 'Vista tarjetas' : 'Comparar planes'}
-              </button>
-            ))}
+        {loadingCatalog ? (
+          <div className="flex-1 flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-slate-500" />
           </div>
-        </div>
+        ) : catalogError || uiPlans.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center py-16 text-center gap-2">
+            <AlertCircle className="w-6 h-6 text-amber-400" />
+            <p className="text-slate-400 text-sm">No se pudo cargar la información de planes. Intenta de nuevo más tarde.</p>
+          </div>
+        ) : (
+          <>
+            {/* Tab toggle */}
+            <div className="flex justify-center mb-4">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-1 flex gap-1">
+                {(['cards', 'table'] as const).map(tab => (
+                  <button key={tab} onClick={() => setActiveTab(tab)}
+                    className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
+                      activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-white'
+                    }`}>
+                    {tab === 'cards' ? 'Vista tarjetas' : 'Comparar planes'}
+                  </button>
+                ))}
+              </div>
+            </div>
 
         {/* ── Cards view ── */}
         {activeTab === 'cards' && (
@@ -387,47 +556,47 @@ export default function PlansPage() {
                     <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-blue-500 via-purple-500 to-blue-500" />
                   )}
 
-                  {/* Top section */}
-                  <div className={`p-4 ${plan.highlight ? 'bg-[#161a2e]' : 'bg-[#16181f]'}`}>
-                    {plan.highlight && (
-                      <div className="inline-flex items-center bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[10px] font-semibold px-2 py-0.5 rounded-full mb-2">
-                        MÁS POPULAR
+                      {/* Top section */}
+                      <div className={`p-4 ${plan.highlight ? 'bg-[#161a2e]' : 'bg-[#16181f]'}`}>
+                        {plan.highlight && (
+                          <div className="inline-flex items-center bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[10px] font-semibold px-2 py-0.5 rounded-full mb-2">
+                            MÁS POPULAR
+                          </div>
+                        )}
+
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${
+                          plan.highlight ? 'bg-blue-500/15 text-blue-400' : 'bg-white/5 text-slate-300'
+                        }`}>
+                          {plan.icon}
+                        </div>
+
+                        <h2 className="text-sm font-bold text-white leading-tight">{plan.name}</h2>
+                        <p className="text-slate-400 text-xs mb-3">{plan.description}</p>
+
+                        {/* Price */}
+                        <div className="mb-3">
+                          <span className="text-2xl font-black text-white">${plan.priceLabel}</span>
+                          <span className="text-slate-400 text-xs font-medium ml-1.5">{plan.unit}</span>
+                          <span className="text-slate-600 text-xs ml-1">· {plan.billing}</span>
+                        </div>
+
+                        {/* CTA */}
+                        <button
+                          onClick={() => handlePlanClick(plan)}
+                          disabled={loading === plan.key}
+                          className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2
+                            transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed
+                            ${plan.highlight
+                              ? 'bg-white text-slate-900 hover:bg-slate-100'
+                              : 'bg-white/8 hover:bg-white/14 text-white border border-white/15'
+                            }`}
+                        >
+                          {loading === plan.key
+                            ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Procesando...</>
+                            : <>{plan.currentPlan ? 'Recargar' : 'Cambiar de plan'} <ArrowRight className="w-3.5 h-3.5" /></>
+                          }
+                        </button>
                       </div>
-                    )}
-
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${
-                      plan.highlight ? 'bg-blue-500/15 text-blue-400' : 'bg-white/5 text-slate-300'
-                    }`}>
-                      {plan.icon}
-                    </div>
-
-                    <h2 className="text-sm font-bold text-white leading-tight">{plan.name}</h2>
-                    <p className="text-slate-400 text-xs mb-3">{plan.description}</p>
-
-                    {/* Price */}
-                    <div className="mb-3">
-                      <span className="text-2xl font-black text-white">${plan.price}</span>
-                      <span className="text-slate-400 text-xs font-medium ml-1.5">{plan.unit}</span>
-                      <span className="text-slate-600 text-xs ml-1">· {plan.billing}</span>
-                    </div>
-
-                    {/* CTA */}
-                    <button
-                      onClick={() => handlePlanClick(plan)}
-                      disabled={loading === plan.key}
-                      className={`w-full py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2
-                        transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed
-                        ${plan.highlight
-                          ? 'bg-white text-slate-900 hover:bg-slate-100'
-                          : 'bg-white/8 hover:bg-white/14 text-white border border-white/15'
-                        }`}
-                    >
-                      {loading === plan.key
-                        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Procesando...</>
-                        : <>{plan.cta} <ArrowRight className="w-3.5 h-3.5" /></>
-                      }
-                    </button>
-                  </div>
 
                   {/* Highlights */}
                   <div className="px-4 py-3 bg-[#13151b] border-t border-white/6">
@@ -518,16 +687,23 @@ export default function PlansPage() {
           </div>
         )}
 
-        <p className="text-center text-slate-600 text-xs mt-3">
-          Los planes Estándar y Premium se activan por inversión, no son suscripciones recurrentes.
-        </p>
+            <p className="text-center text-slate-600 text-xs mt-3">
+              Los planes Estándar y Premium se activan por inversión, no son suscripciones recurrentes.
+            </p>
+          </>
+        )}
       </div>
 
-      {/* Deposit Modal */}
-      {modalPlan && (
-        <DepositModal
+      {/* Plan Change Modal */}
+      {rechargeConflict ? (
+        <RechargeConflictModal
+          onGoToRecharge={() => router.push('/commercial/balance')}
+          onClose={() => { setRechargeConflict(false); setLoading(null); }}
+        />
+      ) : modalPlan && (
+        <PlanChangeModal
           plan={modalPlan}
-          onConfirm={handleDepositConfirm}
+          onConfirm={handlePlanChangeConfirm}
           onClose={() => { setModalPlan(null); setLoading(null); }}
           loading={loading === modalPlan.key}
         />

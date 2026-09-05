@@ -16,6 +16,7 @@ import { useSession } from 'next-auth/react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   AlertTriangle,
+  ArrowLeftRight,
   FileSignature,
   LogOut,
   Menu,
@@ -31,6 +32,7 @@ const NAV = [
   { title: 'Revisión KYC', short: 'KYC', href: '/compliance/kyc', icon: ShieldCheck },
   { title: 'Alertas de screening', short: 'Screening', href: '/compliance/screenings', icon: AlertTriangle },
   { title: 'Contratos comerciales', short: 'Contratos', href: '/compliance/contracts', icon: FileSignature },
+  { title: 'Cambios de plan', short: 'Cambios plan', href: '/compliance/plan-changes', icon: ArrowLeftRight },
   { title: 'Logs de auditoría', short: 'Auditoría', href: '/compliance/audit-logs', icon: ScrollText },
 ];
 

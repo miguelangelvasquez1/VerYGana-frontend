@@ -219,6 +219,13 @@ export const rejectContractReview = async (
   await apiClient.post(`/compliance/contracts/${contractId}/reject`, { reason, documentsIssue });
 };
 
+// Fallback manual — en producción la firma se marca sola vía webhook de
+// ZapSign. Hoy solo lo consume el panel de cambios de plan (ver
+// PlanChangesReviewPanel), no el de onboarding.
+export const markContractSigned = async (contractId: number): Promise<void> => {
+  await apiClient.post(`/compliance/contracts/${contractId}/esignature/mark-signed`);
+};
+
 // ── Negociaciones pendientes (rutas D/E) ────────────────────────────────────
 // Casos de integración técnica (D) o condiciones a la medida (E) que todavía
 // no tienen contrato generado — compliance debe resolverlos antes de que el

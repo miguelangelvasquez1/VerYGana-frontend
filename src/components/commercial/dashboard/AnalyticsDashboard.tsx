@@ -39,7 +39,8 @@ export function AnalyticsDashboard() {
   const [dateRange, setDateRange] = useState<DateRangeFilter>(makeDefaultRange);
   const [activeSection, setActiveSection] = useState<SectionId>("overview");
 
-  const canExportPdf = hasPlanAccess(effectivePlan, [PlanCode.PREMIUM]);
+  const hasExportPlan = hasPlanAccess(effectivePlan, [PlanCode.PREMIUM]);
+  const canExportPdf = hasExportPlan;
 
   const applyQuickRange = (days: number) => {
     const end = new Date();
