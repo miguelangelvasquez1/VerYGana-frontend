@@ -6,17 +6,21 @@
 // `paymentRequiredBus`. No desloguea ni redirige a un error genérico:
 // solo ofrece ir directo al checkout de recarga.
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Wallet, X } from 'lucide-react';
 import {
   subscribePaymentRequired,
   PAYMENT_REQUIRED_DEFAULT_MESSAGE,
 } from '@/lib/api/paymentRequiredBus';
+import { usePlanState } from '../layout/DashboardLayout';
 
 export function PaymentRequiredModal() {
   const router = useRouter();
   const pathname = usePathname();
+  const { refreshPlanState } = usePlanState();
+  const refreshPlanStateRef = useRef(refreshPlanState);
+  refreshPlanStateRef.current = refreshPlanState;
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState(PAYMENT_REQUIRED_DEFAULT_MESSAGE);
 
@@ -27,6 +31,10 @@ export function PaymentRequiredModal() {
       if (pathname?.startsWith('/commercial/balance')) return;
       setMessage(msg);
       setOpen(true);
+      // El 402 es fallback: los flags de /plans/commercial/state son la
+      // fuente de verdad para habilitar/deshabilitar. Re-sincronizamos por si
+      // el estado cambió (ej. pasó a DORMANT) desde la última carga.
+      refreshPlanStateRef.current();
     });
   }, [pathname]);
 

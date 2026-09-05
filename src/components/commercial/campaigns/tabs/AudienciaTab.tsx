@@ -2,6 +2,7 @@ import React from 'react';
 import { Loader2, Pencil, Save, Target, X } from 'lucide-react';
 import type { Campaign } from '@/services/CampaignService';
 import { CampaignTargetingSelector } from '../../branding/CampaignTargetingSelector';
+import { BudgetDormantEditNotice } from '../../plans/WalletBudgetAlerts';
 import { InfoRow, fieldCls, genderLabel, missingTargetingFields, type AudienceForm } from '../campaignDetail.shared';
 
 interface Props {
@@ -13,13 +14,17 @@ interface Props {
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
+  /** true cuando la cuenta está en DORMANT (saldo agotado + gracia vencida): no se puede editar. */
+  editBlocked?: boolean;
+  editBlockedReason?: string;
 }
 
-export const AudienciaTab: React.FC<Props> = ({ campaign, editing, form, onChangeForm, saving, onEdit, onCancel, onSave }) => {
+export const AudienciaTab: React.FC<Props> = ({ campaign, editing, form, onChangeForm, saving, onEdit, onCancel, onSave, editBlocked = false, editBlockedReason }) => {
   const missing = missingTargetingFields(campaign);
 
   return (
     <div className="p-5 space-y-4">
+      {editBlocked && !editing && <BudgetDormantEditNotice />}
       {missing.length > 0 && !editing && (
         <div className="flex items-start gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl">
           <Target size={16} className="text-amber-600 shrink-0 mt-0.5" />
@@ -89,7 +94,12 @@ export const AudienciaTab: React.FC<Props> = ({ campaign, editing, form, onChang
         <div className="space-y-2.5">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Audiencia y configuración actual</p>
-            <button onClick={onEdit} className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors">
+            <button
+              onClick={onEdit}
+              disabled={editBlocked}
+              title={editBlocked ? editBlockedReason : undefined}
+              className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-blue-600"
+            >
               <Pencil size={13} /> Editar
             </button>
           </div>

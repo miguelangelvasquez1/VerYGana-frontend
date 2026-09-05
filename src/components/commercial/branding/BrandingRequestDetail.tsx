@@ -41,6 +41,8 @@ import {
 } from '@/services/BrandingRequestService';
 import { CampaignTargetingSelector } from './CampaignTargetingSelector';
 import { CommentsSection } from './CommentsSection';
+import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
+import { isBudgetDormant, BudgetDormantEditNotice, WALLET_DORMANT_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -162,6 +164,8 @@ interface Props {
 
 export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) => {
   const router = useRouter();
+  const { planState } = usePlanState();
+  const editBlockedByBudget = isBudgetDormant(planState);
   const [detail, setDetail] = useState<BrandingDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -246,6 +250,10 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
 
   const handleSaveConfig = async () => {
     if (!detail) return;
+    if (editBlockedByBudget) {
+      toast.error(WALLET_DORMANT_TOOLTIP);
+      return;
+    }
     setSaving(true);
     try {
       const dto: BrandingConfigDto = {};
@@ -719,6 +727,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
         {activeTab === 'campaña' && (
           <div className="p-5 space-y-4">
             {/* Warnings */}
+            {canEditConfig && editBlockedByBudget && !editingConfig && <BudgetDormantEditNotice />}
 {canEditConfig && !detail.hasCompleteTargeting && (
               <div className="flex items-start gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl">
                 <Target size={16} className="text-amber-600 shrink-0 mt-0.5" />
@@ -781,7 +790,12 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Configuración actual</p>
                   {canEditConfig && (
-                    <button onClick={() => setEditingConfig(true)} className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors">
+                    <button
+                      onClick={() => setEditingConfig(true)}
+                      disabled={editBlockedByBudget}
+                      title={editBlockedByBudget ? WALLET_DORMANT_TOOLTIP : undefined}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-blue-600"
+                    >
                       <Pencil size={13} /> Editar
                     </button>
                   )}

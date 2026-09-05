@@ -17,6 +17,8 @@ import TargetAudienceFields, {
 } from "@/components/shared/targeting/TargetAudienceFields";
 import toast from "react-hot-toast";
 import { RefreshCw, ChevronLeft, ChevronRight, Trash2, Eye, EyeOff, Copy } from "lucide-react";
+import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
+import { isBudgetDormant, BudgetDormantBlock } from "@/components/commercial/plans/WalletBudgetAlerts";
 
 // ============================================================
 // TIPOS LOCALES
@@ -58,6 +60,8 @@ const buildExpirationDate = (date: string, time: string): string | null => {
 // ============================================================
 
 export default function EditProductForm({ productId, onSuccess, onCancel }: Props) {
+  const { planState } = usePlanState();
+  const editBlocked = isBudgetDormant(planState);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSavingData, setIsSavingData] = useState(false);
@@ -298,6 +302,10 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
   // ============================================================
   // RENDER
   // ============================================================
+
+  if (editBlocked) {
+    return <BudgetDormantBlock backHref="/commercial/products" backLabel="Volver a productos" />;
+  }
 
   if (loading) return <p className="text-center py-8 text-gray-500">Cargando...</p>;
 

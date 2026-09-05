@@ -13,7 +13,7 @@ import { getCommercialInitialData } from '@/services/commercialService';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
 import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
 import { WalletStatus } from '@/types/finance/Wallet.types';
-import { isWalletExhausted, isWalletLow, WalletExhaustedBanner, WalletLowBalanceBanner } from '../plans/WalletBudgetAlerts';
+import { isWalletExhausted, isBudgetDormant, WalletExhaustedBanner, WalletDormantBanner } from '../plans/WalletBudgetAlerts';
 import { PaymentRequiredModal } from '../plans/PaymentRequiredModal';
 import { PlanChangeBlockedModal } from '../planChange/PlanChangeBlockedModal';
 import { usePathname, useRouter } from 'next/navigation';
@@ -374,11 +374,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               const showBudgetBanner = !currentPath.startsWith('/commercial/balance');
               return (
                 <>
-                  {showBudgetBanner && isWalletExhausted(planState) && (
-                    <div className="mb-4"><WalletExhaustedBanner /></div>
+                  {showBudgetBanner && isBudgetDormant(planState) && (
+                    <div className="mb-4"><WalletDormantBanner /></div>
                   )}
-                  {showBudgetBanner && !isWalletExhausted(planState) && isWalletLow(planState) && (
-                    <div className="mb-4"><WalletLowBalanceBanner /></div>
+                  {showBudgetBanner && isWalletExhausted(planState) && !isBudgetDormant(planState) && (
+                    <div className="mb-4"><WalletExhaustedBanner /></div>
                   )}
                   {children}
                 </>

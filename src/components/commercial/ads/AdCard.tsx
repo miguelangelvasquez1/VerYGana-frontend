@@ -28,6 +28,9 @@ interface AdCardProps {
   /** false cuando hay una solicitud de cambio de plan en curso: reactivar consume plan/presupuesto y el backend lo rechaza. */
   canReactivate?: boolean;
   reactivateDisabledReason?: string;
+  /** true cuando la cuenta está en DORMANT (saldo agotado + periodo de gracia vencido): no se puede editar. */
+  editBlocked?: boolean;
+  editBlockedReason?: string;
 }
 
 export function AdCard({
@@ -38,9 +41,20 @@ export function AdCard({
   onDelete,
   canReactivate = true,
   reactivateDisabledReason,
+  editBlocked = false,
+  editBlockedReason,
 }: AdCardProps) {
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // El backend puede omitir campos numéricos (p.ej. presupuesto no asignado
+  // todavía en un anuncio PENDING) — se tratan como 0 para no romper el render.
+  const completionPct = ad.completionPercentage ?? 0;
+  const money = (value: number | null | undefined) =>
+    (value ?? 0).toLocaleString('es-CO', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   // Determinar si el anuncio se puede editar (solo PENDING)
   const canEdit = ad.status === 'PENDING' || ad.status === 'PAUSED';
@@ -136,7 +150,7 @@ export function AdCard({
             {getStatusBadge(ad.status)}
             <div className="bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-sm">
               <span className="text-xs font-bold text-gray-700">
-                {ad.completionPercentage.toFixed(0)}%
+                {completionPct.toFixed(0)}%
               </span>
             </div>
           </div>
@@ -179,7 +193,7 @@ export function AdCard({
                 <Heart className="w-4 h-4 text-pink-500" />
               </div>
               <p className="text-sm font-bold text-gray-900">
-                {ad.currentLikes}/{ad.maxLikes}
+                {ad.currentLikes ?? 0}/{ad.maxLikes ?? 0}
               </p>
               <p className="text-xs text-gray-500">Likes</p>
             </div>
@@ -188,7 +202,7 @@ export function AdCard({
                 <DollarSign className="w-4 h-4 text-green-500" />
               </div>
               <p className="text-sm font-bold text-gray-900">
-                ${ad.totalBudget.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ${money(ad.totalBudget)}
               </p>
               <p className="text-xs text-gray-500">Invertido</p>
             </div>
@@ -197,7 +211,7 @@ export function AdCard({
                 <TrendingUp className="w-4 h-4 text-blue-500" />
               </div>
               <p className="text-sm font-bold text-gray-900">
-                ${ad.remainingBudget.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ${money(ad.remainingBudget)}
               </p>
               <p className="text-xs text-gray-500">Restante</p>
             </div>
@@ -207,12 +221,12 @@ export function AdCard({
           <div className="mb-4">
             <div className="flex justify-between text-xs text-gray-600 mb-1.5">
               <span className="font-medium">Progreso</span>
-              <span className="font-bold">{ad.completionPercentage.toFixed(1)}%</span>
+              <span className="font-bold">{completionPct.toFixed(1)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 h-2.5 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(ad.completionPercentage, 100)}%` }}
+                style={{ width: `${Math.min(completionPct, 100)}%` }}
               />
             </div>
           </div>
@@ -234,8 +248,8 @@ export function AdCard({
 
           {/* Botones de acción mejorados */}
           <div className="flex gap-2">
-            {/* Botón Editar - Solo visible si status es PENDING */}
-            {canEdit && (
+            {/* Botón Editar - Solo visible si status es PENDING/PAUSED y la cuenta no está en pausa por saldo */}
+            {canEdit && !editBlocked && (
               <button
                 onClick={() => onEdit(ad)}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm cursor-pointer"
@@ -246,11 +260,15 @@ export function AdCard({
             )}
 
             {/* Botón deshabilitado cuando no se puede editar */}
-            {!canEdit && (
+            {(!canEdit || editBlocked) && (
               <button
                 disabled
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-300 text-gray-500 text-sm font-semibold rounded-lg cursor-not-allowed"
-                title="Solo se pueden editar anuncios pendientes"
+                title={
+                  editBlocked
+                    ? (editBlockedReason ?? 'No disponible ahora')
+                    : 'Solo se pueden editar anuncios pendientes'
+                }
               >
                 <Edit2 className="w-4 h-4" />
                 Editar

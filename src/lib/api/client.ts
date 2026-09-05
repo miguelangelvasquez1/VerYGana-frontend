@@ -147,7 +147,13 @@ apiClient.interceptors.response.use((response) => response, async (error) => {
 
 export default apiClient;
 
-async function handleUnauthorized() {
+/**
+ * Fuerza el mismo cierre de sesión que dispara un 401 sin refresh posible.
+ * Reutilizado por flujos que detectan una sesión/token inválidos por otra vía
+ * (ej. un 422 "Token inválido" fuera del ciclo normal de request/response),
+ * para no reimplementar el signOut + redirect en cada lugar.
+ */
+export async function handleUnauthorized() {
   try {
     await signOut({ redirect: false });
   } catch (error) {

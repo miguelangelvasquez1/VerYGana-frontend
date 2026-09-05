@@ -21,11 +21,6 @@ interface HeaderProps {
   commercialData?: CommercialInitialDataResponseDTO | null;
 }
 
-// Umbral desde variable de entorno (con fallback seguro)
-const BUDGET_LOW_THRESHOLD = Number(
-  process.env.NEXT_PUBLIC_BUDGET_LOW_THRESHOLD ?? 500000
-);
-
 const PLAN_COLORS: Record<string, { pill: string; label: string }> = {
   BASIC:    { pill: 'bg-slate-100 text-slate-600 border border-slate-200', label: 'text-slate-400' },
   STANDARD: { pill: 'bg-[#03548C]/10 text-[#03548C] border border-[#03548C]/20', label: 'text-[#03548C]/60' },
@@ -63,8 +58,6 @@ export function Header({ title, onMenuClick, showMenuButton, planState, commerci
 
   const hasBudget = isStandardOrPremium && remainingBudget > 0;
 
-  const shouldShowRechargeButton = remainingBudget < BUDGET_LOW_THRESHOLD;
-
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
       <div className="px-4 lg:px-6 py-3.5">
@@ -96,15 +89,13 @@ export function Header({ title, onMenuClick, showMenuButton, planState, commerci
                   </span>
                 </div>
 
-                {/* Botón Recargar - Solo aparece si está bajo el umbral */}
-                {shouldShowRechargeButton && (
-                  <Link
-                    href="/commercial/balance"
-                    className="text-[10px] font-bold bg-[#03548C] text-white px-3 py-1.5 rounded-lg hover:bg-[#0b1440] transition-colors"
-                  >
-                    Recargar
-                  </Link>
-                )}
+                {/* Botón Recargar - Siempre visible */}
+                <Link
+                  href="/commercial/balance"
+                  className="text-[10px] font-bold bg-[#03548C] text-white px-3 py-1.5 rounded-lg hover:bg-[#0b1440] transition-colors"
+                >
+                  Recargar
+                </Link>
               </div>
             ) : (
               /* BASIC o sin presupuesto */

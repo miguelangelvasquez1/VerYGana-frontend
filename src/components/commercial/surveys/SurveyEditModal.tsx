@@ -7,6 +7,9 @@ import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { GENDER_LABELS } from '@/hooks/surveys/surveyUtils';
 import type { SurveyCommercialDetailDTO, UpdateSurveyRequest, TargetGender } from '@/types/survey.types';
+import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
+import { isBudgetDormant, BudgetDormantEditNotice, WALLET_DORMANT_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
+import toast from 'react-hot-toast';
 
 interface MunicipalityData {
   code: string;
@@ -22,6 +25,8 @@ interface Props {
 
 export default function SurveyEditModal({ survey, onClose }: Props) {
   const updateMutation = useUpdateSurvey(survey.id);
+  const { planState } = usePlanState();
+  const editBlocked = isBudgetDormant(planState);
   const { categories, loading: loadingCategories } = useCategories();
   const { departments, loading: loadingDepartments } = useDepartments();
 
@@ -82,6 +87,11 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
+    if (editBlocked) {
+      toast.error(WALLET_DORMANT_TOOLTIP);
+      return;
+    }
+
     const errs: { minAge?: string; maxAge?: string } = {};
     const minVal = minAge ? parseInt(minAge) : NaN;
     const maxVal = maxAge ? parseInt(maxAge) : NaN;
@@ -141,6 +151,8 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
         </div>
 
         <div className="space-y-5 p-6">
+
+          {editBlocked && <BudgetDormantEditNotice />}
 
           {/* Title */}
           <div>
@@ -369,7 +381,8 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
           </button>
           <button
             type="submit"
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || editBlocked}
+            title={editBlocked ? WALLET_DORMANT_TOOLTIP : undefined}
             className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#03548C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {updateMutation.isPending ? (

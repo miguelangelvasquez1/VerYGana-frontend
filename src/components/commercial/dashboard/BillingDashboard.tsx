@@ -32,14 +32,12 @@ const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - 4 + i);
 const walletStatusLabels: Record<WalletStatus, string> = {
   [WalletStatus.INACTIVE]: 'Inactiva',
   [WalletStatus.ACTIVE]: 'Activa',
-  [WalletStatus.LOW_BALANCE]: 'Saldo Bajo',
   [WalletStatus.EXHAUSTED]: 'Agotada',
 };
 
 const walletStatusColors: Record<WalletStatus, string> = {
   [WalletStatus.INACTIVE]: 'bg-gray-100 text-gray-700',
   [WalletStatus.ACTIVE]: 'bg-green-100 text-green-700',
-  [WalletStatus.LOW_BALANCE]: 'bg-yellow-100 text-yellow-700',
   [WalletStatus.EXHAUSTED]: 'bg-red-100 text-red-700',
 };
 

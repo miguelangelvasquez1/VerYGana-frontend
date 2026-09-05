@@ -1,17 +1,16 @@
 // components/VideoAdPlayer.tsx
 'use client'
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQueryClient } from '@tanstack/react-query';
 import VideoControls from './VideoControls';
-import { useNextAd, useLikeAd } from '@/hooks/ads/mutations';
-import { AdForConsumerDTO, AdLikedResponse } from '@/types/ads/commercial';
+import { useAdFlow } from '@/hooks/ads/useAdFlow';
+import { adService } from '@/services/adService';
 import { levelService } from '@/services/LevelService';
 import { levelKeys } from '@/hooks/useLevelProfile';
 import type { XpRewardData } from '@/components/levels/XpRewardToast';
 import type { LevelProfile } from '@/types/level';
 import { resolveLevelUp } from '@/utils/levelUp';
-import toast from 'react-hot-toast';
 
 interface Props {
   onXpReward?: (data: XpRewardData) => void;
@@ -29,20 +28,24 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
   const [rewardAmount, setRewardAmount] = useState<number | null>(null);
   const [showReward, setShowReward] = useState(false);
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
-  const [currentAd, setCurrentAd] = useState<AdForConsumerDTO | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [mediaError, setMediaError] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { mutate: getNextAd, isPending: isLoadingAd } = useNextAd();
-  const { mutate: likeAd, isPending: isLikingAd } = useLikeAd();
-
-  // Cargar el primer anuncio al montar el componente
-  useEffect(() => {
-    loadNextAd();
-  }, []);
+  // Máquina de estados del flujo GET /adLike/next -> POST /adLike/like,
+  // con manejo centralizado de errores (ver src/lib/api/adFlowErrors.ts).
+  const {
+    status: adFlowStatus,
+    currentAd,
+    isLoadingNext,
+    isLiking,
+    blockedMessage,
+    loadNext,
+    like: likeCurrentAd,
+    retry: retryAdFlow,
+  } = useAdFlow();
 
   // Bloquear scroll de la página mientras el componente está montado
   useEffect(() => {
@@ -58,25 +61,12 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
     };
   }, []);
 
-  const loadNextAd = () => {
-    getNextAd(undefined, {
-      onSuccess: (ad: AdForConsumerDTO| null) => {
-        setIsInitialized(true);
-        if (ad) {
-          setCurrentAd(ad);
-          resetAdState();
-        } else {
-          setCurrentAd(null);
-        }
-      },
-      onError: (error: unknown) => {
-        setIsInitialized(true);
-        console.error('Error cargando anuncio:', error);
-      }
-    });
-  };
-
-  const resetAdState = () => {
+  // Reinicia el estado de UI propio de "este" anuncio cuando useAdFlow entrega
+  // uno nuevo. useLayoutEffect (no useEffect) para que corra antes del pintado
+  // y no se alcance a ver, aunque sea un frame, el overlay del anuncio anterior
+  // (like/reward/fin de video) superpuesto al contenido del nuevo.
+  useLayoutEffect(() => {
+    if (!currentAd) return;
     setProgress(0);
     setWatchTime(0);
     setIsLiked(false);
@@ -84,6 +74,22 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
     setHasReachedEnd(false);
     setIsPlaying(true);
     setIsExpanded(false);
+    setMediaError(false);
+    // Solo debe resetear al cambiar de anuncio (nuevo id), no ante cualquier
+    // cambio de referencia de `currentAd` (ej. si en el futuro se actualiza
+    // in-place algún campo como currentLikes).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentAd?.id]);
+
+  // El contenido del anuncio (contentUrl) no se pudo cargar: video/imagen roto,
+  // 404, formato no soportado, etc. Detenemos la reproducción y ofrecemos saltar.
+  const handleMediaError = () => {
+    setMediaError(true);
+    setIsPlaying(false);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   };
 
   // Efecto para manejar la reproducción del medio actual
@@ -165,55 +171,56 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
   }, [currentAd?.id, isPlaying, hasReachedEnd]);
 
   const handleLike = () => {
-    if (!currentAd || isLikingAd || isLiked || !hasReachedEnd) return;
-    likeAd(
-      {
-        adId: currentAd.id,
-        sessionUUID: currentAd.sessionUUID
-      },
-      {
-        onSuccess: (res: AdLikedResponse) => {
-          setIsLiked(true);
+    if (!currentAd || isLiking || isLiked || !hasReachedEnd) return;
 
-          if (res.rewardAmount > 0) {
-            setRewardAmount(res.rewardAmount);
-            setShowReward(true);
-          } else {
-            setTimeout(() => loadNextAd(), 500);
-          }
+    likeCurrentAd().then((res) => {
+      // res === null: el error ya fue resuelto dentro de useAdFlow (avanzó al
+      // siguiente anuncio, pidió reintentar viendo el video, etc.) — nada que
+      // hacer acá.
+      if (!res) return;
 
-          const token = session?.accessToken as string | undefined;
-          if (token && onXpReward) {
-            const prevLevel = queryClient.getQueryData<LevelProfile>(levelKeys.profile())?.currentLevel;
-            Promise.all([
-              levelService.getProfile(token),
-              levelService.getHistory(token, 0, 1),
-            ]).then(([profile, history]) => {
-              queryClient.setQueryData(levelKeys.profile(), profile);
-              const latest = history.content[0];
-              if (!latest) return;
-              onXpReward({
-                activityType: 'VIDEO_WATCHED',
-                xpEarned:     latest.xpEarned,
-                multiplier:   latest.multiplierApplied,
-                xpTotal:      profile.xpTotal,
-                xpToNextLevel: profile.xpToNextLevel,
-                ...resolveLevelUp(prevLevel, profile.currentLevel),
-              });
-            }).catch(() => {/* non-critical */});
-          }
-        },
-        onError: (error: unknown) => {
-          const message = (error as any)?.response?.data?.message;
-          toast.error('No se pudo registrar el like. Intenta nuevamente.');
-          console.error('Error al dar like:', message);
-        }
+      setIsLiked(true);
+
+      if (res.rewardAmount > 0) {
+        setRewardAmount(res.rewardAmount);
+        setShowReward(true);
+      } else {
+        setTimeout(() => loadNext(), 500);
       }
-    );
+
+      const token = session?.accessToken as string | undefined;
+      if (token && onXpReward) {
+        const prevLevel = queryClient.getQueryData<LevelProfile>(levelKeys.profile())?.currentLevel;
+        Promise.all([
+          levelService.getProfile(token),
+          levelService.getHistory(token, 0, 1),
+        ]).then(([profile, history]) => {
+          queryClient.setQueryData(levelKeys.profile(), profile);
+          const latest = history.content[0];
+          if (!latest) return;
+          onXpReward({
+            activityType: 'VIDEO_WATCHED',
+            xpEarned:     latest.xpEarned,
+            multiplier:   latest.multiplierApplied,
+            xpTotal:      profile.xpTotal,
+            xpToNextLevel: profile.xpToNextLevel,
+            ...resolveLevelUp(prevLevel, profile.currentLevel),
+          });
+        }).catch(() => {/* non-critical */});
+      }
+    });
   };
 
   const handleVisitAd = () => {
     if (!currentAd?.targetUrl) return;
+
+    // Métrica "Remisión" del panel comercial: se registra antes de abrir la
+    // URL, fire-and-forget (no bloquea la navegación si falla).
+    adService.registerAdPageVisit(
+      currentAd.id,
+      currentAd.targetUrl,
+      session?.accessToken as string | undefined,
+    );
 
     window.open(currentAd.targetUrl, '_blank', 'noopener,noreferrer');
   };
@@ -239,7 +246,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
     console.log('Guardar:', currentAd);
   };
 
-  if (!isInitialized || (isLoadingAd && !currentAd)) {
+  if (adFlowStatus === 'loading' && !currentAd) {
     return (
       <div className="flex justify-center items-center w-full h-full bg-[#f4f7fb]">
         <div className="text-center">
@@ -250,11 +257,46 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
     );
   }
 
+  if (adFlowStatus === 'reauth') {
+    return (
+      <div className="flex justify-center items-center w-full h-full bg-[#f4f7fb]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#03548C] mx-auto mb-4"></div>
+          <p className="text-[#0b1440]">Tu sesión expiró, redirigiendo...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (adFlowStatus === 'blocked') {
+    return (
+      <div className="flex justify-center items-center w-full h-full bg-[#f4f7fb]">
+        <div className="text-center text-[#0b1440] p-6 max-w-sm">
+          <p className="text-xl mb-2">No pudimos cargar anuncios</p>
+          <p className="text-sm text-[#0b1440]/70 mb-6">{blockedMessage}</p>
+          <button
+            onClick={retryAdFlow}
+            className="px-6 py-3 bg-[#03548C] text-white rounded-full font-bold cursor-pointer hover:bg-[#024270] transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!currentAd) {
     return (
       <div className="flex justify-center items-center w-full h-full bg-[#f4f7fb]">
         <div className="text-center text-[#0b1440] p-6">
           <p className="text-xl mb-4">No hay más anuncios disponibles</p>
+          <button
+            onClick={retryAdFlow}
+            disabled={isLoadingNext}
+            className="px-6 py-3 bg-[#03548C] text-white rounded-full font-bold cursor-pointer hover:bg-[#024270] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isLoadingNext ? 'Buscando...' : 'Reintentar'}
+          </button>
         </div>
       </div>
     );
@@ -283,6 +325,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
           <img
             src={currentAd.contentUrl}
             alt={currentAd.title}
+            onError={handleMediaError}
             className="max-w-full max-h-[calc(80dvh-1rem)] w-auto h-auto object-contain"
           />
         ) : (
@@ -293,8 +336,31 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
             loop={false}
             playsInline
             preload="metadata"
+            onError={handleMediaError}
             className="max-w-full h-[calc(80dvh-1rem)] w-auto object-contain"
           />
+        )}
+
+        {/* Contenido del anuncio no disponible - saltar al siguiente */}
+        {mediaError && (
+          <div className="absolute inset-0 flex items-center justify-center z-40 bg-black/80 backdrop-blur-[2px] p-6">
+            <div className="text-center max-w-xs">
+              <div className="text-5xl mb-3">📵</div>
+              <p className="text-white text-lg font-bold mb-1">
+                No se pudo cargar este anuncio
+              </p>
+              <p className="text-white/70 text-sm mb-6">
+                Hubo un problema con el contenido. Puedes continuar con el siguiente.
+              </p>
+              <button
+                onClick={loadNext}
+                disabled={isLoadingNext}
+                className="px-8 py-3.5 bg-gradient-to-r from-[#03548C] to-[#00a4ff] text-white rounded-full font-bold text-base transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {isLoadingNext ? 'Cargando...' : 'Ver siguiente anuncio →'}
+              </button>
+            </div>
+          </div>
         )}
 
         {/* End of ad overlay - Like prompt */}
@@ -314,7 +380,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
               <div className="relative text-center bg-white/10 backdrop-blur-md rounded-2xl px-8 py-7 mx-4 overflow-hidden">
 
                 {/* Corazones flotantes al procesar */}
-                {isLikingAd && [0, 1, 2, 3, 4].map((i) => (
+                {isLiking && [0, 1, 2, 3, 4].map((i) => (
                   <span
                     key={i}
                     className="absolute text-2xl pointer-events-none select-none"
@@ -331,7 +397,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
                 {/* Icono */}
                 <div
                   className="text-5xl mb-3"
-                  style={{ animation: isLikingAd ? 'none' : 'heartPulse 1.4s ease-in-out infinite' }}
+                  style={{ animation: isLiking ? 'none' : 'heartPulse 1.4s ease-in-out infinite' }}
                 >
                   ❤️
                 </div>
@@ -343,11 +409,11 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
 
                 <button
                   onClick={handleLike}
-                  disabled={isLikingAd}
+                  disabled={isLiking}
                   className={`px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full font-bold text-lg transition-all duration-200 disabled:cursor-not-allowed cursor-pointer
-                    ${isLikingAd ? 'scale-95 opacity-80' : 'hover:scale-105 active:scale-95'}`}
+                    ${isLiking ? 'scale-95 opacity-80' : 'hover:scale-105 active:scale-95'}`}
                 >
-                  {isLikingAd ? (
+                  {isLiking ? (
                     <span className="flex items-center gap-2">
                       <span className="inline-block animate-bounce">❤️</span>
                       Procesando...
@@ -360,7 +426,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
         )}
 
         {/* Loading next ad overlay */}
-        {isLiked && isLoadingAd && (
+        {isLiked && isLoadingNext && (
           <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/70">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
@@ -370,7 +436,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
         )}
 
         {/* Media Info Overlay */}
-        <div className={`absolute left-0 right-0 bottom-0 bg-gradient-to-t from-black/40 to-transparent p-3 pb-4 md:pb-4 z-20 pt-5 
+        <div className={`absolute left-0 right-0 bottom-0 bg-gradient-to-t from-black/40 to-transparent p-3 pb-4 md:pb-4 z-20 pt-5
           ${isExpanded ? 'bg-gradient-to-t from-black/60 to-transparent' : ''}`}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
@@ -388,7 +454,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
           <h3 className="text-white font-bold text-base mb-1 leading-tight drop-shadow-lg">
             {currentAd.title}
           </h3>
-          
+
           <p
             className={`text-white/90 text-sm leading-snug drop-shadow-lg transition-all ${
               isExpanded ? '' : 'line-clamp-2'
@@ -498,7 +564,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
                       onClick={() => {
                         setShowReward(false);
                         setRewardAmount(null);
-                        loadNextAd();
+                        loadNext();
                       }}
                       className="mt-1 w-full px-6 py-3 bg-amber-900/20 hover:bg-amber-900/30 active:scale-95 text-amber-900 font-bold rounded-2xl transition-all duration-150 border border-amber-900/20 cursor-pointer"
                     >

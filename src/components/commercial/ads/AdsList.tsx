@@ -11,7 +11,7 @@ import { useAds } from '@/hooks/ads/querys';
 import { usePauseAd, useResumeAd, useDeleteAd } from '@/hooks/ads/mutations';
 import { usePlanState } from '../layout/DashboardLayout';
 import { LimitReachedBanner, isLimitReached } from '../plans/LimitReached';
-import { isWalletExhausted, WALLET_EXHAUSTED_TOOLTIP } from '../plans/WalletBudgetAlerts';
+import { isWalletExhausted, isBudgetDormant, WALLET_EXHAUSTED_TOOLTIP, WALLET_DORMANT_TOOLTIP } from '../plans/WalletBudgetAlerts';
 import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
 import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from '../planChange/PlanChangeInProgress';
 import toast from 'react-hot-toast';
@@ -39,6 +39,7 @@ export function AdsList() {
 
   const adsLimitReached = planState != null && isLimitReached(totalElements, planState.maxAds);
   const walletExhausted = isWalletExhausted(planState);
+  const budgetDormant = isBudgetDormant(planState);
   const createBlocked = adsLimitReached || walletExhausted || planChangeBlocked;
   const createBlockedTitle = planChangeBlocked
     ? PLAN_CHANGE_BLOCK_TOOLTIP
@@ -227,6 +228,8 @@ export function AdsList() {
                   onDelete={handleDelete}
                   canReactivate={!planChangeBlocked}
                   reactivateDisabledReason={PLAN_CHANGE_BLOCK_TOOLTIP}
+                  editBlocked={budgetDormant}
+                  editBlockedReason={WALLET_DORMANT_TOOLTIP}
                 />
               ))}
             </div>

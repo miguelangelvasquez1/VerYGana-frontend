@@ -20,8 +20,8 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
   const { data: ad, isLoading: loadingAd } = useAdDetails(adId);
   const { data: likesData, isLoading: loadingLikes } = useAdLikes(adId, likesPage);
 
-  const formatMoney = (value: number) =>
-    value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const formatMoney = (value: number | null | undefined) =>
+    (value ?? 0).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString('es-CO', {
@@ -118,12 +118,12 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
               <div>
                 <div className="flex justify-between text-xs text-gray-600 mb-1.5">
                   <span>Progreso</span>
-                  <span className="font-bold">{ad.completionPercentage.toFixed(1)}%</span>
+                  <span className="font-bold">{(ad.completionPercentage ?? 0).toFixed(1)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all"
-                    style={{ width: `${Math.min(ad.completionPercentage, 100)}%` }}
+                    style={{ width: `${Math.min(ad.completionPercentage ?? 0, 100)}%` }}
                   />
                 </div>
               </div>

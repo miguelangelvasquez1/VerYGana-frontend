@@ -8,13 +8,14 @@ import {
   DashboardAlertType,
 } from "@/types/commercial/Dashboard.types";
 
-// Alertas de saldo publicitario (agotado / bajo): NO se pintan aquí porque el
-// layout del panel comercial ya muestra un banner global
-// (WalletExhaustedBanner / WalletLowBalanceBanner) en todas las pantallas
-// cuando el presupuesto se agota o queda bajo. Evita el banner duplicado.
+// Saldo agotado: NO se pinta aquí porque el layout del panel comercial ya
+// muestra un banner global (WalletExhaustedBanner / WalletDormantBanner) en
+// todas las pantallas cuando el presupuesto se agota. Evita el banner
+// duplicado. El "saldo bajo" (LOW_BALANCE, WARNING o CRITICAL) sí se pinta
+// acá: ya no es un estado persistido del wallet, solo llega como alerta del
+// dashboard.
 const ALERTS_HANDLED_BY_LAYOUT: DashboardAlertType[] = [
   "BUDGET_SUSPENDED",
-  "LOW_BALANCE",
 ];
 
 // A dónde lleva el CTA de cada tipo de alerta.
