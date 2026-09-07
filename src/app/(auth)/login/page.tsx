@@ -29,7 +29,6 @@ function CallbackUrlCleaner() {
   const searchParams =
       useSearchParams();
 
-
   useEffect(() => {
 
     if (
