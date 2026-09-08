@@ -13,6 +13,7 @@ import {
 } from '@/types/finance/Wallet.types';
 import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { PagedResponse } from '@/types/Generic.types';
+import { PayoutMethodsSection } from '@/components/commercial/payout-methods/PayoutMethodsSection';
 
 const formatCents = (cents: number) =>
   new Intl.NumberFormat('es-CO', {
@@ -452,6 +453,9 @@ export function BillingDashboard() {
           </>
         )}
       </div>
+
+      {/* ── Métodos de pago ── */}
+      <PayoutMethodsSection />
 
     </div>
   );

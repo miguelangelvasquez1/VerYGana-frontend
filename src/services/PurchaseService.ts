@@ -1,6 +1,6 @@
 import apiClient from "@/lib/api/client";
 import { PagedResponse } from "@/types/Generic.types";
-import { PurchaseResponseDTO, CreatePurchaseRequestDTO, InitiatePurchaseResponseDTO } from "@/types/purchases/purchase.types";
+import { PurchaseResponseDTO, ConsumerPurchaseResponseDTO, CreatePurchaseRequestDTO, InitiatePurchaseResponseDTO } from "@/types/purchases/purchase.types";
 
 export const purchaseService = {
   async createPurchase(request: CreatePurchaseRequestDTO): Promise<InitiatePurchaseResponseDTO> {
@@ -13,8 +13,8 @@ export const purchaseService = {
     return response.data;
   },
 
-  async getPurchases(page = 0, size = 10): Promise<PagedResponse<PurchaseResponseDTO>> {
-    const response = await apiClient.get<PagedResponse<PurchaseResponseDTO>>('/purchases', {
+  async getPurchases(page = 0, size = 10): Promise<PagedResponse<ConsumerPurchaseResponseDTO>> {
+    const response = await apiClient.get<PagedResponse<ConsumerPurchaseResponseDTO>>('/purchases', {
       params: { page, size },
     });
     return response.data;

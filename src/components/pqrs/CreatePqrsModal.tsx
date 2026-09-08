@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import { createPqrs } from "@/services/PqrsService";
 import { PqrsType } from "@/types/Pqrs.types";
 import { pqrsTypeLabel } from "./pqrsMeta";
+import { usePqrsEvidenceUpload } from "@/hooks/pqrs/usePqrsEvidenceUpload";
+import PqrsEvidenceUploader from "./PqrsEvidenceUploader";
 
 interface Props {
   onClose: () => void;
@@ -19,14 +21,21 @@ const CreatePqrsModal = ({ onClose, onCreated }: Props) => {
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const evidence = usePqrsEvidenceUpload();
 
-  const canSubmit = subject.trim().length > 0 && description.trim().length > 0 && !submitting;
+  const canSubmit =
+    subject.trim().length > 0 && description.trim().length > 0 && !submitting && !evidence.busy;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
     setSubmitting(true);
     try {
-      await createPqrs({ type, subject: subject.trim(), description: description.trim() });
+      await createPqrs({
+        type,
+        subject: subject.trim(),
+        description: description.trim(),
+        assetIds: evidence.assetIds,
+      });
       toast.success("Tu solicitud fue enviada correctamente");
       onCreated();
     } catch (err: any) {
@@ -88,6 +97,8 @@ const CreatePqrsModal = ({ onClose, onCreated }: Props) => {
               {description.length}/{DESCRIPTION_MAX}
             </span>
           </div>
+
+          <PqrsEvidenceUploader evidence={evidence} />
 
           <div className="flex gap-3 pt-1">
             <button

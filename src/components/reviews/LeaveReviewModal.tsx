@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ConsumerPurchaseItemResponseDTO } from "@/types/purchases/purchaseItem.types";
+import { ConsumerPurchaseItemResponseDTO, PurchaseItemStatus } from "@/types/purchases/purchaseItem.types";
 import { createProductReview } from "@/services/ProductReviewService";
 import toast from "react-hot-toast";
 
@@ -10,6 +10,11 @@ interface Props {
   onClose: () => void;
   items: ConsumerPurchaseItemResponseDTO[];
 }
+
+// Solo un item entregado (CLAIMED) puede reseñarse: si aún no llega, se
+// reembolsó o se canceló, no hay producto que calificar.
+export const canReviewPurchaseItem = (item: ConsumerPurchaseItemResponseDTO) =>
+  item.status === PurchaseItemStatus.CLAIMED && item.canBeReviewed;
 
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -29,7 +34,7 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
 }
 
 export default function LeaveReviewModal({ open, onClose, items }: Props) {
-  const reviewable = items.filter((i) => i.canBeReviewed);
+  const reviewable = items.filter(canReviewPurchaseItem);
 
   const [selected, setSelected] = useState<ConsumerPurchaseItemResponseDTO | null>(null);
   const [rating, setRating] = useState(0);

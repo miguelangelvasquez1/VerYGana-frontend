@@ -1,12 +1,17 @@
 import React from "react";
 import Link from "next/link";
-import { Star, Building2 } from "lucide-react";
-import { ProductResponseDTO } from "@/types/products/Product.types";
+import { Star, Building2, Download, Truck } from "lucide-react";
+import { ProductResponseDTO, ProductType } from "@/types/products/Product.types";
 
 interface Props {
   product: ProductResponseDTO;
   footer?: React.ReactNode;
 }
+
+const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  [ProductType.DIGITAL]: "Digital",
+  [ProductType.PHYSICAL]: "Físico",
+};
 
 const ProductInfoCard: React.FC<Props> = ({ product, footer }) => {
   return (
@@ -27,6 +32,15 @@ const ProductInfoCard: React.FC<Props> = ({ product, footer }) => {
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
           {product.name}
         </h1>
+
+        <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full w-fit bg-gray-100 text-gray-600">
+          {product.productType === ProductType.DIGITAL ? (
+            <Download className="w-3.5 h-3.5" />
+          ) : (
+            <Truck className="w-3.5 h-3.5" />
+          )}
+          {PRODUCT_TYPE_LABELS[product.productType]}
+        </span>
 
         {product.companyName && (
           <Link

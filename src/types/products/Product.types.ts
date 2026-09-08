@@ -9,6 +9,11 @@ export enum ProductStatus {
   INACTIVE = "INACTIVE"
 }
 
+export enum ProductType {
+  DIGITAL = "DIGITAL",
+  PHYSICAL = "PHYSICAL"
+}
+
 export interface ConfirmProductCreationRequestDTO {
   productAssetId: number;
   productData: CreateProductRequestDTO;
@@ -48,6 +53,7 @@ export interface ProductResponseDTO {
   reviewCount : number;
   reviews : ProductReviewResponseDTO[];
   isGameReward : boolean;
+  productType : ProductType;
 }
 
 export interface ProductEditInfoResponseDTO {
@@ -60,6 +66,7 @@ export interface ProductEditInfoResponseDTO {
   totalStockItems: number;
   availableStockItems: number;
   targeting: TargetAudienceResponseDTO | null;
+  productType : ProductType;
 }
 
 export interface CreateProductRequestDTO {
@@ -68,6 +75,7 @@ export interface CreateProductRequestDTO {
   productCategoryId: number;
   price: number;
   stockItems: ProductStockRequestDTO[];
+  productType : ProductType;
   targeting: OptionalTargetAudienceDTO;
 }
 

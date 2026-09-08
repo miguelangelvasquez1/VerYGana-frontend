@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import {
   Check, X, Zap, Rocket, Star, ArrowRight, Sparkles,
-  Package, Megaphone, Gamepad2, Boxes, TrendingUp,
+  Package, Megaphone, Gamepad2, Layers, TrendingUp,
   PawPrint, ClipboardList, BadgePercent, Loader2,
   AlertCircle, ArrowLeft, RefreshCw
 } from 'lucide-react';
@@ -27,8 +27,13 @@ function apiErrorMessage(err: unknown, fallback: string): string {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+const NA = 'No aplica';
+
 const formatCOP = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+
+// Solo el número con separador de miles (sin símbolo) — el JSX antepone el "$".
+const plainCOP = (cents: number) => new Intl.NumberFormat('es-CO').format(Math.round(cents / 100));
 
 const parseCOP = (raw: string) => parseInt(raw.replace(/\D/g, ''), 10) || 0;
 
@@ -53,31 +58,19 @@ const capacityLabel = (enabled: boolean, max: number): string | boolean => {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface PlanFeatureRow {
+type FeatureValue = boolean | string;
+
+interface FeatureRow {
   label: string;
   icon: React.ReactNode;
-  basic: string | boolean;
-  standard: string | boolean;
-  premium: string | boolean;
+  basic: FeatureValue;
+  standard: FeatureValue;
+  premium: FeatureValue;
 }
 
-// Modelo de plan para la UI: combina lo que llega de GET /plans/catalog con
-// metadata puramente visual (ícono, si se resalta como "más popular", el
-// texto de la sección de features) que la API no expone y no varía.
-interface UIPlan {
-  key: PlanCode;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  highlight: boolean;
-  currentPlan: boolean;
-  featuresLabel: string;
-  priceLabel: string;
-  unit: string;
-  billing: string;
-  monthlyFeeCents: number | null;
-  minInvestmentCents: number | null;
-  maxInvestmentCents: number | null;
+interface FeatureCategory {
+  title: string;
+  rows: FeatureRow[];
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -457,46 +450,20 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
   );
 }
 
-// ─── Recharge Conflict Modal ────────────────────────────────────────────────────
-// Se muestra cuando el backend rechaza una nueva solicitud de cambio de plan
-// porque hay una recarga en curso (contractId guardado en sessionStorage
-// desde /commercial/balance) que la bloquea. Solo informa — el comercial
-// decide si cancela la recarga manualmente desde su pantalla de recarga.
+// ─── Cell renderer (table view) ────────────────────────────────────────────────
 
-interface RechargeConflictModalProps {
-  onGoToRecharge: () => void;
-  onClose: () => void;
-}
-
-function RechargeConflictModal({ onGoToRecharge, onClose }: RechargeConflictModalProps) {
+function FeatureCell({ val, tinted }: { val: FeatureValue; tinted: boolean }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-[#13151f] border border-white/10 rounded-2xl p-6 shadow-2xl text-center">
-        <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-4">
-          <AlertCircle className="w-6 h-6" />
-        </div>
-        <h3 className="text-white font-bold text-base mb-2">Tienes una recarga en curso</h3>
-        <p className="text-slate-400 text-sm mb-5 leading-relaxed">
-          No puedes solicitar un cambio de plan mientras tengas una recarga de saldo en curso. Si quieres continuar,
-          cancélala tú mismo desde tu pantalla de recarga y vuelve a intentarlo.
-        </p>
-        <button
-          onClick={onGoToRecharge}
-          className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 mb-2
-            bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white
-            transition-all duration-200 active:scale-[0.98] cursor-pointer"
-        >
-          Ir a mi recarga
-        </button>
-        <button
-          onClick={onClose}
-          className="w-full py-2 text-sm font-semibold text-slate-500 hover:text-white transition-colors cursor-pointer"
-        >
-          Volver
-        </button>
-      </div>
-    </div>
+    <td className={`px-5 py-3 text-center ${tinted ? 'bg-blue-600/5' : ''}`}>
+      {val === true
+        ? <Check className="w-4 h-4 text-emerald-500 mx-auto" strokeWidth={2.5} />
+        : val === false
+          ? <X className="w-4 h-4 text-slate-600 mx-auto" strokeWidth={2} />
+          : val === NA
+            ? <span className="text-xs text-slate-600 italic">No aplica</span>
+            : <span className="text-sm text-slate-300 font-medium">{val}</span>
+      }
+    </td>
   );
 }
 
@@ -652,7 +619,7 @@ export default function PlansPage() {
   );
 
   return (
-    <div className="h-screen overflow-hidden bg-[#111318] text-white font-sans flex flex-col">
+    <div className="min-h-screen bg-[#111318] text-white font-sans flex flex-col">
       {/* Ambient */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-15%] left-[15%] w-125 h-125 rounded-full bg-blue-700/8 blur-[140px]" />
@@ -671,7 +638,7 @@ export default function PlansPage() {
       </div>
 
       <div
-        className="relative flex-1 flex flex-col justify-center max-w-4xl w-full mx-auto px-6"
+        className="relative flex-1 flex flex-col max-w-6xl w-full mx-auto px-6 py-6"
         style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease' }}
       >
         {/* Header */}
@@ -684,8 +651,8 @@ export default function PlansPage() {
             <span className="text-white">Planes y </span>
             <span className="bg-linear-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">Precios</span>
           </h1>
-          <p className="text-slate-400 text-xs max-w-md mx-auto mt-1.5">
-            Desde tu primera venta hasta escalar con anuncios y experiencias gamificadas.
+          <p className="text-slate-400 text-xs max-w-lg mx-auto mt-1.5">
+            Desde tu primera venta hasta escalar con anuncios, juegos y patrocinios de máxima visibilidad.
           </p>
         </div>
 
@@ -714,28 +681,23 @@ export default function PlansPage() {
               </div>
             </div>
 
-            {/* ── Cards view ── */}
-            {activeTab === 'cards' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
-                {uiPlans.map((plan, i) => {
-                  const planFeatures = featureRows.filter(f => {
-                    const val = f[plan.key.toLowerCase() as keyof typeof f];
-                    return val !== false;
-                  });
-
-                  return (
-                    <div
-                      key={plan.key}
-                      className={`relative rounded-xl border overflow-hidden transition-all duration-300
-                        ${plan.highlight
-                          ? 'border-blue-500/40 shadow-[0_0_30px_rgba(59,130,246,0.10)]'
-                          : 'border-white/10 hover:border-white/20'
-                        }`}
-                      style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'none' : 'translateY(16px)', transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s` }}
-                    >
-                      {plan.highlight && (
-                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-blue-500 via-purple-500 to-blue-500" />
-                      )}
+        {/* ── Cards view ── */}
+        {activeTab === 'cards' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+            {plans.map((plan, i) => {
+              return (
+                <div
+                  key={plan.key}
+                  className={`relative rounded-xl border overflow-hidden transition-all duration-300
+                    ${plan.highlight
+                      ? 'border-blue-500/40 shadow-[0_0_30px_rgba(59,130,246,0.10)]'
+                      : 'border-white/10 hover:border-white/20'
+                    }`}
+                  style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'none' : 'translateY(16px)', transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s` }}
+                >
+                  {plan.highlight && (
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-blue-500 via-purple-500 to-blue-500" />
+                  )}
 
                       {/* Top section */}
                       <div className={`p-4 ${plan.highlight ? 'bg-[#161a2e]' : 'bg-[#16181f]'}`}>
@@ -779,54 +741,56 @@ export default function PlansPage() {
                         </button>
                       </div>
 
-                      {/* Features section */}
-                      <div className="px-4 py-3 bg-[#13151b] border-t border-white/6">
-                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide mb-2">
-                          {plan.featuresLabel}
-                        </p>
-                        <ul className="space-y-1.5">
-                          {planFeatures.map(f => {
-                            const val = f[plan.key.toLowerCase() as keyof typeof f] as string | boolean;
-                            return (
-                              <li key={f.label} className="flex items-center gap-2 text-xs text-slate-300">
-                                <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" strokeWidth={2.5} />
-                                <span>
-                                  {f.label}
-                                  {typeof val === 'string' && (
-                                    <span className="text-slate-500 ml-1">({val})</span>
-                                  )}
-                                </span>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* ── Table view ── */}
-            {activeTab === 'table' && (
-              <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.4s' }}>
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-white/10 bg-white/2">
-                      <th className="text-left px-5 py-4 text-slate-400 font-medium text-sm w-[38%]">Funcionalidad</th>
-                      {uiPlans.map(p => (
-                        <th key={p.key} className={`px-5 py-4 text-center ${p.highlight ? 'bg-blue-600/8' : ''}`}>
-                          <div className="font-bold text-white text-base">{p.name}</div>
-                          <div className={`text-sm font-black mt-0.5 ${p.highlight ? 'text-blue-400' : 'text-slate-400'}`}>
-                            ${p.priceLabel}
-                          </div>
-                          <div className="text-xs text-slate-500">{p.unit}</div>
-                        </th>
+                  {/* Highlights */}
+                  <div className="px-4 py-3 bg-[#13151b] border-t border-white/6">
+                    <ul className="space-y-2">
+                      {plan.highlights.map(h => (
+                        <li key={h.text} className="flex items-center gap-2.5 text-xs text-slate-300">
+                          <span className={`shrink-0 ${plan.highlight ? 'text-blue-400' : 'text-slate-500'}`}>{h.icon}</span>
+                          <span>{h.text}</span>
+                        </li>
                       ))}
+                    </ul>
+                    <button
+                      onClick={() => setActiveTab('table')}
+                      className="mt-3 text-xs text-slate-500 hover:text-white transition-colors cursor-pointer underline underline-offset-2"
+                    >
+                      Ver todos los detalles
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ── Table view ── */}
+        {activeTab === 'table' && (
+          <div className="rounded-2xl border border-white/10 overflow-x-auto" style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.4s' }}>
+            <table className="w-full min-w-[720px]">
+              <thead>
+                <tr className="border-b border-white/10 bg-white/2">
+                  <th className="text-left px-5 py-4 text-slate-400 font-medium text-sm w-[38%]">Funcionalidad</th>
+                  {plans.map(p => (
+                    <th key={p.key} className={`px-5 py-4 text-center ${p.highlight ? 'bg-blue-600/8' : ''}`}>
+                      <div className="font-bold text-white text-base">{p.name}</div>
+                      <div className={`text-sm font-black mt-0.5 ${p.highlight ? 'text-blue-400' : 'text-slate-400'}`}>
+                        ${p.price}
+                      </div>
+                      <div className="text-xs text-slate-500">{p.unit}</div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map(cat => (
+                  <React.Fragment key={cat.title}>
+                    <tr className="bg-white/4">
+                      <td colSpan={4} className="px-5 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                        {cat.title}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {featureRows.map((row, i) => (
+                    {cat.rows.map((row, i) => (
                       <tr key={row.label}
                         className={`border-b border-white/6 transition-colors hover:bg-white/2 ${i % 2 === 0 ? '' : 'bg-white/1'}`}>
                         <td className="px-5 py-3 text-slate-300">
@@ -835,44 +799,36 @@ export default function PlansPage() {
                             {row.label}
                           </div>
                         </td>
-                        {(['basic', 'standard', 'premium'] as const).map((key, ci) => {
-                          const val = row[key];
-                          return (
-                            <td key={key} className={`px-5 py-3 text-center ${ci === 1 ? 'bg-blue-600/5' : ''}`}>
-                              {val === true
-                                ? <Check className="w-4 h-4 text-emerald-500 mx-auto" strokeWidth={2.5} />
-                                : val === false
-                                  ? <X className="w-4 h-4 text-slate-600 mx-auto" strokeWidth={2} />
-                                  : <span className="text-sm text-slate-300 font-medium">{val as string}</span>
-                              }
-                            </td>
-                          );
-                        })}
+                        {(['basic', 'standard', 'premium'] as const).map((key, ci) => (
+                          <FeatureCell key={key} val={row[key]} tinted={ci === 1} />
+                        ))}
                       </tr>
                     ))}
-                    <tr className="bg-white/2">
-                      <td className="px-5 py-4" />
-                      {uiPlans.map((p, ci) => (
-                        <td key={p.key} className={`px-5 py-4 text-center ${ci === 1 ? 'bg-blue-600/5' : ''}`}>
-                          <button
-                            onClick={() => handlePlanClick(p)}
-                            disabled={loading === p.key}
-                            className={`w-full py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-95
-                              cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed
-                              ${p.highlight
-                                ? 'bg-white text-slate-900 hover:bg-slate-100'
-                                : 'bg-white/8 hover:bg-white/15 text-white border border-white/15'
-                              }`}
-                          >
-                            {loading === p.key ? 'Procesando...' : (p.currentPlan ? 'Recargar' : 'Cambiar de plan')}
-                          </button>
-                        </td>
-                      ))}
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  </React.Fragment>
+                ))}
+                <tr className="bg-white/2">
+                  <td className="px-5 py-4" />
+                  {plans.map((p, ci) => (
+                    <td key={p.key} className={`px-5 py-4 text-center ${ci === 1 ? 'bg-blue-600/5' : ''}`}>
+                      <button
+                        onClick={() => handlePlanClick(p)}
+                        disabled={loading === p.key}
+                        className={`w-full py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-95
+                          cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed
+                          ${p.highlight
+                            ? 'bg-white text-slate-900 hover:bg-slate-100'
+                            : 'bg-white/8 hover:bg-white/15 text-white border border-white/15'
+                          }`}
+                      >
+                        {loading === p.key ? 'Procesando...' : p.cta}
+                      </button>
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
 
             <p className="text-center text-slate-600 text-xs mt-3">
               Los planes Estándar y Premium se activan por inversión, no son suscripciones recurrentes.

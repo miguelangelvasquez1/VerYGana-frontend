@@ -1,21 +1,29 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useProductCreation } from "@/hooks/products/useProductCreation";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
-import { CreateProductRequestDTO } from "@/types/products/Product.types";
+import { CreateProductRequestDTO, ProductType } from "@/types/products/Product.types";
 import { ProductStockRequestDTO } from "@/types/products/ProductStock.types";
+import { getMyProducts } from "@/services/ProductService";
+import { getAll as getPayoutMethods } from "@/services/commercial/PayoutMethodService";
+import { VerificationStatus } from "@/types/PayoutMethod.types";
 import { OptionalTargetAudienceDTO } from "@/types/TargetAudience.types";
 import StockInputSection, { StockItemForm } from "./stock/StockInputSection";
 import TargetAudienceFields, {
   isTargetAudienceValid,
 } from "@/components/shared/targeting/TargetAudienceFields";
 import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
-import { LimitReachedBlock } from "@/components/commercial/plans/LimitReached";
-import { usePlanSlot } from "@/hooks/commercial/usePlanSlot";
+import { LimitReachedBlock, isLimitReached } from "@/components/commercial/plans/LimitReached";
 import { usePlanChangeRequest } from "@/hooks/planChange/usePlanChangeRequest";
 import { PlanChangeInProgressBlock } from "@/components/commercial/planChange/PlanChangeInProgress";
+import { PayoutMethodRequiredBlock } from "@/components/commercial/payout-methods/PayoutMethodRequiredBlock";
 import toast from "react-hot-toast";
+
+// El backend valida lo mismo del lado del servidor; este patrón detecta ese
+// mensaje puntual para mostrar el CTA en vez del toast genérico de error.
+const PAYOUT_METHOD_REQUIRED_PATTERN = /m[eé]todo de pago/i;
 
 // ============================================================
 // TIPOS LOCALES
@@ -27,7 +35,13 @@ interface ProductFormState {
   productCategoryId: string;
   price: string;
   stockItems: StockItemForm[];
+  productType: ProductType | '';
 }
+
+const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  [ProductType.DIGITAL]: 'Digital',
+  [ProductType.PHYSICAL]: 'Físico',
+};
 
 interface Category {
   id: number;
@@ -49,6 +63,7 @@ const initialForm: ProductFormState = {
   productCategoryId: '',
   price: '',
   stockItems: [],
+  productType: '',
 };
 
 
@@ -57,16 +72,18 @@ const initialForm: ProductFormState = {
 // ============================================================
 
 export default function CreateProductForm() {
+  const router = useRouter();
   const [form, setForm] = useState<ProductFormState>(initialForm);
   const [targeting, setTargeting] = useState<OptionalTargetAudienceDTO>({});
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [totalProducts, setTotalProducts] = useState<number | null>(null);
+  const [hasVerifiedPayoutMethod, setHasVerifiedPayoutMethod] = useState<boolean | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { state, createProduct, reset } = useProductCreation();
-  const { loadingPlan } = usePlanState();
-  const productsSlot = usePlanSlot('PRODUCTS');
+  const { planState, loadingPlan } = usePlanState();
   const { blockingRequest: planChangeRequest, isLoading: loadingPlanChange } = usePlanChangeRequest();
 
   const isSubmitting = ['preparing', 'uploading', 'creating'].includes(state.status);
@@ -77,6 +94,24 @@ export default function CreateProductForm() {
       .then(setCategories)
       .catch((err) => console.error('Error cargando categorías:', err));
   }, []);
+
+  // ── Cargar cantidad de productos actuales (para validar el límite del plan) ──
+  useEffect(() => {
+    getMyProducts(0)
+      .then((res) => setTotalProducts(res.meta?.totalElements ?? res.data?.length ?? 0))
+      .catch(() => setTotalProducts(0));
+  }, []);
+
+  // ── Si es su primer producto, exige un método de pago ya verificado ──
+  // (evita payouts retrasados/errados). El backend valida lo mismo — si
+  // este chequeo falla en el cliente, se deja pasar y se confía en esa
+  // validación reactiva al confirmar la creación.
+  useEffect(() => {
+    if (totalProducts !== 0) return;
+    getPayoutMethods(0, 20)
+      .then((res) => setHasVerifiedPayoutMethod(res.data.some((m) => m.verificationStatus === VerificationStatus.VERIFIED)))
+      .catch(() => setHasVerifiedPayoutMethod(true));
+  }, [totalProducts]);
 
   // ── Limpiar URL de preview al desmontar ────────────────────
   useEffect(() => {
@@ -107,6 +142,7 @@ export default function CreateProductForm() {
 
     if (!image) return toast.error('Selecciona una imagen');
     if (!form.productCategoryId) return toast.error('Debes seleccionar una categoría');
+    if (!form.productType) return toast.error('Debes seleccionar un tipo de producto');
 
     const price = parseFloat(form.price);
     if (!price || price <= 0) return toast.error('El precio debe ser mayor a 0');
@@ -129,6 +165,7 @@ export default function CreateProductForm() {
       productCategoryId: parseInt(form.productCategoryId),
       price,
       stockItems,
+      productType: form.productType as ProductType,
       targeting,
     };
 
@@ -143,6 +180,9 @@ export default function CreateProductForm() {
       setImage(null);
       setImagePreview(null);
       reset();
+    } else if (PAYOUT_METHOD_REQUIRED_PATTERN.test(result.errorMsg ?? '')) {
+      toast.error('Antes de crear tu primer producto debes registrar y verificar un método de pago. Te llevamos a esa sección.');
+      router.push('/commercial/billing');
     } else {
       toast.error(result.errorMsg ?? 'No se pudo crear el producto');
     }
@@ -159,7 +199,7 @@ export default function CreateProductForm() {
   // RENDER
   // ============================================================
 
-  if (loadingPlan || productsSlot.isLoading || loadingPlanChange) {
+  if (loadingPlan || totalProducts === null || loadingPlanChange || (totalProducts === 0 && hasVerifiedPayoutMethod === null)) {
     return (
       <div className="flex items-center justify-center h-48">
         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -177,11 +217,20 @@ export default function CreateProductForm() {
     );
   }
 
-  if (productsSlot.reason === 'SLOT_FULL') {
+  if (totalProducts === 0 && hasVerifiedPayoutMethod === false) {
+    return (
+      <PayoutMethodRequiredBlock
+        backHref="/commercial/products"
+        backLabel="Volver a productos"
+      />
+    );
+  }
+
+  if (planState != null && isLimitReached(totalProducts, planState.maxProducts)) {
     return (
       <LimitReachedBlock
         resourceLabel="productos"
-        max={productsSlot.max ?? 0}
+        max={planState.maxProducts}
         backHref="/commercial/products"
         backLabel="Volver a productos"
       />
@@ -274,6 +323,25 @@ export default function CreateProductForm() {
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Tipo de producto *</label>
+          <select
+            name="productType"
+            value={form.productType}
+            onChange={handleChange}
+            className="w-full border border-gray-200 p-2 rounded-lg"
+            required
+            disabled={isSubmitting}
+          >
+            <option value="">Selecciona un tipo</option>
+            {Object.values(ProductType).map((type) => (
+              <option key={type} value={type}>
+                {PRODUCT_TYPE_LABELS[type]}
               </option>
             ))}
           </select>
