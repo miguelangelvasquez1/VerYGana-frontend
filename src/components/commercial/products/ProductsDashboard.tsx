@@ -9,11 +9,11 @@ import { DashboardStats } from "@/types/Commercial.types";
 import CommercialProductCard from "@/components/commercial/products/CommercialProductCard";
 import CreateProductForm from "@/components/commercial/products/CreateProductForm";
 import { useRouter, useSearchParams } from "next/navigation";
-import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
-import { LimitReachedBanner, isLimitReached } from "@/components/commercial/plans/LimitReached";
-import { isWalletExhausted, WALLET_EXHAUSTED_TOOLTIP } from "@/components/commercial/plans/WalletBudgetAlerts";
+import { LimitReachedBanner } from "@/components/commercial/plans/LimitReached";
+import { usePlanSlot } from "@/hooks/commercial/usePlanSlot";
+import { PlanSlotCounter } from "@/components/commercial/plans/PlanSlotCounter";
 import { usePlanChangeRequest } from "@/hooks/planChange/usePlanChangeRequest";
-import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from "@/components/commercial/planChange/PlanChangeInProgress";
+import { PlanChangeInProgressBanner } from "@/components/commercial/planChange/PlanChangeInProgress";
 
 // Servicios
 import * as productService from "@/services/ProductService";
@@ -25,14 +25,12 @@ export default function ProductsDashboard() {
   const searchParams = useSearchParams();
   const section = searchParams.get("section") ?? "dashboard";
   const { isAuthenticated } = useAuth();
-  const { planState } = usePlanState();
   const { blockingRequest: planChangeRequest } = usePlanChangeRequest();
 
   const hasLoaded = useRef(false);
 
   // ================== Estados ==================
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
-  const [totalProducts, setTotalProducts] = useState(0);
   const [stats, setStats] = useState<DashboardStats>({
     totalPendingProducts: 0,
     totalActiveProducts: 0,
@@ -44,6 +42,13 @@ export default function ProductsDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [showCreateForm, setShowCreateForm] = useState(false);
+
+  // Cupo de PRODUCTS: used/max (del dashboard) + bloqueo con las mismas reglas
+  // que el backend. Conteo local de respaldo = PENDING + ACTIVE (los únicos
+  // estados que ocupan cupo), por si el dashboard aún no trae el slot.
+  const productsSlot = usePlanSlot("PRODUCTS", {
+    fallbackUsed: stats.totalPendingProducts + stats.totalActiveProducts,
+  });
 
   // ================== Cargar datos ==================
   const loadDashboardData = useCallback(async () => {
@@ -88,7 +93,6 @@ export default function ProductsDashboard() {
       // ===== Productos =====
       if (productsRes.status === "fulfilled") {
         const content = productsRes.value?.data ?? [];
-        setTotalProducts(productsRes.value?.meta?.totalElements ?? content.length);
 
         if (process.env.NODE_ENV === "development") {
           console.log("📦 Products:", content);
@@ -209,15 +213,8 @@ export default function ProductsDashboard() {
 
   // ================== UI ==================
 
-  const planChangeBlocked = planChangeRequest != null;
-  const productsLimitReached = planState != null && isLimitReached(totalProducts, planState.maxProducts);
-  const walletExhausted = isWalletExhausted(planState);
-  const createBlocked = productsLimitReached || walletExhausted || planChangeBlocked;
-  const createBlockedTitle = planChangeBlocked
-    ? PLAN_CHANGE_BLOCK_TOOLTIP
-    : walletExhausted
-    ? WALLET_EXHAUSTED_TOOLTIP
-    : `Alcanzaste el máximo de ${planState?.maxProducts} productos de tu plan`;
+  const createBlocked = productsSlot.blocked;
+  const createBlockedTitle = productsSlot.tooltip ?? undefined;
 
   const renderProducts = () => {
     return (
@@ -226,29 +223,32 @@ export default function ProductsDashboard() {
       <h2 className="text-3xl font-bold text-gray-900">
         Todos tus productos
       </h2>
-      {createBlocked ? (
-        <button
-          type="button"
-          disabled
-          title={createBlockedTitle}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 rounded-xl font-semibold text-sm cursor-not-allowed"
-        >
-          <PlusCircle className="w-4 h-4" />
-          Crear producto
-        </button>
-      ) : (
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition cursor-pointer"
-        >
-          <PlusCircle className="w-4 h-4" />
-          Crear producto
-        </button>
-      )}
+      <div className="flex items-center gap-3">
+        <PlanSlotCounter status={productsSlot} resourceLabel="productos" />
+        {createBlocked ? (
+          <button
+            type="button"
+            disabled
+            title={createBlockedTitle}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 rounded-xl font-semibold text-sm cursor-not-allowed"
+          >
+            <PlusCircle className="w-4 h-4" />
+            Crear producto
+          </button>
+        ) : (
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4" />
+            Crear producto
+          </button>
+        )}
+      </div>
       </div>
 
-      {productsLimitReached && (
-        <LimitReachedBanner resourceLabel="productos" max={planState!.maxProducts} />
+      {productsSlot.reason === 'SLOT_FULL' && (
+        <LimitReachedBanner resourceLabel="productos" max={productsSlot.max ?? 0} />
       )}
 
       {planChangeRequest && <PlanChangeInProgressBanner request={planChangeRequest} />}

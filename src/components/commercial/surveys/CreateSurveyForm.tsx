@@ -16,14 +16,15 @@ import {
   Info,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCreateSurvey, useSurveyConfigs, useCommercialSurveys } from '@/hooks/surveys/useCommercialSurvey';
+import { useCreateSurvey, useSurveyConfigs } from '@/hooks/surveys/useCommercialSurvey';
 import { useSurveyForm, MAX_QUESTIONS, MAX_OPTIONS_PER_QUESTION, MAX_QUESTION_TEXT_LENGTH } from '@/hooks/surveys/useSurveyForm';
 import { useCategories } from '@/hooks/useCategories';
 import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { QUESTION_TYPE_LABELS, GENDER_LABELS } from '@/hooks/surveys/surveyUtils';
 import type { QuestionType, TargetGender, CreateSurveyRequest } from '@/types/survey.types';
 import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
-import { LimitReachedBlock, isLimitReached } from '@/components/commercial/plans/LimitReached';
+import { LimitReachedBlock } from '@/components/commercial/plans/LimitReached';
+import { usePlanSlot } from '@/hooks/commercial/usePlanSlot';
 import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
 import { PlanChangeInProgressBlock } from '@/components/commercial/planChange/PlanChangeInProgress';
 
@@ -56,8 +57,8 @@ function getMultiplesFrom(min: number, count = 8, step = 10): number[] {
 export default function SurveyFormModal() {
   const router = useRouter();
   const createMutation = useCreateSurvey();
-  const { planState, loadingPlan, refreshPlanState } = usePlanState();
-  const { data: allSurveysData, isLoading: loadingSurveysCount } = useCommercialSurveys(0, 1);
+  const { loadingPlan, refreshPlanState } = usePlanState();
+  const surveysSlot = usePlanSlot('SURVEYS');
   const { blockingRequest: planChangeRequest, isLoading: loadingPlanChange } = usePlanChangeRequest();
 
   const {
@@ -211,10 +212,7 @@ export default function SurveyFormModal() {
 
   // ─── Render ──────────────────────────────────────────────────────────────
 
-  const totalSurveysCount = allSurveysData?.meta.totalElements ?? 0;
-  const surveysLimitReached = planState != null && isLimitReached(totalSurveysCount, planState.maxSurveys);
-
-  if (loadingPlan || loadingSurveysCount || loadingPlanChange) {
+  if (loadingPlan || surveysSlot.isLoading || loadingPlanChange) {
     return (
       <div className="flex items-center justify-center h-48">
         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -232,11 +230,11 @@ export default function SurveyFormModal() {
     );
   }
 
-  if (surveysLimitReached) {
+  if (surveysSlot.reason === 'SLOT_FULL') {
     return (
       <LimitReachedBlock
         resourceLabel="encuestas"
-        max={planState!.maxSurveys}
+        max={surveysSlot.max ?? 0}
         backHref="/commercial/surveys"
         backLabel="Volver a encuestas"
       />

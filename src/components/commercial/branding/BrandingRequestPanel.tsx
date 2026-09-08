@@ -17,10 +17,12 @@ import {
 } from 'lucide-react';
 import { getMyBrandingRequests, type BrandingRequest, type BrandingStatus } from '@/services/BrandingRequestService';
 import { CreateBrandingWizard } from './CreateBrandingWizard';
-import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
-import { isWalletExhausted, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
+import { usePlanSlot } from '@/hooks/commercial/usePlanSlot';
+import { PlanSlotCounter } from '@/components/commercial/plans/PlanSlotCounter';
+import { LimitReachedBanner } from '@/components/commercial/plans/LimitReached';
+import { countBrandedGamesOccupyingSlot } from '@/components/commercial/plans/planSlots';
 import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
-import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from '@/components/commercial/planChange/PlanChangeInProgress';
+import { PlanChangeInProgressBanner } from '@/components/commercial/planChange/PlanChangeInProgress';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -147,12 +149,7 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
 
 export const BrandingRequestPanel: React.FC = () => {
   const router = useRouter();
-  const { planState } = usePlanState();
   const { blockingRequest: planChangeRequest } = usePlanChangeRequest();
-  const walletExhausted = isWalletExhausted(planState);
-  const planChangeBlocked = planChangeRequest != null;
-  const createBlocked = walletExhausted || planChangeBlocked;
-  const createBlockedTitle = planChangeBlocked ? PLAN_CHANGE_BLOCK_TOOLTIP : WALLET_EXHAUSTED_TOOLTIP;
 
   const [view, setView] = useState<'list' | 'create'>('list');
   const [requests, setRequests] = useState<BrandingRequest[]>([]);
@@ -160,6 +157,16 @@ export const BrandingRequestPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<BrandingStatus | 'all'>('all');
+
+  // Cupo de BRANDED_GAMES (campañas + solicitudes de branding no terminales).
+  // El dashboard trae el `used` combinado; el conteo local de respaldo solo ve
+  // las solicitudes de este panel (sin las campañas), así que solo se usa si el
+  // dashboard aún no cargó.
+  const gamesSlot = usePlanSlot('BRANDED_GAMES', {
+    fallbackUsed: requests.length ? countBrandedGamesOccupyingSlot(null, requests) : null,
+  });
+  const createBlocked = gamesSlot.blocked;
+  const createBlockedTitle = gamesSlot.tooltip ?? undefined;
 
   const load = async (signal?: AbortSignal) => {
     setLoading(true);
@@ -240,27 +247,34 @@ const filtered = requests.filter(r => {
             </div>
           </div>
           {/* New request button */}
-          {createBlocked ? (
-            <button
-              type="button"
-              disabled
-              title={createBlockedTitle}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 text-sm font-semibold rounded-md cursor-not-allowed"
-            >
-              <Plus size={16} />
-              Nueva solicitud
-            </button>
-          ) : (
-            <button
-              onClick={() => setView('create')}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-[#03548C] text-white text-sm font-semibold rounded-md hover:bg-[#0b1440] transition-colors cursor-pointer shadow-sm"
-            >
-              <Plus size={16} />
-              Nueva solicitud
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <PlanSlotCounter status={gamesSlot} resourceLabel="juegos brandeados" />
+            {createBlocked ? (
+              <button
+                type="button"
+                disabled
+                title={createBlockedTitle}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 text-sm font-semibold rounded-md cursor-not-allowed"
+              >
+                <Plus size={16} />
+                Nueva solicitud
+              </button>
+            ) : (
+              <button
+                onClick={() => setView('create')}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-[#03548C] text-white text-sm font-semibold rounded-md hover:bg-[#0b1440] transition-colors cursor-pointer shadow-sm"
+              >
+                <Plus size={16} />
+                Nueva solicitud
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {gamesSlot.reason === 'SLOT_FULL' && (
+        <LimitReachedBanner resourceLabel="juegos brandeados" max={gamesSlot.max ?? 0} />
+      )}
 
       {planChangeRequest && <PlanChangeInProgressBanner request={planChangeRequest} />}
 

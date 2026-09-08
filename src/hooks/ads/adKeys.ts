@@ -10,8 +10,6 @@ export const adKeys = {
 
   detail: (id: number) => [...adKeys.details(), id] as const,
 
-  stats: (id: number) => [...adKeys.all, 'stats', id] as const,
-
   likes: (id: number, page: number) =>
     [...adKeys.all, 'likes', id, page] as const,
 };

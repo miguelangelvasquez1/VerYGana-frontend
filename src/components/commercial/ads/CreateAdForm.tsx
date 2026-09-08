@@ -15,8 +15,8 @@ import { useRouter } from 'next/navigation';
 import { AdDetails } from '@/types/ads/commercial';
 import toast from 'react-hot-toast';
 import { usePlanState } from '../layout/DashboardLayout';
-import { useAds } from '@/hooks/ads/querys';
-import { LimitReachedBlock, isLimitReached } from '../plans/LimitReached';
+import { LimitReachedBlock } from '../plans/LimitReached';
+import { usePlanSlot } from '@/hooks/commercial/usePlanSlot';
 import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
 import { PlanChangeInProgressBlock } from '../planChange/PlanChangeInProgress';
 
@@ -90,8 +90,8 @@ function InfoNote({ children }: { children: React.ReactNode }) {
 
 export function CreateAdForm() {
   const router = useRouter();
-  const { planState, loadingPlan, refreshPlanState } = usePlanState();
-  const { data: adsCountData, isLoading: loadingAdsCount } = useAds(0, 1);
+  const { loadingPlan, refreshPlanState } = usePlanState();
+  const adsSlot = usePlanSlot('ADS');
   const { blockingRequest: planChangeRequest, isLoading: loadingPlanChange } = usePlanChangeRequest();
 
   const [step, setStep] = useState<FormStep>('file');
@@ -263,10 +263,7 @@ export function CreateAdForm() {
 
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const totalAdsCount = adsCountData?.totalElements ?? 0;
-  const adsLimitReached = planState != null && isLimitReached(totalAdsCount, planState.maxAds);
-
-  if (loadingPlan || loadingAdsCount || loadingPlanChange) {
+  if (loadingPlan || adsSlot.isLoading || loadingPlanChange) {
     return (
       <div className="flex items-center justify-center h-48">
         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -284,11 +281,11 @@ export function CreateAdForm() {
     );
   }
 
-  if (adsLimitReached) {
+  if (adsSlot.reason === 'SLOT_FULL') {
     return (
       <LimitReachedBlock
         resourceLabel="anuncios"
-        max={planState!.maxAds}
+        max={adsSlot.max ?? 0}
         backHref="/commercial/ads"
         backLabel="Volver a anuncios"
       />

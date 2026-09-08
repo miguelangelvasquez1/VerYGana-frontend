@@ -20,15 +20,6 @@ export function useAd(adId: number | null) {
   });
 }
 
-// Hook para estadísticas de un anuncio
-export function useAdStats(adId: number | null) {
-  return useQuery({
-    queryKey: adKeys.stats(adId!),
-    queryFn: () => adService.getAdStats(adId!),
-    enabled: !!adId,
-  });
-}
-
 // Hook para anuncios activos (consumidores)
 export function useActiveAds(page: number = 0, size: number = 10) {
   return useQuery({

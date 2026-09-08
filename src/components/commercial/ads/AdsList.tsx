@@ -9,9 +9,11 @@ import Link from 'next/link';
 import { AdResponseDTO } from '@/types/ads/commercial';
 import { useAds } from '@/hooks/ads/querys';
 import { usePauseAd, useResumeAd, useDeleteAd } from '@/hooks/ads/mutations';
+import { LimitReachedBanner } from '../plans/LimitReached';
+import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from '../plans/WalletBudgetAlerts';
 import { usePlanState } from '../layout/DashboardLayout';
-import { LimitReachedBanner, isLimitReached } from '../plans/LimitReached';
-import { isWalletExhausted, isBudgetDormant, WALLET_EXHAUSTED_TOOLTIP, WALLET_DORMANT_TOOLTIP } from '../plans/WalletBudgetAlerts';
+import { usePlanSlot } from '@/hooks/commercial/usePlanSlot';
+import { PlanSlotCounter } from '../plans/PlanSlotCounter';
 import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
 import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from '../planChange/PlanChangeInProgress';
 import toast from 'react-hot-toast';
@@ -35,17 +37,12 @@ export function AdsList() {
   const totalElements = data?.totalElements || 0;
 
   const { blockingRequest: planChangeRequest } = usePlanChangeRequest();
-  const planChangeBlocked = planChangeRequest != null;
 
-  const adsLimitReached = planState != null && isLimitReached(totalElements, planState.maxAds);
-  const walletExhausted = isWalletExhausted(planState);
+  // Cupo de ADS: used/max + bloqueo con las mismas reglas que el backend.
+  const adsSlot = usePlanSlot('ADS');
   const budgetDormant = isBudgetDormant(planState);
-  const createBlocked = adsLimitReached || walletExhausted || planChangeBlocked;
-  const createBlockedTitle = planChangeBlocked
-    ? PLAN_CHANGE_BLOCK_TOOLTIP
-    : walletExhausted
-    ? WALLET_EXHAUSTED_TOOLTIP
-    : `Alcanzaste el máximo de ${planState?.maxAds} anuncios de tu plan`;
+  const createBlocked = adsSlot.blocked;
+  const createBlockedTitle = adsSlot.tooltip ?? undefined;
 
   const filteredAds = ads.filter(ad => {
     const matchesSearch = ad.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,30 +155,33 @@ export function AdsList() {
             </div>
 
             {/* Botón crear anuncio */}
-            {createBlocked ? (
-              <button
-                type="button"
-                disabled
-                title={createBlockedTitle}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
-              >
-                <Plus className="h-4 w-4" />
-                Crear Anuncio
-              </button>
-            ) : (
-              <Link
-                href="/commercial/ads/create"
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
-              >
-                <Plus className="h-4 w-4" />
-                Crear Anuncio
-              </Link>
-            )}
+            <div className="flex items-center gap-3">
+              <PlanSlotCounter status={adsSlot} resourceLabel="anuncios" />
+              {createBlocked ? (
+                <button
+                  type="button"
+                  disabled
+                  title={createBlockedTitle}
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
+                >
+                  <Plus className="h-4 w-4" />
+                  Crear Anuncio
+                </button>
+              ) : (
+                <Link
+                  href="/commercial/ads/create"
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
+                >
+                  <Plus className="h-4 w-4" />
+                  Crear Anuncio
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 
-        {adsLimitReached && (
-          <LimitReachedBanner resourceLabel="anuncios" max={planState!.maxAds} />
+        {adsSlot.reason === 'SLOT_FULL' && (
+          <LimitReachedBanner resourceLabel="anuncios" max={adsSlot.max ?? 0} />
         )}
 
         {planChangeRequest && <PlanChangeInProgressBanner request={planChangeRequest} />}
@@ -196,13 +196,13 @@ export function AdsList() {
             <div className="bg-white rounded-lg shadow-md p-4">
               <p className="text-sm text-gray-600">Presupuesto Total</p>
               <p className="text-2xl font-bold text-[#03548C]">
-                ${ads.reduce((sum, ad) => sum + Number(ad.totalBudget), 0).toFixed(2)}
+                ${ads.reduce((sum, ad) => sum + Number(ad.totalBudget), 0).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-4">
               <p className="text-sm text-gray-600">Gastado</p>
               <p className="text-2xl font-bold text-green-600">
-                ${ads.reduce((sum, ad) => sum + Number(ad.spentBudget), 0).toFixed(2)}
+                ${ads.reduce((sum, ad) => sum + Number(ad.spentBudget), 0).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-4">
@@ -226,8 +226,8 @@ export function AdsList() {
                   onPause={handlePause}
                   onResume={handleResume}
                   onDelete={handleDelete}
-                  canReactivate={!planChangeBlocked}
-                  reactivateDisabledReason={PLAN_CHANGE_BLOCK_TOOLTIP}
+                  canReactivate={!adsSlot.activate.blocked}
+                  reactivateDisabledReason={adsSlot.activate.tooltip ?? PLAN_CHANGE_BLOCK_TOOLTIP}
                   editBlocked={budgetDormant}
                   editBlockedReason={WALLET_DORMANT_TOOLTIP}
                 />

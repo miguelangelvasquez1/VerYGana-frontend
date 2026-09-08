@@ -2,15 +2,6 @@ import apiClient from '@/lib/api/client';
 import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdLikeDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, AssetAnalysisResult, FileUploadRequestDTO } from '@/types/ads/commercial';
 import { PagedResponse } from '@/types/Generic.types';
 
-export interface AdStats {
-  totalViews: number;
-  totalLikes: number;
-  totalClicks: number;
-  spentBudget: number;
-  remainingBudget: number;
-  conversionRate: number;
-}
-
 class AdService {
   private _token: string | null = null;
 
@@ -106,12 +97,6 @@ class AdService {
   // Activar un anuncio
   async resumeAd(id: number): Promise<AdResponseDTO> {
     const response = await apiClient.post<AdResponseDTO>(`/ads/${id}/activate`);
-    return response.data;
-  }
-
-  // Obtener estadísticas de un anuncio
-  async getAdStats(id: number): Promise<AdStats> {
-    const response = await apiClient.get<AdStats>(`/ads/${id}/stats`);
     return response.data;
   }
 
