@@ -19,12 +19,24 @@ export type OnboardingStep =
   | "PAYMENT_PENDING"
   | "COMPLETED";
 
+// El diagnóstico solo produce A / B / C (las tres modalidades). D / E ya no
+// salen de este paso — se conservan en la unión porque compliance las usa en
+// otros flujos (ver NegotiationRoute en ComplianceService).
 export type OnboardingRoute = "A" | "B" | "C" | "D" | "E";
 
 export interface ClassificationResult {
+  // "A" | "B" | "C" cuando viene del diagnóstico.
   route: OnboardingRoute;
   routeLabel: string;
+  // "Empresa Tipo A" | "Empresa Tipo B" | "Candidata a Empresa Premium".
+  modalityLabel: string;
   explanation: string;
+  // true => recomendación aproximada (faltan señales o el perfil quedó en el
+  // borde entre dos modalidades). El usuario puede revisar y reenviar.
+  preliminary: boolean;
+  // true SOLO para "Candidata a Empresa Premium" — informativo para el copy,
+  // el flujo posterior sigue siendo autoservicio.
+  verificationRequired: boolean;
   confirmed: boolean;
 }
 
@@ -107,20 +119,80 @@ export interface LegalIdentificationResult extends Partial<OnboardingStatus> {
   status?: string;
 }
 
-export type PrimaryGoal = "VENDER" | "PUBLICIDAD" | "AMBAS";
+// ── Diagnóstico (paso 4) ─────────────────────────────────────────────────────
+// El catálogo del cuestionario (secciones, preguntas, opciones, adaptividad)
+// se sirve desde el backend — no se hardcodea en el front. Secciones y
+// preguntas vienen ya ordenadas: renderizar en ese orden.
+
+export type DiagnosticQuestionType = "SINGLE_CHOICE" | "MULTI_CHOICE" | "BOOLEAN";
+
+export interface DiagnosticQuestionOption {
+  value: string;
+  label: string;
+  // "Ninguno" / "Ninguna": al marcarla se deseleccionan las demás y viceversa.
+  exclusive: boolean;
+}
+
+export interface DiagnosticQuestionDependsOn {
+  questionCode: string;
+  // La pregunta se muestra solo si la respuesta a `questionCode` está incluida
+  // aquí. Siempre apunta a una pregunta anterior del flujo.
+  values: string[];
+}
+
+export interface DiagnosticQuestion {
+  code: string;
+  // Clave para el body del POST /diagnostic.
+  fieldName: string;
+  text: string;
+  // Contenido de "¿Por qué me preguntan esto?".
+  helpText?: string | null;
+  type: DiagnosticQuestionType;
+  // Ninguna pregunta required tiene dependsOn (todas siempre visibles).
+  required: boolean;
+  // Solo MULTI_CHOICE — null = sin límite.
+  maxSelections: number | null;
+  // MULTI_CHOICE: true => el orden de selección es la prioridad (índice 0 = más
+  // importante) y así se envía el array.
+  ordered: boolean;
+  // null => siempre visible.
+  dependsOn: DiagnosticQuestionDependsOn | null;
+  options: DiagnosticQuestionOption[];
+}
+
+export interface DiagnosticSection {
+  code: string;
+  title: string;
+  subtitle?: string | null;
+  questions: DiagnosticQuestion[];
+}
+
+export interface DiagnosticQuestionnaire {
+  version: number;
+  openingMessage: string;
+  openingActions: string[];
+  sections: DiagnosticSection[];
+}
+
+// Valor de una respuesta según el type de la pregunta:
+//   SINGLE_CHOICE -> string (el value elegido)
+//   MULTI_CHOICE  -> string[] (values; en orden de prioridad si ordered)
+//   BOOLEAN       -> boolean
+export type DiagnosticAnswerValue = string | boolean | string[];
+
+// Body del POST /diagnostic: objeto plano { [fieldName]: valor } solo con las
+// preguntas visibles y respondidas. Campos omitidos = "no respondido".
+export type DiagnosticAnswers = Record<string, DiagnosticAnswerValue>;
+
+// Escotilla para Ruta D: si la empresa necesita integración técnica especial no
+// pasa por el cuestionario de modalidades (A/B/C). Se envía esta señal al mismo
+// POST /diagnostic y el backend deja currentStep en ADVISOR_CONTACT_PENDING.
 export type TechIntegrationNeed = "API" | "CONCILIACION" | "ACTIVACION_AUTOMATICA";
 
-export interface DiagnosticRequest {
+export interface SpecialIntegrationRequest {
   techIntegrationNeeds: TechIntegrationNeed[];
-  // Requerido si techIntegrationNeeds no viene vacío — describe la necesidad
-  // técnica (máx. 1000 caracteres). En ese caso el backend calcula Ruta D
-  // directo y el resto de los campos de abajo no aplican ni se envían.
-  integrationDetails?: string;
-  primaryGoal?: PrimaryGoal;
-  wantsFixedFee?: boolean;
-  requiresCustomGames?: boolean;
-  requiresPets?: boolean;
-  requiresSurveys?: boolean;
+  // Describe la necesidad técnica (máx. 1000 caracteres). Requerido.
+  integrationDetails: string;
 }
 
 // ── Plan (pasos 6-7) ─────────────────────────────────────────────────────────
@@ -344,7 +416,21 @@ export const OnboardingService = {
     return response.data;
   },
 
-  async submitDiagnostic(data: DiagnosticRequest): Promise<ClassificationResult> {
+  // Catálogo del cuestionario (paso 4). Auth: ROLE_COMMERCIAL.
+  async getDiagnosticQuestionnaire(): Promise<DiagnosticQuestionnaire> {
+    const response = await apiClient.get(`${BASE}/diagnostic/questionnaire`);
+    return response.data;
+  },
+
+  async submitDiagnostic(answers: DiagnosticAnswers): Promise<ClassificationResult> {
+    const response = await apiClient.post(`${BASE}/diagnostic`, answers);
+    return response.data;
+  },
+
+  // Ruta D — ver SpecialIntegrationRequest. Devuelve la clasificación con
+  // route "D"; el wizard debe releer getStatus() para saltar a
+  // ADVISOR_CONTACT_PENDING (sin plan, documentos, contrato ni pago).
+  async submitSpecialIntegration(data: SpecialIntegrationRequest): Promise<ClassificationResult> {
     const response = await apiClient.post(`${BASE}/diagnostic`, data);
     return response.data;
   },

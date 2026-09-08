@@ -18,7 +18,9 @@ import {
 import { getMyBrandingRequests, type BrandingRequest, type BrandingStatus } from '@/services/BrandingRequestService';
 import { CreateBrandingWizard } from './CreateBrandingWizard';
 import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
-import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
+import { isWalletExhausted, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
+import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
+import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from '@/components/commercial/planChange/PlanChangeInProgress';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -146,7 +148,11 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
 export const BrandingRequestPanel: React.FC = () => {
   const router = useRouter();
   const { planState } = usePlanState();
+  const { blockingRequest: planChangeRequest } = usePlanChangeRequest();
   const walletExhausted = isWalletExhausted(planState);
+  const planChangeBlocked = planChangeRequest != null;
+  const createBlocked = walletExhausted || planChangeBlocked;
+  const createBlockedTitle = planChangeBlocked ? PLAN_CHANGE_BLOCK_TOOLTIP : WALLET_EXHAUSTED_TOOLTIP;
 
   const [view, setView] = useState<'list' | 'create'>('list');
   const [requests, setRequests] = useState<BrandingRequest[]>([]);
@@ -178,7 +184,7 @@ export const BrandingRequestPanel: React.FC = () => {
   }, []);
 
 
-  if (view === 'create') {
+  if (view === 'create' && !createBlocked) {
     return (
       <CreateBrandingWizard
         onBack={() => setView('list')}
@@ -234,11 +240,11 @@ const filtered = requests.filter(r => {
             </div>
           </div>
           {/* New request button */}
-          {walletExhausted ? (
+          {createBlocked ? (
             <button
               type="button"
               disabled
-              title={WALLET_EXHAUSTED_TOOLTIP}
+              title={createBlockedTitle}
               className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 text-sm font-semibold rounded-md cursor-not-allowed"
             >
               <Plus size={16} />
@@ -256,7 +262,7 @@ const filtered = requests.filter(r => {
         </div>
       </div>
 
-      {walletExhausted && <WalletExhaustedBanner />}
+      {planChangeRequest && <PlanChangeInProgressBanner request={planChangeRequest} />}
 
       {/* Stats */}
       {requests.length > 0 && (
@@ -319,11 +325,11 @@ const filtered = requests.filter(r => {
               ? 'Prueba ajustando los filtros de búsqueda'
               : 'Crea tu primera solicitud para integrar tu marca en un videojuego'}
           </p>
-          {walletExhausted ? (
+          {createBlocked ? (
             <button
               type="button"
               disabled
-              title={WALLET_EXHAUSTED_TOOLTIP}
+              title={createBlockedTitle}
               className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 rounded-md text-sm cursor-not-allowed"
             >
               <Plus size={16} />

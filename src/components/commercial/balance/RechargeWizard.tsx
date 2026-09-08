@@ -66,7 +66,8 @@ function formatInput(raw: string) {
 }
 
 export function RechargeWizard() {
-  const { planState, loadingPlan, refreshPlanState } = usePlanState();
+  const { planState, loadingPlan, refreshPlanState, pollPlanStateAfterRecharge } = usePlanState();
+  const [reactivating, setReactivating] = useState(false);
   const [step, setStep] = useState<Step>('loading');
   const [contract, setContract] = useState<ContractSummaryResponseDTO | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -148,8 +149,13 @@ export function RechargeWizard() {
           sessionStorage.removeItem(RECHARGE_PAYMENT_REFERENCE_KEY);
           sessionStorage.removeItem(RECHARGE_CONTRACT_ID_KEY);
           setPaymentMessage(result.message);
-          refreshPlanState();
           setStep('success');
+          // El backend levanta la suspensión del presupuesto cuando el
+          // webhook de pago confirma — puede tardar unos segundos. Hacemos
+          // polling corto del estado del plan hasta que el saldo deje de
+          // estar agotado, para que banner/badge/bloqueos se quiten solos.
+          setReactivating(true);
+          pollPlanStateAfterRecharge().finally(() => setReactivating(false));
           return;
         }
         if (result.wompiStatus === 'DECLINED' || result.wompiStatus === 'ERROR') {
@@ -554,6 +560,12 @@ export function RechargeWizard() {
               <h3 className="text-lg font-bold text-gray-900 mb-2">¡Recarga exitosa!</h3>
               <p className="text-sm text-gray-600 leading-relaxed">{paymentMessage || 'Tu saldo fue actualizado.'}</p>
             </div>
+            {reactivating && (
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Procesando tu recarga… reactivando tus anuncios y campañas.
+              </div>
+            )}
             <Link
               href="/commercial/products"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"

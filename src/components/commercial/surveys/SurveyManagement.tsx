@@ -9,7 +9,9 @@ import SurveyTable from './SurveyTable';
 import type { SurveyStatus } from '@/types/survey.types';
 import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
 import { LimitReachedBanner, isLimitReached } from '@/components/commercial/plans/LimitReached';
-import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
+import { isWalletExhausted, WALLET_EXHAUSTED_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
+import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
+import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from '@/components/commercial/planChange/PlanChangeInProgress';
 
 const ALL_STATUSES: SurveyStatus[] = [
   'DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED', 'ACTIVE', 'PAUSED', 'SUSPENDED', 'COMPLETED',
@@ -26,17 +28,21 @@ export default function SurveyManagement() {
   // encuestas y validarlo contra el límite del plan (el total filtrado no sirve).
   const { data: allSurveysData } = useCommercialSurveys(0, 1);
   const { planState } = usePlanState();
+  const { blockingRequest: planChangeRequest } = usePlanChangeRequest();
 
   const filteredSurveys = useMemo(
     () => (data?.data ?? []).filter((s) => s.title.toLowerCase().includes(searchTerm.toLowerCase())),
     [data?.data, searchTerm],
   );
 
+  const planChangeBlocked = planChangeRequest != null;
   const surveysLimitReached = planState != null
     && isLimitReached(allSurveysData?.meta.totalElements ?? 0, planState.maxSurveys);
   const walletExhausted = isWalletExhausted(planState);
-  const createBlocked = surveysLimitReached || walletExhausted;
-  const createBlockedTitle = walletExhausted
+  const createBlocked = surveysLimitReached || walletExhausted || planChangeBlocked;
+  const createBlockedTitle = planChangeBlocked
+    ? PLAN_CHANGE_BLOCK_TOOLTIP
+    : walletExhausted
     ? WALLET_EXHAUSTED_TOOLTIP
     : `Alcanzaste el máximo de ${planState?.maxSurveys} encuestas de tu plan`;
 
@@ -101,11 +107,11 @@ export default function SurveyManagement() {
         </div>
       </div>
 
-      {surveysLimitReached ? (
+      {surveysLimitReached && (
         <LimitReachedBanner resourceLabel="encuestas" max={planState!.maxSurveys} />
-      ) : walletExhausted ? (
-        <WalletExhaustedBanner />
-      ) : null}
+      )}
+
+      {planChangeRequest && <PlanChangeInProgressBanner request={planChangeRequest} />}
 
       {/* ── Table ──────────────────────────────────────────────────────────── */}
       {isError ? (

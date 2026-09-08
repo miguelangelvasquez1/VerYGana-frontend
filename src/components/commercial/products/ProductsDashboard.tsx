@@ -12,7 +12,9 @@ import PendingClaimsPanel from "@/components/commercial/products/PendingClaimsPa
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
 import { LimitReachedBanner, isLimitReached } from "@/components/commercial/plans/LimitReached";
-import { isWalletExhausted, WalletExhaustedBanner, WALLET_EXHAUSTED_TOOLTIP } from "@/components/commercial/plans/WalletBudgetAlerts";
+import { isWalletExhausted, WALLET_EXHAUSTED_TOOLTIP } from "@/components/commercial/plans/WalletBudgetAlerts";
+import { usePlanChangeRequest } from "@/hooks/planChange/usePlanChangeRequest";
+import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from "@/components/commercial/planChange/PlanChangeInProgress";
 
 // Servicios
 import * as productService from "@/services/ProductService";
@@ -25,6 +27,7 @@ export default function ProductsDashboard() {
   const section = searchParams.get("section") ?? "dashboard";
   const { isAuthenticated } = useAuth();
   const { planState } = usePlanState();
+  const { blockingRequest: planChangeRequest } = usePlanChangeRequest();
 
   const hasLoaded = useRef(false);
 
@@ -207,10 +210,13 @@ export default function ProductsDashboard() {
 
   // ================== UI ==================
 
+  const planChangeBlocked = planChangeRequest != null;
   const productsLimitReached = planState != null && isLimitReached(totalProducts, planState.maxProducts);
   const walletExhausted = isWalletExhausted(planState);
-  const createBlocked = productsLimitReached || walletExhausted;
-  const createBlockedTitle = walletExhausted
+  const createBlocked = productsLimitReached || walletExhausted || planChangeBlocked;
+  const createBlockedTitle = planChangeBlocked
+    ? PLAN_CHANGE_BLOCK_TOOLTIP
+    : walletExhausted
     ? WALLET_EXHAUSTED_TOOLTIP
     : `Alcanzaste el máximo de ${planState?.maxProducts} productos de tu plan`;
 
@@ -242,11 +248,11 @@ export default function ProductsDashboard() {
       )}
       </div>
 
-      {productsLimitReached ? (
+      {productsLimitReached && (
         <LimitReachedBanner resourceLabel="productos" max={planState!.maxProducts} />
-      ) : walletExhausted ? (
-        <WalletExhaustedBanner />
-      ) : null}
+      )}
+
+      {planChangeRequest && <PlanChangeInProgressBanner request={planChangeRequest} />}
 
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex-1 relative">

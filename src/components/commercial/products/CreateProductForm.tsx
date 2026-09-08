@@ -16,6 +16,8 @@ import TargetAudienceFields, {
 } from "@/components/shared/targeting/TargetAudienceFields";
 import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
 import { LimitReachedBlock, isLimitReached } from "@/components/commercial/plans/LimitReached";
+import { usePlanChangeRequest } from "@/hooks/planChange/usePlanChangeRequest";
+import { PlanChangeInProgressBlock } from "@/components/commercial/planChange/PlanChangeInProgress";
 import { PayoutMethodRequiredBlock } from "@/components/commercial/payout-methods/PayoutMethodRequiredBlock";
 import toast from "react-hot-toast";
 
@@ -82,6 +84,7 @@ export default function CreateProductForm() {
 
   const { state, createProduct, reset } = useProductCreation();
   const { planState, loadingPlan } = usePlanState();
+  const { blockingRequest: planChangeRequest, isLoading: loadingPlanChange } = usePlanChangeRequest();
 
   const isSubmitting = ['preparing', 'uploading', 'creating'].includes(state.status);
 
@@ -196,11 +199,21 @@ export default function CreateProductForm() {
   // RENDER
   // ============================================================
 
-  if (loadingPlan || totalProducts === null || (totalProducts === 0 && hasVerifiedPayoutMethod === null)) {
+  if (loadingPlan || totalProducts === null || loadingPlanChange || (totalProducts === 0 && hasVerifiedPayoutMethod === null)) {
     return (
       <div className="flex items-center justify-center h-48">
         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
+    );
+  }
+
+  if (planChangeRequest) {
+    return (
+      <PlanChangeInProgressBlock
+        request={planChangeRequest}
+        backHref="/commercial/products"
+        backLabel="Volver a productos"
+      />
     );
   }
 

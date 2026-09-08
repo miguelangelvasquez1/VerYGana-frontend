@@ -13,13 +13,16 @@ import { getCommercialInitialData } from '@/services/commercialService';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
 import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
 import { WalletStatus } from '@/types/finance/Wallet.types';
-import { isWalletExhausted, isWalletLow, WalletExhaustedBanner, WalletLowBalanceBanner } from '../plans/WalletBudgetAlerts';
+import { isWalletExhausted, isBudgetDormant, WalletExhaustedBanner, WalletDormantBanner } from '../plans/WalletBudgetAlerts';
+import { PaymentRequiredModal } from '../plans/PaymentRequiredModal';
+import { PlanChangeBlockedModal } from '../planChange/PlanChangeBlockedModal';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 // ─── Route protection ─────────────────────────────────────────────────────────
 
 const PROTECTED_ROUTES: { path: string; requiredPlans: PlanCode[] }[] = [
+  { path: '/commercial/dashboard', requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/products',  requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD] },
   { path: '/commercial/ads',       requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
   { path: '/commercial/branding',  requiredPlans: [PlanCode.STANDARD, PlanCode.PREMIUM] },
@@ -106,12 +109,21 @@ interface PlanContextValue {
   planState: EffectivePlanStateResponseDTO | null;
   loadingPlan: boolean;
   refreshPlanState: () => void;
+  /**
+   * Tras volver del checkout de recarga: el backend levanta la suspensión
+   * del presupuesto cuando el webhook de pago confirma, y eso puede tardar
+   * unos segundos. Re-consulta el estado con reintentos hasta que el saldo
+   * deje de estar agotado (o se agoten los intentos). Devuelve `true` si el
+   * saldo ya está disponible.
+   */
+  pollPlanStateAfterRecharge: () => Promise<boolean>;
 }
 
 export const PlanContext = createContext<PlanContextValue>({
   planState: null,
   loadingPlan: true,
   refreshPlanState: () => {},
+  pollPlanStateAfterRecharge: async () => false,
 });
 
 export const usePlanState = () => useContext(PlanContext);
@@ -163,7 +175,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
 
   useEffect(() => {
-    if (pathname === '/commercial') router.replace('/commercial/products');
+    if (pathname === '/commercial') router.replace('/commercial/dashboard');
   }, [pathname, router]);
   // Memoizamos el pathname actual para evitar renders inestables
   const currentPath = useMemo(() => pathname, [pathname]);
@@ -176,6 +188,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
     // 2️⃣ Partial match (ordenado por longitud)
     const routes = [
+      { match: '/commercial/dashboard', title: 'Inicio' },
+
       { match: '/commercial/ads/create', title: 'Crear Anuncio' },
       { match: '/commercial/ads', title: 'Mis Anuncios' },
 
@@ -223,6 +237,24 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     } finally {
       setLoadingPlan(false);
     }
+  };
+
+  const pollPlanStateAfterRecharge = async (): Promise<boolean> => {
+    const MAX_TRIES = 8;
+    const INTERVAL_MS = 2500;
+    for (let i = 0; i < MAX_TRIES; i++) {
+      try {
+        const state = await getEffectivePlanState();
+        setPlanState(state);
+        if (!isWalletExhausted(state)) return true;
+      } catch (err) {
+        console.error('Error re-consultando estado del plan tras recarga:', err);
+      }
+      if (i < MAX_TRIES - 1) {
+        await new Promise((resolve) => setTimeout(resolve, INTERVAL_MS));
+      }
+    }
+    return false;
   };
 
   const loadCommercialData = async () => {
@@ -273,8 +305,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [commercialData, onboardingCompleted, router]);
 
   return (
-    <PlanContext.Provider value={{ planState, loadingPlan, refreshPlanState: loadPlan }}>
+    <PlanContext.Provider value={{ planState, loadingPlan, refreshPlanState: loadPlan, pollPlanStateAfterRecharge }}>
       <div className="min-h-screen bg-gray-50">
+
+        <PaymentRequiredModal />
+        <PlanChangeBlockedModal />
 
         {isMobile && sidebarOpen && (
           <div
@@ -339,11 +374,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               const showBudgetBanner = !currentPath.startsWith('/commercial/balance');
               return (
                 <>
-                  {showBudgetBanner && isWalletExhausted(planState) && (
-                    <div className="mb-4"><WalletExhaustedBanner /></div>
+                  {showBudgetBanner && isBudgetDormant(planState) && (
+                    <div className="mb-4"><WalletDormantBanner /></div>
                   )}
-                  {showBudgetBanner && !isWalletExhausted(planState) && isWalletLow(planState) && (
-                    <div className="mb-4"><WalletLowBalanceBanner /></div>
+                  {showBudgetBanner && isWalletExhausted(planState) && !isBudgetDormant(planState) && (
+                    <div className="mb-4"><WalletExhaustedBanner /></div>
                   )}
                   {children}
                 </>
@@ -359,6 +394,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 // config/pageTitles.ts
 export const PAGE_TITLES: Record<string, string> = {
   '/commercial': 'Dashboard',
+  '/commercial/dashboard': 'Inicio',
   '/commercial/products': 'Mis Productos',
   '/commercial/products/create': 'Crear Producto',
   '/commercial/ads': 'Mis Anuncios',

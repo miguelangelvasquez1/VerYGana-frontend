@@ -2,7 +2,7 @@ import { adService } from "@/services/adService";
 import { adKeys } from "./adKeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminAdKeys } from "./adminQuerys";
-import { AdForAdminDTO, AdForConsumerDTO, AdResponseDTO, AdUpdateDTO } from "@/types/ads/commercial";
+import { AdForAdminDTO, AdResponseDTO, AdUpdateDTO } from "@/types/ads/commercial";
 
 // Helper para actualizar listas en caché
 const updateAdInLists = (
@@ -220,27 +220,7 @@ export function useDeleteAd() {
   });
 }
 
-// hook para obtener siguiente anuncio
-export function useNextAd() {
-  return useMutation<AdForConsumerDTO | null>({
-    mutationFn: () => adService.getNextAd()
-  })
-}
-
-
-// Hook para registrar like en anuncio
-export function useLikeAd() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      adId,
-      sessionUUID
-    }: {
-      adId: number
-      sessionUUID: string
-    }) => adService.likeAd(adId, sessionUUID),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['consumer', 'initialData'] });
-    },
-  })
-}
+// El flujo "ver anuncios" del consumer (GET /adLike/next, POST /adLike/like)
+// vive en src/hooks/ads/useAdFlow.ts, que centraliza el manejo de errores del
+// backend (410/409/429/etc. — ver src/lib/api/adFlowErrors.ts) en vez de
+// mutaciones sueltas de React Query.

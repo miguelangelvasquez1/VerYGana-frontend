@@ -14,7 +14,7 @@ import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { ProductCategoryResponseDTO } from "@/types/products/ProductCategory.types";
 import { formatPesos } from "@/utils/currency";
 import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
-import { isWalletExhausted, WalletExhaustedBanner } from "@/components/commercial/plans/WalletBudgetAlerts";
+import { isWalletExhausted } from "@/components/commercial/plans/WalletBudgetAlerts";
 
 type Tab = "search" | "promotions";
 
@@ -134,7 +134,6 @@ export default function AlliesDashboard() {
 
       {tab === "search" ? (
         <div className="space-y-4">
-          {walletExhausted && <WalletExhaustedBanner />}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <SearchBar onSearch={setSearchTerm} />

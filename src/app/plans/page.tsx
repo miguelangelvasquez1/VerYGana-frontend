@@ -1,21 +1,22 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import {
   Check, X, Zap, Rocket, Star, ArrowRight, Sparkles,
   Package, Megaphone, Gamepad2, Layers, TrendingUp,
   PawPrint, ClipboardList, BadgePercent, Loader2,
-  AlertCircle, ArrowLeft, Handshake, BarChart3, Eye,
-  ShoppingBag, FileText
+  AlertCircle, ArrowLeft, RefreshCw
 } from 'lucide-react';
 import { initiatePayment, getPlanCatalog } from '@/services/planService';
 import { previewPlanChange, requestPlanChange, getCurrentPlanChangeRequest } from '@/services/planChangeService';
 import { getRechargeContract } from '@/services/planRechargeService';
+import { useInvalidatePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
 import { PlanCode, PlanPaymentRequestDTO } from '@/types/finance/plans/Plan.types';
 import { PlanCatalogOption, PlanCatalogResponseDTO } from '@/types/finance/plans/PlanCatalog.types';
-import { PlanChangePreviewResponseDTO } from '@/types/finance/plans/PlanChange.types';
+import { PlanChangeAssetType, PlanChangePreviewResponseDTO } from '@/types/finance/plans/PlanChange.types';
 import { WompiCheckoutResponseDTO } from '@/types/finance/wompi/Wompi.types';
 import { RECHARGE_CONTRACT_ID_KEY, isActiveRechargeContract } from '@/components/commercial/balance/balance.shared';
 
@@ -73,106 +74,112 @@ interface FeatureCategory {
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
-// Basado en la Tabla comparativa de planes VERYGANA (aprobación de dirección, 22 jul 2026)
 
-const categories: FeatureCategory[] = [
-  {
-    title: 'Económico y ventas',
-    rows: [
-      { label: 'Venta directa en la plataforma',            icon: <Package className="w-4 h-4" />,      basic: true,   standard: true,               premium: false },
-      { label: 'Comisión sobre ventas propias',              icon: <BadgePercent className="w-4 h-4" />, basic: '20%',  standard: '10%',              premium: NA },
-      { label: '% máximo de Llaves en compra propia',        icon: <BadgePercent className="w-4 h-4" />, basic: '20%',  standard: '50%',              premium: NA },
-      { label: 'Límite de productos activos en marketplace', icon: <Layers className="w-4 h-4" />,        basic: '10 productos', standard: '50 productos', premium: NA },
-    ],
-  },
-  {
-    title: 'Publicidad, juegos y visibilidad',
-    rows: [
-      { label: 'Publicar anuncios (Ads)',              icon: <Megaphone className="w-4 h-4" />,     basic: false, standard: 'Hasta 10 activos', premium: 'Hasta 50 activos' },
-      { label: 'Juegos brandeados (Campañas)',          icon: <Gamepad2 className="w-4 h-4" />,      basic: false, standard: 'Hasta 5 activos',  premium: 'Hasta 20 activos' },
-      { label: 'Encuestas',                             icon: <ClipboardList className="w-4 h-4" />, basic: false, standard: 'Hasta 10 activas', premium: 'Hasta 50 activas' },
-      { label: 'Boost de prioridad en visibilidad',     icon: <TrendingUp className="w-4 h-4" />,    basic: '0%',  standard: '30%',              premium: '70%' },
-      { label: 'Patrocinio en mascotas/avatares',       icon: <PawPrint className="w-4 h-4" />,      basic: false, standard: false,              premium: true },
-    ],
-  },
-  {
-    title: 'Aliados y recomendaciones patrocinadas',
-    rows: [
-      { label: 'Puede ser recomendado como aliado',                                  icon: <Handshake className="w-4 h-4" />, basic: true,  standard: true,  premium: NA },
-      { label: 'Promociona productos de aliados en el pop up final de sus juegos',    icon: <Sparkles className="w-4 h-4" />,  basic: false, standard: false, premium: true },
-    ],
-  },
-  {
-    title: 'Métricas',
-    rows: [
-      { label: 'Estadísticas de ventas',                              icon: <BarChart3 className="w-4 h-4" />,     basic: true,  standard: true,  premium: NA },
-      { label: 'Estadísticas de anuncios',                            icon: <Megaphone className="w-4 h-4" />,     basic: false, standard: true,  premium: true },
-      { label: 'Estadísticas de encuestas',                           icon: <ClipboardList className="w-4 h-4" />, basic: false, standard: true,  premium: true },
-      { label: 'Estadísticas de juegos',                              icon: <Gamepad2 className="w-4 h-4" />,      basic: false, standard: true,  premium: true },
-      { label: 'Métricas de remisión (impresiones y clics)',          icon: <Eye className="w-4 h-4" />,           basic: false, standard: false, premium: true },
-      { label: 'Visualizaciones a página oficial del empresario',     icon: <Eye className="w-4 h-4" />,           basic: false, standard: false, premium: true },
-      { label: 'Consumos en tienda de mascotas por producto patrocinado', icon: <ShoppingBag className="w-4 h-4" />, basic: false, standard: false, premium: true },
-      { label: 'Reporte ejecutivo exportable (PDF)',                  icon: <FileText className="w-4 h-4" />,      basic: false, standard: false, premium: true },
-    ],
-  },
-];
+const PLAN_ORDER: PlanCode[] = [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM];
 
-const plans = [
-  {
-    key: PlanCode.BASIC,
-    name: 'Básico',
-    price: '200.000',
-    unit: 'COP / mes',
-    billing: 'cobro mensual',
-    description: 'Vende tus productos y comienza a crecer',
-    icon: <Star className="w-8 h-8" />,
-    cta: 'Comenzar ahora',
-    highlight: false,
-    highlights: [
-      { icon: <BadgePercent className="w-3.5 h-3.5" />, text: 'Comisión del 20% por venta propia' },
-      { icon: <Layers className="w-3.5 h-3.5" />,        text: 'Hasta 10 productos activos' },
-      { icon: <Handshake className="w-3.5 h-3.5" />,     text: 'Puede ser recomendado como aliado' },
-    ],
-  },
-  {
-    key: PlanCode.STANDARD,
-    name: 'Estándar',
-    price: '1.000.000',
-    unit: 'COP mín.',
-    billing: 'inversión mensual',
-    description: 'Vende con menor comisión y gana visibilidad con anuncios, juegos y encuestas',
-    icon: <Zap className="w-8 h-8" />,
-    cta: 'Activar plan',
-    highlight: true,
-    highlights: [
-      { icon: <BadgePercent className="w-3.5 h-3.5" />, text: 'Comisión reducida al 10%' },
-      { icon: <Megaphone className="w-3.5 h-3.5" />,     text: 'Anuncios, juegos y encuestas activos' },
-      { icon: <BarChart3 className="w-3.5 h-3.5" />,     text: 'Estadísticas de ventas, anuncios y juegos' },
-    ],
-  },
-  {
-    key: PlanCode.PREMIUM,
-    name: 'Premium',
-    price: '10.000.000',
-    unit: 'COP mín.',
-    billing: 'inversión mensual',
-    description: 'Máxima visibilidad, patrocinios y métricas — sin venta directa',
-    icon: <Rocket className="w-8 h-8" />,
-    cta: 'Ir a Premium',
-    highlight: false,
-    highlights: [
-      { icon: <TrendingUp className="w-3.5 h-3.5" />,  text: '70% de boost de prioridad en visibilidad' },
-      { icon: <PawPrint className="w-3.5 h-3.5" />,    text: 'Patrocinio en mascotas y recomendaciones de aliados' },
-      { icon: <FileText className="w-3.5 h-3.5" />,    text: 'Métricas de remisión y reporte ejecutivo PDF' },
-    ],
-  },
-];
+// Cada blocker del preview enlaza a la pantalla donde el comercial ve el
+// estado y la fecha de fin de ese tipo de activo.
+const BLOCKER_ASSET_ROUTES: Record<PlanChangeAssetType, { href: string; label: string }> = {
+  PRODUCTS:      { href: '/commercial/products',         label: 'Ir a Mis productos' },
+  ADS:           { href: '/commercial/ads',              label: 'Ir a Mis anuncios' },
+  BRANDED_GAMES: { href: '/commercial/branding/requests', label: 'Ir a Mis juegos' },
+  SURVEYS:       { href: '/commercial/surveys',          label: 'Ir a Mis encuestas' },
+};
 
-// ─── Deposit Modal ────────────────────────────────────────────────────────────
+const PLAN_UI_META: Record<PlanCode, { icon: React.ReactNode; highlight: boolean; featuresLabel: string }> = {
+  [PlanCode.BASIC]: { icon: <Star className="w-8 h-8" />, highlight: false, featuresLabel: 'Incluye:' },
+  [PlanCode.STANDARD]: { icon: <Zap className="w-8 h-8" />, highlight: true, featuresLabel: 'Todo lo de Personal, más:' },
+  [PlanCode.PREMIUM]: { icon: <Rocket className="w-8 h-8" />, highlight: false, featuresLabel: 'Todo lo de Estándar, más:' },
+};
 
-interface DepositModalProps {
-  plan: typeof plans[number];
-  onConfirm: (amountCents: number) => void;
+function buildUIPlans(catalog: PlanCatalogResponseDTO): UIPlan[] {
+  return PLAN_ORDER
+    .map(code => catalog.plans.find(p => p.planCode === code))
+    .filter((p): p is PlanCatalogOption => !!p)
+    .map(p => {
+      const meta = PLAN_UI_META[p.planCode];
+      const isMonthly = p.monthlyFeeCents != null;
+      const priceCents = isMonthly ? p.monthlyFeeCents! : (p.minInvestmentCents ?? 0);
+      return {
+        key: p.planCode,
+        name: p.planName,
+        description: p.description,
+        icon: meta.icon,
+        highlight: meta.highlight,
+        currentPlan: p.currentPlan,
+        featuresLabel: meta.featuresLabel,
+        priceLabel: new Intl.NumberFormat('es-CO').format(priceCents / 100),
+        unit: isMonthly ? 'COP / mes' : 'COP mín.',
+        billing: isMonthly ? 'cobro mensual' : 'inversión única',
+        monthlyFeeCents: p.monthlyFeeCents,
+        minInvestmentCents: p.minInvestmentCents,
+        maxInvestmentCents: p.maxInvestmentCents,
+      };
+    });
+}
+
+function buildFeatureRows(catalog: PlanCatalogResponseDTO): PlanFeatureRow[] {
+  const byCode = new Map(catalog.plans.map(p => [p.planCode, p]));
+  const b = byCode.get(PlanCode.BASIC);
+  const s = byCode.get(PlanCode.STANDARD);
+  const p = byCode.get(PlanCode.PREMIUM);
+  if (!b || !s || !p) return [];
+
+  return [
+    {
+      label: 'Venta de productos', icon: <Package className="w-4 h-4" />,
+      basic: `comisión ${b.saleCommissionPct}%`, standard: `comisión ${s.saleCommissionPct}%`, premium: `comisión ${p.saleCommissionPct}%`,
+    },
+    {
+      label: 'Pago con llaves', icon: <BadgePercent className="w-4 h-4" />,
+      basic: pctOrUnlimited(b.maxKeysPct), standard: pctOrUnlimited(s.maxKeysPct), premium: pctOrUnlimited(p.maxKeysPct),
+    },
+    {
+      label: 'Productos publicables', icon: <Boxes className="w-4 h-4" />,
+      basic: limitOrUnlimited(b.maxProducts), standard: limitOrUnlimited(s.maxProducts), premium: limitOrUnlimited(p.maxProducts),
+    },
+    {
+      label: 'Juegos branded', icon: <Gamepad2 className="w-4 h-4" />,
+      basic: capacityLabel(b.canUseGames, b.maxBrandedGames),
+      standard: capacityLabel(s.canUseGames, s.maxBrandedGames),
+      premium: capacityLabel(p.canUseGames, p.maxBrandedGames),
+    },
+    {
+      label: 'Publicar anuncios', icon: <Megaphone className="w-4 h-4" />,
+      basic: capacityLabel(b.canAdvertise, b.maxAds),
+      standard: capacityLabel(s.canAdvertise, s.maxAds),
+      premium: capacityLabel(p.canAdvertise, p.maxAds),
+    },
+    {
+      label: 'Encuestas personalizadas', icon: <ClipboardList className="w-4 h-4" />,
+      basic: capacityLabel(b.canUseSurveys, b.maxSurveys),
+      standard: capacityLabel(s.canUseSurveys, s.maxSurveys),
+      premium: capacityLabel(p.canUseSurveys, p.maxSurveys),
+    },
+    {
+      label: 'Sección de mascotas', icon: <PawPrint className="w-4 h-4" />,
+      basic: b.canHavePets, standard: s.canHavePets, premium: p.canHavePets,
+    },
+    {
+      label: 'Aumento de visibilidad', icon: <TrendingUp className="w-4 h-4" />,
+      basic: b.visibilityBoostPct > 0 ? `+${b.visibilityBoostPct}%` : false,
+      standard: s.visibilityBoostPct > 0 ? `+${s.visibilityBoostPct}%` : false,
+      premium: p.visibilityBoostPct > 0 ? `+${p.visibilityBoostPct}%` : false,
+    },
+  ];
+}
+
+// ─── Plan Change Modal ──────────────────────────────────────────────────────────
+// Cubre tanto el cambio a STANDARD/PREMIUM (con monto de inversión) como la
+// bajada a BASIC (sin monto) — ambos casos pasan por el preview antes de
+// habilitar el botón de confirmar.
+
+interface PlanChangeModalProps {
+  plan: UIPlan;
+  // Devuelve un mensaje de error para mostrar en el modal (ej. 422 por
+  // carrera: el comercial agregó activos en otra pestaña), o void si se
+  // resolvió (navegación al detalle / conflicto de recarga).
+  onConfirm: (amountCents?: number) => Promise<string | void> | void;
   onClose: () => void;
   loading: boolean;
 }
@@ -188,12 +195,19 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
   const [error, setError] = useState('');
   const [preview, setPreview] = useState<PlanChangePreviewResponseDTO | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  // Se incrementa para re-verificar el preview: al volver a enfocar la
+  // ventana (los activos pudieron finalizar), al pulsar "Volver a verificar"
+  // y tras un 422 al crear la solicitud.
+  const [reloadKey, setReloadKey] = useState(0);
   const amount = parseCOP(inputValue);
 
   // El backend acota el abono al rango [min, max] del plan destino. Validamos
   // contra el preview (fuente de verdad); si aún no cargó, caemos al catálogo.
   const effMin = preview?.targetMinInvestmentPesos ?? minCOP;
   const effMax = preview?.targetMaxInvestmentPesos ?? maxCOP;
+
+  const revalidate = () => setReloadKey((k) => k + 1);
 
   useEffect(() => {
     if (!isBasic && !amount) {
@@ -209,7 +223,15 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
         .finally(() => setPreviewLoading(false));
     }, isBasic ? 0 : 500);
     return () => clearTimeout(timer);
-  }, [amount, isBasic, plan.key]);
+  }, [amount, isBasic, plan.key, reloadKey]);
+
+  // Re-verificar al volver a enfocar la ventana — el estado de los activos
+  // del comercial pudo haber cambiado (finalizaron, o soporte los canceló).
+  useEffect(() => {
+    const onFocus = () => setReloadKey((k) => k + 1);
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, []);
 
   const validate = () => {
     if (isBasic) return '';
@@ -219,24 +241,31 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
     return '';
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const err = validate();
     if (err) { setError(err); return; }
     if (!preview?.eligible) return;
-    onConfirm(isBasic ? undefined : amount * 100);
+    setSubmitError(null);
+    const result = await onConfirm(isBasic ? undefined : amount * 100);
+    if (typeof result === 'string') {
+      setSubmitError(result);
+      revalidate();
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(formatInput(e.target.value));
     setError('');
+    setSubmitError(null);
   };
 
+  const blockers = preview?.blockers ?? [];
   const confirmDisabled = loading || previewLoading || !preview?.eligible || (!isBasic && amount === 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-[#13151f] border border-white/10 rounded-2xl p-6 shadow-2xl">
+      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-[#13151f] border border-white/10 rounded-2xl p-6 shadow-2xl">
         <div className="flex items-center gap-3 mb-5">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
             plan.key === PlanCode.PREMIUM ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
@@ -293,16 +322,113 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
               <Loader2 className="w-4 h-4 animate-spin" /> Calculando...
             </p>
           )}
+          {!previewLoading && preview && (
+            <>
+              <p className="leading-relaxed">{preview.message}</p>
+              {!preview.eligible && blockers.length === 0 && (
+                <button
+                  type="button"
+                  onClick={revalidate}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-200/90 hover:text-amber-100 cursor-pointer"
+                >
+                  <RefreshCw className="w-3 h-3" /> Volver a verificar
+                </button>
+              )}
+              {preview.eligible && (
+                <ul className="text-xs opacity-80 space-y-1">
+                  {isBasic && preview.targetMonthlyPricePesos != null && (
+                    <li>Tarifa mensual: <span className="text-white">{formatCOP(preview.targetMonthlyPricePesos)}</span></li>
+                  )}
+                  {!isBasic && preview.targetMinInvestmentPesos != null && (
+                    <li>
+                      Rango de inversión:{' '}
+                      <span className="text-white">
+                        {formatCOP(preview.targetMinInvestmentPesos)}
+                        {preview.targetMaxInvestmentPesos ? ` – ${formatCOP(preview.targetMaxInvestmentPesos)}` : ' o más'}
+                      </span>
+                    </li>
+                  )}
+                  <li>Comisión por venta: <span className="text-white">{preview.targetSaleCommissionPct}%</span></li>
+                  {!isBasic && (
+                    <li>
+                      Abono a pagar:{' '}
+                      <span className="text-white font-semibold">
+                        {formatCOP(preview.requiredTopUpAmountPesos ?? amount)}
+                      </span>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </>
+          )}
+          {!previewLoading && !preview && !isBasic && (
+            <p className="leading-relaxed">Ingresa un monto para ver el resumen del cambio de plan.</p>
+          )}
         </div>
 
-        <div className="bg-white/3 border border-white/6 rounded-xl p-3 mb-4">
-          <p className="text-slate-400 text-sm leading-relaxed">
-            {plan.key === PlanCode.STANDARD
-              ? <>Este monto se acredita en tu presupuesto de anuncios, juegos y encuestas. Tu comisión por venta directa en el marketplace es del <strong className="text-white">10%</strong>.</>
-              : <>Este monto impulsa tus anuncios, campañas y patrocinios. El plan Premium no vende productos directamente en el marketplace.</>
-            }
+        {blockers.length > 0 && (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 mb-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-amber-200">
+                  Debes esperar a que finalicen algunos activos antes de cambiar de plan
+                </p>
+                <p className="text-xs text-amber-100/80 leading-relaxed mt-0.5">
+                  Tus activos no se migran al plan {plan.name}. Espera a que finalicen los que sobran para poder cambiar.
+                </p>
+              </div>
+            </div>
+
+            <ul className="space-y-2">
+              {blockers.map((b) => {
+                const route = BLOCKER_ASSET_ROUTES[b.assetType];
+                return (
+                  <li key={b.assetType} className="rounded-lg border border-white/10 bg-white/5 p-2.5 space-y-1">
+                    <p className="text-sm font-semibold text-white capitalize">{b.assetLabel}</p>
+                    <p className="text-xs text-slate-300">
+                      Tienes {b.currentCount} activos ·{' '}
+                      {b.allowedByTargetPlan === 0
+                        ? `${plan.name} no permite ${b.assetLabel}`
+                        : `${plan.name} permite ${b.allowedByTargetPlan}`}
+                    </p>
+                    <p className="text-xs font-medium text-amber-200">Deben finalizar {b.excessCount}</p>
+                    {b.message && <p className="text-[11px] text-slate-400 leading-relaxed">{b.message}</p>}
+                    {route && (
+                      <Link
+                        href={route.href}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-300 hover:text-blue-200"
+                      >
+                        {route.label} <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+
+            <button
+              type="button"
+              onClick={revalidate}
+              disabled={previewLoading}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white disabled:opacity-50 cursor-pointer"
+            >
+              {previewLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              Volver a verificar
+            </button>
+
+            <p className="text-[11px] text-slate-400 leading-relaxed border-t border-white/10 pt-2">
+              Los activos no se pueden eliminar. Espera a que finalicen o contacta al soporte de VerYGana si necesitas
+              cancelarlos antes.
+            </p>
+          </div>
+        )}
+
+        {submitError && (
+          <p className="flex items-start gap-1.5 text-red-400 text-sm mb-3">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" /> {submitError}
           </p>
-        </div>
+        )}
 
         <button
           onClick={handleSubmit}
@@ -353,6 +479,7 @@ export default function PlansPage() {
   const [catalogError, setCatalogError] = useState(false);
   const [rechargeConflict, setRechargeConflict] = useState(false);
   const router = useRouter();
+  const invalidatePlanChangeRequest = useInvalidatePlanChangeRequest();
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -390,15 +517,19 @@ export default function PlansPage() {
     }
   }, [router]);
 
-  // Intenta crear la solicitud de cambio de plan. Si el backend responde 422,
-  // puede ser porque hay una recarga en curso (guardada en sessionStorage
-  // desde el flujo de /commercial/balance) que bloquea el cambio — en ese
-  // caso se muestra ese contrato con opción de cancelarlo y reintentar
-  // (rate limit u otro 422 sin recarga guardada cae al toast genérico).
+  // Intenta crear la solicitud de cambio de plan. Devuelve un mensaje de
+  // error para mostrar en el modal, o `undefined` si se resolvió (navegación
+  // al detalle, o conflicto de recarga que abre su propio modal).
+  //
+  // El 422 puede ser: (a) recarga en curso (contractId guardado en
+  // sessionStorage desde /commercial/balance) → modal de conflicto de
+  // recarga; (b) activos que exceden el plan destino (carrera: el preview ya
+  // debería evitarlo) → se muestra el `message` del backend en el modal, que
+  // vuelve a verificar el preview.
   const attemptRequestPlanChange = useCallback(async (
     targetPlanCode: PlanCode,
     amountCents?: number
-  ): Promise<'success' | 'conflict' | 'error'> => {
+  ): Promise<string | void> => {
     // Si la última solicitud fue rechazada y el comercial aún no dio por
     // leído el motivo, /current la sigue devolviendo con status REJECTED.
     // El back aceptaría una solicitud nueva, pero por UX primero lo
@@ -409,7 +540,7 @@ export default function PlansPage() {
         toast.error('Primero revisa por qué se rechazó tu solicitud anterior.');
         setModalPlan(null);
         router.push('/commercial/plan-change');
-        return 'error';
+        return;
       }
     } catch {
       /* si /current falla seguimos con el flujo normal de creación */
@@ -421,10 +552,12 @@ export default function PlansPage() {
         targetPlanCode,
         intendedInvestmentAmountCents: amountCents,
       });
+      invalidatePlanChangeRequest();
       router.push('/commercial/plan-change');
-      return 'success';
+      return;
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status;
+      const msg = apiErrorMessage(err, 'No se pudo crear la solicitud de cambio de plan.');
       if (status === 422) {
         const contractId = sessionStorage.getItem(RECHARGE_CONTRACT_ID_KEY);
         if (contractId) {
@@ -433,25 +566,32 @@ export default function PlansPage() {
             if (isActiveRechargeContract(contract)) {
               setModalPlan(null);
               setRechargeConflict(true);
-              return 'conflict';
+              return;
             }
           } catch {
-            /* no se pudo confirmar el conflicto — cae al toast genérico */
+            /* no se pudo confirmar el conflicto de recarga */
           }
         }
+        // 422 por activos que exceden el plan destino (u otra causa):
+        // dejamos el modal abierto con el mensaje del backend.
+        return msg;
       }
-      toast.error(apiErrorMessage(err, 'No se pudo crear la solicitud de cambio de plan.'));
+      toast.error(msg);
       setModalPlan(null);
-      return 'error';
+      return;
     }
-  }, [router]);
+  }, [router, invalidatePlanChangeRequest]);
 
   // Cambiar a un plan distinto al actual (incluye bajar a BASIC) — pasa por
   // el pipeline de solicitud de cambio de plan, no por /plans/checkout.
-  const handleRequestPlanChange = useCallback(async (targetPlanCode: PlanCode, amountCents?: number) => {
+  const handleRequestPlanChange = useCallback(async (
+    targetPlanCode: PlanCode,
+    amountCents?: number
+  ): Promise<string | void> => {
     setLoading(targetPlanCode);
-    await attemptRequestPlanChange(targetPlanCode, amountCents);
+    const result = await attemptRequestPlanChange(targetPlanCode, amountCents);
     setLoading(null);
+    return result;
   }, [attemptRequestPlanChange]);
 
   // plan.currentPlan viene directo del catálogo — es el plan activo del
@@ -470,10 +610,13 @@ export default function PlansPage() {
     setModalPlan(plan);
   }, [loadingCatalog, handleRenewCurrentPlan]);
 
-  const handlePlanChangeConfirm = useCallback((amountCents?: number) => {
-    if (!modalPlan) return;
-    handleRequestPlanChange(modalPlan.key, amountCents);
-  }, [modalPlan, handleRequestPlanChange]);
+  const handlePlanChangeConfirm = useCallback(
+    (amountCents?: number): Promise<string | void> | void => {
+      if (!modalPlan) return;
+      return handleRequestPlanChange(modalPlan.key, amountCents);
+    },
+    [modalPlan, handleRequestPlanChange],
+  );
 
   return (
     <div className="min-h-screen bg-[#111318] text-white font-sans flex flex-col">

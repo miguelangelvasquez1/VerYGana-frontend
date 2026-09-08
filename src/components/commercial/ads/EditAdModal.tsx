@@ -10,6 +10,7 @@ import { useDepartments, useMunicipalities } from '@/hooks/useLocation';
 import { useUpdateAd } from '@/hooks/ads/mutations';
 import toast from 'react-hot-toast';
 import { usePlanState } from '../layout/DashboardLayout';
+import { isBudgetDormant, BudgetDormantEditNotice, WALLET_DORMANT_TOOLTIP } from '../plans/WalletBudgetAlerts';
 
 interface EditAdModalProps {
   ad: AdResponseDTO;
@@ -51,7 +52,8 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
   const { departments, loading: loadingDepartments } = useDepartments();
   const { municipalities, loading: loadingMunicipalities } = useMunicipalities(selectedDepartment);
   const updateAdMutation = useUpdateAd();
-  const { refreshPlanState } = usePlanState();
+  const { planState, refreshPlanState } = usePlanState();
+  const editBlocked = isBudgetDormant(planState);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitErrorDetails, setSubmitErrorDetails] = useState<Record<string, string> | null>(null);
@@ -110,6 +112,11 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (editBlocked) {
+      toast.error(WALLET_DORMANT_TOOLTIP);
+      return;
+    }
 
     if (formData.categoryIds.length === 0) {
       toast.error('Debes seleccionar al menos una categoría');
@@ -181,6 +188,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
 
         {/* Content - Scrollable */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+          {editBlocked && <BudgetDormantEditNotice />}
           {/* Información básica */}
           <div className="space-y-4">
             <div>
@@ -567,7 +575,8 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
             <button
               onClick={handleSubmit}
               className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2 cursor-pointer"
-              disabled={submitting || ageRangeInvalid}
+              disabled={submitting || ageRangeInvalid || editBlocked}
+              title={editBlocked ? WALLET_DORMANT_TOOLTIP : undefined}
             >
               {submitting ? (
                 <>

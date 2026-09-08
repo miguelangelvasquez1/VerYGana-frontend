@@ -33,6 +33,8 @@ import {
 import { ResumenTab } from './tabs/ResumenTab';
 import { RendimientoTab } from './tabs/RendimientoTab';
 import { AudienciaTab } from './tabs/AudienciaTab';
+import { usePlanState } from '../layout/DashboardLayout';
+import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from '../plans/WalletBudgetAlerts';
 
 type Tab = 'resumen' | 'rendimiento' | 'audiencia';
 
@@ -50,6 +52,8 @@ interface Props {
 }
 
 export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
+  const { planState } = usePlanState();
+  const editBlocked = isBudgetDormant(planState);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +94,10 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
 
   const handleSaveAudience = async () => {
     if (!campaign) return;
+    if (editBlocked) {
+      toast.error(WALLET_DORMANT_TOOLTIP);
+      return;
+    }
     setSavingAudience(true);
     try {
       const dto: UpdateCampaignDto = {
@@ -298,6 +306,8 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
             onEdit={() => setEditingAudience(true)}
             onCancel={cancelEditAudience}
             onSave={handleSaveAudience}
+            editBlocked={editBlocked}
+            editBlockedReason={WALLET_DORMANT_TOOLTIP}
           />
         )}
       </div>
