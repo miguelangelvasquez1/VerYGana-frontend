@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useEffect, useId, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+
 import {
   authService,
   AccountPendingReviewError,
@@ -10,25 +12,87 @@ import {
   EmailVerificationPendingError,
   KycReviewPendingError,
   PasswordSetupRequiredError,
-} from "@/lib/auth/authService";
-import { getCommercialInitialDataWithToken } from "@/services/commercialService";
-import { getRoleHomePath } from "@/lib/auth/roleRedirect";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import { AlertCircle, Eye, EyeOff } from "lucide-react";
-import { signIn } from "next-auth/react";
+} from '@/lib/auth/authService';
+
+import { getCommercialInitialDataWithToken } from '@/services/commercialService';
+import { getRoleHomePath } from '@/lib/auth/roleRedirect';
+
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+import {
+  AlertCircle,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
+
+import { signIn } from 'next-auth/react';
+
+const validateIdentifier = (value: string): string | null => {
+  const identifier = value.trim();
+
+  if (!identifier) {
+    return 'Ingresa tu correo electrónico o número de teléfono.';
+  }
+
+  const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  if (emailRegex.test(identifier)) {
+    return null;
+  }
+
+  const colombianPhoneRegex =
+      /^3\d{9}$/;
+
+  if (colombianPhoneRegex.test(identifier)) {
+    return null;
+  }
+
+  return 'Ingresa un correo electrónico válido o un número de teléfono válido.';
+};
 
 const LoginForm = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-
   const router = useRouter();
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const [formData, setFormData] = useState({
-    identifier: "",
-    password: "",
-  });
+  const [isLoading, setIsLoading] =
+      useState(false);
+
+  const [error, setError] =
+      useState<string | null>(null);
+
+  const [identifierError, setIdentifierError] =
+      useState<string | null>(null);
+
+  const [showPassword, setShowPassword] =
+      useState(false);
+
+  const errorRef =
+      useRef<HTMLDivElement>(null);
+
+  const identifierId =
+      useId();
+
+  const passwordId =
+      useId();
+
+  const errorId =
+      useId();
+
+  const [formData, setFormData] =
+      useState({
+        identifier: '',
+        password: '',
+      });
+
+  useEffect(() => {
+    if (
+        error &&
+        errorRef.current
+    ) {
+      errorRef.current.focus();
+    }
+  }, [error]);
 
   const handleSubmit = async (
       e: React.FormEvent<HTMLFormElement>
@@ -38,164 +102,196 @@ const LoginForm = () => {
     if (isLoading) return;
 
     setError(null);
+    setIdentifierError(null);
     setIsLoading(true);
 
-    const identifier = formData.identifier.trim();
+    const identifier =
+        formData.identifier.trim();
+
+    const password =
+        formData.password;
 
     try {
-      const password = formData.password.trim();
+      if (
+          !identifier ||
+          !password
+      ) {
+        setError(
+            'Por favor completa todos los campos.'
+        );
 
-      /*
-       * ---------------------------------------------------------
-       * 1. Validación básica del formulario
-       * ---------------------------------------------------------
-       */
-      if (!identifier || !password) {
-        setError("Por favor completa todos los campos");
         setIsLoading(false);
         return;
       }
 
-      /*
-       * ---------------------------------------------------------
-       * 2. Verificar que reCAPTCHA esté disponible
-       * ---------------------------------------------------------
-       */
+      const validationError =
+          validateIdentifier(identifier);
+
+      if (validationError) {
+        setIdentifierError(
+            validationError
+        );
+
+        setIsLoading(false);
+        return;
+      }
+
       if (!executeRecaptcha) {
         throw new Error(
-            "No fue posible cargar la verificación de seguridad. Recarga la página e inténtalo nuevamente."
+            'No fue posible cargar la verificación de seguridad. Recarga la página e inténtalo nuevamente.'
         );
       }
 
-      /*
-       * ---------------------------------------------------------
-       * 3. Generar token reCAPTCHA
-       *
-       * La acción debe coincidir con:
-       *
-       * recaptcha.login-action=login
-       *
-       * del backend.
-       * ---------------------------------------------------------
-       */
-      const recaptchaToken = await executeRecaptcha("login");
+      const recaptchaToken =
+          await executeRecaptcha('login');
 
-      /*
-       * ---------------------------------------------------------
-       * 4. Login contra el backend
-       *
-       * authService.login recibe:
-       * identifier
-       * password
-       * recaptchaToken
-       * ---------------------------------------------------------
-       */
-      const loginResponse = await authService.login(
-          identifier,
-          password,
-          recaptchaToken
-      );
+      const loginResponse =
+          await authService.login(
+              identifier,
+              password,
+              recaptchaToken
+          );
 
-      /*
-       * ---------------------------------------------------------
-       * 5. Sincronizar la autenticación con NextAuth
-       * ---------------------------------------------------------
-       */
-      const result = await signIn("credentials-sync", {
-        redirect: false,
-        accessToken: loginResponse.accessToken,
-        identifier: identifier,
-      });
+      const result =
+          await signIn(
+              'credentials-sync',
+              {
+                redirect: false,
+                accessToken:
+                loginResponse.accessToken,
+                identifier,
+              }
+          );
 
       if (result?.error) {
-        throw new Error(result.error);
+        throw new Error(
+            result.error
+        );
       }
 
-      /*
-       * ---------------------------------------------------------
-       * 6. Redirección según el rol
-       * ---------------------------------------------------------
-       */
-      const role = loginResponse.role;
+      const role =
+          loginResponse.role;
 
-      if (role === "ROLE_COMMERCIAL") {
+      if (
+          role === 'ROLE_COMMERCIAL'
+      ) {
         try {
           const initialData =
               await getCommercialInitialDataWithToken(
                   loginResponse.accessToken
               );
 
-          if (initialData.onboardingStatus === "COMPLETED") {
-            router.push("/commercial");
+          if (
+              initialData.onboardingStatus ===
+              'COMPLETED'
+          ) {
+            router.push(
+                '/commercial'
+            );
           } else {
-            router.push("/commercial-onboarding");
+            router.push(
+                '/commercial-onboarding'
+            );
           }
         } catch {
-          /*
-           * Si falla la consulta del onboarding,
-           * dejamos que /commercial haga la validación.
-           */
-          router.push("/commercial");
+          router.push(
+              '/commercial'
+          );
         }
-      } else {
-        const homePath = getRoleHomePath(role);
 
-        if (homePath) {
-          router.push(homePath);
-        }
+        return;
       }
 
-    } catch (err: any) {
+      const homePath =
+          getRoleHomePath(role);
 
-      /*
-       * ---------------------------------------------------------
-       * 7. Manejo de errores específicos de autenticación
-       * ---------------------------------------------------------
-       */
+      if (homePath) {
+        router.push(
+            homePath
+        );
+      } else {
+        setError(
+            'No se pudo determinar el acceso de tu cuenta.'
+        );
 
-      if (err instanceof AccountLockedError) {
+        setIsLoading(false);
+      }
+
+    } catch (err: unknown) {
+
+      if (
+          err instanceof
+          AccountLockedError
+      ) {
         router.push(
             `/unlock-account?identifier=${encodeURIComponent(
                 err.identifier
             )}`
         );
-        return;
 
-      } else if (err instanceof EmailVerificationPendingError) {
+        return;
+      }
+
+      if (
+          err instanceof
+          EmailVerificationPendingError
+      ) {
         router.push(
-            `/verify?email=${encodeURIComponent(identifier)}`
+            `/verify?email=${encodeURIComponent(
+                identifier
+            )}`
         );
+
         return;
+      }
 
-      } else if (err instanceof KycReviewPendingError) {
-        setError(err.message);
-
-      } else if (err instanceof PasswordSetupRequiredError) {
-        setError(err.message);
-
-      } else if (err instanceof AccountPendingReviewError) {
+      if (
+          err instanceof
+          KycReviewPendingError
+      ) {
         setError(
-            "Tu cuenta está en revisión por el equipo de cumplimiento. " +
-            "Te notificaremos cuando sea aprobada."
+            err.message
         );
 
       } else if (
-          err.message
-              ?.toLowerCase()
-              .includes("invalid credentials")
+          err instanceof
+          PasswordSetupRequiredError
       ) {
         setError(
-            "Correo/teléfono o contraseña incorrectos."
+            err.message
         );
 
-        setFormData((f) => ({
-          ...f,
-          password: "",
-        }));
+      } else if (
+          err instanceof
+          AccountPendingReviewError
+      ) {
+        setError(
+            'Tu cuenta está en revisión por el equipo de cumplimiento. ' +
+            'Te notificaremos cuando sea aprobada.'
+        );
+
+      } else if (
+          err instanceof Error &&
+          err.message
+              ?.toLowerCase()
+              .includes('invalid credentials')
+      ) {
+        setError(
+            'Correo/teléfono o contraseña incorrectos.'
+        );
+
+        setFormData(
+            (current) => ({
+              ...current,
+              password: '',
+            })
+        );
 
       } else {
         setError(
-            err.message || "Error al iniciar sesión"
+            err instanceof Error
+                ? err.message
+                : 'No fue posible iniciar sesión. Inténtalo nuevamente.'
         );
       }
 
@@ -204,335 +300,540 @@ const LoginForm = () => {
   };
 
   return (
-      <div className="w-full max-w-xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 p-8 sm:p-10 border border-gray-100">
+      <div className="w-full">
 
-          {/* =====================================================
-            ERROR GENERAL
-            ===================================================== */}
+        <section
+            aria-labelledby="login-title"
+            className="
+          w-full
+          rounded-2xl
+          border
+          border-gray-200
+          bg-white
+          px-7
+          py-10
+          shadow-xl
+          shadow-gray-200/50
+          sm:px-10
+          sm:py-11
+          lg:px-12
+          lg:py-12
+        "
+        >
+
+          <header className="mb-9">
+
+            <h1
+                id="login-title"
+                className="
+              text-[1.65rem]
+              sm:text-3xl
+              font-extrabold
+              tracking-tight
+              text-[#0b1440]
+            "
+            >
+              Inicia sesión
+            </h1>
+
+            <p
+                id="login-description"
+                className="
+              mt-2.5
+              max-w-lg
+              text-sm
+              leading-6
+              text-gray-600
+            "
+            >
+              Accede a tu cuenta y continúa disfrutando
+              de tus recompensas.
+            </p>
+
+          </header>
+
           {error && (
               <div
-                  className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-start"
+                  id={errorId}
+                  ref={errorRef}
                   role="alert"
+                  aria-live="assertive"
+                  tabIndex={-1}
+                  className="
+              mb-7
+              flex
+              items-start
+              gap-3
+              rounded-xl
+              border
+              border-red-200
+              bg-red-50
+              px-4
+              py-3.5
+              focus:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-red-500/40
+            "
               >
-                <AlertCircle className="w-5 h-5 text-red-600 mr-2 shrink-0 mt-0.5" />
 
-                <p className="text-sm text-red-800">
+                <AlertCircle
+                    aria-hidden="true"
+                    className="
+                mt-0.5
+                h-5
+                w-5
+                shrink-0
+                text-red-600
+              "
+                />
+
+                <p
+                    className="
+                text-sm
+                leading-6
+                text-red-800
+              "
+                >
                   {error}
                 </p>
+
               </div>
           )}
 
-          {/* =====================================================
-            HEADER DEL FORMULARIO
-            ===================================================== */}
-          <div className="text-center mb-6">
-
-            <div className="w-16 h-16 bg-linear-to-br from-[#0b1440] to-[#03548C] rounded-full flex items-center justify-center mx-auto mb-4">
-
-              <svg
-                  className="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-              >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-
-            </div>
-
-            <p className="text-gray-600 text-sm sm:text-base">
-              Inicia sesión en tu cuenta de Ver y Gana
-            </p>
-          </div>
-
-          {/* =====================================================
-            FORMULARIO
-            ===================================================== */}
           <form
               onSubmit={handleSubmit}
-              className="space-y-4"
               autoComplete="on"
+              aria-describedby="login-description"
+              className="space-y-7"
           >
 
-            {/* ===================================================
-              IDENTIFIER
-              =================================================== */}
             <div>
 
               <label
-                  htmlFor="identifier"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  htmlFor={identifierId}
+                  className="
+                mb-2
+                block
+                text-sm
+                font-semibold
+                text-gray-800
+              "
               >
                 Correo electrónico o teléfono
-                <span className="text-red-500 ml-1">
+
+                <span
+                    aria-hidden="true"
+                    className="
+                  ml-1
+                  text-red-600
+                "
+                >
                 *
               </span>
+
+                <span className="sr-only">
+                Campo obligatorio
+              </span>
+
               </label>
 
               <input
-                  id="identifier"
+                  id={identifierId}
                   name="identifier"
                   type="text"
-                  value={formData.identifier}
-                  onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        identifier: e.target.value,
-                      })
+                  inputMode="text"
+                  value={
+                    formData.identifier
                   }
+                  onChange={(e) => {
+
+                    setFormData(
+                        (current) => ({
+                          ...current,
+                          identifier:
+                          e.target.value,
+                        })
+                    );
+
+                    if (identifierError) {
+                      setIdentifierError(null);
+                    }
+
+                    if (error) {
+                      setError(null);
+                    }
+
+                  }}
+                  onBlur={() => {
+
+                    if (
+                        formData.identifier.trim()
+                    ) {
+                      setIdentifierError(
+                          validateIdentifier(
+                              formData.identifier
+                          )
+                      );
+                    }
+
+                  }}
                   required
                   autoComplete="username"
-                  placeholder="ej. usuario@correo.com o 3001234567"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  placeholder="Correo o número de teléfono"
+                  aria-invalid={
+                    Boolean(identifierError)
+                  }
+                  aria-describedby={
+                    identifierError
+                        ? `${identifierId}-error`
+                        : undefined
+                  }
                   disabled={isLoading}
-                  className="
+                  className={`
                 w-full
-                px-4
-                py-3
-                border
-                border-gray-300
+                h-12
                 rounded-lg
+                border
+                bg-white
+                px-4
+                text-sm
+                text-gray-900
                 shadow-sm
-                focus:ring-2
-                focus:ring-[#03548C]/40
-                focus:border-[#03548C]
+                placeholder:text-gray-400
                 transition-all
                 duration-200
-                ease-in-out
-                hover:border-gray-400
-                text-gray-900
-                placeholder-gray-500
-                bg-white
-                text-sm
-              "
+                focus:outline-none
+                focus-visible:ring-2
+                disabled:cursor-not-allowed
+                disabled:bg-gray-100
+                disabled:text-gray-500
+
+                ${
+                      identifierError
+                          ? `
+                      border-red-400
+                      focus:border-red-500
+                      focus:ring-red-500/30
+                    `
+                          : `
+                      border-gray-300
+                      hover:border-gray-400
+                      focus:border-[#03548C]
+                      focus:ring-[#03548C]/30
+                    `
+                  }
+              `}
               />
+
+              {identifierError && (
+                  <p
+                      id={`${identifierId}-error`}
+                      role="alert"
+                      className="
+                  mt-2
+                  flex
+                  items-start
+                  gap-2
+                  text-sm
+                  leading-6
+                  text-red-700
+                "
+                  >
+
+                    <AlertCircle
+                        aria-hidden="true"
+                        className="
+                    mt-1
+                    h-4
+                    w-4
+                    shrink-0
+                  "
+                    />
+
+                    <span>
+                  {identifierError}
+                </span>
+
+                  </p>
+              )}
 
             </div>
 
-            {/* ===================================================
-              PASSWORD
-              =================================================== */}
             <div>
 
-              <div className="flex items-center justify-between mb-2">
+              <div
+                  className="
+                mb-2
+                flex
+                flex-wrap
+                items-center
+                justify-between
+                gap-x-4
+                gap-y-1
+              "
+              >
 
                 <label
-                    htmlFor="password"
-                    className="block text-sm font-semibold text-gray-700"
-                >
-                  Contraseña
-                  <span className="text-red-500 ml-1">
-                  *
-                </span>
-                </label>
-
-                <a
-                    href="/forgot-password"
+                    htmlFor={passwordId}
                     className="
                   text-sm
+                  font-semibold
+                  text-gray-800
+                "
+                >
+                  Contraseña
+
+                  <span
+                      aria-hidden="true"
+                      className="
+                    ml-1
+                    text-red-600
+                  "
+                  >
+                  *
+                </span>
+
+                  <span className="sr-only">
+                  Campo obligatorio
+                </span>
+
+                </label>
+
+                <Link
+                    href="/forgot-password"
+                    className="
+                  shrink-0
+                  rounded-sm
+                  text-sm
+                  font-medium
                   text-[#03548C]
+                  transition-colors
                   hover:text-[#0b1440]
-                  underline
-                  decoration-2
-                  underline-offset-2
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-[#03548C]/40
                 "
                 >
                   ¿Olvidaste tu contraseña?
-                </a>
+                </Link>
 
               </div>
 
               <div className="relative">
 
                 <input
-                    id="password"
+                    id={passwordId}
                     name="password"
-                    type={showPassword ? "text" : "password"}
-                    value={formData.password}
-                    onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          password: e.target.value,
-                        })
+                    type={
+                      showPassword
+                          ? 'text'
+                          : 'password'
                     }
+                    value={
+                      formData.password
+                    }
+                    onChange={(e) => {
+
+                      setFormData(
+                          (current) => ({
+                            ...current,
+                            password:
+                            e.target.value,
+                          })
+                      );
+
+                      if (error) {
+                        setError(null);
+                      }
+
+                    }}
                     required
                     autoComplete="current-password"
-                    placeholder="Ingrese su contraseña"
+                    placeholder="Ingresa tu contraseña"
                     disabled={isLoading}
                     className="
                   w-full
-                  px-4
-                  py-3
-                  pr-11
+                  h-12
+                  rounded-lg
                   border
                   border-gray-300
-                  rounded-lg
+                  bg-white
+                  px-4
+                  pr-14
+                  text-sm
+                  text-gray-900
                   shadow-sm
-                  focus:ring-2
-                  focus:ring-[#03548C]/40
-                  focus:border-[#03548C]
+                  placeholder:text-gray-400
                   transition-all
                   duration-200
-                  ease-in-out
                   hover:border-gray-400
-                  text-gray-900
-                  placeholder-gray-500
-                  bg-white
-                  text-sm
+                  focus:border-[#03548C]
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-[#03548C]/30
+                  focus-visible:ring-2
+                  focus-visible:ring-[#03548C]/40
+                  disabled:cursor-not-allowed
+                  disabled:bg-gray-100
+                  disabled:text-gray-500
                 "
                 />
 
                 <button
                     type="button"
                     onClick={() =>
-                        setShowPassword((v) => !v)
+                        setShowPassword(
+                            (current) =>
+                                !current
+                        )
                     }
-                    tabIndex={-1}
+                    disabled={isLoading}
                     aria-label={
                       showPassword
-                          ? "Ocultar contraseña"
-                          : "Mostrar contraseña"
+                          ? 'Ocultar contraseña'
+                          : 'Mostrar contraseña'
+                    }
+                    aria-pressed={
+                      showPassword
                     }
                     className="
                   absolute
-                  inset-y-0
-                  right-0
+                  right-1
+                  top-1/2
                   flex
+                  h-10
+                  w-10
+                  -translate-y-1/2
                   items-center
-                  pr-3.5
-                  text-gray-400
-                  hover:text-gray-600
-                  cursor-pointer
+                  justify-center
+                  rounded-lg
+                  text-gray-500
+                  transition-colors
+                  hover:bg-gray-100
+                  hover:text-gray-700
+                  focus:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-[#03548C]/40
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
                 "
                 >
                   {showPassword ? (
-                      <EyeOff className="w-4.5 h-4.5" />
+                      <EyeOff
+                          aria-hidden="true"
+                          className="h-5 w-5"
+                      />
                   ) : (
-                      <Eye className="w-4.5 h-4.5" />
+                      <Eye
+                          aria-hidden="true"
+                          className="h-5 w-5"
+                      />
                   )}
                 </button>
 
               </div>
-            </div>
-
-            {/* ===================================================
-              SUBMIT
-              =================================================== */}
-            <div className="pt-2">
-
-              <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="
-                w-full
-                bg-linear-to-r
-                from-[#b8860b]
-                via-[#FFD700]
-                to-[#c9a227]
-                hover:brightness-110
-                disabled:opacity-50
-                disabled:cursor-not-allowed
-                text-gray-900
-                font-bold
-                py-3
-                px-6
-                rounded-xl
-                transition-all
-                duration-200
-                ease-in-out
-                transform
-                hover:scale-[1.02]
-                active:scale-[0.98]
-                disabled:transform-none
-                shadow-md
-                shadow-yellow-200/60
-                flex
-                items-center
-                justify-center
-                gap-2
-                text-sm
-                sm:text-base
-                cursor-pointer
-              "
-              >
-                {isLoading ? (
-                    <LoadingSpinner label="Procesando..." />
-                ) : (
-                    <span>Iniciar Sesión</span>
-                )}
-              </button>
 
             </div>
+
+            <button
+                type="submit"
+                disabled={isLoading}
+                aria-busy={isLoading}
+                className="
+              flex
+              w-full
+              h-12
+              items-center
+              justify-center
+              gap-2
+              rounded-lg
+              bg-gradient-to-r
+              from-[#D4A72C]
+              via-[#FFD21F]
+              to-[#D4A72C]
+              px-6
+              text-sm
+              sm:text-base
+              font-bold
+              text-[#0b1440]
+              shadow-md
+              shadow-yellow-200/50
+              transition-all
+              duration-200
+              hover:brightness-105
+              hover:shadow-lg
+              hover:shadow-yellow-200/60
+              active:brightness-95
+              focus:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[#0b1440]
+              focus-visible:ring-offset-2
+              disabled:cursor-not-allowed
+              disabled:opacity-60
+            "
+            >
+
+              {isLoading ? (
+                  <>
+                    <LoadingSpinner
+                        label="Procesando..."
+                    />
+
+                    <span className="sr-only">
+                  Iniciando sesión, espera un momento.
+                </span>
+                  </>
+              ) : (
+                  <span>
+                Iniciar sesión
+              </span>
+              )}
+
+            </button>
+
           </form>
 
-          {/* =====================================================
-            REGISTRO
-            ===================================================== */}
-          <div className="mt-6 text-center">
+          <div
+              className="
+            mt-6
+            border-t
+            border-gray-100
+            pt-5
+            text-center
+            text-sm
+          "
+          >
 
-            <p className="text-gray-600 text-sm">
-              ¿No tienes una cuenta?{" "}
+          <span className="text-gray-500">
+            ¿No tienes una cuenta?
+          </span>
 
-              <a
-                  href="/register"
-                  className="
-                text-[#03548C]
-                hover:text-[#0b1440]
-                font-semibold
-                underline
-                decoration-2
-                underline-offset-2
-              "
-              >
-                Regístrate aquí
-              </a>
-            </p>
-
-          </div>
-
-          {/* =====================================================
-            LINKS INFERIORES
-            ===================================================== */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-
-            <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
-
-              <a
-                  href="/terminos"
-                  className="hover:text-gray-700 underline"
-              >
-                Términos
-              </a>
-
-              <span>•</span>
-
-              <a
-                  href="/privacidad"
-                  className="hover:text-gray-700 underline"
-              >
-                Privacidad
-              </a>
-
-              <span>•</span>
-
-              <a
-                  href="/ayuda"
-                  className="hover:text-gray-700 underline"
-              >
-                Ayuda
-              </a>
-
-            </div>
+            <Link
+                href="/register"
+                className="
+              ml-1.5
+              rounded-sm
+              font-semibold
+              text-[#03548C]
+              decoration-1
+              underline-offset-4
+              transition-colors
+              hover:text-[#0b1440]
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[#03548C]/40
+            "
+            >
+              Regístrate
+            </Link>
 
           </div>
 
-        </div>
+        </section>
+
       </div>
   );
 };
