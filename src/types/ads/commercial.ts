@@ -91,7 +91,13 @@ export interface AdResponseDTO {
   remainingBudget: number;
   remainingLikes: number;
   completionPercentage: number;
-  contentUrl: string;
+  /**
+   * URL pública del CDN para estados normales; para un anuncio BLOCKED es una
+   * URL PREFIRMADA de corta duración (~5 min) que caduca — hay que re-pedir el
+   * recurso antes de renderizar y nunca guardarla en estado persistente.
+   * `null` si el anuncio aún no tiene asset.
+   */
+  contentUrl: string | null;
   targetUrl: string | null;
   categories: Category[];
   minAge: number;
@@ -175,7 +181,13 @@ export type AdForAdminDTO = {
   remainingBudget: number;
   remainingLikes: number;
   completionPercentage: number;
-  contentUrl: string;
+  /**
+   * URL pública del CDN para estados normales; para un anuncio BLOCKED es una
+   * URL PREFIRMADA de corta duración (~5 min) que caduca — hay que re-pedir el
+   * recurso antes de renderizar y nunca guardarla en estado persistente.
+   * `null` si el anuncio aún no tiene asset.
+   */
+  contentUrl: string | null;
   mediaType: MediaType;
   targetUrl: string;
   categories: Category[];

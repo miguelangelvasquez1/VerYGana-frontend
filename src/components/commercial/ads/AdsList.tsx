@@ -8,6 +8,7 @@ import { Search, Filter, Plus, FileImage, ChevronLeft, ChevronRight, Loader2 } f
 import Link from 'next/link';
 import { AdResponseDTO } from '@/types/ads/commercial';
 import { useAds } from '@/hooks/ads/querys';
+import { useRefetchOnExpiredMedia } from '@/hooks/ads/useRefetchOnExpiredMedia';
 import { usePauseAd, useResumeAd, useDeleteAd } from '@/hooks/ads/mutations';
 import { LimitReachedBanner } from '../plans/LimitReached';
 import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from '../plans/WalletBudgetAlerts';
@@ -26,7 +27,10 @@ export function AdsList() {
   const [editingAd, setEditingAd] = useState<AdResponseDTO | null>(null);
 
   // React Query hooks
-  const { data, isLoading, error } = useAds(currentPage, pageSize);
+  const { data, isLoading, error, refetch } = useAds(currentPage, pageSize);
+  // Anuncios BLOCKED: su `contentUrl` prefirmada caduca a los ~5 min; si el
+  // media falla (403) re-pedimos la lista para traer una URL fresca.
+  const handleMediaError = useRefetchOnExpiredMedia(refetch);
   const pauseAdMutation = usePauseAd();
   const resumeAdMutation = useResumeAd();
   const deleteAdMutation = useDeleteAd();
@@ -226,6 +230,7 @@ export function AdsList() {
                   onPause={handlePause}
                   onResume={handleResume}
                   onDelete={handleDelete}
+                  onMediaError={handleMediaError}
                   canReactivate={!adsSlot.activate.blocked}
                   reactivateDisabledReason={adsSlot.activate.tooltip ?? PLAN_CHANGE_BLOCK_TOOLTIP}
                   editBlocked={budgetDormant}

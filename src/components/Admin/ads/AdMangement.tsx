@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAllAdsAdmin } from '@/hooks/ads/adminQuerys';
+import { useRefetchOnExpiredMedia } from '@/hooks/ads/useRefetchOnExpiredMedia';
 import { useApproveAd, useRejectAd, usePauseAdAsAdmin, useActivateAdAsAdmin, useBlockAd } from '@/hooks/ads/mutations';
 import { AdForAdminDTO } from '@/types/ads/commercial';
 import { AdStats } from './AdStats';
@@ -28,7 +29,10 @@ const AdManagement: React.FC = () => {
   const [blockReason, setBlockReason] = useState('');
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  const { data, isLoading } = useAllAdsAdmin(currentPage, 20, statusFilter);
+  const { data, isLoading, refetch } = useAllAdsAdmin(currentPage, 20, statusFilter);
+  // Anuncios BLOCKED: su `contentUrl` prefirmada caduca a los ~5 min. Si el
+  // <img>/<video> falla (403 por URL vencida) re-pedimos la lista.
+  const handleMediaError = useRefetchOnExpiredMedia(refetch);
   const approveAdMutation = useApproveAd();
   const rejectAdMutation = useRejectAd();
   const pauseAdMutation = usePauseAdAsAdmin();
@@ -39,6 +43,17 @@ const AdManagement: React.FC = () => {
   const totalPages = data?.totalPages || 0;
   const filteredAds = useMemo(() => filterAds(ads, searchTerm, statusFilter), [ads, searchTerm, statusFilter]);
   const stats = useMemo(() => calculateStats(ads), [ads]);
+
+  // El modal de detalle renderiza desde este snapshot; cuando la lista se
+  // refresca (p.ej. por una URL de media caducada de un anuncio BLOCKED) lo
+  // re-sincronizamos para que muestre la `contentUrl` fresca.
+  useEffect(() => {
+    if (!selectedAd) return;
+    const fresh = data?.content.find((ad) => ad.id === selectedAd.id);
+    if (fresh && fresh.contentUrl !== selectedAd.contentUrl) {
+      setSelectedAd(fresh);
+    }
+  }, [data, selectedAd]);
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -171,6 +186,7 @@ const AdManagement: React.FC = () => {
               onResume={handleResume}
               onBlock={handleBlock}
               onViewDetail={handleViewDetail}
+              onMediaError={handleMediaError}
               isLoading={{
                 approve: approveAdMutation.isPending,
                 reject: rejectAdMutation.isPending,
@@ -224,6 +240,7 @@ const AdManagement: React.FC = () => {
       {showDetailModal && selectedAd && (
         <AdDetailModal
           ad={selectedAd}
+          onMediaError={handleMediaError}
           onClose={() => { setShowDetailModal(false); setSelectedAd(null); }}
         />
       )}

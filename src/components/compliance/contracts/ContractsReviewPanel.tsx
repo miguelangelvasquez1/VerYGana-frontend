@@ -15,6 +15,8 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   AlertTriangle,
   Check,
+  ChevronDown,
+  ChevronUp,
   ClipboardCheck,
   Clock,
   Eye,
@@ -30,6 +32,7 @@ import {
 } from 'lucide-react';
 import {
   approveContractReview,
+  COMMERCIAL_ACTIVITY_TYPE_LABELS,
   getBackgroundCheckDetail,
   getBackgroundChecks,
   getContractForReview,
@@ -43,15 +46,24 @@ import {
   type BackgroundCheckFindingSeverity,
   type BackgroundCheckStatus,
   type BackgroundCheckType,
+  type CommercialActivityType,
+  type ContractBusinessProfile,
   type ContractReviewDetail,
   type ContractReviewListStatus,
   type PendingContractSummary,
 } from '@/services/ComplianceService';
-import { DOCUMENT_TYPE_LABELS } from '@/services/commercial/OnboardingService';
+import {
+  DOCUMENT_TYPE_LABELS,
+  type AnnualIncomeRange,
+  type DiagnosticAnswerValue,
+  type LegalRepDocType,
+  type PersonType,
+} from '@/services/commercial/OnboardingService';
 import {
   Btn,
   EmptyState,
   ErrorState,
+  inputClass,
   Ledger,
   LedgerBody,
   LedgerHead,
@@ -166,6 +178,172 @@ const FILTER_TABS: { value: FilterOption; label: string }[] = [
   { value: 'REJECTED', label: 'Rechazados' },
   { value: 'ALL', label: 'Todos' },
 ];
+
+const PERSON_TYPE_LABELS: Record<PersonType, string> = {
+  NATURAL: 'Persona Natural',
+  JURIDICA: 'Persona Jurídica',
+};
+
+const LEGAL_REP_DOC_TYPE_LABELS: Record<LegalRepDocType, string> = {
+  CC: 'Cédula de Ciudadanía',
+  CE: 'Cédula de Extranjería',
+  PP: 'Pasaporte',
+};
+
+const ANNUAL_INCOME_RANGE_LABELS: Record<AnnualIncomeRange, string> = {
+  LESS_THAN_500_SMMLV: 'Menos de 500 SMMLV',
+  FROM_500_TO_5000_SMMLV: '500 a 5.000 SMMLV',
+  FROM_5000_TO_50000_SMMLV: '5.000 a 50.000 SMMLV',
+  MORE_THAN_50000_SMMLV: 'Más de 50.000 SMMLV',
+};
+
+function boolLabel(value: boolean): string {
+  return value ? 'Sí' : 'No';
+}
+
+/* ── Perfil del negocio ──────────────────────────────────────────────── */
+
+function BusinessProfileSection({
+  profile,
+  // Editable solo mientras el contrato sigue en PENDING_VERYGANA_REVIEW —
+  // en el resto de estados (APPROVED, REJECTED) se muestra de solo lectura,
+  // igual que el resto del perfil.
+  editable,
+  activityType,
+  onActivityTypeChange,
+}: {
+  profile: ContractBusinessProfile | null;
+  editable: boolean;
+  activityType: CommercialActivityType | '';
+  onActivityTypeChange: (value: CommercialActivityType | '') => void;
+}) {
+  if (!profile) return null;
+
+  const rows: [string, string][] = [
+    ['Tipo de persona', PERSON_TYPE_LABELS[profile.personType]],
+    ...(profile.companyName ? ([['Razón social', profile.companyName]] as [string, string][]) : []),
+    ['NIT', profile.nit],
+    ...(profile.mercantileRegistration
+      ? ([['Matrícula mercantil', profile.mercantileRegistration]] as [string, string][])
+      : []),
+    ['Representante legal', `${profile.legalRepFirstName} ${profile.legalRepLastName}`],
+    [
+      'Documento del representante',
+      `${LEGAL_REP_DOC_TYPE_LABELS[profile.legalRepDocType]} ${profile.legalRepDocNumber}`,
+    ],
+    ['¿Representante es PEP?', boolLabel(profile.legalRepPepDeclaration)],
+    ...(profile.annualIncomeRange
+      ? ([['Ingresos anuales', ANNUAL_INCOME_RANGE_LABELS[profile.annualIncomeRange]]] as [
+          string,
+          string
+        ][])
+      : []),
+    ...(profile.ciiuCode ? ([['Código CIIU', profile.ciiuCode]] as [string, string][]) : []),
+    ['Actividad económica', profile.economicActivityDescription],
+    ['Dirección', profile.address],
+    ...(profile.municipalityName || profile.departmentName
+      ? ([
+          [
+            'Ubicación',
+            [profile.municipalityName, profile.departmentName].filter(Boolean).join(', '),
+          ],
+        ] as [string, string][])
+      : []),
+  ];
+
+  return (
+    <section>
+      <p className="cmp-label mb-2 text-cmp-mute">Perfil del negocio</p>
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-3 rounded-xl border border-cmp-rule bg-white px-4 py-3 sm:grid-cols-2">
+        {rows.map(([label, value]) => (
+          <div key={label}>
+            <dt className="cmp-label text-cmp-mute">{label}</dt>
+            <dd className="mt-1 text-sm text-cmp-ink">{value}</dd>
+          </div>
+        ))}
+        <div className="sm:col-span-2">
+          <dt className="cmp-label text-cmp-mute">Actividad comercial</dt>
+          <dd className="mt-1 text-sm text-cmp-ink">
+            {editable ? (
+              <select
+                value={activityType}
+                onChange={(e) => onActivityTypeChange(e.target.value as CommercialActivityType)}
+                className={`${inputClass} w-auto py-1 text-xs`}
+              >
+                {(Object.entries(COMMERCIAL_ACTIVITY_TYPE_LABELS) as [CommercialActivityType, string][]).map(
+                  ([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  )
+                )}
+              </select>
+            ) : profile.commercialActivityType ? (
+              COMMERCIAL_ACTIVITY_TYPE_LABELS[profile.commercialActivityType]
+            ) : (
+              'Sin definir'
+            )}
+          </dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
+/* ── Respuestas del diagnóstico comercial ────────────────────────────── */
+
+// Sin catálogo de preguntas a mano en este panel (solo lectura) — se
+// humaniza el fieldName crudo en vez de mapear contra las ~40 etiquetas
+// del cuestionario dinámico del comercial.
+function humanizeFieldName(fieldName: string): string {
+  const spaced = fieldName.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
+
+function formatDiagnosticValue(value: DiagnosticAnswerValue): string {
+  if (typeof value === 'boolean') return boolLabel(value);
+  if (Array.isArray(value)) return value.length ? value.join(', ') : '—';
+  return value || '—';
+}
+
+function DiagnosticAnswersSection({
+  answers,
+}: {
+  answers: Record<string, DiagnosticAnswerValue> | null;
+}) {
+  const [open, setOpen] = useState(false);
+  if (!answers) return null;
+  const entries = Object.entries(answers);
+
+  return (
+    <section>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="cursor-pointer flex w-full items-center justify-between rounded-xl border border-cmp-rule bg-white px-4 py-3 text-left"
+      >
+        <span className="cmp-label text-cmp-mute">
+          Respuestas del diagnóstico comercial ({entries.length})
+        </span>
+        {open ? (
+          <ChevronUp className="h-4 w-4 shrink-0 text-cmp-mute" />
+        ) : (
+          <ChevronDown className="h-4 w-4 shrink-0 text-cmp-mute" />
+        )}
+      </button>
+      {open && (
+        <dl className="mt-2 grid grid-cols-1 gap-x-6 gap-y-3 rounded-xl border border-cmp-rule bg-white px-4 py-3 sm:grid-cols-2">
+          {entries.map(([fieldName, value]) => (
+            <div key={fieldName}>
+              <dt className="cmp-label text-cmp-mute">{humanizeFieldName(fieldName)}</dt>
+              <dd className="mt-1 text-sm text-cmp-ink">{formatDiagnosticValue(value)}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </section>
+  );
+}
 
 function PepBadge() {
   return (
@@ -482,6 +660,9 @@ function ContractDetailModal({
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [reason, setReason] = useState('');
   const [documentsIssue, setDocumentsIssue] = useState<boolean | null>(null);
+  const [activityType, setActivityType] = useState<CommercialActivityType | ''>('');
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   // Evita el doble llamado que provoca React Strict Mode en dev (monta ->
   // limpia -> vuelve a montar cada efecto) — el modal se desmonta por
   // completo al cerrarse, así que no hace falta resetear esto para volver
@@ -492,7 +673,12 @@ function ContractDetailModal({
     setLoading(true);
     setError(false);
     try {
-      setDetail(await getContractForReview(summary.contractId));
+      const d = await getContractForReview(summary.contractId);
+      setDetail(d);
+      // El selector ya no tiene opción vacía — si el diagnóstico todavía no
+      // completó este campo, se preselecciona "Productos" para que el
+      // oficial deba revisarlo y confirmarlo antes de aprobar.
+      setActivityType(d.businessProfile?.commercialActivityType ?? 'PRODUCTS');
     } catch {
       setError(true);
     } finally {
@@ -509,7 +695,9 @@ function ContractDetailModal({
   const handleApprove = async () => {
     setActionLoading(true);
     try {
-      await approveContractReview(summary.contractId);
+      const original = detail?.businessProfile?.commercialActivityType ?? '';
+      const corrected = activityType && activityType !== original ? activityType : undefined;
+      await approveContractReview(summary.contractId, corrected);
       toast.success(`Contrato aprobado — ${summary.companyName}`);
       onDecided();
     } catch {
@@ -599,6 +787,15 @@ function ContractDetailModal({
             Ver contrato
             <ExternalLink className="h-3 w-3" />
           </a>
+
+          <BusinessProfileSection
+            profile={detail.businessProfile}
+            editable={detail.status === 'PENDING_VERYGANA_REVIEW'}
+            activityType={activityType}
+            onActivityTypeChange={setActivityType}
+          />
+
+          <DiagnosticAnswersSection answers={detail.diagnosticAnswers} />
 
           <section>
             <p className="cmp-label mb-2 text-cmp-mute">Documentos ({detail.documents.length})</p>
@@ -721,9 +918,8 @@ function ContractDetailModal({
                         className="flex-1"
                         variant="danger"
                         icon={XCircle}
-                        loading={actionLoading}
                         disabled={!reason.trim() || documentsIssue === null}
-                        onClick={handleReject}
+                        onClick={() => setShowRejectConfirm(true)}
                       >
                         Confirmar rechazo
                       </Btn>
@@ -748,8 +944,7 @@ function ContractDetailModal({
                       className="flex-1"
                       variant="approve"
                       icon={Check}
-                      loading={actionLoading}
-                      onClick={handleApprove}
+                      onClick={() => setShowApproveConfirm(true)}
                     >
                       Aprobar
                     </Btn>
@@ -758,6 +953,72 @@ function ContractDetailModal({
               </AnimatePresence>
             </div>
           )}
+        </div>
+      )}
+
+      {showApproveConfirm && detail && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-cmp-ink/45 backdrop-blur-[2px]"
+            onClick={() => !actionLoading && setShowApproveConfirm(false)}
+          />
+          <div className="relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+            <h4 className="font-bold text-cmp-ink mb-2">Aprobar contrato</h4>
+            <p className="text-sm text-cmp-slate">
+              ¿Confirmas la aprobación del contrato de <strong>{summary.companyName}</strong>?
+            </p>
+            {activityType !== (detail.businessProfile?.commercialActivityType ?? '') && (
+              <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-cmp-hold/25 bg-cmp-hold-bg px-3 py-2 text-xs text-cmp-hold">
+                <AlertTriangle className="mt-px h-3.5 w-3.5 shrink-0" />
+                Vas a registrar la actividad comercial como{' '}
+                <strong>{COMMERCIAL_ACTIVITY_TYPE_LABELS[activityType as CommercialActivityType]}</strong>.
+              </p>
+            )}
+            <div className="mt-4 flex gap-3">
+              <Btn className="flex-1" onClick={() => setShowApproveConfirm(false)} disabled={actionLoading}>
+                Cancelar
+              </Btn>
+              <Btn
+                className="flex-1"
+                variant="approve"
+                icon={Check}
+                loading={actionLoading}
+                onClick={handleApprove}
+              >
+                Confirmar aprobación
+              </Btn>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRejectConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-cmp-ink/45 backdrop-blur-[2px]"
+            onClick={() => !actionLoading && setShowRejectConfirm(false)}
+          />
+          <div className="relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+            <h4 className="font-bold text-cmp-ink mb-2">Rechazar contrato</h4>
+            <p className="text-sm text-cmp-slate">
+              ¿Confirmas el rechazo del contrato de <strong>{summary.companyName}</strong>? El
+              empresario verá el motivo que escribiste.
+            </p>
+            <div className="mt-4 flex gap-3">
+              <Btn className="flex-1" onClick={() => setShowRejectConfirm(false)} disabled={actionLoading}>
+                Cancelar
+              </Btn>
+              <Btn
+                className="flex-1"
+                variant="danger"
+                icon={XCircle}
+                loading={actionLoading}
+                onClick={handleReject}
+              >
+                Confirmar rechazo
+              </Btn>
+            </div>
+          </div>
         </div>
       )}
     </Modal>

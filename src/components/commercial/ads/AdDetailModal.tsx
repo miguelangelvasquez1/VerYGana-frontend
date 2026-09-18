@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAdDetails } from '@/hooks/ads/querys';
 import { useAdLikes } from '@/hooks/ads/querys';
+import { useRefetchOnExpiredMedia } from '@/hooks/ads/useRefetchOnExpiredMedia';
 
 interface AdDetailModalProps {
   adId: number;
@@ -17,8 +18,12 @@ interface AdDetailModalProps {
 export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
   const [likesPage, setLikesPage] = useState(0);
 
-  const { data: ad, isLoading: loadingAd } = useAdDetails(adId);
+  const { data: ad, isLoading: loadingAd, refetch: refetchAd } = useAdDetails(adId);
   const { data: likesData, isLoading: loadingLikes } = useAdLikes(adId, likesPage);
+
+  // Anuncio BLOCKED: su `contentUrl` prefirmada caduca a los ~5 min; si el media
+  // falla (403 por URL vencida) re-pedimos el detalle para traer una URL fresca.
+  const handleMediaError = useRefetchOnExpiredMedia(refetchAd);
 
   const formatMoney = (value: number | null | undefined) =>
     (value ?? 0).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -71,9 +76,19 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
               {ad.contentUrl && (
                 <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gray-100">
                   {ad.mediaType === 'VIDEO' ? (
-                    <video src={ad.contentUrl} controls className="w-full h-full object-cover" />
+                    <video
+                      src={ad.contentUrl}
+                      controls
+                      onError={ad.status === 'BLOCKED' ? handleMediaError : undefined}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <img src={ad.contentUrl} alt={ad.title} className="w-full h-full object-cover" />
+                    <img
+                      src={ad.contentUrl}
+                      alt={ad.title}
+                      onError={ad.status === 'BLOCKED' ? handleMediaError : undefined}
+                      className="w-full h-full object-cover"
+                    />
                   )}
                 </div>
               )}

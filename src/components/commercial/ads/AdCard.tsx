@@ -25,6 +25,8 @@ interface AdCardProps {
   onPause: (adId: number) => void;
   onResume: (adId: number) => void;
   onDelete: (adId: number) => void;
+  /** Se llama si el media falla al cargar (p.ej. URL prefirmada de un BLOCKED ya caducada). */
+  onMediaError?: () => void;
   /** false cuando hay una solicitud de cambio de plan en curso: reactivar consume plan/presupuesto y el backend lo rechaza. */
   canReactivate?: boolean;
   reactivateDisabledReason?: string;
@@ -39,6 +41,7 @@ export function AdCard({
   onPause,
   onResume,
   onDelete,
+  onMediaError,
   canReactivate = true,
   reactivateDisabledReason,
   editBlocked = false,
@@ -129,6 +132,7 @@ export function AdCard({
                 src={ad.contentUrl}
                 alt={ad.title}
                 fill
+                onError={ad.status === 'BLOCKED' ? onMediaError : undefined}
                 className="object-cover"
               />
             )
@@ -365,6 +369,7 @@ export function AdCard({
                 src={ad.contentUrl}
                 controls
                 autoPlay
+                onError={ad.status === 'BLOCKED' ? onMediaError : undefined}
                 className="w-full h-full max-h-[90vh] rounded-lg"
               />
             ) : (
@@ -374,6 +379,7 @@ export function AdCard({
                   alt={ad.title}
                   width={1200}
                   height={800}
+                  onError={ad.status === 'BLOCKED' ? onMediaError : undefined}
                   className="object-contain max-h-[90vh] rounded-lg"
                 />
               </div>

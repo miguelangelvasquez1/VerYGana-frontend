@@ -1,11 +1,15 @@
 import apiClient from "@/lib/api/client";
 import type {
+  AnnualIncomeRange,
   ContractStatus,
+  DiagnosticAnswers,
+  LegalRepDocType,
   OnboardingDocument,
   OnboardingRoute,
   OnboardingStep,
   OnboardingSummaryLegalIdentification,
   OnboardingSummaryPlan,
+  PersonType,
 } from "@/services/commercial/OnboardingService";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -16,6 +20,16 @@ export type ScreeningList =
   | 'ATTORNEY_GENERAL'
   | 'COMPTROLLER'
   | 'NATIONAL_POLICE';
+
+// "PRODUCTS" | "SERVICES" — autocompletado desde el diagnóstico comercial
+// (respuesta G-5). El oficial de compliance puede corregirlo al aprobar el
+// contrato — ver approveContractReview. No se corrige desde la pantalla KYC.
+export type CommercialActivityType = "PRODUCTS" | "SERVICES";
+
+export const COMMERCIAL_ACTIVITY_TYPE_LABELS: Record<CommercialActivityType, string> = {
+  PRODUCTS: "Productos",
+  SERVICES: "Servicios",
+};
 
 export interface KycPendingEntry {
   id: number;
@@ -178,6 +192,30 @@ export interface PendingContractSummary {
   pep: boolean;
 }
 
+// Datos del comercio en el momento en que completó identificación legal +
+// diagnóstico — para que compliance pueda verificar la actividad comercial
+// declarada antes de aprobar. Mismo shape que OnboardingSummaryLegalIdentification
+// más commercialActivityType (auto-clasificado desde el diagnóstico).
+export interface ContractBusinessProfile {
+  personType: PersonType;
+  companyName: string | null;
+  nit: string;
+  mercantileRegistration: string | null;
+  legalRepFirstName: string;
+  legalRepLastName: string;
+  legalRepDocType: LegalRepDocType;
+  legalRepDocNumber: string;
+  legalRepPepDeclaration: boolean;
+  annualIncomeRange: AnnualIncomeRange | null;
+  ciiuCode: string | null;
+  economicActivityDescription: string;
+  // null si el diagnóstico aún no se completó.
+  commercialActivityType: CommercialActivityType | null;
+  address: string;
+  municipalityName: string | null;
+  departmentName: string | null;
+}
+
 export interface ContractReviewDetail {
   contractId: number;
   version: number;
@@ -191,6 +229,10 @@ export interface ContractReviewDetail {
   // downloadUrl de cada uno viene null si no está VALIDATED, y las URLs
   // (tanto esta como la del contrato) expiran a los ~5 min — no reutilizar.
   documents: OnboardingDocument[];
+  // Ambos vienen null si el contrato no es de tipo ONBOARDING (recarga o
+  // cambio de plan no tienen diagnóstico ni identificación legal nuevos).
+  businessProfile: ContractBusinessProfile | null;
+  diagnosticAnswers: DiagnosticAnswers | null;
 }
 
 export const getContracts = async (
@@ -207,8 +249,16 @@ export const getContractForReview = async (contractId: number): Promise<Contract
   return res.data;
 };
 
-export const approveContractReview = async (contractId: number): Promise<void> => {
-  await apiClient.post(`/compliance/contracts/${contractId}/approve`);
+// commercialActivityType solo se envía si el oficial corrigió el valor
+// autocompletado (o lo completó porque venía null) — si no se pasa, el
+// backend conserva el que ya tenía.
+export const approveContractReview = async (
+  contractId: number,
+  commercialActivityType?: CommercialActivityType
+): Promise<void> => {
+  await apiClient.post(`/compliance/contracts/${contractId}/approve`, null, {
+    params: commercialActivityType ? { commercialActivityType } : undefined,
+  });
 };
 
 export const rejectContractReview = async (

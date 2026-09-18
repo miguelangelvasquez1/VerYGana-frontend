@@ -15,6 +15,8 @@ interface AdCardProps {
   onResume: (id: number) => void;
   onBlock: (ad: AdForAdminDTO) => void;
   onViewDetail: (ad: AdForAdminDTO) => void;
+  /** Se llama si el media falla al cargar (p.ej. URL prefirmada de un BLOCKED ya caducada). */
+  onMediaError?: () => void;
   isLoading: {
     approve: boolean;
     reject: boolean;
@@ -32,6 +34,7 @@ export const AdCard: React.FC<AdCardProps> = ({
   onResume,
   onBlock,
   onViewDetail,
+  onMediaError,
   isLoading,
 }) => {
   return (
@@ -40,7 +43,12 @@ export const AdCard: React.FC<AdCardProps> = ({
       {/* Thumbnail */}
       <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
         {ad.contentUrl && ad.mediaType === 'IMAGE' ? (
-          <img src={ad.contentUrl} alt={ad.title} className="w-full h-full object-cover" />
+          <img
+            src={ad.contentUrl}
+            alt={ad.title}
+            onError={ad.status === 'BLOCKED' ? onMediaError : undefined}
+            className="w-full h-full object-cover"
+          />
         ) : ad.mediaType === 'VIDEO' ? (
           <Video className="w-6 h-6 text-slate-400" />
         ) : (
