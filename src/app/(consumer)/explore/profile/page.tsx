@@ -119,7 +119,7 @@ export default function ConsumerProfilePage() {
               </h1>
               <p className="text-white/70 mt-1 text-sm">ID #{profile.id}</p>
               <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
-                <StatusBadge state={profile.userState} />
+                <StatusBadge state={profile.accountStatus || profile.userState} />
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white">
                   <Shield className="w-3 h-3" />
                   {profile.role === "CONSUMER" ? "Beneficiario" : profile.role}

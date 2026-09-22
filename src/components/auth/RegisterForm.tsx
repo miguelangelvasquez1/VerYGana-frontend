@@ -4,6 +4,11 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { registerConsumer } from "@/services/ConsumerService";
 import { registerCommercial } from "@/services/AdvertiserService";
+import {
+  UnderageUserError,
+  PossibleDuplicityError,
+  DuplicateAccountError,
+} from "@/lib/auth/authService";
 import { Category } from "@/types/Category.types";
 import { useCategories } from "@/hooks/useCategories";
 import { getActiveAvatars, AvatarDTO } from "@/services/AvatarService";
@@ -28,6 +33,10 @@ type FieldErrors = Record<string, string>;
 
 // Edad mínima para registrarse
 const MIN_AGE = 18;
+
+// Versión de T&C actualmente vigente (debe coincidir con lo que valida el back)
+const CONSUMER_TERMS_VERSION = "1";
+
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -177,6 +186,8 @@ function PasswordInput({
 export default function RegisterForm() {
   const [role, setRole] = useState<Role | null>(null);
   const [formData, setFormData] = useState<any>({ isPEP: false });
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatars, setAvatars] = useState<AvatarDTO[]>([]);
   const [loadingAvatars, setLoadingAvatars] = useState(false);
@@ -298,6 +309,18 @@ export default function RegisterForm() {
       return;
     }
 
+    // MP-38 § 5.2: declaración explícita de mayoría de edad obligatoria
+    if (role === "BENEFICIARIO" && !ageConfirmed) {
+      setFieldErrors({ ageConfirmed: "Debes confirmar que eres mayor de 18 años para continuar" });
+      return;
+    }
+
+    // MP-38 § 1.2: aceptación libre, previa e informada de T&C
+    if (role === "BENEFICIARIO" && !termsAccepted) {
+      setFieldErrors({ termsAccepted: "Debes aceptar los Términos y Condiciones para continuar" });
+      return;
+    }
+
     if (role === "BENEFICIARIO") {
       const clientErrors: FieldErrors = {};
       if (!formData.documentType) clientErrors["documentType"] = "El tipo de documento es requerido";
@@ -370,6 +393,9 @@ export default function RegisterForm() {
             occupation: formData.occupation?.trim() || undefined,
             incomeRange: formData.incomeRange || undefined,
             isPEP: formData.isPEP ?? false,
+            ageDeclaration: ageConfirmed,
+            termsAccepted,
+            termsVersion: CONSUMER_TERMS_VERSION,
             recaptchaToken,
           });
 
@@ -406,22 +432,97 @@ export default function RegisterForm() {
           throw new Error("Rol no válido");
       }
     } catch (error: any) {
-      console.error("Error en el registro:", error);
-
       if (error.response) {
         const data = error.response.data;
-        const errorCode = data?.errorCode ?? data?.code;
+        const errorCode = data?.errorCode ?? data?.code ?? "";
+        const msg: string = (data?.message ?? "").toLowerCase();
+        const details =
+          data?.details && typeof data.details === "object"
+            ? (data.details as Record<string, unknown>)
+            : {};
 
-        if (errorCode === "SCREENING_HIT" || errorCode === "COMPLIANCE_REJECT") {
+        const isDuplicity =
+          errorCode === "POSSIBLE_DUPLICITY" ||
+          errorCode === "DUPLICATE_ACCOUNT" ||
+          errorCode === "FRAUD_CONFIRMED" ||
+          errorCode === "EMAIL_ALREADY_EXISTS" ||
+          errorCode === "DOCUMENT_ALREADY_EXISTS" ||
+          errorCode === "USER_ALREADY_EXISTS" ||
+          error.response.status === 409 ||
+          msg.includes("duplicad") ||
+          msg.includes("already exists") ||
+          msg.includes("ya está registrad") ||
+          msg.includes("ya existe") ||
+          Object.keys(details).some((field) =>
+            ["email", "username", "userName", "documentNumber"].includes(field)
+          );
+        const isAgeDeclarationError =
+          msg.includes("agedeclaration") ||
+          msg.includes("age declaration") ||
+          msg.includes("mayor de 18") ||
+          msg.includes("18 years");
+        const isTermsAcceptanceError =
+          msg.includes("termsacceptance") ||
+          msg.includes("terms acceptance") ||
+          msg.includes("términos") ||
+          msg.includes("terminos");
+
+        if (errorCode === "UNDERAGE_USER") {
+          setFieldErrors({ birthDate: "Debes ser mayor de 18 años. El registro no está permitido para menores de edad." });
+          toast.error("Registro no permitido: debes tener al menos 18 años.");
+        } else if (isDuplicity) {
+          // Mensaje más específico según el campo duplicado
+          if (msg.includes("teléfono") || msg.includes("telefono") || msg.includes("número")) {
+            toast.error("Este número de teléfono ya está registrado. Si es tu cuenta, inicia sesión.");
+          } else if (msg.includes("correo") || msg.includes("email")) {
+            toast.error("Este correo electrónico ya está registrado. Si es tu cuenta, inicia sesión.");
+          } else if (msg.includes("documento") || msg.includes("identidad")) {
+            toast.error("Este documento de identidad ya está registrado. Si es tu cuenta, inicia sesión.");
+          } else {
+            toast.error("Este correo, documento o teléfono ya está registrado. Si es tu cuenta, inicia sesión.");
+          }
+        } else if (errorCode === "POSSIBLE_DUPLICITY") {
+          setRegistrationResult("pep_review");
+        } else if (errorCode === "SCREENING_HIT" || errorCode === "COMPLIANCE_REJECT") {
           toast.error("No es posible completar el registro en este momento. Comunícate con soporte.");
-        } else if (data?.details && typeof data.details === "object") {
-          setFieldErrors(data.details);
-          toast.error(data.message || "Verifica los campos marcados en rojo");
-        } else if (error.response.status === 409) {
-          toast.error("Este correo electrónico ya está registrado.");
+        } else if (Object.keys(details).length > 0) {
+          const INTERNAL_FIELDS = new Set(["ageDeclaration", "termsAccepted", "termsAcceptance", "termsVersion"]);
+          const visibleDetails: FieldErrors = {};
+          for (const [k, v] of Object.entries(details)) {
+            if (!INTERNAL_FIELDS.has(k)) {
+              visibleDetails[k] = String(v);
+            }
+          }
+          if ("ageDeclaration" in details) {
+            setFieldErrors({ ...visibleDetails, ageConfirmed: "Debes confirmar que eres mayor de 18 años para continuar" });
+          } else if ("termsAccepted" in details || "termsAcceptance" in details) {
+            setFieldErrors({
+              ...visibleDetails,
+              termsAccepted: "Debes aceptar los Términos y Condiciones para continuar",
+            });
+          } else {
+            setFieldErrors(visibleDetails);
+          }
+          if (Object.keys(visibleDetails).length > 0) {
+            toast.error(data.message || "Verifica los campos marcados en rojo");
+          }
+        } else if (isAgeDeclarationError) {
+          setFieldErrors({ ageConfirmed: "Debes confirmar que eres mayor de 18 años para continuar" });
+        } else if (isTermsAcceptanceError) {
+          setFieldErrors({ termsAccepted: "Debes aceptar los Términos y Condiciones para continuar" });
         } else {
           toast.error(data?.message || "Error en el registro. Por favor, intenta de nuevo.");
         }
+      } else if (error instanceof UnderageUserError) {
+        setFieldErrors({
+          birthDate: error.message,
+        });
+        toast.error(error.message);
+      } else if (error instanceof PossibleDuplicityError) {
+        setRegistrationResult("pep_review");
+        toast(error.message, { icon: "🔍" });
+      } else if (error instanceof DuplicateAccountError) {
+        toast.error(error.message);
       } else if (error.request) {
         toast.error("No se pudo conectar con el servidor. Verifica tu conexión.");
       } else {
@@ -524,8 +625,11 @@ export default function RegisterForm() {
           <p className="text-gray-500 text-sm">Completa todos los campos para crear tu cuenta</p>
         </div>
 
-        {/* Global API error banner */}
-        {Object.keys(fieldErrors).length > 0 && (
+        {/* Global API error banner: internal consent errors are shown next to
+            their checkbox so the summary only contains actionable fields. */}
+        {Object.entries(fieldErrors).some(
+            ([field]) => field !== "ageConfirmed" && field !== "termsAccepted"
+        ) && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4">
               <p className="text-sm font-semibold text-red-700 mb-2 flex items-center gap-2">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -1091,6 +1195,106 @@ export default function RegisterForm() {
               </>
           )}
 
+          {/* ── Declaración de mayoría de edad (MP-38 § 5.2) ── */}
+          {role === "BENEFICIARIO" && (
+              <section>
+                <label
+                    className={`flex items-start gap-3 cursor-pointer group rounded-xl border-2 p-4 transition ${
+                        ageConfirmed
+                            ? "border-blue-400 bg-blue-50"
+                            : fieldErrors["ageConfirmed"]
+                                ? "border-red-400 bg-red-50"
+                                : "border-gray-200 hover:border-gray-300"
+                    }`}
+                >
+                  <input
+                      type="checkbox"
+                      checked={ageConfirmed}
+                      onChange={(e) => {
+                        setAgeConfirmed(e.target.checked);
+                        if (e.target.checked) {
+                          setFieldErrors((prev) => {
+                            const next = { ...prev };
+                            delete next["ageConfirmed"];
+                            return next;
+                          });
+                        }
+                      }}
+                      className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#03548C] focus:ring-[#03548C]/40 shrink-0"
+                  />
+                  <span className="text-sm text-gray-700 leading-snug">
+                    <span className="font-semibold text-gray-900">Declaro que soy mayor de 18 años.</span>{" "}
+                    Entiendo que Ver y Gana está disponible exclusivamente para personas naturales mayores
+                    de edad, y que proporcionar información falsa puede resultar en la terminación de mi cuenta.
+                  </span>
+                </label>
+                {fieldErrors["ageConfirmed"] && (
+                    <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
+                      <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            fillRule="evenodd"
+                            d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0zm-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-1-9a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1z"
+                            clipRule="evenodd"
+                        />
+                      </svg>
+                      {fieldErrors["ageConfirmed"]}
+                    </p>
+                )}
+              </section>
+          )}
+
+          {role === "BENEFICIARIO" && (
+              <section>
+                <label
+                    className={`flex items-start gap-3 cursor-pointer group rounded-xl border-2 p-4 transition ${
+                        termsAccepted
+                            ? "border-blue-400 bg-blue-50"
+                            : fieldErrors["termsAccepted"]
+                                ? "border-red-400 bg-red-50"
+                                : "border-gray-200 hover:border-gray-300"
+                    }`}
+                >
+                  <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => {
+                        setTermsAccepted(e.target.checked);
+                        if (e.target.checked) clearFieldError("termsAccepted");
+                      }}
+                      className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#03548C] focus:ring-[#03548C]/40 shrink-0"
+                  />
+                  <span className="text-sm text-gray-700 leading-snug">
+                    <span className="font-semibold text-gray-900">
+                      Acepto los{" "}
+                      <a
+                        href="/terminos"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#03548C] underline hover:text-[#0b1440]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Términos y Condiciones
+                      </a>
+                      .
+                    </span>{" "}
+                    Confirmo que los he leído y acepto las condiciones de uso de Ver y Gana.
+                  </span>
+                </label>
+                {fieldErrors["termsAccepted"] && (
+                    <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
+                      <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            fillRule="evenodd"
+                            d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0 8 8 0 0 1-16 0zm-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm0-8a1 1 0 1 1 1 1v3a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1z"
+                            clipRule="evenodd"
+                        />
+                      </svg>
+                      {fieldErrors["termsAccepted"]}
+                    </p>
+                )}
+              </section>
+          )}
+
           {/* Submit buttons */}
           <div className="space-y-3 pt-2">
             <button
@@ -1131,6 +1335,8 @@ export default function RegisterForm() {
                 type="button"
                 onClick={() => {
                   setRole(null);
+                  setAgeConfirmed(false);
+                  setTermsAccepted(false);
                   setFieldErrors({});
                 }}
                 disabled={isSubmitting}

@@ -12,6 +12,10 @@ import {
   EmailVerificationPendingError,
   KycReviewPendingError,
   PasswordSetupRequiredError,
+  UnderageUserError,
+  PossibleDuplicityError,
+  DuplicateAccountError,
+  AccountTerminatedError,
 } from '@/lib/auth/authService';
 
 import { getCommercialInitialDataWithToken } from '@/services/commercialService';
@@ -269,6 +273,30 @@ const LoginForm = () => {
             'Tu cuenta está en revisión por el equipo de cumplimiento. ' +
             'Te notificaremos cuando sea aprobada.'
         );
+
+      } else if (err instanceof AccountTerminatedError) {
+        // MP-38 § 5.4 / 5.8 — cuenta terminada (puede incluir terminación por minoría de edad).
+        // PQR, garantías y obligaciones de datos personales se conservan.
+        setError(
+            err.message
+        );
+
+      } else if (err instanceof UnderageUserError) {
+        // MP-38 § 5.2-5.3 — menor de edad confirmado; bloqueo estructural sin excepción.
+        setError(
+            'El acceso no está permitido para menores de 18 años.'
+        );
+
+      } else if (err instanceof PossibleDuplicityError) {
+        // MP-38 § 5.7 — posible coincidencia; NO implica fraude confirmado.
+        setError(
+            'Detectamos una posible coincidencia con otra cuenta. ' +
+            'Tu caso está siendo revisado; te notificaremos pronto.'
+        );
+
+      } else if (err instanceof DuplicateAccountError) {
+        // MP-38 § 5.7 — duplicidad confirmada como fraude.
+        setError(err.message);
 
       } else if (
           err instanceof Error &&
