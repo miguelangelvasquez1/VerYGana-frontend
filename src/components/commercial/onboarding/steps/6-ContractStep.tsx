@@ -67,6 +67,11 @@ function boolLabel(value: boolean): string {
   return value ? "Sí" : "No";
 }
 
+// -1 = ilimitado, según el contrato del backend.
+function formatLimit(n: number): string {
+  return n === -1 ? "Ilimitado" : n.toLocaleString("es-CO");
+}
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -250,8 +255,22 @@ export function ContractGenerateStep({
               {plan.contractDurationMonths != null && (
                 <Row label="Duración del contrato" value={`${plan.contractDurationMonths} meses`} />
               )}
-              <Row label="Comisión por venta" value={`${plan.saleCommissionPct}%`} />
-              <Row label="Máx. % llaves promocionales" value={`${plan.maxKeysPct}%`} />
+              {plan.grossAmountCents != null && (
+                <Row label="Monto bruto" value={formatCOP(plan.grossAmountCents)} />
+              )}
+              {plan.excludedTaxesCents != null && (
+                <Row label="Impuestos excluidos" value={formatCOP(plan.excludedTaxesCents)} />
+              )}
+              {plan.prosperityThresholdCents != null && (
+                <Row label="Umbral de prosperidad" value={formatCOP(plan.prosperityThresholdCents)} />
+              )}
+              {plan.saleCommissionPct > 0 && (
+                <Row label="Comisión por venta" value={`${plan.saleCommissionPct}%`} />
+              )}
+              <Row
+                label="Máx. % llaves promocionales"
+                value={plan.maxKeysPct === -1 ? "Ilimitado" : `${plan.maxKeysPct}%`}
+              />
               {plan.requiresSpecialNegotiation && plan.specialNegotiationDetails && (
                 <Row label="Condiciones a la medida" value={plan.specialNegotiationDetails} />
               )}
@@ -273,6 +292,20 @@ export function ContractGenerateStep({
             </div>
           )}
         </Section>
+
+        {plan?.benefits && (
+          <Section title="Beneficios del plan">
+            <Row label="Publicidad" value={boolLabel(plan.benefits.canAdvertise)} />
+            <Row label="Juegos personalizados" value={boolLabel(plan.benefits.canUseGames)} />
+            <Row label="Encuestas" value={boolLabel(plan.benefits.canUseSurveys)} />
+            <Row label="Mascotas" value={boolLabel(plan.benefits.canUsePets)} />
+            <Row label="Máx. productos" value={formatLimit(plan.benefits.maxProducts)} />
+            <Row label="Máx. anuncios" value={formatLimit(plan.benefits.maxAds)} />
+            <Row label="Máx. juegos personalizados" value={formatLimit(plan.benefits.maxBrandedGames)} />
+            <Row label="Máx. encuestas" value={formatLimit(plan.benefits.maxSurveys)} />
+            <Row label="Aumento de visibilidad" value={`${plan.benefits.visibilityBoostPct}%`} />
+          </Section>
+        )}
 
         <Section title="Documentos">
           {documents.checklist.map((item) => (

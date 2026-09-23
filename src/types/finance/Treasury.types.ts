@@ -10,6 +10,10 @@ export interface TreasuryBalanceResponseDTO {
     fortificationCents: number;
     operationsCents: number;
     payoutsPendingCents: number;
+    taxReserveCents: number;
+    connectivityCents: number;
+    infrastructureCents: number;
+    payrollCents: number;
     totalCents: number;
     keysReserveHealthPct: number;
     keysReserveStatus: string;

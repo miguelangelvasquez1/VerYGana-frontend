@@ -447,12 +447,27 @@ export function RechargeWizard() {
               >
                 <p className="font-medium">{preview.message}</p>
                 {preview.eligible && (
-                  <div className="text-xs opacity-80 space-y-0.5">
-                    <p>
-                      Pagas {formatBudget(preview.requestedAmountPesos)}, se acreditan{' '}
-                      {formatBudget(preview.estimatedCreditedAmountPesos)} a tu saldo publicitario.
-                    </p>
-                    <p>Saldo resultante: {formatBudget(preview.resultingWalletBalancePesos)}</p>
+                  <div className="text-xs space-y-2 pt-1">
+                    <div className="space-y-0.5 opacity-80">
+                      <div className="flex justify-between gap-4">
+                        <span>Monto de la recarga</span>
+                        <span>{formatBudget(preview.requestedAmountPesos)}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span>IVA</span>
+                        <span>{formatBudget(preview.vatAmountPesos)}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between gap-4 border-t border-blue-200 pt-1.5 text-sm font-bold">
+                      <span>Total a pagar</span>
+                      <span>{formatBudget(preview.totalToPayPesos)}</span>
+                    </div>
+                    <div className="space-y-0.5 opacity-80">
+                      <p>
+                        Se acreditan {formatBudget(preview.estimatedCreditedAmountPesos)} a tu saldo publicitario.
+                      </p>
+                      <p>Saldo resultante: {formatBudget(preview.resultingWalletBalancePesos)}</p>
+                    </div>
                   </div>
                 )}
               </div>

@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api/client";
-import { PlanCode } from "@/types/finance/plans/Plan.types";
+import { PlanCode, PlanSummaryResponseDTO } from "@/types/finance/plans/Plan.types";
 import { WompiCheckoutResponseDTO } from "@/types/finance/wompi/Wompi.types";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -209,13 +209,17 @@ export interface OnboardingPlanOption {
   // Solo aplican a STANDARD/PREMIUM — null en BASIC.
   minInvestmentCents: number | null;
   maxInvestmentCents: number | null;
+  // 0 = no aplica al plan (no se muestra). Si ambas vienen > 0 (STANDARD),
+  // la que aplica depende de la caracterización Productos/Servicios que
+  // asigne VERyGANA — ver planCommissions en onboarding.shared.
   saleCommissionPct: number;
+  servicesCommissionPct: number;
   // -1 = ilimitado.
   maxKeysPct: number;
   canAdvertise: boolean;
   canUseGames: boolean;
   canUseSurveys: boolean;
-  canHavePets: boolean;
+  canUsePets: boolean;
   // -1 = ilimitado.
   maxProducts: number;
   maxAds: number;
@@ -323,34 +327,9 @@ export interface OnboardingSummaryLegalIdentification {
   departmentName: string | null;
 }
 
-export interface OnboardingSummaryPlan {
-  planCode: PlanCode;
-  planName: string;
-  description: string;
-  monthlyFeeCents: number | null;
-  minInvestmentCents: number | null;
-  maxInvestmentCents: number | null;
-  investmentAmountCents: number | null;
-  saleCommissionPct: number;
-  maxKeysPct: number;
-  taxNote: string;
-  liquidationConditions: string;
-  accepted: boolean;
-  acceptedAt: string | null;
-  // Solo aplica a BASIC — null en STANDARD/PREMIUM y en BASIC antes de aceptar.
-  contractDurationMonths: number | null;
-  // true mientras haya una negociación especial pendiente por resolver (Ruta
-  // D o E) — bloquea "Generar contrato" y "Cambiar de plan" hasta que
-  // compliance la resuelva. Antes esto vivía en un campo separado
-  // (requiresAdvisorContact, solo Ruta E) — ahora Ruta D también lo usa.
-  requiresSpecialNegotiation: boolean;
-  specialNegotiationDetails: string | null;
-  // Cuándo se resolvió la negociación — null si nunca hubo una o sigue
-  // pendiente. Si no es null y requiresSpecialNegotiation ya es false, el
-  // plan quedó "congelado" (acceptPlan ahora responde 4xx si se intenta
-  // cambiar), solo queda continuar a generar el contrato.
-  specialNegotiationResolvedAt: string | null;
-}
+// El backend devuelve PlanSummaryResponseDTO tal cual — se conserva el alias
+// para no tocar los imports existentes.
+export type OnboardingSummaryPlan = PlanSummaryResponseDTO;
 
 export interface OnboardingSummary {
   termsVersion: string | null;
@@ -453,7 +432,7 @@ export const OnboardingService = {
   },
 
   // Devuelve el mismo PlanSummaryResponseDTO que trae GET /summary → plan.
-  async acceptPlan(data: AcceptPlanRequest): Promise<OnboardingSummaryPlan> {
+  async acceptPlan(data: AcceptPlanRequest): Promise<PlanSummaryResponseDTO> {
     const response = await apiClient.post(`${BASE}/plan/accept`, data);
     return response.data;
   },

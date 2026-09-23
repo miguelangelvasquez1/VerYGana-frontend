@@ -4,6 +4,7 @@ import {
   ArrowDown,
   ArrowUp,
   Check,
+  ChevronRight,
   Info,
   Loader2,
   ShieldCheck,
@@ -24,6 +25,7 @@ import { getPlanCatalog } from "@/services/planService";
 import { PlanCode } from "@/types/finance/plans/Plan.types";
 import type { PlanCatalogOption, PlanCatalogResponseDTO } from "@/types/finance/plans/PlanCatalog.types";
 import { FieldErrors, formatCOP, StepButton } from "../onboarding.shared";
+import { PlanDetailModal, planPriceSummary } from "../PlanDetailModal";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -64,10 +66,6 @@ function planByCode(
 // Los valores se escriben en pesos; formatCOP recibe centavos.
 function copFromPesos(pesos: number): string {
   return formatCOP(Math.round(pesos * 100));
-}
-
-function formatKeysPct(pct: number): string {
-  return pct === -1 ? "Sin límite" : `${pct}%`;
 }
 
 function optionCls(selected: boolean, opts?: { error?: boolean; center?: boolean }): string {
@@ -176,55 +174,56 @@ function ModalitiesComparison({
   catalog: PlanCatalogResponseDTO | null;
   highlightRoute?: string;
 }) {
+  const [detail, setDetail] = useState<{ plan: PlanCatalogOption; label: string } | null>(null);
+
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
-      {MODALITY_CARDS.map((m) => {
-        const plan = planByCode(catalog, m.planCode);
-        const highlighted = highlightRoute === m.route;
-        return (
-          <div
-            key={m.route}
-            className={`rounded-xl border p-4 ${
-              highlighted ? "border-[#03548C] bg-[#03548C]/5" : "border-gray-200 bg-white"
-            }`}
-          >
-            {highlighted && (
-              <span className="inline-block mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[#03548C] bg-[#03548C]/10 px-2 py-0.5 rounded-full">
-                Tu resultado
-              </span>
-            )}
-            <p className="text-sm font-bold text-gray-900">{m.label}</p>
-            <p className="mt-1 text-xs text-gray-500 leading-relaxed">{m.blurb}</p>
-            {plan && (
-              <dl className="mt-3 space-y-1 text-xs">
-                {plan.monthlyFeeCents != null && (
-                  <div className="flex justify-between gap-2">
-                    <dt className="text-gray-400">Cuota mensual</dt>
-                    <dd className="font-semibold text-gray-700">{formatCOP(plan.monthlyFeeCents)}</dd>
-                  </div>
-                )}
-                {plan.minInvestmentCents != null && plan.maxInvestmentCents != null && (
-                  <div className="flex justify-between gap-2">
-                    <dt className="text-gray-400">Inversión</dt>
-                    <dd className="font-semibold text-gray-700">
-                      {formatCOP(plan.minInvestmentCents)} – {formatCOP(plan.maxInvestmentCents)}
-                    </dd>
-                  </div>
-                )}
-                <div className="flex justify-between gap-2">
-                  <dt className="text-gray-400">Comisión por venta</dt>
-                  <dd className="font-semibold text-gray-700">{plan.saleCommissionPct}%</dd>
+    <>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {MODALITY_CARDS.map((m) => {
+          const plan = planByCode(catalog, m.planCode);
+          const price = plan ? planPriceSummary(plan) : null;
+          const highlighted = highlightRoute === m.route;
+          return (
+            <div
+              key={m.route}
+              className={`flex flex-col rounded-xl border p-4 ${
+                highlighted ? "border-[#03548C] bg-[#03548C]/5" : "border-gray-200 bg-white"
+              }`}
+            >
+              {highlighted && (
+                <span className="self-start mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[#03548C] bg-[#03548C]/10 px-2 py-0.5 rounded-full">
+                  Tu resultado
+                </span>
+              )}
+              <p className="text-sm font-bold text-gray-900">{m.label}</p>
+              <p className="mt-1 text-xs text-gray-500 leading-relaxed">{m.blurb}</p>
+
+              {plan && (
+                <div className="mt-auto pt-4 space-y-3">
+                  {price && (
+                    <div>
+                      <p className="text-[11px] text-gray-400">{price.label}</p>
+                      <p className="text-sm font-bold text-gray-900">{price.value}</p>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setDetail({ plan, label: m.label })}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] cursor-pointer"
+                  >
+                    Ver detalle del plan <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-gray-400">Máx. llaves</dt>
-                  <dd className="font-semibold text-gray-700">{formatKeysPct(plan.maxKeysPct)}</dd>
-                </div>
-              </dl>
-            )}
-          </div>
-        );
-      })}
-    </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {detail && (
+        <PlanDetailModal plan={detail.plan} modalityLabel={detail.label} onClose={() => setDetail(null)} />
+      )}
+    </>
   );
 }
 

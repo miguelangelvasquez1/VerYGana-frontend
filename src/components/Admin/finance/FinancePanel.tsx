@@ -15,9 +15,14 @@ import {
   ChevronRight,
   Wallet,
   Eye,
+  Landmark,
+  Wifi,
+  Server,
+  Users,
+  type LucideIcon,
 } from 'lucide-react';
 import { getBalance, getMovements } from '@/services/TreasuryService';
-import { TreasuryMovementResponseDTO } from '@/types/finance/Treasury.types';
+import { TreasuryBalanceResponseDTO, TreasuryMovementResponseDTO } from '@/types/finance/Treasury.types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -54,12 +59,25 @@ const getHealthDescription = (pct: number): string => {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ACCOUNTS = [
-  { code: 'KEYS_RESERVE',    label: 'Reserva de Llaves', icon: Shield,   color: 'blue'   },
-  { code: 'FORTIFICATION',   label: 'Fortalecimiento',   icon: Zap,      color: 'purple' },
-  { code: 'OPERATIONS',      label: 'Operaciones',        icon: Activity, color: 'green'  },
-  { code: 'PAYOUTS_PENDING', label: 'Pagos Pendientes',  icon: Clock,    color: 'orange' },
-] as const;
+// `field` es la propiedad de TreasuryBalanceResponseDTO con el saldo de la
+// cuenta; `code` es el accountCode que espera GET /movements.
+const ACCOUNTS: {
+  code: string;
+  label: string;
+  icon: LucideIcon;
+  color: string;
+  field: keyof TreasuryBalanceResponseDTO;
+  description: string;
+}[] = [
+  { code: 'KEYS_RESERVE',    label: 'Reserva de Llaves',   icon: Shield,   color: 'blue',   field: 'keysReserveCents',     description: 'Fondos de respaldo del sistema de llaves'   },
+  { code: 'FORTIFICATION',   label: 'Fortalecimiento',     icon: Zap,      color: 'purple', field: 'fortificationCents',   description: 'Inversión en crecimiento y mejoras'         },
+  { code: 'OPERATIONS',      label: 'Operaciones',         icon: Activity, color: 'green',  field: 'operationsCents',      description: 'Capital operativo y gastos corrientes'      },
+  { code: 'PAYOUTS_PENDING', label: 'Pagos Pendientes',    icon: Clock,    color: 'orange', field: 'payoutsPendingCents',  description: 'Pagos a ganadores pendientes de entrega'    },
+  { code: 'TAX_RESERVE',     label: 'Reserva Tributaria',  icon: Landmark, color: 'amber',  field: 'taxReserveCents',      description: 'Provisión para el pago de impuestos'        },
+  { code: 'CONNECTIVITY',    label: 'Conectividad',        icon: Wifi,     color: 'teal',   field: 'connectivityCents',    description: 'Fondos destinados a llaves de conectividad' },
+  { code: 'INFRASTRUCTURE',  label: 'Infraestructura',     icon: Server,   color: 'slate',  field: 'infrastructureCents', description: 'Servidores, servicios y plataforma'         },
+  { code: 'PAYROLL',         label: 'Nómina',              icon: Users,    color: 'rose',   field: 'payrollCents',         description: 'Pago de salarios y prestaciones'            },
+];
 
 const REF_TYPE_LABELS: Record<string, { label: string; color: string }> = {
   RAFFLE:   { label: 'Rifa',     color: 'bg-admin-gold/10 text-admin-gold'         },
@@ -77,6 +95,10 @@ const COLOR_MAP: Record<string, {
   purple: { bg: 'bg-admin-gold/5',     icon: 'bg-admin-gold/10 text-admin-gold',         badge: 'bg-admin-gold',     border: 'border-admin-gold/20',     light: 'text-admin-gold',     ring: 'ring-admin-gold/30',     bar: 'bg-admin-gold'     },
   green:  { bg: 'bg-admin-midnight/5', icon: 'bg-admin-midnight/10 text-admin-midnight', badge: 'bg-admin-midnight', border: 'border-admin-midnight/20', light: 'text-admin-midnight', ring: 'ring-admin-midnight/30', bar: 'bg-admin-midnight' },
   orange: { bg: 'bg-admin-navy/5',     icon: 'bg-admin-navy/10 text-admin-navy',         badge: 'bg-admin-navy',     border: 'border-admin-navy/20',     light: 'text-admin-navy',     ring: 'ring-admin-navy/30',     bar: 'bg-admin-navy'     },
+  amber:  { bg: 'bg-amber-50',         icon: 'bg-amber-100 text-amber-600',              badge: 'bg-amber-500',      border: 'border-amber-200',         light: 'text-amber-600',      ring: 'ring-amber-300',         bar: 'bg-amber-500'      },
+  teal:   { bg: 'bg-teal-50',          icon: 'bg-teal-100 text-teal-600',                badge: 'bg-teal-500',       border: 'border-teal-200',          light: 'text-teal-600',       ring: 'ring-teal-300',          bar: 'bg-teal-500'       },
+  slate:  { bg: 'bg-slate-50',         icon: 'bg-slate-100 text-slate-600',              badge: 'bg-slate-500',      border: 'border-slate-200',         light: 'text-slate-600',      ring: 'ring-slate-300',         bar: 'bg-slate-500'      },
+  rose:   { bg: 'bg-rose-50',          icon: 'bg-rose-100 text-rose-600',                badge: 'bg-rose-500',       border: 'border-rose-200',          light: 'text-rose-600',       ring: 'ring-rose-300',          bar: 'bg-rose-500'       },
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -186,40 +208,10 @@ export default function TreasuryPanel() {
 
   const total = balance?.totalCents ?? 0;
 
-  const accountData = [
-    {
-      code: 'KEYS_RESERVE',
-      label: 'Reserva de Llaves',
-      icon: Shield,
-      color: 'blue',
-      value: balance?.keysReserveCents ?? 0,
-      description: 'Fondos de respaldo del sistema de llaves',
-    },
-    {
-      code: 'FORTIFICATION',
-      label: 'Fortalecimiento',
-      icon: Zap,
-      color: 'purple',
-      value: balance?.fortificationCents ?? 0,
-      description: 'Inversión en crecimiento y mejoras',
-    },
-    {
-      code: 'OPERATIONS',
-      label: 'Operaciones',
-      icon: Activity,
-      color: 'green',
-      value: balance?.operationsCents ?? 0,
-      description: 'Capital operativo y gastos corrientes',
-    },
-    {
-      code: 'PAYOUTS_PENDING',
-      label: 'Pagos Pendientes',
-      icon: Clock,
-      color: 'orange',
-      value: balance?.payoutsPendingCents ?? 0,
-      description: 'Pagos a ganadores pendientes de entrega',
-    },
-  ];
+  const accountData = ACCOUNTS.map((a) => ({
+    ...a,
+    value: (balance?.[a.field] as number | undefined) ?? 0,
+  }));
 
   const lastUpdated = dataUpdatedAt
     ? new Date(dataUpdatedAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })

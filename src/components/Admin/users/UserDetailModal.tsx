@@ -202,9 +202,37 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
                   <Section title="Plan actual">
                     <InfoRow label="Plan" value={co.currentPlan?.planName ?? 'Sin plan activo'} />
                     <InfoRow label="Cuota mensual" value={formatCOP(co.currentPlan?.monthlyFeeCents)} />
-                    <InfoRow label="Comisión por venta" value={co.currentPlan ? `${co.currentPlan.saleCommissionPct}%` : '—'} />
+                    <InfoRow label="Monto de inversión" value={formatCOP(co.currentPlan?.investmentAmountCents)} />
+                    <InfoRow label="Duración del contrato" value={co.currentPlan?.contractDurationMonths != null ? `${co.currentPlan.contractDurationMonths} meses` : '—'} />
+                    <InfoRow label="Monto bruto" value={formatCOP(co.currentPlan?.grossAmountCents)} />
+                    <InfoRow label="Impuestos excluidos" value={formatCOP(co.currentPlan?.excludedTaxesCents)} />
+                    <InfoRow label="Umbral de prosperidad" value={formatCOP(co.currentPlan?.prosperityThresholdCents)} />
+                    {co.currentPlan && co.currentPlan.saleCommissionPct > 0 && (
+                      <InfoRow label="Comisión por venta" value={`${co.currentPlan.saleCommissionPct}%`} />
+                    )}
+                    <InfoRow label="Máx. % llaves promocionales" value={co.currentPlan ? (co.currentPlan.maxKeysPct === -1 ? 'Ilimitado' : `${co.currentPlan.maxKeysPct}%`) : '—'} />
                     <InfoRow label="Aceptado" value={co.currentPlan?.accepted ? `Sí, el ${formatDate(co.currentPlan.acceptedAt)}` : 'No'} />
+                    {co.currentPlan?.requiresSpecialNegotiation && (
+                      <InfoRow label="Negociación especial" value={co.currentPlan.specialNegotiationDetails || 'Pendiente'} />
+                    )}
                   </Section>
+                  {co.currentPlan?.benefits && (() => {
+                    const b = co.currentPlan.benefits;
+                    const limit = (n: number) => (n === -1 ? 'Ilimitado' : n.toLocaleString('es-CO'));
+                    return (
+                      <Section title="Beneficios del plan">
+                        <InfoRow label="Publicidad" value={b.canAdvertise ? 'Sí' : 'No'} />
+                        <InfoRow label="Juegos personalizados" value={b.canUseGames ? 'Sí' : 'No'} />
+                        <InfoRow label="Encuestas" value={b.canUseSurveys ? 'Sí' : 'No'} />
+                        <InfoRow label="Mascotas" value={b.canUsePets ? 'Sí' : 'No'} />
+                        <InfoRow label="Máx. productos" value={limit(b.maxProducts)} />
+                        <InfoRow label="Máx. anuncios" value={limit(b.maxAds)} />
+                        <InfoRow label="Máx. juegos personalizados" value={limit(b.maxBrandedGames)} />
+                        <InfoRow label="Máx. encuestas" value={limit(b.maxSurveys)} />
+                        <InfoRow label="Aumento de visibilidad" value={`${b.visibilityBoostPct}%`} />
+                      </Section>
+                    );
+                  })()}
                 </>
               );
             })()}

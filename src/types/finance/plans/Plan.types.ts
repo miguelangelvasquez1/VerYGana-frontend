@@ -28,6 +28,18 @@ export interface PlanPaymentStatusResponseDTO {
     message: string;
 }
 
+export interface PlanBenefitsDTO {
+    canAdvertise: boolean;
+    canUseGames: boolean;
+    canUseSurveys: boolean;
+    canUsePets: boolean;
+    maxProducts: number;
+    maxAds: number;
+    maxBrandedGames: number;
+    maxSurveys: number;
+    visibilityBoostPct: number;
+}
+
 
 export interface EffectivePlanStateResponseDTO {
   effectivePlan: PlanCode | null;
@@ -79,19 +91,36 @@ export interface EffectivePlanStateResponseDTO {
   walletStatus: WalletStatus;
 }
 
+// Mismo DTO en: onboarding (GET /summary → plan, POST /plan/accept),
+// compliance (negociaciones pendientes) y admin (currentPlan del comercial).
 export interface PlanSummaryResponseDTO {
     planCode: PlanCode;
     planName: string;
     description: string;
-    monthlyFeeCents: number;
-    minInvestmentCents: number;
-    maxInvestmentCents: number;
-    contractDurationMonths: number;
+    // Solo aplica a BASIC — null en STANDARD/PREMIUM.
+    monthlyFeeCents: number | null;
+    // Solo aplican a STANDARD/PREMIUM — null en BASIC.
+    minInvestmentCents: number | null;
+    maxInvestmentCents: number | null;
+    investmentAmountCents: number | null;
+    // Solo aplica a BASIC — null en STANDARD/PREMIUM y en BASIC antes de aceptar.
+    contractDurationMonths: number | null;
     saleCommissionPct: number;
+    // -1 = ilimitado.
     maxKeysPct: number;
+    // true mientras haya una negociación especial pendiente (Ruta D o E) —
+    // bloquea "Generar contrato" y "Cambiar de plan" hasta que compliance la
+    // resuelva.
     requiresSpecialNegotiation: boolean;
+    // Cuándo se resolvió la negociación — null si nunca hubo una o sigue
+    // pendiente. Si no es null y requiresSpecialNegotiation ya es false, el
+    // plan quedó "congelado" (acceptPlan responde 4xx si se intenta cambiar).
     specialNegotiationResolvedAt: string | null;
     specialNegotiationDetails: string | null;
     accepted: boolean | null;
     acceptedAt: string | null;
+    grossAmountCents: number | null;
+    excludedTaxesCents: number | null;
+    benefits: PlanBenefitsDTO | null;
+    prosperityThresholdCents: number | null;
 }

@@ -11,13 +11,16 @@ export interface PlanCatalogOption {
   // Solo aplican a STANDARD/PREMIUM — null en BASIC.
   minInvestmentCents: number | null;
   maxInvestmentCents: number | null;
+  // 0 = no aplica al plan. Si ambas vienen > 0 (STANDARD), la que aplica
+  // depende de la caracterización Productos/Servicios que asigne VERyGANA.
   saleCommissionPct: number;
+  servicesCommissionPct: number;
   // -1 = ilimitado.
   maxKeysPct: number;
   canAdvertise: boolean;
   canUseGames: boolean;
   canUseSurveys: boolean;
-  canHavePets: boolean;
+  canUsePets: boolean;
   // -1 = ilimitado.
   maxProducts: number;
   maxAds: number;

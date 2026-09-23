@@ -70,6 +70,8 @@ export interface PlanChangePreviewResponseDTO {
   // activos). Listo para mostrar tal cual.
   message: string;
   requiredTopUpAmountPesos: number | null;
+  requiredTopUpVatAmountPesos: number | null;
+  requiredTopUpTotalPesos: number | null;
   currentWalletBalancePesos: number;
   targetMonthlyPricePesos: number | null;
   targetMinInvestmentPesos: number | null;

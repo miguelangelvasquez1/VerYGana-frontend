@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
-import { getRafflesByFilters } from "@/services/raffleService";
-import { RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
+import { getActiveRaffles } from "@/services/raffleService";
+import { RaffleSummaryResponseDTO, RaffleType } from "@/types/raffles/raffle.types";
 import { PagedResponse } from "@/types/Generic.types";
 import RaffleUserCard from "./RaffleUserCard";
 
@@ -25,37 +24,18 @@ export default function ActiveRafflesSection() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [filter, setFilter] = useState<RaffleTypeFilter>("ALL");
-  const [drawDate, setDrawDate] = useState("");
-
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(0);
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [search]);
 
   useEffect(() => {
     loadRaffles();
-  }, [page, filter, drawDate, debouncedSearch]);
+  }, [page, filter]);
 
   const loadRaffles = async () => {
     setLoading(true);
     try {
-      const type = filter === "ALL" ? undefined : filter;
+      const type = filter === "ALL" ? undefined : (filter as RaffleType);
 
       const response: PagedResponse<RaffleSummaryResponseDTO> =
-        await getRafflesByFilters(
-          "ACTIVE",
-          debouncedSearch || undefined,
-          drawDate || undefined,
-          type,
-          PAGE_SIZE,
-          page
-        );
+        await getActiveRaffles(type, page, PAGE_SIZE);
 
       setRaffles(response.data);
       setTotalPages(response.meta.totalPages);
@@ -68,11 +48,6 @@ export default function ActiveRafflesSection() {
 
   const handleFilterChange = (type: RaffleTypeFilter) => {
     setFilter(type);
-    setPage(0);
-  };
-
-  const handleDrawDateChange = (value: string) => {
-    setDrawDate(value);
     setPage(0);
   };
 
@@ -89,52 +64,17 @@ export default function ActiveRafflesSection() {
         </h2>
       </div>
 
-      {/* Barra de búsqueda */}
-      <div className="relative mb-4 max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar rifas por título..."
-          className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] focus:border-transparent"
-        />
-      </div>
-
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <div className="flex gap-2">
-          {(["ALL", "STANDARD", "PREMIUM"] as RaffleTypeFilter[]).map((type) => (
-            <button
-              key={type}
-              onClick={() => handleFilterChange(type)}
-              className={`cursor-pointer px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterButtonClass(filter, type)}`}
-            >
-              {type === "ALL" ? "Todas" : type === "STANDARD" ? "Estándar" : "Premium"}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <label htmlFor="raffle-draw-date" className="text-sm font-medium text-gray-600">
-            Fecha de sorteo
-          </label>
-          <input
-            id="raffle-draw-date"
-            type="date"
-            value={drawDate}
-            onChange={(e) => handleDrawDateChange(e.target.value)}
-            className="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#03548C]"
-          />
-          {drawDate && (
-            <button
-              onClick={() => handleDrawDateChange("")}
-              className="text-xs text-gray-500 hover:text-gray-800 underline cursor-pointer"
-            >
-              Limpiar
-            </button>
-          )}
-        </div>
+      <div className="flex gap-2 mb-6">
+        {(["ALL", "STANDARD", "PREMIUM"] as RaffleTypeFilter[]).map((type) => (
+          <button
+            key={type}
+            onClick={() => handleFilterChange(type)}
+            className={`cursor-pointer px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterButtonClass(filter, type)}`}
+          >
+            {type === "ALL" ? "Todas" : type === "STANDARD" ? "Estándar" : "Premium"}
+          </button>
+        ))}
       </div>
 
       {/* Grid */}
@@ -163,9 +103,7 @@ export default function ActiveRafflesSection() {
               No hay rifas disponibles
             </h3>
             <p className="text-white/70 text-sm max-w-xs mx-auto">
-              {debouncedSearch || drawDate
-                ? "No encontramos rifas que coincidan con tu búsqueda o filtros."
-                : filter === "ALL"
+              {filter === "ALL"
                 ? "Por el momento no hay rifas activas. ¡Vuelve pronto para participar!"
                 : `No hay rifas ${filter === "STANDARD" ? "estándar" : "premium"} disponibles en este momento.`}
             </p>

@@ -9,6 +9,8 @@ export interface RechargePreviewResponseDTO {
   eligible: boolean;
   message: string;
   requestedAmountPesos: number;
+  vatAmountPesos: number;
+  totalToPayPesos: number;
   minInvestmentPesos: number | null;
   maxInvestmentPesos: number | null;
   currentWalletBalancePesos: number;

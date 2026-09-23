@@ -158,7 +158,7 @@ function buildFeatureRows(catalog: PlanCatalogResponseDTO): PlanFeatureRow[] {
     },
     {
       label: 'Sección de mascotas', icon: <PawPrint className="w-4 h-4" />,
-      basic: b.canHavePets, standard: s.canHavePets, premium: p.canHavePets,
+      basic: b.canUsePets, standard: s.canUsePets, premium: p.canUsePets,
     },
     {
       label: 'Aumento de visibilidad', icon: <TrendingUp className="w-4 h-4" />,
@@ -350,12 +350,23 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
                   )}
                   <li>Comisión por venta: <span className="text-white">{preview.targetSaleCommissionPct}%</span></li>
                   {!isBasic && (
-                    <li>
-                      Abono a pagar:{' '}
-                      <span className="text-white font-semibold">
-                        {formatCOP(preview.requiredTopUpAmountPesos ?? amount)}
-                      </span>
-                    </li>
+                    <>
+                      <li>
+                        Abono:{' '}
+                        <span className="text-white">{formatCOP(preview.requiredTopUpAmountPesos ?? amount)}</span>
+                      </li>
+                      {preview.requiredTopUpVatAmountPesos != null && (
+                        <li>
+                          IVA: <span className="text-white">{formatCOP(preview.requiredTopUpVatAmountPesos)}</span>
+                        </li>
+                      )}
+                      {preview.requiredTopUpTotalPesos != null && (
+                        <li>
+                          Total a pagar:{' '}
+                          <span className="text-white font-semibold">{formatCOP(preview.requiredTopUpTotalPesos)}</span>
+                        </li>
+                      )}
+                    </>
                   )}
                 </ul>
               )}
