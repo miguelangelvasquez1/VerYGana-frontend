@@ -71,11 +71,11 @@ export const Step3Config: React.FC<Props> = ({
           <label className="block text-sm font-medium text-gray-700 mb-1">Edad mínima</label>
           <input
             type="number"
-            min={13}
+            min={18}
             max={100}
             value={form.minAge}
             onChange={e => onChange('minAge', e.target.value)}
-            placeholder="13"
+            placeholder="18"
             className={fieldCls}
           />
         </div>
@@ -84,7 +84,7 @@ export const Step3Config: React.FC<Props> = ({
           <label className="block text-sm font-medium text-gray-700 mb-1">Edad máxima</label>
           <input
             type="number"
-            min={13}
+            min={18}
             max={100}
             value={form.maxAge}
             onChange={e => onChange('maxAge', e.target.value)}

@@ -813,11 +813,11 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Edad mínima</label>
-                    <input type="number" min={13} max={100} value={configForm.minAge} onChange={e => setConfigForm(f => ({ ...f, minAge: e.target.value }))} placeholder="13" className={fieldCls} />
+                    <input type="number" min={18} max={100} value={configForm.minAge} onChange={e => setConfigForm(f => ({ ...f, minAge: e.target.value }))} placeholder="18" className={fieldCls} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Edad máxima</label>
-                    <input type="number" min={13} max={100} value={configForm.maxAge} onChange={e => setConfigForm(f => ({ ...f, maxAge: e.target.value }))} placeholder="100" className={fieldCls} />
+                    <input type="number" min={18} max={100} value={configForm.maxAge} onChange={e => setConfigForm(f => ({ ...f, maxAge: e.target.value }))} placeholder="100" className={fieldCls} />
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de inicio</label>

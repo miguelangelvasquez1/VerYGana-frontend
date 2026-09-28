@@ -60,11 +60,11 @@ export const AudienciaTab: React.FC<Props> = ({ campaign, editing, form, onChang
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Edad mínima</label>
-              <input type="number" min={13} max={100} value={form.minAge} onChange={e => onChangeForm(f => ({ ...f, minAge: e.target.value }))} placeholder="13" className={fieldCls} />
+              <input type="number" min={18} max={100} value={form.minAge} onChange={e => onChangeForm(f => ({ ...f, minAge: e.target.value }))} placeholder="18" className={fieldCls} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Edad máxima</label>
-              <input type="number" min={13} max={100} value={form.maxAge} onChange={e => onChangeForm(f => ({ ...f, maxAge: e.target.value }))} placeholder="100" className={fieldCls} />
+              <input type="number" min={18} max={100} value={form.maxAge} onChange={e => onChangeForm(f => ({ ...f, maxAge: e.target.value }))} placeholder="100" className={fieldCls} />
             </div>
           </div>
           <div className="border-t border-gray-100 pt-4">
