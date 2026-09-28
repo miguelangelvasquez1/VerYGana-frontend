@@ -5,7 +5,9 @@ import { Gamepad2, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Form from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
+import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 import { type DesignerBrandingDetail } from '@/services/GameDesignerService';
+import { withoutBackendManaged, withoutBackendManagedUi } from '../rjsf/gameConfig';
 
 import TextInputWidget from '../rjsf/widgets/TextInputWidget';
 import NumberInputWidget from '../rjsf/widgets/NumberInputWidget';
@@ -96,11 +98,15 @@ export const ConfigTab: React.FC<Props> = ({ detail, gameConfig, onFormChange })
             )}
           </div>
           <Form
-            schema={detail.gameSchema.jsonSchema as any}
-            uiSchema={detail.gameSchema.uiSchema as any}
+            schema={withoutBackendManaged(detail.gameSchema.jsonSchema as RJSFSchema)}
+            uiSchema={withoutBackendManagedUi(detail.gameSchema.uiSchema) as UiSchema | undefined}
             formData={gameConfig}
             disabled={!canEdit}
             validator={validator}
+            // Sin esto la validación solo corría al hacer submit, y el <Form> no
+            // tiene botón de submit propio: el diseñador nunca veía un error.
+            liveValidate={canEdit}
+            showErrorList={false}
             widgets={rjsfWidgets}
             templates={rjsfTemplates}
             formContext={{ brandingRequestId: detail.id }}

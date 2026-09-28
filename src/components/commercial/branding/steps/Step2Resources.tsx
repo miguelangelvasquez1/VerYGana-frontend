@@ -9,6 +9,9 @@ const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 const MAX_SIZE = 20 * 1024 * 1024;
 
 interface Props {
+  /** Cuántos archivos exige este juego, o 0 si no exige ninguno. */
+  requiredCount: number;
+  requiredLabel: string | null;
   files: FileEntry[];
   onUpload: (file: File) => void;
   onRemoveFile: (localId: string) => void;
@@ -17,6 +20,8 @@ interface Props {
 }
 
 export const Step2Resources: React.FC<Props> = ({
+  requiredCount,
+  requiredLabel,
   files,
   onUpload,
   onRemoveFile,
@@ -52,6 +57,27 @@ export const Step2Resources: React.FC<Props> = ({
           Logos, guías de marca, imágenes · PNG, JPEG, WEBP · Máx 20 MB
         </p>
       </div>
+
+      {requiredCount > 0 && (
+        // El anunciante no tenía forma de saber cuántas necesitaba: lo descubría el
+        // diseñador al abrir el diseño, con la solicitud ya en la cola.
+        <div
+          className={`rounded-lg border p-3 text-sm ${
+            confirmedCount >= requiredCount
+              ? 'border-green-200 bg-green-50 text-green-800'
+              : 'border-amber-200 bg-amber-50 text-amber-800'
+          }`}
+        >
+          <p className="font-medium">
+            Este juego necesita al menos {requiredCount} archivos · llevas {confirmedCount}
+          </p>
+          {requiredLabel && <p className="mt-0.5 text-xs opacity-90">{requiredLabel}</p>}
+          <p className="mt-1 text-xs opacity-90">
+            El diseñador los revisa antes de usarlos en el juego, así que no hace falta
+            que estén recortados ni en un tamaño exacto.
+          </p>
+        </div>
+      )}
 
       <button
         onClick={() => fileInputRef.current?.click()}

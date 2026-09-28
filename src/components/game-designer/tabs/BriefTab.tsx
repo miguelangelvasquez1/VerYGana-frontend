@@ -3,6 +3,7 @@
 import React from 'react';
 import { Globe, Gamepad2 } from 'lucide-react';
 import type { DesignerBrandingDetail } from '@/services/GameDesignerService';
+import { BrandContentSection } from './BrandContentSection';
 
 const GOAL_LABELS: Record<string, string> = {
   BRAND_AWARENESS: 'Reconocimiento de marca',
@@ -126,6 +127,8 @@ export const BriefTab: React.FC<Props> = ({ detail }) => (
         )}
       </div>
     )}
+
+    <BrandContentSection briefData={detail.briefData} />
 
     {detail.adminNotes && (
       <div className="p-3 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">

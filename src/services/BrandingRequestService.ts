@@ -96,6 +96,42 @@ export const getBrandingGames = async (page = 0, size = 12, signal?: AbortSignal
   return data;
 };
 
+// ─── Contenido del juego (brief del anunciante) ──────────────────────────────
+
+/**
+ * Lo que un juego le pide al anunciante, en las dos formas en que puede pedirlo.
+ *
+ * El texto que escribe la marca —las preguntas de la trivia, las palabras de la
+ * sopa de letras— viene como esquema y se pinta con el mismo RJSF que el formulario
+ * del diseñador. Las imágenes no: esas se suben como recursos corporativos, que son
+ * privados y temporales a propósito, porque el diseñador audita que el contenido sea
+ * apropiado y esté en calidad antes de publicarlo como asset del juego. Por eso acá
+ * llegan como un mínimo de archivos, no como campos del formulario.
+ */
+export interface GameBriefRequirements {
+  gameId: number;
+  gameName: string;
+  /** Nulos si el juego no pide texto: el paso del formulario no se muestra. */
+  jsonSchema: Record<string, unknown> | null;
+  uiSchema: Record<string, unknown> | null;
+  /** Cero si el juego no exige archivos del anunciante. */
+  requiredResourceCount: number;
+  requiredResourceLabel: string | null;
+}
+
+export const getBriefRequirements = async (
+  gameId: number,
+  signal?: AbortSignal,
+): Promise<GameBriefRequirements> => {
+  const { data } = await apiClient.get(`/branding-requests/games/${gameId}/brief-schema`, { signal });
+  return data;
+};
+
+/** Se valida contra el esquema en el backend: un contenido incompleto no se guarda. */
+export const saveBrief = async (requestId: number, content: Record<string, unknown>): Promise<void> => {
+  await apiClient.patch(`/branding-requests/${requestId}/brief`, { content });
+};
+
 // ─── Commercial ──────────────────────────────────────────────────────────────
 
 export const createBrandingRequest = async (dto: CreateBrandingDto): Promise<BrandingRequest> => {
@@ -185,6 +221,8 @@ export interface BrandingRequestDetail {
   campaignGoal: string | null;
   hasCompleteTargeting: boolean;
   campaignId: number | null;
+  /** El contenido del juego ya guardado, para repintar el formulario sin volver a pedirlo. */
+  briefData: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
 }

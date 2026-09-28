@@ -17,6 +17,8 @@ import { ResourcesTab }    from './tabs/ResourcesTab';
 import { CommentsTab }     from './tabs/CommentsTab';
 import { ConfigTab }       from './tabs/ConfigTab';
 import { JsonPreviewTab }  from './tabs/JsonPreviewTab';
+import { validateGameConfig } from './rjsf/gameConfig';
+import type { RJSFSchema } from '@rjsf/utils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -119,14 +121,18 @@ export const DesignerRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     }, 1500);
   };
 
-const handlePreview = async () => {
+  // Sin configuración guardada el backend responde 422 y el build arrancaría sin
+  // datos, cargando su configuración por defecto sin decir nada.
+  const hasSavedConfig = Object.keys(gameConfig).length > 0;
+
+  const handlePreview = async () => {
     if (!detail) return;
     setPreviewLoading(true);
     try {
       const url = await getDesignerPreviewUrl(detail.id);
       window.open(url, '_blank', 'noopener,noreferrer');
-    } catch {
-      toast.error('No se pudo obtener la URL de preview');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'No se pudo obtener la URL de preview');
     } finally {
       setPreviewLoading(false);
     }
@@ -134,6 +140,26 @@ const handlePreview = async () => {
 
   const handleSubmitDesign = async () => {
     if (!detail) return;
+
+    // El backend rechaza igual, pero acá el diseñador ve qué campo corregir en vez
+    // de un error genérico del servidor.
+    const schema = detail.gameSchema?.jsonSchema as RJSFSchema | undefined;
+    if (schema) {
+      const errores = validateGameConfig(gameConfig, schema);
+      if (errores.length > 0) {
+        setShowSubmitConfirm(false);
+        setActiveTab('config');
+        const detalle = errores.slice(0, 3).map(e => `${e.path}: ${e.message}`).join(' · ');
+        toast.error(
+          errores.length > 3
+            ? `Faltan ${errores.length} campos por corregir — ${detalle}…`
+            : `Corrige antes de enviar — ${detalle}`,
+          { duration: 6000 },
+        );
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       await submitDesign(detail.id);
@@ -208,8 +234,11 @@ const handlePreview = async () => {
         {canPreview && (
           <button
             onClick={handlePreview}
-            disabled={previewLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition-colors disabled:opacity-60 cursor-pointer shrink-0"
+            disabled={previewLoading || !hasSavedConfig}
+            title={hasSavedConfig
+              ? undefined
+              : 'Configura y guarda algo antes de previsualizar: el juego cargaría sin datos'}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer shrink-0"
           >
             {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
             Ver juego

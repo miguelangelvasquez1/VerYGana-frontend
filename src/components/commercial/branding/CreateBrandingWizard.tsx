@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronLeft, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -10,6 +10,9 @@ import {
   confirmUpload,
   configureBranding,
   submitBrandingRequest,
+  getBriefRequirements,
+  saveBrief,
+  type GameBriefRequirements,
   type BrandingGame,
   type BrandingConfigDto,
   type BrandingRequest,
@@ -20,9 +23,23 @@ import { Step1BrandInfo } from './steps/Step1BrandInfo';
 import { Step2Resources } from './steps/Step2Resources';
 import { Step3Config } from './steps/Step3Config';
 import { Step4Submit } from './steps/Step4Submit';
+import { StepGameContent } from './steps/StepGameContent';
 
-const STEPS = ['Marca', 'Recursos', 'Configuración', 'Enviar'];
-type FormStep = 1 | 2 | 3 | 4;
+/**
+ * El paso de contenido solo existe para los juegos que piden algo que únicamente la
+ * marca puede dar —las preguntas de la trivia, las palabras de la sopa de letras,
+ * las cartas del memoria—. El backend lo dice devolviendo un esquema recortado; si
+ * viene en null, el juego no pide nada y el paso no se muestra.
+ */
+type StepKey = 'brand' | 'resources' | 'content' | 'config' | 'submit';
+
+const STEP_LABELS: Record<StepKey, string> = {
+  brand: 'Marca',
+  resources: 'Recursos',
+  content: 'Contenido',
+  config: 'Configuración',
+  submit: 'Enviar',
+};
 
 interface Props {
   onBack: () => void;
@@ -32,7 +49,9 @@ interface Props {
 export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) => {
   const [showCatalog, setShowCatalog] = useState(true);
   const [selectedGame, setSelectedGame] = useState<BrandingGame | null>(null);
-  const [step, setStep] = useState<FormStep>(1);
+  const [step, setStep] = useState<StepKey>('brand');
+  const [briefReqs, setBriefReqs] = useState<GameBriefRequirements | null>(null);
+  const [briefContent, setBriefContent] = useState<Record<string, unknown>>({});
   const [requestId, setRequestId] = useState<number | null>(null);
   const [createdRequest, setCreatedRequest] = useState<BrandingRequest | null>(null);
   const [files, setFiles] = useState<FileEntry[]>([]);
@@ -46,6 +65,21 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
     campaignGoal: '',
   });
   const [step1Errors, setStep1Errors] = useState<Partial<Step1Form>>({});
+
+  // Se consulta al elegir el juego, no al llegar al paso: el stepper tiene que saber
+  // de entrada cuántos pasos hay, o cambiaría de largo a mitad del recorrido.
+  useEffect(() => {
+    if (!selectedGame) return;
+    const controller = new AbortController();
+    getBriefRequirements(selectedGame.id, controller.signal)
+      .then(setBriefReqs)
+      .catch(() => {
+        // Un fallo acá no puede bloquear la solicitud: se sigue sin el paso y el
+        // envío avisará si al juego le falta contenido.
+        setBriefReqs(null);
+      });
+    return () => controller.abort();
+  }, [selectedGame]);
 
   const [step3, setStep3] = useState<Step3Form>({
     targetGender: 'ALL',
@@ -89,7 +123,7 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
     if (!selectedGame || !validateStep1()) return;
     // Request already created — skip POST and just advance
     if (requestId !== null) {
-      setStep(2);
+      goTo('resources');
       return;
     }
     setSubmitting(true);
@@ -104,7 +138,7 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
       });
       setRequestId(req.id);
       setCreatedRequest(req);
-      setStep(2);
+      goTo('resources');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Error al crear la solicitud');
     } finally {
@@ -156,7 +190,7 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
       if (step3.categoryIds.length > 0) dto.categoryIds = step3.categoryIds;
       if (step3.municipalityCodes.length > 0) dto.municipalityCodes = step3.municipalityCodes;
       if (Object.keys(dto).length > 0) await configureBranding(requestId, dto);
-      setStep(4);
+      goTo('submit');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Error al guardar la configuración');
     } finally {
@@ -175,6 +209,33 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
       onComplete();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Error al enviar la solicitud');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const steps: StepKey[] = [
+    'brand',
+    'resources',
+    ...(briefReqs?.jsonSchema ? (['content'] as StepKey[]) : []),
+    'config',
+    'submit',
+  ];
+  const stepIndex = steps.indexOf(step);
+  const goTo = (key: StepKey) => setStep(key);
+  const goNext = () => setStep(steps[Math.min(stepIndex + 1, steps.length - 1)]);
+  const goBack = () => setStep(steps[Math.max(stepIndex - 1, 0)]);
+
+  const handleContentNext = async () => {
+    if (!requestId) return;
+    setSubmitting(true);
+    try {
+      await saveBrief(requestId, briefContent);
+      goNext();
+    } catch (err: any) {
+      // El mensaje del backend nombra la cantidad que falta ("al menos 10 preguntas"),
+      // que es lo único accionable para el anunciante.
+      toast.error(err?.response?.data?.message || 'Revisa el contenido del juego');
     } finally {
       setSubmitting(false);
     }
@@ -219,12 +280,11 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
       {/* Stepper */}
       <div className="bg-white rounded-lg shadow-md px-6 py-4">
         <div className="flex items-center">
-          {STEPS.map((label, i) => {
-            const n = (i + 1) as FormStep;
-            const done = step > n;
-            const active = step === n;
+          {steps.map((key, i) => {
+            const done = stepIndex > i;
+            const active = stepIndex === i;
             return (
-              <React.Fragment key={n}>
+              <React.Fragment key={key}>
                 <div className="flex flex-col items-center gap-1.5 shrink-0">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${
@@ -235,17 +295,17 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
                         : 'bg-gray-100 text-gray-400'
                     }`}
                   >
-                    {done ? <Check size={16} strokeWidth={3} /> : <span className="text-sm">{n}</span>}
+                    {done ? <Check size={16} strokeWidth={3} /> : <span className="text-sm">{i + 1}</span>}
                   </div>
                   <span
                     className={`text-xs font-semibold hidden sm:block ${
                       active ? 'text-blue-600' : done ? 'text-gray-600' : 'text-gray-400'
                     }`}
                   >
-                    {label}
+                    {STEP_LABELS[key]}
                   </span>
                 </div>
-                {i < STEPS.length - 1 && (
+                {i < steps.length - 1 && (
                   <div
                     className={`flex-1 h-0.5 mx-3 mb-5 transition-all duration-500 ${
                       done ? 'bg-blue-600' : 'bg-gray-200'
@@ -259,7 +319,7 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
       </div>
 
       {/* Step content */}
-      {step === 1 && (
+      {step === 'brand' && (
         <Step1BrandInfo
           selectedGame={selectedGame}
           form={step1}
@@ -275,17 +335,32 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
         />
       )}
 
-      {step === 2 && (
+      {step === 'resources' && (
         <Step2Resources
+          requiredCount={briefReqs?.requiredResourceCount ?? 0}
+          requiredLabel={briefReqs?.requiredResourceLabel ?? null}
           files={files}
           onUpload={uploadFile}
           onRemoveFile={localId => setFiles(prev => prev.filter(f => f.localId !== localId))}
-          onBack={() => setStep(1)}
-          onNext={() => setStep(3)}
+          onBack={() => goTo('brand')}
+          onNext={goNext}
         />
       )}
 
-      {step === 3 && (
+      {step === 'content' && briefReqs?.jsonSchema && selectedGame && (
+        <StepGameContent
+          requirements={briefReqs}
+          gameName={selectedGame.title}
+          requestId={requestId}
+          content={briefContent}
+          submitting={submitting}
+          onChange={setBriefContent}
+          onBack={goBack}
+          onNext={handleContentNext}
+        />
+      )}
+
+      {step === 'config' && (
         <Step3Config
           form={step3}
           submitting={submitting}
@@ -294,13 +369,13 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
           }
           onChangeCategoryIds={ids => setStep3(prev => ({ ...prev, categoryIds: ids }))}
           onChangeMunicipalityCodes={codes => setStep3(prev => ({ ...prev, municipalityCodes: codes }))}
-          onBack={() => setStep(2)}
-          onSkip={() => setStep(4)}
+          onBack={goBack}
+          onSkip={() => goTo('submit')}
           onNext={handleStep3Next}
         />
       )}
 
-      {step === 4 && (
+      {step === 'submit' && (
         <Step4Submit
           selectedGame={selectedGame}
           step1Form={step1}
@@ -309,7 +384,7 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
           estimatedSessions={createdRequest?.estimatedSessions ?? null}
           averageRewardPerSessionCents={createdRequest?.averageRewardPerSessionCents ?? null}
           scoreRewardFactor={createdRequest?.scoreRewardFactor ?? null}
-          onBack={() => setStep(3)}
+          onBack={goBack}
           onSubmit={handleSubmit}
         />
       )}

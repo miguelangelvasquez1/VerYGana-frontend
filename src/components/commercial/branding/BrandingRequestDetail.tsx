@@ -21,10 +21,14 @@ import {
   Settings,
   Megaphone,
   ArrowRight,
+  Puzzle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   getBrandingRequestDetail,
+  getBriefRequirements,
+  saveBrief,
+  type GameBriefRequirements,
   submitBrandingRequest,
   configureBranding,
   approveDesign,
@@ -39,6 +43,7 @@ import {
   type BrandingConfigDto,
 } from '@/services/BrandingRequestService';
 import { CampaignTargetingSelector } from './CampaignTargetingSelector';
+import { GameContentTab } from './GameContentTab';
 import { CommentsSection } from './CommentsSection';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -85,10 +90,11 @@ const STATUS_META: Record<
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'resumen' | 'recursos' | 'campaña' | 'comentarios';
+type Tab = 'resumen' | 'contenido' | 'recursos' | 'campaña' | 'comentarios';
 
 const ALL_TABS: { id: Tab; label: string; Icon: React.FC<{ size?: number; className?: string }> }[] = [
   { id: 'resumen',     label: 'Resumen',      Icon: BarChart2 },
+  { id: 'contenido',  label: 'Contenido',    Icon: Puzzle },
   { id: 'recursos',   label: 'Recursos',     Icon: FileImage },
   { id: 'campaña',    label: 'Campaña',      Icon: Settings },
   { id: 'comentarios', label: 'Comentarios', Icon: MessageSquare },
@@ -137,8 +143,11 @@ const detailToConfigForm = (d: BrandingDetailData): ConfigForm => ({
   maxAge: d.maxAge?.toString() ?? '',
   maxSessionsPerUserPerDay: d.maxSessionsPerUserPerDay?.toString() ?? '',
   startDate: isoToLocal(d.startDate),
-  categoryIds: d.categories.map(c => c.id),
-  municipalityCodes: d.targetMunicipalities.map(m => m.code),
+  // Un borrador sin targeting no trae estas listas. Revienta acá adentro del try que
+  // envuelve la carga, así que el usuario veía «No se pudo cargar el detalle» con la
+  // petición respondiendo 200. El backend ya las devuelve vacías; esto cubre el resto.
+  categoryIds: d.categories?.map(c => c.id) ?? [],
+  municipalityCodes: d.targetMunicipalities?.map(m => m.code) ?? [],
 });
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -175,6 +184,13 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
   const [approvingDesign, setApprovingDesign] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showChangesModal, setShowChangesModal] = useState(false);
+
+  // El contenido del juego: qué pide este juego y qué lleva escrito la marca. El
+  // asistente de creación tiene su propio paso, pero una solicitud creada antes —o
+  // dejada a medias— solo se puede completar desde acá.
+  const [briefReqs, setBriefReqs] = useState<GameBriefRequirements | null>(null);
+  const [briefContent, setBriefContent] = useState<Record<string, unknown>>({});
+  const [savingBrief, setSavingBrief] = useState(false);
   const [changesNote, setChangesNote] = useState('');
   const [sendingChanges, setSendingChanges] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -221,6 +237,40 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     loadDetail(ctrl.signal);
     return () => ctrl.abort();
   }, [requestId]);
+
+  useEffect(() => {
+    if (!detail) return;
+    const ctrl = new AbortController();
+    getBriefRequirements(detail.gameId, ctrl.signal)
+      .then(setBriefReqs)
+      .catch(() => setBriefReqs(null));
+    return () => ctrl.abort();
+  }, [detail?.gameId]);
+
+  // Lo ya guardado vuelve al formulario: si no, editar una palabra borraría el resto.
+  useEffect(() => {
+    if (detail?.briefData) setBriefContent(detail.briefData);
+  }, [detail?.briefData]);
+
+  // El backend exige recursos en estado VALIDATED, no los que están a medio subir:
+  // contar todos haría creer que ya se cumplió el mínimo.
+  const validatedResourceCount =
+    detail?.corporateResources.filter(r => r.status === 'VALIDATED').length ?? 0;
+
+  const handleSaveBrief = async () => {
+    if (!detail) return;
+    setSavingBrief(true);
+    try {
+      await saveBrief(detail.id, briefContent);
+      toast.success('Contenido guardado');
+      await loadDetail();
+    } catch (err: any) {
+      // El mensaje del backend nombra la cantidad que falta ("al menos 10 palabras").
+      toast.error(err?.response?.data?.message || 'Revisa el contenido del juego');
+    } finally {
+      setSavingBrief(false);
+    }
+  };
 
   const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -367,7 +417,12 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
   const canEditConfig = CONFIG_EDITABLE_STATUSES.includes(detail.status);
   const canPreview = PREVIEW_STATUSES.includes(detail.status);
   const canComment = COMMENTS_ALLOWED_STATUSES.includes(detail.status);
-  const visibleTabs = canComment ? ALL_TABS : ALL_TABS.filter(t => t.id !== 'comentarios');
+  const visibleTabs = ALL_TABS.filter(t => {
+    if (t.id === 'comentarios') return canComment;
+    // Un juego que no pide contenido escrito no muestra la pestaña vacía.
+    if (t.id === 'contenido') return Boolean(briefReqs?.jsonSchema);
+    return true;
+  });
 
   return (
     <div className="space-y-4">
@@ -627,8 +682,46 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
         )}
 
         {/* ── Tab: Recursos ── */}
+        {activeTab === 'contenido' && briefReqs?.jsonSchema && (
+          <GameContentTab
+            requirements={briefReqs}
+            content={briefContent}
+            editable={detail.status === 'DRAFT'}
+            saving={savingBrief}
+            onChange={setBriefContent}
+            onSave={handleSaveBrief}
+          />
+        )}
+
         {activeTab === 'recursos' && (
           <div className="p-5">
+            {/*
+              Cuántos archivos pide el juego. Sin esto el anunciante subía uno y se
+              quedaba tranquilo; el faltante lo descubría el diseñador al abrir el
+              diseño, con la solicitud ya en la cola. Va como una línea de texto acá
+              mismo, no como un paso aparte.
+            */}
+            {(briefReqs?.requiredResourceCount ?? 0) > 0 && (
+              <p
+                className={`text-sm mb-3 ${
+                  validatedResourceCount >= (briefReqs?.requiredResourceCount ?? 0)
+                    ? 'text-green-700'
+                    : 'text-amber-700'
+                }`}
+              >
+                <span className="font-medium">
+                  {detail.gameName} necesita al menos {briefReqs?.requiredResourceCount} archivos
+                </span>{' '}
+                · llevas {validatedResourceCount}
+                {briefReqs?.requiredResourceLabel && (
+                  <span className="block text-xs text-gray-500 mt-0.5">
+                    {briefReqs.requiredResourceLabel} · el diseñador los revisa antes de
+                    usarlos, así que no hace falta que estén recortados ni en un tamaño exacto
+                  </span>
+                )}
+              </p>
+            )}
+
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-500">
                 {detail.corporateResources.length === 0 ? 'Sin archivos subidos' : `${detail.corporateResources.length} archivo(s)`}

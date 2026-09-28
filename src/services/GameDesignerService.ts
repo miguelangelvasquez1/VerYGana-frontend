@@ -72,6 +72,15 @@ export interface DesignerBrandingDetail {
   gameSchema: GameSchema | null;
   gameConfig: Record<string, unknown> | null;
   draftFormData: Record<string, unknown> | null;
+  /**
+   * El contenido tal como lo escribió la marca, de solo lectura.
+   *
+   * El borrador ya viene sembrado con esto, así que en el formulario se ve igual que
+   * un valor por defecto del esquema. Esta copia existe para poder comparar: si el
+   * diseñador cambia una pregunta sin darse cuenta de que la puso el anunciante, el
+   * anunciante se entera recién en la preview.
+   */
+  briefData: Record<string, unknown> | null;
 
   createdAt: string;
   updatedAt: string;
