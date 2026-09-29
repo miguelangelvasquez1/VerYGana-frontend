@@ -4,7 +4,6 @@ import type {
   SurveyFormState,
   QuestionFormState,
   QuestionType,
-  CreateSurveyRequest,
 } from '@/types/survey.types';
 
 // ─── Limits ───────────────────────────────────────────────────────────────────
@@ -248,29 +247,6 @@ export function useSurveyForm(initial?: Partial<SurveyFormState>) {
     return Object.keys(validate(form)).length === 0;
   }, [form]);
 
-  /** Serializes form state to the backend CreateSurveyRequest DTO. */
-  const toPayload = useCallback((): CreateSurveyRequest => ({
-    title: form.title.trim(),
-    description: form.description.trim() || undefined,
-    surveyConfigId: form.surveyConfigId!,
-    rewardAmount: form.rewardAmount ? parseFloat(form.rewardAmount) : 0,
-    maxResponses: form.maxResponses ? parseInt(form.maxResponses) : undefined,
-    endsAt: form.endsAt || undefined,
-    categoryIds: form.categoryIds,
-    municipalityCodes:
-      form.municipalityCodes.length > 0 ? form.municipalityCodes : undefined,
-    minAge: form.minAge ? parseInt(form.minAge) : undefined,
-    maxAge: form.maxAge ? parseInt(form.maxAge) : undefined,
-    targetGender: form.targetGender || undefined,
-    questions: form.questions.map((q) => ({
-      text: q.text.trim(),
-      type: q.type,
-      required: q.required,
-      options:
-        q.options.length > 0 ? q.options.filter((o) => o.trim()) : undefined,
-    })),
-  }), [form]);
-
   const reset = useCallback(() => {
     setForm({ ...INITIAL_FORM, ...initial });
     setTouched(new Set());
@@ -295,7 +271,6 @@ export function useSurveyForm(initial?: Partial<SurveyFormState>) {
     updateOption,
     // Submission
     validateAll,
-    toPayload,
     reset,
   };
 }

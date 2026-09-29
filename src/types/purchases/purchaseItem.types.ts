@@ -1,7 +1,13 @@
+import { MarketPlaceIssueReason } from "../Pqrs.types";
+import { DocumentType } from "../User.types";
+
 export enum PurchaseItemStatus {
     PENDING = "PENDING",
-    DELIVERED = "DELIVERED",
-    FAILED = "FAILED"
+    CLAIMED = "CLAIMED",
+    IN_REVIEW = "IN_REVIEW",
+    EXPIRED_UNCLAIMED = "EXPIRED_UNCLAIMED",
+    REFUNDED = "REFUNDED",
+    CANCELLED = "CANCELLED"
 }
 
 export interface CreatePurchaseItemRequestDTO {
@@ -34,4 +40,26 @@ export interface FeaturedProductResponseDTO {
     price: number;
     averageRate: number;
     totalSales: number;
+}
+
+export interface ClaimPurchaseItemRequestDTO {
+    pin: string;
+}
+
+export interface CommercialPendingClaimResponseDTO {
+    id: number;
+    productId: number;
+    productName: string;
+    imageUrl: string;
+    unitPriceCents: number;
+    buyerName: string;
+    documentType : DocumentType;
+    documentNumber : string
+    purchasedAt: string;
+}
+
+export interface ReportPurchaseItemRequestDTO {
+    reason : MarketPlaceIssueReason;
+    description: string;
+    assetIds?: number[];
 }

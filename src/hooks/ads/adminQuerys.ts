@@ -12,11 +12,20 @@ export const adminAdKeys = {
     [...adminAdKeys.all, 'pending', { page, size }] as const,
 };
 
+// Cada cuánto se re-piden las listas que contienen anuncios BLOCKED: su
+// `contentUrl` es una URL prefirmada que caduca a los ~5 min, así que refrescamos
+// por debajo de ese plazo para no dejar <img>/<video> dando 403 en pantalla.
+const BLOCKED_MEDIA_REFRESH_MS = 4 * 60 * 1000;
+
 // Hook para obtener todos los anuncios (Admin) con filtros
 export function useAllAdsAdmin(page: number = 0, size: number = 20, status?: string) {
   return useQuery({
     queryKey: adminAdKeys.list(page, size, status),
     queryFn: () => adService.getAllAds(page, size, status),
     staleTime: 30 * 1000,
+    refetchInterval: (query) =>
+      query.state.data?.content?.some((ad) => ad.status === 'BLOCKED')
+        ? BLOCKED_MEDIA_REFRESH_MS
+        : false,
   });
 }

@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api/client";
-import { PlanCode } from "@/types/finance/plans/Plan.types";
+import { PlanCode, PlanSummaryResponseDTO } from "@/types/finance/plans/Plan.types";
 import { WompiCheckoutResponseDTO } from "@/types/finance/wompi/Wompi.types";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -19,12 +19,24 @@ export type OnboardingStep =
   | "PAYMENT_PENDING"
   | "COMPLETED";
 
+// El diagnóstico solo produce A / B / C (las tres modalidades). D / E ya no
+// salen de este paso — se conservan en la unión porque compliance las usa en
+// otros flujos (ver NegotiationRoute en ComplianceService).
 export type OnboardingRoute = "A" | "B" | "C" | "D" | "E";
 
 export interface ClassificationResult {
+  // "A" | "B" | "C" cuando viene del diagnóstico.
   route: OnboardingRoute;
   routeLabel: string;
+  // "Empresa Tipo A" | "Empresa Tipo B" | "Candidata a Empresa Premium".
+  modalityLabel: string;
   explanation: string;
+  // true => recomendación aproximada (faltan señales o el perfil quedó en el
+  // borde entre dos modalidades). El usuario puede revisar y reenviar.
+  preliminary: boolean;
+  // true SOLO para "Candidata a Empresa Premium" — informativo para el copy,
+  // el flujo posterior sigue siendo autoservicio.
+  verificationRequired: boolean;
   confirmed: boolean;
 }
 
@@ -107,20 +119,80 @@ export interface LegalIdentificationResult extends Partial<OnboardingStatus> {
   status?: string;
 }
 
-export type PrimaryGoal = "VENDER" | "PUBLICIDAD" | "AMBAS";
+// ── Diagnóstico (paso 4) ─────────────────────────────────────────────────────
+// El catálogo del cuestionario (secciones, preguntas, opciones, adaptividad)
+// se sirve desde el backend — no se hardcodea en el front. Secciones y
+// preguntas vienen ya ordenadas: renderizar en ese orden.
+
+export type DiagnosticQuestionType = "SINGLE_CHOICE" | "MULTI_CHOICE" | "BOOLEAN";
+
+export interface DiagnosticQuestionOption {
+  value: string;
+  label: string;
+  // "Ninguno" / "Ninguna": al marcarla se deseleccionan las demás y viceversa.
+  exclusive: boolean;
+}
+
+export interface DiagnosticQuestionDependsOn {
+  questionCode: string;
+  // La pregunta se muestra solo si la respuesta a `questionCode` está incluida
+  // aquí. Siempre apunta a una pregunta anterior del flujo.
+  values: string[];
+}
+
+export interface DiagnosticQuestion {
+  code: string;
+  // Clave para el body del POST /diagnostic.
+  fieldName: string;
+  text: string;
+  // Contenido de "¿Por qué me preguntan esto?".
+  helpText?: string | null;
+  type: DiagnosticQuestionType;
+  // Ninguna pregunta required tiene dependsOn (todas siempre visibles).
+  required: boolean;
+  // Solo MULTI_CHOICE — null = sin límite.
+  maxSelections: number | null;
+  // MULTI_CHOICE: true => el orden de selección es la prioridad (índice 0 = más
+  // importante) y así se envía el array.
+  ordered: boolean;
+  // null => siempre visible.
+  dependsOn: DiagnosticQuestionDependsOn | null;
+  options: DiagnosticQuestionOption[];
+}
+
+export interface DiagnosticSection {
+  code: string;
+  title: string;
+  subtitle?: string | null;
+  questions: DiagnosticQuestion[];
+}
+
+export interface DiagnosticQuestionnaire {
+  version: number;
+  openingMessage: string;
+  openingActions: string[];
+  sections: DiagnosticSection[];
+}
+
+// Valor de una respuesta según el type de la pregunta:
+//   SINGLE_CHOICE -> string (el value elegido)
+//   MULTI_CHOICE  -> string[] (values; en orden de prioridad si ordered)
+//   BOOLEAN       -> boolean
+export type DiagnosticAnswerValue = string | boolean | string[];
+
+// Body del POST /diagnostic: objeto plano { [fieldName]: valor } solo con las
+// preguntas visibles y respondidas. Campos omitidos = "no respondido".
+export type DiagnosticAnswers = Record<string, DiagnosticAnswerValue>;
+
+// Escotilla para Ruta D: si la empresa necesita integración técnica especial no
+// pasa por el cuestionario de modalidades (A/B/C). Se envía esta señal al mismo
+// POST /diagnostic y el backend deja currentStep en ADVISOR_CONTACT_PENDING.
 export type TechIntegrationNeed = "API" | "CONCILIACION" | "ACTIVACION_AUTOMATICA";
 
-export interface DiagnosticRequest {
+export interface SpecialIntegrationRequest {
   techIntegrationNeeds: TechIntegrationNeed[];
-  // Requerido si techIntegrationNeeds no viene vacío — describe la necesidad
-  // técnica (máx. 1000 caracteres). En ese caso el backend calcula Ruta D
-  // directo y el resto de los campos de abajo no aplican ni se envían.
-  integrationDetails?: string;
-  primaryGoal?: PrimaryGoal;
-  wantsFixedFee?: boolean;
-  requiresCustomGames?: boolean;
-  requiresPets?: boolean;
-  requiresSurveys?: boolean;
+  // Describe la necesidad técnica (máx. 1000 caracteres). Requerido.
+  integrationDetails: string;
 }
 
 // ── Plan (pasos 6-7) ─────────────────────────────────────────────────────────
@@ -137,13 +209,17 @@ export interface OnboardingPlanOption {
   // Solo aplican a STANDARD/PREMIUM — null en BASIC.
   minInvestmentCents: number | null;
   maxInvestmentCents: number | null;
+  // 0 = no aplica al plan (no se muestra). Si ambas vienen > 0 (STANDARD),
+  // la que aplica depende de la caracterización Productos/Servicios que
+  // asigne VERyGANA — ver planCommissions en onboarding.shared.
   saleCommissionPct: number;
+  servicesCommissionPct: number;
   // -1 = ilimitado.
   maxKeysPct: number;
   canAdvertise: boolean;
   canUseGames: boolean;
   canUseSurveys: boolean;
-  canHavePets: boolean;
+  canUsePets: boolean;
   // -1 = ilimitado.
   maxProducts: number;
   maxAds: number;
@@ -251,34 +327,9 @@ export interface OnboardingSummaryLegalIdentification {
   departmentName: string | null;
 }
 
-export interface OnboardingSummaryPlan {
-  planCode: PlanCode;
-  planName: string;
-  description: string;
-  monthlyFeeCents: number | null;
-  minInvestmentCents: number | null;
-  maxInvestmentCents: number | null;
-  investmentAmountCents: number | null;
-  saleCommissionPct: number;
-  maxKeysPct: number;
-  taxNote: string;
-  liquidationConditions: string;
-  accepted: boolean;
-  acceptedAt: string | null;
-  // Solo aplica a BASIC — null en STANDARD/PREMIUM y en BASIC antes de aceptar.
-  contractDurationMonths: number | null;
-  // true mientras haya una negociación especial pendiente por resolver (Ruta
-  // D o E) — bloquea "Generar contrato" y "Cambiar de plan" hasta que
-  // compliance la resuelva. Antes esto vivía en un campo separado
-  // (requiresAdvisorContact, solo Ruta E) — ahora Ruta D también lo usa.
-  requiresSpecialNegotiation: boolean;
-  specialNegotiationDetails: string | null;
-  // Cuándo se resolvió la negociación — null si nunca hubo una o sigue
-  // pendiente. Si no es null y requiresSpecialNegotiation ya es false, el
-  // plan quedó "congelado" (acceptPlan ahora responde 4xx si se intenta
-  // cambiar), solo queda continuar a generar el contrato.
-  specialNegotiationResolvedAt: string | null;
-}
+// El backend devuelve PlanSummaryResponseDTO tal cual — se conserva el alias
+// para no tocar los imports existentes.
+export type OnboardingSummaryPlan = PlanSummaryResponseDTO;
 
 export interface OnboardingSummary {
   termsVersion: string | null;
@@ -344,7 +395,21 @@ export const OnboardingService = {
     return response.data;
   },
 
-  async submitDiagnostic(data: DiagnosticRequest): Promise<ClassificationResult> {
+  // Catálogo del cuestionario (paso 4). Auth: ROLE_COMMERCIAL.
+  async getDiagnosticQuestionnaire(): Promise<DiagnosticQuestionnaire> {
+    const response = await apiClient.get(`${BASE}/diagnostic/questionnaire`);
+    return response.data;
+  },
+
+  async submitDiagnostic(answers: DiagnosticAnswers): Promise<ClassificationResult> {
+    const response = await apiClient.post(`${BASE}/diagnostic`, answers);
+    return response.data;
+  },
+
+  // Ruta D — ver SpecialIntegrationRequest. Devuelve la clasificación con
+  // route "D"; el wizard debe releer getStatus() para saltar a
+  // ADVISOR_CONTACT_PENDING (sin plan, documentos, contrato ni pago).
+  async submitSpecialIntegration(data: SpecialIntegrationRequest): Promise<ClassificationResult> {
     const response = await apiClient.post(`${BASE}/diagnostic`, data);
     return response.data;
   },
@@ -367,7 +432,7 @@ export const OnboardingService = {
   },
 
   // Devuelve el mismo PlanSummaryResponseDTO que trae GET /summary → plan.
-  async acceptPlan(data: AcceptPlanRequest): Promise<OnboardingSummaryPlan> {
+  async acceptPlan(data: AcceptPlanRequest): Promise<PlanSummaryResponseDTO> {
     const response = await apiClient.post(`${BASE}/plan/accept`, data);
     return response.data;
   },

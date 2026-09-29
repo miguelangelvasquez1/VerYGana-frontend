@@ -24,6 +24,7 @@ import {
   ProductSummaryResponseDTO,
   ProductResponseDTO,
   ProductStatus,
+  ProductType,
 } from "@/types/products/Product.types";
 import { ProductReviewResponseDTO } from "@/types/products/ProductReview.types";
 
@@ -85,6 +86,11 @@ const STATUS_DOT: Record<ProductStatus, string> = {
   [ProductStatus.PENDING]: "bg-yellow-500",
   [ProductStatus.REJECTED]: "bg-red-500",
   [ProductStatus.INACTIVE]: "bg-gray-400",
+};
+
+const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  [ProductType.DIGITAL]: "Digital",
+  [ProductType.PHYSICAL]: "Físico",
 };
 
 // ─────────────────────────────────────────────
@@ -892,6 +898,10 @@ export default function AdminProductsPage() {
                   <div>
                     <span className="text-gray-400 text-xs">Recompensa de juego</span>
                     <p className="font-medium text-gray-800">{detailState.product.isGameReward ? "Sí" : "No"}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 text-xs">Tipo de producto</span>
+                    <p className="font-medium text-gray-800">{PRODUCT_TYPE_LABELS[detailState.product.productType]}</p>
                   </div>
                 </div>
 

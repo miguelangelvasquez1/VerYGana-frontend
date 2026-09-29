@@ -1,6 +1,7 @@
 
 import apiClient from '@/lib/api/client';
 import { EffectivePlanStateResponseDTO, PlanPaymentRequestDTO, PlanPaymentStatusResponseDTO,  } from "@/types/finance/plans/Plan.types";
+import { PlanCatalogResponseDTO } from "@/types/finance/plans/PlanCatalog.types";
 import { WompiCheckoutResponseDTO } from "@/types/finance/wompi/Wompi.types";
 
 export const initiatePayment = async (request: PlanPaymentRequestDTO): Promise<WompiCheckoutResponseDTO> => {
@@ -19,6 +20,14 @@ export const getPaymentStatus = async (reference: string): Promise<PlanPaymentSt
  */
 export const getEffectivePlanState = async (): Promise<EffectivePlanStateResponseDTO> => {
   const response = await apiClient.get('/plans/commercial/state');
+  return response.data;
+};
+
+// Catálogo de planes (BASIC/STANDARD/PREMIUM) para el comercial autenticado,
+// con currentPlanCode/currentPlan marcando el plan activo — reemplaza el uso
+// de getEffectivePlanState solo para identificar el plan vigente.
+export const getPlanCatalog = async (): Promise<PlanCatalogResponseDTO> => {
+  const response = await apiClient.get<PlanCatalogResponseDTO>('/plans/catalog');
   return response.data;
 };
 

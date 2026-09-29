@@ -9,12 +9,16 @@ import ProductImageGallery from "@/components/shared/products/ProductImageGaller
 import ProductInfoCard from "@/components/shared/products/ProductInfoCard";
 import ProductReviews from "@/components/shared/products/ProductReviews";
 import { markProductAsReward } from "@/services/ProductService";
+import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
+import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from "@/components/commercial/plans/WalletBudgetAlerts";
 
 interface Props {
   product: ProductResponseDTO;
 }
 
 const ProductDetailCommercial: React.FC<Props> = ({ product }) => {
+  const { planState } = usePlanState();
+  const editBlocked = isBudgetDormant(planState);
   const [isReward, setIsReward] = useState(product.isGameReward ?? false);
   const [rewardLoading, setRewardLoading] = useState(false);
 
@@ -38,14 +42,26 @@ const ProductDetailCommercial: React.FC<Props> = ({ product }) => {
   const managementFooter = (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col sm:flex-row gap-3">
-        <Link
-          href={`/commercial/products/edit/${product.id}`}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white transition hover:opacity-90"
-          style={{ background: "linear-gradient(to right, #014C92, #1EA5BD)" }}
-        >
-          <Pencil className="w-4 h-4" />
-          Editar producto
-        </Link>
+        {editBlocked ? (
+          <button
+            type="button"
+            disabled
+            title={WALLET_DORMANT_TOOLTIP}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
+          >
+            <Pencil className="w-4 h-4" />
+            Editar producto
+          </button>
+        ) : (
+          <Link
+            href={`/commercial/products/edit/${product.id}`}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white transition hover:opacity-90"
+            style={{ background: "linear-gradient(to right, #014C92, #1EA5BD)" }}
+          >
+            <Pencil className="w-4 h-4" />
+            Editar producto
+          </Link>
+        )}
       </div>
 
       <button

@@ -76,6 +76,53 @@ export class PasswordSetupRequiredError extends Error {
   }
 }
 
+// MP-38 § 5.2-5.4 — Intento de registro/login de menor de edad confirmado.
+// El bloqueo es estructural: no admite excepción por autorización parental.
+export class UnderageUserError extends Error {
+  constructor(message?: string) {
+    super(message || 'Debes ser mayor de 18 años para usar Ver y Gana.');
+    this.name = 'UnderageUserError';
+  }
+}
+
+// MP-38 § 5.7 — Posible duplicidad detectada; NO implica fraude confirmado.
+// La cuenta queda en PREVENTIVELY_RESTRICTED mientras se revisa.
+export class PossibleDuplicityError extends Error {
+  constructor(message?: string) {
+    super(
+      message ||
+        'Detectamos una posible coincidencia con otra cuenta. ' +
+        'Tu solicitud está en revisión; te notificaremos pronto.'
+    );
+    this.name = 'PossibleDuplicityError';
+  }
+}
+
+// MP-38 § 5.7 — Duplicidad confirmada como fraude: registro rechazado.
+export class DuplicateAccountError extends Error {
+  constructor(message?: string) {
+    super(
+      message ||
+        'No es posible crear una segunda cuenta. ' +
+        'Cada persona natural puede tener una sola cuenta en Ver y Gana.'
+    );
+    this.name = 'DuplicateAccountError';
+  }
+}
+
+// MP-38 § 5.4 / 5.8 — Cuenta terminada (incluye terminación por minoría de edad).
+// Se preservan PQR, garantías y obligaciones de datos personales.
+export class AccountTerminatedError extends Error {
+  constructor(message?: string) {
+    super(
+      message ||
+        'Esta cuenta ha sido terminada. Si tienes reclamaciones o garantías ' +
+        'pendientes, comunícate con nuestro equipo de soporte.'
+    );
+    this.name = 'AccountTerminatedError';
+  }
+}
+
 // El backend a veces responde JSON ({ message: "..." }) y a veces texto plano
 // ("Cuenta desbloqueada...") en el mismo endpoint — soportamos ambos formatos.
 async function parseAuthBody(response: Response): Promise<{ message: string }> {
@@ -120,6 +167,29 @@ export const authService = {
 
       if (response.status === 428) {
         throw new PasswordSetupRequiredError(error.message);
+      }
+
+      // MP-38: estados de cuenta con errorCode explícito del back
+      const errorCode: string = error.errorCode ?? error.code ?? '';
+
+      if (errorCode === 'UNDERAGE_USER' || response.status === 451) {
+        throw new UnderageUserError(error.message);
+      }
+
+      if (errorCode === 'POSSIBLE_DUPLICITY') {
+        throw new PossibleDuplicityError(error.message);
+      }
+
+      if (errorCode === 'DUPLICATE_ACCOUNT' || errorCode === 'FRAUD_CONFIRMED') {
+        throw new DuplicateAccountError(error.message);
+      }
+
+      if (
+        errorCode === 'ACCOUNT_TERMINATED' ||
+        error.message?.toLowerCase().includes('terminada') ||
+        error.message?.toLowerCase().includes('terminated')
+      ) {
+        throw new AccountTerminatedError(error.message);
       }
 
       const isDisabled =

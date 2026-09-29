@@ -9,7 +9,9 @@ import {
   OnboardingStep,
   ClassificationResult,
   LegalIdentificationRequest,
-  DiagnosticRequest,
+  DiagnosticQuestionnaire,
+  DiagnosticAnswers,
+  SpecialIntegrationRequest,
   OnboardingPlanCatalog,
   OnboardingDocumentsResponse,
   OnboardingContract,
@@ -27,7 +29,7 @@ import {
 } from "./onboarding.shared";
 import { TermsStep } from "./steps/1-TermsStep";
 import { LegalIdentificationStep, LegalIdentificationForm } from "./steps/2-LegalIdentificationStep";
-import { DiagnosticStep, DiagnosticForm, ClassificationStep } from "./steps/3-DiagnosticStep";
+import { DiagnosticStep, ClassificationStep } from "./steps/3-DiagnosticStep";
 import { PlanStep, AcceptPlanData } from "./steps/4-PlanStep";
 import { DocumentsStep } from "./steps/5-DocumentsStep";
 import {
@@ -141,7 +143,12 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   const [termsDocument, setTermsDocument] = useState<LegalDocument | null>(null);
   const [termsLoadError, setTermsLoadError] = useState(false);
   const [legalForm, setLegalForm] = useState<LegalIdentificationForm>({});
-  const [diagnosticForm, setDiagnosticForm] = useState<DiagnosticForm>({});
+  // Cuestionario del paso 4 servido desde el backend (secciones/preguntas ya
+  // ordenadas) + respuestas del usuario. Las respuestas se elevan aquí para
+  // sobrevivir a "Volver a responder" desde la pantalla de resultado.
+  const [diagnosticQuestionnaire, setDiagnosticQuestionnaire] = useState<DiagnosticQuestionnaire | null>(null);
+  const [diagnosticQuestionnaireError, setDiagnosticQuestionnaireError] = useState(false);
+  const [diagnosticAnswers, setDiagnosticAnswers] = useState<DiagnosticAnswers>({});
   const [classification, setClassification] = useState<ClassificationResult | null>(
     initialStatus.classification
   );
@@ -171,6 +178,7 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   // segunda pasada el estado ("!termsDocument", "!plan", etc.) todavía no
   // se actualizó, así que ese chequeo solo no alcanza para bloquearla.
   const hasLoadedTermsRef = useRef(false);
+  const hasLoadedQuestionnaireRef = useRef(false);
   const hasLoadedClassificationRef = useRef(false);
   const hasLoadedPlanRef = useRef(false);
   const hasLoadedDocumentsRef = useRef(false);
@@ -242,6 +250,23 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
       loadTermsDocument();
     }
   }, [step, termsDocument, termsLoadError]);
+
+  // El catálogo del cuestionario (paso 4) se sirve desde el backend. `onReload`
+  // reintenta tras un fallo de red sin recargar toda la página.
+  const loadQuestionnaire = () => {
+    setDiagnosticQuestionnaireError(false);
+    OnboardingService.getDiagnosticQuestionnaire()
+      .then(setDiagnosticQuestionnaire)
+      .catch(() => setDiagnosticQuestionnaireError(true));
+  };
+
+  useEffect(() => {
+    if (step === "DIAGNOSTIC_PENDING" && !diagnosticQuestionnaire && !diagnosticQuestionnaireError) {
+      if (hasLoadedQuestionnaireRef.current) return;
+      hasLoadedQuestionnaireRef.current = true;
+      loadQuestionnaire();
+    }
+  }, [step, diagnosticQuestionnaire, diagnosticQuestionnaireError]);
 
   // Recuperación ante recarga: si llegamos a CLASSIFICATION_PENDING o
   // ADVISOR_CONTACT_PENDING (Ruta D) sin clasificación en memoria (ej. status
@@ -367,27 +392,45 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
     }
   };
 
-  const handleSubmitDiagnostic = async () => {
+  // El paso 4 arma el body plano { [fieldName]: valor } solo con las preguntas
+  // visibles y respondidas (ver DiagnosticStep). El diagnóstico ahora solo
+  // produce las modalidades A/B/C, así que el paso siguiente es siempre la
+  // pantalla de resultado (CLASSIFICATION_PENDING) — no asumimos el step igual
+  // y lo tomamos de getStatus().
+  const handleSubmitDiagnostic = async (payload: DiagnosticAnswers) => {
     if (submitting) return;
     setSubmitting(true);
     setErrors({});
     try {
-      // Si el usuario marcó alguna necesidad de integración técnica, solo esa
-      // pregunta + su detalle aplican — el resto del diagnóstico se ignora y
-      // el backend calcula Ruta D directo, saltando clasificación y plan.
-      const hasTechNeeds = (diagnosticForm.techIntegrationNeeds || []).length > 0;
-      const payload: DiagnosticRequest = hasTechNeeds
-        ? {
-            techIntegrationNeeds: diagnosticForm.techIntegrationNeeds!,
-            integrationDetails: diagnosticForm.integrationDetails,
-          }
-        : { ...diagnosticForm, integrationDetails: undefined } as DiagnosticRequest;
       const result = await OnboardingService.submitDiagnostic(payload);
       setClassification(result);
-      // No asumimos el próximo paso: para Ruta D el backend deja currentStep
-      // en ADVISOR_CONTACT_PENDING (pantalla terminal — sin plan, documentos,
-      // contrato, firma ni pago dentro de la plataforma; se coordina
-      // manualmente cuando un asesor de VerYGana se contacte).
+      const status = await OnboardingService.getStatus();
+      syncRejectionState(status);
+      setStep(status.currentStep as WizardStep);
+    } catch (err) {
+      handleApiError(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // "Volver a responder" desde la pantalla de resultado — vuelve al cuestionario
+  // conservando las respuestas ya dadas (diagnosticAnswers vive en este nivel).
+  const handleRetryDiagnostic = () => {
+    setErrors({});
+    setStep("DIAGNOSTIC_PENDING");
+  };
+
+  // Escotilla Ruta D: integración técnica especial. El backend clasifica en
+  // Ruta D y deja currentStep en ADVISOR_CONTACT_PENDING (pantalla terminal —
+  // sin plan, documentos, contrato ni pago dentro de la plataforma).
+  const handleSubmitSpecialIntegration = async (data: SpecialIntegrationRequest) => {
+    if (submitting) return;
+    setSubmitting(true);
+    setErrors({});
+    try {
+      const result = await OnboardingService.submitSpecialIntegration(data);
+      setClassification(result);
       const status = await OnboardingService.getStatus();
       syncRejectionState(status);
       setStep(status.currentStep as WizardStep);
@@ -742,11 +785,15 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
 
         {step === "DIAGNOSTIC_PENDING" && (
           <DiagnosticStep
-            form={diagnosticForm}
+            questionnaire={diagnosticQuestionnaire}
+            loadError={diagnosticQuestionnaireError}
+            onReload={loadQuestionnaire}
+            answers={diagnosticAnswers}
             errors={errors}
             submitting={submitting}
-            onChange={(field, value) => setDiagnosticForm((prev) => ({ ...prev, [field]: value }))}
-            onNext={handleSubmitDiagnostic}
+            onAnswersChange={setDiagnosticAnswers}
+            onSubmit={handleSubmitDiagnostic}
+            onSubmitSpecialIntegration={handleSubmitSpecialIntegration}
           />
         )}
 
@@ -755,6 +802,7 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
             classification={classification}
             submitting={submitting}
             onConfirm={handleConfirmClassification}
+            onRetry={handleRetryDiagnostic}
           />
         )}
 

@@ -1,8 +1,19 @@
+import { BankAccountType, DocType } from "../PayoutMethod.types";
+
+export enum CashRefundStatus {
+    PENDING_PAYMENT = "PENDING_PAYMENT",
+    PAID = "PAID"
+}
+
 export interface TreasuryBalanceResponseDTO {
     keysReserveCents: number;
     fortificationCents: number;
     operationsCents: number;
     payoutsPendingCents: number;
+    taxReserveCents: number;
+    connectivityCents: number;
+    infrastructureCents: number;
+    payrollCents: number;
     totalCents: number;
     keysReserveHealthPct: number;
     keysReserveStatus: string;
@@ -18,4 +29,29 @@ export interface TreasuryMovementResponseDTO {
     referenceId: string;
     referenceType: string;
     createdAt: string;
+}
+
+export interface SubmitCashRefundBankDetailsRequestDTO {
+    accountHolderName : string;
+    accountHolderDoc : string;
+    accountHolderDocType : DocType
+    bankName : string;
+    accountNumber : string;
+    accountType : BankAccountType;
+}
+
+export interface CashRefundResponseDTO {
+    id : string;
+    purchaseItemId : number;
+    amountCents : number;
+    status : CashRefundStatus;
+    accountHolderName : string;
+    accountHolderDoc : string;
+    accountHolderDocType : DocType;
+    bankName : string;
+    accountNumber : string;
+    accountType : BankAccountType;
+    createdAt : string;
+    bankDetailsSubmittedAt : string;
+    paidAt : string | null;
 }

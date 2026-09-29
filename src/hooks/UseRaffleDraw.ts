@@ -134,6 +134,9 @@ export function useRaffleDraw(raffleId: number): UseRaffleDrawReturn {
           secondsUntilDraw:  status.secondsUntilDraw,
           totalTickets:      0,
           totalParticipants: status.totalParticipants ?? 0,
+          // El endpoint REST de estado no trae premios — llegan en el primer
+          // WAITING_ROOM_UPDATE por WS, que reemplaza este estado inicial.
+          prizes: [],
         })
       }
     } catch (err) {

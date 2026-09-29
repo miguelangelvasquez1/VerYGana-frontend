@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { Lock } from 'lucide-react';
-import { PlanCode } from '@/types/finance/plans/Plan.types';
-import { ANALYTICS_SECTIONS, SectionId, hasPlanAccess } from '../sections.config';
+import { ANALYTICS_SECTIONS, SectionId } from '../sections.config';
 
 interface HighlightData {
   value: string;
@@ -16,22 +15,23 @@ const PLACEHOLDER_DATA: Record<Exclude<SectionId, 'overview'>, HighlightData> = 
   ads:       { value: '—', subtitle: 'Impresiones y clicks' },
   surveys:   { value: '—', subtitle: 'Respuestas recibidas' },
   games:     { value: '—', subtitle: 'Partidas jugadas' },
-  referrals: { value: '—', subtitle: 'Impresiones y clics de remisión' },
-  premium:   { value: '—', subtitle: 'Visitas y consumos' },
+  referrals: { value: '—', subtitle: 'Visitas a tu página oficial' },
+  premium:   { value: '—', subtitle: 'Consumo en la tienda de mascotas' },
 };
 
 interface OverviewSectionProps {
-  effectivePlan: PlanCode | null;
+  /** Resuelve el acceso a cada sección (flags de plan-state para las pestañas conectadas). */
+  isSectionUnlocked: (id: SectionId) => boolean;
   onNavigate: (section: SectionId) => void;
 }
 
-export function OverviewSection({ effectivePlan, onNavigate }: OverviewSectionProps) {
+export function OverviewSection({ isSectionUnlocked, onNavigate }: OverviewSectionProps) {
   const sections = ANALYTICS_SECTIONS.filter((s) => s.id !== 'overview');
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       {sections.map((section) => {
-        const unlocked = hasPlanAccess(effectivePlan, section.allowedPlans);
+        const unlocked = isSectionUnlocked(section.id);
         const data = PLACEHOLDER_DATA[section.id as Exclude<SectionId, 'overview'>];
         const Icon = section.icon;
 

@@ -8,6 +8,7 @@ import { Star, Eye, Pencil, Trash, Tag, Trophy, HelpCircle, X, Building2 } from 
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
 import { PlanCode } from "@/types/finance/plans/Plan.types";
+import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from "@/components/commercial/plans/WalletBudgetAlerts";
 
 interface CommercialProductCardProps {
   product: ProductSummaryResponseDTO;
@@ -61,6 +62,8 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
   const canUseGameRewards =
     planState?.effectivePlan === PlanCode.STANDARD ||
     planState?.effectivePlan === PlanCode.PREMIUM;
+
+  const editBlocked = isBudgetDormant(planState);
 
   return (
     <>
@@ -183,8 +186,9 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
 
             <button
               onClick={() => onEdit?.(product.id)}
-              title="Editar"
-              className="flex items-center justify-center w-7 h-7 shrink-0 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition cursor-pointer"
+              disabled={editBlocked}
+              title={editBlocked ? WALLET_DORMANT_TOOLTIP : "Editar"}
+              className="flex items-center justify-center w-7 h-7 shrink-0 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>

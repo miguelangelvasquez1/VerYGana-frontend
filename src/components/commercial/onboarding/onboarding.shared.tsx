@@ -17,6 +17,18 @@ export const formatCOP = (cents: number | null | undefined): string => {
   }).format(cents / 100);
 };
 
+// Comisiones del plan. Las que vienen en 0 no aplican y no se muestran
+// (PREMIUM trae ambas en 0). Si vienen las dos (STANDARD), cuál se cobra
+// depende de la caracterización que VERyGANA asigne a la empresa.
+export function planCommissions(plan: { saleCommissionPct: number; servicesCommissionPct?: number | null }) {
+  const sale = plan.saleCommissionPct > 0 ? plan.saleCommissionPct : null;
+  const services = plan.servicesCommissionPct != null && plan.servicesCommissionPct > 0 ? plan.servicesCommissionPct : null;
+  return { sale, services, dual: sale != null && services != null, none: sale == null && services == null };
+}
+
+export const DUAL_COMMISSION_NOTE =
+  "La comisión sobre las ventas para empresas con plan estándar depende de la caracterización (empresa vendedora de productos o empresa prestadora de servicios) que un funcionario de VERyGANA asigne a tu empresa.";
+
 // Recuerda el último rechazo de VERyGANA que el usuario ya vio (modal
 // bloqueante), para no repetirlo en cada visita mientras siga siendo el
 // mismo rechazo — solo se re-muestra si `rejectedAt` cambia.

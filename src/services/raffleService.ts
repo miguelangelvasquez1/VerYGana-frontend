@@ -1,7 +1,7 @@
 import apiClient from "@/lib/api/client";
 import { PagedResponse } from "@/types/Generic.types";
 import { PrizeStatus } from "@/types/raffles/prize.types";
-import { RaffleResponseDTO, RaffleStatsResponseDTO, RaffleStatus, RaffleSummaryResponseDTO, UserRaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
+import { RaffleResponseDTO, RaffleStatsResponseDTO, RaffleStatus, RaffleSummaryResponseDTO, RaffleType, UserRaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
 import { DrawProofResponseDTO, RaffleResultResponseDTO, RaffleSummaryResultResponseDTO } from "@/types/raffles/raffleResult.types";
 import { RaffleTicketResponseDTO } from "@/types/raffles/raffleTicket.types";
 import { ClaimPrizeRequestDTO, PrizeWonResponseDTO, WinnerSummaryResponseDTO } from "@/types/raffles/raffleWinner.types";
@@ -23,6 +23,17 @@ export const getRafflesByFilters = async (status?: string, search?: string, draw
 
 export const getRaffleById = async (raffleId: number): Promise<RaffleResponseDTO> => {
     const response = await apiClient.get(`/api/raffles/${raffleId}`);
+    return response.data;
+}
+
+export const getActiveRaffles = async (type? : RaffleType, page? : number, size? : number): Promise<PagedResponse<RaffleSummaryResponseDTO>> => {
+    const response = await apiClient.get("api/raffles/actives", {
+        params: {
+            type,
+            page,
+            size
+        }
+    });
     return response.data;
 }
 

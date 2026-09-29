@@ -91,6 +91,15 @@ export const authOptions: NextAuthOptions = {
         };
       }
 
+      // Sesión anónima: nunca hubo login, por lo tanto no hay nada que
+      // refrescar. Sin este guard, un token vacío hace que
+      // `Date.now() < undefined` sea false y caiga al branch de "expirado",
+      // marcando RefreshAccessTokenError para un usuario que nunca se
+      // autenticó (rompe salas de espera públicas vía WebSocket).
+      if (!token.accessToken) {
+        return token;
+      }
+
       // If token not expired, return it
       if (Date.now() < (token.accessTokenExpires as number)) {
         return token;

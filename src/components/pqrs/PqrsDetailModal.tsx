@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { getMyPqrsById } from "@/services/PqrsService";
-import { PqrsResponseDTO } from "@/types/Pqrs.types";
+import { PqrsResponseDTO, PqrsStatus } from "@/types/Pqrs.types";
 import PqrsStatusBadge from "./PqrsStatusBadge";
 import { formatPqrsDate, pqrsTypeLabel } from "./pqrsMeta";
+import RefundBankDetailsForm from "./RefundBankDetailsForm";
+import PqrsAssetThumbnail from "./PqrsAssetThumbnail";
 
 interface Props {
   pqrsId: number;
@@ -93,6 +95,17 @@ const PqrsDetailModal = ({ pqrsId, onClose }: Props) => {
                 <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{pqrs.description}</p>
               </div>
 
+              {pqrs.assets && pqrs.assets.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Evidencia adjunta</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {pqrs.assets.map((asset) => (
+                      <PqrsAssetThumbnail key={asset.id} asset={asset} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {pqrs.response ? (
                 <div className="p-3.5 bg-blue-50 border-l-4 border-[#03548C] rounded-r-lg">
                   <p className="text-xs font-semibold text-[#03548C] mb-1">Respuesta</p>
@@ -105,6 +118,11 @@ const PqrsDetailModal = ({ pqrsId, onClose }: Props) => {
                   </p>
                 </div>
               )}
+
+              {pqrs.purchaseItemId != null &&
+                pqrs.status === PqrsStatus.PENDIENTE_PAGO_REEMBOLSO && (
+                  <RefundBankDetailsForm purchaseItemId={pqrs.purchaseItemId} />
+                )}
             </div>
           )}
         </div>

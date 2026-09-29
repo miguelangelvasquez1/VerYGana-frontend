@@ -19,11 +19,29 @@ export enum Role {
   COMPLIANCE_OFFICER = 'COMPLIANCE_OFFICER'
 }
 
+/**
+ * Estados de cuenta definidos en MP-38 (TÉRMINOS 5.8; GUÍA 3.4).
+ * El orden refleja el ciclo de vida del usuario.
+ */
 export enum UserState {
-  PENDING_EMAIL = 'PENDING_EMAIL',
-  PENDING_KYC_REVIEW = 'PENDING_KYC_REVIEW',
-  ACTIVE = 'ACTIVE',
-  BLOCKED = 'BLOCKED'
+  // Registro iniciado — pendiente de aceptar T&C / correo sin verificar
+  PENDING_EMAIL            = 'PENDING_EMAIL',
+  // Pendiente de aceptación de Términos
+  PENDING_ACCEPTANCE       = 'PENDING_ACCEPTANCE',
+  // Pendiente de verificación (OTP correo / SMS)
+  PENDING_VERIFICATION     = 'PENDING_VERIFICATION',
+  // Pendiente de activación (revisión KYC / cumplimiento)
+  PENDING_KYC_REVIEW       = 'PENDING_KYC_REVIEW',
+  // Cuenta activa y operativa
+  ACTIVE                   = 'ACTIVE',
+  // Restringida preventivamente (posible duplicidad, revisión en curso)
+  PREVENTIVELY_RESTRICTED  = 'PREVENTIVELY_RESTRICTED',
+  // Suspendida temporalmente
+  SUSPENDED                = 'SUSPENDED',
+  // Cuenta bloqueada por múltiples intentos fallidos
+  BLOCKED                  = 'BLOCKED',
+  // Terminada (incluye terminación por minoría de edad — TÉRMINOS 5.4)
+  TERMINATED               = 'TERMINATED',
 }
 
 export enum Gender {

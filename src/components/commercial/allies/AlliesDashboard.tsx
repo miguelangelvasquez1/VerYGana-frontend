@@ -13,10 +13,14 @@ import { useAllyPromotions } from "@/hooks/commercial/useAllyPromotions";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { ProductCategoryResponseDTO } from "@/types/products/ProductCategory.types";
 import { formatPesos } from "@/utils/currency";
+import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
+import { isWalletExhausted } from "@/components/commercial/plans/WalletBudgetAlerts";
 
 type Tab = "search" | "promotions";
 
 export default function AlliesDashboard() {
+  const { planState } = usePlanState();
+  const walletExhausted = isWalletExhausted(planState);
   const [tab, setTab] = useState<Tab>("search");
 
   // ── Búsqueda de productos ──
@@ -206,6 +210,7 @@ export default function AlliesDashboard() {
                     isPromoted={promotedIds.has(product.id)}
                     isToggling={togglingIds.has(product.id)}
                     onTogglePromote={handleTogglePromote}
+                    blocked={walletExhausted}
                   />
                 ))}
               </div>

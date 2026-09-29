@@ -115,17 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           title: 'Finanzas',
           icon: DollarSign,
           href: '/admin/finance',
-        },
-        {
-          title: 'Notificaciones',
-          icon: Bell,
-          href: '/admin/notifications',
-        },
-        {
-          title: 'Configuración',
-          icon: Settings,
-          href: '/admin/config',
-        },
+        }
       ],
     },
   ];

@@ -112,9 +112,9 @@ export const surveyAdminService = {
 
   /**
    * PATCH /surveys/:id/commercial-status?status=
-   * Lets the owning commercial change their own survey's status
-   * (ACTIVE ⇄ PAUSED, or → CLOSED). Rejects status=DRAFT and surveys
-   * that are already CLOSED (400), or surveys owned by someone else (403).
+   * Lets the owning commercial change their own published survey's status
+   * (ACTIVE ⇄ PAUSED). Rejects status=DRAFT, or surveys owned by someone
+   * else (403).
    */
   updateSurveyStatus: async (
     surveyId: number,
@@ -126,6 +126,19 @@ export const surveyAdminService = {
         null,
         { params: { status } },
       );
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
+  },
+
+  /**
+   * PATCH /surveys/:id/submit
+   * Sends a DRAFT survey to admin review. DRAFT → PENDING_REVIEW.
+   */
+  submitForReview: async (surveyId: number): Promise<SurveyResponse> => {
+    try {
+      const { data } = await apiClient.patch(`/surveys/${surveyId}/submit`);
       return data;
     } catch (err) {
       handleError(err);
@@ -258,8 +271,8 @@ export const surveyAdminService = {
   },
  
   /**
-   * PATCH /api/v1/admin/surveys/:id/publish
-   * DRAFT → ACTIVE shortcut.
+   * PATCH /surveys/:id/publish (rol COMMERCIAL)
+   * APPROVED → ACTIVE. Responde 400 si el estado no es APPROVED.
    */
   publishSurvey: async (surveyId: number): Promise<SurveyResponse> => {
     try {
@@ -271,10 +284,11 @@ export const surveyAdminService = {
       handleError(err);
     }
   },
- 
+
   /**
    * PATCH /api/v1/admin/surveys/:id/status?status=
-   * Change status freely (ACTIVE → PAUSED → CLOSED, etc.).
+   * Moderación de admin: SUSPENDED (bloquea, ya no reembolsa presupuesto) o
+   * PAUSED (solo para revertir una suspensión: SUSPENDED → PAUSED).
    */
   updateStatus: async (
     surveyId: number,
@@ -285,6 +299,38 @@ export const surveyAdminService = {
         `/surveys/${surveyId}/status`,
         null,
         { params: { status } },
+      );
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
+  },
+
+  /**
+   * POST /surveys/admin/:id/approve (rol ADMIN)
+   * PENDING_REVIEW → APPROVED.
+   */
+  approveSurvey: async (surveyId: number): Promise<SurveyResponse> => {
+    try {
+      const { data } = await apiClient.post<SurveyResponse>(
+        `/surveys/admin/${surveyId}/approve`,
+      );
+      return data;
+    } catch (err) {
+      handleError(err);
+    }
+  },
+
+  /**
+   * POST /surveys/admin/:id/reject (rol ADMIN)
+   * PENDING_REVIEW → REJECTED. Devuelve el presupuesto completo a la wallet
+   * del comercial. Terminal: no se puede reactivar ni editar.
+   */
+  rejectSurvey: async (surveyId: number, reason: string): Promise<SurveyResponse> => {
+    try {
+      const { data } = await apiClient.post<SurveyResponse>(
+        `/surveys/admin/${surveyId}/reject`,
+        { reason },
       );
       return data;
     } catch (err) {

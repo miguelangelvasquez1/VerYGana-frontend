@@ -16,10 +16,14 @@ import {
   Calendar,
   CheckCircle2,
   Ban,
+  Check,
+  XCircle,
 } from 'lucide-react';
 import {
   useAdminSurveyDetail,
   useAdminUpdateStatus,
+  useAdminApproveSurvey,
+  useAdminRejectSurvey,
   SurveyApiError,
 } from '@/hooks/surveys/useAdminSurvey';
 import {
@@ -33,6 +37,7 @@ import {
   getResponseProgress,
 } from '@/hooks/surveys/surveyUtils';
 import { TRANSITIONS, ConfirmDialog, type Transition } from './surveyStatusTransitions';
+import { RejectSurveyModal } from './RejectSurveyModal';
 import type { QuestionResponse } from '@/types/survey.types';
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -46,9 +51,13 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
 
   const { data: survey, isLoading, isError } = useAdminSurveyDetail(surveyId);
   const updateStatus = useAdminUpdateStatus();
+  const approveSurvey = useAdminApproveSurvey();
+  const rejectSurvey = useAdminRejectSurvey();
 
   const [pendingTransition, setPendingTransition] = useState<Transition | null>(null);
   const [mutationError,     setMutationError]     = useState<string | null>(null);
+  const [showRejectModal,   setShowRejectModal]   = useState(false);
+  const [rejectReason,      setRejectReason]      = useState('');
 
   const confirmChange = () => {
     if (!pendingTransition) return;
@@ -65,6 +74,34 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
           );
           setPendingTransition(null);
         },
+      },
+    );
+  };
+
+  const handleApprove = () => {
+    setMutationError(null);
+    approveSurvey.mutate(surveyId, {
+      onError: (err: any) => setMutationError(
+        err instanceof SurveyApiError ? err.message : 'Error al aprobar la encuesta',
+      ),
+    });
+  };
+
+  const closeRejectModal = () => {
+    setShowRejectModal(false);
+    setRejectReason('');
+  };
+
+  const confirmReject = () => {
+    if (!rejectReason.trim()) return;
+    setMutationError(null);
+    rejectSurvey.mutate(
+      { surveyId, reason: rejectReason.trim() },
+      {
+        onSuccess: closeRejectModal,
+        onError: (err: any) => setMutationError(
+          err instanceof SurveyApiError ? err.message : 'Error al rechazar la encuesta',
+        ),
       },
     );
   };
@@ -132,6 +169,28 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
               </div>
             )}
 
+            {/* Approve / reject — only for surveys pending review */}
+            {survey.status === 'PENDING_REVIEW' && (
+              <div className="mt-5 flex flex-wrap gap-2 border-t border-gray-100 pt-5">
+                <button
+                  onClick={handleApprove}
+                  disabled={approveSurvey.isPending}
+                  className="cursor-pointer flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-500 disabled:opacity-50 active:scale-95"
+                >
+                  {approveSurvey.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  Aprobar encuesta
+                </button>
+                <button
+                  onClick={() => setShowRejectModal(true)}
+                  disabled={rejectSurvey.isPending}
+                  className="cursor-pointer flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition-all hover:bg-red-50 disabled:opacity-50 active:scale-95"
+                >
+                  <XCircle className="h-4 w-4" />
+                  Rechazar encuesta
+                </button>
+              </div>
+            )}
+
             {/* Action buttons */}
             {TRANSITIONS[survey.status].length > 0 && (
               <div className="mt-5 flex flex-wrap gap-2 border-t border-gray-100 pt-5">
@@ -151,10 +210,12 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
               </div>
             )}
 
-            {survey.status === 'CLOSED' && (
-              <div className="mt-5 flex items-center gap-2 border-t border-gray-100 pt-5 text-sm text-gray-400">
-                <CheckCircle2 className="h-4 w-4" />
-                Encuesta cancelada permanentemente
+            {survey.status === 'REJECTED' && (
+              <div className="mt-5 border-t border-gray-100 pt-5">
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-red-500 mb-1">Motivo del rechazo</h4>
+                  <p className="text-sm text-red-800">{survey.rejectionReason}</p>
+                </div>
               </div>
             )}
 
@@ -361,6 +422,18 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
           loading={updateStatus.isPending}
           onConfirm={confirmChange}
           onCancel={() => setPendingTransition(null)}
+        />
+      )}
+
+      {/* ── Reject modal ──────────────────────────────────────────────────── */}
+      {showRejectModal && survey && (
+        <RejectSurveyModal
+          surveyTitle={survey.title}
+          reason={rejectReason}
+          isSubmitting={rejectSurvey.isPending}
+          onReasonChange={setRejectReason}
+          onConfirm={confirmReject}
+          onCancel={closeRejectModal}
         />
       )}
     </div>

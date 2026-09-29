@@ -16,8 +16,8 @@ export const STATUS_META: Record<
 
 export const VALID_TRANSITIONS: Record<CampaignStatus, CampaignStatus[]> = {
   DRAFT: ['ACTIVE'],
-  ACTIVE: ['PAUSED', 'CANCELLED'],
-  PAUSED: ['ACTIVE', 'CANCELLED'],
+  ACTIVE: ['PAUSED'],
+  PAUSED: ['ACTIVE'],
   COMPLETED: [],
   CANCELLED: [],
 };

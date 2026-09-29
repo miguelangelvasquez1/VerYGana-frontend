@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, Headset, ChevronRight, ChevronLeft } from 'lucide-react';
+import { RefreshCw, Headset, ChevronRight, ChevronLeft, Package } from 'lucide-react';
 import { getAssignedPqrs } from '@/services/admin/AdminPqrsService';
 import { PqrsAdminDetailDTO, PqrsStatus, PqrsType } from '@/types/Pqrs.types';
-import { pqrsStatusColor, pqrsStatusLabel, pqrsTypeLabel } from '@/components/pqrs/pqrsMeta';
+import { marketPlaceIssueReasonLabel, pqrsStatusColor, pqrsStatusLabel, pqrsTypeLabel } from '@/components/pqrs/pqrsMeta';
 import { AdminPqrsDetail } from './AdminPqrsDetail';
 
 const PAGE_SIZE = 10;
@@ -134,7 +134,7 @@ const AdminPqrsPanel: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  {['#', 'Asunto', 'Solicitante', 'Tipo', 'Estado', 'Vence', 'Fecha', ''].map((h) => (
+                  {['#', 'Asunto', 'Solicitante', 'Tipo', 'Origen', 'Estado', 'Vence', 'Fecha', ''].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {h}
                     </th>
@@ -155,6 +155,19 @@ const AdminPqrsPanel: React.FC = () => {
                       <p className="text-xs text-gray-400">{item.requesterEmail}</p>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">{pqrsTypeLabel[item.type]}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {item.purchaseItemId != null ? (
+                        <span
+                          title={item.reasonCode ? marketPlaceIssueReasonLabel[item.reasonCode] : undefined}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200"
+                        >
+                          <Package size={11} />
+                          {item.reasonCode ? marketPlaceIssueReasonLabel[item.reasonCode] : 'Reclamo de producto'}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">General</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${pqrsStatusColor[item.status]}`}>
                         {pqrsStatusLabel[item.status]}

@@ -15,7 +15,31 @@ export enum DocType {
     NIT = 'NIT',
     PP = 'PP',
     TI = 'TI',
-    DNI = 'DNI'
+}
+
+export interface CreatePayoutMethodRequestDTO {
+    type : PayoutMethodType;
+    alias : string;
+    bankCode : string;
+    accountNumber : string;
+    bankAccountType : BankAccountType;
+    phoneNumber : string;
+    accountHolderName : string;
+    accountHolderDocType : DocType;
+    accountHolderDoc : string;
+}
+
+export interface ConfirmPayoutMethodCertificateUploadRequestDTO {
+    certificateAssetId : number;
+}
+
+export interface PayoutBankResponseDTO {
+    id : string;
+    name : string;
+}
+
+export interface VerifyOtpRequestDTO {
+    code : string;
 }
 
 export enum VerificationStatus {
@@ -27,8 +51,8 @@ export enum VerificationStatus {
     SUSPENDED = 'SUSPENDED'
 }
 
-export interface PayoutMethodResponse {
-    id: string;
+export interface PayoutMethodResponseDTO {
+    id: number;
     type: PayoutMethodType;
     alias: string;
     bankCode?: string;
@@ -41,7 +65,9 @@ export interface PayoutMethodResponse {
     verificationStatus: VerificationStatus;
     rejectionReason?: string;
     active: boolean;
+    defaultMethod: boolean;
     firstPayoutCompleted: boolean;
     createdAt: string;
     verifiedAt?: string;
+    certificateUrl? : string;
 }

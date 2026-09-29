@@ -2,15 +2,6 @@ import apiClient from '@/lib/api/client';
 import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdLikeDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, AssetAnalysisResult, FileUploadRequestDTO } from '@/types/ads/commercial';
 import { PagedResponse } from '@/types/Generic.types';
 
-export interface AdStats {
-  totalViews: number;
-  totalLikes: number;
-  totalClicks: number;
-  spentBudget: number;
-  remainingBudget: number;
-  conversionRate: number;
-}
-
 class AdService {
   private _token: string | null = null;
 
@@ -109,12 +100,6 @@ class AdService {
     return response.data;
   }
 
-  // Obtener estadísticas de un anuncio
-  async getAdStats(id: number): Promise<AdStats> {
-    const response = await apiClient.get<AdStats>(`/ads/${id}/stats`);
-    return response.data;
-  }
-
   // Obtener anuncios activos (para usuarios)
   async getActiveAds(page: number = 0, size: number = 10): Promise<{
     content: AdForConsumerDTO[];
@@ -175,15 +160,12 @@ class AdService {
   }
 
   async getNextAd(): Promise<AdForConsumerDTO | null> {
-    try {
-      const res = await apiClient.get('/adLike/next');
-      return res.data;
-    } catch (e: any) {
-      if (e.response?.status === 204) {
-        return null;
-      }
-      throw e;
-    }
+    // 204 (sin anuncios elegibles) es 2xx: axios no lanza, y el body viene
+    // vacío. Cualquier otro status no-2xx sí lanza y lo maneja el mapeador
+    // central del flujo (ver src/lib/api/adFlowErrors.ts).
+    const res = await apiClient.get('/adLike/next');
+    if (res.status === 204 || !res.data) return null;
+    return res.data;
   }
 
   async likeAd(adId: number, sessionUUID: string): Promise<{
@@ -201,6 +183,34 @@ class AdService {
   // Registrar un clic en la url de un anuncio IMPLEMENTAR
   async clickAd(adId: number): Promise<void> {
     await apiClient.post(`/ads/${adId}/click`);
+  }
+
+  /**
+   * Registra la visita a la página oficial del empresario cuando el consumer
+   * abre el enlace (`targetUrl`) de un anuncio — alimenta la métrica "Remisión"
+   * del panel de analíticas del comercial.
+   *
+   * Fire-and-forget: `keepalive` para que sobreviva a la navegación y se
+   * ignora cualquier error (nunca bloquea abrir la URL). El backend deduplica
+   * el mismo (anuncio, usuario) dentro de una ventana corta, así que no hay
+   * que preocuparse por doble envío. `navigator.sendBeacon` no sirve porque no
+   * permite mandar el header `Authorization`.
+   */
+  registerAdPageVisit(adId: number, targetUrl: string, token?: string | null): void {
+    const authToken = token ?? this._token;
+    try {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/commercials/page-visits`, {
+        method: 'POST',
+        keepalive: true,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify({ adId, targetUrl }),
+      }).catch(() => {});
+    } catch {
+      /* fire-and-forget */
+    }
   }
 
   async getAdDetails(id: number): Promise<AdResponseDTO> {

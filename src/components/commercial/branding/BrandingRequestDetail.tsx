@@ -30,6 +30,7 @@ import {
   saveBrief,
   type GameBriefRequirements,
   submitBrandingRequest,
+  cancelBrandingRequest,
   configureBranding,
   approveDesign,
   requestDesignChanges,
@@ -45,6 +46,8 @@ import {
 import { CampaignTargetingSelector } from './CampaignTargetingSelector';
 import { GameContentTab } from './GameContentTab';
 import { CommentsSection } from './CommentsSection';
+import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
+import { isBudgetDormant, BudgetDormantEditNotice, WALLET_DORMANT_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -170,6 +173,8 @@ interface Props {
 
 export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) => {
   const router = useRouter();
+  const { planState } = usePlanState();
+  const editBlockedByBudget = isBudgetDormant(planState);
   const [detail, setDetail] = useState<BrandingDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -197,6 +202,8 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
   const [uploading, setUploading] = useState(false);
   const [submitNote, setSubmitNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -293,6 +300,10 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
 
   const handleSaveConfig = async () => {
     if (!detail) return;
+    if (editBlockedByBudget) {
+      toast.error(WALLET_DORMANT_TOOLTIP);
+      return;
+    }
     setSaving(true);
     try {
       const dto: BrandingConfigDto = {};
@@ -335,6 +346,23 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
       toast.error(err?.response?.data?.message || 'Error al enviar la solicitud');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!detail) return;
+    setCancelling(true);
+    try {
+      await cancelBrandingRequest(detail.id);
+      toast.success('Solicitud cancelada. El presupuesto fue devuelto a tu wallet.');
+      setShowCancelModal(false);
+      const updated = await getBrandingRequestDetail(detail.id);
+      setDetail(updated);
+      setConfigForm(detailToConfigForm(updated));
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Error al cancelar la solicitud');
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -486,7 +514,14 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
             placeholder="Ej: Logo actualizado, ya está listo para revisión..."
             className="w-full px-3 py-2 border border-blue-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setShowCancelModal(true)}
+              disabled={submitting}
+              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-60 cursor-pointer"
+            >
+              Cancelar solicitud
+            </button>
             <button
               onClick={handleSubmit}
               disabled={submitting}
@@ -785,6 +820,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
         {activeTab === 'campaña' && (
           <div className="p-5 space-y-4">
             {/* Warnings */}
+            {canEditConfig && editBlockedByBudget && !editingConfig && <BudgetDormantEditNotice />}
 {canEditConfig && !detail.hasCompleteTargeting && (
               <div className="flex items-start gap-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl">
                 <Target size={16} className="text-amber-600 shrink-0 mt-0.5" />
@@ -847,7 +883,12 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Configuración actual</p>
                   {canEditConfig && (
-                    <button onClick={() => setEditingConfig(true)} className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors">
+                    <button
+                      onClick={() => setEditingConfig(true)}
+                      disabled={editBlockedByBudget}
+                      title={editBlockedByBudget ? WALLET_DORMANT_TOOLTIP : undefined}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-blue-600"
+                    >
                       <Pencil size={13} /> Editar
                     </button>
                   )}
@@ -964,6 +1005,43 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                 >
                   {sendingChanges && <Loader2 size={14} className="animate-spin" />}
                   Enviar feedback
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Confirm Cancel Request ── */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h2 className="text-base font-semibold text-gray-900">Cancelar solicitud</h2>
+              <button onClick={() => setShowCancelModal(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Se devolverá el presupuesto completo a tu wallet y se eliminarán todos los recursos
+                que hayas subido. Esta acción no se puede deshacer.
+              </p>
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  disabled={cancelling}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-60 cursor-pointer"
+                >
+                  Volver
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {cancelling && <Loader2 size={14} className="animate-spin" />}
+                  Sí, cancelar solicitud
                 </button>
               </div>
             </div>

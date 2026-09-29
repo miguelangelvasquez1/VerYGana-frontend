@@ -27,6 +27,7 @@ import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { AllyCommercialResponseDTO } from "@/types/Allies.types";
 import CommercialProductCard from "@/components/commercial/products/CommercialProductCard";
 import AlliesSummarySection from "@/components/commercial/profile/AlliesSummarySection";
+import { ChangePlanButton } from "@/components/commercial/planChange/planChange.shared";
 import toast from "react-hot-toast";
 
 function formatDate(iso: string) {
@@ -258,6 +259,17 @@ export default function CommercialProfileSeller() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── PLAN ── */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-bold text-gray-700">Tu plan</h2>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Cambia de plan cuando quieras. Si ya tienes una solicitud en curso, te llevaremos a su detalle.
+          </p>
+        </div>
+        <ChangePlanButton />
       </div>
 
       {/* ── CATEGORÍAS ── */}

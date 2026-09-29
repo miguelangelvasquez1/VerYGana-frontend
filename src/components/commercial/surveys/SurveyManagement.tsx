@@ -7,10 +7,15 @@ import { useCommercialSurveys } from '@/hooks/surveys/useCommercialSurvey';
 import { STATUS_LABELS } from '@/hooks/surveys/surveyUtils';
 import SurveyTable from './SurveyTable';
 import type { SurveyStatus } from '@/types/survey.types';
-import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
-import { LimitReachedBanner, isLimitReached } from '@/components/commercial/plans/LimitReached';
+import { LimitReachedBanner } from '@/components/commercial/plans/LimitReached';
+import { usePlanSlot } from '@/hooks/commercial/usePlanSlot';
+import { PlanSlotCounter } from '@/components/commercial/plans/PlanSlotCounter';
+import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
+import { PlanChangeInProgressBanner } from '@/components/commercial/planChange/PlanChangeInProgress';
 
-const ALL_STATUSES: SurveyStatus[] = ['DRAFT', 'ACTIVE', 'PAUSED', 'SUSPENDED', 'COMPLETED', 'CLOSED'];
+const ALL_STATUSES: SurveyStatus[] = [
+  'DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED', 'ACTIVE', 'PAUSED', 'SUSPENDED', 'COMPLETED',
+];
 
 export default function SurveyManagement() {
   const router = useRouter();
@@ -19,18 +24,19 @@ export default function SurveyManagement() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const { data, isLoading, isError } = useCommercialSurveys(page, 10, statusFilter);
-  // Consulta sin filtro de estado: usada solo para conocer el total real de
-  // encuestas y validarlo contra el límite del plan (el total filtrado no sirve).
-  const { data: allSurveysData } = useCommercialSurveys(0, 1);
-  const { planState } = usePlanState();
+  const { blockingRequest: planChangeRequest } = usePlanChangeRequest();
+
+  // Cupo de SURVEYS: used/max (del dashboard) + bloqueo con las mismas reglas
+  // de estado que el backend.
+  const surveysSlot = usePlanSlot('SURVEYS');
 
   const filteredSurveys = useMemo(
     () => (data?.data ?? []).filter((s) => s.title.toLowerCase().includes(searchTerm.toLowerCase())),
     [data?.data, searchTerm],
   );
 
-  const surveysLimitReached = planState != null
-    && isLimitReached(allSurveysData?.meta.totalElements ?? 0, planState.maxSurveys);
+  const createBlocked = surveysSlot.blocked;
+  const createBlockedTitle = surveysSlot.tooltip ?? undefined;
 
   return (
     <div className="space-y-6">
@@ -71,31 +77,36 @@ export default function SurveyManagement() {
           </div>
 
           {/* Botón crear encuesta */}
-          {surveysLimitReached ? (
-            <button
-              type="button"
-              disabled
-              title={`Alcanzaste el máximo de ${planState?.maxSurveys} encuestas de tu plan`}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
-            >
-              <Plus className="h-4 w-4" />
-              Nueva encuesta
-            </button>
-          ) : (
-            <button
-              onClick={() => router.push('/commercial/surveys/new')}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              Nueva encuesta
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <PlanSlotCounter status={surveysSlot} resourceLabel="encuestas" />
+            {createBlocked ? (
+              <button
+                type="button"
+                disabled
+                title={createBlockedTitle}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
+              >
+                <Plus className="h-4 w-4" />
+                Nueva encuesta
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push('/commercial/surveys/new')}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
+              >
+                <Plus className="h-4 w-4" />
+                Nueva encuesta
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {surveysLimitReached && (
-        <LimitReachedBanner resourceLabel="encuestas" max={planState!.maxSurveys} />
+      {surveysSlot.reason === 'SLOT_FULL' && (
+        <LimitReachedBanner resourceLabel="encuestas" max={surveysSlot.max ?? 0} />
       )}
+
+      {planChangeRequest && <PlanChangeInProgressBanner request={planChangeRequest} />}
 
       {/* ── Table ──────────────────────────────────────────────────────────── */}
       {isError ? (

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAdDetails } from '@/hooks/ads/querys';
 import { useAdLikes } from '@/hooks/ads/querys';
+import { useRefetchOnExpiredMedia } from '@/hooks/ads/useRefetchOnExpiredMedia';
 
 interface AdDetailModalProps {
   adId: number;
@@ -17,11 +18,15 @@ interface AdDetailModalProps {
 export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
   const [likesPage, setLikesPage] = useState(0);
 
-  const { data: ad, isLoading: loadingAd } = useAdDetails(adId);
+  const { data: ad, isLoading: loadingAd, refetch: refetchAd } = useAdDetails(adId);
   const { data: likesData, isLoading: loadingLikes } = useAdLikes(adId, likesPage);
 
-  const formatMoney = (value: number) =>
-    value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // Anuncio BLOCKED: su `contentUrl` prefirmada caduca a los ~5 min; si el media
+  // falla (403 por URL vencida) re-pedimos el detalle para traer una URL fresca.
+  const handleMediaError = useRefetchOnExpiredMedia(refetchAd);
+
+  const formatMoney = (value: number | null | undefined) =>
+    (value ?? 0).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString('es-CO', {
@@ -71,9 +76,19 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
               {ad.contentUrl && (
                 <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gray-100">
                   {ad.mediaType === 'VIDEO' ? (
-                    <video src={ad.contentUrl} controls className="w-full h-full object-cover" />
+                    <video
+                      src={ad.contentUrl}
+                      controls
+                      onError={ad.status === 'BLOCKED' ? handleMediaError : undefined}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <img src={ad.contentUrl} alt={ad.title} className="w-full h-full object-cover" />
+                    <img
+                      src={ad.contentUrl}
+                      alt={ad.title}
+                      onError={ad.status === 'BLOCKED' ? handleMediaError : undefined}
+                      className="w-full h-full object-cover"
+                    />
                   )}
                 </div>
               )}
@@ -118,12 +133,12 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
               <div>
                 <div className="flex justify-between text-xs text-gray-600 mb-1.5">
                   <span>Progreso</span>
-                  <span className="font-bold">{ad.completionPercentage.toFixed(1)}%</span>
+                  <span className="font-bold">{(ad.completionPercentage ?? 0).toFixed(1)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all"
-                    style={{ width: `${Math.min(ad.completionPercentage, 100)}%` }}
+                    style={{ width: `${Math.min(ad.completionPercentage ?? 0, 100)}%` }}
                   />
                 </div>
               </div>

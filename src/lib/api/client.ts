@@ -3,6 +3,8 @@ import { getSession, signOut } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import { getAccessToken, whenTokenReady } from '@/lib/auth/tokenStore';
 import { refreshAccessToken } from '@/lib/auth/tokenRefresh';
+import { emitPaymentRequired } from '@/lib/api/paymentRequiredBus';
+import { emitPlanChangeBlocked, isPlanChangeBlockMessage } from '@/lib/api/planChangeBlockBus';
 
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -84,6 +86,35 @@ apiClient.interceptors.response.use((response) => response, async (error) => {
   }
 
   /*
+   * SALDO PUBLICITARIO AGOTADO (walletStatus EXHAUSTED / budgetSuspended)
+   *
+   * Distinto de un 400 genérico de "tu plan no incluye esto" (ese lleva a
+   * upgrade de plan) — un 402 significa específicamente que hay que
+   * recargar saldo. Los botones de creación ya deberían estar
+   * deshabilitados en la mayoría de los casos; esto cubre acciones
+   * forzadas (ej. un formulario ya abierto). Se maneja globalmente con un
+   * modal ("Recarga tu billetera para continuar") con acción directa al
+   * checkout de recarga — sin desloguear ni redirigir a un error genérico.
+   */
+  if (status === 402 && typeof window !== 'undefined') {
+    emitPaymentRequired(message);
+  }
+
+  /*
+   * CREACIÓN DE ACTIVOS BLOQUEADA POR SOLICITUD DE CAMBIO DE PLAN
+   *
+   * El backend responde 400 con un mensaje específico cuando se intenta
+   * crear/activar un activo (anuncio, producto, encuesta, juego brandeado)
+   * teniendo una solicitud de cambio de plan abierta. Los CTA ya deberían
+   * estar deshabilitados; esto cubre carreras (otra pestaña) y formularios
+   * ya abiertos. Se muestra un modal con enlace a la solicitud, sin tratarlo
+   * como error genérico.
+   */
+  if (status === 400 && typeof window !== 'undefined' && isPlanChangeBlockMessage(message)) {
+    emitPlanChangeBlocked(message);
+  }
+
+  /*
    * TOKEN EXPIRADO / SESIÓN INVÁLIDA
    *
    * Un 401 no siempre significa "sesión inválida" — la causa más común es
@@ -116,7 +147,13 @@ apiClient.interceptors.response.use((response) => response, async (error) => {
 
 export default apiClient;
 
-async function handleUnauthorized() {
+/**
+ * Fuerza el mismo cierre de sesión que dispara un 401 sin refresh posible.
+ * Reutilizado por flujos que detectan una sesión/token inválidos por otra vía
+ * (ej. un 422 "Token inválido" fuera del ciclo normal de request/response),
+ * para no reimplementar el signOut + redirect en cada lugar.
+ */
+export async function handleUnauthorized() {
   try {
     await signOut({ redirect: false });
   } catch (error) {

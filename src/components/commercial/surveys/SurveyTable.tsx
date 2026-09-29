@@ -9,13 +9,15 @@ import {
   XCircle,
   Ban,
   CheckCircle2,
+  Send,
+  Clock,
   ChevronLeft,
   ChevronRight,
   Loader2,
   ClipboardList,
   BarChart2,
 } from 'lucide-react';
-import { usePublishSurvey, useUpdateSurveyStatus } from '@/hooks/surveys/useCommercialSurvey';
+import { usePublishSurvey, useUpdateSurveyStatus, useSubmitSurveyForReview } from '@/hooks/surveys/useCommercialSurvey';
 import {
   STATUS_LABELS,
   STATUS_COLORS,
@@ -45,6 +47,7 @@ export default function SurveyTable({
   const [detailId, setDetailId] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const publishMutation = usePublishSurvey();
+  const submitMutation  = useSubmitSurveyForReview();
   const statusMutation  = useUpdateSurveyStatus();
 
   const handlePublish = (id: number) => {
@@ -52,6 +55,15 @@ export default function SurveyTable({
     publishMutation.mutate(id, {
       onError: (err) => setErrorMsg(
         err instanceof SurveyApiError ? err.message : 'Error al publicar la encuesta',
+      ),
+    });
+  };
+
+  const handleSubmitForReview = (id: number) => {
+    setErrorMsg(null);
+    submitMutation.mutate(id, {
+      onError: (err) => setErrorMsg(
+        err instanceof SurveyApiError ? err.message : 'Error al enviar la encuesta a revisión',
       ),
     });
   };
@@ -125,10 +137,13 @@ export default function SurveyTable({
                   router.push(`/commercial/surveys/${survey.id}`)
                 }
                 onPublish={() => handlePublish(survey.id)}
+                onSubmitForReview={() => handleSubmitForReview(survey.id)}
                 onStatusChange={handleStatusChange}
                 isUpdating={
                   (publishMutation.isPending &&
                     publishMutation.variables === survey.id) ||
+                  (submitMutation.isPending &&
+                    submitMutation.variables === survey.id) ||
                   (statusMutation.isPending &&
                     statusMutation.variables?.surveyId === survey.id)
                 }
@@ -180,6 +195,7 @@ function SurveyRow({
   onView,
   onViewResponses,
   onPublish,
+  onSubmitForReview,
   onStatusChange,
   isUpdating,
 }: {
@@ -187,6 +203,7 @@ function SurveyRow({
   onView: () => void;
   onViewResponses: () => void;
   onPublish: () => void;
+  onSubmitForReview: () => void;
   onStatusChange: (id: number, status: SurveyStatus) => void;
   isUpdating: boolean;
 }) {
@@ -242,6 +259,23 @@ function SurveyRow({
 
           {survey.status === 'DRAFT' && (
             <ActionBtn
+              tooltip="Enviar a revisión"
+              onClick={onSubmitForReview}
+              loading={isUpdating}
+              className="text-blue-600 hover:bg-blue-50"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </ActionBtn>
+          )}
+
+          {survey.status === 'PENDING_REVIEW' && (
+            <span title="En revisión por un administrador" className="text-yellow-500">
+              <Clock className="h-3.5 w-3.5" />
+            </span>
+          )}
+
+          {survey.status === 'APPROVED' && (
+            <ActionBtn
               tooltip="Publicar"
               onClick={onPublish}
               loading={isUpdating}
@@ -249,6 +283,12 @@ function SurveyRow({
             >
               <Play className="h-3.5 w-3.5" />
             </ActionBtn>
+          )}
+
+          {survey.status === 'REJECTED' && (
+            <span title="Encuesta rechazada" className="text-red-400">
+              <XCircle className="h-3.5 w-3.5" />
+            </span>
           )}
 
           {survey.status === 'ACTIVE' && (
@@ -270,21 +310,6 @@ function SurveyRow({
               className="text-emerald-600 hover:bg-emerald-50"
             >
               <Play className="h-3.5 w-3.5" />
-            </ActionBtn>
-          )}
-
-          {['ACTIVE', 'PAUSED'].includes(survey.status) && (
-            <ActionBtn
-              tooltip="Cancelar (definitivo)"
-              onClick={() => {
-                if (window.confirm(
-                  'Esta acción es DEFINITIVA: la encuesta quedará cancelada para siempre y no podrás reactivarla. ¿Continuar?',
-                )) onStatusChange(survey.id, 'CLOSED');
-              }}
-              loading={isUpdating}
-              className="text-red-500 hover:bg-red-50"
-            >
-              <XCircle className="h-3.5 w-3.5" />
             </ActionBtn>
           )}
 

@@ -18,6 +18,7 @@ import {
   type BrandingRequest,
 } from '@/services/BrandingRequestService';
 import type { FileEntry, Step1Form, Step3Form } from './branding.types';
+import { usePlanState } from '../layout/DashboardLayout';
 import { GameCatalog } from './GameCatalog';
 import { Step1BrandInfo } from './steps/Step1BrandInfo';
 import { Step2Resources } from './steps/Step2Resources';
@@ -47,6 +48,7 @@ interface Props {
 }
 
 export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) => {
+  const { refreshPlanState } = usePlanState();
   const [showCatalog, setShowCatalog] = useState(true);
   const [selectedGame, setSelectedGame] = useState<BrandingGame | null>(null);
   const [step, setStep] = useState<StepKey>('brand');
@@ -138,6 +140,7 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
       });
       setRequestId(req.id);
       setCreatedRequest(req);
+      await refreshPlanState();
       goTo('resources');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Error al crear la solicitud');

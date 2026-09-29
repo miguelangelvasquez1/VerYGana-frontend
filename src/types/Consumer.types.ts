@@ -27,6 +27,9 @@ export interface RegisterConsumerDTO {
   occupation?: string;
   incomeRange?: IncomeRange;
   isPEP: boolean;
+  ageDeclaration: boolean;
+  termsAccepted: boolean;
+  termsVersion: string;
   recaptchaToken: string;
 }
 
@@ -50,14 +53,14 @@ export interface ConsumerProfileResponseDTO {
     email : string;
     phoneNumber : string;
     role : string;
-    userState : string;
+    accountStatus : string;  // Nombre correcto del backend
+    userState : string;      // Alias para mantener compatibilidad
     department : string;
     municipalityName : string;
 }
 
 export interface ConsumerUpdateProfileRequestDTO {
     email ?: string;
-    phoneNumber ?: string;
     department ?: string;
     municipalityName ?: string;
 }

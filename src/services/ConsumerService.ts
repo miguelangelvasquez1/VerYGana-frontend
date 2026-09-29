@@ -29,6 +29,9 @@ export const registerConsumer = async (data: {
   occupation?: string;
   incomeRange?: IncomeRange;
   isPEP: boolean;
+  ageDeclaration: boolean;
+  termsAccepted: boolean;
+  termsVersion: string;
   recaptchaToken: string;
 }): Promise<any> => {
   const payload: RegisterConsumerDTO = {
@@ -50,6 +53,9 @@ export const registerConsumer = async (data: {
     occupation: data.occupation || undefined,
     incomeRange: data.incomeRange || undefined,
     isPEP: data.isPEP,
+    ageDeclaration: data.ageDeclaration,
+    termsAccepted: data.termsAccepted,
+    termsVersion: data.termsVersion,
     recaptchaToken: data.recaptchaToken,
   };
 
@@ -90,6 +96,14 @@ export const updateConsumerProfile = async (
 ): Promise<EntityUpdatedResponseDTO> => {
   const response = await apiClient.put(`/consumers/profile/edit`, data);
   return response.data;
+};
+
+export const requestPhoneChange = async (newPhoneNumber: string): Promise<void> => {
+  await apiClient.post("/users/me/phone/request-change", { newPhoneNumber });
+};
+
+export const verifyPhoneChange = async (newPhoneNumber: string, otpCode: string): Promise<void> => {
+  await apiClient.post("/users/me/phone/verify-change", { newPhoneNumber, otpCode });
 };
 
 /**

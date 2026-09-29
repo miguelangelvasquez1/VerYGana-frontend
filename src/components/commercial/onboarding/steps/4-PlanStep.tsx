@@ -3,7 +3,7 @@ import { AlertTriangle, Check, Loader2, PhoneCall, X } from "lucide-react";
 import type { OnboardingPlanCatalog, OnboardingPlanOption } from "@/services/commercial/OnboardingService";
 import type { PlanCode } from "@/types/finance/plans/Plan.types";
 import { useKeysReservePct } from "@/hooks/useTreasuryConfig";
-import { formatCOP, HelpTooltip, StepButton } from "../onboarding.shared";
+import { DUAL_COMMISSION_NOTE, formatCOP, HelpTooltip, planCommissions, StepButton } from "../onboarding.shared";
 
 export interface AcceptPlanData {
   investmentAmountCents?: number;
@@ -53,6 +53,21 @@ function BoolCell({ value }: { value: boolean }) {
   );
 }
 
+// Comisiones en 0 no aplican al plan (PREMIUM). Con ambas (STANDARD) se
+// cobra una u otra según la caracterización — ver nota bajo la tabla.
+function CommissionCell({ plan }: { plan: OnboardingPlanOption }) {
+  const { sale, services, dual } = planCommissions(plan);
+  if (dual) return `${formatPct(sale!)} o ${formatPct(services!)}`;
+  if (sale != null) return formatPct(sale);
+  if (services != null) return formatPct(services);
+  return "No aplica";
+}
+
+function formatKeysPct(pct: number): string {
+  if (pct === 0) return "No aplica";
+  return pct === -1 ? formatLimit(pct) : formatPct(pct);
+}
+
 interface MetricRow {
   label: string;
   render: (plan: OnboardingPlanOption) => React.ReactNode;
@@ -70,17 +85,17 @@ const METRIC_GROUPS: MetricGroup[] = [
       { label: "Tarifa mensual", render: (p) => formatMoneyOrNA(p.monthlyFeeCents) },
       { label: "Inversión mínima", render: (p) => formatMoneyOrNA(p.minInvestmentCents) },
       { label: "Inversión máxima", render: (p) => formatMoneyOrNA(p.maxInvestmentCents) },
-      { label: "Comisión por venta", render: (p) => formatPct(p.saleCommissionPct) },
-      { label: "Máximo % de llaves promocionales", render: (p) => formatLimit(p.maxKeysPct) + (p.maxKeysPct !== -1 ? "%" : "") },
+      { label: "Comisión por venta", render: (p) => <CommissionCell plan={p} /> },
+      { label: "Máximo % de llaves promocionales", render: (p) => formatKeysPct(p.maxKeysPct) },
     ],
   },
   {
     title: "Funcionalidades",
     rows: [
       { label: "Publicidad", render: (p) => <BoolCell value={p.canAdvertise} /> },
-      { label: "Juegos de marca", render: (p) => <BoolCell value={p.canUseGames} /> },
+      { label: "Juegos personalizados", render: (p) => <BoolCell value={p.canUseGames} /> },
       { label: "Encuestas", render: (p) => <BoolCell value={p.canUseSurveys} /> },
-      { label: "Mascotas", render: (p) => <BoolCell value={p.canHavePets} /> },
+      { label: "Mascotas", render: (p) => <BoolCell value={p.canUsePets} /> },
     ],
   },
   {
@@ -88,7 +103,7 @@ const METRIC_GROUPS: MetricGroup[] = [
     rows: [
       { label: "Productos", render: (p) => formatLimit(p.maxProducts) },
       { label: "Anuncios", render: (p) => formatLimit(p.maxAds) },
-      { label: "Juegos de marca", render: (p) => formatLimit(p.maxBrandedGames) },
+      { label: "Juegos personalizados", render: (p) => formatLimit(p.maxBrandedGames) },
       { label: "Encuestas", render: (p) => formatLimit(p.maxSurveys) },
     ],
   },
@@ -251,15 +266,18 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
             ))}
           </tbody>
         </table>
+        {catalog.plans.some((p) => planCommissions(p).dual) && (
+          <p className="mt-2 text-xs text-gray-400">{DUAL_COMMISSION_NOTE}</p>
+        )}
       </div>
 
       {requiresInvestment && selectedPlan && (
         <div>
           <label className="flex items-center text-sm font-semibold text-gray-700 mb-1.5">
-            Monto de inversión <span className="text-red-500">*</span>
+            Monto de inversión
             {keysReservePct != null && (
               <HelpTooltip
-                text={`Del monto que inviertas, podrás usar el ${keysReservePct}% para crear recursos dentro del ecosistema (anuncios, juegos de marca, encuestas, etc.).`}
+                text={`Del monto que inviertas, podrás usar el ${keysReservePct}% para crear recursos dentro del ecosistema (anuncios, juegos personalizados, encuestas, etc.).`}
               />
             )}
           </label>

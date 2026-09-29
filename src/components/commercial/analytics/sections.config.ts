@@ -81,10 +81,10 @@ export const ANALYTICS_SECTIONS: SectionConfig[] = [
     id: 'referrals',
     label: 'Métricas de remisión',
     shortLabel: 'Remisión',
-    description: 'Impresiones y clics generados por remisión.',
+    description: 'Visitas a tu página oficial generadas por los enlaces de tus anuncios.',
     icon: Share2,
     allowedPlans: [PlanCode.PREMIUM],
-    lockedMessage: 'Exclusivo del plan Premium.',
+    lockedMessage: 'Disponible exclusivamente en el plan Premium.',
   },
   {
     id: 'premium',

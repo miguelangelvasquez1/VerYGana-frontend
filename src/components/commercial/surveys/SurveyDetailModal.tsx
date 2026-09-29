@@ -13,6 +13,8 @@ import {
 } from '@/hooks/surveys/surveyUtils';
 import SurveyEditModal from './SurveyEditModal';
 import type { SurveyCommercialDetailDTO } from '@/types/survey.types';
+import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
+import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
 
 interface Props {
   surveyId: number;
@@ -21,6 +23,8 @@ interface Props {
 
 export default function SurveyDetailModal({ surveyId, onClose }: Props) {
   const { data: survey, isLoading } = useCommercialSurveyDetail(surveyId);
+  const { planState } = usePlanState();
+  const editBlocked = isBudgetDormant(planState);
   const [showEdit, setShowEdit] = useState(false);
 
   return (
@@ -47,8 +51,9 @@ export default function SurveyDetailModal({ surveyId, onClose }: Props) {
               {survey && (
                 <button
                   onClick={() => setShowEdit(true)}
-                  className="cursor-pointer rounded-lg p-1.5 text-[#03548C] hover:bg-[#03548C]/5 hover:text-[#03548C]"
-                  title="Editar encuesta"
+                  disabled={editBlocked}
+                  className="cursor-pointer rounded-lg p-1.5 text-[#03548C] hover:bg-[#03548C]/5 hover:text-[#03548C] disabled:cursor-not-allowed disabled:opacity-40"
+                  title={editBlocked ? WALLET_DORMANT_TOOLTIP : 'Editar encuesta'}
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
@@ -94,6 +99,14 @@ function SurveyContent({ survey }: { survey: SurveyCommercialDetailDTO }) {
 
   return (
     <div className="space-y-6 p-6">
+      {/* Rejection reason */}
+      {survey.status === 'REJECTED' && survey.rejectionReason && (
+        <div className="p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg text-sm text-red-800">
+          <strong className="block mb-1">Motivo del rechazo:</strong>
+          {survey.rejectionReason}
+        </div>
+      )}
+
       {/* Live progress */}
       <div className="grid grid-cols-1 gap-4">
         <StatCard

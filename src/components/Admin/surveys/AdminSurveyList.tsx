@@ -10,10 +10,13 @@ import {
   Eye,
   XCircle,
   CheckCircle2,
+  Check,
 } from 'lucide-react';
 import {
   useAdminSurveyList,
   useAdminUpdateStatus,
+  useAdminApproveSurvey,
+  useAdminRejectSurvey,
   SurveyApiError,
 } from '@/hooks/surveys/useAdminSurvey';
 import {
@@ -24,12 +27,15 @@ import {
   getResponseProgress,
 } from '@/hooks/surveys/surveyUtils';
 import { TRANSITIONS, ConfirmDialog, type Transition } from './surveyStatusTransitions';
+import { RejectSurveyModal } from './RejectSurveyModal';
 import type { SurveyStatus } from '@/types/survey.types';
 import type { AdminSurveySummary } from '@/types/survey.types';
 
 // ─── Status filter pills ──────────────────────────────────────────────────────
 
-const ALL_STATUSES: SurveyStatus[] = ['DRAFT', 'ACTIVE', 'PAUSED', 'SUSPENDED', 'COMPLETED', 'CLOSED'];
+const ALL_STATUSES: SurveyStatus[] = [
+  'DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED', 'ACTIVE', 'PAUSED', 'SUSPENDED', 'COMPLETED',
+];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -39,9 +45,13 @@ export default function AdminSurveyList() {
   const [statusFilter,  setStatusFilter]  = useState<SurveyStatus | undefined>();
   const [errorMsg,      setErrorMsg]      = useState<string | null>(null);
   const [pendingAction,  setPendingAction] = useState<{ surveyId: number; from: SurveyStatus; transition: Transition } | null>(null);
+  const [rejectTarget,  setRejectTarget]  = useState<{ id: number; title: string } | null>(null);
+  const [rejectReason,  setRejectReason]  = useState('');
 
   const { data, isLoading, isError } = useAdminSurveyList(page, 15, statusFilter);
   const updateStatus = useAdminUpdateStatus();
+  const approveSurvey = useAdminApproveSurvey();
+  const rejectSurvey = useAdminRejectSurvey();
 
   const confirmChange = () => {
     if (!pendingAction) return;
@@ -58,6 +68,34 @@ export default function AdminSurveyList() {
           );
           setPendingAction(null);
         },
+      },
+    );
+  };
+
+  const handleApprove = (surveyId: number) => {
+    setErrorMsg(null);
+    approveSurvey.mutate(surveyId, {
+      onError: (err: any) => setErrorMsg(
+        err instanceof SurveyApiError ? err.message : 'Error al aprobar la encuesta',
+      ),
+    });
+  };
+
+  const closeRejectModal = () => {
+    setRejectTarget(null);
+    setRejectReason('');
+  };
+
+  const confirmReject = () => {
+    if (!rejectTarget || !rejectReason.trim()) return;
+    setErrorMsg(null);
+    rejectSurvey.mutate(
+      { surveyId: rejectTarget.id, reason: rejectReason.trim() },
+      {
+        onSuccess: closeRejectModal,
+        onError: (err: any) => setErrorMsg(
+          err instanceof SurveyApiError ? err.message : 'Error al rechazar la encuesta',
+        ),
       },
     );
   };
@@ -138,8 +176,9 @@ export default function AdminSurveyList() {
                     key={survey.id}
                     survey={survey}
                     isUpdating={
-                      updateStatus.isPending &&
-                      updateStatus.variables?.surveyId === survey.id
+                      (updateStatus.isPending && updateStatus.variables?.surveyId === survey.id) ||
+                      (approveSurvey.isPending && approveSurvey.variables === survey.id) ||
+                      (rejectSurvey.isPending && rejectSurvey.variables?.surveyId === survey.id)
                     }
                     onViewDetail={() =>
                       router.push(`/admin/surveys/${survey.id}`)
@@ -147,6 +186,8 @@ export default function AdminSurveyList() {
                     onRequestTransition={(transition) =>
                       setPendingAction({ surveyId: survey.id, from: survey.status, transition })
                     }
+                    onApprove={() => handleApprove(survey.id)}
+                    onReject={() => setRejectTarget({ id: survey.id, title: survey.title })}
                   />
                 ))}
               </tbody>
@@ -191,6 +232,18 @@ export default function AdminSurveyList() {
           onCancel={() => setPendingAction(null)}
         />
       )}
+
+      {/* ── Reject modal ──────────────────────────────────────────────────── */}
+      {rejectTarget && (
+        <RejectSurveyModal
+          surveyTitle={rejectTarget.title}
+          reason={rejectReason}
+          isSubmitting={rejectSurvey.isPending}
+          onReasonChange={setRejectReason}
+          onConfirm={confirmReject}
+          onCancel={closeRejectModal}
+        />
+      )}
     </div>
   );
 }
@@ -202,12 +255,14 @@ export default function AdminSurveyList() {
 // acá reutilizamos el mismo ícono/label/confirmMsg pero con el estilo
 // discreto que ya usa esta tabla.
 const COMPACT_ACTION_CLASS: Record<SurveyStatus, string> = {
-  DRAFT:     'text-gray-400',
-  ACTIVE:    'text-gray-400',
-  PAUSED:    'text-emerald-600 hover:bg-emerald-50',
-  SUSPENDED: 'text-purple-600 hover:bg-purple-50',
-  COMPLETED: 'text-gray-400',
-  CLOSED:    'text-red-500 hover:bg-red-50',
+  DRAFT:           'text-gray-400',
+  PENDING_REVIEW:  'text-gray-400',
+  APPROVED:        'text-gray-400',
+  REJECTED:        'text-gray-400',
+  ACTIVE:          'text-gray-400',
+  PAUSED:          'text-emerald-600 hover:bg-emerald-50',
+  SUSPENDED:       'text-purple-600 hover:bg-purple-50',
+  COMPLETED:       'text-gray-400',
 };
 
 function SurveyRow({
@@ -215,11 +270,15 @@ function SurveyRow({
   isUpdating,
   onViewDetail,
   onRequestTransition,
+  onApprove,
+  onReject,
 }: {
   survey: AdminSurveySummary;
   isUpdating: boolean;
   onViewDetail: () => void;
   onRequestTransition: (transition: Transition) => void;
+  onApprove: () => void;
+  onReject: () => void;
 }) {
   const progress = getResponseProgress(survey.totalResponses, survey.maxResponses);
 
@@ -288,6 +347,28 @@ function SurveyRow({
             <Eye className="h-3.5 w-3.5" />
           </ActionBtn>
 
+          {/* Aprobar / rechazar — solo para encuestas en revisión */}
+          {survey.status === 'PENDING_REVIEW' && (
+            <>
+              <ActionBtn
+                tooltip="Aprobar encuesta"
+                loading={isUpdating}
+                className="text-emerald-600 hover:bg-emerald-50"
+                onClick={onApprove}
+              >
+                <Check className="h-3.5 w-3.5" />
+              </ActionBtn>
+              <ActionBtn
+                tooltip="Rechazar encuesta"
+                loading={isUpdating}
+                className="text-red-500 hover:bg-red-50"
+                onClick={onReject}
+              >
+                <XCircle className="h-3.5 w-3.5" />
+              </ActionBtn>
+            </>
+          )}
+
           {/* Mismas transiciones (con el mismo modal de confirmación) que el detalle */}
           {TRANSITIONS[survey.status].map((t) => (
             <ActionBtn
@@ -301,8 +382,8 @@ function SurveyRow({
             </ActionBtn>
           ))}
 
-          {survey.status === 'CLOSED' && (
-            <span title="Encuesta cancelada">
+          {survey.status === 'REJECTED' && (
+            <span title="Encuesta rechazada">
               <CheckCircle2 className="h-4 w-4 text-gray-300" />
             </span>
           )}

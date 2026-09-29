@@ -7,13 +7,13 @@ import {
   CreditCard,
   FileImage,
   Headset,
+  LayoutDashboard,
   Package,
   ClipboardList,
   X,
   LogOut,
   PawPrint,
   Lock,
-  Sparkles,
   Palette,
   Handshake,
 } from 'lucide-react';
@@ -44,6 +44,12 @@ interface SidebarProps {
 // ─── Menu items ───────────────────────────────────────────────────────────────
 
 const menuItems: MenuItem[] = [
+  {
+    href: '/commercial/dashboard', icon: LayoutDashboard, label: 'Inicio',
+    requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
+    lockIfUnavailable: true,
+    exactMatch: true,
+  },
   {
     href: '/commercial/products', icon: Package, label: 'Mis productos',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD],
@@ -85,7 +91,6 @@ const menuItems: MenuItem[] = [
     lockIfUnavailable: true,
   },
   { href: '/commercial/support', icon: Headset, label: 'Soporte' },
-  { href: '/plans', icon: Sparkles, label: 'Ver Planes' },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -189,11 +194,6 @@ export function Sidebar({
                     active ? 'text-admin-blue' : 'text-slate-500 group-hover:text-slate-300'
                   }`} />
                   <span className="text-sm font-medium">{item.label}</span>
-                  {item.href === '/plans' && (
-                    <span className="ml-auto text-[9px] font-bold bg-linear-to-r from-admin-midnight to-admin-blue text-white px-1.5 py-0.5 rounded-full">
-                      NEW
-                    </span>
-                  )}
                 </Link>
               )}
             </div>

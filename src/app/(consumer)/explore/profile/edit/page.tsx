@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,12 +16,16 @@ import {
   MapPin,
   AlertTriangle,
   CheckCircle2,
+  Pencil,
+  X,
 } from "lucide-react";
 
 import {
   getConsumerProfile,
   updateConsumerProfile,
   getConsumerInitialData,
+  requestPhoneChange,
+  verifyPhoneChange,
 } from "@/services/ConsumerService";
 
 import type {
@@ -32,7 +37,6 @@ import { Camera } from "lucide-react";
 
 const profileSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
-  phoneNumber: z.string().min(7, "Número muy corto").max(15, "Número muy largo"),
   department: z.string().min(2, "Departamento requerido"),
   municipality: z.string().min(2, "Municipio requerido"),
 });
@@ -41,6 +45,28 @@ type ProfileForm = z.infer<typeof profileSchema>;
 
 function getInitials(name: string, lastName: string) {
   return `${name?.charAt(0) ?? ""}${lastName?.charAt(0) ?? ""}`.toUpperCase();
+}
+
+function getPhoneChangeErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data;
+    if (typeof data?.message === "string" && data.message.trim()) {
+      return data.message;
+    }
+    if (data?.errors && typeof data.errors === "object") {
+      const firstError = Object.values(data.errors)[0];
+      if (Array.isArray(firstError) && firstError[0]) {
+        return String(firstError[0]);
+      }
+      if (firstError) {
+        return String(firstError);
+      }
+    }
+    if (Array.isArray(data) && data[0]) {
+      return String(data[0]);
+    }
+  }
+  return fallback;
 }
 
 const FormField = React.forwardRef<
@@ -86,6 +112,15 @@ export default function EditConsumerProfilePage() {
   const [successMsg, setSuccessMsg] = useState(false);
   const [errorMsg, setErrorMsg] = useState(false);
 
+  // ── Phone change modal state ────────────────────────────────────────────
+  const [phoneModal, setPhoneModal] = useState(false);
+  const [phoneStep, setPhoneStep] = useState<1 | 2>(1);
+  const [newPhone, setNewPhone] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [currentPhone, setCurrentPhone] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -105,9 +140,9 @@ export default function EditConsumerProfilePage() {
         setProfile(data);
         setAvatarUrl(initData.avatarUrl);
         setValue("email", data.email);
-        setValue("phoneNumber", data.phoneNumber);
         setValue("department", data.department);
         setValue("municipality", data.municipalityName);
+        setCurrentPhone(data.phoneNumber);
       } catch (error) {
         console.error("Error cargando perfil:", error);
       } finally {
@@ -124,7 +159,6 @@ export default function EditConsumerProfilePage() {
 
     const request: ConsumerUpdateProfileRequestDTO = {
       email: formData.email,
-      phoneNumber: formData.phoneNumber,
       department: formData.department,
       municipalityName: formData.municipality,
     };
@@ -248,9 +282,24 @@ export default function EditConsumerProfilePage() {
               label="Número de Teléfono"
               type="text"
               icon={<Phone className="w-4 h-4" />}
-              error={errors.phoneNumber?.message}
-              {...register("phoneNumber")}
+              value={currentPhone}
+              readOnly
+              disabled
             />
+            <button
+              type="button"
+              onClick={() => {
+                setPhoneModal(true);
+                setPhoneStep(1);
+                setNewPhone("");
+                setOtpCode("");
+                setPhoneError(null);
+              }}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[#03548C] hover:text-[#0b1440] transition cursor-pointer"
+            >
+              <Pencil className="w-4 h-4" />
+              Cambiar Teléfono
+            </button>
           </div>
 
           {/* Sección: Ubicación */}
@@ -308,6 +357,154 @@ export default function EditConsumerProfilePage() {
           setAvatarUrl(initData.avatarUrl);
         }}
       />
+
+      {phoneModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="phone-change-title"
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2 id="phone-change-title" className="text-lg font-bold text-gray-900">
+                  Cambiar teléfono
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  {phoneStep === 1
+                    ? "Solicita un código de verificación para tu nuevo número."
+                    : "Ingresa el código que enviamos a tu nuevo número."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPhoneModal(false)}
+                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+                aria-label="Cerrar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {phoneError && (
+              <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{phoneError}</span>
+              </div>
+            )}
+
+            {phoneStep === 1 ? (
+              <form
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  const normalizedPhone = newPhone.replace(/\D/g, "");
+                  if (normalizedPhone.length !== 10) {
+                    setPhoneError("El número debe tener 10 dígitos.");
+                    return;
+                  }
+
+                  setPhoneLoading(true);
+                  setPhoneError(null);
+                  try {
+                    await requestPhoneChange(normalizedPhone);
+                    setPhoneStep(2);
+                  } catch (error: unknown) {
+                    setPhoneError(
+                      getPhoneChangeErrorMessage(
+                        error,
+                        "No se pudo solicitar el cambio de teléfono. Intenta nuevamente."
+                      )
+                    );
+                  } finally {
+                    setPhoneLoading(false);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <label className="block text-sm font-medium text-gray-700">
+                  Nuevo número de teléfono
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    maxLength={10}
+                    value={newPhone}
+                    onChange={(event) =>
+                      setNewPhone(event.target.value.replace(/\D/g, "").slice(0, 10))
+                    }
+                    placeholder="3210000000"
+                    className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:border-[#03548C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]/30"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={phoneLoading}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#03548C] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:bg-gray-400"
+                >
+                  {phoneLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {phoneLoading ? "Enviando código..." : "Enviar código"}
+                </button>
+              </form>
+            ) : (
+              <form
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  if (otpCode.trim().length < 6) {
+                    setPhoneError("Ingresa el código de verificación de 6 dígitos.");
+                    return;
+                  }
+
+                  setPhoneLoading(true);
+                  setPhoneError(null);
+                  try {
+                    await verifyPhoneChange(newPhone, otpCode.trim());
+                    setCurrentPhone(newPhone);
+                    setProfile((previous) =>
+                      previous ? { ...previous, phoneNumber: newPhone } : previous
+                    );
+                    setPhoneModal(false);
+                  } catch (error: unknown) {
+                    setPhoneError(
+                      getPhoneChangeErrorMessage(
+                        error,
+                        "El código no es válido o expiró. Intenta nuevamente."
+                      )
+                    );
+                  } finally {
+                    setPhoneLoading(false);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <label className="block text-sm font-medium text-gray-700">
+                  Código de verificación
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(event) =>
+                      setOtpCode(event.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    placeholder="123456"
+                    className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-center text-lg tracking-[0.35em] focus:border-[#03548C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]/30"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={phoneLoading}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#03548C] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:bg-gray-400"
+                >
+                  {phoneLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {phoneLoading ? "Verificando..." : "Confirmar teléfono"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

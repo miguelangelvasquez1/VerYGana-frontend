@@ -45,14 +45,14 @@ export function useProductImageUpdate() {
 
         console.log('📋 [PASO 1] Preparando actualización de imagen...');
 
-        const { productAssetId, productImagePermission } =
+        const { assetId, imagePermission } =
           await prepareProductImageUpdate(productId, {
             originalFileName: image.name,
             contentType: image.type,
             sizeBytes: image.size,
           });
 
-        console.log('✅ [PASO 1] Permiso recibido. AssetId:', productAssetId);
+        console.log('✅ [PASO 1] Permiso recibido. AssetId:', assetId);
 
         // ── PASO 2: Subir imagen a R2 ────────────────────────────────
         setState({ status: 'uploading', progress: 0 });
@@ -60,7 +60,7 @@ export function useProductImageUpdate() {
         console.log('📤 [PASO 2] Subiendo imagen a R2...');
 
         await fileUploadService.uploadToR2(
-          productImagePermission.uploadUrl,
+          imagePermission.uploadUrl,
           image,
           (progress) => {
             setState({ status: 'uploading', progress: progress * 0.9 });
@@ -74,7 +74,7 @@ export function useProductImageUpdate() {
 
         console.log('📋 [PASO 3] Confirmando actualización...');
 
-        await confirmProductImageUpdate(productId, { newAssetId: productAssetId });
+        await confirmProductImageUpdate(productId, { newAssetId: assetId });
 
         console.log('✅ [PASO 3] Imagen actualizada correctamente.');
 

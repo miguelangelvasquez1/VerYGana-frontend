@@ -173,7 +173,9 @@ function NegotiationCard({
             <span className="font-semibold text-gray-900">{negotiation.plan.planName}</span>
             {negotiation.plan.monthlyFeeCents != null && <span>Tarifa mensual: {formatCOP(negotiation.plan.monthlyFeeCents)}</span>}
             {negotiation.plan.investmentAmountCents != null && <span>Inversión: {formatCOP(negotiation.plan.investmentAmountCents)}</span>}
-            <span>Comisión por venta: {negotiation.plan.saleCommissionPct}%</span>
+            {negotiation.plan.grossAmountCents != null && <span>Monto bruto: {formatCOP(negotiation.plan.grossAmountCents)}</span>}
+            {negotiation.plan.excludedTaxesCents != null && <span>Impuestos excluidos: {formatCOP(negotiation.plan.excludedTaxesCents)}</span>}
+            {negotiation.plan.saleCommissionPct > 0 && <span>Comisión por venta: {negotiation.plan.saleCommissionPct}%</span>}
             {negotiation.plan.contractDurationMonths != null && (
               <span>Duración: {negotiation.plan.contractDurationMonths} meses</span>
             )}

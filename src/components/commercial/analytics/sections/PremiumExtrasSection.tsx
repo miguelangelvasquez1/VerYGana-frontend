@@ -1,20 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Globe } from 'lucide-react';
-import { MetricStatCard } from '../MetricStatCard';
-import { PetStoreMetrics } from '../PetStoreMetrics';
 import type { DateRangeFilter } from '../analytics.types';
+import { PetStoreMetrics } from '../PetStoreMetrics';
 
 interface PremiumExtrasSectionProps {
   dateRange: DateRangeFilter;
 }
 
-// Métricas exclusivas Premium: visualizaciones de la página oficial del
-// empresario y consumo en la tienda virtual de mascotas por producto patrocinado.
-//
-// La parte de mascotas ya está conectada; la de la página oficial sigue esperando
-// su endpoint y por eso mantiene el "—".
+// Métricas exclusivas Premium: consumo en la tienda virtual de mascotas por
+// producto patrocinado. Las visualizaciones de la página oficial viven ahora en
+// la pestaña "Remisión".
 export function PremiumExtrasSection({ dateRange }: PremiumExtrasSectionProps) {
   return (
     <div className="space-y-6">
@@ -26,17 +22,9 @@ export function PremiumExtrasSection({ dateRange }: PremiumExtrasSectionProps) {
           </span>
         </h3>
         <p className="mt-1 text-sm text-gray-500">
-          Rendimiento de tus productos dentro del juego de mascotas.
+          Rendimiento de tus productos dentro del juego de mascotas. Las visitas a
+          tu página oficial están en la pestaña <span className="font-medium">Remisión</span>.
         </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4">
-        <MetricStatCard
-          title="Visualizaciones a página oficial"
-          value="—"
-          icon={Globe}
-          subtitle="Pendiente de conectar su endpoint"
-        />
       </div>
 
       <div>

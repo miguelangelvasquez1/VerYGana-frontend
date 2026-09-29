@@ -1,11 +1,19 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft, Loader2, RefreshCw, Mail, Phone, User, ClipboardCheck } from 'lucide-react';
+import { ChevronLeft, Loader2, RefreshCw, Mail, Phone, User, ClipboardCheck, Package, Landmark, CheckCheck, Building2, Star, Paperclip } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getPqrsDetail, markUnderReview, respondToPqrs } from '@/services/admin/AdminPqrsService';
-import { PqrsAdminDetailDTO, PqrsStatus } from '@/types/Pqrs.types';
-import { pqrsStatusColor, pqrsStatusLabel, pqrsTypeLabel } from '@/components/pqrs/pqrsMeta';
+import { getByPurchaseItemId, markPaid } from '@/services/admin/AdminCashRefundService';
+import { PqrsAdminDetailDTO, PqrsResolutionAction, PqrsStatus } from '@/types/Pqrs.types';
+import { CashRefundResponseDTO, CashRefundStatus } from '@/types/finance/Treasury.types';
+import { marketPlaceIssueReasonLabel, pqrsResolutionActionLabel, pqrsStatusColor, pqrsStatusLabel, pqrsTypeLabel } from '@/components/pqrs/pqrsMeta';
+import PqrsAssetThumbnail from '@/components/pqrs/PqrsAssetThumbnail';
+import { bankAccountTypeLabel, cashRefundStatusColor, cashRefundStatusLabel, docTypeLabel } from '@/utils/bankDetailsMeta';
+import { formatPesos } from '@/utils/currency';
+
+const REFUND_APPROVED_MESSAGE =
+  'Hemos aprobado tu reembolso. Por favor completa el formulario de datos bancarios que aparece en esta misma solicitud para procesar el pago.';
 
 const REVIEWABLE_STATUSES: PqrsStatus[] = [PqrsStatus.PENDIENTE_ASIGNACION, PqrsStatus.RECIBIDA];
 const RESPONDABLE_STATUSES: PqrsStatus[] = [PqrsStatus.PENDIENTE_ASIGNACION, PqrsStatus.RECIBIDA, PqrsStatus.EN_REVISION];
@@ -32,6 +40,24 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
   const [reviewing, setReviewing] = useState(false);
   const [responseText, setResponseText] = useState('');
   const [responding, setResponding] = useState(false);
+  const [action, setAction] = useState<PqrsResolutionAction | ''>('');
+  const [refund, setRefund] = useState<CashRefundResponseDTO | null>(null);
+  const [refundLoading, setRefundLoading] = useState(false);
+  const [markingPaid, setMarkingPaid] = useState(false);
+
+  const loadRefund = async (purchaseItemId: number) => {
+    setRefundLoading(true);
+    try {
+      const r = await getByPurchaseItemId(purchaseItemId);
+      setRefund(r);
+    } catch {
+      // Aún no existe un reembolso para este ítem (p. ej. el admin no ha
+      // aprobado el reembolso, o el comprador no ha enviado sus datos).
+      setRefund(null);
+    } finally {
+      setRefundLoading(false);
+    }
+  };
 
   const loadDetail = async () => {
     setLoading(true);
@@ -40,6 +66,12 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
       const d = await getPqrsDetail(pqrsId);
       setDetail(d);
       setResponseText(d.response ?? '');
+      setAction(d.action ?? '');
+      if (d.purchaseItemId != null) {
+        await loadRefund(d.purchaseItemId);
+      } else {
+        setRefund(null);
+      }
     } catch {
       setError('No se pudo cargar el detalle de la solicitud');
     } finally {
@@ -63,17 +95,44 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
     }
   };
 
+  const isProductClaim = detail?.purchaseItemId != null;
+
+  const handleSelectAction = (selected: PqrsResolutionAction) => {
+    setAction(selected);
+    if (selected === PqrsResolutionAction.REFUND && !responseText.trim()) {
+      setResponseText(REFUND_APPROVED_MESSAGE);
+    }
+  };
+
   const handleRespond = async () => {
     if (!detail || !responseText.trim()) return;
+    if (isProductClaim && !action) return;
     setResponding(true);
     try {
-      await respondToPqrs(detail.id, { response: responseText.trim() });
+      await respondToPqrs(detail.id, {
+        response: responseText.trim(),
+        action: isProductClaim ? (action as PqrsResolutionAction) : null,
+      });
       toast.success('Respuesta enviada correctamente');
       await loadDetail();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Error al enviar la respuesta');
     } finally {
       setResponding(false);
+    }
+  };
+
+  const handleMarkPaid = async () => {
+    if (!refund) return;
+    setMarkingPaid(true);
+    try {
+      await markPaid(refund.id);
+      toast.success('Reembolso marcado como pagado');
+      await loadDetail();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Error al marcar el reembolso como pagado');
+    } finally {
+      setMarkingPaid(false);
     }
   };
 
@@ -146,6 +205,17 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
         </div>
       )}
 
+      {/* Waiting for refund payment */}
+      {detail.status === PqrsStatus.PENDIENTE_PAGO_REEMBOLSO && (
+        <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
+          <p className="font-semibold text-teal-900 text-sm">Reembolso aprobado, pendiente de pago</p>
+          <p className="text-xs text-teal-700 mt-0.5">
+            El comprador ya fue notificado y debe enviar sus datos bancarios. Cuando el pago se realice,
+            márcalo como pagado desde la sección de reembolsos en efectivo para cerrar esta solicitud.
+          </p>
+        </div>
+      )}
+
       {/* Main card */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-5">
         {/* Requester */}
@@ -157,6 +227,122 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
             <InfoRow label="Teléfono" value={detail.requesterPhone} icon={<Phone size={13} className="text-gray-400" />} />
           </div>
         </div>
+
+        {isProductClaim && (
+          <div className="border-t border-gray-100 pt-4">
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+              <Package size={14} className="text-purple-500" />
+              Reclamo sobre un producto
+            </h3>
+            <div className="space-y-3">
+              {detail.product && (
+                <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
+                  <img
+                    src={detail.product.imageUrl}
+                    alt={detail.product.name}
+                    className="w-12 h-12 rounded-lg object-cover shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{detail.product.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {detail.product.categoryName} · ${formatPesos(detail.product.priceCents)}
+                    </p>
+                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                      <Star size={11} className="text-amber-400" />
+                      {detail.product.averageRate.toFixed(1)} ({detail.product.reviewCount} reseñas)
+                    </p>
+                  </div>
+                </div>
+              )}
+              <InfoRow label="Ítem de compra" value={`#${detail.purchaseItemId}`} />
+              <InfoRow
+                label="Motivo"
+                value={detail.reasonCode ? marketPlaceIssueReasonLabel[detail.reasonCode] : null}
+              />
+            </div>
+          </div>
+        )}
+
+        {detail.commercial && (
+          <div className="border-t border-gray-100 pt-4">
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+              <Building2 size={14} className="text-indigo-500" />
+              Comercio
+            </h3>
+            <div className="space-y-2">
+              <InfoRow label="Empresa" value={`${detail.commercial.companyName} · NIT ${detail.commercial.nit}`} />
+              <InfoRow label="Ubicación" value={`${detail.commercial.municipalityName}, ${detail.commercial.departmentName}`} />
+              <InfoRow label="Contacto" value={`${detail.commercial.contactEmail} · ${detail.commercial.contactPhone}`} />
+              <InfoRow label="Plan actual" value={detail.commercial.currentPlanName} />
+            </div>
+          </div>
+        )}
+
+        {detail.assets && detail.assets.length > 0 && (
+          <div className="border-t border-gray-100 pt-4">
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+              <Paperclip size={14} className="text-gray-400" />
+              Evidencia adjunta
+            </h3>
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {detail.assets.map((asset) => (
+                <PqrsAssetThumbnail key={asset.id} asset={asset} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isProductClaim && (refundLoading || refund) && (
+          <div className="border-t border-gray-100 pt-4">
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+              <Landmark size={14} className="text-teal-600" />
+              Reembolso
+            </h3>
+
+            {refundLoading ? (
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Loader2 size={14} className="animate-spin" /> Cargando información del reembolso...
+              </div>
+            ) : refund && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${cashRefundStatusColor[refund.status]}`}>
+                    {cashRefundStatusLabel[refund.status]}
+                  </span>
+                  <span className="text-sm font-semibold text-gray-800">${formatPesos(refund.amountCents)}</span>
+                </div>
+
+                {refund.bankDetailsSubmittedAt ? (
+                  <div className="space-y-2">
+                    <InfoRow label="Titular" value={refund.accountHolderName} />
+                    <InfoRow
+                      label="Documento"
+                      value={`${docTypeLabel[refund.accountHolderDocType]} ${refund.accountHolderDoc}`}
+                    />
+                    <InfoRow label="Banco" value={refund.bankName} />
+                    <InfoRow label="N.º de cuenta" value={refund.accountNumber} />
+                    <InfoRow label="Tipo de cuenta" value={bankAccountTypeLabel[refund.accountType]} />
+                    <InfoRow label="Datos enviados" value={formatDateTime(refund.bankDetailsSubmittedAt)} />
+                    {refund.paidAt && <InfoRow label="Pagado el" value={formatDateTime(refund.paidAt)} />}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">El comprador todavía no ha enviado sus datos bancarios.</p>
+                )}
+
+                {refund.status === CashRefundStatus.PENDING_PAYMENT && refund.bankDetailsSubmittedAt && (
+                  <button
+                    onClick={handleMarkPaid}
+                    disabled={markingPaid}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 cursor-pointer"
+                  >
+                    {markingPaid ? <Loader2 size={14} className="animate-spin" /> : <CheckCheck size={14} />}
+                    Marcar como pagado
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="border-t border-gray-100 pt-4">
           <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Descripción</h3>
@@ -181,6 +367,29 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
           <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Respuesta</h3>
           {canRespond ? (
             <div className="space-y-3">
+              {isProductClaim && (
+                <div>
+                  <p className="text-xs font-medium text-gray-600 mb-1.5">Decisión sobre el reclamo *</p>
+                  <div className="flex gap-2">
+                    {Object.values(PqrsResolutionAction).map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => handleSelectAction(opt)}
+                        className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors cursor-pointer ${
+                          action === opt
+                            ? opt === PqrsResolutionAction.REFUND
+                              ? 'bg-green-600 border-green-600 text-white'
+                              : 'bg-gray-700 border-gray-700 text-white'
+                            : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pqrsResolutionActionLabel[opt]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <textarea
                 value={responseText}
                 onChange={(e) => setResponseText(e.target.value)}
@@ -192,7 +401,7 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
               <div className="flex justify-end">
                 <button
                   onClick={handleRespond}
-                  disabled={responding || !responseText.trim()}
+                  disabled={responding || !responseText.trim() || (isProductClaim && !action)}
                   className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors disabled:opacity-60 cursor-pointer"
                 >
                   {responding && <Loader2 size={14} className="animate-spin" />}

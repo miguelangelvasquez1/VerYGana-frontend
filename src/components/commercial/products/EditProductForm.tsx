@@ -6,6 +6,7 @@ import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { useProductImageUpdate } from "@/hooks/products/useProductImageUpdate";
 import {
   ProductEditInfoResponseDTO,
+  ProductType,
   UpdateProductRequestDTO,
 } from "@/types/products/Product.types";
 import { ProductStockResponseDTO, ProductStockRequestDTO } from "@/types/products/ProductStock.types";
@@ -17,6 +18,8 @@ import TargetAudienceFields, {
 } from "@/components/shared/targeting/TargetAudienceFields";
 import toast from "react-hot-toast";
 import { RefreshCw, ChevronLeft, ChevronRight, Trash2, Eye, EyeOff, Copy } from "lucide-react";
+import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
+import { isBudgetDormant, BudgetDormantBlock } from "@/components/commercial/plans/WalletBudgetAlerts";
 
 // ============================================================
 // TIPOS LOCALES
@@ -48,6 +51,11 @@ const STATUS_COLORS: Record<StockStatus, string> = {
   INVALID: 'bg-red-100 text-red-600',
 };
 
+const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  [ProductType.DIGITAL]: 'Digital',
+  [ProductType.PHYSICAL]: 'Físico',
+};
+
 const buildExpirationDate = (date: string, time: string): string | null => {
   if (!date) return null;
   return `${date}T${time || '00:00'}:00`;
@@ -58,6 +66,8 @@ const buildExpirationDate = (date: string, time: string): string | null => {
 // ============================================================
 
 export default function EditProductForm({ productId, onSuccess, onCancel }: Props) {
+  const { planState } = usePlanState();
+  const editBlocked = isBudgetDormant(planState);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSavingData, setIsSavingData] = useState(false);
@@ -72,6 +82,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
     totalStockItems: 0,
     availableStockItems: 0,
     targeting: null,
+    productType: ProductType.PHYSICAL,
   });
   const [targeting, setTargeting] = useState<OptionalTargetAudienceDTO>({});
 
@@ -299,6 +310,10 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
   // RENDER
   // ============================================================
 
+  if (editBlocked) {
+    return <BudgetDormantBlock backHref="/commercial/products" backLabel="Volver a productos" />;
+  }
+
   if (loading) return <p className="text-center py-8 text-gray-500">Cargando...</p>;
 
   return (
@@ -458,6 +473,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
           <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 grid grid-cols-2 gap-2">
             <p>Total registrados: <strong>{form.totalStockItems}</strong></p>
             <p>Disponibles: <strong>{form.availableStockItems}</strong></p>
+            <p>Tipo de producto: <strong>{PRODUCT_TYPE_LABELS[form.productType]}</strong></p>
           </div>
 
           <TargetAudienceFields

@@ -47,8 +47,7 @@ export const Step4Submit: React.FC<Props> = ({
         <p className="font-medium">¿Todo listo?</p>
         <p className="mt-1">
           Al enviar, tu solicitud pasará a estado <strong>En revisión</strong>. El equipo de
-          administración la revisará y te asignará un diseñador. Después de enviar no podrás editar
-          la información de marca ni subir más recursos corporativos.
+          administración la revisará y te asignará un diseñador. Puedes seguir el progreso de tu solicitud en la sección de <strong>Solicitudes</strong>.
         </p>
       </div>
 

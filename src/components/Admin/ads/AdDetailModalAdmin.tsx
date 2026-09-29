@@ -10,10 +10,12 @@ import { formatCurrency, formatDate } from './utils/adHelper';
 
 interface AdDetailModalProps {
   ad: AdForAdminDTO;
+  /** Se llama si el media falla al cargar (p.ej. URL prefirmada de un BLOCKED ya caducada). */
+  onMediaError?: () => void;
   onClose: () => void;
 }
 
-export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onClose }) => {
+export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onMediaError, onClose }) => {
   return (
     <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
@@ -48,12 +50,14 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onClose }) => 
                 <video
                   src={ad.contentUrl}
                   controls
+                  onError={ad.status === 'BLOCKED' ? onMediaError : undefined}
                   className="w-full max-h-80 object-contain bg-black"
                 />
               ) : (
                 <img
                   src={ad.contentUrl}
                   alt={ad.title}
+                  onError={ad.status === 'BLOCKED' ? onMediaError : undefined}
                   className="w-full max-h-80 object-contain"
                 />
               )
