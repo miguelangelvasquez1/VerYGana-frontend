@@ -77,6 +77,12 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onMediaError, 
               {ad.mediaType === 'VIDEO' ? <Video className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
               {ad.mediaType === 'VIDEO' ? 'Video' : 'Imagen'}
             </span>
+            {ad.durationSeconds != null && (
+              <span className="flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full font-medium">
+                <Clock className="w-4 h-4" />
+                {ad.durationSeconds} s
+              </span>
+            )}
             {ad.targetUrl && (
               <a
                 href={ad.targetUrl}

@@ -14,9 +14,11 @@ import {
   PlayCircle,
   MoreVertical,
   X,
-  Maximize2
+  Maximize2,
+  PlusCircle
 } from 'lucide-react';
 import { AdResponseDTO } from '@/types/ads/commercial';
+import { canIncreaseBudget } from '@/types/BudgetIncrease.types';
 import { AdDetailModal } from './AdDetailModal';
 
 interface AdCardProps {
@@ -25,6 +27,8 @@ interface AdCardProps {
   onPause: (adId: number) => void;
   onResume: (adId: number) => void;
   onDelete: (adId: number) => void;
+  /** Abre el flujo de aumento de presupuesto (solo se ofrece en ACTIVE / PAUSED / COMPLETED). */
+  onIncreaseBudget?: (ad: AdResponseDTO) => void;
   /** Se llama si el media falla al cargar (p.ej. URL prefirmada de un BLOCKED ya caducada). */
   onMediaError?: () => void;
   /** false cuando hay una solicitud de cambio de plan en curso: reactivar consume plan/presupuesto y el backend lo rechaza. */
@@ -41,6 +45,7 @@ export function AdCard({
   onPause,
   onResume,
   onDelete,
+  onIncreaseBudget,
   onMediaError,
   canReactivate = true,
   reactivateDisabledReason,
@@ -53,8 +58,9 @@ export function AdCard({
   // El backend puede omitir campos numéricos (p.ej. presupuesto no asignado
   // todavía en un anuncio PENDING) — se tratan como 0 para no romper el render.
   const completionPct = ad.completionPercentage ?? 0;
-  const money = (value: number | null | undefined) =>
-    (value ?? 0).toLocaleString('es-CO', {
+  // rewardPerLike / totalBudget / spentBudget / remainingBudget ya llegan en PESOS.
+  const money = (pesos: number | null | undefined) =>
+    Number(pesos ?? 0).toLocaleString('es-CO', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -325,6 +331,20 @@ export function AdCard({
               </button>
             </div>
           </div>
+
+          {/* Aumentar presupuesto: ACTIVE / PAUSED / COMPLETED (un COMPLETED se reabre). No depende
+              del estado DORMANT de la billetera: meter saldo a un anuncio no es "editarlo". */}
+          {onIncreaseBudget && canIncreaseBudget(ad.status) && (
+            <button
+              type="button"
+              onClick={() => onIncreaseBudget(ad)}
+              className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-[#03548C]/20 text-[#03548C] text-sm font-semibold rounded-lg hover:bg-[#03548C]/5 hover:border-[#03548C]/40 transition-colors cursor-pointer"
+              title={ad.status === 'COMPLETED' ? 'Agrega likes para reactivar este anuncio' : 'Agregar más likes al anuncio'}
+            >
+              <PlusCircle className="w-4 h-4" />
+              {ad.status === 'COMPLETED' ? 'Aumentar presupuesto y reactivar' : 'Aumentar presupuesto'}
+            </button>
+          )}
 
           {/* Motivo de rechazo */}
           {ad.status === 'REJECTED' && ad.rejectionReason && (

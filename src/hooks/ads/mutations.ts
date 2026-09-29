@@ -3,6 +3,7 @@ import { adKeys } from "./adKeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminAdKeys } from "./adminQuerys";
 import { AdForAdminDTO, AdResponseDTO, AdUpdateDTO } from "@/types/ads/commercial";
+import type { IncreaseAdBudgetRequest } from "@/types/BudgetIncrease.types";
 
 // Helper para actualizar listas en caché
 const updateAdInLists = (
@@ -112,6 +113,22 @@ export function useRejectAd() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminAdKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adKeys.lists() });
+    },
+  });
+}
+
+// Aumentar presupuesto (más likes al mismo precio; un COMPLETED se reabre).
+// La respuesta es el resumen del aumento, no el anuncio: se invalida en vez de parchar la caché.
+export function useIncreaseAdBudget() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, ...request }: { id: number } & IncreaseAdBudgetRequest) =>
+      adService.increaseBudget(id, request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adKeys.details() });
+      queryClient.invalidateQueries({ queryKey: adminAdKeys.lists() });
     },
   });
 }

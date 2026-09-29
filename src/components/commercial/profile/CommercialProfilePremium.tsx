@@ -23,6 +23,7 @@ import { getMyAllies } from "@/services/AlliesService";
 import { CommercialProfileResponseDTO } from "@/types/Commercial.types";
 import { AllyCommercialResponseDTO } from "@/types/Allies.types";
 import AlliesSummarySection from "@/components/commercial/profile/AlliesSummarySection";
+import ProfileContactInfo from "@/components/commercial/profile/ProfileContactInfo";
 import { ChangePlanButton } from "@/components/commercial/planChange/planChange.shared";
 
 function formatDate(iso: string) {
@@ -199,6 +200,9 @@ export default function CommercialProfilePremium() {
           </div>
         </div>
       </div>
+
+      {/* ── DATOS DE CONTACTO ── */}
+      <ProfileContactInfo />
 
       {/* ── PLAN ── */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
