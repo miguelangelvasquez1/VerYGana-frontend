@@ -18,8 +18,8 @@ import {
   getPendingKyc,
   getUserScreeningHistory,
   rejectKyc,
-  type KycPendingEntry,
-  type ScreeningHistoryEntry,
+  type KycPendingDTO,
+  type ScreeningResultResponseDTO,
 } from '@/services/ComplianceService';
 import {
   Btn,
@@ -43,11 +43,11 @@ const EASE_OUT = [0.23, 1, 0.32, 1] as const;
  * PEP) y empresas (NIT, representante legal). Se leen distinto, así que la
  * tarjeta se arma según lo que el backend realmente mandó.
  */
-const isCompany = (e: KycPendingEntry) =>
+const isCompany = (e: KycPendingDTO) =>
   Boolean(e.companyName || e.nit) ||
   String(e.role ?? '').replace(/^ROLE_/, '').toUpperCase() === 'COMMERCIAL';
 
-const subjectName = (e: KycPendingEntry) => {
+const subjectName = (e: KycPendingDTO) => {
   const person = [e.name, e.lastName].filter(Boolean).join(' ').trim();
   return e.companyName?.trim() || person || e.email;
 };
@@ -63,19 +63,19 @@ function ScreeningHistoryModal({
   entry,
   onClose,
 }: {
-  entry: KycPendingEntry;
+  entry: KycPendingDTO;
   onClose: () => void;
 }) {
-  const [history, setHistory] = useState<ScreeningHistoryEntry[]>([]);
+  const [history, setHistory] = useState<ScreeningResultResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    getUserScreeningHistory(entry.id)
+    getUserScreeningHistory(entry.publicId)
       .then(setHistory)
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [entry.id]);
+  }, [entry.publicId]);
 
   return (
     <Modal
@@ -106,7 +106,7 @@ function ScreeningHistoryModal({
           onRetry={() => {
             setError(false);
             setLoading(true);
-            getUserScreeningHistory(entry.id)
+            getUserScreeningHistory(entry.publicId)
               .then(setHistory)
               .catch(() => setError(true))
               .finally(() => setLoading(false));
@@ -134,22 +134,22 @@ function ScreeningHistoryModal({
                   <div className="min-w-0 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusTag tone={tone}>{h.status.replace('_', ' ')}</StatusTag>
-                      <span className="text-sm font-semibold text-cmp-ink">{h.listName}</span>
+                      <span className="text-sm font-semibold text-cmp-ink">{h.queriedName}</span>
                     </div>
                     <p className="text-sm text-cmp-slate">
                       Nombre consultado:{' '}
                       <span className="font-medium text-cmp-ink">{h.queriedName}</span>
                     </p>
-                    <Ref muted>{h.documentNumber}</Ref>
-                    {h.notes && (
+                    <Ref muted>{h.queriedDocument}</Ref>
+                    {h.officerNotes && (
                       <p className="rounded-lg border border-cmp-rule-soft bg-cmp-rule-soft/40 px-3 py-2 text-xs text-cmp-slate">
-                        {h.notes}
+                        {h.officerNotes}
                       </p>
                     )}
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="cmp-mono text-[11px] text-cmp-mute">{formatDate(h.createdAt)}</p>
-                    {h.reviewed && h.reviewedAt && (
+                    {h.reviewedByOfficerPublicId && h.reviewedAt && (
                       <p className="cmp-label mt-1.5 text-cmp-clear">
                         Revisado {formatDate(h.reviewedAt)}
                       </p>
@@ -173,7 +173,7 @@ function RejectModal({
   onConfirm,
   loading,
 }: {
-  entry: KycPendingEntry;
+  entry: KycPendingDTO;
   onClose: () => void;
   onConfirm: (reason: string) => void;
   loading: boolean;
@@ -220,7 +220,7 @@ function CaseCard({
   onApprove,
   onReject,
 }: {
-  entry: KycPendingEntry;
+  entry: KycPendingDTO;
   index: number;
   busy: 'approve' | 'reject' | null;
   onScreening: () => void;
@@ -303,13 +303,13 @@ function CaseCard({
 /* ── Panel ───────────────────────────────────────────────────────────── */
 
 export default function KycReviewPanel() {
-  const [entries, setEntries] = useState<KycPendingEntry[]>([]);
+  const [entries, setEntries] = useState<KycPendingDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [busyId, setBusyId] = useState<number | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [busyKind, setBusyKind] = useState<'approve' | 'reject' | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<KycPendingEntry | null>(null);
-  const [screeningTarget, setScreeningTarget] = useState<KycPendingEntry | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<KycPendingDTO | null>(null);
+  const [screeningTarget, setScreeningTarget] = useState<KycPendingDTO | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -327,12 +327,12 @@ export default function KycReviewPanel() {
     load();
   }, []);
 
-  const handleApprove = async (entry: KycPendingEntry) => {
-    setBusyId(entry.id);
+  const handleApprove = async (entry: KycPendingDTO) => {
+    setBusyId(entry.publicId);
     setBusyKind('approve');
     try {
-      await approveKyc(entry.id);
-      setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+      await approveKyc(entry.publicId);
+      setEntries((prev) => prev.filter((e) => e.publicId !== entry.publicId ));
       toast.success(`KYC aprobado — ${subjectName(entry)}`);
     } catch {
       toast.error('No se pudo aprobar el KYC. Intenta de nuevo.');
@@ -345,11 +345,11 @@ export default function KycReviewPanel() {
   const handleReject = async (reason: string) => {
     if (!rejectTarget) return;
     const target = rejectTarget;
-    setBusyId(target.id);
+    setBusyId(target.publicId);
     setBusyKind('reject');
     try {
-      await rejectKyc(target.id, reason);
-      setEntries((prev) => prev.filter((e) => e.id !== target.id));
+      await rejectKyc(target.publicId, reason);
+      setEntries((prev) => prev.filter((e) => e.publicId !== target.publicId));
       setRejectTarget(null);
       toast.success(`KYC rechazado — ${subjectName(target)}`);
     } catch {
@@ -388,10 +388,10 @@ export default function KycReviewPanel() {
             <AnimatePresence mode="popLayout">
               {entries.map((entry, i) => (
                 <CaseCard
-                  key={entry.id}
+                  key={entry.publicId}
                   entry={entry}
                   index={i}
-                  busy={busyId === entry.id ? busyKind : null}
+                  busy={busyId === entry.publicId ? busyKind : null}
                   onScreening={() => setScreeningTarget(entry)}
                   onApprove={() => handleApprove(entry)}
                   onReject={() => setRejectTarget(entry)}
@@ -409,7 +409,7 @@ export default function KycReviewPanel() {
             entry={rejectTarget}
             onClose={() => setRejectTarget(null)}
             onConfirm={handleReject}
-            loading={busyId === rejectTarget.id && busyKind === 'reject'}
+            loading={busyId === rejectTarget.publicId && busyKind === 'reject'}
           />
         )}
       </AnimatePresence>

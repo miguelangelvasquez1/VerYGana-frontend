@@ -92,7 +92,7 @@ export const AdCard: React.FC<AdCardProps> = ({
           <span>{ad.currentLikes}/{ad.maxLikes} likes</span>
 
           {/* Advertiser */}
-          <span className="truncate max-w-[120px]">{ad.commercialName || `ID ${ad.commercialId}`}</span>
+          <span className="truncate max-w-[120px]">{ad.commercialName || `ID ${ad.commercialPublicId}`}</span>
 
           {/* Date */}
           <span>{formatDate(ad.startDate)}</span>

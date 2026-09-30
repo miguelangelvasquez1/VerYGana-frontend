@@ -10,10 +10,9 @@ import {
   Palette,
   ClipboardList,
   PawPrint,
-  Handshake,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { getCommercialProfile } from "@/services/commercialService";
+import { getCommercialProfile } from "@/services/commercial/commercialService";
 import { adService } from "@/services/adService";
 import { getCampaigns } from "@/services/CampaignService";
 import { surveyAdminService } from "@/services/surveyService";
@@ -50,7 +49,7 @@ const EMPTY_STATS: PremiumStats = {
 
 export default function CommercialProfilePremium() {
   const { user } = useAuth();
-  const commercialId = Number(user?.id);
+  const commercialPublicId = user?.publicId;
 
   const [profile, setProfile] = useState<CommercialProfileResponseDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,10 +62,10 @@ export default function CommercialProfilePremium() {
   const [alliesLoading, setAlliesLoading] = useState(true);
 
   useEffect(() => {
-    if (!commercialId || isNaN(commercialId)) return;
+    if (!commercialPublicId) return;
     const load = async () => {
       try {
-        const data = await getCommercialProfile(commercialId);
+        const data = await getCommercialProfile(commercialPublicId);
         setProfile(data);
       } catch {
         setError(true);
@@ -75,7 +74,7 @@ export default function CommercialProfilePremium() {
       }
     };
     load();
-  }, [commercialId]);
+  }, [commercialPublicId]);
 
   useEffect(() => {
     const loadStats = async () => {

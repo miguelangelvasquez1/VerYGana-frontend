@@ -180,7 +180,7 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onMediaError, 
               </div>
               <div className="flex items-center gap-2 text-gray-600 bg-gray-50 rounded-xl px-3 py-2">
                 <Users className="w-4 h-4 text-gray-400" />
-                <span><span className="font-semibold">Anunciante:</span> {ad.commercialName || `ID ${ad.commercialId}`}</span>
+                <span><span className="font-semibold">Anunciante:</span> {ad.commercialName || `ID ${ad.commercialPublicId}`}</span>
               </div>
             </div>
           </div>

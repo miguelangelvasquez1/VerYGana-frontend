@@ -19,6 +19,9 @@ import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { RechargePreviewResponseDTO } from '@/types/finance/plans/PlanRecharge.types';
 import { PlanChangeRequestResponseDTO } from '@/types/finance/plans/PlanChange.types';
 import { formatBudget, formatCents } from '@/utils/currency';
+import { isProsperityVisible } from '@/utils/prosperity';
+import { useProsperitySummary } from '@/hooks/prosperity/useProsperity';
+import { ProsperityThresholdPreview } from '@/components/prosperity/ProsperityThresholdPreview';
 import { PLAN_CHANGE_LABELS, isActivePlanChangeRequest, ChangePlanButton } from '../planChange/planChange.shared';
 import {
   RECHARGE_CONTRACT_ID_KEY,
@@ -88,6 +91,16 @@ export function RechargeWizard() {
 
   const effectivePlan = planState?.effectivePlan as PlanCode | null | undefined;
   const range = effectivePlan ? RECHARGE_RANGES[effectivePlan] : undefined;
+
+  // Umbral de Prosperidad (solo STANDARD): se calcula sobre el valor NETO de
+  // la recarga (requestedAmountPesos), nunca sobre el total con IVA. Mientras
+  // el preview se recalcula usamos el monto tecleado para que se actualice en
+  // vivo (es el mismo valor neto).
+  const isStandardRecharge = (preview?.planCode ?? effectivePlan) === PlanCode.STANDARD;
+  const rechargeNetPesos =
+    preview && !previewLoading ? preview.requestedAmountPesos : parseCOP(inputValue);
+  const { data: prosperity } = useProsperitySummary(effectivePlan === PlanCode.STANDARD);
+  const prosperityBalanceCents = isProsperityVisible(prosperity?.status) ? prosperity?.balanceCents : undefined;
 
   // ── Recuperación inicial: sessionStorage puede tener una referencia de
   // pago (volvimos de Wompi) o un contractId (refresh a mitad del flujo).
@@ -471,6 +484,14 @@ export function RechargeWizard() {
                   </div>
                 )}
               </div>
+            )}
+
+            {isStandardRecharge && rechargeNetPesos > 0 && (
+              <ProsperityThresholdPreview
+                netPesos={rechargeNetPesos}
+                help="Equivale a 4 veces el valor neto de tu inversión (sin IVA). Se suma a tu Saldo de Prosperidad al confirmarse el pago; las ventas cubiertas por ese Saldo no pagan comisión."
+                currentBalanceCents={prosperityBalanceCents}
+              />
             )}
 
             {!preview && !previewLoading && (

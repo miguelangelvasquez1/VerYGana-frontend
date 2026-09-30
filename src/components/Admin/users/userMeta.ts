@@ -49,15 +49,25 @@ export const roleBadgeColor: Record<Role, string> = {
 
 export const userStateLabel: Record<UserState, string> = {
   [UserState.PENDING_EMAIL]: 'Pendiente de email',
+  [UserState.PENDING_ACCEPTANCE]: 'Pendiente de aceptar términos',
+  [UserState.PENDING_VERIFICATION]: 'Pendiente de verificación',
   [UserState.PENDING_KYC_REVIEW]: 'Pendiente de revisión',
   [UserState.ACTIVE]: 'Activo',
+  [UserState.PREVENTIVELY_RESTRICTED]: 'Restringido preventivamente',
+  [UserState.SUSPENDED]: 'Suspendido',
   [UserState.BLOCKED]: 'Bloqueado',
+  [UserState.TERMINATED]: 'Terminado',
 };
 
 export const userStateColor: Record<UserState, string> = {
   [UserState.ACTIVE]: 'bg-green-100 text-green-800',
   [UserState.BLOCKED]: 'bg-red-100 text-red-800',
+  [UserState.TERMINATED]: 'bg-gray-200 text-gray-700',
+  [UserState.SUSPENDED]: 'bg-orange-100 text-orange-800',
+  [UserState.PREVENTIVELY_RESTRICTED]: 'bg-orange-100 text-orange-800',
   [UserState.PENDING_EMAIL]: 'bg-amber-100 text-amber-800',
+  [UserState.PENDING_ACCEPTANCE]: 'bg-amber-100 text-amber-800',
+  [UserState.PENDING_VERIFICATION]: 'bg-amber-100 text-amber-800',
   [UserState.PENDING_KYC_REVIEW]: 'bg-purple-100 text-purple-800',
 };
 

@@ -117,7 +117,7 @@ export default function ConsumerProfilePage() {
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 {profile.name} {profile.lastName}
               </h1>
-              <p className="text-white/70 mt-1 text-sm">ID #{profile.id}</p>
+              <p className="text-white/70 mt-1 text-sm">ID #{profile.publicId}</p>
               <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
                 <StatusBadge state={profile.accountStatus || profile.userState} />
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white">

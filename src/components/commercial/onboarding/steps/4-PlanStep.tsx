@@ -4,6 +4,7 @@ import type { OnboardingPlanCatalog, OnboardingPlanOption } from "@/services/com
 import type { PlanCode } from "@/types/finance/plans/Plan.types";
 import { useKeysReservePct } from "@/hooks/useTreasuryConfig";
 import { DUAL_COMMISSION_NOTE, formatCOP, HelpTooltip, planCommissions, StepButton } from "../onboarding.shared";
+import { ProsperityThresholdPreview } from "@/components/prosperity/ProsperityThresholdPreview";
 
 export interface AcceptPlanData {
   investmentAmountCents?: number;
@@ -304,6 +305,16 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
               <AlertTriangle className="w-3 h-3 shrink-0" />
               El monto está fuera del rango permitido para este plan.
             </p>
+          )}
+          {selectedPlan.planCode === "STANDARD" && investmentCOPValue != null && investmentCOPValue > 0 && (
+            <div className="mt-3">
+              <ProsperityThresholdPreview
+                compact
+                netPesos={investmentCOPValue}
+                label="Umbral de Prosperidad que generará tu inversión"
+                help="Equivale a 4 veces el valor neto de tu inversión (sin IVA). Las ventas cubiertas por tu Saldo de Prosperidad no pagan comisión."
+              />
+            </div>
           )}
         </div>
       )}

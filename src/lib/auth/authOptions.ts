@@ -45,9 +45,11 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          // Return a "user" object to NextAuth
+          // Return a "user" object to NextAuth. El backend solo firma el
+          // claim `publicId` (UUID); el id interno ya no viaja en el token.
           return {
-            id: payload.userId?.toString(),
+            id: payload.publicId,
+            publicId: payload.publicId,
             email: payload.sub,
             role: payload.scope,
             accessToken: credentials.accessToken,
@@ -71,7 +73,7 @@ export const authOptions: NextAuthOptions = {
         return {
           ...token,
           accessToken: user.accessToken,
-          userId: user.id,
+          publicId: user.publicId,
           role: user.role,
           accessTokenExpires: expMs,
           error: undefined,
@@ -114,7 +116,11 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user = {
           ...session.user,
-          id: token.userId as string,
+          // Las sesiones abiertas antes de este cambio guardaron `userId` (ya
+          // undefined): se recupera el publicId del propio accessToken para no
+          // obligar a volver a iniciar sesión.
+          publicId:
+            token.publicId ?? (token.accessToken ? parseJwt(token.accessToken)?.publicId : undefined),
           role: token.role as string,
           email: token.email as string,
         } as any;

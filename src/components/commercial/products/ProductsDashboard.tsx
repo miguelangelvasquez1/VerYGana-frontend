@@ -112,7 +112,7 @@ export default function ProductsDashboard() {
           stock: p.stock,
           categoryName: p.categoryName,
           status: p.status,
-          commercialId: p.commercialId,
+          commercialPublicId: p.commercialPublicId,
           companyName: p.companyName,
           isGameReward: p.isGameReward,
         }));

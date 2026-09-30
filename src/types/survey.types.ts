@@ -290,7 +290,7 @@ export interface SurveyAdminDetailDTO {
   totalQuestions: number;
   questions: QuestionResponse[];
 
-  creatorId: number | null;
+  creatorPublicId: string | null;
   companyName: string | null;
   creatorEmail: string | null;
 

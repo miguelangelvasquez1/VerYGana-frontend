@@ -239,11 +239,13 @@ export interface AdminBrandingRequestSummary {
   id: number;
   brandName: string;
   gameName: string;
+  commercialPublicId : string;
   commercialName: string;
   status: BrandingStatus;
   budgetCents: number;
   estimatedSessions: number | null;
   adminNotes: string | null;
+  assignedDesignerPublicId : string | null;
   assignedDesignerName: string | null;
   corporateResourceCount: number;
   createdAt: string;
@@ -253,6 +255,7 @@ export interface AdminBrandingRequestSummary {
 export interface AdminBrandingRequestDetail {
   id: number;
   status: BrandingStatus;
+  commercialPublicId : string;
   commercialName: string;
   brandName: string;
   brandDescription: string;
@@ -269,6 +272,7 @@ export interface AdminBrandingRequestDetail {
   campaignGoal: string | null;
   maxSessionsPerUserPerDay: number | null;
   startDate: string | null;
+  endDate: string | null;
   categories: BrandingCategory[];
   targetMunicipalities: BrandingMunicipality[];
   minAge: number | null;
@@ -276,17 +280,19 @@ export interface AdminBrandingRequestDetail {
   targetGender: 'ALL' | 'MALE' | 'FEMALE' | null;
   adminNotes: string | null;
   reviewedByAdminName: string | null;
+  assignedDesignerPublicId : string | null;
   assignedDesignerName: string | null;
   assignedDesignerCode: string | null;
   corporateResources: BrandingCorporateResource[];
   hasCompleteTargeting: boolean;
+  /** null hasta que la solicitud genera su campaña. */
+  campaignId: number | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Designer {
-  id: number;
-  userId: number;
+  publicId: string;
   name: string;
   lastName: string;
   designerCode: string;
@@ -313,11 +319,11 @@ export const adminGetDesigners = async (): Promise<Designer[]> => {
 
 export const adminApproveBranding = async (
   id: number,
-  designerUserId: number,
+  designerPublicId: string,
   adminNotes?: string
 ): Promise<void> => {
   await apiClient.patch(`/api/admin/branding-requests/${id}/approve`, {
-    designerUserId,
+    designerPublicId,
     adminNotes: adminNotes || undefined,
   });
 };
@@ -326,8 +332,8 @@ export const adminRejectBranding = async (id: number, adminNotes: string): Promi
   await apiClient.patch(`/api/admin/branding-requests/${id}/reject`, { adminNotes });
 };
 
-export const adminAssignDesigner = async (id: number, designerUserId: number): Promise<void> => {
-  await apiClient.patch(`/api/admin/branding-requests/${id}/assign-designer`, { designerUserId });
+export const adminAssignDesigner = async (id: number, designerPublicId: string): Promise<void> => {
+  await apiClient.patch(`/api/admin/branding-requests/${id}/assign-designer`, { designerPublicId });
 };
 
 export const approveDesign = async (requestId: number): Promise<void> => {

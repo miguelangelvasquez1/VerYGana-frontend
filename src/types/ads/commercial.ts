@@ -163,7 +163,7 @@ export interface AdForConsumerDTO {
   currentLikes: number;
   contentUrl: string;
   targetUrl: string;
-  commercialId: number;
+  commercialPublicId: string;
   commercialName: string;
   mediaType: AdMediaType;
   durationSeconds: number;
@@ -203,7 +203,7 @@ export type AdForAdminDTO = {
   targetGender: string;
   rejectionReason: string | null;
   targetMunicipalities: MunicipalityResponseDTO[];
-  commercialId: number;
+  commercialPublicId: string;
   commercialName: string;
 };
 

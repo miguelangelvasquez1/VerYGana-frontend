@@ -111,7 +111,7 @@ const ConsumerProductCard: React.FC<ConsumerProductCardProps> = ({ product }) =>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/commercial/${product.commercialId}`);
+                router.push(`/commercial/${product.commercialPublicId}`);
               }}
               className="text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-blue-50 hover:border-blue-200 hover:text-cyan-500 transition cursor-pointer text-left"
             >
