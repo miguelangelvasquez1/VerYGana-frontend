@@ -15,6 +15,7 @@ import {
 import toast from 'react-hot-toast';
 import {
   getCampaignDetail,
+  increaseCampaignBudget,
   updateCampaign,
   updateCampaignStatus,
   type Campaign,
@@ -35,6 +36,7 @@ import { RendimientoTab } from './tabs/RendimientoTab';
 import { AudienciaTab } from './tabs/AudienciaTab';
 import { usePlanState } from '../layout/DashboardLayout';
 import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from '../plans/WalletBudgetAlerts';
+import { IncreaseBudgetModal } from '../budget/IncreaseBudgetModal';
 
 type Tab = 'resumen' | 'rendimiento' | 'audiencia';
 
@@ -52,8 +54,9 @@ interface Props {
 }
 
 export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
-  const { planState } = usePlanState();
+  const { planState, refreshPlanState } = usePlanState();
   const editBlocked = isBudgetDormant(planState);
+  const [showIncrease, setShowIncrease] = useState(false);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -292,7 +295,9 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
           </div>
         </div>
 
-        {activeTab === 'resumen' && <ResumenTab campaign={campaign} spentPct={spentPct} />}
+        {activeTab === 'resumen' && (
+          <ResumenTab campaign={campaign} spentPct={spentPct} onIncreaseBudget={() => setShowIncrease(true)} />
+        )}
 
         {activeTab === 'rendimiento' && <RendimientoTab campaign={campaign} />}
 
@@ -311,6 +316,36 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
           />
         )}
       </div>
+
+      {/* Aumento de presupuesto. `expectedBudgetCents` es el presupuesto que se está viendo: si otro
+          aumento ya lo cambió el backend responde 409 sin cobrar (anti doble cobro). El gasto por
+          sesión mueve `spentCents`, no `budgetCents`, así que no lo invalida. */}
+      {showIncrease && (
+        <IncreaseBudgetModal
+          assetLabel="campaña"
+          assetName={campaign.brandName ?? `Campaña #${campaign.id}`}
+          mode={{
+            kind: 'amount',
+            currentBudgetCents: budgetCents,
+            quickPicksPesos: [50_000, 100_000, 500_000, 1_000_000],
+          }}
+          willReopen={campaign.status === 'COMPLETED'}
+          balanceCents={planState?.remainingBudgetCents}
+          onSubmit={(additionalBudgetCents) =>
+            increaseCampaignBudget(campaign.id, { expectedBudgetCents: budgetCents, additionalBudgetCents })
+          }
+          onSuccess={() => {
+            setShowIncrease(false);
+            refreshPlanState();
+            loadCampaign();
+          }}
+          onStale={() => {
+            loadCampaign();
+            refreshPlanState();
+          }}
+          onClose={() => setShowIncrease(false)}
+        />
+      )}
     </div>
   );
 };

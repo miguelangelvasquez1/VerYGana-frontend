@@ -1,8 +1,8 @@
 ﻿'use client';
 
 import React, { useState } from 'react';
-import { X, Users, Tag, MapPin, Loader2, Pencil } from 'lucide-react';
-import { useCommercialSurveyDetail } from '@/hooks/surveys/useCommercialSurvey';
+import { X, Users, Tag, MapPin, Loader2, Pencil, PlusCircle } from 'lucide-react';
+import { useCommercialSurveyDetail, useIncreaseSurveyBudget } from '@/hooks/surveys/useCommercialSurvey';
 import {
   STATUS_LABELS,
   STATUS_COLORS,
@@ -12,7 +12,9 @@ import {
   formatDate,
 } from '@/hooks/surveys/surveyUtils';
 import SurveyEditModal from './SurveyEditModal';
+import { IncreaseBudgetModal } from '@/components/commercial/budget/IncreaseBudgetModal';
 import type { SurveyCommercialDetailDTO } from '@/types/survey.types';
+import { canIncreaseBudget } from '@/types/BudgetIncrease.types';
 import { usePlanState } from '@/components/commercial/layout/DashboardLayout';
 import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from '@/components/commercial/plans/WalletBudgetAlerts';
 
@@ -22,10 +24,16 @@ interface Props {
 }
 
 export default function SurveyDetailModal({ surveyId, onClose }: Props) {
-  const { data: survey, isLoading } = useCommercialSurveyDetail(surveyId);
-  const { planState } = usePlanState();
+  const { data: survey, isLoading, refetch } = useCommercialSurveyDetail(surveyId);
+  const increaseBudgetMutation = useIncreaseSurveyBudget(surveyId);
+  const { planState, refreshPlanState } = usePlanState();
   const editBlocked = isBudgetDormant(planState);
   const [showEdit, setShowEdit] = useState(false);
+  const [showIncrease, setShowIncrease] = useState(false);
+
+  // Solo ACTIVE / PAUSED / COMPLETED con cupo definido; no depende del estado DORMANT de la
+  // billetera: meter saldo a una encuesta no es "editarla".
+  const canIncrease = !!survey && survey.maxResponses != null && canIncreaseBudget(survey.status);
 
   return (
     <>
@@ -72,7 +80,10 @@ export default function SurveyDetailModal({ surveyId, onClose }: Props) {
               <Loader2 className="h-8 w-8 animate-spin text-[#03548C]" />
             </div>
           ) : survey ? (
-            <SurveyContent survey={survey} />
+            <SurveyContent
+              survey={survey}
+              onIncreaseBudget={canIncrease ? () => setShowIncrease(true) : undefined}
+            />
           ) : null}
         </div>
       </div>
@@ -80,13 +91,54 @@ export default function SurveyDetailModal({ surveyId, onClose }: Props) {
       {showEdit && survey && (
         <SurveyEditModal survey={survey} onClose={() => setShowEdit(false)} />
       )}
+
+      {/* Aumento de presupuesto. `expectedMaxResponses` es el cupo que se está viendo: si otro
+          aumento ya lo cambió el backend responde 409 sin cobrar (anti doble cobro). */}
+      {showIncrease && survey && survey.maxResponses != null && (
+        <IncreaseBudgetModal
+          assetLabel="encuesta"
+          assetName={survey.title}
+          mode={{
+            kind: 'units',
+            unitSingular: 'respuesta',
+            unitPlural: 'respuestas',
+            unitCostCents: survey.questions.length * survey.rewardAmountPerQuestionCents,
+            currentTotal: survey.maxResponses,
+            quickPicks: [10, 50, 100, 500],
+          }}
+          willReopen={survey.status === 'COMPLETED'}
+          balanceCents={planState?.remainingBudgetCents}
+          onSubmit={(additionalResponses) =>
+            increaseBudgetMutation.mutateAsync({
+              expectedMaxResponses: survey.maxResponses as number,
+              additionalResponses,
+            })
+          }
+          onSuccess={() => {
+            refreshPlanState();
+            setShowIncrease(false);
+          }}
+          onStale={() => {
+            refetch();
+            refreshPlanState();
+          }}
+          onClose={() => setShowIncrease(false)}
+        />
+      )}
     </>
   );
 }
 
 // ─── Content — receives survey so derived values can be computed at the top ───
 
-function SurveyContent({ survey }: { survey: SurveyCommercialDetailDTO }) {
+function SurveyContent({
+  survey,
+  onIncreaseBudget,
+}: {
+  survey: SurveyCommercialDetailDTO;
+  /** Solo se pasa cuando la encuesta admite aumento de presupuesto. */
+  onIncreaseBudget?: () => void;
+}) {
   const categoryNames = (survey.categories ?? []).map((c) => c.name);
   const municipalityNames = (survey.targetMunicipalities ?? []).map((m) => m.name);
 
@@ -145,6 +197,17 @@ function SurveyContent({ survey }: { survey: SurveyCommercialDetailDTO }) {
             <BudgetCard label="Restante" value={formatReward(remainingCents / 100)} colorClass="text-emerald-600" />
           )}
         </div>
+        {onIncreaseBudget && (
+          <button
+            type="button"
+            onClick={onIncreaseBudget}
+            className="mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-[#03548C]/20 px-4 py-2 text-sm font-semibold text-[#03548C] transition-colors hover:border-[#03548C]/40 hover:bg-[#03548C]/5"
+            title={survey.status === 'COMPLETED' ? 'Agrega respuestas para reactivar esta encuesta' : 'Agregar más respuestas a la encuesta'}
+          >
+            <PlusCircle className="h-4 w-4" />
+            {survey.status === 'COMPLETED' ? 'Aumentar presupuesto y reactivar' : 'Aumentar presupuesto'}
+          </button>
+        )}
       </Section>
 
       {/* Targeting */}

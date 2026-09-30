@@ -25,8 +25,9 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
   // falla (403 por URL vencida) re-pedimos el detalle para traer una URL fresca.
   const handleMediaError = useRefetchOnExpiredMedia(refetchAd);
 
-  const formatMoney = (value: number | null | undefined) =>
-    (value ?? 0).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // rewardPerLike / totalBudget / spentBudget / remainingBudget ya llegan en PESOS.
+  const formatMoney = (pesos: number | null | undefined) =>
+    Number(pesos ?? 0).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString('es-CO', {
@@ -97,7 +98,10 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">{ad.title}</h3>
-                  <p className="text-sm text-gray-500 mt-1">ID: {ad.id} · Creado: {formatDate(ad.createdAt)}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    ID: {ad.id} · Creado: {formatDate(ad.createdAt)}
+                    {ad.durationSeconds != null && <> · Duración: {ad.durationSeconds} s</>}
+                  </p>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 ${statusColors[ad.status]}`}>
                   {statusLabels[ad.status]}

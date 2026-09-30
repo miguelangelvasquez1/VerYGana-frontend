@@ -1,9 +1,13 @@
 import { AdForAdminDTO } from '@/types/ads/commercial';
 
-export const formatCurrency = (amount: number): string => {
-  return `$${amount.toLocaleString('es-CO', { 
-    minimumFractionDigits: 2, 
-    maximumFractionDigits: 2 
+/**
+ * Formatea un monto de anuncio. Recibe PESOS (rewardPerLike, totalBudget, spentBudget y
+ * remainingBudget de AdForAdminDTO ya vienen convertidos por el backend).
+ */
+export const formatCurrency = (pesos: number): string => {
+  return `$${Number(pesos).toLocaleString('es-CO', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   })}`;
 };
 

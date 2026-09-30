@@ -304,7 +304,8 @@ function ConfirmDeleteModal({
             <p className="text-sm text-gray-500 mt-1">
               ¿Estás seguro de eliminar{' '}
               <span className="font-semibold text-gray-700">"{title}"</span>?
-              Esta acción no se puede deshacer.
+              Esta acción no se puede deshacer: la historia deja de mostrarse y sus imágenes
+              y videos se borran definitivamente del servidor.
             </p>
           </div>
         </div>

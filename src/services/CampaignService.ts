@@ -1,5 +1,6 @@
 import apiClient from '@/lib/api/client';
 import type { BrandingCategory, BrandingMunicipality } from '@/services/BrandingRequestService';
+import type { BudgetIncreaseResponse, IncreaseCampaignBudgetRequest } from '@/types/BudgetIncrease.types';
 
 export type CampaignStatus = 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED';
 
@@ -68,4 +69,17 @@ export const updateCampaign = async (campaignId: number, dto: UpdateCampaignDto)
 
 export const updateCampaignStatus = async (campaignId: number, status: CampaignStatus): Promise<void> => {
   await apiClient.patch(`/campaigns/update-status/${campaignId}`, { status });
+};
+
+/**
+ * Suma presupuesto a una campaña ACTIVE, PAUSED o COMPLETED y cobra de la wallet; una COMPLETED se
+ * reabre. `expectedBudgetCents` es el presupuesto que se está viendo: si ya cambió (otro aumento),
+ * el backend responde 409 sin cobrar. Ver BudgetIncrease.types.ts.
+ */
+export const increaseCampaignBudget = async (
+  campaignId: number,
+  request: IncreaseCampaignBudgetRequest,
+): Promise<BudgetIncreaseResponse> => {
+  const { data } = await apiClient.post(`/campaigns/${campaignId}/increase-budget`, request);
+  return data;
 };

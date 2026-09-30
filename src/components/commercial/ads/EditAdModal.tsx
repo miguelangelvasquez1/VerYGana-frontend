@@ -41,8 +41,10 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
     }
   });
 
-  const formatMoney = (value: number) =>
-    value.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // rewardPerLike / totalBudget (y los montos que se derivan de ellos) están en CENTAVOS; se muestran en pesos.
+  // Los montos del anuncio ya llegan en PESOS.
+  const formatMoney = (pesos: number) =>
+    Number(pesos).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [selectedMunicipalitiesData, setSelectedMunicipalitiesData] = useState<SelectedMunicipalityData[]>(initialSelectedMunicipalities);

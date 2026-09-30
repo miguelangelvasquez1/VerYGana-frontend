@@ -1,6 +1,7 @@
 import apiClient from '@/lib/api/client';
 import { AdDetails, AdForAdminDTO, AdForConsumerDTO, AdLikeDTO, AdResponseDTO, AdUpdateDTO, AdUploadPermission, AssetAnalysisResult, FileUploadRequestDTO } from '@/types/ads/commercial';
 import { PagedResponse } from '@/types/Generic.types';
+import type { BudgetIncreaseResponse, IncreaseAdBudgetRequest } from '@/types/BudgetIncrease.types';
 
 class AdService {
   private _token: string | null = null;
@@ -97,6 +98,16 @@ class AdService {
   // Activar un anuncio
   async resumeAd(id: number): Promise<AdResponseDTO> {
     const response = await apiClient.post<AdResponseDTO>(`/ads/${id}/activate`);
+    return response.data;
+  }
+
+  /**
+   * Compra más likes (al mismo precio por like) para un anuncio ACTIVE, PAUSED o COMPLETED y cobra
+   * de la wallet; un COMPLETED se reabre. `expectedMaxLikes` es el `maxLikes` que se está viendo:
+   * si ya cambió (otro aumento), el backend responde 409 sin cobrar. Ver BudgetIncrease.types.ts.
+   */
+  async increaseBudget(id: number, request: IncreaseAdBudgetRequest): Promise<BudgetIncreaseResponse> {
+    const response = await apiClient.post<BudgetIncreaseResponse>(`/ads/${id}/increase-budget`, request);
     return response.data;
   }
 
