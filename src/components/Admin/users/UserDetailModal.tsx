@@ -23,6 +23,15 @@ import {
   formatCOP,
   formatKeys,
 } from './userMeta';
+import { CommercialProsperityPanel } from '../prosperity/CommercialProsperityPanel';
+
+type DetailTab = 'info' | 'prosperity';
+
+// Solo para empresarios (COMMERCIAL).
+const DETAIL_TABS: { key: DetailTab; label: string }[] = [
+  { key: 'info', label: 'Información' },
+  { key: 'prosperity', label: 'Prosperidad' },
+];
 
 type DetailDTO =
   | ConsumerResponseDTO
@@ -98,11 +107,13 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
   const [data, setData] = useState<DetailDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<DetailTab>('info');
 
   useEffect(() => {
     if (!isOpen) return;
     setData(null);
     setError(null);
+    setTab('info');
     setLoading(true);
     fetchDetailByRole(role, publicId)
       .then(setData)
@@ -113,11 +124,17 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
   if (!isOpen) return null;
 
   const isBlocked = data?.userState === UserState.BLOCKED;
+  const showTabs = role === Role.COMMERCIAL && !!data && !loading && !error;
+  const prosperityTab = showTabs && tab === 'prosperity';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white">
+      <div
+        className={`bg-white rounded-xl shadow-xl w-full max-h-[90vh] overflow-y-auto transition-[max-width] ${
+          prosperityTab ? 'max-w-6xl' : 'max-w-2xl'
+        }`}
+      >
+        <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold text-gray-900">
@@ -141,12 +158,37 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
           </button>
         </div>
 
+        {showTabs && (
+          <div className="flex gap-1 border-b px-6" role="tablist">
+            {DETAIL_TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.key}
+                onClick={() => setTab(t.key)}
+                className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                  tab === t.key
+                    ? 'border-admin-blue text-admin-blue'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-admin-blue" size={32} />
           </div>
         ) : error || !data ? (
           <div className="p-6 text-center text-red-600 text-sm">{error}</div>
+        ) : prosperityTab ? (
+          <div className="p-4 sm:p-6">
+            <CommercialProsperityPanel publicId={(data as CommercialResponseDTO).publicId ?? null} />
+          </div>
         ) : (
           <div className="p-6 space-y-6">
             <Section title="Información de cuenta">
@@ -171,7 +213,7 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
                     <InfoRow label="Persona expuesta políticamente" value={c.pep ? 'Sí' : 'No'} />
                     <InfoRow label="Tiene mascota" value={<span className="flex items-center gap-1">{c.hasPet ? 'Sí' : 'No'} {c.hasPet && <PawPrint size={14} className="text-admin-gold" />}</span>} />
                     <InfoRow label="Código de referido" value={c.referralCode} />
-                    <InfoRow label="Referido por" value={c.referredBy ?? 'Registro directo'} />
+                    <InfoRow label="Referido por" value={c.referredByPublicId ? <span className="font-mono text-xs break-all">{c.referredByPublicId}</span> : 'Registro directo'} />
                     <InfoRow label="Último login diario" value={formatDate(c.lastDailyLoginDate)} />
                     <InfoRow label="Anuncios vistos" value={c.adsWatched} />
                   </Section>

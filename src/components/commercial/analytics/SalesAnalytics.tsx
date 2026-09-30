@@ -11,12 +11,14 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { ShoppingBag, History, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingBag, History, Star, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { usePlanState } from "@/components/commercial/layout/DashboardLayout";
+import { PlanCode } from "@/types/finance/plans/Plan.types";
 
 import TopSellingProducts from "@/components/commercial/products/commercialStats/TopSellingProducts";
 import { MetricStatCard } from "./MetricStatCard";
 import MonthlySalesReportModal from "./MonthlySalesReportModal";
-import * as commercialService from "@/services/commercialService";
+import * as commercialService from "@/services/commercial/commercialService";
 import { getTotalCommercialSales } from "@/services/PurchaseItemService";
 import { useAuth } from "@/hooks/useAuth";
 import { SalesReportResponseDTO, DailySaleResponseDTO } from "@/types/Commercial.types";
@@ -56,7 +58,9 @@ const formatCents = (cents: number) =>
 
 export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
   const { user } = useAuth();
-  const commercialId = Number(user?.id);
+  const commercialPublicId = user?.publicId;
+  const { planState } = usePlanState();
+  const isStandard = planState?.effectivePlan === PlanCode.STANDARD;
 
   // ================== VENTAS TOTALES (rango de fechas) ==================
   const [salesCount, setSalesCount] = useState<number | null>(null);
@@ -98,15 +102,14 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
   }, []);
 
   useEffect(() => {
-    if (!commercialId || isNaN(commercialId)) return;
+    if (!commercialPublicId) return;
     setReviewCountLoading(true);
     commercialService
-      .getCommercialProfile(commercialId)
+      .getCommercialProfile(commercialPublicId)
       .then((profile) => setReviewCount(profile.reviewCount))
       .catch((error) => console.error("Error loading review count", error))
       .finally(() => setReviewCountLoading(false));
-  }, [commercialId]);
-
+  }, [commercialPublicId]);
   useEffect(() => {
     setReportLoading(true);
     commercialService
@@ -208,9 +211,22 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
                         <td className="py-3 px-4 text-right text-gray-700 whitespace-nowrap">
                           {formatCents(sale.subtotalCents)}
                         </td>
-                        <td className="py-3 px-4 text-right text-red-500 whitespace-nowrap">
-                          -{formatCents(sale.commissionCents)}
-                        </td>
+                        {isStandard && sale.commissionCents === 0 ? (
+                          <td className="py-3 px-4 text-right whitespace-nowrap">
+                            <span
+                              title="Comisión cubierta por tu Saldo de Prosperidad"
+                              className="inline-flex items-center gap-1 text-gray-600 cursor-help"
+                            >
+                              {formatCents(0)}
+                              <Info className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="sr-only">Comisión cubierta por tu Saldo de Prosperidad</span>
+                            </span>
+                          </td>
+                        ) : (
+                          <td className="py-3 px-4 text-right text-red-500 whitespace-nowrap">
+                            -{formatCents(sale.commissionCents)}
+                          </td>
+                        )}
                         <td className="py-3 px-4 text-right font-semibold text-green-600 whitespace-nowrap">
                           {formatCents(sale.netToCommercialCents)}
                         </td>

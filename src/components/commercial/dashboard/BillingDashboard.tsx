@@ -6,14 +6,13 @@ import { getBillingSummary, getDeposits, getPayouts } from '@/services/WalletSer
 import {
   BillingSummaryResponseDTO,
   DepositResponseDTO,
-  PayoutSummaryResponseDTO,
   WalletStatus,
-  PayoutStatus,
   DepositType,
 } from '@/types/finance/Wallet.types';
 import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { PagedResponse } from '@/types/Generic.types';
 import { PayoutMethodsSection } from '@/components/commercial/payout-methods/PayoutMethodsSection';
+import { PayoutStatus, PayoutSummaryResponseDTO } from '@/types/Payout.types';
 
 const formatCents = (cents: number) =>
   new Intl.NumberFormat('es-CO', {
@@ -47,6 +46,7 @@ const payoutStatusLabels: Record<PayoutStatus, string> = {
   [PayoutStatus.SCHEDULED]: 'Programado',
   [PayoutStatus.PAID]: 'Pagado',
   [PayoutStatus.FAILED]: 'Fallido',
+  [PayoutStatus.EXHAUSTED]: 'Agotado',
 };
 
 const payoutStatusColors: Record<PayoutStatus, string> = {
@@ -54,6 +54,7 @@ const payoutStatusColors: Record<PayoutStatus, string> = {
   [PayoutStatus.SCHEDULED]: 'bg-yellow-100 text-yellow-700',
   [PayoutStatus.PAID]: 'bg-green-100 text-green-700',
   [PayoutStatus.FAILED]: 'bg-red-100 text-red-700',
+  [PayoutStatus.EXHAUSTED]: 'bg-gray-100 text-gray-700',
 };
 
 const depositTypeLabels: Record<DepositType, string> = {

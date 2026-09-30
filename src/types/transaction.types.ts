@@ -1,7 +1,7 @@
 
 
 export interface EarningsByMonthResponseDTO {
-    commercialId: number;
+    sellerPublicId: string;
     year: number;
     month: number;
     earnings: number;

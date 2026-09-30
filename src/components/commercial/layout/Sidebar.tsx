@@ -16,9 +16,12 @@ import {
   Lock,
   Palette,
   Handshake,
+  Sprout,
 } from 'lucide-react';
 import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { useLogout } from '@/hooks/useLogout';
+import { useProsperitySummary } from '@/hooks/prosperity/useProsperity';
+import { isProsperityVisible } from '@/utils/prosperity';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,6 +35,8 @@ interface MenuItem {
   skipActive?: boolean;
   /** Only highlight on an exact pathname match — no matching of child routes (used for the root Dashboard link). */
   exactMatch?: boolean;
+  /** Solo visible si el comercial tiene Saldo de Prosperidad (ACTIVE o FROZEN), sin importar el plan actual. */
+  prosperityOnly?: boolean;
 }
 
 interface SidebarProps {
@@ -85,6 +90,7 @@ const menuItems: MenuItem[] = [
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
   },
+  { href: '/commercial/prosperity', icon: Sprout, label: 'Saldo de Prosperidad', prosperityOnly: true },
   {
     href: '/commercial/billing', icon: CreditCard, label: 'Facturación',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
@@ -103,6 +109,7 @@ export function Sidebar({
 }: SidebarProps) {
 
   const { logout } = useLogout();
+  const { data: prosperity } = useProsperitySummary();
 
   // Usamos el pathname que viene del Layout (más estable)
   const isActive = useMemo(() => {
@@ -129,6 +136,7 @@ export function Sidebar({
   };
 
   const showItem = (item: MenuItem): boolean => {
+    if (item.prosperityOnly) return isProsperityVisible(prosperity?.status);
     if (item.requiredPlans && !item.lockIfUnavailable && !canAccess(item)) return false;
     return true;
   };

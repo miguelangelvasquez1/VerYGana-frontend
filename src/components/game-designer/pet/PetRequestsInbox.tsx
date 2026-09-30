@@ -165,8 +165,8 @@ export default function PetRequestsInbox() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-gray-900">{req.productName}</p>
-                      {req.commercialName && (
-                        <p className="mt-0.5 text-xs text-gray-400">{req.commercialName}</p>
+                      {req.companyName && (
+                        <p className="mt-0.5 text-xs text-gray-400">{req.companyName}</p>
                       )}
                     </div>
                     <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${cfg.bg} ${cfg.text}`}>

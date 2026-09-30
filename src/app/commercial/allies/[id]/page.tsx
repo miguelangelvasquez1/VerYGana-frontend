@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 
-import { getCommercialProfile } from "@/services/commercialService";
+import { getCommercialProfile } from "@/services/commercial/commercialService";
 import { getCommercialProducts } from "@/services/ProductService";
 import { CommercialProfileResponseDTO } from "@/types/Commercial.types";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
@@ -15,7 +15,7 @@ import { useAllyPromotions } from "@/hooks/commercial/useAllyPromotions";
 export default function AllyStorefrontPage() {
   const { id } = useParams();
   const router = useRouter();
-  const commercialId = Number(id);
+  const commercialPublicId = String(id);
 
   const [profile, setProfile] = useState<CommercialProfileResponseDTO | null>(null);
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
@@ -30,7 +30,7 @@ export default function AllyStorefrontPage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await getCommercialProfile(commercialId);
+        const data = await getCommercialProfile(commercialPublicId);
         setProfile(data);
         setProducts(data.activeProducts.data);
         setHasMore(data.activeProducts.meta.hasNext);
@@ -42,14 +42,14 @@ export default function AllyStorefrontPage() {
       }
     };
     fetchProfile();
-  }, [commercialId]);
+  }, [commercialPublicId]);
 
   const loadMoreProducts = async () => {
     if (productsLoading || !hasMore) return;
     setProductsLoading(true);
     try {
       const nextPage = currentPage + 1;
-      const res = await getCommercialProducts(commercialId, nextPage);
+      const res = await getCommercialProducts(commercialPublicId, nextPage);
       setProducts((prev) => [...prev, ...res.data]);
       setHasMore(res.meta.hasNext);
       setCurrentPage(nextPage);

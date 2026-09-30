@@ -9,7 +9,7 @@ import { Lock, Sparkles, Loader2 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { getEffectivePlanState } from '@/services/planService';
-import { getCommercialInitialData } from '@/services/commercialService';
+import { getCommercialInitialData } from '@/services/commercial/commercialService';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
 import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
 import { WalletStatus } from '@/types/finance/Wallet.types';

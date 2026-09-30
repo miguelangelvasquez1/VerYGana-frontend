@@ -43,7 +43,7 @@ const AdminPetRequestsPanel: React.FC = () => {
   }
 
   const sinAsignar = requests.filter(
-    r => (r.status === 'APPROVED' || r.status === 'ITEM_IN_PROGRESS') && !r.assignedDesignerUserId,
+    r => (r.status === 'APPROVED' || r.status === 'ITEM_IN_PROGRESS') && !r.assignedDesignerPublicId,
   ).length;
 
   return (
@@ -141,7 +141,7 @@ const AdminPetRequestsPanel: React.FC = () => {
                 const status = PET_STATUS_CONFIG[req.status];
                 const necesitaDisenador =
                   (req.status === 'APPROVED' || req.status === 'ITEM_IN_PROGRESS') &&
-                  !req.assignedDesignerUserId;
+                  !req.assignedDesignerPublicId;
                 return (
                   <tr
                     key={req.id}
@@ -169,7 +169,7 @@ const AdminPetRequestsPanel: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700 max-w-[160px] truncate">
-                      {req.commercialName ?? <span className="text-gray-300">—</span>}
+                      {req.companyName ??<span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${status.className}`}>

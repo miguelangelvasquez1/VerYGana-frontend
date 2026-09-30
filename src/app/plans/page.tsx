@@ -19,6 +19,9 @@ import { PlanCatalogOption, PlanCatalogResponseDTO } from '@/types/finance/plans
 import { PlanChangeAssetType, PlanChangePreviewResponseDTO } from '@/types/finance/plans/PlanChange.types';
 import { WompiCheckoutResponseDTO } from '@/types/finance/wompi/Wompi.types';
 import { RECHARGE_CONTRACT_ID_KEY, isActiveRechargeContract } from '@/components/commercial/balance/balance.shared';
+import { ProsperityThresholdPreview } from '@/components/prosperity/ProsperityThresholdPreview';
+import { useProsperitySummary } from '@/hooks/prosperity/useProsperity';
+import { formatProsperityCents, isProsperityVisible } from '@/utils/prosperity';
 
 function apiErrorMessage(err: unknown, fallback: string): string {
   const data = (err as { response?: { data?: { message?: string } } })?.response?.data;
@@ -31,9 +34,6 @@ const NA = 'No aplica';
 
 const formatCOP = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
-
-// Solo el número con separador de miles (sin símbolo) — el JSX antepone el "$".
-const plainCOP = (cents: number) => new Intl.NumberFormat('es-CO').format(Math.round(cents / 100));
 
 const parseCOP = (raw: string) => parseInt(raw.replace(/\D/g, ''), 10) || 0;
 
@@ -73,6 +73,26 @@ interface FeatureCategory {
   rows: FeatureRow[];
 }
 
+// Modelo de plan para la UI: combina lo que llega de GET /plans/catalog con
+// metadata puramente visual (ícono, si se resalta como "más popular", el
+// texto de la sección de features) que la API no expone y no varía.
+interface UIPlan {
+  key: PlanCode;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  highlight: boolean;
+  currentPlan: boolean;
+  featuresLabel: string;
+  priceLabel: string;
+  unit: string;
+  billing: string;
+  highlights: { icon: React.ReactNode; text: string }[];
+  monthlyFeeCents: number | null;
+  minInvestmentCents: number | null;
+  maxInvestmentCents: number | null;
+}
+
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const PLAN_ORDER: PlanCode[] = [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM];
@@ -92,7 +112,26 @@ const PLAN_UI_META: Record<PlanCode, { icon: React.ReactNode; highlight: boolean
   [PlanCode.PREMIUM]: { icon: <Rocket className="w-8 h-8" />, highlight: false, featuresLabel: 'Todo lo de Estándar, más:' },
 };
 
+const PLAN_ROW_KEY: Record<PlanCode, 'basic' | 'standard' | 'premium'> = {
+  [PlanCode.BASIC]: 'basic',
+  [PlanCode.STANDARD]: 'standard',
+  [PlanCode.PREMIUM]: 'premium',
+};
+
+// Las tarjetas muestran solo las funcionalidades habilitadas del plan; el
+// valor textual (comisión, tope, etc.) se agrega junto a la etiqueta.
+function buildHighlights(code: PlanCode, rows: FeatureRow[]): UIPlan['highlights'] {
+  const rowKey = PLAN_ROW_KEY[code];
+  return rows
+    .filter(r => r[rowKey] !== false && r[rowKey] !== NA)
+    .map(r => {
+      const val = r[rowKey];
+      return { icon: r.icon, text: typeof val === 'string' ? `${r.label}: ${val}` : r.label };
+    });
+}
+
 function buildUIPlans(catalog: PlanCatalogResponseDTO): UIPlan[] {
+  const rows = buildFeatureCategories(catalog).flatMap(c => c.rows);
   return PLAN_ORDER
     .map(code => catalog.plans.find(p => p.planCode === code))
     .filter((p): p is PlanCatalogOption => !!p)
@@ -111,6 +150,7 @@ function buildUIPlans(catalog: PlanCatalogResponseDTO): UIPlan[] {
         priceLabel: new Intl.NumberFormat('es-CO').format(priceCents / 100),
         unit: isMonthly ? 'COP / mes' : 'COP mín.',
         billing: isMonthly ? 'cobro mensual' : 'inversión única',
+        highlights: buildHighlights(p.planCode, rows),
         monthlyFeeCents: p.monthlyFeeCents,
         minInvestmentCents: p.minInvestmentCents,
         maxInvestmentCents: p.maxInvestmentCents,
@@ -118,14 +158,14 @@ function buildUIPlans(catalog: PlanCatalogResponseDTO): UIPlan[] {
     });
 }
 
-function buildFeatureRows(catalog: PlanCatalogResponseDTO): PlanFeatureRow[] {
+function buildFeatureCategories(catalog: PlanCatalogResponseDTO): FeatureCategory[] {
   const byCode = new Map(catalog.plans.map(p => [p.planCode, p]));
   const b = byCode.get(PlanCode.BASIC);
   const s = byCode.get(PlanCode.STANDARD);
   const p = byCode.get(PlanCode.PREMIUM);
   if (!b || !s || !p) return [];
 
-  return [
+  const salesRows: FeatureRow[] = [
     {
       label: 'Venta de productos', icon: <Package className="w-4 h-4" />,
       basic: `comisión ${b.saleCommissionPct}%`, standard: `comisión ${s.saleCommissionPct}%`, premium: `comisión ${p.saleCommissionPct}%`,
@@ -135,9 +175,12 @@ function buildFeatureRows(catalog: PlanCatalogResponseDTO): PlanFeatureRow[] {
       basic: pctOrUnlimited(b.maxKeysPct), standard: pctOrUnlimited(s.maxKeysPct), premium: pctOrUnlimited(p.maxKeysPct),
     },
     {
-      label: 'Productos publicables', icon: <Boxes className="w-4 h-4" />,
+      label: 'Productos publicables', icon: <Layers className="w-4 h-4" />,
       basic: limitOrUnlimited(b.maxProducts), standard: limitOrUnlimited(s.maxProducts), premium: limitOrUnlimited(p.maxProducts),
     },
+  ];
+
+  const visibilityRows: FeatureRow[] = [
     {
       label: 'Juegos branded', icon: <Gamepad2 className="w-4 h-4" />,
       basic: capacityLabel(b.canUseGames, b.maxBrandedGames),
@@ -166,6 +209,11 @@ function buildFeatureRows(catalog: PlanCatalogResponseDTO): PlanFeatureRow[] {
       standard: s.visibilityBoostPct > 0 ? `+${s.visibilityBoostPct}%` : false,
       premium: p.visibilityBoostPct > 0 ? `+${p.visibilityBoostPct}%` : false,
     },
+  ];
+
+  return [
+    { title: 'Económico y ventas', rows: salesRows },
+    { title: 'Publicidad, juegos y visibilidad', rows: visibilityRows },
   ];
 }
 
@@ -259,8 +307,18 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
     setSubmitError(null);
   };
 
+  // Saldo de Prosperidad — Umbral sobre el abono NETO (requiredTopUpAmountPesos,
+  // nunca el total con IVA). Mientras el preview recalcula usamos el monto
+  // tecleado para que la fila se actualice en vivo.
+  const toStandard = (preview?.toPlanCode ?? plan.key) === PlanCode.STANDARD;
+  const prosperityNetPesos =
+    preview && !previewLoading ? (preview.requiredTopUpAmountPesos ?? amount) : amount;
+  const leavingStandard =
+    preview?.fromPlanCode === PlanCode.STANDARD && preview.toPlanCode !== PlanCode.STANDARD;
+  const { data: prosperity } = useProsperitySummary(leavingStandard);
+
   const blockers = preview?.blockers ?? [];
-  const confirmDisabled = loading || previewLoading || !preview?.eligible || (!isBasic && amount === 0);
+  const confirmDisabled =loading || previewLoading || !preview?.eligible || (!isBasic && amount === 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -435,6 +493,32 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
           </div>
         )}
 
+        {/* Saldo de Prosperidad: destino STANDARD genera Umbral sobre el abono neto. */}
+        {toStandard && prosperityNetPesos > 0 && (
+          <div className="mb-4">
+            <ProsperityThresholdPreview
+              variant="dark"
+              netPesos={prosperityNetPesos}
+              help="Equivale a 4 veces el valor neto de tu inversión (sin IVA). Se suma a tu Saldo de Prosperidad al confirmarse el pago; las ventas cubiertas por ese Saldo no pagan comisión."
+            />
+          </div>
+        )}
+
+        {/* Saliendo de STANDARD: el Saldo queda congelado (no se pierde). */}
+        {leavingStandard && (
+          <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 mb-4">
+            <AlertCircle className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-100 leading-relaxed">
+              Tu Saldo de Prosperidad
+              {prosperity && isProsperityVisible(prosperity.status)
+                ? ` (${formatProsperityCents(prosperity.balanceCents)})`
+                : ''}{' '}
+              quedará congelado: no cubrirá ventas mientras no estés en el plan Estándar, pero no se pierde. Tus
+              ventas pagarán la comisión completa del nuevo plan.
+            </p>
+          </div>
+        )}
+
         {submitError && (
           <p className="flex items-start gap-1.5 text-red-400 text-sm mb-3">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" /> {submitError}
@@ -455,6 +539,49 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando solicitud...</>
             : <>Solicitar cambio de plan <ArrowRight className="w-4 h-4" /></>
           }
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Recharge Conflict Modal ────────────────────────────────────────────────────
+// Se muestra cuando el backend rechaza una nueva solicitud de cambio de plan
+// porque hay una recarga en curso (contractId guardado en sessionStorage
+// desde /commercial/balance) que la bloquea. Solo informa — el comercial
+// decide si cancela la recarga manualmente desde su pantalla de recarga.
+
+interface RechargeConflictModalProps {
+  onGoToRecharge: () => void;
+  onClose: () => void;
+}
+
+function RechargeConflictModal({ onGoToRecharge, onClose }: RechargeConflictModalProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-[#13151f] border border-white/10 rounded-2xl p-6 shadow-2xl text-center">
+        <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-4">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <h3 className="text-white font-bold text-base mb-2">Tienes una recarga en curso</h3>
+        <p className="text-slate-400 text-sm mb-5 leading-relaxed">
+          No puedes solicitar un cambio de plan mientras tengas una recarga de saldo en curso. Si quieres continuar,
+          cancélala tú mismo desde tu pantalla de recarga y vuelve a intentarlo.
+        </p>
+        <button
+          onClick={onGoToRecharge}
+          className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 mb-2
+            bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white
+            transition-all duration-200 active:scale-[0.98] cursor-pointer"
+        >
+          Ir a mi recarga
+        </button>
+        <button
+          onClick={onClose}
+          className="w-full py-2 text-sm font-semibold text-slate-500 hover:text-white transition-colors cursor-pointer"
+        >
+          Volver
         </button>
       </div>
     </div>
@@ -502,7 +629,7 @@ export default function PlansPage() {
   }, []);
 
   const uiPlans = useMemo(() => (catalog ? buildUIPlans(catalog) : []), [catalog]);
-  const featureRows = useMemo(() => (catalog ? buildFeatureRows(catalog) : []), [catalog]);
+  const categories = useMemo(() => (catalog ? buildFeatureCategories(catalog) : []), [catalog]);
 
   // Renovar el plan que ya se tiene: BASIC sigue usando /plans/checkout,
   // STANDARD/PREMIUM ahora requiere el flujo de recarga con contrato.
@@ -695,7 +822,7 @@ export default function PlansPage() {
         {/* ── Cards view ── */}
         {activeTab === 'cards' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
-            {plans.map((plan, i) => {
+            {uiPlans.map((plan, i) => {
               return (
                 <div
                   key={plan.key}
@@ -782,11 +909,11 @@ export default function PlansPage() {
               <thead>
                 <tr className="border-b border-white/10 bg-white/2">
                   <th className="text-left px-5 py-4 text-slate-400 font-medium text-sm w-[38%]">Funcionalidad</th>
-                  {plans.map(p => (
+                  {uiPlans.map(p => (
                     <th key={p.key} className={`px-5 py-4 text-center ${p.highlight ? 'bg-blue-600/8' : ''}`}>
                       <div className="font-bold text-white text-base">{p.name}</div>
                       <div className={`text-sm font-black mt-0.5 ${p.highlight ? 'text-blue-400' : 'text-slate-400'}`}>
-                        ${p.price}
+                        ${p.priceLabel}
                       </div>
                       <div className="text-xs text-slate-500">{p.unit}</div>
                     </th>
@@ -819,7 +946,7 @@ export default function PlansPage() {
                 ))}
                 <tr className="bg-white/2">
                   <td className="px-5 py-4" />
-                  {plans.map((p, ci) => (
+                  {uiPlans.map((p, ci) => (
                     <td key={p.key} className={`px-5 py-4 text-center ${ci === 1 ? 'bg-blue-600/5' : ''}`}>
                       <button
                         onClick={() => handlePlanClick(p)}
@@ -831,7 +958,7 @@ export default function PlansPage() {
                             : 'bg-white/8 hover:bg-white/15 text-white border border-white/15'
                           }`}
                       >
-                        {loading === p.key ? 'Procesando...' : p.cta}
+                        {loading === p.key ? 'Procesando...' : (p.currentPlan ? 'Recargar' : 'Cambiar de plan')}
                       </button>
                     </td>
                   ))}

@@ -1,6 +1,7 @@
 import apiClient from "@/lib/api/client";
-import { BillingSummaryResponseDTO, DepositResponseDTO, PayoutSummaryResponseDTO } from "@/types/finance/Wallet.types";
+import { BillingSummaryResponseDTO, DepositResponseDTO} from "@/types/finance/Wallet.types";
 import { PagedResponse } from "@/types/Generic.types";
+import { PayoutSummaryResponseDTO } from "@/types/Payout.types";
 
 export const getBillingSummary = async (): Promise<BillingSummaryResponseDTO> => {
     const response = await apiClient.get<BillingSummaryResponseDTO>("/commercial/wallet/me/billing-summary");

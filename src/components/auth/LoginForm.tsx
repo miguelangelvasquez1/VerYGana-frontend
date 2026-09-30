@@ -18,7 +18,7 @@ import {
   AccountTerminatedError,
 } from '@/lib/auth/authService';
 
-import { getCommercialInitialDataWithToken } from '@/services/commercialService';
+import { getCommercialInitialDataWithToken } from '@/services/commercial/commercialService';
 import { getRoleHomePath } from '@/lib/auth/roleRedirect';
 
 import LoadingSpinner from '@/components/LoadingSpinner';

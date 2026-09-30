@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { getBalance, getMovements } from '@/services/TreasuryService';
 import { TreasuryBalanceResponseDTO, TreasuryMovementResponseDTO } from '@/types/finance/Treasury.types';
+import { ProsperityReconciliationCard } from '@/components/admin/prosperity/ProsperityReconciliationCard';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -438,6 +439,9 @@ export default function TreasuryPanel() {
           </>
         )}
       </div>
+
+      {/* ── Conciliación de Prosperidad ── */}
+      <ProsperityReconciliationCard />
 
       {/* ── Movements section ── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

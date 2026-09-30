@@ -47,7 +47,7 @@ export interface ConsumerInitialDataResponseDTO {
 }
 
 export interface ConsumerProfileResponseDTO {
-    id : number;
+    publicId : string;
     name : string;
     lastName : string;
     email : string;

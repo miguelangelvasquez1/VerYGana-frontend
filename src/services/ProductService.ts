@@ -128,10 +128,10 @@ export const getProductDetail = async (productId: number): Promise<ProductTypes.
  * Obtener productos de un vendedor específico (PÚBLICO)
  */
 export const getCommercialProducts = async (
-  commercialId: number,
+  publicId: string,
   page: number = 0
 ): Promise<PagedResponse<ProductTypes.ProductSummaryResponseDTO>> => {
-  const response = await apiClient.get(`/products/commercial/${commercialId}`, {
+  const response = await apiClient.get(`/products/commercial/${publicId}`, {
     params: { page }
   });
   return response.data;

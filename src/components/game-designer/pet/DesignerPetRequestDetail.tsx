@@ -83,8 +83,8 @@ export function DesignerPetRequestDetail({
     setLoadError(false);
     try {
       const detail = await getGameDesignerPetRequestDetail(requestId);
-      const initial = detail.draft && Object.keys(detail.draft).length > 0
-        ? detail.draft
+      const initial = detail.itemDraft && Object.keys(detail.itemDraft).length > 0
+        ? detail.itemDraft
         : seedDraft(detail);
       setReq(detail);
       setDraft(initial);
@@ -224,8 +224,8 @@ export function DesignerPetRequestDetail({
               Lo que pidió el comercio
             </p>
             <h2 className="mt-1 font-bold" style={{ color: INK }}>{req.productName}</h2>
-            {req.commercialName && (
-              <p className="mt-0.5 text-xs text-gray-400">{req.commercialName}</p>
+            {req.companyName && (
+              <p className="mt-0.5 text-xs text-gray-400">{req.companyName}</p>
             )}
 
             <dl className="mt-4 space-y-3 text-sm">

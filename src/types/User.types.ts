@@ -116,7 +116,7 @@ export interface ConsumerResponseDTO extends UserSummaryResponseDTO {
   age: number;
   gender: Gender;
   lastDailyLoginDate: string;
-  referredBy: number | null;
+  referredByPublicId: string | null;
   documentType: DocumentType;
   documentNumber: string;
   occupation: string;

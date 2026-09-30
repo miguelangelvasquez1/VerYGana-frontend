@@ -9,8 +9,8 @@ import {
   adminGetPetRequestDetail,
   adminGetPetDesigners,
   adminMarkPetRequestInReview,
-  adminApprovePetRequest,
-  adminAssignPetDesigner,
+  approvePetRequest,
+  assignPetDesigner,
   adminRejectPetRequest,
   type PetRequestDetail,
   type PetDesigner,
@@ -36,7 +36,7 @@ export function AdminPetRequestDetail({
   const [running, setRunning] = useState<Action | null>(null);
   const [actionError, setActionError] = useState('');
 
-  const [designerId, setDesignerId] = useState<number | ''>('');
+  const [designerId, setDesignerId] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [reason, setReason] = useState('');
   const [rejecting, setRejecting] = useState(false);
@@ -47,7 +47,7 @@ export function AdminPetRequestDetail({
     try {
       const detail = await adminGetPetRequestDetail(requestId);
       setReq(detail);
-      setDesignerId(detail.assignedDesignerUserId ?? '');
+      setDesignerId(detail.assignedDesignerPublicId ?? '');
     } catch {
       setLoadError(true);
     } finally {
@@ -103,7 +103,7 @@ export function AdminPetRequestDetail({
   const status = PET_STATUS_CONFIG[req.status];
   const abierta = req.status === 'PENDING' || req.status === 'IN_REVIEW';
   const enDiseno = req.status === 'APPROVED' || req.status === 'ITEM_IN_PROGRESS';
-  const sinDisenador = enDiseno && !req.assignedDesignerUserId;
+  const sinDisenador = enDiseno && !req.assignedDesignerPublicId;
   const busy = running !== null;
 
   return (
@@ -136,7 +136,7 @@ export function AdminPetRequestDetail({
             </div>
             <p className="mt-2 text-sm leading-relaxed text-gray-600">{req.description}</p>
             <dl className="mt-4 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
-              <Row label="Comercio" value={req.commercialName} />
+              <Row label="Comercio" value={req.companyName} />
               <Row label="Enviada" value={formatPetDate(req.createdAt)} />
               <Row label="Diseñador" value={req.assignedDesignerName} fallback="Sin asignar" />
               <Row
@@ -214,7 +214,7 @@ export function AdminPetRequestDetail({
             <select
               id="pet-designer"
               value={designerId}
-              onChange={e => setDesignerId(e.target.value ? Number(e.target.value) : '')}
+              onChange={e => setDesignerId(e.target.value)}
               disabled={busy || designers.length === 0}
               className="w-full max-w-md cursor-pointer rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-50"
             >
@@ -222,7 +222,7 @@ export function AdminPetRequestDetail({
                 {designers.length === 0 ? 'No hay diseñadores activos' : 'Elige un diseñador…'}
               </option>
               {designers.map(d => (
-                <option key={d.userId} value={d.userId}>{designerLabel(d)}</option>
+                <option key={d.publicId} value={d.publicId}>{designerLabel(d)}</option>
               ))}
             </select>
 
@@ -247,7 +247,7 @@ export function AdminPetRequestDetail({
             {abierta && (
               <button
                 onClick={() =>
-                  run('approve', () => adminApprovePetRequest(req.id, designerId as number, adminNotes))
+                  run('approve', () => approvePetRequest(req.id, designerId, adminNotes))
                 }
                 disabled={busy || designerId === ''}
                 title={designerId === '' ? 'Elige un diseñador para poder aprobar' : undefined}
@@ -260,12 +260,12 @@ export function AdminPetRequestDetail({
 
             {enDiseno && (
               <button
-                onClick={() => run('assign', () => adminAssignPetDesigner(req.id, designerId as number))}
-                disabled={busy || designerId === '' || designerId === req.assignedDesignerUserId}
+                onClick={() => run('assign', () => assignPetDesigner(req.id, designerId))}
+                disabled={busy || designerId === '' || designerId === req.assignedDesignerPublicId}
                 className="flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 {running === 'assign' ? <Loader2 size={15} className="animate-spin" /> : <UserCheck size={15} />}
-                {req.assignedDesignerUserId ? 'Reasignar diseñador' : 'Asignar diseñador'}
+                {req.assignedDesignerPublicId ? 'Reasignar diseñador' : 'Asignar diseñador'}
               </button>
             )}
 

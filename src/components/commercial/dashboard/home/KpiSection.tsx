@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
   DollarSign,
@@ -22,9 +23,10 @@ interface KpiCardProps {
   value: string;
   icon: LucideIcon;
   deltaPct: number | null | undefined;
+  footer?: React.ReactNode;
 }
 
-function KpiCard({ title, value, icon: Icon, deltaPct }: KpiCardProps) {
+function KpiCard({ title, value, icon: Icon, deltaPct, footer }: KpiCardProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
       <div className="flex items-start justify-between gap-3">
@@ -38,6 +40,7 @@ function KpiCard({ title, value, icon: Icon, deltaPct }: KpiCardProps) {
         <DeltaChip deltaPct={deltaPct} />
         <span className="ml-1.5 text-xs text-gray-400">vs. periodo anterior</span>
       </div>
+      {footer && <div className="mt-2">{footer}</div>}
     </div>
   );
 }
@@ -45,9 +48,11 @@ function KpiCard({ title, value, icon: Icon, deltaPct }: KpiCardProps) {
 interface KpiSectionProps {
   sales?: DashboardSales | null;
   engagement?: DashboardEngagement | null;
+  /** STANDARD con Saldo de Prosperidad activo: explica por qué paga menos comisión. */
+  showProsperityCommissionLink?: boolean;
 }
 
-export function KpiSection({ sales, engagement }: KpiSectionProps) {
+export function KpiSection({ sales, engagement, showProsperityCommissionLink = false }: KpiSectionProps) {
   const cards: KpiCardProps[] = [];
 
   if (sales) {
@@ -75,6 +80,14 @@ export function KpiSection({ sales, engagement }: KpiSectionProps) {
         value: formatCentsToCOP(sales.current.platformCommissionsCents),
         icon: Landmark,
         deltaPct: sales.platformCommissionsDeltaPct,
+        footer: showProsperityCommissionLink ? (
+          <Link
+            href="/commercial/prosperity"
+            className="text-xs font-semibold text-[#03548C] hover:underline"
+          >
+            ¿Por qué pago menos comisión?
+          </Link>
+        ) : undefined,
       },
     );
   }

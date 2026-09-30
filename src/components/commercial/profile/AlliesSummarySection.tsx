@@ -50,8 +50,8 @@ export default function AlliesSummarySection({
             const clickable = Boolean(linkBase);
             return (
               <div
-                key={ally.commercialId}
-                onClick={clickable ? () => router.push(`${linkBase}/${ally.commercialId}`) : undefined}
+                key={ally.commercialPublicId}
+                onClick={clickable ? () => router.push(`${linkBase}/${ally.commercialPublicId}`) : undefined}
                 className={`flex items-center gap-3 py-3 ${
                   clickable ? "cursor-pointer hover:bg-gray-50 -mx-2 px-2 rounded-lg transition" : ""
                 }`}

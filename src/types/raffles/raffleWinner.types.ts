@@ -19,7 +19,7 @@ export interface WinnerDetailResponseDTO {
 
 export interface PrizeWonResponseDTO {
     prizeId: number;
-    winnerId: number;
+    winnerPublicId: string;
     title: string;
     description: string;
     brand: string;

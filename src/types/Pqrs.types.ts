@@ -56,7 +56,7 @@ export interface PqrsProductContextDTO {
 }
 
 export interface PqrsCommercialContextDTO {
-    commercialUserId : number;
+    commercialPublicId : string;
     companyName : string;
     nit : string;
     municipalityName : string;
@@ -123,7 +123,7 @@ export interface PqrsAdminDetailDTO {
     dueDate: string;
     createdAt: string;
     resolvedAt: string | null;
-    requesterId: number;
+    requesterPublicId: string;
     requesterName: string;
     requesterEmail: string;
     requesterPhone: string;

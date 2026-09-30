@@ -15,7 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { getCommercialProfile } from "@/services/commercialService";
+import { getCommercialProfile } from "@/services/commercial/commercialService";
 import {
   deleteProduct,
   markProductAsReward,
@@ -41,7 +41,7 @@ function formatDate(iso: string) {
 export default function CommercialProfileSeller() {
   const router = useRouter();
   const { user } = useAuth();
-  const commercialId = Number(user?.id);
+  const commercialPublicId = user?.publicId;
 
   const [profile, setProfile] = useState<CommercialProfileResponseDTO | null>(null);
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
@@ -55,10 +55,10 @@ export default function CommercialProfileSeller() {
   const [promotersLoading, setPromotersLoading] = useState(true);
 
   useEffect(() => {
-    if (!commercialId || isNaN(commercialId)) return;
+    if (!commercialPublicId) return;
     const load = async () => {
       try {
-        const data = await getCommercialProfile(commercialId);
+        const data = await getCommercialProfile(commercialPublicId);
         setProfile(data);
         setProducts(data.activeProducts.data);
         setHasMore(data.activeProducts.meta.hasNext);
@@ -70,7 +70,7 @@ export default function CommercialProfileSeller() {
       }
     };
     load();
-  }, [commercialId]);
+  }, [commercialPublicId]);
 
   useEffect(() => {
     const loadPromoters = async () => {
@@ -86,11 +86,11 @@ export default function CommercialProfileSeller() {
   }, []);
 
   const loadMore = async () => {
-    if (productsLoading || !hasMore) return;
+    if (!commercialPublicId || productsLoading || !hasMore) return;
     setProductsLoading(true);
     try {
       const nextPage = currentPage + 1;
-      const res = await getCommercialProducts(commercialId, nextPage);
+      const res = await getCommercialProducts(commercialPublicId, nextPage);
       setProducts((prev) => [...prev, ...res.data]);
       setHasMore(res.meta.hasNext);
       setCurrentPage(nextPage);
