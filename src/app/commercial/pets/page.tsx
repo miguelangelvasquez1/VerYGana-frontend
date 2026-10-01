@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   PawPrint, Plus, Loader2, AlertTriangle, CheckCircle2,
-  ChevronDown, ChevronUp, X, Send, ImagePlus, Trash2, Sparkles,
+  ChevronDown, ChevronUp, X, Send, ImagePlus, Trash2, Sparkles, Wallet,
 } from 'lucide-react';
 import {
   submitPetRequest,
   getMyPetRequests,
+  PET_CHARGE_PER_USE_CENTS,
   type PetRequest,
   type PetRequestStatus,
   type SubmitPetRequestBody,
@@ -30,6 +31,12 @@ const AZUL_D = '#0089d6';
 const GOLD  = '#c9a227';
 
 const RAIL = `linear-gradient(90deg, ${AZUL_D}, ${AZUL})`;
+
+const copFormatter = new Intl.NumberFormat('es-CO', {
+  style: 'currency', currency: 'COP', maximumFractionDigits: 0,
+});
+const formatCOP = (cents: number) => copFormatter.format(cents / 100);
+const CHARGE_PER_USE_PESOS = PET_CHARGE_PER_USE_CENTS / 100;
 
 // ── Etapas ────────────────────────────────────────────────────────────────────
 //
@@ -115,6 +122,44 @@ const STATUS_CHIP: Record<PetRequestStatus, { label: string; bg: string; text: s
   REJECTED:         { label: 'Rechazada',   bg: '#FFEBEE', text: '#B71C1C' },
 };
 
+// ── Consumo de la bolsa ───────────────────────────────────────────────────────
+//
+// Las solicitudes anteriores al cobro por uso no tienen bolsa: no se pinta nada.
+
+function BudgetUsage({ req }: { req: PetRequest }) {
+  if (req.budgetCents == null || req.budgetCents <= 0) return null;
+
+  if (req.status === 'REJECTED') {
+    return (
+      <p className="flex items-center gap-1.5 text-xs text-gray-500">
+        <Wallet className="h-3.5 w-3.5" />
+        Te devolvimos {formatCOP(req.budgetCents - (req.spentCents ?? 0))} a tu saldo.
+      </p>
+    );
+  }
+
+  const spent = req.spentCents ?? 0;
+  const pct = Math.min(100, Math.round((spent / req.budgetCents) * 100));
+  const uses = Math.floor(spent / PET_CHARGE_PER_USE_CENTS);
+  const exhausted = spent >= req.budgetCents;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="flex items-center gap-1.5 font-medium text-gray-600">
+          <Wallet className="h-3.5 w-3.5" />
+          {formatCOP(spent)} de {formatCOP(req.budgetCents)}
+          {uses > 0 && <span className="text-gray-400">· {uses} {uses === 1 ? 'compra' : 'compras'}</span>}
+        </span>
+        {exhausted && <span className="font-semibold text-amber-700">Presupuesto agotado</span>}
+      </div>
+      <div className="h-1 overflow-hidden rounded-full bg-gray-100">
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: exhausted ? '#D97706' : GOLD }} />
+      </div>
+    </div>
+  );
+}
+
 // ── Tarjeta de solicitud ──────────────────────────────────────────────────────
 
 function RequestCard({ req }: { req: PetRequest }) {
@@ -152,6 +197,8 @@ function RequestCard({ req }: { req: PetRequest }) {
           </div>
 
           <StageTrack status={req.status} />
+
+          <BudgetUsage req={req} />
 
           <button
             type="button"
@@ -222,7 +269,7 @@ function ImageField({ upload }: { upload: ReturnType<typeof usePetImageUpload> }
   return (
     <div className="flex flex-col gap-2">
       <label className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-        Imagen del producto <span className="text-gray-400">· opcional</span>
+        Imagen del producto
       </label>
 
       <div
@@ -329,15 +376,6 @@ function ImageField({ upload }: { upload: ReturnType<typeof usePetImageUpload> }
           >
             {state.status === 'ready' ? 'Cambiar imagen' : 'Elegir otra imagen'}
           </button>
-          {state.status === 'error' && state.previewUrl && (
-            <button
-              type="button"
-              onClick={clear}
-              className="cursor-pointer text-xs font-semibold text-gray-500 hover:underline"
-            >
-              Seguir sin imagen
-            </button>
-          )}
         </div>
       )}
     </div>
@@ -347,6 +385,60 @@ function ImageField({ upload }: { upload: ReturnType<typeof usePetImageUpload> }
 // ── Formulario ────────────────────────────────────────────────────────────────
 
 const EMPTY_FORM = { productName: '', description: '', desiredEffects: '' };
+
+// ── Campo de presupuesto ──────────────────────────────────────────────────────
+//
+// Se escribe en pesos (solo dígitos) y viaja en centavos. Sale del saldo al
+// enviar: cada unidad que un cliente compre cuesta CHARGE_PER_USE_PESOS, y el
+// ítem sale del juego cuando se acaba.
+
+function BudgetField({ pesos, onChange }: { pesos: string; onChange: (v: string) => void }) {
+  const [focused, setFocused] = useState(false);
+  const value = Number(pesos || 0);
+  const uses = Math.floor(value / CHARGE_PER_USE_PESOS);
+  const tooLow = pesos !== '' && value < CHARGE_PER_USE_PESOS;
+  const display = focused || !pesos ? pesos : value.toLocaleString('es-CO');
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label
+        htmlFor="pet-budget"
+        className="text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+      >
+        Presupuesto
+      </label>
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+        <input
+          id="pet-budget"
+          inputMode="numeric"
+          value={display}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          onChange={(e) => onChange(e.target.value.replace(/\D/g, ''))}
+          placeholder={(CHARGE_PER_USE_PESOS * 100).toLocaleString('es-CO')}
+          className="w-full rounded-xl border px-3 py-2.5 pl-7 text-sm outline-none transition focus:border-transparent focus:ring-2"
+          style={{
+            borderColor: tooLow ? '#FCA5A5' : '#E5E7EB',
+            '--tw-ring-color': AZUL,
+          } as React.CSSProperties}
+        />
+      </div>
+      {tooLow ? (
+        <p className="text-xs font-medium text-red-600">
+          El mínimo es {formatCOP(PET_CHARGE_PER_USE_CENTS)}, lo que cuesta una compra.
+        </p>
+      ) : (
+        <p className="text-xs leading-relaxed text-gray-400">
+          Cada vez que un cliente compra tu producto en el juego se descuentan{' '}
+          {formatCOP(PET_CHARGE_PER_USE_CENTS)}
+          {uses > 0 && <> · alcanza para <strong className="text-gray-600">{uses.toLocaleString('es-CO')} {uses === 1 ? 'compra' : 'compras'}</strong></>}.
+          Sale de tu saldo al enviar y te lo devolvemos si la solicitud se rechaza.
+        </p>
+      )}
+    </div>
+  );
+}
 
 const FIELDS = [
   {
@@ -368,7 +460,7 @@ const FIELDS = [
   {
     key: 'desiredEffects' as const,
     label: 'Qué debería hacer en el juego',
-    required: false,
+    required: true,
     rows: 3,
     placeholder: 'Subir la felicidad de la mascota y darle energía extra por 24 horas.',
     help: 'Entre más concreto, menos vueltas da la revisión.',
@@ -377,6 +469,7 @@ const FIELDS = [
 
 function NewRequestDialog({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const [form, setForm] = useState(EMPTY_FORM);
+  const [budgetPesos, setBudgetPesos] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const upload = usePetImageUpload();
@@ -403,6 +496,22 @@ function NewRequestDialog({ onClose, onCreated }: { onClose: () => void; onCreat
       setError('Escribe el nombre del producto y qué es.');
       return;
     }
+    // El backend exige los dos: el diseñador no puede hornear el producto sin
+    // verlo ni sin saber qué debe hacer en el juego.
+    if (!form.desiredEffects.trim()) {
+      setError('Cuéntanos qué debería hacer el producto en el juego.');
+      return;
+    }
+    const imageObjectKey = upload.state.objectKey;
+    if (upload.state.status !== 'ready' || !imageObjectKey) {
+      setError('Sube una foto del producto.');
+      return;
+    }
+    const budgetCents = Number(budgetPesos || 0) * 100;
+    if (budgetCents < PET_CHARGE_PER_USE_CENTS) {
+      setError(`El presupuesto debe ser de al menos ${formatCOP(PET_CHARGE_PER_USE_CENTS)}.`);
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -410,7 +519,8 @@ function NewRequestDialog({ onClose, onCreated }: { onClose: () => void; onCreat
         productName:    form.productName.trim(),
         description:    form.description.trim(),
         desiredEffects: form.desiredEffects.trim(),
-        imageObjectKey: upload.state.objectKey,
+        imageObjectKey,
+        budgetCents,
       };
       await submitPetRequest(body);
       upload.clear();
@@ -486,6 +596,7 @@ function NewRequestDialog({ onClose, onCreated }: { onClose: () => void; onCreat
                 {help && <p className="text-xs text-gray-400">{help}</p>}
               </div>
             ))}
+            <BudgetField pesos={budgetPesos} onChange={setBudgetPesos} />
           </div>
         </div>
 

@@ -23,7 +23,7 @@ export interface PetRequest {
   id: number;
   productName: string;
   description: string;
-  /** `null` cuando el comercio envió la solicitud sin imagen. */
+  /** `null` solo en solicitudes viejas, de cuando la imagen era opcional. */
   imageObjectKey: string | null;
   /** URL lista para `<img src>` — no la construyas desde `imageObjectKey`. */
   imageUrl?: string;
@@ -38,7 +38,21 @@ export interface PetRequest {
   assignedDesignerUserId?: number | null;
   assignedDesignerName?: string | null;
   adminNotes?: string | null;
+  /**
+   * Bolsa que el comercio reservó para el cobro por uso, en centavos. `null` en
+   * las solicitudes anteriores al cobro, que no reservaron nada.
+   */
+  budgetCents?: number | null;
+  /** Lo que ya se cobró de la bolsa, en centavos. */
+  spentCents?: number;
 }
+
+/**
+ * Lo que se le cobra al comercio por cada unidad que un cliente compra de su
+ * ítem, en centavos ($150). Refleja `pets.commercial-charge-per-use-cents` del
+ * backend: si allá cambia, cambiarlo aquí. El backend valida igual el mínimo.
+ */
+export const PET_CHARGE_PER_USE_CENTS = 15_000;
 
 /**
  * El detalle trae además el borrador del diseñador. Es un objeto JSON libre:
@@ -61,9 +75,14 @@ export interface PetCatalogItemBody {
 export interface SubmitPetRequestBody {
   productName: string;
   description: string;
-  /** `null` cuando la solicitud va sin imagen — es opcional. */
-  imageObjectKey: string | null;
+  /** Obligatoria: el backend rechaza con 400 una solicitud sin imagen. */
+  imageObjectKey: string;
   desiredEffects: string;
+  /**
+   * Bolsa para el cobro por uso, en centavos. Sale del saldo del comercio al
+   * enviar y se le devuelve si la solicitud se rechaza. Mínimo un uso.
+   */
+  budgetCents: number;
 }
 
 /** Lo que declaramos del archivo para que el backend firme la subida. */
