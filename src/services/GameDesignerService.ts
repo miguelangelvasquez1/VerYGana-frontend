@@ -10,7 +10,7 @@ import type {
 export type { BrandingComment };
 
 export interface DesignerProfile {
-  id: number;
+  publicId: string;
   name: string;
   lastName: string;
   email: string;

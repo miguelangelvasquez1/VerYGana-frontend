@@ -32,7 +32,7 @@ export interface ProductSummaryResponseDTO {
   categoryName : string;
   stock : number;
   status : ProductStatus;
-  commercialId: number;
+  commercialPublicId: string;
   companyName : string;
   isGameReward : boolean;
 }
@@ -47,7 +47,7 @@ export interface ProductResponseDTO {
   minCashCents: number;
   averageRate : number;
   categoryName : string;
-  commercialId: number;
+  commercialPublicId: string;
   companyName : string;
   stock : number;
   reviewCount : number;

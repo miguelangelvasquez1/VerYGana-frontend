@@ -5,7 +5,6 @@ import {
   ShoppingCart,
   Calendar,
   Users,
-  Trophy,
   AlertCircle,
   CheckCircle2,
   Info,
@@ -54,20 +53,6 @@ const RULE_TYPE_META: Record<
     hint: "Otorga tickets al referir la cantidad indicada de nuevos usuarios",
     color: "text-purple-600",
     bg: "bg-purple-50 border-purple-200",
-  },
-  [TicketEarningRuleType.ADS_WATCHED]: {
-    label: "Anuncios Vistos",
-    icon: <Trophy size={16} />,
-    hint: "Otorga tickets al visualizar la cantidad indicada de anuncios",
-    color: "text-cyan-600",
-    bg: "bg-cyan-50 border-cyan-200",
-  },
-  [TicketEarningRuleType.GAME_ACHIEVEMENT]: {
-    label: "Logro del Juego",
-    icon: <Trophy size={16} />,
-    hint: "Otorga tickets al completar logros específicos del juego",
-    color: "text-rose-600",
-    bg: "bg-rose-50 border-rose-200",
   },
 };
 
@@ -302,12 +287,6 @@ export default function CreateTicketEarningRuleForm({
                 Iniciar sesión diariamente
               </option>
               <option value={TicketEarningRuleType.REFERRAL}>Referidos</option>
-              <option value={TicketEarningRuleType.ADS_WATCHED}>
-                Anuncios visualizados
-              </option>
-              <option value={TicketEarningRuleType.GAME_ACHIEVEMENT}>
-                Logros del juego
-              </option>
             </select>
 
             <div className={`
@@ -393,46 +372,6 @@ export default function CreateTicketEarningRuleForm({
                       {errors.referralAddedQuantity}
                     </p>
                 )}
-              </div>
-          )}
-
-          {/* CONDICIONAL: ADS_WATCHED */}
-          {formData.ruleType === TicketEarningRuleType.ADS_WATCHED && (
-              <div className="bg-cyan-50/80 border-2 border-cyan-200 rounded-2xl p-4 flex items-start gap-3">
-                <Trophy className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-bold text-cyan-900">
-                    Anuncios Visualizados
-                  </p>
-                  <p className="text-sm text-cyan-700 mt-0.5">
-                    Se otorgarán <strong>{formData.ticketsToAward || 1}</strong> ticket
-                    {formData.ticketsToAward !== 1 ? "s" : ""} por cada{" "}
-                    <strong>5 anuncios</strong> visualizados.
-                  </p>
-                  <p className="text-xs text-cyan-600 mt-1">
-                    💡 Puedes configurar la cantidad de anuncios en la edición de la regla.
-                  </p>
-                </div>
-              </div>
-          )}
-
-          {/* CONDICIONAL: GAME_ACHIEVEMENT */}
-          {formData.ruleType === TicketEarningRuleType.GAME_ACHIEVEMENT && (
-              <div className="bg-rose-50/80 border-2 border-rose-200 rounded-2xl p-4 flex items-start gap-3">
-                <Trophy className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-bold text-rose-900">
-                    Logros del Juego
-                  </p>
-                  <p className="text-sm text-rose-700 mt-0.5">
-                    Se otorgarán <strong>{formData.ticketsToAward || 1}</strong> ticket
-                    {formData.ticketsToAward !== 1 ? "s" : ""} al completar logros
-                    específicos.
-                  </p>
-                  <p className="text-xs text-rose-600 mt-1">
-                    💡 Puedes configurar los logros específicos en la edición de la regla.
-                  </p>
-                </div>
               </div>
           )}
 

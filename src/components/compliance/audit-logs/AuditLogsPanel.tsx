@@ -14,7 +14,8 @@ import { ChevronRight, FileSearch, Search, SlidersHorizontal } from 'lucide-reac
 import {
   getAuditLogs,
   getCriticalAuditLogs,
-  type AuditLog,
+  auditLevel,
+  type AuditLogDTO,
   type AuditLogFilters,
   type PageResponse,
 } from '@/services/ComplianceService';
@@ -45,14 +46,38 @@ import {
 const PAGE_SIZE = 20;
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
-const LEVEL: Record<AuditLog['level'], { tone: Tone; label: string }> = {
-  INFO: { tone: 'info', label: 'Info' },
-  WARNING: { tone: 'hold', label: 'Alerta' },
-  CRITICAL: { tone: 'flag', label: 'Crítico' },
+const LEVEL: Record<auditLevel, { tone: Tone; label: string }> = {
+  [auditLevel.DEBUG]: { tone: 'neutral', label: 'Debug' },
+  [auditLevel.INFO]: { tone: 'info', label: 'Info' },
+  [auditLevel.WARNING]: { tone: 'hold', label: 'Alerta' },
+  [auditLevel.CRITICAL]: { tone: 'flag', label: 'Crítico' },
 };
 
+// La entidad afectada llega con entityPublicId si es un usuario, o con
+// entityId en cualquier otro caso — nunca ambos.
+const entityRef = (log: AuditLogDTO) => {
+  const ref = log.entityPublicId ?? (log.entityId != null ? `#${log.entityId}` : null);
+  if (!log.entityType && !ref) return null;
+  return [log.entityType, ref].filter(Boolean).join(' ');
+};
+
+const hasAdditionalData = (log: AuditLogDTO) =>
+  !!log.additionalData && Object.keys(log.additionalData).length > 0;
+
+const hasDetail = (log: AuditLogDTO) =>
+  !!(log.description || entityRef(log) || log.ipAddress || log.userAgent || hasAdditionalData(log));
+
+function DetailItem({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="cmp-label text-cmp-mute">{label}</dt>
+      <dd className="mt-0.5 break-words text-cmp-slate">{children}</dd>
+    </div>
+  );
+}
+
 const emptyFilters: AuditLogFilters = {
-  userId: undefined,
+  userPublicId: undefined,
   action: '',
   level: '',
   category: '',
@@ -61,24 +86,43 @@ const emptyFilters: AuditLogFilters = {
   to: '',
 };
 
+// El backend recibe userPublicId como UUID: cualquier otro formato responde
+// 400, así que se valida antes de pedir.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const invalidUserPublicId = (f: AuditLogFilters) =>
+  !!f.userPublicId && !UUID_RE.test(f.userPublicId);
+
 const countActive = (f: AuditLogFilters) =>
-  [f.userId, f.action, f.level, f.category, f.success, f.from, f.to].filter(
+  [f.userPublicId, f.action, f.level, f.category, f.success, f.from, f.to].filter(
     (v) => v !== undefined && v !== ''
   ).length;
 
 /* ── Fila expandible ─────────────────────────────────────────────────── */
 
-function LogRow({ log, index }: { log: AuditLog; index: number }) {
+function LogRow({ log, index }: { log: AuditLogDTO; index: number }) {
   const [open, setOpen] = useState(false);
   const reduce = useReducedMotion();
   const level = LEVEL[log.level] ?? { tone: 'neutral' as Tone, label: log.level };
+  const detail = hasDetail(log);
+  const entity = entityRef(log);
 
   return (
     <>
       <LedgerRow index={index} tone={level.tone}>
         <Td className="cmp-mono text-[11px] text-cmp-mute">{log.id}</Td>
         <Td>
-          {log.userId ? <Ref muted>#{log.userId}</Ref> : <span className="text-cmp-rule">—</span>}
+          {log.username || log.userEmail ? (
+            <div className="min-w-0" title={log.userPublicId ?? undefined}>
+              <p className="truncate text-cmp-ink">{log.username || log.userEmail}</p>
+              {log.username && log.userEmail && (
+                <p className="truncate text-[11px] text-cmp-mute">{log.userEmail}</p>
+              )}
+            </div>
+          ) : log.userPublicId ? (
+            <Ref muted>{log.userPublicId.slice(0, 8)}</Ref>
+          ) : (
+            <span className="text-cmp-rule">—</span>
+          )}
         </Td>
         <Td className="font-medium text-cmp-ink">{log.action}</Td>
         <Td>
@@ -102,7 +146,7 @@ function LogRow({ log, index }: { log: AuditLog; index: number }) {
           })}
         </Td>
         <Td align="right">
-          {log.details && (
+          {detail && (
             <button
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
@@ -121,7 +165,7 @@ function LogRow({ log, index }: { log: AuditLog; index: number }) {
       {/* La fila misma es el elemento animado: si el <tr> se desmontara de
           inmediato, el cierre no se vería nunca. */}
       <AnimatePresence initial={false}>
-        {open && log.details && (
+        {open && detail && (
           <motion.tr
             key="details"
             initial={{ opacity: 0 }}
@@ -137,9 +181,27 @@ function LogRow({ log, index }: { log: AuditLog; index: number }) {
                 transition={{ duration: 0.22, ease: EASE_OUT }}
                 className="overflow-hidden bg-cmp-rule-soft/40"
               >
-                <pre className="cmp-mono overflow-x-auto px-4 py-3 text-[11px] leading-relaxed text-cmp-slate">
-                  {log.details}
-                </pre>
+                <div className="space-y-3 px-4 py-3 text-[12px]">
+                  {log.description && <p className="leading-relaxed text-cmp-ink">{log.description}</p>}
+                  <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {entity && (
+                      <DetailItem label="Entidad">
+                        <span className="cmp-mono text-[11px]">{entity}</span>
+                      </DetailItem>
+                    )}
+                    {log.ipAddress && (
+                      <DetailItem label="IP">
+                        <span className="cmp-mono text-[11px]">{log.ipAddress}</span>
+                      </DetailItem>
+                    )}
+                    {log.userAgent && <DetailItem label="User agent">{log.userAgent}</DetailItem>}
+                  </dl>
+                  {hasAdditionalData(log) && (
+                    <pre className="cmp-mono overflow-x-auto rounded-lg bg-white/70 p-3 text-[11px] leading-relaxed text-cmp-slate">
+                      {JSON.stringify(log.additionalData, null, 2)}
+                    </pre>
+                  )}
+                </div>
               </motion.div>
             </td>
           </motion.tr>
@@ -156,13 +218,18 @@ export default function AuditLogsPanel() {
   const [filters, setFilters] = useState<AuditLogFilters>(emptyFilters);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [data, setData] = useState<PageResponse<AuditLog> | null>(null);
+  const [data, setData] = useState<PageResponse<AuditLogDTO> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const reduce = useReducedMotion();
 
   const fetchLogs = useCallback(
     async (activeTab: 'all' | 'critical', activeFilters: AuditLogFilters, page: number) => {
+      // "Solo críticos" no filtra por usuario, así que ahí el campo no bloquea.
+      if (activeTab === 'all' && invalidUserPublicId(activeFilters)) {
+        setFiltersOpen(true);
+        return;
+      }
       setLoading(true);
       setError(false);
       try {
@@ -201,6 +268,7 @@ export default function AuditLogsPanel() {
   const logs = data?.content ?? [];
   const totalPages = data?.totalPages ?? 1;
   const activeFilters = countActive(filters);
+  const userIdInvalid = invalidUserPublicId(filters);
 
   return (
     <div className="space-y-6">
@@ -252,19 +320,27 @@ export default function AuditLogsPanel() {
           >
             <div className="rounded-xl border border-cmp-rule bg-white p-5">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <Field label="Usuario ID">
+                <Field label="Usuario (publicId)">
                   <input
-                    type="number"
-                    placeholder="42"
-                    value={filters.userId ?? ''}
+                    type="text"
+                    placeholder="3f2a9c1e-…"
+                    value={filters.userPublicId ?? ''}
                     onChange={(e) =>
                       setFilters((f) => ({
                         ...f,
-                        userId: e.target.value ? Number(e.target.value) : undefined,
+                        userPublicId: e.target.value.trim() || undefined,
                       }))
                     }
-                    className={`${inputClass} cmp-mono`}
+                    aria-invalid={userIdInvalid}
+                    className={`${inputClass} cmp-mono ${
+                      userIdInvalid ? 'border-cmp-flag focus:border-cmp-flag' : ''
+                    }`}
                   />
+                  {userIdInvalid && (
+                    <span className="mt-1 block text-[11px] text-cmp-flag">
+                      Debe ser un UUID completo, ej. 3f2a9c1e-8b4d-4e2f-9a1c-0d5e6f7a8b9c
+                    </span>
+                  )}
                 </Field>
                 <Field label="Acción">
                   <input
@@ -281,6 +357,7 @@ export default function AuditLogsPanel() {
                     className={inputClass}
                   >
                     <option value="">Todos</option>
+                    <option value="DEBUG">Debug</option>
                     <option value="INFO">Info</option>
                     <option value="WARNING">Alerta</option>
                     <option value="CRITICAL">Crítico</option>
@@ -341,7 +418,13 @@ export default function AuditLogsPanel() {
                 >
                   Limpiar
                 </Btn>
-                <Btn size="sm" variant="primary" icon={Search} onClick={handleSearch}>
+                <Btn
+                  size="sm"
+                  variant="primary"
+                  icon={Search}
+                  onClick={handleSearch}
+                  disabled={tab === 'all' && userIdInvalid}
+                >
                   Buscar
                 </Btn>
               </div>

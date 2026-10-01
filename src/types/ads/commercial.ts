@@ -77,6 +77,7 @@ export interface AdResponseDTO {
   id: number;
   title: string;
   description: string;
+  /** PESOS por like (el backend guarda centavos y los convierte con MoneyMapper.fromCents). */
   rewardPerLike: number;
   maxLikes: number;
   maxLikesPerUserPerDay?: number;
@@ -86,8 +87,11 @@ export interface AdResponseDTO {
   updatedAt: string;
   startDate: string | null; // null mientras el anuncio esté PENDING/APPROVED; lo fija el servidor al pasar a ACTIVE (no es editable por el front)
   endDate: string | null;
+  /** PESOS: rewardPerLike × maxLikes. */
   totalBudget: number;
+  /** PESOS: rewardPerLike × currentLikes. */
   spentBudget: number;
+  /** PESOS: totalBudget − spentBudget. */
   remainingBudget: number;
   remainingLikes: number;
   completionPercentage: number;
@@ -105,6 +109,8 @@ export interface AdResponseDTO {
   targetGender: string;
   rejectionReason: string | null;
   mediaType?: string;
+  /** Duración del asset en segundos (imagen: la elegida al subir; video: ffprobe, redondeada hacia arriba). `null` sin asset. */
+  durationSeconds?: number | null;
   targetMunicipalities: MunicipalityDTO[];
 }
 
@@ -157,7 +163,7 @@ export interface AdForConsumerDTO {
   currentLikes: number;
   contentUrl: string;
   targetUrl: string;
-  commercialId: number;
+  commercialPublicId: string;
   commercialName: string;
   mediaType: AdMediaType;
   durationSeconds: number;
@@ -168,7 +174,7 @@ export type AdForAdminDTO = {
   id: number;
   title: string;
   description: string;
-  rewardPerLike: number;           // BigDecimal → number
+  rewardPerLike: number;           // PESOS por like (BigDecimal → number)
   maxLikes: number;
   currentLikes: number;
   status: AdStatus;
@@ -176,9 +182,9 @@ export type AdForAdminDTO = {
   updatedAt: string;
   startDate: string | null;        // null hasta que el anuncio pase a ACTIVE
   endDate: string;
-  totalBudget: number;
-  spentBudget: number;
-  remainingBudget: number;
+  totalBudget: number;             // PESOS
+  spentBudget: number;             // PESOS
+  remainingBudget: number;         // PESOS
   remainingLikes: number;
   completionPercentage: number;
   /**
@@ -189,6 +195,7 @@ export type AdForAdminDTO = {
    */
   contentUrl: string | null;
   mediaType: MediaType;
+  durationSeconds?: number | null; // segundos del asset; null sin asset
   targetUrl: string;
   categories: Category[];
   minAge: number;
@@ -196,7 +203,7 @@ export type AdForAdminDTO = {
   targetGender: string;
   rejectionReason: string | null;
   targetMunicipalities: MunicipalityResponseDTO[];
-  commercialId: number;
+  commercialPublicId: string;
   commercialName: string;
 };
 

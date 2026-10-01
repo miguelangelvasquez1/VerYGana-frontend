@@ -10,17 +10,8 @@ export interface DashboardStats {
   averageRating: number;
 }
 
-export interface MonthlyReportResponseDTO {
-  commercialId : number;
-  month: number;
-  totalSalesAmount : number;
-  earnings: number;
-  totalPlatformCommissionsAmount: number;
-  year: number;
-}
-
 export interface SalesReportResponseDTO {
-  commercialId: number;
+  commercialPublicId: string;
   month: number;
   year: number;
   startDate: string;

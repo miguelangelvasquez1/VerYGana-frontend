@@ -96,9 +96,11 @@ const fieldCls =
 // ─── Designer Selector ────────────────────────────────────────────────────────
 
 const DesignerSelector: React.FC<{
-  selectedUserId: number | null;
-  onSelect: (userId: number) => void;
-}> = ({ selectedUserId, onSelect }) => {
+  selectedPublicId: string | null;
+  onSelect: (publicId: string) => void;
+  /** Diseñador ya asignado: se marca como "Actual" para no reasignarlo a sí mismo. */
+  currentPublicId?: string | null;
+}> = ({ selectedPublicId, onSelect, currentPublicId }) => {
   const [designers, setDesigners] = useState<Designer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -125,9 +127,9 @@ const DesignerSelector: React.FC<{
     <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
       {designers.map(d => (
         <label
-          key={d.userId}
+          key={d.publicId}
           className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors select-none ${
-            selectedUserId === d.userId
+            selectedPublicId === d.publicId
               ? 'border-admin-blue bg-admin-blue/10'
               : 'border-gray-200 hover:bg-gray-50'
           }`}
@@ -135,13 +137,18 @@ const DesignerSelector: React.FC<{
           <input
             type="radio"
             name="designer"
-            checked={selectedUserId === d.userId}
-            onChange={() => onSelect(d.userId)}
+            checked={selectedPublicId === d.publicId}
+            onChange={() => onSelect(d.publicId)}
             className="text-admin-blue shrink-0"
           />
           <div className="min-w-0">
             <p className="text-sm font-medium text-gray-900">
               {d.name} {d.lastName}
+              {currentPublicId === d.publicId && (
+                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-semibold uppercase rounded bg-gray-100 text-gray-500">
+                  Actual
+                </span>
+              )}
             </p>
             <p className="text-xs text-gray-500">
               {d.designerCode} · {d.campaignsDesigned} campaña{d.campaignsDesigned !== 1 ? 's' : ''}
@@ -161,16 +168,16 @@ const ApproveModal: React.FC<{
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ requestId, brandName, onClose, onSuccess }) => {
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedPublicId, setSelectedPublicId] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUserId) { toast.error('Selecciona un diseñador'); return; }
+    if (!selectedPublicId) { toast.error('Selecciona un diseñador'); return; }
     setSubmitting(true);
     try {
-      await adminApproveBranding(requestId, selectedUserId, adminNotes || undefined);
+      await adminApproveBranding(requestId, selectedPublicId, adminNotes || undefined);
       toast.success('Solicitud aprobada y diseñador asignado');
       onSuccess();
     } catch (err: any) {
@@ -201,7 +208,7 @@ const ApproveModal: React.FC<{
             <p className="text-sm font-medium text-gray-700 mb-2">
               Diseñador asignado <span className="text-red-500">*</span>
             </p>
-            <DesignerSelector selectedUserId={selectedUserId} onSelect={setSelectedUserId} />
+            <DesignerSelector selectedPublicId={selectedPublicId} onSelect={setSelectedPublicId} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -227,7 +234,7 @@ const ApproveModal: React.FC<{
             </button>
             <button
               type="submit"
-              disabled={submitting || !selectedUserId}
+              disabled={submitting || !selectedPublicId}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
@@ -326,18 +333,21 @@ const ReassignModal: React.FC<{
   requestId: number;
   brandName: string;
   currentDesignerName: string | null;
+  currentDesignerPublicId: string | null;
   onClose: () => void;
   onSuccess: () => void;
-}> = ({ requestId, brandName, currentDesignerName, onClose, onSuccess }) => {
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+}> = ({ requestId, brandName, currentDesignerName, currentDesignerPublicId, onClose, onSuccess }) => {
+  const [selectedPublicId, setSelectedPublicId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const sameDesigner = !!selectedPublicId && selectedPublicId === currentDesignerPublicId;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUserId) { toast.error('Selecciona un diseñador'); return; }
+    if (!selectedPublicId) { toast.error('Selecciona un diseñador'); return; }
+    if (sameDesigner) { toast.error('Ese diseñador ya está asignado'); return; }
     setSubmitting(true);
     try {
-      await adminAssignDesigner(requestId, selectedUserId);
+      await adminAssignDesigner(requestId, selectedPublicId);
       toast.success('Diseñador reasignado');
       onSuccess();
     } catch (err: any) {
@@ -370,7 +380,16 @@ const ReassignModal: React.FC<{
             <p className="text-sm font-medium text-gray-700 mb-2">
               Nuevo diseñador <span className="text-red-500">*</span>
             </p>
-            <DesignerSelector selectedUserId={selectedUserId} onSelect={setSelectedUserId} />
+            <DesignerSelector
+              selectedPublicId={selectedPublicId}
+              onSelect={setSelectedPublicId}
+              currentPublicId={currentDesignerPublicId}
+            />
+            {sameDesigner && (
+              <p className="mt-2 text-xs text-amber-600">
+                Ese es el diseñador actual. Elige otro para reasignar.
+              </p>
+            )}
           </div>
           <div className="flex gap-3 pt-1">
             <button
@@ -382,7 +401,7 @@ const ReassignModal: React.FC<{
             </button>
             <button
               type="submit"
-              disabled={submitting || !selectedUserId}
+              disabled={submitting || !selectedPublicId || sameDesigner}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
@@ -664,6 +683,10 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
           />
           <InfoRow label="Sesiones máx / día" value={detail.maxSessionsPerUserPerDay ?? '—'} />
           <InfoRow label="Fecha de inicio" value={formatDate(detail.startDate)} />
+          <InfoRow label="Fecha de fin" value={formatDate(detail.endDate)} />
+          {detail.campaignId != null && (
+            <InfoRow label="Campaña" value={`#${detail.campaignId}`} />
+          )}
           {detail.categories.length > 0 && (
             <div className="flex gap-3 text-sm">
               <span className="text-gray-500 shrink-0 w-44">Categorías</span>
@@ -801,6 +824,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
           requestId={detail.id}
           brandName={detail.brandName}
           currentDesignerName={detail.assignedDesignerName}
+          currentDesignerPublicId={detail.assignedDesignerPublicId}
           onClose={() => setModal(null)}
           onSuccess={handleModalSuccess}
         />

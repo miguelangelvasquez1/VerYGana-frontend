@@ -9,6 +9,7 @@ import { CreatePrizeRequestDTO, PrizeType } from "@/types/raffles/prize.types";
 import { CreateRaffleRequestDTO, DrawMethod, RaffleType } from "@/types/raffles/raffle.types";
 import { CreateRaffleRuleRequestDTO } from "@/types/raffles/raffleRule.types";
 import { TicketEarningRuleResponseDTO } from "@/types/raffles/ticketEarningRule.types";
+import { OptionalTargetAudienceDTO } from "@/types/TargetAudience.types";
 import TargetAudienceFields, {
   isTargetAudienceValid,
 } from "@/components/shared/targeting/TargetAudienceFields";
@@ -103,11 +104,12 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
   };
 
   /* ================== SANITIZADOR DE EDADES ================== */
-  const handleTargetingChange = (newTargeting: Record<string, unknown>) => {
-    const sanitizeAge = (val: unknown) => {
-      if (val === "" || val === undefined || val === null) return "";
+  // Vacío = null: así lo espera OptionalTargetAudienceDTO e isTargetAudienceValid.
+  const handleTargetingChange = (newTargeting: OptionalTargetAudienceDTO) => {
+    const sanitizeAge = (val: unknown): number | null => {
+      if (val === "" || val === undefined || val === null) return null;
       const num = parseInt(String(val), 10);
-      if (isNaN(num)) return "";
+      if (isNaN(num)) return null;
       if (num > 100) return 100;
       if (num < 0) return 0;
       return num;
@@ -118,6 +120,10 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
       minAge: sanitizeAge(newTargeting?.minAge),
       maxAge: sanitizeAge(newTargeting?.maxAge),
     };
+
+    // TargetAudienceFields no expone onBlur: se marca como tocada la edad que cambió.
+    if (cleanedTargeting.minAge !== (formData.targeting?.minAge ?? null)) markTouched("minAge");
+    if (cleanedTargeting.maxAge !== (formData.targeting?.maxAge ?? null)) markTouched("maxAge");
 
     setFormData((prev) => ({ ...prev, targeting: cleanedTargeting }));
   };
@@ -236,8 +242,8 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
     const minAgeRaw = formData.targeting?.minAge;
     const maxAgeRaw = formData.targeting?.maxAge;
 
-    const hasMinAge = minAgeRaw !== undefined && minAgeRaw !== null && minAgeRaw !== "";
-    const hasMaxAge = maxAgeRaw !== undefined && maxAgeRaw !== null && maxAgeRaw !== "";
+    const hasMinAge = minAgeRaw != null;
+    const hasMaxAge = maxAgeRaw != null;
 
     const numMin = hasMinAge ? Number(minAgeRaw) : NaN;
     const numMax = hasMaxAge ? Number(maxAgeRaw) : NaN;
@@ -565,14 +571,14 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
           <TargetAudienceFields
             value={formData.targeting}
             onChange={handleTargetingChange}
-            onBlurMinAge={() => markTouched("minAge")}
-            onBlurMaxAge={() => markTouched("maxAge")}
-            errors={{
-              minAge: showError("minAge") ? errors.minAge : undefined,
-              maxAge: showError("maxAge") ? errors.maxAge : undefined,
-            }}
             mode="restriction"
           />
+          {showError("minAge") && (
+            <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.minAge}</p>
+          )}
+          {showError("maxAge") && (
+            <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.maxAge}</p>
+          )}
           {showError("targeting") && (
             <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.targeting}</p>
           )}

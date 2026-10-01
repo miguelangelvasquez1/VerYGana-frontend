@@ -13,10 +13,11 @@ import toast from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import { ClipboardCheck, ShieldCheck } from 'lucide-react';
 import {
-  getScreeningHits,
+  getUnresolvedHits,
   reviewScreening,
+  ScreeningStatus,
   type PageResponse,
-  type ScreeningHit,
+  type ScreeningResultResponseDTO,
   type ScreeningList,
 } from '@/services/ComplianceService';
 import {
@@ -44,10 +45,16 @@ import {
 
 const PAGE_SIZE = 20;
 
-const HIT_TONE: Record<ScreeningHit['status'], Tone> = { HIT: 'flag', FUZZY_HIT: 'hold' };
-const HIT_LABEL: Record<ScreeningHit['status'], string> = {
-  HIT: 'Coincidencia',
-  FUZZY_HIT: 'Parcial',
+// /hits solo devuelve HIT y FUZZY_HIT; NO_HIT se cubre porque el enum lo incluye.
+const HIT_TONE: Record<ScreeningStatus, Tone> = {
+  [ScreeningStatus.HIT]: 'flag',
+  [ScreeningStatus.FUZZY_HIT]: 'hold',
+  [ScreeningStatus.NO_HIT]: 'clear',
+};
+const HIT_LABEL: Record<ScreeningStatus, string> = {
+  [ScreeningStatus.HIT]: 'Coincidencia',
+  [ScreeningStatus.FUZZY_HIT]: 'Parcial',
+  [ScreeningStatus.NO_HIT]: 'Sin coincidencia',
 };
 
 const LIST_LABELS: Record<ScreeningList, string> = {
@@ -64,7 +71,7 @@ function ReviewModal({
   onConfirm,
   loading,
 }: {
-  hit: ScreeningHit;
+  hit: ScreeningResultResponseDTO;
   onClose: () => void;
   onConfirm: (notes: string) => void;
   loading: boolean;
@@ -76,13 +83,13 @@ function ReviewModal({
       title="Marcar como revisada"
       subtitle={
         <span>
-          {hit.queriedName} · {LIST_LABELS[hit.listName] ?? hit.listName}
+          {hit.queriedName} · {LIST_LABELS[hit.restrictiveList] ?? hit.restrictiveList}
         </span>
       }
     >
       <div className="mb-4 flex items-center gap-2">
         <StatusTag tone={HIT_TONE[hit.status]}>{HIT_LABEL[hit.status] ?? hit.status}</StatusTag>
-        <Ref muted>{hit.documentNumber}</Ref>
+        <Ref muted>{hit.queriedDocument}</Ref>
       </div>
       <TextField
         label="Notas de revisión"
@@ -110,18 +117,18 @@ function ReviewModal({
 }
 
 export default function ScreeningsPanel() {
-  const [page, setPage] = useState<PageResponse<ScreeningHit> | null>(null);
+  const [page, setPage] = useState<PageResponse<ScreeningResultResponseDTO> | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
-  const [reviewTarget, setReviewTarget] = useState<ScreeningHit | null>(null);
+  const [reviewTarget, setReviewTarget] = useState<ScreeningResultResponseDTO | null>(null);
 
   const load = useCallback(async (p: number) => {
     setLoading(true);
     setError(false);
     try {
-      setPage(await getScreeningHits(p, PAGE_SIZE));
+      setPage(await getUnresolvedHits(p, PAGE_SIZE));
     } catch {
       setError(true);
     } finally {
@@ -195,10 +202,10 @@ export default function ScreeningsPanel() {
                     <LedgerRow key={hit.id} index={i} tone={HIT_TONE[hit.status]}>
                       <Td className="font-medium text-cmp-ink">{hit.queriedName}</Td>
                       <Td>
-                        <Ref muted>{hit.documentNumber}</Ref>
+                        <Ref muted>{hit.queriedDocument}</Ref>
                       </Td>
                       <Td className="text-cmp-slate">
-                        {LIST_LABELS[hit.listName] ?? hit.listName}
+                        {LIST_LABELS[hit.restrictiveList] ?? hit.restrictiveList}
                       </Td>
                       <Td>
                         <StatusTag tone={HIT_TONE[hit.status]}>

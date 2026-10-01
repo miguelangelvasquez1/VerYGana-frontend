@@ -10,10 +10,9 @@ import {
   Palette,
   ClipboardList,
   PawPrint,
-  Handshake,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { getCommercialProfile } from "@/services/commercialService";
+import { getCommercialProfile } from "@/services/commercial/commercialService";
 import { adService } from "@/services/adService";
 import { getCampaigns } from "@/services/CampaignService";
 import { surveyAdminService } from "@/services/surveyService";
@@ -23,6 +22,7 @@ import { getMyAllies } from "@/services/AlliesService";
 import { CommercialProfileResponseDTO } from "@/types/Commercial.types";
 import { AllyCommercialResponseDTO } from "@/types/Allies.types";
 import AlliesSummarySection from "@/components/commercial/profile/AlliesSummarySection";
+import ProfileContactInfo from "@/components/commercial/profile/ProfileContactInfo";
 import { ChangePlanButton } from "@/components/commercial/planChange/planChange.shared";
 
 function formatDate(iso: string) {
@@ -49,7 +49,7 @@ const EMPTY_STATS: PremiumStats = {
 
 export default function CommercialProfilePremium() {
   const { user } = useAuth();
-  const commercialId = Number(user?.id);
+  const commercialPublicId = user?.publicId;
 
   const [profile, setProfile] = useState<CommercialProfileResponseDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,10 +62,10 @@ export default function CommercialProfilePremium() {
   const [alliesLoading, setAlliesLoading] = useState(true);
 
   useEffect(() => {
-    if (!commercialId || isNaN(commercialId)) return;
+    if (!commercialPublicId) return;
     const load = async () => {
       try {
-        const data = await getCommercialProfile(commercialId);
+        const data = await getCommercialProfile(commercialPublicId);
         setProfile(data);
       } catch {
         setError(true);
@@ -74,7 +74,7 @@ export default function CommercialProfilePremium() {
       }
     };
     load();
-  }, [commercialId]);
+  }, [commercialPublicId]);
 
   useEffect(() => {
     const loadStats = async () => {
@@ -199,6 +199,9 @@ export default function CommercialProfilePremium() {
           </div>
         </div>
       </div>
+
+      {/* ── DATOS DE CONTACTO ── */}
+      <ProfileContactInfo />
 
       {/* ── PLAN ── */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

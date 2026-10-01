@@ -21,6 +21,7 @@ import {
   type PersonType,
 } from "@/services/commercial/OnboardingService";
 import { formatCOP, StepButton } from "../onboarding.shared";
+import { PROSPERITY_MULTIPLIER } from "@/utils/prosperity";
 
 // ─── Paso 9: revisar resumen y generar el contrato ─────────────────────────
 
@@ -261,8 +262,22 @@ export function ContractGenerateStep({
               {plan.excludedTaxesCents != null && (
                 <Row label="Impuestos excluidos" value={formatCOP(plan.excludedTaxesCents)} />
               )}
-              {plan.prosperityThresholdCents != null && (
-                <Row label="Umbral de prosperidad" value={formatCOP(plan.prosperityThresholdCents)} />
+              {plan.planCode === "STANDARD" ? (
+                (plan.prosperityThresholdCents != null || plan.investmentAmountCents != null) && (
+                  // prosperityThresholdCents hoy siempre llega null: se calcula
+                  // sobre el monto neto de inversión × PROSPERITY_MULTIPLIER.
+                  <Row
+                    label="Umbral de Prosperidad que generará tu inversión"
+                    value={formatCOP(
+                      plan.prosperityThresholdCents ??
+                        (plan.investmentAmountCents ?? 0) * PROSPERITY_MULTIPLIER,
+                    )}
+                  />
+                )
+              ) : (
+                plan.prosperityThresholdCents != null && (
+                  <Row label="Umbral de prosperidad" value={formatCOP(plan.prosperityThresholdCents)} />
+                )
               )}
               {plan.saleCommissionPct > 0 && (
                 <Row label="Comisión por venta" value={`${plan.saleCommissionPct}%`} />

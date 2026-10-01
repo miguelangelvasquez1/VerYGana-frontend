@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 
-import { getCommercialProfile } from "@/services/commercialService";
+import { getCommercialProfile } from "@/services/commercial/commercialService";
 import { getCommercialProducts } from "@/services/ProductService";
 import { CommercialProfileResponseDTO } from "@/types/Commercial.types";
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
@@ -14,7 +14,7 @@ import CommercialStorefrontView from "@/components/shared/CommercialStorefrontVi
 export default function CommercialProfilePage() {
   const { id } = useParams();
   const router = useRouter();
-  const commercialId = Number(id);
+  const publicId = String(id);
 
   const [profile, setProfile] = useState<CommercialProfileResponseDTO | null>(null);
   const [products, setProducts] = useState<ProductSummaryResponseDTO[]>([]);
@@ -27,7 +27,7 @@ export default function CommercialProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await getCommercialProfile(commercialId);
+        const data = await getCommercialProfile(publicId);
         setProfile(data);
         // Seed products from the profile response (page 0 already included)
         setProducts(data.activeProducts.data);
@@ -40,14 +40,14 @@ export default function CommercialProfilePage() {
       }
     };
     fetchProfile();
-  }, [commercialId]);
+  }, [publicId]);
 
   const loadMoreProducts = async () => {
     if (productsLoading || !hasMore) return;
     setProductsLoading(true);
     try {
       const nextPage = currentPage + 1;
-      const res = await getCommercialProducts(commercialId, nextPage);
+      const res = await getCommercialProducts(publicId, nextPage);
       setProducts((prev) => [...prev, ...res.data]);
       setHasMore(res.meta.hasNext);
       setCurrentPage(nextPage);

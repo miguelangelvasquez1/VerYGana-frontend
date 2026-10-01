@@ -31,8 +31,8 @@ export const COMMERCIAL_ACTIVITY_TYPE_LABELS: Record<CommercialActivityType, str
   SERVICES: "Servicios",
 };
 
-export interface KycPendingEntry {
-  id: number;
+export interface KycPendingDTO {
+  publicId: string;
   email: string;
   phoneNumber: string;
   role: string;
@@ -51,30 +51,50 @@ export interface KycPendingEntry {
   legalRepDocNumber?: string;
 }
 
-export interface ScreeningHit {
-  id: number;
-  queriedName: string;
-  documentNumber: string;
-  listName: ScreeningList;
-  status: "HIT" | "FUZZY_HIT";
-  reviewed: boolean;
-  createdAt: string;
+export enum ScreeningStatus {
+  NO_HIT = "NO_HIT",
+  FUZZY_HIT = "FUZZY_HIT",
+  HIT = "HIT"
 }
-
-export interface ScreeningHistoryEntry extends ScreeningHit {
-  notes?: string;
+export interface ScreeningResultResponseDTO {
+  id: number;
+  userPublicId: string;
+  queriedName: string;
+  queriedDocument: string;
+  restrictiveList: ScreeningList;
+  status : ScreeningStatus;
+  referenceId: string;
+  rawResponse: string;
+  reviewedByOfficerPublicId?: string;
+  officerNotes?: string;
+  createdAt: string;
   reviewedAt?: string;
 }
 
-export interface AuditLog {
-  id: number;
-  userId?: number;
-  action: string;
-  level: "INFO" | "WARNING" | "CRITICAL";
-  category: string;
-  success: boolean;
-  createdAt: string;
-  details?: string;
+export enum auditLevel {
+  INFO = "INFO",
+  WARNING = "WARNING",
+  CRITICAL = "CRITICAL",
+  DEBUG = "DEBUG"
+}
+
+export interface AuditLogDTO {
+  id : number;
+  userPublicId : string;
+  username : string;
+  userEmail : string;
+  action : string;
+  level : auditLevel;
+  category : string;
+  description : string;
+  ipAddress : string;
+  userAgent : string;
+  createdAt : string;
+  success : boolean;
+  entityType : string;
+  entityId : number;
+  entityPublicId : string;
+  additionalData : Record<string, unknown> | null;
 }
 
 export interface PageResponse<T> {
@@ -86,7 +106,7 @@ export interface PageResponse<T> {
 }
 
 export interface AuditLogFilters {
-  userId?: number;
+  userPublicId?: string;
   action?: string;
   level?: string;
   category?: string;
@@ -99,27 +119,27 @@ export interface AuditLogFilters {
 
 // ── KYC ──────────────────────────────────────────────────────────────────────
 
-export const getPendingKyc = async (): Promise<KycPendingEntry[]> => {
+export const getPendingKyc = async (): Promise<KycPendingDTO[]> => {
   const res = await apiClient.get("/compliance/kyc/pending");
   return res.data;
 };
 
-export const approveKyc = async (id: number): Promise<void> => {
-  await apiClient.post(`/compliance/kyc/${id}/approve`);
+export const approveKyc = async (publicId: string): Promise<void> => {
+  await apiClient.post(`/compliance/kyc/${publicId}/approve`);
 };
 
-export const rejectKyc = async (id: number, reason: string): Promise<void> => {
-  await apiClient.post(`/compliance/kyc/${id}/reject`, null, {
+export const rejectKyc = async (publicId: string, reason: string): Promise<void> => {
+  await apiClient.post(`/compliance/kyc/${publicId}/reject`, null, {
     params: { reason },
   });
 };
 
 // ── Screenings ────────────────────────────────────────────────────────────────
 
-export const getScreeningHits = async (
+export const getUnresolvedHits = async (
   page = 0,
   size = 20
-): Promise<PageResponse<ScreeningHit>> => {
+): Promise<PageResponse<ScreeningResultResponseDTO>> => {
   const res = await apiClient.get("/compliance/screenings/hits", {
     params: { page, size },
   });
@@ -127,9 +147,9 @@ export const getScreeningHits = async (
 };
 
 export const getUserScreeningHistory = async (
-  userId: number
-): Promise<ScreeningHistoryEntry[]> => {
-  const res = await apiClient.get(`/compliance/screenings/user/${userId}`);
+  publicId: string
+): Promise<ScreeningResultResponseDTO[]> => {
+  const res = await apiClient.get(`/compliance/screenings/user/${publicId}`);
   return res.data;
 };
 
@@ -146,7 +166,7 @@ export const reviewScreening = async (
 
 export const getAuditLogs = async (
   filters: AuditLogFilters
-): Promise<PageResponse<AuditLog>> => {
+): Promise<PageResponse<AuditLogDTO>> => {
   const { page = 0, size = 20, ...rest } = filters;
   const params: Record<string, any> = { page, size };
   Object.entries(rest).forEach(([k, v]) => {
@@ -161,7 +181,7 @@ export const getCriticalAuditLogs = async (
   to?: string,
   page = 0,
   size = 20
-): Promise<PageResponse<AuditLog>> => {
+): Promise<PageResponse<AuditLogDTO>> => {
   const res = await apiClient.get("/compliance/audit-logs/critical", {
     params: { from, to, page, size },
   });
@@ -346,7 +366,7 @@ export interface BackgroundCheck {
   // severidad). null hasta que la consulta avanza.
   score: number | null;
   pdfReportUrl: string | null;
-  requestedByOfficerId: number;
+  requestedByOfficerPublicId: string;
   requestedAt: string;
   completedAt: string | null;
 }

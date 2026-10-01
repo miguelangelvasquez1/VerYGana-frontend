@@ -18,6 +18,8 @@ import { PlanUsageCard } from "./PlanUsageCard";
 import { ActiveAssetsSection } from "./ActiveAssetsSection";
 import { QuickActionsRow } from "./QuickActionsRow";
 import { AllyPromotionsCard } from "./AllyPromotionsCard";
+import { ProsperityDashboardCard } from "../../prosperity/ProsperityDashboardCard";
+import { useProsperitySummary } from "@/hooks/prosperity/useProsperity";
 
 export function CommercialDashboard() {
   const [period, setPeriod] = useState<DashboardPeriodType>(
@@ -25,6 +27,7 @@ export function CommercialDashboard() {
   );
   const { data, isLoading, isError, isFetching, refetch } =
     useCommercialDashboard(period);
+  const { data: prosperity } = useProsperitySummary();
 
   // Carga inicial (sin datos previos todavía).
   if (isLoading && !data) {
@@ -99,7 +102,14 @@ export function CommercialDashboard() {
       </div>
 
       {/* 3. KPIs */}
-      <KpiSection sales={sales} engagement={engagement} />
+      <KpiSection
+        sales={sales}
+        engagement={engagement}
+        showProsperityCommissionLink={prosperity?.status === "ACTIVE"}
+      />
+
+      {/* 3.1 Saldo de Prosperidad (STANDARD, o FROZEN si dejó de serlo) */}
+      <ProsperityDashboardCard />
 
       {/* 4. Tendencia de ventas */}
       {salesTrend != null && <SalesTrendChart trend={salesTrend} />}

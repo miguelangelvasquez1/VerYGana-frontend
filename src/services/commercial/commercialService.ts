@@ -1,6 +1,6 @@
 import apiClient from "@/lib/api/client";
 import { CommercialInitialDataResponseDTO } from "@/types/ads/commercial";
-import { CommercialProfileResponseDTO, DailySaleResponseDTO, MonthlyReportResponseDTO, SalesReportResponseDTO } from "@/types/Commercial.types";
+import { CommercialProfileResponseDTO, DailySaleResponseDTO, SalesReportResponseDTO } from "@/types/Commercial.types";
 import { PagedResponse } from "@/types/Generic.types";
 import { PayoutReportResponseDTO } from "@/types/Payout.types";
 
@@ -82,8 +82,8 @@ export const getCommercialInitialDataWithToken = async (
 /**
  * Obtener perfil del vendedor
  */
-export const getCommercialProfile = async (commercialId: number): Promise<CommercialProfileResponseDTO> => {
-  const response = await apiClient.get(`/commercials/${commercialId}/profile`);
+export const getCommercialProfile = async (publicId: string): Promise<CommercialProfileResponseDTO> => {
+  const response = await apiClient.get(`/commercials/${publicId}/profile`);
   return response.data;
 };
 
@@ -165,16 +165,3 @@ export const getDailySales = async (startDate: string, endDate: string, page: nu
   });
   return response.data;
 };
-
-/**
- * Reporte mensual del vendedor
- */
-export const getMonthlyReport = async (year: number, month: number): Promise<MonthlyReportResponseDTO> => {
-  const response = await apiClient.get("/commercials/report", {
-    params: {
-    year,
-    month
-  },
-});
-return response.data;
-}

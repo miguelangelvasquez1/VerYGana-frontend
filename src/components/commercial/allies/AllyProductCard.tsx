@@ -81,7 +81,7 @@ const AllyProductCard: React.FC<AllyProductCardProps> = ({
 
         {product.companyName && (
           <button
-            onClick={() => router.push(`/commercial/allies/${product.commercialId}`)}
+            onClick={() => router.push(`/commercial/allies/${product.commercialPublicId}`)}
             className="text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-blue-50 hover:border-blue-200 hover:text-cyan-500 transition cursor-pointer text-left w-fit"
           >
             <Building2 className="w-2.5 h-2.5 shrink-0" />

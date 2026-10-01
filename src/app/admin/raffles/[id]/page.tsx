@@ -7,7 +7,8 @@ import toast from "react-hot-toast";
 import RaffleDetailCard from "@/components/admin/raffles/RaffleDetailAdmin";
 import { RaffleResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
 import {
-    conductDraw,
+    closeRaffle,
+    verifyDrawIntegrity,
     cancelRaffle,
     updateRaffle,
     activateRaffle,
@@ -56,11 +57,25 @@ export default function RaffleDetailPage() {
         fetchRaffle();
     }, [raffleId]);
 
-    const handleDraw = async (id: number) => {
+    const handleCloseRaffle = async (id: number) => {
         try {
-            await conductDraw(id);
-            toast.success("Sorteo realizado correctamente");
+            await closeRaffle(id);
+            toast.success("Rifa cerrada correctamente");
             await fetchRaffle();
+        } catch (err: any) {
+            const friendlyMessage = getFriendlyErrorMessage(err);
+            toast.error(friendlyMessage);
+        }
+    };
+
+    const handleVerify = async (id: number) => {
+        try {
+            const valid = await verifyDrawIntegrity(id);
+            if (valid) {
+                toast.success("Integridad verificada correctamente");
+            } else {
+                toast.error("El sorteo no pasó la verificación");
+            }
         } catch (err: any) {
             const friendlyMessage = getFriendlyErrorMessage(err);
             toast.error(friendlyMessage);
@@ -171,7 +186,8 @@ export default function RaffleDetailPage() {
                     <RaffleDetailCard
                         raffle={raffle}
                         onClose={() => router.push("/admin/raffles")}
-                        onDraw={handleDraw}
+                        onCloseRaffle={handleCloseRaffle}
+                        onVerify={handleVerify}
                         onCancel={handleCancel}
                         onUpdate={handleUpdate}
                         onActivate={handleActivate}

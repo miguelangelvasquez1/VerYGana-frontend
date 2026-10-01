@@ -19,6 +19,7 @@ import type {
   SurveyCommercialDetailDTO,
 } from '@/types/survey.types';
 import { PagedResponse } from '@/types/Generic.types';
+import type { BudgetIncreaseResponse, IncreaseSurveyBudgetRequest } from '@/types/BudgetIncrease.types';
 import apiClient from '@/lib/api/client';
 
 // ─── User endpoints ───────────────────────────────────────────────────────────
@@ -130,6 +131,21 @@ export const surveyAdminService = {
     } catch (err) {
       handleError(err);
     }
+  },
+
+  /**
+   * POST /surveys/:id/increase-budget
+   * Buys more response slots (at the survey's own price per question) for an ACTIVE, PAUSED or
+   * COMPLETED survey and charges the wallet; a COMPLETED survey is reopened. `expectedMaxResponses`
+   * is the quota being displayed: if it already changed (another increase) the backend answers 409
+   * without charging. Errors are left as raw axios errors so callers can branch on the status.
+   */
+  increaseSurveyBudget: async (
+    surveyId: number,
+    request: IncreaseSurveyBudgetRequest,
+  ): Promise<BudgetIncreaseResponse> => {
+    const { data } = await apiClient.post(`/surveys/${surveyId}/increase-budget`, request);
+    return data;
   },
 
   /**

@@ -44,7 +44,7 @@ const ProductInfoCard: React.FC<Props> = ({ product, footer }) => {
 
         {product.companyName && (
           <Link
-            href={`/commercial/${product.commercialId}`}
+            href={`/commercial/${product.commercialPublicId}`}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-blue-700 transition group"
           >
             <Building2 className="w-4 h-4 shrink-0 group-hover:text-blue-600 transition" />

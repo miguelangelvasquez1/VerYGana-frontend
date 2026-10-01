@@ -5,6 +5,7 @@ import Sidebar from './shared/Sidebar';
 import Header from './shared/Header';
 import { Poppins } from 'next/font/google';
 import { AdminSearchProvider } from '@/context/AdminSearchContext';
+import { AdminRoleGuard } from './AdminRoleGuard';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -18,17 +19,19 @@ const poppins = Poppins({
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
-    <AdminSearchProvider>
-      <div className="flex h-screen overflow-hidden bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-x-hidden overflow-y-auto p-6">
-            {children}
-          </main>
+    <AdminRoleGuard>
+      <AdminSearchProvider>
+        <div className="flex h-screen overflow-hidden bg-gray-50">
+          <Sidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Header />
+            <main className="flex-1 overflow-x-hidden overflow-y-auto p-6">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
-    </AdminSearchProvider>
+      </AdminSearchProvider>
+    </AdminRoleGuard>
   );
 };
 

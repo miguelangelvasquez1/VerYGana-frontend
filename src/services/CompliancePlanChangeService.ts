@@ -10,7 +10,7 @@ import { PlanChangeRequestStatus } from '@/types/finance/plans/PlanChange.types'
 
 export interface PlanChangeReviewListItemDTO {
   id: number;
-  commercialId: number;
+  commercialPublicId: string;
   companyName: string;
   email: string;
   fromPlanCode: PlanCode | null;

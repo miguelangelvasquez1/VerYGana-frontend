@@ -1,6 +1,7 @@
 import React from 'react';
-import { BarChart2 } from 'lucide-react';
+import { BarChart2, PlusCircle } from 'lucide-react';
 import type { Campaign } from '@/services/CampaignService';
+import { canIncreaseBudget } from '@/types/BudgetIncrease.types';
 import { InfoRow, formatCOP, formatDate } from '../campaignDetail.shared';
 
 const GOAL_LABELS: Record<string, string> = {
@@ -13,9 +14,11 @@ const GOAL_LABELS: Record<string, string> = {
 interface Props {
   campaign: Campaign;
   spentPct: number;
+  /** Abre el flujo de aumento de presupuesto (solo se ofrece en ACTIVE / PAUSED / COMPLETED). */
+  onIncreaseBudget?: () => void;
 }
 
-export const ResumenTab: React.FC<Props> = ({ campaign, spentPct }) => (
+export const ResumenTab: React.FC<Props> = ({ campaign, spentPct, onIncreaseBudget }) => (
   <div className="p-5 space-y-5">
     <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">
       <div className="flex items-baseline justify-between mb-1">
@@ -26,6 +29,17 @@ export const ResumenTab: React.FC<Props> = ({ campaign, spentPct }) => (
         <div className="h-full bg-linear-to-r from-blue-400 to-blue-600 rounded-full transition-all" style={{ width: `${spentPct}%` }} />
       </div>
       <p className="text-[11px] text-gray-400">{spentPct}% del presupuesto utilizado</p>
+      {onIncreaseBudget && canIncreaseBudget(campaign.status) && (
+        <button
+          type="button"
+          onClick={onIncreaseBudget}
+          className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-blue-200 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer"
+          title={campaign.status === 'COMPLETED' ? 'Agrega presupuesto para reactivar esta campaña' : 'Agregar presupuesto a la campaña'}
+        >
+          <PlusCircle size={16} />
+          {campaign.status === 'COMPLETED' ? 'Aumentar presupuesto y reactivar' : 'Aumentar presupuesto'}
+        </button>
+      )}
     </div>
 
     <div className="space-y-2.5">

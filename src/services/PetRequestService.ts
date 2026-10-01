@@ -33,9 +33,9 @@ export interface PetRequest {
   resultCatalogItemId?: number;
   createdAt: string;
   updatedAt: string;
-  commercialName?: string;
+  companyName?: string;
   /** Presentes una vez el admin asigna diseñador. */
-  assignedDesignerUserId?: number | null;
+  assignedDesignerPublicId?: string | null;
   assignedDesignerName?: string | null;
   adminNotes?: string | null;
   /**
@@ -59,7 +59,7 @@ export const PET_CHARGE_PER_USE_CENTS = 15_000;
  * el backend lo guarda tal cual, así que acá no se valida su forma.
  */
 export interface PetRequestDetail extends PetRequest {
-  draft?: PetItemDraft | null;
+  itemDraft?: PetItemDraft | null;
 }
 
 /** Borrador libre. Las claves de `PetCatalogItemBody` son las que publica el ítem. */
@@ -105,11 +105,10 @@ export interface PetImageUploadPermission {
 }
 
 export interface PetDesigner {
-  userId: number;
+  publicId: string;
   name: string;
   lastName?: string;
   designerCode?: string;
-  email?: string;
 }
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
@@ -143,23 +142,23 @@ export const adminMarkPetRequestInReview = async (id: number): Promise<void> => 
   await apiClient.patch(`/api/admin/pet-requests/${id}/review`);
 };
 
-/** Aprobar exige diseñador: sin `designerUserId` la solicitud no le llega a nadie. */
-export const adminApprovePetRequest = async (
+/** Aprobar exige diseñador: sin `designerPublicId` la solicitud no le llega a nadie. */
+export const approvePetRequest = async (
   id: number,
-  designerUserId: number,
+  designerPublicId: string,
   adminNotes?: string
 ): Promise<void> => {
   await apiClient.patch(`/api/admin/pet-requests/${id}/approve`, {
-    designerUserId,
+    designerPublicId,
     adminNotes: adminNotes?.trim() || undefined,
   });
 };
 
-export const adminAssignPetDesigner = async (
+export const assignPetDesigner = async (
   id: number,
-  designerUserId: number
+  designerPublicId: string
 ): Promise<void> => {
-  await apiClient.patch(`/api/admin/pet-requests/${id}/assign-designer`, { designerUserId });
+  await apiClient.patch(`/api/admin/pet-requests/${id}/assign-designer`, { designerPublicId });
 };
 
 export const adminRejectPetRequest = async (id: number, reason: string): Promise<void> => {

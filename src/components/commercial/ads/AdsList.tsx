@@ -4,12 +4,13 @@
 import React, { useState } from 'react';
 import { AdCard } from './AdCard';
 import { EditAdModal } from './EditAdModal';
+import { IncreaseBudgetModal } from '../budget/IncreaseBudgetModal';
 import { Search, Filter, Plus, FileImage, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { AdResponseDTO } from '@/types/ads/commercial';
 import { useAds } from '@/hooks/ads/querys';
 import { useRefetchOnExpiredMedia } from '@/hooks/ads/useRefetchOnExpiredMedia';
-import { usePauseAd, useResumeAd, useDeleteAd } from '@/hooks/ads/mutations';
+import { usePauseAd, useResumeAd, useDeleteAd, useIncreaseAdBudget } from '@/hooks/ads/mutations';
 import { LimitReachedBanner } from '../plans/LimitReached';
 import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from '../plans/WalletBudgetAlerts';
 import { usePlanState } from '../layout/DashboardLayout';
@@ -19,12 +20,16 @@ import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
 import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from '../planChange/PlanChangeInProgress';
 import toast from 'react-hot-toast';
 
+/** Tope de likes de un anuncio (mismo que el backend: CreateAdRequestDTO / Ad.maxLikes). */
+const MAX_AD_LIKES = 10_000_000;
+
 export function AdsList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(12);
   const [editingAd, setEditingAd] = useState<AdResponseDTO | null>(null);
+  const [increasingAd, setIncreasingAd] = useState<AdResponseDTO | null>(null);
 
   // React Query hooks
   const { data, isLoading, error, refetch } = useAds(currentPage, pageSize);
@@ -34,7 +39,8 @@ export function AdsList() {
   const pauseAdMutation = usePauseAd();
   const resumeAdMutation = useResumeAd();
   const deleteAdMutation = useDeleteAd();
-  const { planState } = usePlanState();
+  const increaseBudgetMutation = useIncreaseAdBudget();
+  const { planState, refreshPlanState } = usePlanState();
 
   const ads = data?.content || [];
   const totalPages = data?.totalPages || 0;
@@ -230,6 +236,7 @@ export function AdsList() {
                   onPause={handlePause}
                   onResume={handleResume}
                   onDelete={handleDelete}
+                  onIncreaseBudget={setIncreasingAd}
                   onMediaError={handleMediaError}
                   canReactivate={!adsSlot.activate.blocked}
                   reactivateDisabledReason={adsSlot.activate.tooltip ?? PLAN_CHANGE_BLOCK_TOOLTIP}
@@ -295,6 +302,42 @@ export function AdsList() {
           </div>
         )}
       </div>
+
+      {/* Modal de aumento de presupuesto. `expectedMaxLikes` es el maxLikes que se está viendo: si
+          otro aumento ya lo cambió el backend responde 409 sin cobrar (anti doble cobro). */}
+      {increasingAd && (
+        <IncreaseBudgetModal
+          assetLabel="anuncio"
+          assetName={increasingAd.title}
+          mode={{
+            kind: 'units',
+            unitSingular: 'like',
+            unitPlural: 'likes',
+            unitCostCents: Math.round(Number(increasingAd.rewardPerLike) * 100), // rewardPerLike llega en pesos
+            currentTotal: increasingAd.maxLikes,
+            maxTotal: MAX_AD_LIKES,
+            quickPicks: [100, 500, 1000, 5000],
+          }}
+          willReopen={increasingAd.status === 'COMPLETED'}
+          balanceCents={planState?.remainingBudgetCents}
+          onSubmit={(additionalLikes) =>
+            increaseBudgetMutation.mutateAsync({
+              id: increasingAd.id,
+              expectedMaxLikes: increasingAd.maxLikes,
+              additionalLikes,
+            })
+          }
+          onSuccess={() => {
+            refreshPlanState();
+            setIncreasingAd(null);
+          }}
+          onStale={() => {
+            refetch();
+            refreshPlanState();
+          }}
+          onClose={() => setIncreasingAd(null)}
+        />
+      )}
 
       {/* Modal de edición */}
       {editingAd && (

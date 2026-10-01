@@ -12,6 +12,7 @@ import type {
   SurveyCommercialDetailDTO,
   SurveyStatus,
 } from '@/types/survey.types';
+import type { IncreaseSurveyBudgetRequest } from '@/types/BudgetIncrease.types';
 
 // ─── List all surveys (admin) ─────────────────────────────────────────────────
 
@@ -155,6 +156,27 @@ export function useUpdateSurvey(surveyId: number) {
 
     onSuccess: (updated) => {
       queryClient.setQueryData(surveyKeys.commercialDetail(surveyId), updated);
+      queryClient.invalidateQueries({ queryKey: surveyKeys.adminLists() });
+    },
+  });
+}
+
+// ─── Increase survey budget ───────────────────────────────────────────────────
+
+/**
+ * Buys more response slots for an ACTIVE / PAUSED / COMPLETED survey (a COMPLETED one is reopened).
+ * The response is the increase summary, not the survey, so the detail and the list are invalidated
+ * rather than patched.
+ */
+export function useIncreaseSurveyBudget(surveyId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: IncreaseSurveyBudgetRequest) =>
+      surveyAdminService.increaseSurveyBudget(surveyId, request),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: surveyKeys.commercialDetail(surveyId) });
       queryClient.invalidateQueries({ queryKey: surveyKeys.adminLists() });
     },
   });
