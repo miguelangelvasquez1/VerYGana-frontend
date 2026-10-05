@@ -24,6 +24,7 @@ import {
 import { getBalance, getMovements } from '@/services/TreasuryService';
 import { TreasuryBalanceResponseDTO, TreasuryMovementResponseDTO } from '@/types/finance/Treasury.types';
 import { ProsperityReconciliationCard } from '@/components/admin/prosperity/ProsperityReconciliationCard';
+import { ProsperityCommercialSection } from '@/components/admin/prosperity/ProsperityCommercialSection';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -440,9 +441,6 @@ export default function TreasuryPanel() {
         )}
       </div>
 
-      {/* ── Conciliación de Prosperidad ── */}
-      <ProsperityReconciliationCard />
-
       {/* ── Movements section ── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
@@ -559,6 +557,18 @@ export default function TreasuryPanel() {
           </>
         )}
       </div>
+
+      {/* ── Saldo de Prosperidad ── */}
+      <div className="pt-4">
+        <h2 className="text-lg font-bold text-gray-900">Saldo de Prosperidad</h2>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Conciliación global y gestión del Saldo de cada empresario
+        </p>
+      </div>
+
+      <ProsperityReconciliationCard />
+
+      <ProsperityCommercialSection />
     </div>
   );
 }

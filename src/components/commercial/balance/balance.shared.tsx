@@ -4,12 +4,10 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle, HelpCircle, Info } from "lucide-react";
 import { PlanCode } from "@/types/finance/plans/Plan.types";
-import { ContractSummaryResponseDTO } from "@/types/finance/plans/Contract.types";
 
-// sessionStorage — permite recuperar el flujo si el usuario recarga la
-// página a mitad de camino, y marca "salí a pagar a Wompi" para que el
-// wizard sepa que debe auto-verificar el estado al volver.
-export const RECHARGE_CONTRACT_ID_KEY = "vg_recharge_contract_id";
+// sessionStorage — marca "salí a pagar a Wompi" para que el wizard sepa que
+// debe auto-verificar el estado al volver. El contractId no se guarda:
+// GET /plans/recharge/current es la fuente de verdad de la recarga en curso.
 export const RECHARGE_PAYMENT_REFERENCE_KEY = "vg_recharge_payment_reference";
 
 // Mismo rango usado en /plans (src/app/plans/page.tsx) — solo valida en
@@ -18,17 +16,6 @@ export const RECHARGE_RANGES: Partial<Record<PlanCode, { min: number; max: numbe
   [PlanCode.STANDARD]: { min: 1_000_000, max: 9_999_999 },
   [PlanCode.PREMIUM]: { min: 10_000_000, max: null },
 };
-
-// Usado para detectar, desde otro flujo (ej. cambio de plan), si el
-// contrato de recarga guardado en sessionStorage todavía puede bloquear la
-// nueva acción. REJECTED/CANCELLED son los únicos estados definitivamente
-// no cancelables; el resto se intenta cancelar y el backend responde 422
-// si ya se generó el checkout de pago.
-export function isActiveRechargeContract(
-  contract: ContractSummaryResponseDTO | null | undefined
-): contract is ContractSummaryResponseDTO {
-  return !!contract && contract.status !== "REJECTED" && contract.status !== "CANCELLED";
-}
 
 export type FieldErrors = Record<string, string>;
 

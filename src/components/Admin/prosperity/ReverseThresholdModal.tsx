@@ -18,9 +18,11 @@ interface Props {
   balanceCents: number;
   onClose: () => void;
   onReversed: (movement: ProsperityMovementResponseDTO) => void;
+  /** El backend respondió 409: el padre debe cerrar el modal y recargar. */
+  onAlreadyReversed: (message: string) => void;
 }
 
-export function ReverseThresholdModal({ threshold, balanceCents, onClose, onReversed }: Props) {
+export function ReverseThresholdModal({ threshold, balanceCents, onClose, onReversed, onAlreadyReversed }: Props) {
   const [cause, setCause] = useState('');
   const [supportRef, setSupportRef] = useState('');
   // Doble paso: el primer clic arma la confirmación, el segundo envía.
@@ -38,6 +40,11 @@ export function ReverseThresholdModal({ threshold, balanceCents, onClose, onReve
     onError: (err) => {
       const { status, message, details } = parseProsperityError(err);
       setConfirming(false);
+      // 409: el Umbral ya fue revertido (otra sesión o datos desactualizados).
+      if (status === 409) {
+        onAlreadyReversed(message);
+        return;
+      }
       if (status === 400 && Object.keys(details).length > 0) {
         setFieldErrors(details);
         setFormError(null);

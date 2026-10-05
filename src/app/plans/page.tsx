@@ -12,13 +12,12 @@ import {
 } from 'lucide-react';
 import { initiatePayment, getPlanCatalog } from '@/services/planService';
 import { previewPlanChange, requestPlanChange, getCurrentPlanChangeRequest } from '@/services/planChangeService';
-import { getRechargeContract } from '@/services/planRechargeService';
+import { getCurrentRecharge } from '@/services/planRechargeService';
 import { useInvalidatePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
 import { PlanCode, PlanPaymentRequestDTO } from '@/types/finance/plans/Plan.types';
 import { PlanCatalogOption, PlanCatalogResponseDTO } from '@/types/finance/plans/PlanCatalog.types';
 import { PlanChangeAssetType, PlanChangePreviewResponseDTO } from '@/types/finance/plans/PlanChange.types';
 import { WompiCheckoutResponseDTO } from '@/types/finance/wompi/Wompi.types';
-import { RECHARGE_CONTRACT_ID_KEY, isActiveRechargeContract } from '@/components/commercial/balance/balance.shared';
 import { ProsperityThresholdPreview } from '@/components/prosperity/ProsperityThresholdPreview';
 import { useProsperitySummary } from '@/hooks/prosperity/useProsperity';
 import { formatProsperityCents, isProsperityVisible } from '@/utils/prosperity';
@@ -547,8 +546,8 @@ function PlanChangeModal({ plan, onConfirm, onClose, loading }: PlanChangeModalP
 
 // ─── Recharge Conflict Modal ────────────────────────────────────────────────────
 // Se muestra cuando el backend rechaza una nueva solicitud de cambio de plan
-// porque hay una recarga en curso (contractId guardado en sessionStorage
-// desde /commercial/balance) que la bloquea. Solo informa — el comercial
+// porque hay una recarga en curso (GET /plans/recharge/current) que la
+// bloquea. Solo informa — el comercial
 // decide si cancela la recarga manualmente desde su pantalla de recarga.
 
 interface RechargeConflictModalProps {
@@ -659,9 +658,8 @@ export default function PlansPage() {
   // error para mostrar en el modal, o `undefined` si se resolvió (navegación
   // al detalle, o conflicto de recarga que abre su propio modal).
   //
-  // El 422 puede ser: (a) recarga en curso (contractId guardado en
-  // sessionStorage desde /commercial/balance) → modal de conflicto de
-  // recarga; (b) activos que exceden el plan destino (carrera: el preview ya
+  // El 422 puede ser: (a) recarga en curso (GET /plans/recharge/current)
+  // → modal de conflicto de recarga; (b) activos que exceden el plan destino (carrera: el preview ya
   // debería evitarlo) → se muestra el `message` del backend en el modal, que
   // vuelve a verificar el preview.
   const attemptRequestPlanChange = useCallback(async (
@@ -697,18 +695,14 @@ export default function PlansPage() {
       const status = (err as { response?: { status?: number } })?.response?.status;
       const msg = apiErrorMessage(err, 'No se pudo crear la solicitud de cambio de plan.');
       if (status === 422) {
-        const contractId = sessionStorage.getItem(RECHARGE_CONTRACT_ID_KEY);
-        if (contractId) {
-          try {
-            const contract = await getRechargeContract(Number(contractId));
-            if (isActiveRechargeContract(contract)) {
-              setModalPlan(null);
-              setRechargeConflict(true);
-              return;
-            }
-          } catch {
-            /* no se pudo confirmar el conflicto de recarga */
+        try {
+          if (await getCurrentRecharge()) {
+            setModalPlan(null);
+            setRechargeConflict(true);
+            return;
           }
+        } catch {
+          /* no se pudo confirmar el conflicto de recarga */
         }
         // 422 por activos que exceden el plan destino (u otra causa):
         // dejamos el modal abierto con el mensaje del backend.

@@ -21,6 +21,8 @@ export interface ProsperityThresholdsResponse {
     generatedCents : number;
     planVersion : number;
     validatedAt : string;
+    reversed : boolean;
+    reversedAt : string | null;
 }
 
 export interface ProsperitySummaryResponseDTO {
