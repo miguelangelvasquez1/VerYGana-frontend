@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { SessionProvider } from "./providers/SessionProvider";
 import { AuthProvider } from "./providers/AuthProvider";
+import { NotificationsProvider } from "./providers/NotificationsProvider";
 import { CartProvider } from "@/context/CartContext";
 
 import { CartDrawer } from "@/components/consumer/cart/CartDrawer";
@@ -49,10 +50,12 @@ export default function RootLayout({
         <ReactQueryProvider>
         <SessionProvider>
           <AuthProvider>
-            <CartProvider>
-              {children}
-              <CartDrawer />
-            </CartProvider>
+            <NotificationsProvider>
+              <CartProvider>
+                {children}
+                <CartDrawer />
+              </CartProvider>
+            </NotificationsProvider>
           </AuthProvider>
         </SessionProvider>
         </ReactQueryProvider>

@@ -1,62 +1,69 @@
 // hooks/useNotifications.ts
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useCallback, useMemo } from "react";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     getNotifications,
     getUnreadCount,
     markAllAsRead as markAllAsReadService,
-    createNotificationStream,
 } from "@/services/NotificationService";
-import { NotificationResponseDTO } from "@/types/Generic.types";
-import { getSession } from "next-auth/react";
+import {
+    NOTIFICATIONS_KEY,
+    NOTIFICATIONS_LIST_KEY,
+    NOTIFICATIONS_UNREAD_COUNT_KEY,
+    NotificationPages,
+} from "@/lib/notifications/queryKeys";
 
 const PAGE_SIZE = 20;
 
+// Lista y conteo en React Query: varios componentes (o el doble montaje de
+// StrictMode) comparten una sola request en vez de disparar una cada uno.
+// Lo que llega por SSE lo escribe NotificationsProvider en estas mismas cachés.
 export function useNotifications() {
-    const [notifications, setNotifications] = useState<NotificationResponseDTO[]>([]);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
+    const queryClient = useQueryClient();
 
-    const eventSourceRef = useRef<EventSource | null>(null);
+    const listQuery = useInfiniteQuery({
+        queryKey: NOTIFICATIONS_LIST_KEY,
+        queryFn: ({ pageParam }) => getNotifications(pageParam, PAGE_SIZE),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) =>
+            lastPage.meta.hasNext ? allPages.length : undefined,
+    });
 
-    // ── Carga inicial ──────────────────────────────────────────
-    const loadInitial = useCallback(async () => {
-        setLoading(true);
-        try {
-            const [paged, count] = await Promise.all([
-                getNotifications(0, PAGE_SIZE),
-                getUnreadCount(),
-            ]);
-            setNotifications(paged.data);
-            setHasMore(paged.meta.hasNext);
-            setPage(0);
-            setUnreadCount(count);
-        } catch (err) {
-            console.error("Error cargando notificaciones:", err);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const countQuery = useQuery({
+        queryKey: NOTIFICATIONS_UNREAD_COUNT_KEY,
+        queryFn: getUnreadCount,
+    });
+
+    const unreadCount = countQuery.data ?? 0;
+
+    // Una notificación que llega por SSE desplaza los offsets del servidor, así que
+    // la página siguiente puede repetir un ítem ya mostrado: se filtra por id.
+    const notifications = useMemo(() => {
+        const seen = new Set<number>();
+        return (listQuery.data?.pages ?? [])
+            .flatMap((page) => page.data)
+            .filter((n) => (seen.has(n.id) ? false : (seen.add(n.id), true)));
+    }, [listQuery.data]);
+
+    const setAllRead = useCallback((isRead: boolean) => {
+        queryClient.setQueryData<NotificationPages>(NOTIFICATIONS_LIST_KEY, (prev) =>
+            prev && {
+                ...prev,
+                pages: prev.pages.map((page) => ({
+                    ...page,
+                    data: page.data.map((n) => ({ ...n, isRead })),
+                })),
+            });
+    }, [queryClient]);
 
     // ── Cargar más ─────────────────────────────────────────────
+    const { hasNextPage, isFetchingNextPage, fetchNextPage } = listQuery;
     const loadMore = useCallback(async () => {
-        if (loading || !hasMore) return;
-        setLoading(true);
-        try {
-            const nextPage = page + 1;
-            const paged = await getNotifications(nextPage, PAGE_SIZE);
-            setNotifications((prev) => [...prev, ...paged.data]);
-            setHasMore(paged.meta.hasNext);
-            setPage(nextPage);
-        } catch (err) {
-            console.error("Error cargando más notificaciones:", err);
-        } finally {
-            setLoading(false);
-        }
-    }, [loading, hasMore, page]);
+        if (!hasNextPage || isFetchingNextPage) return;
+        await fetchNextPage();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     // ── Marcar TODAS como leídas ───────────────────────────────
     // Se llama al abrir el panel, solo si hay no leídas
@@ -64,59 +71,29 @@ export function useNotifications() {
         if (unreadCount === 0) return; // nada que hacer
 
         // Optimistic update inmediato — el usuario ve el cambio al instante
-        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-        setUnreadCount(0);
+        setAllRead(true);
+        queryClient.setQueryData<number>(NOTIFICATIONS_UNREAD_COUNT_KEY, 0);
 
         try {
             await markAllAsReadService();
         } catch (err) {
-            // Rollback si el backend falla
+            // Rollback: se vuelve a pedir el estado real al servidor
             console.error("Error marcando todas como leídas:", err);
-            setNotifications((prev) => prev.map((n) => ({ ...n, isRead: false })));
-            // Recarga el conteo real desde el servidor
-            const count = await getUnreadCount();
-            setUnreadCount(count);
+            await queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
         }
-    }, [unreadCount]);
+    }, [unreadCount, setAllRead, queryClient]);
 
-    // ── SSE ────────────────────────────────────────────────────
-    const connectSSE = useCallback(async () => {
-        if (eventSourceRef.current) return;
-        const session = await getSession();
-        const token = (session as any)?.accessToken;
-        if (!token) return;
-
-        eventSourceRef.current = createNotificationStream(
-            token,
-            (newNotification) => {
-                setNotifications((prev) => [newNotification, ...prev]);
-                setUnreadCount((prev) => prev + 1);
-            },
-            (error) => console.warn("SSE error:", error)
-        );
-    }, []);
-
-    const disconnectSSE = useCallback(() => {
-        eventSourceRef.current?.close();
-        eventSourceRef.current = null;
-    }, []);
-
-    useEffect(() => {
-        connectSSE();
-        return () => disconnectSSE();
-    }, [connectSSE, disconnectSSE]);
-
-    useEffect(() => {
-        loadInitial();
-    }, [loadInitial]);
+    const reload = useCallback(async () => {
+        await queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
+    }, [queryClient]);
 
     return {
         notifications,
         unreadCount,
-        loading,
-        hasMore,
+        loading: listQuery.isLoading || isFetchingNextPage,
+        hasMore: hasNextPage,
         markAllAsRead,
         loadMore,
-        reload: loadInitial,
+        reload,
     };
 }
