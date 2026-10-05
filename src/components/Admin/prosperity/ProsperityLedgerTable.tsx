@@ -25,7 +25,7 @@ function RowIndicators({ m }: { m: ProsperityMovementResponseDTO }) {
   const uncovered = (m.uncoveredCents ?? 0) > 0;
   if (m.relatedEntryId == null && !uncovered) return null;
   return (
-    <div className="mt-1 flex flex-wrap gap-1">
+    <div className="mt-2 flex flex-wrap gap-1.5">
       {m.relatedEntryId != null && (
         <span className="inline-flex items-center gap-1 rounded-full bg-admin-blue/10 px-2 py-0.5 text-[11px] font-medium text-admin-blue">
           <Link2 className="h-3 w-3" />
@@ -107,6 +107,8 @@ export function ProsperityLedgerTable({ publicId, page, onPageChange, onAdjustEn
                   <Th align="right">Valor</Th>
                   <Th align="right">Saldo antes</Th>
                   <Th align="right">Saldo después</Th>
+                  <Th>Compensa</Th>
+                  <Th align="right">No cubierto</Th>
                   <Th>Origen</Th>
                   <Th>Registrado por</Th>
                   <Th>Causal</Th>
@@ -122,9 +124,8 @@ export function ProsperityLedgerTable({ publicId, page, onPageChange, onAdjustEn
                     <td className="whitespace-nowrap px-4 py-3 text-xs text-gray-500">
                       {formatProsperityDateTime(m.effectiveAt)}
                     </td>
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900">{getMovementTypeMeta(m.type).label}</p>
-                      <RowIndicators m={m} />
+                    <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">
+                      {getMovementTypeMeta(m.type).label}
                     </td>
                     <td className={`whitespace-nowrap px-4 py-3 text-right font-semibold ${amountClass(m.type)}`}>
                       {formatSignedMovement(m)}
@@ -134,6 +135,26 @@ export function ProsperityLedgerTable({ publicId, page, onPageChange, onAdjustEn
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-gray-900">
                       {formatProsperityCents(m.balanceAfterCents)}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      {m.relatedEntryId != null ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-admin-blue/10 px-2 py-0.5 text-xs font-medium text-admin-blue">
+                          <Link2 className="h-3 w-3" />
+                          Asiento #{m.relatedEntryId}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-right">
+                      {(m.uncoveredCents ?? 0) > 0 ? (
+                        <span className="inline-flex items-center gap-1 font-semibold text-red-700">
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          {formatProsperityCents(m.uncoveredCents)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-gray-600">{origin(m)}</td>
                     <td className="px-4 py-3 text-xs text-gray-600">{m.performedBy ?? '—'}</td>

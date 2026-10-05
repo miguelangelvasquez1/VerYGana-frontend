@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { CreditCard, Loader2, Mail, RefreshCw, CheckCircle2, XCircle, Lock, ArrowRightLeft } from 'lucide-react';
+import { CreditCard, Loader2, Mail, RefreshCw, CheckCircle2, XCircle, Lock, ArrowRightLeft, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { usePlanState } from '../layout/DashboardLayout';
@@ -11,12 +11,18 @@ import {
   getRechargeContract,
   rechargeCheckout,
   cancelRecharge,
+  getCurrentRecharge,
+  reconcileRecharge,
 } from '@/services/planRechargeService';
 import { getPaymentStatus } from '@/services/planService';
 import { getCurrentPlanChangeRequest, cancelPlanChangeRequest } from '@/services/planChangeService';
 import { ContractSummaryResponseDTO, ContractStatus } from '@/types/finance/plans/Contract.types';
 import { PlanCode } from '@/types/finance/plans/Plan.types';
-import { RechargePreviewResponseDTO } from '@/types/finance/plans/PlanRecharge.types';
+import {
+  OpenRechargeResponseDTO,
+  RechargeNextAction,
+  RechargePreviewResponseDTO,
+} from '@/types/finance/plans/PlanRecharge.types';
 import { PlanChangeRequestResponseDTO } from '@/types/finance/plans/PlanChange.types';
 import { formatBudget, formatCents } from '@/utils/currency';
 import { isProsperityVisible } from '@/utils/prosperity';
@@ -24,7 +30,6 @@ import { useProsperitySummary } from '@/hooks/prosperity/useProsperity';
 import { ProsperityThresholdPreview } from '@/components/prosperity/ProsperityThresholdPreview';
 import { PLAN_CHANGE_LABELS, isActivePlanChangeRequest, ChangePlanButton } from '../planChange/planChange.shared';
 import {
-  RECHARGE_CONTRACT_ID_KEY,
   RECHARGE_PAYMENT_REFERENCE_KEY,
   RECHARGE_RANGES,
   extractApiError,
@@ -36,19 +41,31 @@ type Step =
   | 'loading'
   | 'ineligible'
   | 'amount'
+  | 'open_recharge'
   | 'plan_change_conflict'
   | 'signature'
   | 'payment'
   | 'confirming'
-  | 'success'
-  | 'declined'
-  | 'cancelled';
+  | 'success';
 
 // El comercial solo puede autocancelar la recarga mientras el contrato siga
-// en un estado firmable/firmado y todavía no haya generado el pago. El backend
-// es la fuente de verdad (devuelve un message legible si ya no aplica); esto
-// solo decide si mostramos el botón.
+// en un estado firmable/firmado. El backend es la fuente de verdad (devuelve
+// un message legible si ya no aplica); esto solo decide si mostramos el botón.
 const RECHARGE_CANCELABLE_STATUSES: ContractStatus[] = ['APPROVED', 'PENDING_SIGNATURE', 'SIGNED'];
+
+// Botón principal de la tarjeta "Recarga en curso" según `nextAction`.
+// WAIT_PAYMENT no tiene acción principal: solo se puede actualizar.
+const OPEN_RECHARGE_ACTION_LABELS: Partial<Record<RechargeNextAction, string>> = {
+  SIGN: 'Continuar firma',
+  PAY: 'Continuar pago',
+  RETRY_PAYMENT: 'Reintentar pago',
+};
+
+function formatDateTime(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' });
+}
 
 const PAYMENT_MAX_POLLS = 8;
 const PAYMENT_POLL_INTERVAL_MS = 2500;
@@ -73,6 +90,8 @@ export function RechargeWizard() {
   const [reactivating, setReactivating] = useState(false);
   const [step, setStep] = useState<Step>('loading');
   const [contract, setContract] = useState<ContractSummaryResponseDTO | null>(null);
+  const [openRecharge, setOpenRecharge] = useState<OpenRechargeResponseDTO | null>(null);
+  const [reconciling, setReconciling] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [showRechargeConfirm, setShowRechargeConfirm] = useState(false);
@@ -102,8 +121,42 @@ export function RechargeWizard() {
   const { data: prosperity } = useProsperitySummary(effectivePlan === PlanCode.STANDARD);
   const prosperityBalanceCents = isProsperityVisible(prosperity?.status) ? prosperity?.balanceCents : undefined;
 
-  // ── Recuperación inicial: sessionStorage puede tener una referencia de
-  // pago (volvimos de Wompi) o un contractId (refresh a mitad del flujo).
+  // Fuente de verdad de la recarga en curso: GET /plans/recharge/current.
+  // Con recarga → tarjeta "Recarga en curso"; sin recarga → formulario normal.
+  // `creditedIfNone`: venimos de un intento de pago o de un 422, así que si ya
+  // no hay recarga en curso es porque quedó pagada → refrescamos el saldo.
+  const loadCurrentRecharge = async (creditedIfNone = false) => {
+    try {
+      const current = await getCurrentRecharge();
+      if (current) {
+        setOpenRecharge(current);
+        setStep('open_recharge');
+        return;
+      }
+      if (creditedIfNone) refreshPlanState();
+    } catch (err) {
+      // Si /current falla caemos al formulario: el preview también trae
+      // `openRecharge` y nos devuelve a la tarjeta si hay una en curso.
+      console.error('Error consultando la recarga en curso:', err);
+    }
+    setOpenRecharge(null);
+    setContract(null);
+    setStep('amount');
+  };
+
+  // Errores de /checkout, /cancel y /reconcile: siempre se muestra el
+  // `message` del backend. Un 422 significa que el estado cambió (ya estaba
+  // pagada, hay un pago en proceso, no se pudo verificar) → re-consultamos.
+  const handleRechargeActionError = async (err: unknown) => {
+    const { message } = extractApiError(err);
+    toast.error(message);
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    if (status === 422) await loadCurrentRecharge(true);
+  };
+
+  // ── Recuperación inicial: si sessionStorage tiene una referencia de pago
+  // volvimos de Wompi y hay que verificarlo; si no, se consulta la recarga
+  // en curso al backend.
   useEffect(() => {
     if (loadingPlan) return;
     if (hasInitRef.current) return;
@@ -120,25 +173,8 @@ export function RechargeWizard() {
       return;
     }
 
-    const contractId = sessionStorage.getItem(RECHARGE_CONTRACT_ID_KEY);
-    if (contractId) {
-      getRechargeContract(Number(contractId))
-        .then((c) => {
-          setContract(c);
-          if (c.status === 'SIGNED') setStep('payment');
-          else if (c.status === 'REJECTED') {
-            sessionStorage.removeItem(RECHARGE_CONTRACT_ID_KEY);
-            setStep('amount');
-          } else setStep('signature');
-        })
-        .catch(() => {
-          sessionStorage.removeItem(RECHARGE_CONTRACT_ID_KEY);
-          setStep('amount');
-        });
-      return;
-    }
-
-    setStep('amount');
+    loadCurrentRecharge();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingPlan, effectivePlan]);
 
   // ── Paso "confirmando pago": mismo patrón que la página de resultado de
@@ -147,11 +183,19 @@ export function RechargeWizard() {
     if (step !== 'confirming') return;
     const reference = sessionStorage.getItem(RECHARGE_PAYMENT_REFERENCE_KEY);
     if (!reference) {
-      setStep('amount');
+      loadCurrentRecharge();
       return;
     }
     let cancelled = false;
     let tries = 0;
+
+    // Sin pago confirmado (rechazado, checkout cerrado, o sigue pendiente):
+    // no nos quedamos bloqueados aquí — volvemos a la recarga en curso, que
+    // ofrece continuar/reintentar el pago, cancelar o reconciliar.
+    const fallBackToCurrent = () => {
+      sessionStorage.removeItem(RECHARGE_PAYMENT_REFERENCE_KEY);
+      loadCurrentRecharge(true);
+    };
 
     const poll = async () => {
       if (cancelled) return;
@@ -160,7 +204,6 @@ export function RechargeWizard() {
         if (cancelled) return;
         if (result.wompiStatus === 'APPROVED') {
           sessionStorage.removeItem(RECHARGE_PAYMENT_REFERENCE_KEY);
-          sessionStorage.removeItem(RECHARGE_CONTRACT_ID_KEY);
           setPaymentMessage(result.message);
           setStep('success');
           // El backend levanta la suspensión del presupuesto cuando el
@@ -172,16 +215,20 @@ export function RechargeWizard() {
           return;
         }
         if (result.wompiStatus === 'DECLINED' || result.wompiStatus === 'ERROR') {
-          setPaymentMessage(result.message);
-          setStep('declined');
+          if (result.message) toast.error(result.message);
+          fallBackToCurrent();
           return;
         }
       } catch {
         /* seguimos reintentando hasta agotar los intentos */
       }
       tries += 1;
-      if (tries >= PAYMENT_MAX_POLLS) return;
-      if (!cancelled) setTimeout(poll, PAYMENT_POLL_INTERVAL_MS);
+      if (cancelled) return;
+      if (tries >= PAYMENT_MAX_POLLS) {
+        fallBackToCurrent();
+        return;
+      }
+      setTimeout(poll, PAYMENT_POLL_INTERVAL_MS);
     };
 
     const initial = setTimeout(poll, 1200);
@@ -205,7 +252,16 @@ export function RechargeWizard() {
     setPreviewLoading(true);
     const timer = setTimeout(() => {
       previewRecharge(amount * 100)
-        .then(setPreview)
+        .then((result) => {
+          // Hay una recarga en curso que /current no alcanzó a reportar:
+          // mostramos la tarjeta en vez de un aviso sin acciones.
+          if (result.openRecharge) {
+            setOpenRecharge(result.openRecharge);
+            setStep('open_recharge');
+            return;
+          }
+          setPreview(result);
+        })
         .catch(() => setPreview(null))
         .finally(() => setPreviewLoading(false));
     }, 500);
@@ -220,7 +276,6 @@ export function RechargeWizard() {
     try {
       const result = await requestRecharge(amountCents);
       setContract(result);
-      sessionStorage.setItem(RECHARGE_CONTRACT_ID_KEY, String(result.contractId));
       setStep('signature');
       return 'success';
     } catch (err) {
@@ -303,8 +358,9 @@ export function RechargeWizard() {
       if (fresh.status === 'SIGNED') {
         setStep('payment');
       } else if (fresh.status === 'REJECTED') {
-        sessionStorage.removeItem(RECHARGE_CONTRACT_ID_KEY);
         toast.error('Tu solicitud de recarga fue rechazada.');
+        setOpenRecharge(null);
+        setContract(null);
         setStep('amount');
       } else {
         toast('Tu contrato de recarga todavía no ha sido firmado.');
@@ -317,58 +373,109 @@ export function RechargeWizard() {
     }
   };
 
+  // La recarga sobre la que actúan pagar/cancelar/reconciliar: la tarjeta
+  // "Recarga en curso" o el contrato del flujo nuevo (misma recarga si se
+  // retomó la firma desde la tarjeta).
+  const activeContractId = openRecharge?.contractId ?? contract?.contractId;
+
+  // Sirve tanto para el primer pago como para retomarlo o reintentarlo: el
+  // backend genera un checkout nuevo cada vez.
   const handlePay = async () => {
-    if (!contract || submitting) return;
+    if (activeContractId == null || submitting) return;
     setSubmitting(true);
     try {
-      const checkout = await rechargeCheckout(contract.contractId);
+      const checkout = await rechargeCheckout(activeContractId);
       sessionStorage.setItem(RECHARGE_PAYMENT_REFERENCE_KEY, checkout.reference);
       window.location.href = checkout.checkoutUrl;
     } catch (err) {
-      const { message } = extractApiError(err);
-      toast.error(message);
+      await handleRechargeActionError(err);
       setSubmitting(false);
     }
   };
 
+  // "Continuar firma" desde la tarjeta: reutiliza el paso de firma del flujo
+  // normal con el contrato de la recarga en curso.
+  const handleContinueSignature = async () => {
+    if (!openRecharge || submitting) return;
+    setSubmitting(true);
+    try {
+      const fresh = await getRechargeContract(openRecharge.contractId);
+      setContract(fresh);
+      setStep(fresh.status === 'SIGNED' ? 'payment' : 'signature');
+    } catch (err) {
+      const { message } = extractApiError(err);
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // "Ya pagué y no se refleja" / "Actualizar": verifica el pago contra Wompi.
+  const handleReconcile = async () => {
+    if (!openRecharge || reconciling) return;
+    setReconciling(true);
+    try {
+      const updated = await reconcileRecharge(openRecharge.contractId);
+      if (updated) {
+        setOpenRecharge(updated);
+        return;
+      }
+      // 204: la recarga quedó pagada.
+      sessionStorage.removeItem(RECHARGE_PAYMENT_REFERENCE_KEY);
+      setOpenRecharge(null);
+      setContract(null);
+      setPaymentMessage(null);
+      setStep('success');
+      setReactivating(true);
+      pollPlanStateAfterRecharge().finally(() => setReactivating(false));
+    } catch (err) {
+      await handleRechargeActionError(err);
+    } finally {
+      setReconciling(false);
+    }
+  };
+
   // Autocancelación de la recarga en curso — desbloquea al comercial que dejó
-  // una recarga a medias y quiere en su lugar pedir un cambio de plan.
+  // una recarga a medias y quiere pedir otra o un cambio de plan.
   const canCancelRecharge =
-    !!contract &&
-    (step === 'signature' || step === 'payment') &&
-    RECHARGE_CANCELABLE_STATUSES.includes(contract.status);
+    (step === 'open_recharge' && !!openRecharge && openRecharge.nextAction !== 'WAIT_PAYMENT') ||
+    (!!contract &&
+      (step === 'signature' || step === 'payment') &&
+      RECHARGE_CANCELABLE_STATUSES.includes(contract.status));
 
   const handleCancelRecharge = () => {
-    if (!contract || cancelling || submitting) return;
+    if (activeContractId == null || cancelling || submitting) return;
     setShowCancelConfirm(true);
   };
 
   const confirmCancelRecharge = async () => {
-    if (!contract) return;
+    if (activeContractId == null) return;
     setCancelling(true);
     try {
-      await cancelRecharge(contract.contractId);
-      sessionStorage.removeItem(RECHARGE_CONTRACT_ID_KEY);
+      await cancelRecharge(activeContractId);
       sessionStorage.removeItem(RECHARGE_PAYMENT_REFERENCE_KEY);
       setContract(null);
+      setOpenRecharge(null);
       setInputValue('');
       setPreview(null);
+      setAmountError('');
       refreshPlanState();
       toast.success('Recarga cancelada');
-      setStep('cancelled');
+      setStep('amount');
     } catch (err) {
-      const { message } = extractApiError(err);
-      toast.error(message);
+      await handleRechargeActionError(err);
     } finally {
       setCancelling(false);
     }
   };
 
+  const openRechargeActionLabel = openRecharge ? OPEN_RECHARGE_ACTION_LABELS[openRecharge.nextAction] : undefined;
+
   const cancelRechargeButton = canCancelRecharge ? (
     <button
       type="button"
       onClick={handleCancelRecharge}
-      disabled={cancelling || submitting || checking}
+      disabled={cancelling || submitting || checking || reconciling}
       className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold text-gray-500 hover:text-red-600 transition disabled:opacity-50 cursor-pointer"
     >
       {cancelling ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
@@ -512,6 +619,71 @@ export function RechargeWizard() {
           </div>
         )}
 
+        {step === 'open_recharge' && openRecharge && (
+          <div className="space-y-6 py-4">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-amber-500" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Recarga en curso</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{openRecharge.message}</p>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-1.5 text-sm text-gray-600">
+              <div className="flex justify-between gap-4">
+                <span>Monto de la recarga</span>
+                <span>{formatBudget(openRecharge.amountPesos)}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span>IVA</span>
+                <span>{formatBudget(openRecharge.vatAmountPesos)}</span>
+              </div>
+              <div className="flex justify-between gap-4 border-t border-gray-200 pt-1.5 font-bold text-gray-900">
+                <span>Total a pagar</span>
+                <span>{formatBudget(openRecharge.totalToPayPesos)}</span>
+              </div>
+              {openRecharge.expiresAt && (
+                <p className="text-xs text-gray-500 pt-1.5">
+                  Vence el {formatDateTime(openRecharge.expiresAt)}. Si no se paga antes, se cancela automáticamente.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2 text-center">
+              {openRechargeActionLabel ? (
+                <WizardActionButton
+                  submitting={submitting}
+                  onClick={openRecharge.nextAction === 'SIGN' ? handleContinueSignature : handlePay}
+                  label={openRechargeActionLabel}
+                  disabled={cancelling || reconciling}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleReconcile}
+                  disabled={reconciling}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 cursor-pointer"
+                >
+                  {reconciling ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                  Actualizar
+                </button>
+              )}
+              {cancelRechargeButton}
+              {openRecharge.paymentAttempted && openRechargeActionLabel && (
+                <button
+                  type="button"
+                  onClick={handleReconcile}
+                  disabled={reconciling || submitting || cancelling}
+                  className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-[#03548C] hover:underline transition disabled:opacity-50 cursor-pointer"
+                >
+                  {reconciling && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {reconciling ? 'Verificando tu pago...' : 'Ya pagué y no se refleja'}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {step === 'plan_change_conflict' && planChangeConflict && (
           <div className="space-y-6 text-center py-4">
             <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
@@ -608,53 +780,6 @@ export function RechargeWizard() {
             >
               Volver al panel
             </Link>
-          </div>
-        )}
-
-        {step === 'cancelled' && (
-          <div className="space-y-6 text-center py-4">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-              <XCircle className="w-8 h-8 text-gray-400" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Recarga cancelada</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Cancelamos tu contrato de recarga. Puedes solicitar una recarga nueva cuando quieras o pedir un cambio de
-                plan.
-              </p>
-            </div>
-            <WizardActionButton
-              submitting={false}
-              onClick={() => {
-                setAmountError('');
-                setStep('amount');
-              }}
-              label="Solicitar nueva recarga"
-            />
-          </div>
-        )}
-
-        {step === 'declined' && (
-          <div className="space-y-6 text-center py-4">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-              <XCircle className="w-8 h-8 text-red-500" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Pago rechazado</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {paymentMessage || 'Tu banco o Wompi rechazó el pago. No se realizó ningún cargo.'}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                sessionStorage.removeItem(RECHARGE_PAYMENT_REFERENCE_KEY);
-                setStep('payment');
-              }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors cursor-pointer"
-            >
-              Intentar de nuevo
-            </button>
           </div>
         )}
       </div>

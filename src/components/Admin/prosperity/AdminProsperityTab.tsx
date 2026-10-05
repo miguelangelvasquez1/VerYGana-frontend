@@ -120,15 +120,18 @@ export function AdminProsperityTab({ publicId }: Props) {
         <ProsperityThresholdsTable
           thresholds={summary.thresholds ?? []}
           emptyMessage="Este empresario aún no tiene Umbrales."
-          renderActions={(t) => (
-            <button
-              type="button"
-              onClick={() => setReversing(t)}
-              className="inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50"
-            >
-              <Undo2 className="h-3.5 w-3.5" /> Revertir
-            </button>
-          )}
+          renderActions={(t) =>
+            // Un Umbral solo se revierte una vez (el backend responde 409 si se repite).
+            t.reversed ? null : (
+              <button
+                type="button"
+                onClick={() => setReversing(t)}
+                className="inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+              >
+                <Undo2 className="h-3.5 w-3.5" /> Revertir
+              </button>
+            )
+          }
         />
       </section>
 
@@ -155,6 +158,11 @@ export function AdminProsperityTab({ publicId }: Props) {
             } else {
               toast.success(`Umbral revertido: se retiraron ${formatProsperityCents(movement.amountCents)}.`);
             }
+            reload();
+          }}
+          onAlreadyReversed={(message) => {
+            setReversing(null);
+            toast.error(message);
             reload();
           }}
         />

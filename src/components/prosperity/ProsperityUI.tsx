@@ -7,7 +7,7 @@ import type {
   ProsperityThresholdsResponse,
 } from '@/types/commercial/Prosperity.types';
 import type { PagedResponse } from '@/types/Generic.types';
-import { formatProsperityCents, formatProsperityDate } from '@/utils/prosperity';
+import { formatProsperityCents, formatProsperityDate, formatProsperityDateTime } from '@/utils/prosperity';
 
 // Componentes compartidos del Saldo de Prosperidad (panel del empresario y
 // pestaña del admin). Recordatorio: el Saldo NO es dinero — sin íconos de
@@ -74,6 +74,30 @@ export function ProsperityIndicators({ items }: { items: ProsperityIndicatorItem
 
 // ─── Tabla de Umbrales ───────────────────────────────────────────────────────
 
+// Un Umbral revertido ya no aporta al Saldo: se marca con la fecha de reversión.
+function ThresholdStateBadge({ t }: { t: ProsperityThresholdsResponse }) {
+  if (!t.reversed) {
+    return (
+      <span className="inline-flex items-center rounded-full border border-green-200 bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+        Vigente
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex flex-col items-start gap-0.5">
+      <span className="inline-flex items-center rounded-full border border-red-200 bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">
+        Revertido
+      </span>
+      {t.reversedAt && (
+        <span className="whitespace-nowrap text-[11px] text-gray-500">el {formatProsperityDateTime(t.reversedAt)}</span>
+      )}
+    </span>
+  );
+}
+
+const generatedClass = (t: ProsperityThresholdsResponse) =>
+  t.reversed ? 'text-gray-400 line-through' : 'text-gray-900';
+
 interface ThresholdsTableProps {
   thresholds: ProsperityThresholdsResponse[];
   emptyMessage?: string;
@@ -100,6 +124,7 @@ export function ProsperityThresholdsTable({
               <Th align="right">Inversión neta</Th>
               <Th align="center">Multiplicador</Th>
               <Th align="right">Umbral generado</Th>
+              <Th>Estado</Th>
               {renderActions && <Th align="right">Acciones</Th>}
             </tr>
           </thead>
@@ -111,8 +136,11 @@ export function ProsperityThresholdsTable({
                   {formatProsperityCents(t.investmentNetCents)}
                 </td>
                 <td className="px-4 py-3 text-center font-medium text-gray-600">× {t.multiplier}</td>
-                <td className="whitespace-nowrap px-4 py-3 text-right font-semibold text-gray-900">
+                <td className={`whitespace-nowrap px-4 py-3 text-right font-semibold ${generatedClass(t)}`}>
                   {formatProsperityCents(t.generatedCents)}
+                </td>
+                <td className="px-4 py-3">
+                  <ThresholdStateBadge t={t} />
                 </td>
                 {renderActions && <td className="px-4 py-3 text-right">{renderActions(t)}</td>}
               </tr>
@@ -127,11 +155,16 @@ export function ProsperityThresholdsTable({
           <li key={t.id} className="rounded-xl border border-gray-100 p-3">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-gray-500">{formatProsperityDate(t.validatedAt)}</span>
-              <span className="text-sm font-semibold text-gray-900">{formatProsperityCents(t.generatedCents)}</span>
+              <span className={`text-sm font-semibold ${generatedClass(t)}`}>
+                {formatProsperityCents(t.generatedCents)}
+              </span>
             </div>
             <p className="mt-1 text-xs text-gray-500">
               Inversión neta {formatProsperityCents(t.investmentNetCents)} · × {t.multiplier}
             </p>
+            <div className="mt-2">
+              <ThresholdStateBadge t={t} />
+            </div>
             {renderActions && <div className="mt-2 flex justify-end">{renderActions(t)}</div>}
           </li>
         ))}
