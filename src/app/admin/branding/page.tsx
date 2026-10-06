@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import AdminBrandingPanel from '@/components/admin/branding/AdminBrandingPanel';
+import AdminLayout from '@/components/Admin/AdminLayout';
+import AdminBrandingPanel from '@/components/Admin/branding/AdminBrandingPanel';
 
 export default function AdminBrandingPage() {
   return (

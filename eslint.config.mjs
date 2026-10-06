@@ -11,6 +11,14 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    // Deuda de calidad (spec 006, D-23): ~200 usos de `any` pasan de error a
+    // aviso para no bloquear el build de la beta. Las demás reglas siguen
+    // como error. Reducir los avisos después de la beta.
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -95,7 +95,7 @@ export default function CustomArrayFieldTemplate({
       {items.length === 0 && (
         <div className={`${colors.bg} border-2 ${colors.border} border-dashed rounded-lg p-8 text-center`}>
           <p className="text-sm text-gray-600">
-            No hay elementos. Haz clic en "Agregar" para comenzar.
+            No hay elementos. Haz clic en &quot;Agregar&quot; para comenzar.
           </p>
         </div>
       )}

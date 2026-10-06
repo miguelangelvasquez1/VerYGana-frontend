@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Salida autocontenida para la imagen Docker (server.js + solo las dependencias que se usan).
+  output: 'standalone',
   images: {
     remotePatterns: [
       {

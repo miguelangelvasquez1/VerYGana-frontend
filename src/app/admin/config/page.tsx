@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import ConfigPanel from '@/components/admin/config/ConfigPanel';
+import AdminLayout from '@/components/Admin/AdminLayout';
+import ConfigPanel from '@/components/Admin/config/ConfigPanel';
 
 export default function ConfigPage() {
   return (

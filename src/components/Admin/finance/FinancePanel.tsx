@@ -23,8 +23,8 @@ import {
 } from 'lucide-react';
 import { getBalance, getMovements } from '@/services/TreasuryService';
 import { TreasuryBalanceResponseDTO, TreasuryMovementResponseDTO } from '@/types/finance/Treasury.types';
-import { ProsperityReconciliationCard } from '@/components/admin/prosperity/ProsperityReconciliationCard';
-import { ProsperityCommercialSection } from '@/components/admin/prosperity/ProsperityCommercialSection';
+import { ProsperityReconciliationCard } from '@/components/Admin/prosperity/ProsperityReconciliationCard';
+import { ProsperityCommercialSection } from '@/components/Admin/prosperity/ProsperityCommercialSection';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

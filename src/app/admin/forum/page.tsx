@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import ImpactStoryForm from '@/components/admin/forum/ImpactStoryForm';
-import ImpactStoryEditForm from '@/components/admin/forum/ImpactStoryEditForm';
-import StoryRow from '@/components/admin/forum/StoryRow';
+import AdminLayout from '@/components/Admin/AdminLayout';
+import ImpactStoryForm from '@/components/Admin/forum/ImpactStoryForm';
+import ImpactStoryEditForm from '@/components/Admin/forum/ImpactStoryEditForm';
+import StoryRow from '@/components/Admin/forum/StoryRow';
 import { useImpactStories, useDeleteImpactStory } from '@/hooks/useImpactStory';
 import type { ImpactStoryResponse, StoryStatus, ImpactStoryFilters } from '@/types/impactStory.types';
 
@@ -303,7 +303,7 @@ function ConfirmDeleteModal({
             <h3 className="font-bold text-gray-900 text-base">Eliminar historia</h3>
             <p className="text-sm text-gray-500 mt-1">
               ¿Estás seguro de eliminar{' '}
-              <span className="font-semibold text-gray-700">"{title}"</span>?
+              <span className="font-semibold text-gray-700">&quot;{title}&quot;</span>?
               Esta acción no se puede deshacer: la historia deja de mostrarse y sus imágenes
               y videos se borran definitivamente del servidor.
             </p>

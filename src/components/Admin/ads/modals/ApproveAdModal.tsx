@@ -26,7 +26,7 @@ export const ApproveAdModal: React.FC<ApproveAdModalProps> = ({
         </div>
         <p className="text-gray-600 mb-6">
           ¿Estás seguro de que deseas aprobar el anuncio{' '}
-          <span className="font-semibold text-gray-800">"{ad.title}"</span>?
+          <span className="font-semibold text-gray-800">&quot;{ad.title}&quot;</span>?
           Esta acción habilitará el anuncio para ser activado en la plataforma.
         </p>
         <div className="flex gap-3">

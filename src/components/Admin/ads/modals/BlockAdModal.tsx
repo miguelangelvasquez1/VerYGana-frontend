@@ -25,7 +25,7 @@ export const BlockAdModal: React.FC<BlockAdModalProps> = ({
           Bloquear Anuncio
         </h3>
         <p className="text-gray-600 mb-4">
-          Proporciona una razón clara para bloquear "{ad.title}"
+          Proporciona una razón clara para bloquear &quot;{ad.title}&quot;
         </p>
         <textarea
           value={reason}
