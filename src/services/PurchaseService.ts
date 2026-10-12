@@ -1,8 +1,13 @@
 import apiClient from "@/lib/api/client";
 import { PagedResponse } from "@/types/Generic.types";
-import { PurchaseResponseDTO, ConsumerPurchaseResponseDTO, CreatePurchaseRequestDTO, InitiatePurchaseResponseDTO } from "@/types/purchases/purchase.types";
+import { PurchaseResponseDTO, ConsumerPurchaseResponseDTO, CreatePurchaseRequestDTO, InitiatePurchaseResponseDTO, PurchaseQuoteRequestDTO, PurchaseQuoteResponseDTO } from "@/types/purchases/purchase.types";
 
 export const purchaseService = {
+  async quotePurchase(request: PurchaseQuoteRequestDTO): Promise<PurchaseQuoteResponseDTO> {
+    const response = await apiClient.post<PurchaseQuoteResponseDTO>('/purchases/quote', request);
+    return response.data;
+  },
+
   async createPurchase(request: CreatePurchaseRequestDTO): Promise<InitiatePurchaseResponseDTO> {
     const response = await apiClient.post<InitiatePurchaseResponseDTO>('/purchases/buy', request);
     return response.data;

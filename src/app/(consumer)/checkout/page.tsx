@@ -1,59 +1,127 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { ShoppingBag, AlertCircle, Mail, CreditCard, Package, ChevronRight, Loader2 } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ShoppingBag, AlertCircle, Mail, CreditCard, Package, ChevronRight, Loader2, Info, RefreshCw, Sparkles } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/context/CartContext';
 import { CartService } from '@/services/CartService';
 import { purchaseService } from '@/services/PurchaseService';
+import { keyPromotionKeys, usePurchaseQuote } from '@/hooks/keys/useKeyPromotions';
+import { formatColombiaDateTime, formatCopCents, formatKeys, parseKeysError } from '@/utils/keys';
 import Link from 'next/link';
-
-const KEY_VALUE_COP = 10;
 
 const formatCOP = (amount: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amount);
 
 export default function CheckoutPage() {
   const { cart, cartSummary, clearCart } = useCart();
+  const queryClient = useQueryClient();
   const [contactEmail, setContactEmail] = useState('');
-  const [keysToUse, setKeysToUse] = useState(0);
+  // Llaves elegidas en el selector. null = el usuario aún no ha visto una
+  // cotización; con la primera se sugiere el máximo utilizable.
+  const [selectedKeys, setSelectedKeys] = useState<number | null>(null);
+  const [keysNotice, setKeysNotice] = useState<string | null>(null);
+  const [keysInputError, setKeysInputError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
 
   const stockValidation = CartService.validateStock(cart);
 
-  const totalMaxKeysAllowed = useMemo(
-    () => cart.reduce((sum, item) => sum + item.maxKeysAllowed * item.quantity, 0),
-    [cart]
+  const items = useMemo(() => CartService.convertToCreatePurchaseDTO(cart), [cart]);
+
+  const {
+    data: quote,
+    isFetching: quoteFetching,
+    isPlaceholderData,
+    isError: quoteFailed,
+    error: quoteError,
+    refetch: refetchQuote,
+  } = usePurchaseQuote(items);
+
+  // Solo se cotiza al entrar y cuando cambia el carrito; con cada cotización
+  // nueva el selector se ajusta al máximo que el backend permite.
+  useEffect(() => {
+    if (!quote || isPlaceholderData) return;
+    if (selectedKeys === null) {
+      // Primera carga: el máximo es solo una sugerencia que el usuario ve y puede cambiar.
+      setSelectedKeys(quote.usableKeys);
+      return;
+    }
+    if (selectedKeys > quote.usableKeys) {
+      setSelectedKeys(quote.usableKeys);
+      setKeysNotice(
+        `Ajustamos tu selección a ${formatKeys(quote.usableKeys)}: es lo máximo que puedes usar en esta compra.`
+      );
+    }
+  }, [quote, isPlaceholderData]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const maxSelectableKeys = quote ? Math.max(0, quote.usableKeys) : 0;
+
+  // Todo lo que depende de las llaves elegidas se calcula aquí, con enteros.
+  const appliedKeys = Math.min(selectedKeys ?? maxSelectableKeys, maxSelectableKeys);
+  const cashToPayCents = quote ? quote.totalCents - appliedKeys * quote.keyValueCents : 0;
+  const cashToPayAtMaxCoverageCents = quote ? quote.totalCents - quote.maxApplicableKeys * quote.keyValueCents : 0;
+  const missingKeysForMaxCoverage = quote ? Math.max(0, quote.maxApplicableKeys - quote.availableKeys) : 0;
+
+  // La cotización en pantalla corresponde al carrito actual.
+  const quoteReady = !!quote && !quoteFailed && !quoteFetching && !isPlaceholderData;
+
+  const quoteItemsById = useMemo(
+    () => new Map((quote?.items ?? []).map((item) => [item.productId, item])),
+    [quote]
   );
 
-  const totalMinCashCOP = useMemo(
-    () => Math.ceil(cart.reduce((sum, item) => sum + item.minCashCents * item.quantity, 0) / 100),
-    [cart]
-  );
-
-  const keysValueCOP = keysToUse * KEY_VALUE_COP;
-  const cashToPayCOP = cartSummary.total - keysValueCOP;
+  // Sin llaves utilizables el selector se muestra, pero bloqueado en 0.
+  const keysLocked = isProcessing || maxSelectableKeys === 0;
 
   const handleKeysChange = (value: number) => {
-    setKeysToUse(Math.max(0, Math.min(value, totalMaxKeysAllowed)));
+    const requested = Math.floor(value) || 0;
+    setKeysNotice(null);
+    // Se recorta al rango permitido y se explica por qué.
+    if (requested > maxSelectableKeys && quote) {
+      setKeysInputError(
+        !quote.backingSufficient
+          ? `Por ahora solo puedes usar hasta ${formatKeys(quote.usableKeys)} en esta compra.`
+          : quote.availableKeys < quote.maxApplicableKeys
+            ? `Solo tienes ${formatKeys(quote.availableKeys)} disponibles.`
+            : `El tope para esta compra es de ${formatKeys(quote.maxApplicableKeys)}.`
+      );
+    } else if (requested < 0) {
+      setKeysInputError('La cantidad de llaves no puede ser negativa.');
+    } else {
+      setKeysInputError(null);
+    }
+    setSelectedKeys(Math.max(0, Math.min(requested, maxSelectableKeys)));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrorStatus(null);
     if (cart.length === 0) { setError('El carrito está vacío'); return; }
     if (!stockValidation.isValid) { setError('Algunos productos no tienen stock suficiente.'); return; }
+    if (!quoteReady) return;
     setIsProcessing(true);
     try {
       const result = await purchaseService.createPurchase({
-        items: CartService.convertToCreatePurchaseDTO(cart),
-        keysToUse: keysToUse > 0 ? keysToUse : undefined,
+        items,
+        keysToUse: appliedKeys,
         contactEmail: contactEmail || undefined,
       });
       clearCart();
       window.location.href = result.checkoutUrl;
-    } catch (err: any) {
-      setError(err.message || 'Error al procesar la compra. Intenta nuevamente.');
+    } catch (err) {
+      const { status, message } = parseKeysError(err);
+      setError(message);
+      setErrorStatus(status);
+      // 400 (llaves de más o insuficientes), 409 (respaldo) y 422 (la promoción
+      // cambió): el backend no recorta, así que se recotiza para mostrar el tope vigente.
+      if (status === 400 || status === 409 || status === 422) {
+        if (status === 422) queryClient.invalidateQueries({ queryKey: keyPromotionKeys.active });
+        setKeysNotice('Actualizamos la cotización. Revisa cuántas llaves puedes usar antes de pagar.');
+        refetchQuote();
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -95,7 +163,7 @@ export default function CheckoutPage() {
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Finalizar compra</h1>
           <p className="text-white/70 text-sm sm:text-base">
-            {cartSummary.itemCount} producto{cartSummary.itemCount !== 1 ? 's' : ''} · Total {formatCOP(cartSummary.total)}
+            {cartSummary.itemCount} producto{cartSummary.itemCount !== 1 ? 's' : ''} · Total {quote ? formatCopCents(quote.totalCents) : formatCOP(cartSummary.total)}
           </p>
         </div>
 
@@ -127,68 +195,174 @@ export default function CheckoutPage() {
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3">
                 <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700">{error}</p>
+                <div className="text-sm text-red-700 space-y-2">
+                  <p>{error}</p>
+                  {errorStatus === 409 && appliedKeys > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-red-600">Puedes reintentar con menos llaves o pagar todo en dinero.</p>
+                      <button
+                        type="button"
+                        onClick={() => { setError(null); setErrorStatus(null); handleKeysChange(0); }}
+                        className="cursor-pointer px-3 py-1.5 rounded-lg border border-red-300 bg-white text-red-700 font-semibold hover:bg-red-100 transition-colors"
+                      >
+                        Pagar todo en dinero
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
 
               {/* Pagar con llaves */}
-              {totalMaxKeysAllowed > 0 && (
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="px-5 py-4 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                      <img src="/logos/llave.png" alt="llave" className="w-5 h-5 object-contain" />
-                    </div>
-                    <h2 className="font-semibold text-white text-sm">Pagar con llaves</h2>
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-5 py-4 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <img src="/logos/llave.png" alt="llave" className="w-5 h-5 object-contain" />
                   </div>
+                  <h2 className="font-semibold text-white text-sm">Pagar con llaves</h2>
+                  {quoteFetching && <Loader2 className="ml-auto w-4 h-4 text-white/70 animate-spin" />}
+                </div>
 
+                {quoteFailed ? (
+                  <div className="p-5 space-y-3">
+                    <div className="flex gap-3 text-sm text-red-700">
+                      <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                      <p>{parseKeysError(quoteError).message}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => refetchQuote()}
+                      className="cursor-pointer inline-flex items-center gap-1.5 text-sm font-semibold text-[#03548C] hover:underline"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Volver a cotizar
+                    </button>
+                  </div>
+                ) : !quote ? (
+                  <div className="p-8 flex items-center justify-center gap-2 text-sm text-gray-500">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Calculando tu cotización...
+                  </div>
+                ) : (
                   <div className="p-5 space-y-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Llaves disponibles para esta compra</span>
-                      <span className="font-bold text-[#03548C]">{totalMaxKeysAllowed.toLocaleString('es-CO')}</span>
-                    </div>
-
-                    <input
-                      type="range"
-                      min={0}
-                      max={totalMaxKeysAllowed}
-                      value={keysToUse}
-                      onChange={(e) => handleKeysChange(Number(e.target.value))}
-                      className="w-full accent-[#03548C]"
-                    />
-
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="number"
-                        min={0}
-                        max={totalMaxKeysAllowed}
-                        value={keysToUse || ''}
-                        placeholder="0"
-                        onChange={(e) => handleKeysChange(Number(e.target.value) || 0)}
-                        className="w-28 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
-                      />
-                    </div>
-
-                    {/* Desglose */}
-                    <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+                    <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Descuento con llaves</span>
-                        <span className="text-[#03548C] font-medium">−{formatCOP(keysValueCOP)}</span>
+                        <span className="text-gray-600">Tus llaves disponibles</span>
+                        <span className="font-bold text-[#03548C]">{formatKeys(quote.availableKeys)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Tope de llaves para esta compra</span>
+                        <span className="font-bold text-[#03548C]">{formatKeys(quote.maxApplicableKeys)}</span>
+                      </div>
+                    </div>
+
+                    {/* El selector siempre está visible: usar llaves es opcional (de 0 al máximo). */}
+                    <div className="space-y-3">
+                        <label htmlFor="keys-to-use" className="block text-sm font-medium text-gray-700">
+                          ¿Cuántas llaves quieres usar?
+                        </label>
+                        <input
+                          type="range"
+                          min={0}
+                          max={Math.max(maxSelectableKeys, 1)}
+                          value={appliedKeys}
+                          onChange={(e) => handleKeysChange(Number(e.target.value))}
+                          disabled={keysLocked}
+                          aria-label="Llaves a usar"
+                          className="w-full accent-[#03548C] disabled:opacity-40 disabled:cursor-not-allowed"
+                        />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <input
+                            id="keys-to-use"
+                            type="number"
+                            min={0}
+                            max={maxSelectableKeys}
+                            value={appliedKeys || ''}
+                            placeholder="0"
+                            onChange={(e) => handleKeysChange(Number(e.target.value) || 0)}
+                            disabled={keysLocked}
+                            className={`w-28 px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                              keysInputError ? 'border-red-400 focus:ring-red-200' : 'border-gray-300 focus:ring-[#03548C]'
+                            }`}
+                          />
+                          <span className="text-xs text-gray-400">
+                            de 0 a {maxSelectableKeys.toLocaleString('es-CO')}
+                          </span>
+                          <div className="ml-auto flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleKeysChange(0)}
+                              disabled={keysLocked || appliedKeys === 0}
+                              className="cursor-pointer px-2.5 py-1 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              Sin llaves
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleKeysChange(maxSelectableKeys)}
+                              disabled={keysLocked || appliedKeys === maxSelectableKeys}
+                              className="cursor-pointer px-2.5 py-1 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              Máximo
+                            </button>
+                          </div>
+                        </div>
+                        {keysInputError && <p className="text-xs text-red-600">{keysInputError}</p>}
+                        {maxSelectableKeys === 0 && (
+                          <p className="text-sm text-gray-500">
+                            {quote.availableKeys === 0
+                              ? 'Aún no tienes llaves disponibles: esta compra se paga completa en dinero.'
+                              : 'Esta compra no admite pago con llaves.'}
+                          </p>
+                        )}
+                    </div>
+
+                    {keysNotice && (
+                      <div className="flex gap-2 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+                        <Info className="w-4 h-4 shrink-0 mt-0.5 text-[#03548C]" />
+                        <p>{keysNotice}</p>
+                      </div>
+                    )}
+
+                    {!quote.backingSufficient && (
+                      <div className="flex gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                        <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+                        <p>Por ahora solo puedes usar hasta {formatKeys(quote.usableKeys)} en esta compra.</p>
+                      </div>
+                    )}
+
+                    {/* Desglose de la cotización */}
+                    <div className={`bg-gray-50 rounded-xl p-4 space-y-2 text-sm transition-opacity ${quoteReady ? '' : 'opacity-60'}`}>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Precio total</span>
+                        <span className="font-medium text-gray-700">{formatCopCents(quote.totalCents)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Llaves aplicadas</span>
+                        <span className="text-[#03548C] font-medium">{formatKeys(appliedKeys)}</span>
                       </div>
                       <div className="flex justify-between border-t border-gray-200 pt-2">
-                        <span className="text-gray-700 font-medium">Pago en efectivo</span>
-                        <span className="font-bold text-[#0b1440]">{formatCOP(cashToPayCOP)}</span>
+                        <span className="text-gray-700 font-medium">Dinero a pagar ahora</span>
+                        <span className="font-bold text-[#0b1440]">{formatCopCents(cashToPayCents)}</span>
                       </div>
-                      {totalMinCashCOP > 0 && (
-                        <p className="text-xs text-gray-400">
-                          Mínimo en efectivo requerido: {formatCOP(totalMinCashCOP)}
-                        </p>
-                      )}
+                      <div className="border-t border-dashed border-gray-200 pt-2 space-y-1 text-xs text-gray-500">
+                        {missingKeysForMaxCoverage > 0 && (
+                          <div className="flex justify-between gap-3">
+                            <span>Llaves que te faltan para la cobertura máxima</span>
+                            <span className="font-semibold text-gray-700 shrink-0">{formatKeys(missingKeysForMaxCoverage)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between gap-3">
+                          <span>Dinero a pagar con la cobertura máxima</span>
+                          <span className="font-semibold text-gray-700 shrink-0">{formatCopCents(cashToPayAtMaxCoverageCents)}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Email de contacto */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4">
@@ -211,7 +385,7 @@ export default function CheckoutPage() {
 
                 <button
                   type="submit"
-                  disabled={isProcessing || !stockValidation.isValid}
+                  disabled={isProcessing || !stockValidation.isValid || !quoteReady}
                   className="cursor-pointer w-full py-3.5 bg-[#03548C] hover:bg-[#0b1440] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
                 >
                   {isProcessing ? (
@@ -220,10 +394,19 @@ export default function CheckoutPage() {
                       Procesando...
                     </>
                   ) : (
-                    <>
-                      Pagar {formatCOP(cashToPayCOP)}
-                      <ChevronRight className="w-4 h-4" />
-                    </>
+                    quoteReady && quote ? (
+                      <>
+                        Pagar {formatCopCents(cashToPayCents)}
+                        <ChevronRight className="w-4 h-4" />
+                      </>
+                    ) : quoteFailed ? (
+                      'Cotización no disponible'
+                    ) : (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Actualizando cotización...
+                      </>
+                    )
                   )}
                 </button>
               </div>
@@ -245,7 +428,9 @@ export default function CheckoutPage() {
 
               {/* Productos */}
               <div className="divide-y divide-gray-50">
-                {cart.map((item) => (
+                {cart.map((item) => {
+                  const quoteItem = quoteItemsById.get(item.productId);
+                  return (
                   <div key={item.productId} className="flex gap-3 p-4">
                     <img
                       src={item.imageUrl}
@@ -262,28 +447,45 @@ export default function CheckoutPage() {
                           {formatCOP(item.price * item.quantity)}
                         </span>
                       </div>
+                      {quoteItem && (
+                        <div className="mt-1.5 space-y-1">
+                          {quoteItem.promotionEndsAt !== null ? (
+                            <span className="inline-flex items-start gap-1 rounded-xl bg-orange-100 px-2 py-0.5 text-[11px] font-semibold leading-snug text-orange-700">
+                              <Sparkles className="w-3 h-3 shrink-0 mt-0.5" />
+                              Hasta {quoteItem.maxKeysPct} % con Llaves · válida hasta {formatColombiaDateTime(quoteItem.promotionEndsAt)}
+                            </span>
+                          ) : (
+                            <p className="text-xs text-gray-400">
+                              Hasta {quoteItem.maxKeysPct} % con Llaves
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Totales */}
               <div className="px-5 py-4 bg-gray-50 space-y-2.5 border-t border-gray-100">
                 <div className="flex justify-between text-sm text-gray-500">
-                  <span>Subtotal</span>
-                  <span className="font-medium text-gray-700">{formatCOP(cartSummary.total)}</span>
+                  <span>Precio total</span>
+                  <span className="font-medium text-gray-700">
+                    {quote ? formatCopCents(quote.totalCents) : formatCOP(cartSummary.total)}
+                  </span>
                 </div>
 
-                {keysToUse > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[#03548C]">Llaves ({keysToUse.toLocaleString('es-CO')})</span>
-                    <span className="font-semibold text-[#03548C]">−{formatCOP(keysValueCOP)}</span>
-                  </div>
-                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#03548C]">Llaves aplicadas</span>
+                  <span className="font-semibold text-[#03548C]">{quote ? formatKeys(appliedKeys) : '—'}</span>
+                </div>
 
                 <div className="flex justify-between items-center pt-2.5 border-t border-gray-200">
-                  <span className="text-base font-bold text-gray-900">Total a pagar</span>
-                  <span className="text-lg font-extrabold text-[#03548C]">{formatCOP(cashToPayCOP)}</span>
+                  <span className="text-base font-bold text-gray-900">Dinero a pagar</span>
+                  <span className={`text-lg font-extrabold text-[#03548C] transition-opacity ${quoteReady ? '' : 'opacity-60'}`}>
+                    {quote ? formatCopCents(cashToPayCents) : '—'}
+                  </span>
                 </div>
               </div>
 

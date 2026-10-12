@@ -25,6 +25,29 @@ export interface CreatePurchaseRequestDTO {
     redirectUrl?: string;
 }
 
+// POST /purchases/quote — cotiza sin reservar llaves, stock ni presupuesto.
+// Devuelve los límites del carrito y el valor de la llave; lo que depende de
+// cuántas llaves elige el usuario se calcula en el frontend (siempre con enteros).
+export interface PurchaseQuoteRequestDTO {
+    items: CreatePurchaseItemRequestDTO[];
+}
+
+export interface PurchaseQuoteItemDTO {
+    productId: number;
+    maxKeysPct: number;              // 50 ordinario o el % de la promoción
+    promotionEndsAt: string | null;  // null si rige el tope ordinario
+}
+
+export interface PurchaseQuoteResponseDTO {
+    totalCents: number;
+    availableKeys: number;       // llaves que el usuario puede gastar hoy
+    maxApplicableKeys: number;   // tope de la compra
+    usableKeys: number;          // máximo aplicable ahora: el menor entre tope, saldo y respaldo
+    keyValueCents: number;       // valor de una llave en centavos
+    backingSufficient: boolean;  // false si el respaldo es lo que limita usableKeys
+    items: PurchaseQuoteItemDTO[];
+}
+
 export interface PurchaseResponseDTO {
     id: number;
     referenceId: string;
