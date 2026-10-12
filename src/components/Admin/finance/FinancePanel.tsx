@@ -19,12 +19,14 @@ import {
   Wifi,
   Server,
   Users,
+  KeyRound,
   type LucideIcon,
 } from 'lucide-react';
 import { getBalance, getMovements } from '@/services/TreasuryService';
 import { TreasuryBalanceResponseDTO, TreasuryMovementResponseDTO } from '@/types/finance/Treasury.types';
 import { ProsperityReconciliationCard } from '@/components/admin/prosperity/ProsperityReconciliationCard';
 import { ProsperityCommercialSection } from '@/components/admin/prosperity/ProsperityCommercialSection';
+import { KeyLedgerToolsCard } from '@/components/admin/key-promotions/KeyLedgerToolsCard';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -79,6 +81,7 @@ const ACCOUNTS: {
   { code: 'CONNECTIVITY',    label: 'Conectividad',        icon: Wifi,     color: 'teal',   field: 'connectivityCents',    description: 'Fondos destinados a llaves de conectividad' },
   { code: 'INFRASTRUCTURE',  label: 'Infraestructura',     icon: Server,   color: 'slate',  field: 'infrastructureCents', description: 'Servidores, servicios y plataforma'         },
   { code: 'PAYROLL',         label: 'Nómina',              icon: Users,    color: 'rose',   field: 'payrollCents',         description: 'Pago de salarios y prestaciones'            },
+  { code: 'PROMOTIONS_RESERVE', label: 'Garantía de promociones de llaves', icon: KeyRound, color: 'fuchsia', field: 'promotionsReserveCents', description: 'Apartado del Fortalecimiento para promociones especiales' },
 ];
 
 const REF_TYPE_LABELS: Record<string, { label: string; color: string }> = {
@@ -100,6 +103,7 @@ const COLOR_MAP: Record<string, {
   amber:  { bg: 'bg-amber-50',         icon: 'bg-amber-100 text-amber-600',              badge: 'bg-amber-500',      border: 'border-amber-200',         light: 'text-amber-600',      ring: 'ring-amber-300',         bar: 'bg-amber-500'      },
   teal:   { bg: 'bg-teal-50',          icon: 'bg-teal-100 text-teal-600',                badge: 'bg-teal-500',       border: 'border-teal-200',          light: 'text-teal-600',       ring: 'ring-teal-300',          bar: 'bg-teal-500'       },
   slate:  { bg: 'bg-slate-50',         icon: 'bg-slate-100 text-slate-600',              badge: 'bg-slate-500',      border: 'border-slate-200',         light: 'text-slate-600',      ring: 'ring-slate-300',         bar: 'bg-slate-500'      },
+  fuchsia: { bg: 'bg-fuchsia-50',      icon: 'bg-fuchsia-100 text-fuchsia-600',          badge: 'bg-fuchsia-500',    border: 'border-fuchsia-200',       light: 'text-fuchsia-600',    ring: 'ring-fuchsia-300',       bar: 'bg-fuchsia-500'    },
   rose:   { bg: 'bg-rose-50',          icon: 'bg-rose-100 text-rose-600',                badge: 'bg-rose-500',       border: 'border-rose-200',          light: 'text-rose-600',       ring: 'ring-rose-300',          bar: 'bg-rose-500'       },
 };
 
@@ -569,6 +573,16 @@ export default function TreasuryPanel() {
       <ProsperityReconciliationCard />
 
       <ProsperityCommercialSection />
+
+      {/* ── Libro de llaves ── */}
+      <div className="pt-4">
+        <h2 className="text-lg font-bold text-gray-900">Libro de llaves</h2>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Herramientas de operación: vencimiento y conciliación de las llaves de los usuarios
+        </p>
+      </div>
+
+      <KeyLedgerToolsCard />
     </div>
   );
 }

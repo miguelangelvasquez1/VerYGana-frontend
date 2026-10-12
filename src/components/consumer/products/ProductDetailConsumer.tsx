@@ -9,6 +9,8 @@ import { AddToCartButton } from "./AddToCartButton";
 import ProductImageGallery from "@/components/shared/products/ProductImageGallery";
 import ProductInfoCard from "@/components/shared/products/ProductInfoCard";
 import ProductReviews from "@/components/shared/products/ProductReviews";
+import { useActiveKeyPromotions } from "@/hooks/keys/useKeyPromotions";
+import { KeyPromotionNotice } from "./KeyPromotionBadge";
 
 interface Props {
   product: ProductResponseDTO;
@@ -18,6 +20,8 @@ const ProductDetailConsumer: React.FC<Props> = ({ product }) => {
   const { role } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [quantity, setQuantity] = useState(1);
+  const { byProductId } = useActiveKeyPromotions();
+  const promotion = byProductId.get(product.id);
 
   const favoriteButton =
     role === "CONSUMER" ? (
@@ -37,6 +41,7 @@ const ProductDetailConsumer: React.FC<Props> = ({ product }) => {
 
   const cartFooter = (
     <div className="space-y-4">
+      {promotion && <KeyPromotionNotice promotion={promotion} />}
       {product.stock > 0 && (
         <div className="flex items-center gap-4">
           <span className="text-sm font-semibold text-gray-700">Cantidad</span>

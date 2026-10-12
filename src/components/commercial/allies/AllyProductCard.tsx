@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Star, Building2, Check, Loader2, Megaphone } from "lucide-react";
 
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
+import { KeysDiscountTag } from "@/components/shared/KeysDiscountTag";
 
 interface AllyProductCardProps {
   product: ProductSummaryResponseDTO;
@@ -44,6 +45,7 @@ const AllyProductCard: React.FC<AllyProductCardProps> = ({
             Promocionando
           </div>
         )}
+        <KeysDiscountTag pct={product.maxKeysPct} />
       </div>
 
       {/* Content */}

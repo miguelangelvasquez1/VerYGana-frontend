@@ -17,6 +17,7 @@ import {
   Palette,
   Handshake,
   Sprout,
+  KeyRound,
 } from 'lucide-react';
 import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { useLogout } from '@/hooks/useLogout';
@@ -91,6 +92,8 @@ const menuItems: MenuItem[] = [
     lockIfUnavailable: true,
   },
   { href: '/commercial/prosperity', icon: Sprout, label: 'Saldo de Prosperidad', prosperityOnly: true },
+  // Solo los comerciales STANDARD reciben invitaciones a promociones de llaves (MP-12).
+  { href: '/commercial/key-promotions', icon: KeyRound, label: 'Promociones de Llaves', requiredPlans: [PlanCode.STANDARD] },
   {
     href: '/commercial/billing', icon: CreditCard, label: 'Facturación',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],

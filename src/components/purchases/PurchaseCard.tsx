@@ -3,6 +3,7 @@ import { ConsumerPurchaseResponseDTO, PurchaseStatus } from "@/types/purchases/p
 import PurchaseItemsPreview from "./PurchaseItemsPreview";
 import PurchaseActions from "./PurchaseActions";
 import { formatPesos } from "@/utils/currency";
+import { centsToKeys, formatKeys } from "@/utils/keys";
 
 interface Props {
   purchase: ConsumerPurchaseResponseDTO;
@@ -80,15 +81,15 @@ const PurchaseCard = ({ purchase }: Props) => {
                   height={24}
                   className="w-5 h-5 sm:w-6 sm:h-6"
                 />
-                Llaves utilizadas
+                Llaves aplicadas
               </span>
-              <span>{purchase.keysValueCents / 1000}</span>
+              <span>{formatKeys(centsToKeys(purchase.keysValueCents))}</span>
             </div>
           )}
           <div className="flex justify-between items-center font-semibold text-gray-900">
             <span className="flex items-center gap-2 text-gray-500 font-medium">
               <span className="text-lg sm:text-xl">💵</span>
-              Total pagado
+              Dinero pagado
             </span>
             <span className="text-base sm:text-lg font-bold text-[#03548C]">${formatPesos(purchase.cashCents)}</span>
           </div>
