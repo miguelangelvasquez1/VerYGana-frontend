@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Una corrida nueva del mismo PR (o rama) cancela la anterior.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Check requerido para el merge: "Lint, tipos y build".
+  verify:
+    name: Lint, tipos y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Valores públicos y ficticios: solo para que el build compile.
+      # No se usa ningún secreto de GitHub.
+      NEXT_PUBLIC_API_URL: https://api.example.test
+      NEXT_PUBLIC_WS_URL: https://api.example.test/ws
+      NEXT_PUBLIC_PET_GAME_URL: https://games.example.test
+      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ficticia-solo-para-ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # Tope de avisos para que la deuda de lint no crezca. Hoy hay 360 avisos
+      # y 0 errores; bajar este número a medida que se corrijan (nunca subirlo).
+      - name: Lint
+        run: npx next lint --max-warnings 360
+
+      - name: Build
+        run: npm run build
+
+      # Después del build a propósito: `next build` genera los tipos de rutas en
+      # .next/types, y solo con ellos `tsc` ve los mismos errores que el build.
+      # Antes del build, tsc no los vería (falso verde).
+      - name: Tipos
+        run: npx tsc --noEmit
+
+  # Auditoría de dependencias de producción (--omit=dev: lo de desarrollo no
+  # llega al bundle ni al contenedor).
+  # TODO: hoy quedan vulnerabilidades abiertas (`xlsx`, y el `postcss` anidado en
+  # Next, que solo se corrige con Next 16); pasa a bloqueante (quitar
+  # continue-on-error) cuando se resuelvan.
+  audit:
+    name: Auditoría de dependencias
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: npm audit
+        run: npm audit --omit=dev --audit-level=high

@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Salida autocontenida para la imagen Docker (server.js + solo las dependencias que se usan).
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -24,6 +26,19 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'verygana-bucket.e1cb6cf5ad3bfde79bd415645b6a29e0.r2.cloudflarestorage.com',
       },
+      // Buckets propios de beta (SCRUM-105).
+      {
+        protocol: 'https',
+        hostname: 'cdn-beta.verygana.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mascotas-beta.verygana.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'verygana-beta-bucket.e1cb6cf5ad3bfde79bd415645b6a29e0.r2.cloudflarestorage.com',
+      },
       {
         protocol: 'https',
         hostname: 'freepnglogo.com',
@@ -42,6 +57,7 @@ const nextConfig: NextConfig = {
    * permiso de red local. Y nadie necesita el build en su máquina.
    */
   async rewrites() {
+    // SCRUM-105: siguen apuntando a dev hasta publicar un build de mascotas para beta; el destino futuro es https://mascotas-beta.verygana.com
     return [
       {
         source: '/pet-game/:path*',

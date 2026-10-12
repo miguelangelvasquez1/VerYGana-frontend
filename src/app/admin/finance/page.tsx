@@ -1,7 +1,7 @@
 'use client';
 
-import AdminLayout from '@/components/admin/AdminLayout';
-import FinancePanel from '@/components/admin/finance/FinancePanel';
+import AdminLayout from '@/components/Admin/AdminLayout';
+import FinancePanel from '@/components/Admin/finance/FinancePanel';
 
 export default function FinancePage() {
   return (

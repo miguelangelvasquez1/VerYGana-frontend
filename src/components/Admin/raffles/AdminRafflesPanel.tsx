@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Gift, TicketIcon, ShieldAlert, BarChart3 } from "lucide-react";
 import RaffleManagement from "./RaffleManagement";
-import TicketRulesManagement from "@/components/admin/ticket-rules/TicketRulesManagement";
+import TicketRulesManagement from "@/components/Admin/ticket-rules/TicketRulesManagement";
 import AuditLogPanel from "./AuditLogPanel";
 import CompletedRafflesStats from "./CompletedRafflesStats";
 import { RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";

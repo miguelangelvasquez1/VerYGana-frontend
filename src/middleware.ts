@@ -21,8 +21,12 @@ export const config = {
     // role prefixes (literal entries)
     '/commercial/:path*',
     '/commercial',
-    // '/admin/:path*',
-    // '/admin',
+    '/admin/:path*',
+    '/admin',
+
+    // oficial de cumplimiento
+    '/compliance',
+    '/compliance/:path*',
 
     // game designer (reset-password is public and excluded in middleware logic)
     '/game-designer',
@@ -48,6 +52,15 @@ const CONSUMER_ALLOWED = [
  * Roles que usan prefijo (las rutas que empiezan con su nombre).
  */
 const ROLE_PREFIXES = ['commercial', 'admin'] as const;
+
+/**
+ * Rutas del diseñador que son públicas (enlaces de correo sin sesión).
+ * Las usan el cuerpo del middleware y el callback `authorized`: una sola lista.
+ */
+const GAME_DESIGNER_PUBLIC = [
+  '/game-designer/reset-password',
+  '/game-designer/setup-password',
+] as const;
 
 /** Helpers para comprobar patrones simples como '/consumer/orders/:path*' */
 function patternBase(pattern: string): string {
@@ -128,8 +141,7 @@ export default withAuth(function middleware(req: NextRequest) {
 
   // 2.6) Rutas de game-designer (reset-password es pública)
   if (pathname === '/game-designer' || pathname.startsWith('/game-designer/')) {
-    if (pathname === '/game-designer/reset-password') return NextResponse.next();
-    if (pathname === '/game-designer/setup-password') return NextResponse.next();
+    if ((GAME_DESIGNER_PUBLIC as readonly string[]).includes(pathname)) return NextResponse.next();
     if (!token) {
       const loginUrl = new URL('/login', req.url);
       loginUrl.searchParams.set('from', pathname);
@@ -147,9 +159,12 @@ export default withAuth(function middleware(req: NextRequest) {
 {
   callbacks: {
       // Desactiva la validación automática en dev mode
-      authorized: ({ token }) => {
+      authorized: ({ token, req }) => {
         const dev_mode = process.env.MIDDLEWARE !== 'ACTIVE';
         if (dev_mode) return true; // ✅ Siempre permite en dev
+        // Sin esto el callback corta antes de las excepciones públicas del cuerpo (D-1).
+        const path = req.nextUrl.pathname.replace(/\/$/, '');
+        if ((GAME_DESIGNER_PUBLIC as readonly string[]).includes(path)) return true;
         return !!token; // 🔒 Valida token en producción
       },
     },

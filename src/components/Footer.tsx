@@ -1,6 +1,7 @@
 'use client';
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   HeartHandshake,
   Home,
@@ -33,9 +34,9 @@ export default function Footer() {
         <div>
           <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#1EA5BD]">Navegación</h4>
           <ul className="space-y-2.5 text-sm">
-            <li><a href="/" className="flex items-center gap-2 text-gray-300 transition duration-200 hover:translate-x-1 hover:text-white"><Home size={15} />Inicio</a></li>
-            <li><a href="/raffles" className="flex items-center gap-2 text-gray-300 transition duration-200 hover:translate-x-1 hover:text-white"><Ticket size={15} />Rifas</a></li>
-            <li><a href="/products" className="flex items-center gap-2 text-gray-300 transition duration-200 hover:translate-x-1 hover:text-white"><ShoppingCart size={15} />Marketplace</a></li>
+            <li><Link href="/" className="flex items-center gap-2 text-gray-300 transition duration-200 hover:translate-x-1 hover:text-white"><Home size={15} />Inicio</Link></li>
+            <li><Link href="/raffles" className="flex items-center gap-2 text-gray-300 transition duration-200 hover:translate-x-1 hover:text-white"><Ticket size={15} />Rifas</Link></li>
+            <li><Link href="/products" className="flex items-center gap-2 text-gray-300 transition duration-200 hover:translate-x-1 hover:text-white"><ShoppingCart size={15} />Marketplace</Link></li>
             <li><a href="/plans/mobile-plans" className="flex items-center gap-2 text-gray-300 transition duration-200 hover:translate-x-1 hover:text-white"><Smartphone size={15} />Recargas</a></li>
             <li><a href="/ads" className="flex items-center gap-2 text-gray-300 transition duration-200 hover:translate-x-1 hover:text-white"><Megaphone size={15} />Anuncios</a></li>
             <li><a href="/forum" className="flex items-center gap-2 text-gray-300 transition duration-200 hover:translate-x-1 hover:text-white"><HeartHandshake size={15} />Historias de Impacto</a></li>

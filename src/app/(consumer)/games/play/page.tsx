@@ -1,14 +1,14 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getGameRewards, init } from '@/services/GameService';
 import { RewardCardResponseDTO } from '@/types/games/game.types';
 import { useCart } from '@/context/CartContext';
 
-export default function PlayGamePage() {
+function PlayGameContent() {
   const searchParams = useSearchParams();
   const encodedUrl = searchParams.get('url');
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -225,5 +225,14 @@ export default function PlayGamePage() {
         </button>
       )}
     </>
+  );
+}
+
+// useSearchParams exige un límite de Suspense para que `next build` pueda prerenderizar la página.
+export default function PlayGamePage() {
+  return (
+    <Suspense fallback={null}>
+      <PlayGameContent />
+    </Suspense>
   );
 }
