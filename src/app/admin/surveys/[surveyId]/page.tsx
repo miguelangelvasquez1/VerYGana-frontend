@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import AdminSurveyDetail from '@/components/admin/surveys/AdminSurveyDetail';
-import AdminLayout from '@/components/admin/AdminLayout';
+import AdminSurveyDetail from '@/components/Admin/surveys/AdminSurveyDetail';
+import AdminLayout from '@/components/Admin/AdminLayout';
 
 export default function SystemAdminSurveyDetailPage() {
   const params   = useParams<{ surveyId: string }>();

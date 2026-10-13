@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import AdminPqrsPanel from '@/components/admin/pqrs/AdminPqrsPanel';
-import AdminRefundsPanel from '@/components/admin/pqrs/AdminRefundsPanel';
-import AdminPayoutMethodsPanel from '@/components/admin/pqrs/AdminPayoutMethodsPanel';
+import AdminLayout from '@/components/Admin/AdminLayout';
+import AdminPqrsPanel from '@/components/Admin/pqrs/AdminPqrsPanel';
+import AdminRefundsPanel from '@/components/Admin/pqrs/AdminRefundsPanel';
+import AdminPayoutMethodsPanel from '@/components/Admin/pqrs/AdminPayoutMethodsPanel';
 
 type Tab = 'pqrs' | 'refunds' | 'payout-methods';
 

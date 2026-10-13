@@ -227,7 +227,7 @@ export default function AlliesDashboard() {
             <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
               <Megaphone className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500 text-sm">
-                Aún no estás promocionando ningún producto. Ve a "Buscar productos" para elegir el primero.
+                Aún no estás promocionando ningún producto. Ve a &quot;Buscar productos&quot; para elegir el primero.
               </p>
             </div>
           ) : (

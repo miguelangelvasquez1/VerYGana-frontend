@@ -2,13 +2,14 @@ import ProductDetailConsumer from "@/components/consumer/products/ProductDetailC
 import { getProductDetail } from "@/services/ProductService";
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProductDetail(Number(params.id));
+  const { id } = await params;
+  const product = await getProductDetail(Number(id));
 
   return (
     <main className="bg-gray-50 min-h-screen">

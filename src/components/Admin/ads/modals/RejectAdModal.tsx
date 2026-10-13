@@ -25,7 +25,7 @@ export const RejectAdModal: React.FC<RejectAdModalProps> = ({
           Rechazar Anuncio
         </h3>
         <p className="text-gray-600 mb-4">
-          Proporciona una razón clara para rechazar "{ad.title}"
+          Proporciona una razón clara para rechazar &quot;{ad.title}&quot;
         </p>
         <textarea
           value={reason}

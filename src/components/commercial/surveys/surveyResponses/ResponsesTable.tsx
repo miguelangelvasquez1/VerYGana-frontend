@@ -162,7 +162,7 @@ function AnswerDisplay({ answer }: { answer: SurveyResponseDetail['answers'][num
   if (answer.questionType === 'TEXT') {
     return (
       <p className="text-sm text-gray-700 italic">
-        "{answer.textAnswer ?? '—'}"
+        &quot;{answer.textAnswer ?? '—'}&quot;
       </p>
     );
   }

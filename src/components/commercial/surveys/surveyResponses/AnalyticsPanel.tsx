@@ -218,7 +218,7 @@ function TextAnswers({ stat }: { stat: QuestionStat }) {
             key={i}
             className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-700 italic"
           >
-            "{text}"
+            &quot;{text}&quot;
           </div>
         ))}
       </div>

@@ -1,0 +1,19 @@
+# Nada de esto entra al contexto de build: ni secretos, ni dependencias locales.
+node_modules
+.next
+out
+.git
+.gitignore
+.env
+.env.*
+*.pem
+*.key
+.claude
+.vscode
+.idea
+.DS_Store
+npm-debug.log*
+Dockerfile
+.dockerignore
+*.md
+skills-lock.json
