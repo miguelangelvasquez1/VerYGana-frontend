@@ -1,0 +1,36 @@
+{
+  "exceptions": [
+    {
+      "id": "GHSA-4r6h-8v6p-xvw6",
+      "package": "xlsx",
+      "reason": "Contaminación de prototipo en SheetJS (xlsx 0.18.5). No existe versión corregida en npm. Se usa en cuatro archivos del panel del comercial (carga de inventario y exportación de respuestas de encuestas) y corre en el navegador, no en la imagen del servidor. Resolverla (quitarla, cambiarla o instalarla desde el sitio del fabricante) corresponde a la deuda de seguridad del frente D.",
+      "approvedBy": "Nicolás Castro",
+      "approvedOn": "2026-10-12",
+      "reviewBy": "2026-11-30"
+    },
+    {
+      "id": "GHSA-5pgg-2g8v-p4x9",
+      "package": "xlsx",
+      "reason": "Denegación de servicio por expresión regular (ReDoS) en SheetJS (xlsx 0.18.5). No existe versión corregida en npm. Se usa en cuatro archivos del panel del comercial y corre en el navegador, no en la imagen del servidor. Resolverla corresponde a la deuda de seguridad del frente D.",
+      "approvedBy": "Nicolás Castro",
+      "approvedOn": "2026-10-12",
+      "reviewBy": "2026-11-30"
+    },
+    {
+      "id": "GHSA-6g55-p6wh-862q",
+      "package": "postcss",
+      "reason": "Lectura de archivos por sourceMappingURL en el postcss 8.4.31 anidado en Next 15.5. Solo se usa durante el build y no se carga en ejecución (0 cargas medidas en la revisión de la spec 006); solo procesa el CSS del propio repositorio. Solo se corrige pasando a Next 16, así que la revisión de esta excepción va atada a esa decisión.",
+      "approvedBy": "Nicolás Castro",
+      "approvedOn": "2026-10-12",
+      "reviewBy": "2026-11-30"
+    },
+    {
+      "id": "GHSA-r28c-9q8g-f849",
+      "package": "postcss",
+      "reason": "Recorrido de rutas en la carga automática de mapas de origen del postcss 8.4.31 anidado en Next 15.5. Solo se usa durante el build y no se carga en ejecución; solo procesa el CSS del propio repositorio. Solo se corrige pasando a Next 16, así que la revisión de esta excepción va atada a esa decisión.",
+      "approvedBy": "Nicolás Castro",
+      "approvedOn": "2026-10-12",
+      "reviewBy": "2026-11-30"
+    }
+  ]
+}

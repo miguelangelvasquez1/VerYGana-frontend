@@ -13,12 +13,15 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# Los tres jobs son los checks que se marcan como obligatorios para el merge en
+# GitHub (Settings -> Branches): "Lint, tipos y build", "Pruebas" y
+# "Auditoría de dependencias". No cambiarles el nombre sin cambiar la protección de `main`.
+# Ningún job usa secretos de GitHub y ninguno tolera fallos.
 jobs:
-  # Check requerido para el merge: "Lint, tipos y build".
   verify:
     name: Lint, tipos y build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     env:
       NEXT_TELEMETRY_DISABLED: "1"
       # Valores públicos y ficticios: solo para que el build compile.
@@ -35,13 +38,46 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Caché del build de Next (recomendada por la guía de Next para CI). La clave
+      # incluye el lockfile y el código fuente; si cambia el código se parte de la
+      # caché más reciente del mismo lockfile.
+      - name: Caché de .next/cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
       - name: Instalar dependencias
         run: npm ci
 
-      # Tope de avisos para que la deuda de lint no crezca. Hoy hay 360 avisos
-      # y 0 errores; bajar este número a medida que se corrijan (nunca subirlo).
-      - name: Lint
-        run: npx next lint --max-warnings 360
+      # El tope de avisos (.lint-max-warnings) nunca sube: se compara con el de la
+      # rama destino, que hay que traer porque el checkout es superficial.
+      - name: Traer la rama destino
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git fetch --no-tags --depth=1 origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+
+      # En un push a `main`, `origin/main` ya es el commit nuevo y el tope se compararía
+      # consigo mismo: se trae el commit anterior al push (`github.event.before`, por
+      # variable de entorno). Si no se puede traer (push forzado, rama nueva), el script usa
+      # el respaldo documentado en CLAUDE.md y lo avisa; por eso no falla el paso.
+      - name: Traer el commit anterior al push
+        if: github.event_name == 'push'
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BEFORE_SHA" || echo "Aviso: no se pudo traer el commit anterior al push."
+
+      # Falla con errores, con más avisos que el tope, con menos avisos que el tope
+      # (hay que bajarlo) o con un tope mayor al de la rama destino (en un PR) o al del
+      # commit anterior (en un push).
+      - name: Lint (tope de avisos que solo baja)
+        env:
+          LINT_BASE_SHA: ${{ github.event_name == 'push' && github.event.before || '' }}
+        run: npm run lint:ci
 
       - name: Build
         run: npm run build
@@ -52,16 +88,12 @@ jobs:
       - name: Tipos
         run: npx tsc --noEmit
 
-  # Auditoría de dependencias de producción (--omit=dev: lo de desarrollo no
-  # llega al bundle ni al contenedor).
-  # TODO: hoy quedan vulnerabilidades abiertas (`xlsx`, y el `postcss` anidado en
-  # Next, que solo se corrige con Next 16); pasa a bloqueante (quitar
-  # continue-on-error) cuando se resuelvan.
-  audit:
-    name: Auditoría de dependencias
+  tests:
+    name: Pruebas
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    continue-on-error: true
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -70,5 +102,32 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: npm audit
-        run: npm audit --omit=dev --audit-level=high
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Pruebas
+        run: npm test
+
+  # Auditoría de dependencias de producción (--omit=dev: lo de desarrollo no llega
+  # al bundle ni al contenedor). Bloqueante: los avisos altos conocidos (`xlsx` y el
+  # `postcss` anidado en Next) tienen excepción escrita, con motivo y fecha de revisión,
+  # en security/audit-exceptions.json. Una excepción vencida, o un aviso alto nuevo
+  # (incluso en esos paquetes), hace fallar el job. Si el registro de npm no responde
+  # sale con código 2 y un mensaje distinto: reintentar la corrida.
+  audit:
+    name: Auditoría de dependencias
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Auditoría con excepciones
+        run: npm run audit:ci
