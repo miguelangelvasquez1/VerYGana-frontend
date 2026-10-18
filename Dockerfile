@@ -3,6 +3,7 @@
 #   docker build --platform linux/arm64 \
 #     --build-arg NEXT_PUBLIC_API_URL=... --build-arg NEXT_PUBLIC_WS_URL=... \
 #     --build-arg NEXT_PUBLIC_PET_GAME_URL=... --build-arg NEXT_PUBLIC_RECAPTCHA_SITE_KEY=... \
+#     --build-arg NEXT_PUBLIC_PET_GAME_ORIGIN=https://mascotas-beta.verygana.com \
 #     -t verygana-front:<sha-corto> .
 #
 # Las NEXT_PUBLIC_* se hornean en el bundle de JavaScript: son PÚBLICAS, nunca
@@ -25,6 +26,7 @@ COPY . .
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_WS_URL
 ARG NEXT_PUBLIC_PET_GAME_URL
+ARG NEXT_PUBLIC_PET_GAME_ORIGIN
 ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 ARG NEXT_PUBLIC_CONTACT_EMAIL
 ARG NEXT_PUBLIC_CONTACT_PHONE
@@ -32,6 +34,7 @@ ARG NEXT_PUBLIC_CONTACT_COPYRIGHT_YEAR
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL \
     NEXT_PUBLIC_PET_GAME_URL=$NEXT_PUBLIC_PET_GAME_URL \
+    NEXT_PUBLIC_PET_GAME_ORIGIN=$NEXT_PUBLIC_PET_GAME_ORIGIN \
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY \
     NEXT_PUBLIC_CONTACT_EMAIL=$NEXT_PUBLIC_CONTACT_EMAIL \
     NEXT_PUBLIC_CONTACT_PHONE=$NEXT_PUBLIC_CONTACT_PHONE \
@@ -42,6 +45,11 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
 RUN test -n "$NEXT_PUBLIC_API_URL" -a -n "$NEXT_PUBLIC_WS_URL" \
          -a -n "$NEXT_PUBLIC_PET_GAME_URL" -a -n "$NEXT_PUBLIC_RECAPTCHA_SITE_KEY" \
     || { echo "Faltan NEXT_PUBLIC_API_URL, NEXT_PUBLIC_WS_URL, NEXT_PUBLIC_PET_GAME_URL o NEXT_PUBLIC_RECAPTCHA_SITE_KEY (--build-arg)"; exit 1; }
+
+# El origen del build de mascotas se hornea en las reescrituras al construir;
+# sin él la imagen de beta apuntaría en silencio al bucket de dev.
+RUN test -n "$NEXT_PUBLIC_PET_GAME_ORIGIN" \
+    || { echo "Falta NEXT_PUBLIC_PET_GAME_ORIGIN (--build-arg): origen del build de mascotas, por ejemplo https://mascotas-beta.verygana.com"; exit 1; }
 
 RUN npm run build
 

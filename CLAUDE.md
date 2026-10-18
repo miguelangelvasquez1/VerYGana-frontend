@@ -73,6 +73,7 @@ compilar: son públicas y nunca llevan un secreto (P-3).
 | `NEXT_PUBLIC_API_URL` | navegador y servidor, en el build | URL base de la API (obligatoria para compilar) |
 | `NEXT_PUBLIC_WS_URL` | navegador, en el build | WebSocket de la API (obligatoria para compilar) |
 | `NEXT_PUBLIC_PET_GAME_URL` | navegador, en el build | URL del juego de la mascota (obligatoria para compilar) |
+| `NEXT_PUBLIC_PET_GAME_ORIGIN` | servidor, en el build (`next.config.ts`) | origen del build de mascotas al que se reescriben `/pet-game` y `/pet-assets`; ausente, el bucket de dev; obligatoria en el `Dockerfile` (beta: `https://mascotas-beta.verygana.com`) |
 | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | navegador, en el build | clave pública de reCAPTCHA (obligatoria: sin ella `next build` falla en `/register`) |
 | `NEXT_PUBLIC_CONTACT_EMAIL`, `NEXT_PUBLIC_CONTACT_PHONE`, `NEXT_PUBLIC_CONTACT_COPYRIGHT_YEAR` | navegador, en el build | datos de contacto del onboarding comercial (tienen valor por defecto en el código) |
 | `API_URL` | servidor, en ejecución | URL de la API para código de servidor; `src/lib/auth/authOptions.ts` usa `NEXT_PUBLIC_API_URL` si falta, pero `src/app/(consumer)/raffles/[id]/live/page.tsx` lee solo `API_URL` |
@@ -238,7 +239,10 @@ ser el CORS del bucket, no el código.
 **Juego de la mascota (Unity WebGL).** `/pet` incrusta un build alojado en R2.
 [next.config.ts](next.config.ts) reescribe `/pet-game/*` y `/pet-assets/*` para servirlo como
 mismo origen (evita contenido mixto y bloqueos de red local). Localmente la API necesita
-`PETS_ASSET_BASE_URL=http://localhost:3000/pet-assets`. El estado de sesión del juego está en
+`PETS_ASSET_BASE_URL=http://localhost:3000/pet-assets`. El origen del build al que apuntan esas
+reescrituras sale de `NEXT_PUBLIC_PET_GAME_ORIGIN` al construir (sin ella, el bucket de dev; en el
+`Dockerfile`, obligatoria), y en beta la API necesita
+`PETS_ASSET_BASE_URL=https://beta.verygana.com/pet-assets`. El estado de sesión del juego está en
 `src/hooks/pet/usePetSession.ts`.
 
 **Tiempo real.** WebSocket con `@stomp/stompjs` y `sockjs-client` (`NEXT_PUBLIC_WS_URL`), y SSE
