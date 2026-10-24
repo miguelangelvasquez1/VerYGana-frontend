@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getGameRewards, init } from '@/services/GameService';
@@ -190,9 +190,12 @@ function PlayGameContent() {
 
   return (
     <>
+      {/* El alto va en una variable CSS y no en línea: así la variante `immersive` (celular en horizontal,
+          pantalla completa sin barras) puede anularlo con `h-auto` + `inset-0`. */}
       <div
-        className="relative w-full bg-black overflow-hidden"
-        style={{ height: gameHeight ?? '100vh' }}
+        data-immersive
+        className="relative w-full h-(--game-h) bg-black overflow-hidden immersive:fixed immersive:inset-0 immersive:z-30 immersive:h-auto"
+        style={{ '--game-h': gameHeight === null ? '100vh' : `${gameHeight}px` } as CSSProperties}
       >
         <iframe
           ref={iframeRef}
@@ -215,12 +218,12 @@ function PlayGameContent() {
         )}
       </div>
 
-      {/* Botón volver móvil: encima del bottom nav */}
+      {/* Botón volver móvil: encima del bottom nav; en pantalla completa (horizontal) va arriba a la izquierda */}
       {isMobile && (
         <button
           type="button"
           onClick={() => router.push('/games')}
-          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 z-50 flex items-center gap-1.5 min-h-11 bg-black/70 backdrop-blur-sm text-white rounded-full px-4 py-2 text-sm font-medium shadow-lg cursor-pointer active:bg-black/90"
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 z-50 immersive:bottom-auto immersive:top-[max(0.75rem,env(safe-area-inset-top))] immersive:left-[max(0.75rem,env(safe-area-inset-left))] flex items-center gap-1.5 min-h-11 bg-black/70 backdrop-blur-sm text-white rounded-full px-4 py-2 text-sm font-medium shadow-lg cursor-pointer active:bg-black/90"
           aria-label="Volver a juegos"
         >
           <ArrowLeft className="w-4 h-4" />

@@ -14,6 +14,7 @@ const PROFILE_MENU_LINKS: [string, string][] = [
   ['Mis participaciones', '/explore/participations'],
   ['Mis Referidos', '/explore/referrals'],
   ['Juegos', '/games'],
+  ['Rifas', '/raffles'],
   ['Encuestas', '/surveys'],
   ['Recargas', '/plans/mobile-plans'],
   ['Foro', '/forum'],

@@ -12,7 +12,7 @@ const PetGame: React.FC = () => {
   // build de Unity: el juego se enmarca solo a 16:9, así que las franjas
   // sobrantes se funden con el contenedor en vez de verse como borde blanco.
   const frame =
-    'h-full w-full overflow-hidden bg-[#231f20] shadow-sm sm:rounded-2xl sm:border sm:border-gray-200';
+    'h-full w-full overflow-hidden bg-[#231f20] shadow-sm sm:rounded-2xl sm:border sm:border-gray-200 immersive:rounded-none immersive:border-0 immersive:shadow-none';
 
   if (loading) {
     return (

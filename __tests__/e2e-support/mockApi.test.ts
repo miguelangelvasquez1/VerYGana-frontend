@@ -10,7 +10,7 @@ import { ALLOWED_ORIGIN, ROUTES, createMockRouter, matchPath } from '../../e2e/s
 interface Reply {
   status: number;
   headers: Record<string, string>;
-  body?: string;
+  body?: string | Uint8Array;
 }
 interface Router {
   handle(request: { method: string; url: string; headers?: Record<string, string> }): Reply;
@@ -33,11 +33,21 @@ const TEST_ROUTES = [
   { method: 'GET', path: '/api/things/recent', fixture: 'api/by-query.json' },
 ];
 
+const MEDIA: Record<string, Uint8Array> = {
+  'ad.webm': new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]),
+  'ad.png': new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
+  'ad.exe': new Uint8Array([0x4d, 0x5a]),
+};
+
 const makeRouter = (): Router =>
-  createMockRouter({ routes: TEST_ROUTES, readFixture: (name: string) => FIXTURES[name] });
+  createMockRouter({
+    routes: TEST_ROUTES,
+    readFixture: (name: string) => FIXTURES[name],
+    readBinary: (name: string) => MEDIA[name],
+  });
 
 const get = (router: Router, url: string) => router.handle({ method: 'GET', url });
-const unmatched = (router: Router) => JSON.parse(get(router, '/__unmatched').body ?? '[]');
+const unmatched = (router: Router) => JSON.parse(get(router, '/__unmatched').body?.toString() ?? '[]');
 
 describe('matchPath', () => {
   it('coincide con segmentos variables y los devuelve', () => {
@@ -57,7 +67,7 @@ describe('createMockRouter · coincidencias', () => {
     const r = get(makeRouter(), '/api/raffles/7');
     expect(r.status).toBe(200);
     expect(r.headers['Content-Type']).toContain('application/json');
-    expect(JSON.parse(r.body ?? '')).toEqual({ id: 1 });
+    expect(JSON.parse(r.body?.toString() ?? '')).toEqual({ id: 1 });
   });
 
   it('distingue el método: GET y POST de la misma ruta son entradas distintas', () => {
@@ -68,17 +78,17 @@ describe('createMockRouter · coincidencias', () => {
 
   it('ignora la query salvo que el fixture la pida', () => {
     const router = makeRouter();
-    expect(JSON.parse(get(router, '/api/raffles?page=3&size=10').body ?? '')).toEqual({ content: [1, 2] });
-    expect(JSON.parse(get(router, '/api/items?status=ACTIVE&page=0').body ?? '')).toEqual({ filtered: true });
-    expect(JSON.parse(get(router, '/api/items?status=OTHER').body ?? '')).toEqual({ content: [1, 2] });
-    expect(JSON.parse(get(router, '/api/items').body ?? '')).toEqual({ content: [1, 2] });
+    expect(JSON.parse(get(router, '/api/raffles?page=3&size=10').body?.toString() ?? '')).toEqual({ content: [1, 2] });
+    expect(JSON.parse(get(router, '/api/items?status=ACTIVE&page=0').body?.toString() ?? '')).toEqual({ filtered: true });
+    expect(JSON.parse(get(router, '/api/items?status=OTHER').body?.toString() ?? '')).toEqual({ content: [1, 2] });
+    expect(JSON.parse(get(router, '/api/items').body?.toString() ?? '')).toEqual({ content: [1, 2] });
   });
 });
 
 describe('createMockRouter · especificidad', () => {
   it('una ruta fija gana a una con segmento variable aunque vaya después en la tabla', () => {
-    expect(JSON.parse(get(makeRouter(), '/api/things/recent').body ?? '')).toEqual({ filtered: true });
-    expect(JSON.parse(get(makeRouter(), '/api/things/5').body ?? '')).toEqual({ id: 1 });
+    expect(JSON.parse(get(makeRouter(), '/api/things/recent').body?.toString() ?? '')).toEqual({ filtered: true });
+    expect(JSON.parse(get(makeRouter(), '/api/things/5').body?.toString() ?? '')).toEqual({ id: 1 });
   });
 });
 
@@ -96,8 +106,8 @@ describe('createMockRouter · lo que no tiene fixture', () => {
     router.handle({ method: 'GET', url: '/api/a', headers: { 'x-e2e-test': 'uno' } });
     router.handle({ method: 'GET', url: '/api/b', headers: { 'x-e2e-test': 'dos' } });
     router.handle({ method: 'GET', url: '/api/c' });
-    expect(JSON.parse(get(router, '/__unmatched?test=uno').body ?? '[]')).toEqual(['GET /api/a']);
-    expect(JSON.parse(get(router, '/__unmatched?test=uno').body ?? '[]')).toEqual([]);
+    expect(JSON.parse(get(router, '/__unmatched?test=uno').body?.toString() ?? '[]')).toEqual(['GET /api/a']);
+    expect(JSON.parse(get(router, '/__unmatched?test=uno').body?.toString() ?? '[]')).toEqual([]);
     expect(unmatched(router)).toEqual(['GET /api/b', 'GET /api/c']);
   });
 
@@ -148,7 +158,7 @@ describe('createMockRouter · casos especiales', () => {
     const router = makeRouter();
     const r = get(router, '/api/raffles/999');
     expect(r.status).toBe(500);
-    expect(JSON.parse(r.body ?? '').message).toEqual(expect.any(String));
+    expect(JSON.parse(r.body?.toString() ?? '').message).toEqual(expect.any(String));
     expect(unmatched(router)).toEqual([]);
   });
 
@@ -163,6 +173,33 @@ describe('createMockRouter · casos especiales', () => {
     expect(r.status).toBe(200);
     expect(r.headers['Content-Type']).toContain('text/html');
     expect(r.body).toBe('<html>relleno</html>');
+  });
+});
+
+describe('createMockRouter · /media (medios de los anuncios, spec 013)', () => {
+  it('sirve los bytes del lector binario con el Content-Type de la extensión', () => {
+    const router = makeRouter();
+    const video = get(router, '/media/ad.webm');
+    expect(video.status).toBe(200);
+    expect(video.headers['Content-Type']).toBe('video/webm');
+    expect(video.headers['Access-Control-Allow-Origin']).toBe(ALLOWED_ORIGIN);
+    expect(Array.from(video.body as Uint8Array)).toEqual([0x1a, 0x45, 0xdf, 0xa3]);
+    const image = get(router, '/media/ad.png');
+    expect(image.status).toBe(200);
+    expect(image.headers['Content-Type']).toBe('image/png');
+    expect(unmatched(router)).toEqual([]);
+  });
+
+  it('un nombre que se sale de la carpeta o una extensión no permitida responde 404 y queda registrado', () => {
+    const router = makeRouter();
+    expect(get(router, '/media/..%2Fapi%2Fx.json').status).toBe(404);
+    expect(get(router, '/media/ad.exe').status).toBe(404);
+    expect(get(router, '/media/no-existe.webm').status).toBe(404);
+    expect(unmatched(router)).toEqual([
+      'GET /media/..%2Fapi%2Fx.json',
+      'GET /media/ad.exe',
+      'GET /media/no-existe.webm',
+    ]);
   });
 });
 
@@ -190,6 +227,21 @@ describe('ROUTES (la tabla real)', () => {
     const keys = (ROUTES as { method: string; path: string }[]).map((r) => `${r.method} ${r.path}`);
     expect(keys).toContain('POST /pet/session/init');
     expect(keys).toContain('GET /consumers/profile');
+  });
+
+  it('POST /adLike/like responde el fixture like.json (AdLikedResponse)', () => {
+    const router = createMockRouter({
+      readFixture: (name: string) => {
+        try {
+          return readFileSync(path.join(root, name), 'utf8');
+        } catch {
+          return undefined;
+        }
+      },
+    }) as Router;
+    const r = router.handle({ method: 'POST', url: '/adLike/like' });
+    expect(r.status).toBe(200);
+    expect(JSON.parse(r.body?.toString() ?? '')).toEqual({ liked: true, rewardAmount: 5 });
   });
 
   it('el fixture de /pet/session/init trae una url con session_token y user_hash ficticios', () => {

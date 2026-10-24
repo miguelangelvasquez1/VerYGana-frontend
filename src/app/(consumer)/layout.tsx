@@ -11,7 +11,7 @@ export default function ConsumerLayout({
       <Navbar />
 
       {/* Reserva el alto de la barra inferior fija del celular (4rem) más el área segura del equipo */}
-      <main className="flex-1 bg-gray-100 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <main className="flex-1 bg-gray-100 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0 immersive:pb-0">
         {children}
       </main>
     </div>

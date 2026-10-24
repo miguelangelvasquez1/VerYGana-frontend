@@ -232,19 +232,14 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
     try {
       await navigator.clipboard.writeText(currentAd.targetUrl);
 
-      console.log('Link copiado:', currentAd.targetUrl);
-
-      // opcional
       alert('Link copiado al portapapeles');
     } catch (error) {
       console.error('Error copiando link', error);
     }
   };
 
-  const handleSave = () => {
-    if (!currentAd) return;
-    console.log('Guardar:', currentAd);
-  };
+  // "Guardar" aún no existe: sin efecto. Antes escribía el anuncio entero (con su sessionUUID) en la consola (P-16).
+  const handleSave = () => {};
 
   if (adFlowStatus === 'loading' && !currentAd) {
     return (
@@ -303,6 +298,8 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
   }
 
   const isImage = currentAd.mediaType === 'IMAGE';
+  // Aviso "¡Anuncio completado!" a la vista: nada debe quedar encima de "Me gusta" ni robarle el toque.
+  const showLikePrompt = hasReachedEnd && !isLiked;
   const formattedLikes = new Intl.NumberFormat(navigator.language || 'en-US').format(currentAd.currentLikes);
 
   return (
@@ -310,7 +307,9 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
       ref={containerRef}
       className="relative flex justify-center items-center w-full h-full overflow-hidden bg-[#f4f7fb] touch-none"
     >
-      <div className="relative max-w-full max-h-[100dvh] overflow-hidden rounded-2xl shadow-xl bg-black">
+      {/* En el celular (< lg, mientras se ve la barra inferior) el marco llena el espacio del contenedor, que ya descuenta las barras: así el
+          aviso del final tiene todo el ancho y el alto disponibles. Desde lg conserva el tamaño del medio. */}
+      <div className="relative w-full h-full lg:w-auto lg:h-auto max-w-full max-h-[100dvh] overflow-hidden rounded-2xl shadow-xl bg-black">
 
         {/* Progress bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/20 z-30">
@@ -326,7 +325,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
             src={currentAd.contentUrl}
             alt={currentAd.title}
             onError={handleMediaError}
-            className="max-w-full max-h-[calc(80dvh-1rem)] w-auto h-auto object-contain"
+            className="w-full h-full object-contain lg:w-auto lg:h-auto lg:max-w-full lg:max-h-[calc(80dvh-1rem)]"
           />
         ) : (
           <video
@@ -337,7 +336,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
             playsInline
             preload="metadata"
             onError={handleMediaError}
-            className="max-w-full h-[calc(80dvh-1rem)] w-auto object-contain"
+            className="w-full h-full object-contain lg:max-w-full lg:w-auto lg:h-[calc(80dvh-1rem)]"
           />
         )}
 
@@ -364,7 +363,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
         )}
 
         {/* End of ad overlay - Like prompt */}
-        {hasReachedEnd && !isLiked && (
+        {showLikePrompt && (
           <>
             <style>{`
               @keyframes floatUp {
@@ -376,8 +375,9 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
                 50%       { transform: scale(1.18); }
               }
             `}</style>
-            <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/60 backdrop-blur-[2px]">
-              <div className="relative text-center bg-white/10 backdrop-blur-md rounded-2xl px-8 py-7 mx-4 overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center z-20 max-lg:z-[35] bg-black/60 backdrop-blur-[2px]">
+              {/* En alturas cortas del celular (< lg, en horizontal) la tarjeta se compacta para caber entera */}
+              <div className="relative text-center bg-white/10 backdrop-blur-md rounded-2xl px-8 py-7 mx-4 overflow-hidden max-lg:[@media(max-height:30rem)]:py-3">
 
                 {/* Corazones flotantes al procesar */}
                 {isLiking && [0, 1, 2, 3, 4].map((i) => (
@@ -396,21 +396,21 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
 
                 {/* Icono */}
                 <div
-                  className="text-5xl mb-3"
+                  className="text-5xl mb-3 max-lg:[@media(max-height:30rem)]:text-3xl max-lg:[@media(max-height:30rem)]:mb-1"
                   style={{ animation: isLiking ? 'none' : 'heartPulse 1.4s ease-in-out infinite' }}
                 >
                   ❤️
                 </div>
 
                 <p className="text-white text-xl font-bold mb-1">¡Anuncio completado!</p>
-                <p className="text-white/80 text-sm mb-6">
+                <p className="text-white/80 text-sm mb-6 max-lg:[@media(max-height:30rem)]:mb-3">
                   Dale <span className="text-pink-400 font-bold">Me Gusta</span> para recibir tu recompensa
                 </p>
 
                 <button
                   onClick={handleLike}
                   disabled={isLiking}
-                  className={`px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full font-bold text-lg transition-all duration-200 disabled:cursor-not-allowed cursor-pointer
+                  className={`px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full font-bold text-lg max-lg:[@media(max-height:30rem)]:py-3 transition-all duration-200 disabled:cursor-not-allowed cursor-pointer
                     ${isLiking ? 'scale-95 opacity-80' : 'hover:scale-105 active:scale-95'}`}
                 >
                   {isLiking ? (
@@ -578,7 +578,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
         )}
 
         {/* Mobile controls */}
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col gap-3 md:hidden z-30">
+        <div className={`absolute right-3 top-1/2 -translate-y-1/2 flex flex-col gap-3 md:hidden z-30 ${showLikePrompt ? 'invisible' : ''}`}>
           <VideoControls
             onVisit={handleVisitAd}
             onShare={handleShare}

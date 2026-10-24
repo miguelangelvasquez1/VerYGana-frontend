@@ -34,6 +34,7 @@ import { useLogout } from '@/hooks/useLogout';
 import { useLevelProfile } from '@/hooks/useLevelProfile'
 import { XpRewardToast } from '@/components/levels/XpRewardToast'
 import { useXpReward } from '@/hooks/useXpReward'
+import { isMobileBarItemActive, MOBILE_BAR_ITEMS, MOBILE_MENU_ITEMS } from './mobileNav'
 
 const navItems = [
   { href: '/home',              label: 'Inicio',    Icon: Home          },
@@ -46,23 +47,6 @@ const navItems = [
   { href: '/plans/mobile-plans',label: 'Recargas',  Icon: Smartphone    },
   { href: '/forum',             label: 'Foro',      Icon: MessageSquare },
 ] as const;
-
-// Menú de perfil del celular: incluye las páginas que la barra inferior no alcanza (juegos, encuestas,
-// recargas, foro, favoritos y participaciones), que en escritorio sí están en la barra superior.
-const mobileMenuItems = [
-  { href: '/explore/gamification',   label: 'Mi Nivel',            Icon: Zap           },
-  { href: '/explore/profile',        label: 'Mi Perfil',           Icon: UserCircle    },
-  { href: '/explore/purchases',      label: 'Mis compras',         Icon: ShoppingBag   },
-  { href: '/explore/favorites',      label: 'Mis favoritos',       Icon: Heart         },
-  { href: '/explore/participations', label: 'Mis participaciones', Icon: Ticket        },
-  { href: '/explore/referrals',      label: 'Mis Referidos',       Icon: UserCircle    },
-  { href: '/games',                  label: 'Juegos',              Icon: Gamepad2      },
-  { href: '/surveys',                label: 'Encuestas',           Icon: ClipboardList },
-  { href: '/plans/mobile-plans',     label: 'Recargas',            Icon: Smartphone    },
-  { href: '/forum',                  label: 'Foro',                Icon: MessageSquare },
-  { href: '/support',                label: 'Soporte',             Icon: Headset       },
-] as const;
-
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -451,7 +435,7 @@ export default function Navbar() {
       </nav>
 
       {/* ---------- MOBILE TOP BAR ---------- */}
-      <div className="lg:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
+      <div data-app-bar="top" className="lg:hidden immersive:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
             <Image src="/logos/logoDorado.png" alt="VERyGANA" width={42} height={42} className="object-contain shrink-0" />
@@ -622,58 +606,27 @@ export default function Navbar() {
       </div>
 
       {/* ---------- MOBILE BOTTOM NAVIGATION ---------- */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] shadow-lg pb-safe">
+      <nav aria-label="Navegación inferior" data-app-bar="bottom" className="lg:hidden immersive:hidden fixed bottom-0 left-0 right-0 z-50 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] shadow-lg pb-safe">
         <div className="grid grid-cols-6 h-16">
 
-          {/* HOME */}
-          <Link href="/home" className="flex flex-col items-center justify-center active:bg-white/10 transition-colors">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/home" ? "bg-white/20" : ""}`}>
-                <Home className={`w-5 h-5 transition-all duration-200 ${pathname === "/home" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/home" ? "text-[#00a4ff]" : "text-white/70"}`}>Inicio</span>
-            </div>
-          </Link>
-
-          {/* ANUNCIOS */}
-          <Link href="/ads" className="flex flex-col items-center justify-center active:bg-white/10 transition-colors">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/ads" ? "bg-white/20" : ""}`}>
-                <Megaphone className={`w-5 h-5 transition-all duration-200 ${pathname === "/ads" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/ads" ? "text-[#00a4ff]" : "text-white/70"}`}>Anuncios</span>
-            </div>
-          </Link>
-
-          {/* RIFAS */}
-          <Link href="/raffles" className="flex flex-col items-center justify-center active:bg-white/10 transition-colors">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/raffles" ? "bg-white/20" : ""}`}>
-                <Gift className={`w-5 h-5 transition-all duration-200 ${pathname === "/raffles" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/raffles" ? "text-[#00a4ff]" : "text-white/70"}`}>Rifas</span>
-            </div>
-          </Link>
-
-          {/* MASCOTA */}
-          <Link href="/pet" className="flex flex-col items-center justify-center active:bg-white/10 transition-colors">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/pet" ? "bg-white/20" : ""}`}>
-                <PawPrint className={`w-5 h-5 transition-all duration-200 ${pathname === "/pet" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/pet" ? "text-[#00a4ff]" : "text-white/70"}`}>Mascota</span>
-            </div>
-          </Link>
-
-          {/* PRODUCTOS */}
-          <Link href="/products" className="flex flex-col items-center justify-center active:bg-white/10 transition-colors">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/products" ? "bg-white/20" : ""}`}>
-                <Package className={`w-5 h-5 transition-all duration-200 ${pathname === "/products" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/products" ? "text-[#00a4ff]" : "text-white/70"}`}>Productos</span>
-            </div>
-          </Link>
+          {MOBILE_BAR_ITEMS.map((item) => {
+            const active = isMobileBarItemActive(pathname, item);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className="flex flex-col items-center justify-center active:bg-white/10 transition-colors"
+              >
+                <div className="flex flex-col items-center gap-0.5">
+                  <div className={`p-1.5 rounded-full transition-all duration-200 ${active ? "bg-white/20" : ""}`}>
+                    <item.Icon className={`w-5 h-5 transition-all duration-200 ${active ? "text-[#00a4ff]" : "text-white/70"}`} />
+                  </div>
+                  <span className={`text-[10px] font-semibold transition-all duration-200 ${active ? "text-[#00a4ff]" : "text-white/70"}`}>{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
 
           {/* PERFIL */}
           <button onClick={() => setOpenMenu((v) => !v)} className="cursor-pointer flex flex-col items-center justify-center active:bg-white/10 transition-colors">
@@ -690,7 +643,7 @@ export default function Navbar() {
 
       {/* MOBILE PROFILE MENU (FULL SCREEN) */}
       <div
-        className={`lg:hidden fixed inset-0 z-60 bg-black/50 transition-[opacity,visibility] duration-300 ${openMenu ? "opacity-100 pointer-events-auto" : "invisible opacity-0 pointer-events-none"}`}
+        className={`lg:hidden immersive:hidden fixed inset-0 z-60 bg-black/50 transition-[opacity,visibility] duration-300 ${openMenu ? "opacity-100 pointer-events-auto" : "invisible opacity-0 pointer-events-none"}`}
         onClick={() => setOpenMenu(false)}
       >
         <div
@@ -743,7 +696,7 @@ export default function Navbar() {
             )}
           </div>
           <div className="py-2 pb-20">
-            {mobileMenuItems.map(({ href, label, Icon }) => (
+            {MOBILE_MENU_ITEMS.map(({ href, label, Icon }) => (
               <Link key={href} href={href} className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
                 <Icon className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
                 <span className="font-medium group-hover:text-[#00a4ff]">{label}</span>

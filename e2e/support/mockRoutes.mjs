@@ -57,6 +57,7 @@ export const ROUTES = [
   { method: 'GET', path: '/pqrs/mine', fixture: 'api/pqrs/mine.json' },
   { method: 'GET', path: '/pqrs/:id', fixture: 'api/pqrs/detail.json' },
   { method: 'GET', path: '/adLike/next', fixture: 'api/ads/next.json' },
+  { method: 'POST', path: '/adLike/like', fixture: 'api/ads/like.json' },
 
   // Rifas
   { method: 'GET', path: '/api/raffles/actives', fixture: 'api/raffles/actives.json' },
@@ -81,6 +82,9 @@ export const ROUTES = [
   // Mascota
   { method: 'POST', path: '/pet/session/init', fixture: 'api/pet/session-init.json' },
 ];
+
+/** Extensiones que sirve `/media/<archivo>` (medios ficticios de los anuncios, spec 013) y su tipo. */
+const MEDIA_TYPES = { '.webm': 'video/webm', '.png': 'image/png' };
 
 const CORS_METHODS = 'GET,POST,PUT,PATCH,DELETE,OPTIONS';
 
@@ -132,9 +136,10 @@ function findRoute(routes, method, pathname, search) {
 }
 
 /**
- * @param {{ routes?: MockRoute[], readFixture: (name: string) => string | undefined }} options
+ * `readBinary` lee un medio de `e2e/fixtures/media` por su nombre (sin carpeta) y devuelve sus bytes.
+ * @param {{ routes?: MockRoute[], readFixture: (name: string) => string | undefined, readBinary?: (name: string) => Uint8Array | undefined }} options
  */
-export function createMockRouter({ routes = ROUTES, readFixture }) {
+export function createMockRouter({ routes = ROUTES, readFixture, readBinary = () => undefined }) {
   // Pedidos sin fixture. `test` es el id que la prueba manda en `x-e2e-test` (vacío si no lo manda,
   // como el servidor de Next): con dos workers, cada prueba mira solo lo suyo.
   /** @type {{ line: string, test: string }[]} */
@@ -157,7 +162,7 @@ export function createMockRouter({ routes = ROUTES, readFixture }) {
 
   /**
    * @param {{ method: string, url: string, headers?: Record<string, string> }} request
-   * @returns {{ status: number, headers: Record<string, string>, body?: string }}
+   * @returns {{ status: number, headers: Record<string, string>, body?: string | Uint8Array }}
    */
   function handle({ method, url, headers = {} }) {
     const { pathname, searchParams } = new URL(url, 'http://127.0.0.1');
@@ -191,6 +196,18 @@ export function createMockRouter({ routes = ROUTES, readFixture }) {
       const html = readFixture('pet-game.html');
       if (html === undefined) return json(404, { message: 'Sin fixture del juego' });
       return { status: 200, headers: baseHeaders({ 'Content-Type': 'text/html; charset=utf-8' }), body: html };
+    }
+
+    // Medios de los anuncios (video e imagen ficticios) servidos desde loopback. Solo el nombre de un archivo
+    // con extensión permitida; cualquier otra cosa (subcarpetas, `..`, otras extensiones) es 404 y queda registrada.
+    if (verb === 'GET' && pathname.startsWith('/media/')) {
+      const name = decodeURIComponent(pathname.slice('/media/'.length));
+      const ext = /\.[a-z0-9]+$/i.exec(name)?.[0].toLowerCase() ?? '';
+      const type = MEDIA_TYPES[/** @type {keyof typeof MEDIA_TYPES} */ (ext)];
+      const bytes = type && !/[\\/]/.test(name) ? readBinary(name) : undefined;
+      if (bytes !== undefined) return { status: 200, headers: baseHeaders({ 'Content-Type': type }), body: bytes };
+      unmatched.push({ line: `${verb} ${pathname}`, test: headers['x-e2e-test'] ?? '' });
+      return json(404, { message: `Sin medio para ${pathname}` });
     }
 
     // Sin sockets en las pruebas, y los pedidos del navegador que no son de la app no cuentan como hueco.

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { createMockRouter } from './mockRoutes.mjs';
 
 const FIXTURES_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../fixtures');
+const MEDIA_DIR = path.join(FIXTURES_DIR, 'media');
 export const MOCK_API_PORT = 4010;
 
 /** Lee un fixture por su ruta relativa; undefined si no existe o si intenta salirse de la carpeta. */
@@ -20,8 +21,19 @@ function readFixture(name) {
   }
 }
 
+/** Lee un medio de `e2e/fixtures/media` por su nombre; undefined si no existe o no es un nombre simple. */
+function readBinary(name) {
+  const file = path.resolve(MEDIA_DIR, name);
+  if (path.dirname(file) !== MEDIA_DIR) return undefined;
+  try {
+    return readFileSync(file);
+  } catch {
+    return undefined;
+  }
+}
+
 export function startMockApi(port = MOCK_API_PORT) {
-  const router = createMockRouter({ readFixture });
+  const router = createMockRouter({ readFixture, readBinary });
   const server = createServer((req, res) => {
     const headers = Object.fromEntries(
       Object.entries(req.headers).map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : (v ?? '')]),
