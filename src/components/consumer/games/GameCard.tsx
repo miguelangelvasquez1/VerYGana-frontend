@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { GameCardResponseDTO } from "@/types/games/game.types";
 
 interface GameCardProps {
@@ -14,25 +15,43 @@ const GameCard: React.FC<GameCardProps> = ({
   onClick,
   selectable = true
 }) => {
-  return (
-    <div
-      onClick={selectable ? onClick : undefined}
-      className={`group relative rounded-2xl overflow-hidden bg-black shadow transition
-        ${selectable ? 'cursor-pointer hover:scale-[1.02]' : 'opacity-90'}
-      `}
-    >
-      <img
-        src={game.frontPageUrl}
-        alt={game.title}
-        className="h-40 w-full object-cover"
-      />
+  const content = (
+    <>
+      <span className="relative block h-40 w-full">
+        <Image
+          src={game.frontPageUrl}
+          alt={game.title}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 17vw"
+          className="object-cover"
+        />
+      </span>
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+      <span className="absolute inset-0 block bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-      <div className="absolute bottom-0 p-3 text-white">
-        <h3 className="text-sm font-semibold">{game.title}</h3>
+      <span className="absolute bottom-0 block p-3 text-left text-white">
+        <span className="block text-sm font-semibold">{game.title}</span>
+      </span>
+    </>
+  );
+
+  // Navegar o abrir algo es una acción: se pinta como botón (RN-5). Sin acción, solo informa.
+  if (!selectable) {
+    return (
+      <div className="group relative rounded-2xl overflow-hidden bg-black shadow transition opacity-90">
+        {content}
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative block w-full rounded-2xl overflow-hidden bg-black shadow transition cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+    >
+      {content}
+    </button>
   );
 };
 

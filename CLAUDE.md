@@ -30,6 +30,8 @@ vecino no lo haga.
 - Opcional, para traer las variables de entorno del equipo: la CLI de Infisical con sesión
   iniciada (`infisical login`) y el proyecto del front enlazado (`infisical init`, que crea
   `.infisical.json`; ese archivo está ignorado por git y no se sube).
+- Opcional, para correr las pruebas de navegador (`e2e/`): `npx playwright install chromium`, una sola
+  vez (baja Chromium a `~/.cache/ms-playwright`; no va en `node_modules`).
 - Opcional, para el flujo de specs con agentes: Claude Code (`claude`).
 
 ## Levantar el front
@@ -101,6 +103,10 @@ export NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_API_URL=https://api.example.test \
 | `npm ci` | instalación reproducible desde el lockfile |
 | `npm test` | Vitest (`vitest run`, una pasada): todo `__tests__/**/*.test.ts` |
 | `npx vitest run <archivo>` | una sola prueba |
+| `npm run build:e2e` | `next build` con las `NEXT_PUBLIC_*` de las pruebas de navegador (API simulada en `127.0.0.1:4010`); **reemplaza `.next`**: vuelve a correr `npm run build` antes de `npx tsc --noEmit` |
+| `npm run test:e2e` | Playwright (Chromium) sobre `e2e/`, contra el build de `build:e2e`: levanta solo la API simulada (4010) y la app (3100) |
+| `npx playwright test <archivo> -g "<ruta>"` | una sola prueba de navegador, por ejemplo `e2e/layout.spec.ts -g "/home"` |
+| `npx playwright test --project=desktop-1280 --update-snapshots` | regenera las capturas de escritorio de referencia (solo local; ver `e2e/desktop.spec.ts`) |
 | `npm run lint` | `next lint` tal cual, para ver los avisos |
 | `npm run lint:ci` | la puerta de lint del CI (ver más abajo) |
 | `npm run build` | `next build` (salida `standalone`) |
@@ -108,16 +114,23 @@ export NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_API_URL=https://api.example.test \
 | `npm run audit:ci` | la puerta de auditoría del CI (ver más abajo) |
 | `npm run dev` / `npm start` | desarrollo con Infisical / servir el build |
 
-Ninguna prueba toca la red, la API ni Infisical, y ninguna usa secretos reales.
+Ninguna prueba toca la red externa, la API ni Infisical, y ninguna usa secretos reales. Las pruebas de
+navegador (`e2e/`, Playwright, P-13) hablan solo con `127.0.0.1`: la app y una API simulada con datos
+ficticios (`e2e/support/mockRoutes.mjs`, fixtures en `e2e/fixtures/api`); todo lo demás se aborta. Una
+página nueva en el alcance de esas pruebas necesita sus fixtures: si falta uno, la prueba falla y dice
+qué ruta agregar.
 
 ## Puertas de CI
 
-`.github/workflows/ci.yml` tiene tres checks, cada uno con tiempo límite de 10 minutos y sin
-secretos de GitHub. Para el merge a `main` los tres deben pasar:
+`.github/workflows/ci.yml` tiene cuatro checks, cada uno con tiempo límite de 10 minutos y sin
+secretos de GitHub. Para el merge a `main` los cuatro deben pasar (el cuarto lo agrega Miguel a la
+protección de `main`; mientras no lo haga avisa pero no bloquea):
 
 1. **`Lint, tipos y build`**: `npm run lint:ci`, `npm run build`, `npx tsc --noEmit`.
 2. **`Pruebas`**: `npm test`.
 3. **`Auditoría de dependencias`**: `npm run audit:ci`.
+4. **`Pruebas en navegador`**: `npm run build:e2e` y `npm run test:e2e` (solo Chromium; Safari se
+   comprueba a mano; las capturas de escritorio no corren aquí).
 
 No les cambies el nombre sin cambiar la protección de la rama `main`.
 
@@ -140,7 +153,7 @@ En un **push a `main`** el CI compara con el commit anterior al push (`github.ev
 que el workflow trae con `git fetch` y pasa al script en `LINT_BASE_SHA`), porque `origin/main`
 ya sería el commit nuevo. Si ese commit no se puede traer (push forzado, rama nueva) o no tiene
 `.lint-max-warnings` todavía, el script avisa y usa el respaldo 360: es el único caso en que un
-push no se compara con el tope anterior. En GitHub Actions (`GITHUB_ACTIONS` definida, aunque vacía, o `CI`) `LINT_BASE_CAP` y
+push no se compara con el tope anterior. En GitHub Actions (`GITHUB_ACTIONS` definida, aunque vacía) `LINT_BASE_CAP` y
 `LINT_BASE_REF` se ignoran (con aviso); solo sirven para ensayos locales.
 
 ### Auditoría: excepciones escritas
@@ -171,7 +184,7 @@ Un aviso sin corrección disponible solo se tolera con una excepción **por avis
 - Pasada la fecha `reviewBy` la excepción vence y el CI falla en todos los PR hasta que se
   revise (renovar con motivo, o corregir la dependencia). Una excepción que ya no corresponde a
   ningún aviso solo da un aviso: quítala.
-- Hoy hay cuatro, de `xlsx` y del `postcss` anidado en Next, con revisión el 2026-11-30.
+- Hoy hay cuatro, de `xlsx` (dos) y del `postcss` anidado en Next (dos; el parche 15.5.28 no lo actualiza), con revisión el 2026-11-30.
 - Nunca se baja el umbral (`--audit-level`) para que algo pase.
 
 ## Arquitectura
@@ -283,7 +296,7 @@ Para cambios triviales (un typo, un texto) no hace falta el flujo completo.
 
 ## Qué revisar en cada PR
 
-- Los tres checks de CI en verde. Un `.lint-max-warnings` que sube, o una excepción de
+- Los cuatro checks de CI en verde. Un `.lint-max-warnings` que sube, o una excepción de
   auditoría nueva sin aprobación escrita, se rechaza (P-19, P-14).
 - Una ruta protegida nueva: `matcher`, cuerpo del middleware y `routeAccess.ts` coherentes, y la
   prueba de protección en verde (P-4). Marca siempre cualquier cambio en los roles que exige una

@@ -55,7 +55,8 @@ export function AvatarPickerModal({ isOpen, currentAvatarUrl, onClose, onUpdated
           <h2 className="text-base font-bold text-gray-900">Cambiar avatar</h2>
           <button
             onClick={onClose}
-            className="cursor-pointer p-1.5 rounded-xl text-gray-400 hover:bg-gray-100 transition-colors"
+            aria-label="Cerrar"
+            className="cursor-pointer flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

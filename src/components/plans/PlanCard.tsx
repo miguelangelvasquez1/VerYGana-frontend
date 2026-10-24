@@ -140,12 +140,14 @@ export const PlanCard = ({ plan }: { plan: Plan }) => {
         </div>
 
         {/* Botón de acción */}
-        <button className={`w-full py-3 px-4 rounded-lg font-bold transition-colors duration-200 cursor-pointer ${
-          plan.isPopular
-            ? 'bg-blue-600 text-white hover:bg-blue-700'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-        }`}>
-          Contratar Plan
+        {/* Próximamente: aún no hay flujo para contratar un plan (spec 012, RN-4 fila 12) */}
+        <button
+          type="button"
+          disabled
+          aria-disabled="true"
+          className="w-full min-h-11 py-3 px-4 rounded-lg font-bold bg-gray-100 text-gray-400 cursor-default"
+        >
+          Próximamente
         </button>
       </div>
     </div>

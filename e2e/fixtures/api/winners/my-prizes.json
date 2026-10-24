@@ -1,0 +1,12 @@
+{
+  "data": [],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 0,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

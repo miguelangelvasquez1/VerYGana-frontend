@@ -75,7 +75,8 @@ export default function SurveyList() {
               <button
                 disabled={page === 0}
                 onClick={() => setPage((p) => p - 1)}
-                className="cursor-pointer rounded-xl border border-gray-200 p-2 text-gray-500 hover:border-[#03548C]/30 hover:bg-[#03548C]/5 hover:text-[#03548C] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-colors"
+                aria-label="Página anterior"
+                className="cursor-pointer flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-gray-200 text-gray-500 hover:border-[#03548C]/30 hover:bg-[#03548C]/5 hover:text-[#03548C] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -85,7 +86,8 @@ export default function SurveyList() {
               <button
                 disabled={page >= data.meta.totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}
-                className="cursor-pointer rounded-xl border border-gray-200 p-2 text-gray-500 hover:border-[#03548C]/30 hover:bg-[#03548C]/5 hover:text-[#03548C] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-colors"
+                aria-label="Página siguiente"
+                className="cursor-pointer flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-gray-200 text-gray-500 hover:border-[#03548C]/30 hover:bg-[#03548C]/5 hover:text-[#03548C] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-colors"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>

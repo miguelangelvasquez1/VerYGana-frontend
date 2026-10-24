@@ -91,10 +91,12 @@ const SHA_PATTERN = /^[0-9a-f]{40}$/;
  * @returns {{kind:'forced', cap:string, notes:string[]} | {kind:'ref', ref:string|null, required:boolean, notes:string[]}}
  */
 export function resolveBaseSource(env) {
-  // `GITHUB_ACTIONS` definida pero vacía (p. ej. `GITHUB_ACTIONS= npm run lint:ci`) cuenta como CI,
-  // y también `CI`. Límite conocido: quien quite ambas con `env -u` desactiva la detección; se ve en
+  // El modo CI se detecta solo con `GITHUB_ACTIONS` (GitHub la fija en 'true'). `CI` ya no cuenta:
+  // muchas terminales la tienen definida y anulaban `LINT_BASE_CAP`/`LINT_BASE_REF` en local.
+  // `GITHUB_ACTIONS` definida pero vacía (p. ej. `GITHUB_ACTIONS= npm run lint:ci`) sigue contando
+  // como CI, para fallar cerrado. Límite conocido: quien la quite con `env -u` desactiva la detección; se ve en
   // el diff (`package.json` o el workflow) y GitHub no deja sobrescribir `GITHUB_*` desde `env:`.
-  const inCi = env.GITHUB_ACTIONS !== undefined || Boolean(env.CI);
+  const inCi = env.GITHUB_ACTIONS !== undefined;
   const notes = [];
 
   if (inCi) {

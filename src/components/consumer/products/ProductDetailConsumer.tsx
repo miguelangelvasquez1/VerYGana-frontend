@@ -45,8 +45,10 @@ const ProductDetailConsumer: React.FC<Props> = ({ product }) => {
             style={{ borderColor: "#014C92" }}
           >
             <button
+              type="button"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              className="p-2 hover:bg-blue-50 transition cursor-pointer"
+              aria-label="Disminuir cantidad"
+              className="min-h-11 min-w-11 flex items-center justify-center hover:bg-blue-50 active:bg-blue-50 transition cursor-pointer"
               style={{ color: "#014C92" }}
             >
               <Minus className="w-4 h-4" />
@@ -58,8 +60,10 @@ const ProductDetailConsumer: React.FC<Props> = ({ product }) => {
               {quantity}
             </span>
             <button
+              type="button"
               onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-              className="p-2 hover:bg-blue-50 transition cursor-pointer"
+              aria-label="Aumentar cantidad"
+              className="min-h-11 min-w-11 flex items-center justify-center hover:bg-blue-50 active:bg-blue-50 transition cursor-pointer"
               style={{ color: "#014C92" }}
             >
               <Plus className="w-4 h-4" />

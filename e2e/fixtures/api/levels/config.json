@@ -1,0 +1,50 @@
+[
+  {
+    "level": "BRONCE",
+    "xpMin": 0,
+    "xpMax": 499,
+    "multiplier": 1,
+    "referralTickets": 1,
+    "raffleTickets": 1
+  },
+  {
+    "level": "PLATA",
+    "xpMin": 500,
+    "xpMax": 999,
+    "multiplier": 1.25,
+    "referralTickets": 2,
+    "raffleTickets": 2
+  },
+  {
+    "level": "ORO",
+    "xpMin": 1000,
+    "xpMax": 1999,
+    "multiplier": 1.5,
+    "referralTickets": 3,
+    "raffleTickets": 3
+  },
+  {
+    "level": "RUBI",
+    "xpMin": 2000,
+    "xpMax": 3999,
+    "multiplier": 1.75,
+    "referralTickets": 4,
+    "raffleTickets": 4
+  },
+  {
+    "level": "ESMERALDA",
+    "xpMin": 4000,
+    "xpMax": 7999,
+    "multiplier": 2,
+    "referralTickets": 5,
+    "raffleTickets": 5
+  },
+  {
+    "level": "DIAMANTE",
+    "xpMin": 8000,
+    "xpMax": "Sin límite",
+    "multiplier": 2.5,
+    "referralTickets": 6,
+    "raffleTickets": 6
+  }
+]

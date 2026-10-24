@@ -9,7 +9,7 @@ interface Props {
     onChange: (filters: KeyTxFilters) => void;
 }
 
-const inputClass = "px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C] focus:border-[#03548C] transition";
+const inputClass = "min-h-11 lg:min-h-0 px-3 py-2 border border-gray-200 rounded-xl text-base lg:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C] focus:border-[#03548C] transition";
 
 const KeyTransactionFilters = ({ filters, onChange }: Props) => (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 mt-6">

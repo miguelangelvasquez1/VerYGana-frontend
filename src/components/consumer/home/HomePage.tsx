@@ -166,17 +166,13 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Link href="/ads">
-                  <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer">
+                <Link href="/ads" className="min-h-11 active:scale-95 flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer">
                     Empezar a ganar
                     <ArrowRight className="w-4 h-4" />
-                  </button>
-                </Link>
-                <Link href="/explore/profile">
-                  <button className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-6 py-3 rounded-full transition-all cursor-pointer">
+                  </Link>
+                <Link href="/explore/profile" className="min-h-11 active:scale-95 flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-6 py-3 rounded-full transition-all cursor-pointer">
                     Ver mi perfil
-                  </button>
-                </Link>
+                  </Link>
               </div>
             </div>
 
@@ -261,12 +257,10 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <Link href="/surveys" className="shrink-0">
-                <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer">
+              <Link href="/surveys" className="min-h-11 active:scale-95 flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer shrink-0">
                   Ver encuestas
                   <ChevronRight className="w-4 h-4" />
-                </button>
-              </Link>
+                </Link>
             </div>
           </div>
         </section>
@@ -323,12 +317,10 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <Link href="/forum" className="shrink-0">
-                <button className="flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer">
+              <Link href="/forum" className="min-h-11 active:scale-95 flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer shrink-0">
                   Ir al foro
                   <ChevronRight className="w-4 h-4" />
-                </button>
-              </Link>
+                </Link>
             </div>
           </div>
         </section>

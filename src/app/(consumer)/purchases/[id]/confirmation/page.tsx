@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, XCircle } from 'lucide-react';
@@ -18,8 +20,8 @@ import { resolveLevelUp } from '@/utils/levelUp';
 type Status = 'loading' | 'success' | 'error';
 
 export default function PurchaseConfirmationPage() {
-  const { purchaseId } = useParams();
-  const router = useRouter();
+  // El segmento de la ruta es `[id]` (CA-11): antes se leía `purchaseId`, que no existe.
+  const { id: purchaseId } = useParams();
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const { rewardData, showReward, dismiss } = useXpReward();
@@ -136,9 +138,11 @@ export default function PurchaseConfirmationPage() {
                   key={item.id}
                   className="flex items-center gap-4 border rounded-lg p-3"
                 >
-                  <img
+                  <Image
                     src={item.imageUrl}
                     alt={item.productName}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 object-cover rounded-md"
                   />
                   <span className="font-medium text-gray-800">
@@ -150,19 +154,19 @@ export default function PurchaseConfirmationPage() {
 
             {/* ACTIONS */}
             <div className="space-y-3">
-              <button
-                onClick={() => router.push('/explore/purchases')}
-                className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+              <Link
+                href="/explore/purchases"
+                className="flex items-center justify-center w-full min-h-11 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-700 transition cursor-pointer"
               >
                 Ver mis compras
-              </button>
+              </Link>
 
-              <button
-                onClick={() => router.push('/products')}
-                className="w-full py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+              <Link
+                href="/products"
+                className="flex items-center justify-center w-full min-h-11 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 active:bg-gray-100 transition cursor-pointer"
               >
                 Seguir comprando
-              </button>
+              </Link>
             </div>
           </div>
         )}
@@ -175,12 +179,12 @@ export default function PurchaseConfirmationPage() {
             </h1>
             <p className="text-gray-600 mb-6">{errorMessage}</p>
 
-            <button
-              onClick={() => router.push('/explore/purchases')}
-              className="w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition cursor-pointer"
+            <Link
+              href="/explore/purchases"
+              className="flex items-center justify-center w-full min-h-11 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 active:bg-gray-900 transition cursor-pointer"
             >
               Ir a mis compras
-            </button>
+            </Link>
           </div>
         )}
       </main>

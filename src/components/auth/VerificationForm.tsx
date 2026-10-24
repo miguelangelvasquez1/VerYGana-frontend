@@ -253,6 +253,7 @@ export default function VerificationForm() {
 
       {/* Verify button */}
       <button
+        type="button"
         onClick={handleVerify}
         disabled={isVerifying || code.length < 6}
         style={{
@@ -298,6 +299,7 @@ export default function VerificationForm() {
             color: countdown > 0 ? '#9ca3af' : '#03548C',
             fontWeight: 500,
             padding: 0,
+            minHeight: 44,
             display: 'inline-flex',
             alignItems: 'center',
             gap: 5,
@@ -327,6 +329,7 @@ export default function VerificationForm() {
               color: '#03548C',
               fontWeight: 600,
               padding: 0,
+              minHeight: 44,
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,
@@ -351,6 +354,7 @@ export default function VerificationForm() {
               fontSize: 13,
               color: '#6b7280',
               padding: 0,
+              minHeight: 44,
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,

@@ -88,7 +88,7 @@ const FormField = React.forwardRef<
       <input
         ref={ref}
         {...props}
-        className={`w-full pl-10 pr-4 py-2.5 border rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C] transition text-sm ${
+        className={`w-full pl-10 pr-4 py-2.5 border rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C] transition min-h-11 text-base lg:text-sm ${
           error ? "border-red-400 focus:ring-red-400" : "border-gray-200"
         }`}
       />
@@ -201,7 +201,7 @@ export default function EditConsumerProfilePage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
           <Link
             href="/explore/profile"
-            className="inline-flex items-center gap-1.5 text-white/70 hover:text-white text-sm mb-6 transition"
+            className="inline-flex items-center gap-1.5 min-h-11 text-white/70 hover:text-white active:text-white text-sm mb-2 transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al perfil
@@ -233,7 +233,7 @@ export default function EditConsumerProfilePage() {
               <button
                 type="button"
                 onClick={() => setAvatarPickerOpen(true)}
-                className="cursor-pointer mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 text-white text-xs font-medium px-3 py-1.5 backdrop-blur-sm hover:bg-white/30 hover:scale-105 transition-all duration-200"
+                className="cursor-pointer mt-1 inline-flex items-center gap-1.5 min-h-11 rounded-full bg-white/15 text-white text-xs font-medium px-4 py-1.5 backdrop-blur-sm hover:bg-white/30 hover:scale-105 transition-all duration-200"
               >
                 <Camera className="w-3.5 h-3.5" />
                 Cambiar avatar
@@ -274,13 +274,16 @@ export default function EditConsumerProfilePage() {
             <FormField
               label="Email"
               type="email"
+              inputMode="email"
+              autoComplete="email"
               icon={<Mail className="w-4 h-4" />}
               error={errors.email?.message}
               {...register("email")}
             />
             <FormField
               label="Número de Teléfono"
-              type="text"
+              type="tel"
+              inputMode="tel"
               icon={<Phone className="w-4 h-4" />}
               value={currentPhone}
               readOnly
@@ -295,7 +298,7 @@ export default function EditConsumerProfilePage() {
                 setOtpCode("");
                 setPhoneError(null);
               }}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[#03548C] hover:text-[#0b1440] transition cursor-pointer"
+              className="inline-flex items-center gap-2 min-h-11 text-sm font-semibold text-[#03548C] hover:text-[#0b1440] active:text-[#0b1440] transition cursor-pointer"
             >
               <Pencil className="w-4 h-4" />
               Cambiar Teléfono
@@ -310,6 +313,7 @@ export default function EditConsumerProfilePage() {
             <FormField
               label="Departamento"
               type="text"
+              autoComplete="address-level1"
               icon={<Building2 className="w-4 h-4" />}
               error={errors.department?.message}
               {...register("department")}
@@ -317,6 +321,7 @@ export default function EditConsumerProfilePage() {
             <FormField
               label="Municipio"
               type="text"
+              autoComplete="address-level2"
               icon={<MapPin className="w-4 h-4" />}
               error={errors.municipality?.message}
               {...register("municipality")}
@@ -380,7 +385,7 @@ export default function EditConsumerProfilePage() {
               <button
                 type="button"
                 onClick={() => setPhoneModal(false)}
-                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+                className="rounded-lg min-h-11 min-w-11 flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
                 aria-label="Cerrar"
               >
                 <X className="h-5 w-5" />
@@ -434,13 +439,13 @@ export default function EditConsumerProfilePage() {
                       setNewPhone(event.target.value.replace(/\D/g, "").slice(0, 10))
                     }
                     placeholder="3210000000"
-                    className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:border-[#03548C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]/30"
+                    className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 min-h-11 text-base lg:text-sm focus:border-[#03548C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]/30"
                   />
                 </label>
                 <button
                   type="submit"
                   disabled={phoneLoading}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#03548C] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:bg-gray-400"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#03548C] px-4 py-2.5 min-h-11 text-sm font-semibold text-white transition hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:bg-gray-400"
                 >
                   {phoneLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                   {phoneLoading ? "Enviando código..." : "Enviar código"}
@@ -489,13 +494,13 @@ export default function EditConsumerProfilePage() {
                       setOtpCode(event.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     placeholder="123456"
-                    className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-center text-lg tracking-[0.35em] focus:border-[#03548C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]/30"
+                    className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 min-h-11 text-center text-lg tracking-[0.35em] focus:border-[#03548C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]/30"
                   />
                 </label>
                 <button
                   type="submit"
                   disabled={phoneLoading}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#03548C] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:bg-gray-400"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#03548C] px-4 py-2.5 min-h-11 text-sm font-semibold text-white transition hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:bg-gray-400"
                 >
                   {phoneLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                   {phoneLoading ? "Verificando..." : "Confirmar teléfono"}

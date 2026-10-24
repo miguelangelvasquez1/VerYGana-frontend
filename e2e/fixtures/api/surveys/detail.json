@@ -1,0 +1,14 @@
+{
+  "id": 1,
+  "title": "Encuesta de hábitos de compra",
+  "description": "Cuéntanos cómo compras en línea.",
+  "totalRewardKeys": 15,
+  "maxResponses": 100,
+  "responseCount": 20,
+  "status": "ACTIVE",
+  "startsAt": "2026-10-01T00:00:00",
+  "endsAt": "2026-12-31T23:59:59",
+  "categoryNames": ["Tecnología"],
+  "totalQuestions": 5,
+  "companyName": "Comercio de prueba"
+}

@@ -122,7 +122,7 @@ export function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={isAdding || product.stock === 0 || justAdded}
-      className={`flex w-full items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 min-h-9.5 sm:min-h-10.5 rounded-lg cursor-pointer font-semibold text-sm transition-all ${
+      className={`flex w-full items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 min-h-11 sm:min-h-10.5 rounded-lg cursor-pointer font-semibold text-sm transition-all ${
         justAdded
           ? 'bg-green-600 text-white'
           : product.stock === 0

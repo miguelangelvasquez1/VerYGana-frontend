@@ -31,7 +31,7 @@ const PqrsEvidenceUploader = ({ evidence }: Props) => {
       </label>
 
       {items.length > 0 && (
-        <div className="grid grid-cols-4 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 mb-2">
           {items.map((item) => (
             <div key={item.localId} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
               {item.file.type.startsWith("video/") ? (
@@ -52,7 +52,8 @@ const PqrsEvidenceUploader = ({ evidence }: Props) => {
                     type="button"
                     onClick={() => retry(item.localId)}
                     title={item.error}
-                    className="text-white cursor-pointer"
+                    aria-label="Reintentar subida"
+                    className="absolute bottom-0 left-0 flex h-11 w-11 items-center justify-center text-white cursor-pointer lg:static lg:h-auto lg:w-auto"
                   >
                     <RotateCcw size={16} />
                   </button>
@@ -62,9 +63,12 @@ const PqrsEvidenceUploader = ({ evidence }: Props) => {
               <button
                 type="button"
                 onClick={() => remove(item.localId)}
-                className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white rounded-full p-0.5 cursor-pointer"
+                aria-label="Quitar archivo"
+                className="group absolute top-0 right-0 flex h-11 w-11 items-center justify-center text-white cursor-pointer lg:top-1 lg:right-1 lg:h-auto lg:w-auto"
               >
-                <X size={12} />
+                <span className="rounded-full bg-black/60 p-0.5 group-hover:bg-black/80">
+                  <X size={12} />
+                </span>
               </button>
             </div>
           ))}
@@ -75,7 +79,7 @@ const PqrsEvidenceUploader = ({ evidence }: Props) => {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex items-center gap-2 px-3 py-2 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors cursor-pointer w-full justify-center"
+          className="flex min-h-11 items-center gap-2 px-3 py-2 lg:min-h-0 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors cursor-pointer w-full justify-center"
         >
           <Paperclip size={14} />
           Adjuntar foto o video

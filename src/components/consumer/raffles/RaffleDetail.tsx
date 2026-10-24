@@ -103,18 +103,6 @@ export default function RaffleDetail({ raffle }: Props) {
                 <p className="text-xs text-white/50 mt-1">{getProgress().toFixed(0)}% completado</p>
               </div>
             </div>
-
-            {/* CTA */}
-            <button
-              className="w-full font-bold py-4 rounded-xl text-lg transition hover:opacity-90 active:scale-95 shadow-lg mt-4 cursor-pointer"
-              style={{
-                background: "linear-gradient(to right, #fbbf24, #f59e0b)",
-                color: "#000",
-                boxShadow: "0 8px 24px rgba(251,191,36,0.35)",
-              }}
-            >
-              Participar ahora
-            </button>
           </div>
         </div>
       </div>

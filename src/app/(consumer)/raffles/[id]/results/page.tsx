@@ -86,7 +86,7 @@ export default function RaffleResultPage() {
           />
           <button
             onClick={() => setShowFullImage(true)}
-            className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/50 hover:bg-black/70 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition cursor-pointer"
+            className="absolute top-3 right-3 min-h-11 min-w-11 lg:min-h-0 lg:min-w-0 justify-center flex items-center gap-1.5 bg-black/50 hover:bg-black/70 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition cursor-pointer"
           >
             <Maximize2 className="w-3.5 h-3.5" />
             Ver completa
@@ -112,7 +112,8 @@ export default function RaffleResultPage() {
                 />
                 <button
                   onClick={() => setFullPrizeImage(winner.prizeImageUrl)}
-                  className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-lg transition cursor-pointer"
+                  aria-label="Ampliar imagen"
+                  className="absolute top-2 right-2 min-h-11 min-w-11 flex items-center justify-center lg:min-h-0 lg:min-w-0 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-lg transition cursor-pointer"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
                 </button>
@@ -395,7 +396,7 @@ export default function RaffleResultPage() {
           >
             <button
               onClick={() => setFullPrizeImage(null)}
-              className="absolute -top-10 right-0 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition cursor-pointer"
+              className="absolute -top-12 right-0 min-h-11 min-w-11 justify-end lg:min-h-0 lg:min-w-0 lg:-top-10 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
               Cerrar
@@ -420,7 +421,7 @@ export default function RaffleResultPage() {
           >
             <button
               onClick={() => setShowFullImage(false)}
-              className="absolute -top-10 right-0 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition cursor-pointer"
+              className="absolute -top-12 right-0 min-h-11 min-w-11 justify-end lg:min-h-0 lg:min-w-0 lg:-top-10 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
               Cerrar

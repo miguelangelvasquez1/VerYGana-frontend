@@ -77,8 +77,8 @@ export function CartDrawer() {
           <h2 className="text-lg font-bold">Carrito de Compras</h2>
           <button
             onClick={closeCart}
-            className="cursor-pointer p-1.5 hover:bg-white/20 rounded-lg transition-colors"
-            aria-label="Close cart"
+            className="cursor-pointer inline-flex min-h-11 min-w-11 items-center justify-center p-1.5 hover:bg-white/20 active:bg-white/30 rounded-lg transition-colors lg:min-h-0 lg:min-w-0"
+            aria-label="Cerrar carrito"
           >
             <X className="w-5 h-5" />
           </button>
@@ -97,7 +97,7 @@ export function CartDrawer() {
             </p>
             <button
               onClick={() => { closeCart(); router.push('/products'); }}
-              className="px-6 py-2 bg-[#03548C] hover:bg-[#0b1440] text-white rounded-lg transition-colors cursor-pointer"
+              className="min-h-11 px-6 py-2 bg-[#03548C] hover:bg-[#0b1440] active:bg-[#0b1440] text-white rounded-lg transition-colors cursor-pointer lg:min-h-0"
             >
               Explorar Productos
             </button>
@@ -128,14 +128,14 @@ export function CartDrawer() {
               {/* Botón de checkout */}
               <button
                 onClick={handleCheckout}
-                className="cursor-pointer w-full py-3 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold rounded-lg transition-colors"
+                className="cursor-pointer w-full min-h-11 py-3 bg-[#03548C] hover:bg-[#0b1440] active:bg-[#0b1440] text-white font-semibold rounded-lg transition-colors"
               >
                 Finalizar Compra
               </button>
 
               <button
                 onClick={closeCart}
-                className="cursor-pointer w-full py-2 text-[#03548C] hover:text-[#0b1440] font-medium transition-colors"
+                className="cursor-pointer w-full min-h-11 py-2 text-[#03548C] hover:text-[#0b1440] active:text-[#0b1440] font-medium transition-colors lg:min-h-0"
               >
                 Continuar Comprando
               </button>

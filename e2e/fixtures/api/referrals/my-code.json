@@ -1,0 +1,8 @@
+{
+  "referralCode": "PRUEBA123",
+  "referralLink": "http://127.0.0.1:3100/register?ref=PRUEBA123",
+  "qrCodeBase64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAHnOcQAAAAABJRU5ErkJggg==",
+  "totalReferrals": 2,
+  "consumerName": "Consumidor Prueba",
+  "consumerEmail": "consumidor@example.test"
+}

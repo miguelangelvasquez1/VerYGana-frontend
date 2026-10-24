@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
 
         </div>
       </div>
-      <Footer />
+      <Footer guest />
     </>
   );
 }

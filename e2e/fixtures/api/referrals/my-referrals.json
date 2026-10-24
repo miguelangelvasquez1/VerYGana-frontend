@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Ana",
+    "lastName": "Prueba",
+    "userName": "ana.prueba",
+    "email": "ana@example.test",
+    "department": "Quindío",
+    "municipality": "Armenia",
+    "userState": "ACTIVE",
+    "registeredDate": "2026-10-01T10:00:00"
+  },
+  {
+    "name": "Luis",
+    "lastName": "Ejemplo",
+    "userName": "luis.ejemplo",
+    "email": "luis@example.test",
+    "department": "Antioquia",
+    "municipality": "Medellín",
+    "userState": "PENDING",
+    "registeredDate": "2026-10-05T10:00:00"
+  }
+]

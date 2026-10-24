@@ -6,6 +6,7 @@ import { useCart } from '@/context/CartContext';
 import { CartService } from '@/services/CartService';
 import { purchaseService } from '@/services/PurchaseService';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const KEY_VALUE_COP = 10;
 
@@ -69,11 +70,12 @@ export default function CheckoutPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Tu carrito está vacío</h1>
           <p className="text-gray-500 mb-6">Agrega productos para continuar con la compra</p>
-          <Link href="/products">
-            <button className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold rounded-xl transition-colors">
-              <Package className="w-4 h-4" />
-              Explorar productos
-            </button>
+          <Link
+            href="/products"
+            className="cursor-pointer inline-flex items-center justify-center gap-2 min-h-11 px-6 py-3 bg-[#03548C] hover:bg-[#0b1440] active:bg-[#0b1440] text-white font-semibold rounded-xl transition-colors"
+          >
+            <Package className="w-4 h-4" />
+            Explorar productos
           </Link>
         </div>
       </div>
@@ -138,7 +140,7 @@ export default function CheckoutPage() {
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                   <div className="px-5 py-4 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                      <img src="/logos/llave.png" alt="llave" className="w-5 h-5 object-contain" />
+                      <Image src="/logos/llave.png" alt="llave" width={20} height={20} className="w-5 h-5 object-contain" />
                     </div>
                     <h2 className="font-semibold text-white text-sm">Pagar con llaves</h2>
                   </div>
@@ -155,18 +157,19 @@ export default function CheckoutPage() {
                       max={totalMaxKeysAllowed}
                       value={keysToUse}
                       onChange={(e) => handleKeysChange(Number(e.target.value))}
-                      className="w-full accent-[#03548C]"
+                      className="w-full h-11 accent-[#03548C]"
                     />
 
                     <div className="flex items-center gap-3">
                       <input
                         type="number"
+                        inputMode="numeric"
                         min={0}
                         max={totalMaxKeysAllowed}
                         value={keysToUse || ''}
                         placeholder="0"
                         onChange={(e) => handleKeysChange(Number(e.target.value) || 0)}
-                        className="w-28 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                        className="w-28 min-h-11 px-3 py-1.5 border border-gray-300 rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                       />
                     </div>
 
@@ -200,9 +203,11 @@ export default function CheckoutPage() {
 
                 <input
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] transition"
+                  className="w-full min-h-11 px-4 py-2.5 border border-gray-300 rounded-xl text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] transition"
                   placeholder="tu@email.com"
                 />
                 <p className="text-xs text-gray-400">
@@ -247,9 +252,11 @@ export default function CheckoutPage() {
               <div className="divide-y divide-gray-50">
                 {cart.map((item) => (
                   <div key={item.productId} className="flex gap-3 p-4">
-                    <img
+                    <Image
                       src={item.imageUrl}
                       alt={item.name}
+                      width={64}
+                      height={64}
                       className="w-16 h-16 rounded-xl object-cover shrink-0 border border-gray-100"
                     />
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">

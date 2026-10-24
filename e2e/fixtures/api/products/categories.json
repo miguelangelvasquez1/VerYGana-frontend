@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "name": "Deportes",
+    "imageUrl": "/categories/deporte.jpg",
+    "active": true,
+    "createdAt": "2026-01-01T00:00:00"
+  },
+  {
+    "id": 2,
+    "name": "Joyería",
+    "imageUrl": "/categories/joyeria.webp",
+    "active": true,
+    "createdAt": "2026-01-01T00:00:00"
+  },
+  {
+    "id": 3,
+    "name": "Juguetes",
+    "imageUrl": "/categories/juguetes.jpg",
+    "active": true,
+    "createdAt": "2026-01-01T00:00:00"
+  }
+]

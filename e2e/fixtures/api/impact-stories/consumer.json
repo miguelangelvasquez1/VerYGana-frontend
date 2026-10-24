@@ -1,0 +1,38 @@
+{
+  "content": [
+    {
+      "id": 1,
+      "title": "Útiles escolares para una vereda",
+      "description": "Con lo recaudado se entregaron útiles a 120 niños de una vereda del Quindío.",
+      "storyDate": "2026-09-15",
+      "beneficiariesCount": 120,
+      "investedAmount": 5000000,
+      "investedCurrency": "COP",
+      "location": "Quindío",
+      "category": "Educación",
+      "status": "PUBLISHED",
+      "authorName": "Fundación de Prueba",
+      "tags": "niños,educación",
+      "mediaFiles": [
+        {
+          "id": 1,
+          "mediaType": "IMAGE",
+          "publicUrl": "/categories/papeleria.webp",
+          "fileName": "papeleria.webp",
+          "sizeBytes": 1000,
+          "mimeType": "image/webp",
+          "altText": "Útiles escolares",
+          "displayOrder": 0,
+          "isCover": true,
+          "uploadedAt": "2026-09-15T10:00:00"
+        }
+      ],
+      "createdAt": "2026-09-15T10:00:00",
+      "updatedAt": "2026-09-15T10:00:00"
+    }
+  ],
+  "totalElements": 1,
+  "totalPages": 1,
+  "number": 0,
+  "size": 20
+}

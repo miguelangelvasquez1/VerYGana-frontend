@@ -16,7 +16,7 @@ const PetGame: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={`${frame} flex items-center justify-center`}>
+      <div className={`${frame} flex items-center justify-center px-6 text-center`}>
         <p className="text-sm text-white/70">Preparando tu mascota…</p>
       </div>
     );
@@ -27,8 +27,9 @@ const PetGame: React.FC = () => {
       <div className={`${frame} flex flex-col items-center justify-center gap-4 px-6 text-center`}>
         <p className="text-sm text-white/70">{error}</p>
         <button
+          type="button"
           onClick={retry}
-          className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100"
+          className="min-h-11 min-w-11 rounded-md bg-white px-5 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 active:bg-gray-200"
         >
           Reintentar
         </button>

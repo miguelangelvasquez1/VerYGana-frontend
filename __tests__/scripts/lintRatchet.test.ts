@@ -127,10 +127,9 @@ describe('resolveBaseSource', () => {
     expect(r.notes.join(' ')).toMatch(/LINT_BASE_CAP/);
   });
 
-  it('CI definida (sin GITHUB_ACTIONS) también cuenta como CI', () => {
-    const r = resolveBaseSource({ CI: 'true', LINT_BASE_CAP: '999' });
-    expect(r.kind).toBe('ref');
-    expect(r.notes.join(' ')).toMatch(/LINT_BASE_CAP/);
+  it('CI sola (sin GITHUB_ACTIONS) no es modo CI: LINT_BASE_CAP sigue valiendo en local', () => {
+    const r = resolveBaseSource({ CI: '1', LINT_BASE_CAP: '999' });
+    expect(r).toMatchObject({ kind: 'forced', cap: '999' });
   });
 
   it('en un push: compara con el commit anterior al push, no con origin/main', () => {

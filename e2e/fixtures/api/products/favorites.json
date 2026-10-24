@@ -1,0 +1,47 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Casco de ciclismo profesional con visera y ventilación extendida edición limitada",
+      "imageUrl": "/products/casco.png",
+      "price": 15000000,
+      "maxKeysAllowed": 20,
+      "maxKeysPct": 40,
+      "minCashCents": 1500000,
+      "averageRate": 4.5,
+      "reviewCount": 12,
+      "categoryName": "Deportes",
+      "stock": 15,
+      "status": "ACTIVE",
+      "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+      "companyName": "Tienda de Prueba S.A.S.",
+      "isGameReward": false
+    },
+    {
+      "id": 2,
+      "name": "Camiseta oficial",
+      "imageUrl": "/products/camiseta.png",
+      "price": 8000000,
+      "maxKeysAllowed": 20,
+      "maxKeysPct": 40,
+      "minCashCents": 1500000,
+      "averageRate": 4.5,
+      "reviewCount": 12,
+      "categoryName": "Ropa",
+      "stock": 15,
+      "status": "ACTIVE",
+      "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+      "companyName": "Tienda de Prueba S.A.S.",
+      "isGameReward": false
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

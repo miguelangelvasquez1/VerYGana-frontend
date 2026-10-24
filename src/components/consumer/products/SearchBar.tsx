@@ -27,11 +27,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Buscar productos..."
-        className="flex-1 min-w-0 text-sm sm:text-base text-black px-1 sm:px-3 py-1 outline-none focus:outline-none"
+        className="flex-1 min-w-0 min-h-11 lg:min-h-0 text-base text-black px-1 sm:px-3 py-1 outline-none focus:outline-none"
       />
       <button
         onClick={handleSearch}
-        className="shrink-0 cursor-pointer px-3 sm:px-5 py-1.5 sm:py-2 text-white rounded-lg text-sm font-semibold whitespace-nowrap transition hover:opacity-90"
+        className="shrink-0 cursor-pointer min-h-11 lg:min-h-0 px-3 sm:px-5 py-1.5 sm:py-2 text-white rounded-lg text-sm font-semibold whitespace-nowrap transition hover:opacity-90 active:opacity-80"
         style={{ background: "#014C92" }}
       >
         Buscar

@@ -52,7 +52,7 @@ export default function ReferralCodeBox({ referralCode, referralLink }: Referral
       <div className="flex gap-3">
         <button
           onClick={() => code.copy(referralCode)}
-          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+          className="flex-1 inline-flex items-center justify-center gap-2 min-h-11 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
         >
           {code.copied
             ? <CheckCircle className="w-4 h-4 text-green-600" />

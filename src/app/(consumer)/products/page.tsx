@@ -139,6 +139,7 @@ export default function ProductsPage() {
         </label>
         <input
           type="number"
+          inputMode="numeric"
           step={1000}
           value={draftMaxPrice ?? ""}
           onChange={(e) => {
@@ -154,7 +155,7 @@ export default function ProductsPage() {
             }
           }}
           placeholder="Sin límite"
-          className={`w-full px-2.5 py-1.5 border-2 border-gray-200 rounded-xl font-semibold focus:outline-none focus:border-[#014C92] transition mb-2.5 ${compact ? "text-xs" : "text-sm"}`}
+          className={`w-full min-h-11 lg:min-h-0 px-2.5 py-1.5 border-2 border-gray-200 rounded-xl font-semibold focus:outline-none focus:border-[#014C92] transition mb-2.5 ${compact ? "text-base lg:text-xs" : "text-base lg:text-sm"}`}
           style={{ color: "#014C92" }}
         />
         <input
@@ -167,7 +168,7 @@ export default function ProductsPage() {
             const val = Number(e.target.value);
             setDraftMaxPrice(val === 500000 ? undefined : val);
           }}
-          className="w-full accent-[#014C92]"
+          className="w-full h-11 lg:h-auto accent-[#014C92]"
         />
         <div className={`flex justify-between mt-1 text-gray-400 ${compact ? "text-xs" : "text-sm"}`}>
           <span>$1.000</span>
@@ -181,15 +182,21 @@ export default function ProductsPage() {
         </label>
         <div className="flex gap-1.5">
           {[1, 2, 3, 4, 5].map((n) => (
-            <Star
+            <button
               key={n}
+              type="button"
               onClick={() => setDraftMinRating(draftMinRating === n ? undefined : n)}
-              className={`cursor-pointer transition ${compact ? "w-6 h-6" : "w-7 h-7"} ${
-                draftMinRating && draftMinRating >= n
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "text-gray-300 hover:text-yellow-300"
-              }`}
-            />
+              aria-label={`Valoración mínima de ${n} ${n === 1 ? "estrella" : "estrellas"}`}
+              className="cursor-pointer flex items-center justify-center min-h-11 min-w-11 lg:min-h-0 lg:min-w-0"
+            >
+              <Star
+                className={`transition ${compact ? "w-6 h-6" : "w-7 h-7"} ${
+                  draftMinRating && draftMinRating >= n
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300 hover:text-yellow-300"
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>
@@ -239,7 +246,7 @@ export default function ProductsPage() {
             <div className="flex gap-2 w-max pb-2">
               <button
                 onClick={() => setSelectedCategoryId(null)}
-                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap cursor-pointer ${
+                className={`shrink-0 min-h-11 px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap cursor-pointer ${
                   selectedCategoryId === null
                     ? "text-white border-[#014C92]"
                     : "border-gray-200 text-gray-600 bg-white hover:border-gray-300"
@@ -254,7 +261,7 @@ export default function ProductsPage() {
                   onClick={() =>
                     setSelectedCategoryId(selectedCategoryId === cat.id ? null : cat.id)
                   }
-                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap bg-white cursor-pointer ${
+                  className={`shrink-0 flex items-center gap-1.5 min-h-11 px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap bg-white cursor-pointer ${
                     selectedCategoryId === cat.id
                       ? "border-[#014C92] text-[#014C92] bg-blue-50"
                       : "border-gray-200 text-gray-600 hover:border-gray-300"
@@ -275,7 +282,7 @@ export default function ProductsPage() {
           <div className="lg:hidden flex items-center gap-2 mb-4">
             <button
               onClick={() => setShowMobileFilters(true)}
-              className="cursor-pointer relative flex items-center gap-1.5 px-3 py-2 border-2 rounded-xl text-sm font-semibold border-gray-200 bg-white text-gray-600 hover:border-gray-300 transition shrink-0"
+              className="cursor-pointer relative flex items-center gap-1.5 min-h-11 px-3 py-2 border-2 rounded-xl text-sm font-semibold border-gray-200 bg-white text-gray-600 hover:border-gray-300 transition shrink-0"
             >
               <SlidersHorizontal className="w-4 h-4" />
               Filtrar
@@ -292,7 +299,7 @@ export default function ProductsPage() {
             <select
               value={`${draftSortBy}:${draftSortDirection}`}
               onChange={(e) => handleDraftSortChange(e.target.value)}
-              className="flex-1 px-3 py-2 border-2 border-gray-200 bg-white rounded-xl text-sm font-medium focus:outline-none focus:border-[#014C92] transition"
+              className="flex-1 min-h-11 px-3 py-2 border-2 border-gray-200 bg-white rounded-xl text-base lg:text-sm font-medium focus:outline-none focus:border-[#014C92] transition"
             >
               <option value="createdAt:DESC">Más recientes</option>
               <option value="priceCents:ASC">Precio: menor a mayor</option>
@@ -482,7 +489,8 @@ export default function ProductsPage() {
               <h3 className="font-bold text-gray-900">Filtros</h3>
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="cursor-pointer p-2 rounded-full hover:bg-gray-100 transition"
+                aria-label="Cerrar filtros"
+                className="cursor-pointer min-h-11 min-w-11 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-100 transition"
               >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
@@ -493,7 +501,7 @@ export default function ProductsPage() {
 
               <button
                 onClick={applyFilters}
-                className="cursor-pointer mt-6 w-full py-3 rounded-xl text-white font-bold text-sm transition"
+                className="cursor-pointer mt-6 w-full min-h-11 py-3 rounded-xl text-white font-bold text-sm transition"
                 style={{ background: "linear-gradient(135deg, #014C92, #1EA5BD)" }}
               >
                 Aplicar filtros
@@ -502,7 +510,7 @@ export default function ProductsPage() {
               {hasAnyFilters && (
                 <button
                   onClick={clearFilters}
-                  className="cursor-pointer mt-2 w-full py-2.5 rounded-xl text-sm font-semibold text-red-600 border-2 border-red-200 hover:bg-red-50 transition"
+                  className="cursor-pointer mt-2 w-full min-h-11 py-2.5 rounded-xl text-sm font-semibold text-red-600 border-2 border-red-200 hover:bg-red-50 transition"
                 >
                   Limpiar filtros
                 </button>

@@ -27,7 +27,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   una existente.
 - **Fuente:** Regla del equipo. Es el equivalente a la constitución de la API (principio 1,
   `docs/constitution.md` de ese repo) y a RN-1 de la spec 010.
-- **Versión:** `next` 15.5.27, `react` 19.1.0, `typescript` 5.9.3 (`"strict": true` en
+- **Versión:** `next` 15.5.28, `react` 19.1.0, `typescript` 5.9.3 (`"strict": true` en
   `tsconfig.json`), `tailwindcss` 4.2.1, `next-auth` 4.24.15.
 - **Excepción:** ninguna.
 
@@ -41,7 +41,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   defecto los layouts y las páginas son componentes de servidor, enumera cuándo usar uno de
   cliente, y en "Reducing JS bundle size" pide agregar `'use client'` a componentes interactivos
   concretos en vez de marcar partes grandes de la interfaz.
-- **Versión:** `next` 15.5.27, `react` 19.1.0.
+- **Versión:** `next` 15.5.28, `react` 19.1.0.
 - **Excepción:** deuda conocida: 60 de las 87 `page.tsx` de `src/app` empiezan por `'use client'`
   (medido el 2026-10-12; los 8 `layout.tsx` son de servidor). Esas páginas cargan sus datos y
   su estado en el cliente (ver también P-10), así que pasarlas a servidor exige rehacer cómo
@@ -61,7 +61,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   `NEXT_PUBLIC_` solo existen en Node.js, que las que llevan el prefijo se incrustan en el
   JavaScript del navegador en tiempo de `next build`, y que tras el build la aplicación ya no
   responde a cambios en esos valores.
-- **Versión:** `next` 15.5.27.
+- **Versión:** `next` 15.5.28.
 - **Excepción:** ninguna.
 
 ### P-4 · El `matcher` del middleware es una lista literal y toda ruta con rol está en ella
@@ -78,7 +78,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   <https://nextjs.org/docs/15/app/api-reference/file-conventions/middleware>. Dice que los
   valores del `matcher` deben ser constantes para poder analizarse de forma estática al
   compilar, y que los valores dinámicos (variables) se ignoran.
-- **Versión:** `next` 15.5.27 y `next-auth` 4.24.15 (`withAuth`).
+- **Versión:** `next` 15.5.28 y `next-auth` 4.24.15 (`withAuth`).
 - **Excepción:** la guía de autenticación de Next recomienda que, para autenticación, el
   middleware corra en todas las rutas
   (<https://nextjs.org/docs/15/app/guides/authentication>). Aquí el `matcher` lista solo las
@@ -95,7 +95,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   <https://nextjs.org/docs/15/app/guides/authentication>. Dice que el middleware sirve para
   comprobaciones iniciales pero no debe ser la única línea de defensa, y que la mayoría de las
   comprobaciones de seguridad deben hacerse lo más cerca posible de los datos.
-- **Versión:** `next` 15.5.27.
+- **Versión:** `next` 15.5.28.
 - **Excepción:** ninguna.
 
 ### P-6 · `params` y `searchParams` son asíncronos
@@ -107,7 +107,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   (<https://nextjs.org/docs/15/app/api-reference/file-conventions/layout>). Ambas tipan
   `params` como `Promise<…>`, piden `async/await` o `use`, y avisan de que el acceso síncrono
   que se conserva por compatibilidad dejará de existir.
-- **Versión:** `next` 15.5.27.
+- **Versión:** `next` 15.5.28.
 - **Excepción:** ninguna.
 
 ### P-7 · Imágenes con `next/image` y enlaces internos con `next/link`
@@ -119,8 +119,8 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   ("Prevent usage of `<img>` element due to slower LCP and higher bandwidth") y
   `@next/next/no-html-link-for-pages` ("Prevent usage of `<a>` elements to navigate to
   internal Next.js pages").
-- **Versión:** `next` 15.5.27 y `eslint-config-next` 15.5.27.
-- **Excepción:** en `eslint-config-next` 15.5.27 `no-img-element` es un aviso, no un error, así
+- **Versión:** `next` 15.5.28 y `eslint-config-next` 15.5.28.
+- **Excepción:** en `eslint-config-next` 15.5.28 `no-img-element` es un aviso, no un error, así
   que los `<img>` existentes (unas 100 líneas con `<img` en `src`: `grep -rn '<img' src`, medido el 2026-10-12) cuentan dentro
   del tope de avisos (P-19) en vez de bloquear.
 
@@ -131,7 +131,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
 - **Fuente:** documentación de Next.js 15, "ESLint":
   <https://nextjs.org/docs/15/app/api-reference/config/eslint>. Muestra exactamente esa
   configuración (`FlatCompat` con `extends: ['next/core-web-vitals', 'next/typescript']`).
-- **Versión:** `eslint` 9.39.4 y `eslint-config-next` 15.5.27.
+- **Versión:** `eslint` 9.39.4 y `eslint-config-next` 15.5.28.
 - **Excepción:** el comando `npm run lint` y el script `lint:ci` siguen usando `next lint`
   aunque en Next 15.5 está en desuso y desaparece en Next 16 (anuncio de la versión:
   <https://nextjs.org/blog/next-15-5>, apartado "next lint Deprecation"; el propio
@@ -185,7 +185,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
 - **Fuente:** documentación de react-hook-form, `useForm`:
   <https://react-hook-form.com/docs/useform>. La opción `resolver` "integrates with your
   preferred schema validation library".
-- **Versión:** `react-hook-form` 7.71.2, `@hookform/resolvers` 5.2.2, `zod` 4.3.6.
+- **Versión:** `react-hook-form` 7.71.2, `@hookform/resolvers` 5.2.2, `zod` 4.6.6.
 - **Excepción:** la documentación de react-hook-form no recomienda una librería de esquemas
   concreta; elegir zod es decisión del equipo (P-1). El evitar el doble envío es regla del
   equipo, no de la documentación. Deuda conocida: de los 33 archivos con `<form`, solo 1 usa
@@ -208,19 +208,27 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   los protege la API (P-5). Es deuda conocida del frente D de la spec 010 y no se corrige en la
   primera entrega.
 
-### P-13 · Pruebas con Vitest
+### P-13 · Pruebas con Vitest y Playwright
 
-- **Regla:** las pruebas viven en `__tests__/` y corren con Vitest en entorno `node`. El
-  middleware real se prueba sin refactorizarlo, con las utilidades de pruebas de Next. Las
-  pruebas no tocan la red ni usan secretos reales.
+- **Regla:** las pruebas de lógica viven en `__tests__/` y corren con Vitest en entorno `node`. Las
+  pruebas de navegador (diseño, viewport, áreas táctiles) viven en `e2e/` (`*.spec.ts`) y corren
+  con Playwright contra el build `standalone` de la app. El middleware real se prueba sin
+  refactorizarlo, con las utilidades de pruebas de Next. Ninguna prueba toca la red externa ni usa
+  secretos reales: las de navegador hablan solo con servidores en `127.0.0.1` (la app y una API
+  simulada con datos ficticios) y bloquean todo lo demás.
 - **Fuente:** documentación de Next.js 15, "Setting up Vitest with Next.js":
   <https://nextjs.org/docs/15/app/guides/testing/vitest> (usa `vitest.config.mts` y la carpeta
   `__tests__`, y avisa de que Vitest no soporta aún los componentes de servidor asíncronos).
   Para el middleware, "middleware.js", apartado "Unit testing (experimental)":
   <https://nextjs.org/docs/15/app/api-reference/file-conventions/middleware>. Para el comando
-  `vitest run` (una sola pasada, sin modo de vigilancia): <https://v4.vitest.dev/guide/cli>.
-- **Versión:** `vitest` 4.1.11 (exige Node 20, 22 o 24 o superior; ver `engines`), `next`
-  15.5.27.
+  `vitest run` (una sola pasada, sin modo de vigilancia): <https://v4.vitest.dev/guide/cli>. Para
+  las pruebas de navegador, "Setting up Playwright with Next.js":
+  <https://nextjs.org/docs/15/app/guides/testing/playwright> (recomienda probar contra el código
+  de producción y permite levantar el servidor con `webServer`; se comprobó el 2026-10-23), y la
+  documentación de Playwright de emulación (<https://playwright.dev/docs/emulation>) y de
+  `webServer` (<https://playwright.dev/docs/test-webserver>).
+- **Versión:** `vitest` 4.1.11 (exige Node 20, 22 o 24 o superior; ver `engines`), `@playwright/test`
+  1.64.1 (exige Node 20 o superior), `next` 15.5.28.
 - **Excepción:** (a) de la guía de Vitest de Next solo se instaló `vitest`; no se instalan
   `@vitejs/plugin-react`, `jsdom`, `@testing-library/*` ni `vite-tsconfig-paths` porque estas
   pruebas son de lógica sin interfaz en entorno `node` y el alias `@` se declara en tres líneas
@@ -229,7 +237,9 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   (`next/experimental/testing/server`) y puede cambiar sin aviso; es la única forma de
   comprobar el `matcher` real y, si cambia, se arregla la prueba, no el middleware. (c) El
   script es `"test": "vitest run"` y no `vitest` como en la guía: el CI no puede quedarse en
-  modo de vigilancia.
+  modo de vigilancia. (d) El CI solo corre Chromium; Safari se comprueba a mano (CA-10 de la spec
+  012). Las capturas de escritorio (`e2e/desktop.spec.ts`) dependen del sistema operativo y solo
+  corren en local.
 
 ### P-14 · Instalación reproducible y auditoría de producción
 
@@ -257,7 +267,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   frente a 504), sin colapsarlos en un solo `catch`.
 - **Fuente:** Regla del equipo. Sale de la sección "Dependencias externas" del `CLAUDE.md` de
   la API y se aplica aquí por igual.
-- **Versión:** Node 22 (`AbortSignal.timeout` es de Node estándar), `next` 15.5.27.
+- **Versión:** Node 22 (`AbortSignal.timeout` es de Node estándar), `next` 15.5.28.
 - **Excepción:** deuda conocida: la página de servidor
   `src/app/(consumer)/raffles/[id]/live/page.tsx` hace un `fetch` a la API sin tiempo límite y
   sin mirar `res.ok` antes de leer el JSON, así que una API caída o lenta deja colgada la
@@ -280,7 +290,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
 - **Fuente:** Regla del equipo. Es el principio 5 de la constitución de la API y RN-3 de la spec
   010.
 - **Versión:** aplica a todo el código del front.
-- **Excepción:** deuda conocida, cinco cosas (medido el 2026-10-12, con una búsqueda en `src` de
+- **Excepción:** deuda conocida, cinco categorías (medido el 2026-10-12, con una búsqueda en `src` de
   `email`, `identifier`, `phone`, `document`, `cedula`, `token`, `code`, `otp`, `password`,
   `router.push`, `window.location`, `URLSearchParams`, plantillas con `?` y todo `console.`):
   (a) el middleware escribe ruta y rol en el log de cada petición (frente E de la spec 010); no
@@ -303,10 +313,19 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   `src/components/auth/VerificationForm.tsx` y `src/components/auth/UnlockAccountForm.tsx`.
   `RegisterForm.tsx` navega con `window.location.href`, así que la URL llega también al servidor
   del front y a lo que haya delante. Además, `RegisterForm.tsx` guarda en `sessionStorage` el
-  teléfono enmascarado (solo los últimos dígitos) para `VerificationForm.tsx`. (e) Credenciales
+  teléfono enmascarado (solo los últimos dígitos) para `VerificationForm.tsx`. También van en la
+  query de tres llamadas a la API, sin pasar por la barra del navegador pero sí por los logs de
+  acceso de la API y de lo que haya delante: `src/services/raffleService.ts` (teléfono en
+  `sendClaimPhoneOtp` y correo en `sendClaimEmailOtp`, líneas 84-86 y 91-93) y
+  `src/services/PurchaseItemService.ts` (número de documento en `getPendingClaims`, líneas
+  39-47). El contrato lo fija la API (`@RequestParam` en `RaffleWinnerController` y
+  `PurchaseItemController`), así que el front no puede cumplir solo: es también deuda del
+  principio 5 de la API. (e) Credenciales
   de partida: la URL de juego que devuelve la API trae `session_token` y `user_hash` en la
   query y el front la pone en `?url=` de `/games/play` (`src/app/(consumer)/games/page.tsx` y
-  `src/app/(consumer)/games/play/page.tsx`); `src/hooks/pet/usePetSession.ts` arma la URL del
+  `src/app/(consumer)/games/play/page.tsx`); `src/services/GameService.ts` manda el token de la partida en la query de
+  `GET /games/rewards` (`getGameRewards`, línea 26; mismo contrato fijado por la API);
+  `src/hooks/pet/usePetSession.ts` arma la URL del
   iframe de la mascota con esos dos en la query y el JWT de acceso (`bearer_token`) en el
   fragmento `#`, que no viaja al servidor. Se acepta
   (b) por ahora porque esos recursos y el stream se autentican hoy solo con `?token=` y
@@ -314,7 +333,8 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   acepta (d) y (e) por ahora porque el flujo de verificación, el desbloqueo y los juegos se
   construyeron así y cambiarlos exige también a la API (pasar el correo por estado del
   servidor o una cookie, y un ticket de partida en lugar de las credenciales en la URL). (c)
-  no tiene justificación: se quita en cuanto alguien toque ese archivo. El código nuevo sí
+  no tiene justificación: se quita en cuanto alguien toque ese archivo. La lista es lo encontrado el 2026-10-12 y completado el
+  2026-10-23: lo que no esté en ella no queda admitido por omisión. El código nuevo sí
   cumple: ningún dato personal ni token de acceso o de sesión en una URL ni en un log. Queda
   atada al frente D de la spec 010 (deuda de seguridad) para (b), (d) y (e) y al frente E
   (deuda de calidad) para (a) y (c). Revisado y que no son caso: el código de referido
@@ -352,13 +372,14 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
 
 ### P-19 · Un cambio no llega a `main` si falla una puerta de CI
 
-- **Regla:** el CI tiene tres checks que deben pasar: `Lint, tipos y build`, `Pruebas` y
-  `Auditoría de dependencias`. El tope de avisos de lint (`.lint-max-warnings`) solo baja: un
+- **Regla:** el CI tiene cuatro checks que deben pasar: `Lint, tipos y build`, `Pruebas`,
+  `Auditoría de dependencias` y `Pruebas en navegador`. El tope de avisos de lint (`.lint-max-warnings`) solo baja: un
   PR que agrega avisos falla, y uno que corrige avisos sin bajar el tope también falla.
 - **Fuente:** Regla del equipo (RN-1 y RN-2 de la spec 010; D-10).
-- **Versión:** `eslint` 9.39.4, `next` 15.5.27 (`next lint`), Node 22.
+- **Versión:** `eslint` 9.39.4, `next` 15.5.28 (`next lint`), Node 22.
 - **Excepción:** temporal: mientras Miguel no active la protección de `main` (tarea M-1 de la
-  spec 010) los tres checks avisan pero no impiden el merge ni un push directo. Es el cierre de
+  spec 010; Miguel agrega también "Pruebas en navegador") los cuatro checks avisan pero no impiden el
+  merge ni un push directo. Es el cierre de
   la primera entrega de la spec 010, no deuda del código.
 
 ### P-20 · Lo que se despliega sale de un commit de `main`, sin secretos dentro
@@ -368,7 +389,7 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   de ejecución (`NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `API_URL`, `MIDDLEWARE`,
   `PROXY_DOWNLOAD_ALLOWED_HOSTS`) entran solo al arrancar el contenedor.
 - **Fuente:** Regla del equipo (RN-3 y RN-5 de la spec 010), coherente con P-3.
-- **Versión:** `next` 15.5.27 con `output: 'standalone'`.
+- **Versión:** `next` 15.5.28 con `output: 'standalone'`.
 - **Excepción:** deuda conocida: el `Dockerfile` cumple lo de los secretos (solo `ARG`
   `NEXT_PUBLIC_*`), pero nada construye ni publica la imagen de forma automática, y su
   `COPY . .` toma lo que haya en la carpeta: hoy "desde un commit de `main`" depende de quien

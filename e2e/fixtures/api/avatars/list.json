@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "name": "Avatar uno",
+    "imageUrl": "/logos/logo.png"
+  },
+  {
+    "id": 2,
+    "name": "Avatar dos",
+    "imageUrl": "/logos/logoDorado.png"
+  }
+]

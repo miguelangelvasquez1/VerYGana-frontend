@@ -466,7 +466,7 @@ export default function VideoAdPlayer({ onXpReward }: Props) {
           {currentAd.description && currentAd.description.length > 100 && (
             <button
               onClick={() => setIsExpanded(v => !v)}
-              className="text-[#00a4ff] text-[10px] mt-0.5 font-medium cursor-pointer"
+              className="text-[#00a4ff] text-[10px] mt-0.5 font-medium cursor-pointer min-h-11 min-w-11 lg:min-h-0 lg:min-w-0"
             >
               {isExpanded ? 'Ver menos' : 'Ver más'}
             </button>

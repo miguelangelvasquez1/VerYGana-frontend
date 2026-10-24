@@ -83,11 +83,12 @@ export default function FavoritesPage() {
             <p className="text-gray-500 text-sm max-w-xs mb-6">
               Explora el marketplace y guarda los productos que más te gusten con el botón ❤️
             </p>
-            <Link href="/products">
-              <button className="inline-flex items-center gap-2 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer">
-                <Package className="w-4 h-4" />
-                Explorar productos
-              </button>
+            <Link
+              href="/products"
+              className="inline-flex items-center justify-center gap-2 min-h-11 bg-[#03548C] hover:bg-[#0b1440] active:bg-[#0b1440] text-white font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer"
+            >
+              <Package className="w-4 h-4" />
+              Explorar productos
             </Link>
           </div>
         )}

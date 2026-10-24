@@ -1,0 +1,36 @@
+{
+  "raffleId": 1,
+  "raffleTitle": "Gran rifa de fin de año con premios increíbles para toda la familia",
+  "configuredDrawMethod": "SYSTEM_RANDOM",
+  "actualDrawMethod": "SYSTEM_RANDOM",
+  "drawMethodNote": "Sorteo de prueba.",
+  "randomOrgDrawMetadata": {
+    "serialNumber": 1,
+    "completionTime": "2026-10-15T20:00:00",
+    "bitsUsed": 10,
+    "bitsLeft": 100,
+    "signature": "firma-ficticia",
+    "hashedApiKey": "hash-ficticio",
+    "license": {}
+  },
+  "drawDate": "2026-10-15T20:00:00",
+  "executedAt": "2026-10-15T20:00:05",
+  "totalParticipants": 120,
+  "totalTickets": 350,
+  "ticketPoolHash": "hash-del-pool-ficticio",
+  "numberOfWinners": 1,
+  "winners": [
+    {
+      "userName": "Ganador Uno",
+      "ticketNumber": "000123",
+      "position": 1,
+      "prizeTitle": "Teléfono de última generación",
+      "prizeType": "PHYSICAL",
+      "prizeValue": 4500000,
+      "prizeClaimed": false,
+      "claimDeadline": "2026-11-15T00:00:00",
+      "prizeClaimedAt": null,
+      "prizeTrackingInfo": null
+    }
+  ]
+}

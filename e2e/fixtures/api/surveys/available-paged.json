@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Encuesta de hábitos de compra",
+      "description": "Cuéntanos cómo compras en línea.",
+      "totalRewardKeys": 15,
+      "totalQuestions": 5,
+      "maxResponses": 100,
+      "responseCount": 20,
+      "endsAt": "2026-12-31T23:59:59"
+    },
+    {
+      "id": 2,
+      "title": "Encuesta de entretenimiento",
+      "description": null,
+      "totalRewardKeys": 8,
+      "totalQuestions": 3,
+      "maxResponses": null,
+      "responseCount": null,
+      "endsAt": null
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 8,
+    "totalElements": 20,
+    "totalPages": 3,
+    "hasNext": true,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

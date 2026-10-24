@@ -43,7 +43,11 @@ const PqrsDetailModal = ({ pqrsId, onClose }: Props) => {
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white">
           <h2 className="text-base font-semibold text-gray-900">Detalle de la solicitud</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <button
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="-m-3 flex h-11 w-11 items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer lg:m-0 lg:h-auto lg:w-auto"
+          >
             <X size={20} />
           </button>
         </div>

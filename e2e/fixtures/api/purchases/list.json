@@ -1,0 +1,61 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "referenceId": "REF-0001",
+      "items": [
+        {
+          "id": 1,
+          "productId": 2,
+          "productName": "Camiseta oficial",
+          "imageUrl": "/products/camiseta.png",
+          "unitPriceCents": 8000000,
+          "deliveredAt": "2026-10-15T12:00:00",
+          "status": "CLAIMED",
+          "canBeReviewed": true
+        }
+      ],
+      "totalItems": 1,
+      "totalCents": 8000000,
+      "keysValueCents": 2000000,
+      "cashCents": 6000000,
+      "status": "COMPLETED",
+      "deliveryEmail": "consumidor@example.test",
+      "createdAt": "2026-10-14T10:00:00",
+      "completedAt": "2026-10-14T10:05:00"
+    },
+    {
+      "id": 2,
+      "referenceId": "REF-0002",
+      "items": [
+        {
+          "id": 2,
+          "productId": 3,
+          "productName": "Anillos de plata",
+          "imageUrl": "/products/anillos.png",
+          "unitPriceCents": 8000000,
+          "deliveredAt": null,
+          "status": "PENDING",
+          "canBeReviewed": false
+        }
+      ],
+      "totalItems": 1,
+      "totalCents": 22000000,
+      "keysValueCents": 0,
+      "cashCents": 22000000,
+      "status": "PENDING",
+      "deliveryEmail": null,
+      "createdAt": "2026-10-16T10:00:00",
+      "completedAt": null
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

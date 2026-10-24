@@ -23,7 +23,7 @@ const PurchaseActions = ({ purchase }: Props) => {
     <div className="flex justify-end gap-2">
       {canReportAny && (
         <button
-          className="px-4 py-2 rounded-full border border-red-300 text-red-600 text-sm font-semibold hover:bg-red-50 active:scale-95 transition-all cursor-pointer"
+          className="min-h-11 px-4 py-2 rounded-full border border-red-300 text-red-600 text-sm font-semibold hover:bg-red-50 active:scale-95 transition-all cursor-pointer"
           onClick={() => setDeadlineNoticeOpen(true)}
         >
           Reportar un problema
@@ -32,7 +32,7 @@ const PurchaseActions = ({ purchase }: Props) => {
 
       {canReviewAny && (
         <button
-          className="px-4 py-2 rounded-full border border-[#03548C]/30 text-[#03548C] text-sm font-semibold hover:bg-[#03548C]/5 active:scale-95 transition-all cursor-pointer"
+          className="min-h-11 px-4 py-2 rounded-full border border-[#03548C]/30 text-[#03548C] text-sm font-semibold hover:bg-[#03548C]/5 active:scale-95 transition-all cursor-pointer"
           onClick={() => setReviewOpen(true)}
         >
           Dejar una reseña

@@ -60,7 +60,7 @@ export default function CommercialStorefrontView({
         <div className={fullPage ? "pt-5 pb-4" : "pb-4"}>
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition cursor-pointer"
+            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 active:text-gray-900 transition cursor-pointer lg:min-h-0"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver

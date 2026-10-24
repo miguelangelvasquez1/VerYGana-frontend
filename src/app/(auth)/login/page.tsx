@@ -448,7 +448,7 @@ export default function Login() {
               "
               >
 
-                <Link href="/">
+                <Link href="/" className="flex min-h-11 min-w-11 items-center justify-center">
                   <Image
                       src="/logos/logoDorado.png"
                       alt="Ver y Gana"
@@ -525,43 +525,19 @@ export default function Login() {
                   "
                   >
 
-                    <a
+                    <Link
                         href="/terminos"
                         className="
+                      inline-flex
+                      min-h-11
+                      items-center
+                      px-3
                       transition-colors
                       hover:text-gray-600
                     "
                     >
                       Términos
-                    </a>
-
-                    <span aria-hidden="true">
-                    •
-                  </span>
-
-                    <a
-                        href="/privacidad"
-                        className="
-                      transition-colors
-                      hover:text-gray-600
-                    "
-                    >
-                      Privacidad
-                    </a>
-
-                    <span aria-hidden="true">
-                    •
-                  </span>
-
-                    <a
-                        href="/ayuda"
-                        className="
-                      transition-colors
-                      hover:text-gray-600
-                    "
-                    >
-                      Ayuda
-                    </a>
+                    </Link>
 
                   </div>
 
@@ -576,7 +552,7 @@ export default function Login() {
         </div>
 
 
-        <Footer />
+        <Footer guest />
       </>
   );
 }

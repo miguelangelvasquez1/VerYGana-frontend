@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import { getRoleHomePath } from "@/lib/auth/roleRedirect";
 import {
   Play,
@@ -245,12 +247,12 @@ export default function Home() {
                 y accede a un mundo de oportunidades para ganar los mejores premios.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg cursor-pointer">
+                <Link href="/register" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg cursor-pointer inline-block text-center active:opacity-80">
                   Empezar Ahora
-                </button>
-                <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-600 transition-all duration-200 cursor-pointer">
+                </Link>
+                <Link href="#rifas" className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-600 transition-all duration-200 cursor-pointer inline-block text-center active:opacity-80">
                   Ver Rifas Activas
-                </button>
+                </Link>
               </div>
             </div>
             
@@ -446,11 +448,13 @@ export default function Home() {
             {phones.map((phone, index) => (
               <div key={phone.id} className="group hover:transform hover:scale-105 transition-all duration-300">
                 <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border">
-                  <div className="relative">
-                    <img
+                  <div className="relative h-48">
+                    <Image
                       src={phone.image}
                       alt={phone.name}
-                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                      fill
+                      sizes="(min-width: 1024px) 384px, (min-width: 768px) 50vw, 100vw"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
                       {phone.timeLeft}
@@ -475,9 +479,9 @@ export default function Home() {
                       </div>
                     </div>
                     
-                    <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 cursor-pointer">
+                    <Link href="/login" className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 cursor-pointer active:opacity-80">
                       Participar Ahora
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -485,10 +489,10 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12">
-            <button className="bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors duration-200 inline-flex items-center gap-2 cursor-pointer">
+            <Link href="/login" className="bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors duration-200 inline-flex items-center gap-2 cursor-pointer active:opacity-80">
               Ver Todas las Rifas
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -575,11 +579,13 @@ export default function Home() {
             {products.map((product) => (
               <div key={product.id} className="group hover:transform hover:scale-105 transition-all duration-300">
                 <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border">
-                  <div className="relative">
-                    <img
+                  <div className="relative h-56">
+                    <Image
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
+                      fill
+                      sizes="(min-width: 1024px) 384px, (min-width: 768px) 50vw, 100vw"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     {product.discount > 0 && (
                       <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
@@ -632,10 +638,10 @@ export default function Home() {
                       </span>
                     </div>
                     
-                    <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 inline-flex items-center justify-center gap-2 cursor-pointer">
+                    <Link href="/login" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 inline-flex items-center justify-center gap-2 cursor-pointer active:opacity-80">
                       <ShoppingCart className="w-4 h-4" />
                       Agregar al Carrito
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -643,10 +649,10 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12">
-            <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 inline-flex items-center gap-2 cursor-pointer">
+            <Link href="/login" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 inline-flex items-center gap-2 cursor-pointer active:opacity-80">
               Ver Toda la Tienda
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -694,15 +700,22 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="flex justify-center mt-8 gap-3">
+            <div className="flex justify-center mt-8 gap-1">
               {testimonials.map((_, index) => (
                 <button
                   key={index}
+                  type="button"
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-200 cursor-pointer ${
-                    index === currentTestimonial ? 'bg-white scale-125' : 'bg-white/50'
-                  }`}
-                />
+                  aria-label={`Ver testimonio ${index + 1}`}
+                  aria-current={index === currentTestimonial ? 'true' : undefined}
+                  className="flex h-11 w-11 items-center justify-center cursor-pointer active:opacity-70"
+                >
+                  <span
+                    className={`block w-3 h-3 rounded-full transition-all duration-200 ${
+                      index === currentTestimonial ? 'bg-white scale-125' : 'bg-white/50'
+                    }`}
+                  />
+                </button>
               ))}
             </div>
           </div>
@@ -738,10 +751,10 @@ export default function Home() {
                   </div>
                 </div>
                 
-                <button className="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg inline-flex items-center gap-3 cursor-pointer">
+                <Link href="/register" className="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg inline-flex items-center gap-3 cursor-pointer active:opacity-80">
                   <Users className="w-6 h-6" />
                   Empezar a Referir
-                </button>
+                </Link>
               </div>
               
               <div className="space-y-6">
@@ -844,12 +857,9 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-            <button className="bg-white text-blue-600 px-10 py-4 rounded-2xl font-bold text-xl hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-2xl cursor-pointer">
+            <Link href="/register" className="bg-white text-blue-600 px-10 py-4 rounded-2xl font-bold text-xl hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-2xl cursor-pointer inline-block text-center active:opacity-80">
               🚀 Crear Cuenta Gratis
-            </button>
-            <button className="border-2 border-white text-white px-10 py-4 rounded-2xl font-bold text-xl hover:bg-white hover:text-blue-600 transition-all duration-200 transform hover:scale-105 cursor-pointer">
-              📱 Descargar App
-            </button>
+            </Link>
           </div>
           
           <div className="flex flex-wrap justify-center items-center gap-8 text-blue-200">
@@ -873,7 +883,7 @@ export default function Home() {
         </div>
       </section>
 
-      <Footer />
+      <Footer guest />
     </div>
   );
 }

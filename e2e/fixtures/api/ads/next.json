@@ -1,0 +1,13 @@
+{
+  "id": 1,
+  "title": "Anuncio de prueba",
+  "description": "Mira el video completo para ganar llaves.",
+  "currentLikes": 10,
+  "contentUrl": "/ads/ad1.mp4",
+  "targetUrl": "https://example.test/anuncio",
+  "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+  "commercialName": "Tienda de Prueba S.A.S.",
+  "mediaType": "VIDEO",
+  "durationSeconds": 15,
+  "sessionUUID": "00000000-0000-4000-8000-0000000000a1"
+}

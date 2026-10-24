@@ -119,15 +119,21 @@ function PrizesCarousel({ prizes }: { prizes: PrizeResponseDTO[] }) {
       </div>
 
       {prizes.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-3">
+        <div className="flex justify-center mt-1">
           {prizes.map((_, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => setCurrent(i)}
-              className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                i === current ? 'w-5 bg-[#03548C]' : 'w-2 bg-gray-300'
-              }`}
-            />
+              aria-label={`Ver premio ${i + 1}`}
+              className="flex items-center justify-center min-h-11 min-w-11 cursor-pointer"
+            >
+              <span
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === current ? 'w-5 bg-[#03548C]' : 'w-2 bg-gray-300'
+                }`}
+              />
+            </button>
           ))}
         </div>
       )}
