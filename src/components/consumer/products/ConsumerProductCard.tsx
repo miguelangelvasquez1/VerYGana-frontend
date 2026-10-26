@@ -3,12 +3,15 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Star, Tag, Heart, Building2 } from "lucide-react";
+import { Star, Heart, Building2 } from "lucide-react";
 
 import { ProductSummaryResponseDTO } from "@/types/products/Product.types";
 import { AddToCartButton } from "./AddToCartButton";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useActiveKeyPromotions } from "@/hooks/keys/useKeyPromotions";
+import { KeyPromotionBadge } from "./KeyPromotionBadge";
+import { KeysDiscountTag } from "@/components/shared/KeysDiscountTag";
 
 interface ConsumerProductCardProps {
   product: ProductSummaryResponseDTO;
@@ -17,6 +20,10 @@ interface ConsumerProductCardProps {
 const ConsumerProductCard: React.FC<ConsumerProductCardProps> = ({ product }) => {
   const { role } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { byProductId } = useActiveKeyPromotions();
+  const promotion = byProductId.get(product.id);
+  // Con promoción vigente el tope sube del ordinario al de la promoción.
+  const keysPct = promotion ? Math.max(promotion.keysPct, product.maxKeysPct) : product.maxKeysPct;
 
   return (
     // Tarjeta con enlace extendido: un enlace vacío con `aria-label` cubre toda la tarjeta y navega al producto;
@@ -34,23 +41,13 @@ const ConsumerProductCard: React.FC<ConsumerProductCardProps> = ({ product }) =>
 
         <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
 
-        {product.maxKeysPct > 0 && (
-          <div
-            className="absolute bottom-0 left-0 flex flex-col items-center justify-center text-center shadow-md rounded-tr-[10px] sm:rounded-tr-2xl min-w-12 sm:min-w-18 px-2 pt-1.5 pb-1.5 sm:pl-3 sm:pr-3.5 sm:pt-2.5 sm:pb-3"
-            style={{ background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)" }}
-          >
-            <Tag
-              className="w-2.5 h-2.5 sm:w-4 sm:h-4 text-white/80 mb-0.5"
-              style={{ transform: "rotate(-45deg)" }}
-            />
-            <span className="text-white font-semibold leading-none uppercase tracking-wide text-[6px] sm:text-[9px]">Paga con</span>
-            <span className="text-white font-semibold leading-none uppercase tracking-wide text-[6px] sm:text-[9px]">llaves y</span>
-            <span className="text-white font-bold leading-none uppercase tracking-wide text-[7px] sm:text-[10px]">ahorra</span>
-            <span className="text-white font-extrabold leading-none text-[17px] sm:text-[26px]" style={{ lineHeight: 1.1 }}>
-              {product.maxKeysPct}%
-            </span>
+        {promotion && (
+          <div className="absolute top-3 left-3 right-14">
+            <KeyPromotionBadge promotion={promotion} />
           </div>
         )}
+
+        <KeysDiscountTag pct={keysPct} special={!!promotion} />
 
         {role === "CONSUMER" && (
           <button

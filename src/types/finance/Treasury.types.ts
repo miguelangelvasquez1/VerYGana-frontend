@@ -14,6 +14,7 @@ export interface TreasuryBalanceResponseDTO {
     connectivityCents: number;
     infrastructureCents: number;
     payrollCents: number;
+    promotionsReserveCents: number; // garantía de promociones de llaves (MP-12), ya incluida en totalCents
     totalCents: number;
     keysReserveHealthPct: number;
     keysReserveStatus: string;

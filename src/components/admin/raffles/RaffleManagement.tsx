@@ -23,10 +23,10 @@ import { getRafflesByFilters } from "@/services/raffleService";
 import { fileUploadService } from "@/services/FileUploadService";
 import { useAdminSectionSearch } from "@/context/AdminSearchContext";
 
-import RaffleCard from "@/components/Admin/raffles/RaffleCardAdmin";
+import RaffleCard from "@/components/admin/raffles/RaffleCardAdmin";
 import CreateRaffleForm, {
   CreateRaffleFormSubmitPayload,
-} from "@/components/Admin/raffles/CreateRaffleForm";
+} from "@/components/admin/raffles/CreateRaffleForm";
 
 const PAGE_SIZE = 10;
 

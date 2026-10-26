@@ -71,7 +71,11 @@ export const userStateColor: Record<UserState, string> = {
   [UserState.PENDING_KYC_REVIEW]: 'bg-purple-100 text-purple-800',
 };
 
-export const levelLabel: Record<UserLevel, string> = {
+/** Estados en los que la cuenta no puede operar y el admin puede reactivarla. */
+export const isReactivable = (state?: UserState | null): boolean =>
+  state === UserState.BLOCKED || state === UserState.SUSPENDED;
+
+export const levelLabel:Record<UserLevel, string> = {
   [UserLevel.BRONCE]: 'Bronce',
   [UserLevel.PLATA]: 'Plata',
   [UserLevel.ORO]: 'Oro',

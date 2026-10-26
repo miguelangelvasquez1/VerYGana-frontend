@@ -16,6 +16,7 @@ import { levelService } from '@/services/LevelService';
 import { levelKeys } from '@/hooks/useLevelProfile';
 import type { LevelProfile } from '@/types/level';
 import { resolveLevelUp } from '@/utils/levelUp';
+import { centsToKeys, formatColombiaDateTime, formatCopCents, formatKeys } from '@/utils/keys';
 
 type Status = 'loading' | 'success' | 'error';
 
@@ -120,14 +121,23 @@ export default function PurchaseConfirmationPage() {
               </p>
               <p>
                 <strong>Fecha:</strong>{' '}
-                {new Date(purchase.createdAt).toLocaleString()}
+                {formatColombiaDateTime(purchase.createdAt)}
               </p>
               <p>
                 <strong>Total de productos:</strong> {purchase.totalItems}
               </p>
               <p>
-                <strong>Total pagado:</strong>{' '}
-                ${(purchase.totalCents / 100).toLocaleString()}
+                <strong>Precio total:</strong>{' '}
+                {formatCopCents(purchase.totalCents)}
+              </p>
+              {/* Las llaves no son dinero: van en un renglón aparte del dinero pagado. */}
+              <p>
+                <strong>Llaves aplicadas:</strong>{' '}
+                {formatKeys(centsToKeys(purchase.keyValueCents))}
+              </p>
+              <p>
+                <strong>Dinero pagado:</strong>{' '}
+                {formatCopCents(purchase.cashCents)}
               </p>
             </div>
 

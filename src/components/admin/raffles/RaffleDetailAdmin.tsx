@@ -12,7 +12,7 @@ import { PrizeResponseDTO } from "@/types/raffles/prize.types";
 import { RaffleRuleResponseDTO } from "@/types/raffles/raffleRule.types";
 
 import ConfirmDialog from "@/components/generic/ConfirmDialog";
-import EditRaffleForm from "@/components/Admin/raffles/EditRaffleForm";
+import EditRaffleForm from "@/components/admin/raffles/EditRaffleForm";
 import { getFriendlyErrorMessage } from "@/utils/errorMessages";
 
 import {

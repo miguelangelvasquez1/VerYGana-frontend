@@ -16,6 +16,7 @@ export const config = {
     '/consumer/transactions/:path*',
     '/raffles',
     "/ads",
+    '/explore/recognitions',
     // "/forum",
 
     // role prefixes (literal entries)
@@ -46,6 +47,7 @@ const CONSUMER_ALLOWED = [
   '/consumer/transactions/:path*',
   '/raffles',
   '/ads',
+  '/explore/recognitions',
 ] as const;
 
 /**

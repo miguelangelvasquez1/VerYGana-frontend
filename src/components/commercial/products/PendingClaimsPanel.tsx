@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Loader2, PackageCheck, PackageSearch, Search, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Gift, Loader2, PackageCheck, PackageSearch, Search, X } from 'lucide-react';
 import { getPendingClaims } from '@/services/PurchaseItemService';
 import { CommercialPendingClaimResponseDTO } from '@/types/purchases/purchaseItem.types';
 import { DocumentType } from '@/types/User.types';
@@ -103,7 +103,7 @@ export default function PendingClaimsPanel() {
         </div>
 
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-xs font-medium text-gray-600 mb-1">Número de documento del comprador (opcional)</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Número de documento del comprador o beneficiario (opcional)</label>
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
             <input
@@ -165,7 +165,7 @@ export default function PendingClaimsPanel() {
           <table className="min-w-full divide-y divide-gray-100">
             <thead>
               <tr className="bg-gray-50">
-                {['Producto', 'Comprador', 'Documento', 'Precio', 'Fecha de compra', 'Acciones'].map((h) => (
+                {['Producto', 'Comprador / Beneficiario', 'Documento', 'Precio', 'Fecha de compra', 'Acciones'].map((h) => (
                   <th
                     key={h}
                     className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
@@ -185,10 +185,23 @@ export default function PendingClaimsPanel() {
                         alt={claim.productName}
                         className="w-10 h-10 rounded-lg object-cover border border-gray-100"
                       />
-                      <p className="text-sm font-medium text-gray-900">{claim.productName}</p>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{claim.productName}</p>
+                        {claim.buyerType === 'VERYGANA' && (
+                          <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-admin-gold/40 bg-admin-yellow/10 px-2 py-0.5 text-[11px] font-semibold text-admin-midnight">
+                            <Gift className="h-3 w-3" />
+                            Reconocimiento VERYGANA
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-sm text-gray-700">{claim.buyerName}</td>
+                  <td className="px-5 py-4 text-sm text-gray-700">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                      {claim.buyerType === 'VERYGANA' ? 'Beneficiario' : 'Comprador'}
+                    </p>
+                    {claim.buyerName}
+                  </td>
                   <td className="px-5 py-4 text-sm text-gray-700">
                     {DOCUMENT_TYPE_LABELS[claim.documentType]} {claim.documentNumber}
                   </td>

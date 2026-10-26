@@ -75,7 +75,7 @@ export interface UserSummaryResponseDTO {
   publicId: string;
   role: Role;
   email: string;
-  userState: UserState;
+  accountStatus: UserState;
 }
 
 export enum UserLevel {

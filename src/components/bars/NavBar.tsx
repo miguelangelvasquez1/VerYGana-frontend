@@ -400,6 +400,10 @@ export default function Navbar() {
                     <ShoppingBag className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Mis compras</span>
                   </Link>
+                  <Link href="/explore/recognitions" className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
+                    <Gift className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
+                    <span>Mis reconocimientos</span>
+                  </Link>
                   <Link href={"/explore/favorites"} className="flex items-center gap-3 px-4 py-3 hover:bg-[#00a4ff]/10 hover:text-[#00a4ff] transition-all group">
                     <Heart className="w-5 h-5 text-gray-400 group-hover:text-[#00a4ff]" />
                     <span>Mis favoritos</span>

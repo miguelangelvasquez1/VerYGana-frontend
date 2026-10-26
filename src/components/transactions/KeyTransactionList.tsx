@@ -1,5 +1,11 @@
-import { FileText, ArrowDownLeft, ArrowUpRight, Calendar, Hash, ChevronLeft, ChevronRight } from "lucide-react";
-import { KeyTransactionResponseDTO, KEY_TRANSACTION_LABELS, isPositiveKeyType } from "@/types/KeyTransaction.types";
+import { FileText, ArrowDownLeft, ArrowUpRight, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+    KeyTransactionResponseDTO,
+    KeyTransactionType,
+    KEY_TRANSACTION_LABELS,
+    isPositiveKeyType,
+} from "@/types/KeyTransaction.types";
+import { formatColombiaDate, formatColombiaDateTime } from "@/utils/keys";
 import { KeyTxFilters } from "@/hooks/useTransactions";
 
 interface Props {
@@ -10,13 +16,38 @@ interface Props {
     onPageChange: (page: number) => void;
 }
 
-const formatDelta = (purchase: number | null | undefined, connectivity: number | null | undefined) => {
-    const p = purchase ?? 0;
-    const c = connectivity ?? 0;
-    const parts: { value: number; label: string }[] = [];
+interface DeltaLine {
+    value: number;
+    label: string;
+    // true = no mueve el saldo disponible (ya se descontó al reservar).
+    neutral?: boolean;
+}
+
+const getDeltas = (tx: KeyTransactionResponseDTO): DeltaLine[] => {
+    // El pago confirmado llega con purchaseKeysDelta null: el monto sale del
+    // saldo bloqueado, que ya se había restado del disponible en la reserva.
+    if (tx.type === KeyTransactionType.DEBIT_COPAYMENT) {
+        const blocked = tx.blockedPurchaseKeysDelta ?? tx.purchaseKeysDelta ?? 0;
+        return [{ value: blocked, label: 'reservadas', neutral: tx.purchaseKeysDelta == null }];
+    }
+
+    const p = tx.purchaseKeysDelta ?? 0;
+    const c = tx.connectivityKeysDelta ?? 0;
+    const parts: DeltaLine[] = [];
     if (p !== 0) parts.push({ value: p, label: 'compra' });
     if (c !== 0) parts.push({ value: c, label: 'conex.' });
     return parts.length > 0 ? parts : [{ value: 0, label: 'llaves' }];
+};
+
+const getDetail = (tx: KeyTransactionResponseDTO): string | null => {
+    switch (tx.type) {
+        case KeyTransactionType.DEBIT_COPAYMENT:
+            return 'Estas llaves ya se habían descontado de tu saldo al reservarlas.';
+        case KeyTransactionType.CREDIT_COPAYMENT_REFUND:
+            return tx.expiredAt ? `Estas llaves vencen el ${formatColombiaDate(tx.expiredAt)}.` : null;
+        default:
+            return null;
+    }
 };
 
 const KeyTransactionList = ({ transactions, loading, filters, totalPages, onPageChange }: Props) => {
@@ -46,7 +77,8 @@ const KeyTransactionList = ({ transactions, loading, filters, totalPages, onPage
 
             {transactions.map(tx => {
                 const positive = isPositiveKeyType(tx.type);
-                const deltas = formatDelta(tx.purchaseKeysDelta, tx.connectivityKeysDelta);
+                const deltas = getDeltas(tx);
+                const detail = getDetail(tx);
 
                 return (
                     <div
@@ -65,31 +97,39 @@ const KeyTransactionList = ({ transactions, loading, filters, totalPages, onPage
 
                             <div>
                                 <p className="font-semibold text-gray-900 text-sm">
-                                    {KEY_TRANSACTION_LABELS[tx.type]}
+                                    {KEY_TRANSACTION_LABELS[tx.type] ?? tx.type}
                                 </p>
+
+                                {detail && (
+                                    <p className="text-xs text-gray-500 mt-0.5">{detail}</p>
+                                )}
 
                                 {tx.reason && (
                                     <p className="text-xs text-gray-500 mt-0.5">{tx.reason}</p>
                                 )}
 
-                                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400 mt-1.5">
-                                    <span className="flex items-center gap-1">
-                                        <Calendar className="w-3 h-3" />
-                                        {new Date(tx.createdAt).toLocaleString('es-CO')}
-                                    </span>
-                                    {tx.referenceId && (
-                                        <span className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-full">
-                                            <Hash className="w-3 h-3" />
-                                            {tx.referenceId}
-                                        </span>
-                                    )}
-                                </div>
+                                <p className="flex items-center gap-1 text-xs text-gray-400 mt-1.5">
+                                    <Calendar className="w-3 h-3" />
+                                    {formatColombiaDateTime(tx.createdAt)}
+                                </p>
+
+                                {tx.referenceId && (
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        Referencia:{' '}
+                                        <span className="font-mono text-gray-500 break-all">{tx.referenceId}</span>
+                                    </p>
+                                )}
                             </div>
                         </div>
 
                         <div className="text-right shrink-0">
-                            {deltas.map(({ value, label }) => (
-                                <p key={label} className={`text-base font-extrabold ${value >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                            {deltas.map(({ value, label, neutral }) => (
+                                <p
+                                    key={label}
+                                    className={`text-base font-extrabold ${
+                                        neutral ? 'text-gray-500' : value >= 0 ? 'text-green-600' : 'text-red-500'
+                                    }`}
+                                >
                                     {value > 0 ? '+' : ''}{value.toLocaleString('es-CO')}
                                     <span className="text-xs font-medium ml-1 text-gray-400">{label}</span>
                                 </p>

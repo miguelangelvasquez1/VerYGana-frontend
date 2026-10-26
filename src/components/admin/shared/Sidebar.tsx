@@ -20,6 +20,8 @@ import {
   Headset,
   ShieldAlert,
   PawPrint,
+  KeyRound,
+  Award,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -115,6 +117,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           title: 'Finanzas',
           icon: DollarSign,
           href: '/admin/finance',
+        },
+        {
+          title: 'Promociones de llaves',
+          icon: KeyRound,
+          href: '/admin/key-promotions',
+        },
+        {
+          title: 'Reconocimientos',
+          icon: Award,
+          href: '/admin/recognitions',
         }
       ],
     },
