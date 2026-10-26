@@ -51,7 +51,8 @@ export default function ClaimPinModal({ item, onClose, onClaimed }: Props) {
         </div>
 
         <p className="text-sm text-gray-600">
-          Ingresa el PIN que el comprador te muestra en tienda para confirmar la entrega de{' '}
+          Ingresa el PIN que el {item.buyerType === 'VERYGANA' ? 'beneficiario' : 'comprador'} te muestra en
+          tienda para confirmar la entrega de{' '}
           <span className="font-semibold text-gray-900">{item.productName}</span>.
         </p>
 

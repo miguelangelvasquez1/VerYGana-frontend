@@ -52,6 +52,9 @@ export interface CommercialPendingClaimResponseDTO {
     productName: string;
     imageUrl: string;
     unitPriceCents: number;
+    // VERYGANA = Reconocimiento: buyerName y documento son los del BENEFICIARIO
+    // (quien se presenta a recoger), no de la compradora.
+    buyerType: 'CONSUMER' | 'VERYGANA';
     buyerName: string;
     documentType : DocumentType;
     documentNumber : string

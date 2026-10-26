@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import AdminLayout from '@/components/Admin/AdminLayout';
-import ImpactStoryForm from '@/components/Admin/forum/ImpactStoryForm';
-import ImpactStoryEditForm from '@/components/Admin/forum/ImpactStoryEditForm';
-import StoryRow from '@/components/Admin/forum/StoryRow';
+import AdminLayout from '@/components/admin/AdminLayout';
+import ImpactStoryForm from '@/components/admin/forum/ImpactStoryForm';
+import ImpactStoryEditForm from '@/components/admin/forum/ImpactStoryEditForm';
+import StoryRow from '@/components/admin/forum/StoryRow';
 import { useImpactStories, useDeleteImpactStory } from '@/hooks/useImpactStory';
 import type { ImpactStoryResponse, StoryStatus, ImpactStoryFilters } from '@/types/impactStory.types';
 

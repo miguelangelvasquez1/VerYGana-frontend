@@ -25,7 +25,7 @@ import BlockUnblockModal from './BlockUnblockModal';
 import NotifyUserModal from './NotifyUserModal';
 import {
   AnyUserRow, TabKey, roleLabel, roleBadgeColor, userStateLabel, userStateColor,
-  levelLabel, planLabel, planBadgeColor, getRowRole, getRowTitle,
+  levelLabel, planLabel, planBadgeColor, getRowRole, getRowTitle, isReactivable,
 } from './userMeta';
 
 const PAGE_SIZE = 10;
@@ -35,7 +35,7 @@ interface RowTarget {
   publicId: string;
   displayName: string;
   email: string;
-  userState: UserState;
+  accountStatus: UserState;
 }
 
 const toRowTarget = (row: AnyUserRow, tab: TabKey): RowTarget => ({
@@ -43,7 +43,7 @@ const toRowTarget = (row: AnyUserRow, tab: TabKey): RowTarget => ({
   publicId: row.publicId,
   displayName: getRowTitle(row, tab),
   email: row.email,
-  userState: row.userState,
+  accountStatus: row.accountStatus,
 });
 
 const ROLE_TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
@@ -208,7 +208,7 @@ const UserManagement: React.FC = () => {
   const openEdit = (row: AnyUserRow) => setEditTarget(toRowTarget(row, activeTab));
   const openBlockToggle = (row: AnyUserRow) => setBlockTarget({
     ...toRowTarget(row, activeTab),
-    action: row.userState === UserState.BLOCKED ? 'unblock' : 'block',
+    action: isReactivable(row.accountStatus) ? 'unblock' : 'block',
   });
   const openNotifySingle = (row: AnyUserRow) => setNotifyTarget({
     publicIds: [row.publicId],
@@ -476,8 +476,8 @@ const UserManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${userStateColor[user.userState]}`}>
-                          {userStateLabel[user.userState]}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${userStateColor[user.accountStatus] ?? 'bg-gray-100 text-gray-700'}`}>
+                          {userStateLabel[user.accountStatus] ?? user.accountStatus ?? '—'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">{renderInfoCell(user)}</td>
@@ -494,10 +494,10 @@ const UserManagement: React.FC = () => {
                           </button>
                           <button
                             onClick={() => openBlockToggle(user)}
-                            title={user.userState === UserState.BLOCKED ? 'Reactivar' : 'Bloquear'}
-                            className={user.userState === UserState.BLOCKED ? 'text-green-600 hover:text-green-800 cursor-pointer' : 'text-red-600 hover:text-red-800 cursor-pointer'}
+                            title={isReactivable(user.accountStatus) ? 'Reactivar' : 'Bloquear'}
+                            className={isReactivable(user.accountStatus) ? 'text-green-600 hover:text-green-800 cursor-pointer' : 'text-red-600 hover:text-red-800 cursor-pointer'}
                           >
-                            {user.userState === UserState.BLOCKED ? <Unlock size={16} /> : <Ban size={16} />}
+                            {isReactivable(user.accountStatus) ? <Unlock size={16} /> : <Ban size={16} />}
                           </button>
                         </div>
                       </td>
@@ -559,7 +559,7 @@ const UserManagement: React.FC = () => {
         }}
         onToggleBlock={() => {
           if (detailTarget) {
-            setBlockTarget({ ...detailTarget, action: detailTarget.userState === UserState.BLOCKED ? 'unblock' : 'block' });
+            setBlockTarget({ ...detailTarget, action: isReactivable(detailTarget.accountStatus) ? 'unblock' : 'block' });
             setDetailTarget(null);
           }
         }}

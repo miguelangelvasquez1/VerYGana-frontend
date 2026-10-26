@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import RaffleDetailCard from "@/components/Admin/raffles/RaffleDetailAdmin";
+import RaffleDetailCard from "@/components/admin/raffles/RaffleDetailAdmin";
 import { RaffleResponseDTO, UpdateRaffleRequestDTO } from "@/types/raffles/raffle.types";
 import {
     closeRaffle,
@@ -15,7 +15,7 @@ import {
     deleteRaffle,
 } from "@/services/admin/AdminRaffleService";
 import { getRaffleById } from "@/services/raffleService";
-import AdminLayout from "@/components/Admin/AdminLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { getFriendlyErrorMessage } from "@/utils/errorMessages";
 
 /* ============================================================

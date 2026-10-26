@@ -21,6 +21,7 @@ import {
   ShieldAlert,
   PawPrint,
   KeyRound,
+  Award,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -121,6 +122,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           title: 'Promociones de llaves',
           icon: KeyRound,
           href: '/admin/key-promotions',
+        },
+        {
+          title: 'Reconocimientos',
+          icon: Award,
+          href: '/admin/recognitions',
         }
       ],
     },

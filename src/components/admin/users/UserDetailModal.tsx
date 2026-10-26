@@ -22,6 +22,7 @@ import {
   formatDate,
   formatCOP,
   formatKeys,
+  isReactivable,
 } from './userMeta';
 import { CommercialProsperityPanel } from '../prosperity/CommercialProsperityPanel';
 
@@ -45,9 +46,10 @@ interface Props {
   role: Role;
   publicId: string;
   onClose: () => void;
-  onEdit: () => void;
-  onNotify: () => void;
-  onToggleBlock: () => void;
+  // Sin estas acciones el modal queda en solo lectura (ej. desde Reconocimientos).
+  onEdit?: () => void;
+  onNotify?: () => void;
+  onToggleBlock?: () => void;
 }
 
 const fetchDetailByRole = (role: Role, publicId: string): Promise<DetailDTO> => {
@@ -123,7 +125,7 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
 
   if (!isOpen) return null;
 
-  const isBlocked = data?.userState === UserState.BLOCKED;
+  const isBlocked = isReactivable(data?.accountStatus);
   const showTabs = role === Role.COMMERCIAL && !!data && !loading && !error;
   const prosperityTab = showTabs && tab === 'prosperity';
 
@@ -146,8 +148,8 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
                 </span>
               )}
               {data && (
-                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${userStateColor[data.userState]}`}>
-                  {userStateLabel[data.userState]}
+                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${userStateColor[data.accountStatus] ?? 'bg-gray-100 text-gray-700'}`}>
+                  {userStateLabel[data.accountStatus] ?? data.accountStatus ?? '—'}
                 </span>
               )}
             </div>
@@ -303,6 +305,7 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
               </Section>
             )}
 
+            {onEdit && onNotify && onToggleBlock && (
             <div className="flex flex-wrap gap-3 pt-2 border-t">
               <button
                 onClick={onEdit}
@@ -326,6 +329,7 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
                 {isBlocked ? 'Reactivar' : 'Bloquear'}
               </button>
             </div>
+            )}
           </div>
         )}
       </div>
