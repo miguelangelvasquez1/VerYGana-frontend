@@ -13,7 +13,9 @@ test.beforeEach(async ({ context }) => {
 });
 
 test.describe('CA-6 · barra inferior', () => {
-  for (const url of ['/home', '/games', '/ads', '/pet']) {
+  // `/pet` no está: en vertical, en el celular, la mascota va girada a pantalla completa y sin barras (RN-1,
+  // RN-10); su comprobación está en `pet.spec.ts`. `/products` la reemplaza para seguir probando la barra.
+  for (const url of ['/home', '/games', '/ads', '/products']) {
     test(`${url}: Inicio, Anuncios, Juegos, Mascota, Productos y Perfil, de 44 × 44 px`, async ({ page }) => {
       await page.goto(url);
       await settle(page);

@@ -11,5 +11,21 @@
   </head>
   <body>
     <p>Juego de la mascota (relleno de pruebas)</p>
+    <script>
+      // Herramienta de prueba (spec 013, CA-13): guarda en el DOM de esta página el último toque, en las
+      // coordenadas del propio juego, y cuántos van. Sin postMessage: /pet y /games/play escuchan "message".
+      (function () {
+        function record(type, x, y) {
+          var root = document.documentElement;
+          root.dataset.lastPointer = JSON.stringify({ type: type, x: x, y: y });
+          root.dataset.pointerCount = String(Number(root.dataset.pointerCount || 0) + 1);
+        }
+        window.addEventListener('pointerdown', function (e) { record('pointerdown', e.clientX, e.clientY); }, true);
+        window.addEventListener('touchstart', function (e) {
+          var t = e.touches[0];
+          if (t) record('touchstart', t.clientX, t.clientY);
+        }, true);
+      })();
+    </script>
   </body>
 </html>

@@ -252,3 +252,122 @@ sí; B toca `NavBar.tsx` (marcas `immersive`) después de A para no pisar el mis
 
 - [x] Bloqueante (RN-9, CA-12): el arreglo del celular en `/ads` pasa de `max-md:` a `max-lg:` (la barra inferior se ve hasta `lg`). En `VideoAdPlayer.tsx`: marco que llena el contenedor, clases del video y la imagen, `z-[35]` del aviso y compactación por altura corta. Desde `lg` queda como en `HEAD`. `ads/page.tsx` ya usaba `max-lg:`.
   - Pruebas: `e2e/ads.spec.ts` suma 932 × 430, 915 × 412 y tableta 768 × 1024 (video e imagen). Antes del arreglo fallaron 5 de los 6 casos nuevos (el video de 768 × 1024 ya pasaba); con el arreglo pasan los 6.
+
+## Bloque E · Mascota girada en vertical (cambio después de la ronda 3)
+
+Plan: sección 19 de `plan.md`. T1-T13 y las correcciones de las rondas 1 y 2 están hechas y aprobadas: no se
+rehacen. Mismas reglas de arriba: variables ficticias exportadas, `npm run build:e2e` antes de cada
+`npx playwright test` tras tocar `src/` o `e2e/fixtures`, `npm run build` antes de `npx tsc --noEmit`,
+tope de lint 348 sin subir, capturas `desktop-1280` sin regenerar, sin dependencias nuevas. Orden: T14 →
+T15 (rojo) → T16 → T17 (verde) → T18 → T19. T14-T17 tocan archivos distintos de `/games/play`, que no cambia.
+
+- [x] T14 · Fixture del juego que registra el toque (CA-13, CA-2)
+  - Archivos: e2e/fixtures/pet-game.html
+  - Test primero: no aplica por sí sola (es herramienta de prueba); la usa la prueba de CA-13 de T15. Esta
+    tarea solo comprueba que el fixture no rompe lo que ya pasa.
+  - Cambios: un `<script>` en línea que, en `pointerdown` y `touchstart` (fase de captura, sobre `window`),
+    guarda en `document.documentElement.dataset.lastPointer` el JSON `{ type, x, y }` con `clientX`/`clientY`
+    (de `touches[0]` en `touchstart`) y suma 1 a `data-pointer-count`. Sin `postMessage` (el fixture lo
+    sirven `/pet` y `/games/play`, y los dos escuchan `message`; plan 19.2 y 19.6), sin texto visible nuevo,
+    sin red. Comentario en español que explica para qué es.
+  - Verificar: npm run build:e2e && npx playwright test e2e/pet.spec.ts e2e/games-play.spec.ts --project=mobile-360 (todo lo que pasaba sigue en verde)
+  - Comprobar: con `node e2e/support/mockApi.mjs` levantado, abrir `http://127.0.0.1:4010/pet-game-stub` en el
+    navegador, hacer clic en un punto y ver en DevTools que `<html>` tiene `data-last-pointer` con esas
+    coordenadas y `data-pointer-count="1"`.
+  - Nota: Fixture con script de toques; no rompió pet.spec ni games-play.spec.
+
+- [x] T15 · Pruebas de la mascota girada, en rojo (CA-2, CA-3, CA-4, CA-13, P-17)
+  - Archivos: e2e/pet.spec.ts, e2e/navbar.spec.ts
+  - Test primero (plan 19.8):
+    - e2e/pet.spec.ts: helper `frameBox` (caja en pantalla con `getBoundingClientRect` y maquetación con
+      `offsetWidth`/`offsetHeight`). Se reemplaza el `describe` "CA-7 · vertical 360 × 740" por "CA-2 ·
+      vertical 360 × 740, girada": se queda la prueba R-3 (mensaje que nombra `immersive-portrait`); se
+      **borra** "se ve 'Gira tu teléfono'" y en su lugar: CA-2 juego (barras con `toHaveCount(1)` y ocultas,
+      aviso oculto, iframe con caja `{0, 0, clientWidth, clientHeight}` ±1 px y maquetación
+      `clientHeight × clientWidth` ±1 px, sin scroll), CA-2 cargando (lo mismo sobre el marco, texto dentro
+      del viewport) y CA-2 error (lo mismo sobre el marco; "Reintentar" ≥ 44 × 44, `elementFromPoint` de su
+      centro es el botón, `tap()` provoca un segundo `POST /pet/session/init` con `waitForRequest`). CA-3:
+      en cada paso barras y aviso ocultos; en vertical iframe girado (caja 360 × 740, maquetación 740 × 360);
+      en horizontal derecho; al final misma marca, misma ventana y un pedido. Nuevo `describe` "CA-4 ·
+      'Salir' en vertical girado" (cargando, error y juego): `expectExitReachable(page, PORTRAIT)`, caja más
+      alta que ancha, centro en la mitad izquierda y la mitad de abajo de la pantalla, en error sin cruzarse
+      con "Reintentar", `tap()` → `/home` y `settle`. Nuevo "CA-13 · toques en el juego girado": con el juego
+      cargado, `page.touchscreen.tap(90, 580)` debe dar en el juego `(160, 90)` y `tap(300, 140)` debe dar
+      `(600, 300)`, ±2 px, leídos con `contentFrame.evaluate` y `expect.poll` sobre `data-pointer-count` y
+      `data-last-pointer`; `innerWidth`/`innerHeight` del iframe ≈ 740 / 360. Comentario de la cabecera del
+      archivo actualizado (spec 013, cambio de la ronda 3). CA-1, CA-4 horizontal, CA-5 y la ventana angosta
+      no se tocan.
+    - e2e/navbar.spec.ts: CA-6 recorre `/home`, `/games`, `/ads` y `/products` (sale `/pet`: en vertical ya
+      no tiene barras, RN-1), con un comentario que lo explica.
+  - Deben fallar hoy: CA-2 en los tres estados, CA-3, los tres CA-4 de vertical y CA-13 (el aviso tapa el
+    iframe y no registra toques), **por aserción** y no por error del helper ni tiempo agotado de otra
+    cosa. Deben seguir verdes: R-3, CA-1, CA-4 horizontal, CA-5, ventana angosta y `navbar.spec.ts`.
+    Anota en "Nota" qué aserción falló en cada una.
+  - Verificar: npm run build:e2e && npx playwright test e2e/pet.spec.ts e2e/navbar.spec.ts --project=mobile-360 (rojo esperado solo en las nombradas)
+  - Comprobar: no aplica.
+  - Nota: Rojo con el código de hoy (8 fallos por aserción): CA-2 juego, cargando y error y CA-3 fallaron en `toBeHidden` de `[data-app-bar="top"]` (la barra se ve); los tres CA-4 vertical, en `toBeVisible` de "Salir" (no existe); CA-13, en `innerWidth` del juego (380 contra 740). En verde: R-3, CA-1, CA-4 horizontal, CA-5, ventana angosta y navbar.spec.
+
+- [x] T16 · Variante `immersive-portrait` y barras ocultas en vertical (CA-2, CA-3; base de T17)
+  - Archivos: src/app/globals.css, src/components/bars/NavBar.tsx, src/app/(consumer)/layout.tsx
+  - Test primero: los de T15 (siguen rojos al terminar: ninguna página pone todavía
+    `data-immersive="rotate"`). Lo que debe seguir verde es todo lo demás.
+  - Cambios: `@custom-variant immersive-portrait` en `globals.css`, junto a `immersive` y con su comentario
+    (plan 19.3: `(orientation: portrait) and (pointer: coarse) and (width < 64rem)` y
+    `:where(body:has([data-immersive="rotate"])) &`). `immersive` no se toca. `immersive-portrait:hidden`
+    en la barra superior, la inferior y la hoja del menú de `NavBar.tsx` (nada más en ese archivo);
+    `immersive-portrait:pb-0 immersive-portrait:bg-[#231f20]` en el `<main>` del layout, que sigue de servidor.
+  - Verificar: npm run build && npx tsc --noEmit && npm run lint:ci && npm run build:e2e && npx playwright test e2e/navbar.spec.ts e2e/games-play.spec.ts e2e/pet.spec.ts --project=mobile-360 -g "CA-1|CA-5|angosta|R-3|CA-6|CA-7|CA-8|CA-11"
+  - Comprobar: en `.next/static/css`, la regla de `immersive-portrait:hidden` lleva `orientation: portrait`,
+    `pointer: coarse`, el corte de 64rem y `body:has([data-immersive="rotate"])`; la de `immersive:hidden`
+    sigue igual que antes.
+  - Nota: CSS comprobado en `.next/static/css`: `immersive-portrait:hidden` con `orientation:portrait`, `pointer:coarse`, `not (min-width:64rem)` y `body:has([data-immersive=rotate])`; `immersive:hidden` igual. Tailwind genera también las clases de T17 desde los .md de `specs/` (detecta fuentes sin ignorar); es inofensivo.
+
+- [x] T17 · `/pet` girada en vertical con "Salir" girado (CA-2, CA-3, CA-4, CA-13)
+  - Archivos: src/app/(consumer)/pet/page.tsx, src/components/PetGame.tsx
+  - Test primero: e2e/pet.spec.ts (T15).
+  - Cambios (plan 19.3-19.5): la `<section>` pasa a `data-immersive="rotate"` y gana
+    `immersive-portrait:fixed immersive-portrait:top-1/2 immersive-portrait:left-1/2 immersive-portrait:z-30
+    immersive-portrait:p-0 immersive-portrait:w-[100dvh] immersive-portrait:h-[100dvw]
+    immersive-portrait:[transform:translate(-50%,-50%)_rotate(-90deg)]`; "Salir" gana
+    `immersive-portrait:flex immersive-portrait:top-[max(0.75rem,env(safe-area-inset-left))]
+    immersive-portrait:left-[max(0.75rem,env(safe-area-inset-bottom))]` (se quedan sus clases de
+    horizontal); marco de `PetGame` con `immersive-portrait:rounded-none immersive-portrait:border-0
+    immersive-portrait:shadow-none`; `RotateHint` con `immersive-portrait:hidden` y comentario nuevo (por qué
+    se queda: D-8). Comentarios de la página en español (vertical girada, horizontal derecha, sin estado de
+    React). La página sigue de servidor (sin `'use client'`, P-2), `PetGame` no gana estado, ni `matchMedia`
+    ni `resize`, y el árbol es el mismo en las dos orientaciones (RN-2). Si alguna clase arbitraria no
+    genera CSS en Tailwind 4.2, se escribe la regla equivalente en `globals.css` dentro de la variante y se
+    anota la desviación.
+  - Verificar: npm run build:e2e && npx playwright test e2e/pet.spec.ts e2e/navbar.spec.ts e2e/games-play.spec.ts e2e/touch.spec.ts e2e/layout.spec.ts --project=mobile-360 && npm run build && npx tsc --noEmit && npm run lint:ci
+  - Comprobar: DevTools con un dispositivo táctil de 360 × 740 en `/pet` (con `npx next dev` y la API local, o
+    con `npm start` tras `npm run build:e2e` y la API simulada): sin barras, el juego llena la pantalla girado
+    (se lee de lado), "Salir" abajo a la izquierda, también de lado, y lleva a `/home`; cambiar a 740 × 360 y
+    volver: el juego queda derecho y luego girado, sin barras, y en la pestaña Red no hay un segundo pedido al
+    juego. A 1280 × 800 y en una ventana de 900 × 500 sin emulación táctil, `/pet` igual que antes.
+  - Nota: Verde: pet, navbar, games-play, touch y layout en mobile-360 (160 pruebas). Comprobación manual en DevTools no hecha (sin navegador interactivo); la cubren CA-2, CA-3, CA-4 y CA-13 de Playwright.
+
+- [x] T18 · Pruebas de navegador completas y capturas de escritorio (CA-1 a CA-5, CA-9, CA-11, CA-13)
+  - Archivos: ninguno (si algo falla, se corrige en la tarea que corresponde)
+  - Test primero: no aplica.
+  - Verificar: npm run build:e2e && CI=1 npx playwright test --retries=0, dos veces, borrando antes de la segunda `.next/standalone/.next/cache/images` (las dos en verde) && npx playwright test --project=desktop-1280 (sin `--update-snapshots`; las diez capturas sin diferencias, en la misma máquina que las generó)
+  - Comprobar: anota en "Nota" la duración de cada corrida (margen bajo los 10 min del job), que
+    `layout.spec.ts` pasó en `mobile-390` y `tablet-768` con `/pet`, y si `tablet-768` vio la mascota girada o
+    no (R-18: `matchMedia('(pointer: coarse)')` en ese proyecto).
+  - Nota: Dos corridas completas con `--retries=0`: 271 pasaron y 102 omitidas, en 225 s y 203 s (margen bajo 10 min); desktop-1280: 10 de 10 sin diferencias. `layout.spec.ts` pasó en mobile-390 y tablet-768; tablet-768 usa `isMobile:false, hasTouch:true`: no se midió si ve la mascota girada (R-18).
+
+- [x] T19 · Puertas finales (CA-9)
+  - Archivos: .lint-max-warnings solo si `lint:ci` pide bajarlo
+  - Test primero: no aplica.
+  - Verificar: npm test && npm run lint:ci && npm run build && npx tsc --noEmit && npm run audit:ci
+  - Comprobar: `.lint-max-warnings` ≤ 348; en el diff de T14-T17 no hay `'use client'` nuevo en páginas ni
+    layouts, ni `any`, `console.*`, `<img>`, `<a>` internos, `matchMedia` ni estado nuevo en `PetGame.tsx`;
+    `src/app/(consumer)/games/play/page.tsx`, `e2e/games-play.spec.ts`, `src/middleware.ts`,
+    `__tests__/middleware/`, `package.json` y `package-lock.json` sin cambios.
+  - Nota: npm test 710 pasadas; lint:ci 0 errores, 348 avisos (tope 348, sin cambio); build y tsc en verde; audit:ci sin altas fuera de excepción. Sin `'use client'`, `any`, `console`, `<img>`, `<a>`, `matchMedia` ni estado nuevo.
+
+### Pasos del usuario (cambio de la ronda 3)
+
+- U-1 (arriba) incluye ya las filas de vertical de la tabla de `spec.md`: girado sin que la barra de Safari le
+  quite alto, toques del juego real donde se toca y "Salir" en vertical. En esa pasada conviene mirar además
+  R-12 a R-14 de `plan.md` (franja o salto cuando Safari muestra u oculta su barra, "Salir" cerca del
+  indicador de inicio) y D-9 (esquina de "Volver" en `/games/play` vertical).

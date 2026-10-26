@@ -6,6 +6,10 @@
   R-8 ("en `/pet` horizontal se mantienen las barras").
 - **Fecha del plan:** 2026-10-24. Lecturas hechas sobre `beta-front` en `2674a0e`.
 - **Tareas:** `tasks.md` de esta carpeta.
+- **Cambio después de la ronda 3 (2026-10-24):** la mascota girada en vertical se planifica en la sección 19
+  (tareas T14-T19). Las secciones 1-18 describen lo ya implementado y aprobado; donde la 19 contradice
+  algo de ellas (8.1 "al volver a vertical… barras de vuelta y aviso", la CA-2 de 9.2, la fila de CA-2 de
+  la tabla 15), manda la 19.
 
 ## 1. Resumen
 
@@ -456,3 +460,316 @@ Ninguno. La spec está aprobada, no choca con `CLAUDE.md` ni con la constitució
 no crea rutas ni dependencias. Todo el plan puede empezar sin esperar decisiones salvo: T5-T7 asumen
 D-1 = (a) y D-2 = arriba a la izquierda; T8 asume D-6; D-4 y D-5 son una línea cada una dentro de T8 y
 T10.
+
+---
+
+## 19. Cambio después de la ronda 3: mascota girada en vertical (T14-T19)
+
+- **Spec:** sección "Cambio después de la ronda 3 (2026-10-24)", paso 1 del flujo de `/pet`, RN-1, RN-3,
+  RN-10, CA-2, CA-3, CA-4 y CA-13. T1-T13 y las correcciones de las rondas 1 y 2 no se rehacen.
+- **Lecturas** (2026-10-24, árbol de trabajo de `beta-front` sobre `09352f8`): `src/app/globals.css`
+  (variante `immersive`), `src/app/(consumer)/pet/page.tsx`, `src/components/PetGame.tsx`,
+  `src/app/(consumer)/games/play/page.tsx`, `src/app/(consumer)/layout.tsx`, `src/components/bars/NavBar.tsx`
+  (líneas 438, 609 y 646), `src/hooks/pet/usePetSession.ts`, `e2e/pet.spec.ts`, `e2e/navbar.spec.ts`,
+  `e2e/games-play.spec.ts`, `e2e/layout.spec.ts`, `e2e/touch.spec.ts`, `e2e/fixtures/pet-game.html`,
+  `e2e/support/{pages.ts,measure.ts,mockRoutes.mjs}` y `playwright.config.ts`.
+
+### 19.1 Resumen
+
+En el celular en vertical, `/pet` oculta las dos barras y gira **la sección entera de la página** −90°
+con CSS (`fixed`, `100dvh × 100dvw`, `translate(-50%,-50%) rotate(-90deg)`, como `/games/play`). Como el
+marco del juego y "Salir" son hijos de esa sección, giran juntos: "Salir" queda en la esquina de arriba
+a la izquierda del juego girado sin cálculo aparte. Lo activa una segunda variante, `immersive-portrait`,
+gemela de `immersive`: el DOM y el árbol de React son los mismos en las dos orientaciones (RN-2).
+
+### 19.2 Lo que se encontró
+
+- **`/games/play` (la referencia)** decide el giro con estado (`shouldRotate`, por `resize`) y pinta dos
+  ramas distintas: al girar se desmonta un iframe y se monta otro. En la mascota eso está prohibido (RN-2):
+  aquí se toma solo el CSS de su rama vertical (`fixed`, `top/left 50%`, `width: 100dvh`, `height: 100dvw`,
+  `transform: translate(-50%, -50%) rotate(-90deg)`), que es lo que el usuario ya vio funcionar en su iPhone.
+- **La esquina de "Volver" en `/games/play` vertical no es la que dice su comentario.** El botón está arriba
+  a la derecha de la pantalla con el comentario "en portrait top-right = landscape top-left". Con
+  `rotate(-90deg)` (antihorario), un punto del juego `(x, y)` relativo al centro pasa a `(y, −x)` en
+  pantalla: la esquina de arriba a la izquierda del juego cae **abajo a la izquierda** de la pantalla, y la
+  de arriba a la derecha de la pantalla es la de **abajo a la derecha** del juego. La spec pide para "Salir"
+  la de arriba a la izquierda del juego; se cumple por construcción porque "Salir" gira con la sección
+  (19.3). `/games/play` vertical no cambia (spec): ver D-9.
+- **La variante `immersive` exige `orientation: landscape`** y la usan `/pet` y `/games/play`. Si se le
+  quitara la orientación, `/games/play` vertical también ocultaría las barras y aplicaría las clases
+  `immersive:*` de su rama horizontal en el primer render (antes de que `shouldRotate` pase a `true`); la
+  spec dice que `/games/play` vertical no cambia. Por eso no se toca `immersive` y se agrega otra variante
+  que solo activa `/pet`.
+- **`RotateHint`** se decide solo con CSS (`landscape:hidden pointer-fine:hidden`): hoy se ve en cualquier
+  vertical táctil, de cualquier ancho.
+- **`usePetSession`** escucha `message` solo para `PET_GAME_READY` y `PET_AUTH_EXPIRED`; `/games/play`, para
+  `GAME_LOADED`, `PRODUCT_CLICKED` y `GAME_FINISHED`. Las dos ignoran los demás tipos. El fixture
+  `pet-game.html` lo sirven las dos (`/pet-game-stub`), así que lo que se le agregue no debe mandar mensajes
+  que una de ellas pueda interpretar.
+- **Pruebas que chocan con el cambio:** `e2e/pet.spec.ts` ("se ve 'Gira tu teléfono'" y la vuelta a vertical
+  de CA-3 esperan barras y aviso) y `e2e/navbar.spec.ts` (CA-6 recorre `/pet` en vertical y espera la barra
+  inferior). `layout.spec.ts` y `touch.spec.ts` recorren `/pet` en 360 × 740 (y `layout`, también en
+  390 × 844 y 768 × 1024): deben seguir en verde con el juego girado.
+
+### 19.3 Mecanismo: variante `immersive-portrait`
+
+En `src/app/globals.css`, junto a `immersive`, con su comentario en español:
+
+```css
+/* Mascota girada en el celular en vertical (spec 013, RN-10). Gemela de `immersive`: solo CSS, así que
+   girar no cambia el árbol de React ni desmonta el iframe (RN-2). La activa solo una página que marca un
+   elemento con `data-immersive="rotate"` (hoy, `/pet`); `/games/play` vertical no cambia. */
+@custom-variant immersive-portrait {
+  @media (orientation: portrait) and (pointer: coarse) and (width < 64rem) {
+    :where(body:has([data-immersive="rotate"])) & {
+      @slot;
+    }
+  }
+}
+```
+
+- `/pet` cambia `data-immersive` por `data-immersive="rotate"`: `[data-immersive]` sigue casando (la variante
+  horizontal no cambia) y la nueva solo casa en `/pet`. `/games/play` sigue con `data-immersive` a secas.
+- Las dos variantes se excluyen por la orientación: nunca aplican a la vez y no compiten entre sí.
+- Una ventana angosta de escritorio (puntero fino) no casa con ninguna: la prueba de 900 × 500 sigue igual.
+
+| Archivo | Elemento | Clases nuevas |
+|---------|----------|---------------|
+| `NavBar.tsx` | barra superior, barra inferior y hoja del menú de Perfil (líneas 438, 609, 646) | `immersive-portrait:hidden` |
+| `(consumer)/layout.tsx` | `<main>` | `immersive-portrait:pb-0 immersive-portrait:bg-[#231f20]` (el fondo es red de seguridad para R-12) |
+| `pet/page.tsx` | `<section data-immersive="rotate">` | `immersive-portrait:fixed immersive-portrait:top-1/2 immersive-portrait:left-1/2 immersive-portrait:z-30 immersive-portrait:p-0 immersive-portrait:w-[100dvh] immersive-portrait:h-[100dvw] immersive-portrait:[transform:translate(-50%,-50%)_rotate(-90deg)]` |
+| `pet/page.tsx` | enlace "Salir" | `immersive-portrait:flex` y, en coordenadas del juego, `immersive-portrait:top-[max(0.75rem,env(safe-area-inset-left))] immersive-portrait:left-[max(0.75rem,env(safe-area-inset-bottom))]` (19.5) |
+| `PetGame.tsx` | marco común | `immersive-portrait:rounded-none immersive-portrait:border-0 immersive-portrait:shadow-none` |
+| `PetGame.tsx` | `RotateHint` | `immersive-portrait:hidden` (19.4) |
+
+- **El giro va en la `<section>`, no en el iframe.** Así giran a la vez el marco (en los tres estados:
+  cargando, error y juego), el iframe y "Salir", y el iframe nunca cambia de padre. Antes del giro la
+  sección mide `100dvh` de ancho y `100dvw` de alto (740 × 360 en un 360 × 740); girada, su caja en pantalla
+  es 360 × 740 en `(0, 0)`.
+- **Transformación explícita** (`[transform:…]`) y no `-rotate-90` + `-translate-*` de Tailwind 4 (que usan
+  las propiedades `rotate` y `translate`): da el mismo resultado, pero así es literalmente la de
+  `/games/play`, la que ya funciona en el iPhone.
+- **`fixed` con `transform`** convierte la sección en bloque contenedor de sus hijos fijos; dentro no hay
+  ninguno ("Salir" es `absolute`). El `CartDrawer`, el `Toaster` y el `XpRewardToast` no son hijos: siguen
+  por encima (`z-30`, como en horizontal).
+- `sm:p-4` aplica en 768 px de ancho: `immersive-portrait:p-0` lo anula.
+- **Sin estado de React, sin `matchMedia`, sin `resize`.** `/pet` sigue de servidor (P-2) y `PetGame` no
+  gana estado.
+
+### 19.4 `RotateHint`: se queda, oculto en el celular
+
+Decisión del plan (y D-8 para el usuario): `RotateHint` **no se borra**; gana `immersive-portrait:hidden` y su
+comentario se actualiza. Razones:
+
+1. **Degradación (R-1, R-17).** Si el navegador no entiende `:has()` (iOS < 15.4, Chrome < 105), la regla
+   entera de `immersive-portrait` se descarta: la página queda como hoy en vertical (barras puestas y juego
+   sin girar). Con `RotateHint`, ese usuario ve "Gira tu teléfono", como hoy, en vez de un juego horizontal
+   de 200 px de alto. Sin él, vería el juego diminuto sin ninguna indicación.
+2. **Tableta grande en vertical** (táctil y ≥ 1024 px de ancho, por ejemplo iPad Pro 1024 × 1366): no es
+   "celular" para la spec, `immersive-portrait` no casa, y el aviso se sigue viendo, como hoy. Sin aviso se
+   vería el juego a 16:9 dentro de una pantalla vertical.
+3. Cuesta una clase y no toca el iframe (es una capa encima, decidida por CSS).
+
+En el celular con un navegador actual nunca se ve: CA-2 lo comprueba.
+
+### 19.5 "Salir" girado y el área segura
+
+- "Salir" ya está en la sección, fuera de `PetGame`: se ve en los tres estados y gira con el juego. Las
+  posiciones `top` y `left` del enlace son del sistema del juego. En pantalla: el borde de arriba del juego
+  es el lado **izquierdo** de la pantalla y el borde izquierdo del juego es el lado de **abajo**. Por eso,
+  en vertical girado, `top` usa `env(safe-area-inset-left)` y `left` usa `env(safe-area-inset-bottom)`, con
+  un mínimo de 12 px (`0.75rem`).
+- Con `viewport-fit` sin `cover` (D-3, sigue igual), `env()` vale 0 en el iPhone y Safari deja la página
+  fuera de la muesca y de la barra de estado. Abajo está la barra de Safari, que `100dvh` ya descuenta: el
+  botón queda a 12 px por encima del borde inferior de la zona visible (R-13).
+- Tamaño: el mismo enlace de hoy (`min-h-11 min-w-11`, unos 80 × 44 en el juego; 44 × 80 en pantalla).
+  Sigue cumpliendo los 44 × 44 en los dos ejes.
+- No tapa "Reintentar", que va centrado en el marco: CA-4 comprueba que las cajas no se cruzan.
+
+### 19.6 Toques en el juego girado (CA-13)
+
+El navegador entrega los eventos dentro del iframe en el sistema de coordenadas del propio iframe: el
+documento del juego no está transformado (lo está el elemento padre), y la prueba de impacto atraviesa la
+transformación. Para un iframe que llena la sección girada en un viewport `vw × vh` (aquí 360 × 740, iframe
+de `vh × vw` = 740 × 360 en sus coordenadas), un punto del juego `(gx, gy)` está en pantalla en:
+
+```
+x = gy
+y = vh − gx
+```
+
+La prueba usa dos puntos asimétricos, lejos de "Salir" (que ocupa la esquina `(0..~95, 0..56)` del juego):
+
+| Punto del juego `(gx, gy)` | Toque en pantalla `(x, y)` | Si el giro fuera +90° caería en |
+|----------------------------|----------------------------|---------------------------------|
+| `(160, 90)` | `(90, 580)` | `(270, 160)` |
+| `(600, 300)` | `(300, 140)` | `(60, 600)` |
+
+Tolerancia ±2 px. El fixture `e2e/fixtures/pet-game.html` gana un script que, en `pointerdown` y en
+`touchstart` (en fase de captura, sobre `window`), guarda el último toque en el propio DOM del iframe:
+`document.documentElement.dataset.lastPointer = JSON.stringify({ type, x: clientX, y: clientY })` y un
+contador en `data-pointer-count`. Se eligió el DOM y no `postMessage`: el fixture lo sirven `/pet` y
+`/games/play`, y un mensaje nuevo pasaría por los dos manejadores de `message` (19.2). La prueba lo lee con
+`contentFrame.evaluate` (el mismo recurso que ya usa CA-3, que funciona entre orígenes en Playwright) y
+toca con `page.touchscreen.tap(x, y)` (proyecto `mobile-360`, `hasTouch`). También comprueba que el juego se
+ve en horizontal desde dentro: `innerWidth` del iframe ≈ 740 e `innerHeight` ≈ 360.
+
+Con el código de hoy CA-13 falla: en vertical `RotateHint` tapa el iframe y bloquea el toque (no tiene
+`pointer-events-none`), así que el fixture no registra nada.
+
+### 19.7 Archivos
+
+**Modificar:**
+
+| Ruta | Qué cambia |
+|------|------------|
+| `src/app/globals.css` | Variante `immersive-portrait` (19.3). `immersive` no cambia. |
+| `src/components/bars/NavBar.tsx` | `immersive-portrait:hidden` en las dos barras del celular y en la hoja del menú. Nada más. |
+| `src/app/(consumer)/layout.tsx` | `immersive-portrait:pb-0 immersive-portrait:bg-[#231f20]` en `<main>`. Sigue de servidor. |
+| `src/app/(consumer)/pet/page.tsx` | `data-immersive="rotate"`, clases de la sección y de "Salir" (19.3, 19.5) y comentario de la cabecera (vertical girada). Sigue de servidor (P-2). |
+| `src/components/PetGame.tsx` | Clases `immersive-portrait:*` del marco; `immersive-portrait:hidden` y comentario nuevo en `RotateHint` (19.4). Sin estado nuevo. |
+| `e2e/fixtures/pet-game.html` | Script que registra el último toque en el DOM del iframe (19.6). Sin texto visible nuevo. |
+| `e2e/pet.spec.ts` | Se reemplaza el bloque "CA-7 · vertical" por CA-2 (juego, cargando y error), se ajusta CA-3, se agregan CA-4 en vertical y CA-13; la prueba R-3 se queda. Comentario de la cabecera actualizado (19.8). |
+| `e2e/navbar.spec.ts` | CA-6 recorre `/home`, `/games`, `/ads` y **`/products`** (en lugar de `/pet`, que en vertical ya no tiene barras: RN-1). Comentario que lo explica. |
+
+**No se tocan:** `/games/play` (su vertical no cambia; D-9), `e2e/games-play.spec.ts`, `src/middleware.ts`,
+`__tests__/middleware/*`, `next.config.ts`, `package.json`, servicios, hooks, tipos, `e2e/desktop.spec.ts`
+y sus capturas, ni las carpetas de otros roles. Ninguna ruta nueva ni route handler (P-4).
+
+### 19.8 Pruebas (`e2e/pet.spec.ts`, proyecto `mobile-360`)
+
+Helpers nuevos en el mismo archivo: `frameBox(page, selector)` devuelve `getBoundingClientRect()` (ya incluye
+la transformación) y `offsetWidth`/`offsetHeight` (que no la incluyen) del elemento. Si la caja en pantalla
+mide 360 × 740 y el tamaño de maquetación 740 × 360, el elemento está **girado**, no solo estirado.
+`expectExitReachable` se reutiliza con el viewport vertical.
+
+- **CA-2 · vertical 360 × 740 (reemplaza "se ve 'Gira tu teléfono'")**, en tres estados:
+  - juego: `[data-app-bar="top"]` y `"bottom"` existen (`toHaveCount(1)`) y están ocultos; "Gira tu teléfono"
+    oculto; el iframe mide en pantalla `{0, 0, clientWidth, clientHeight}` ±1 px y su maquetación es
+    `clientHeight × clientWidth` ±1 px; sin scroll en el documento (`scrollWidth`/`scrollHeight`).
+  - cargando (`POST /pet/session/init` retenido): lo mismo sobre el marco (padre de "Preparando tu
+    mascota…"), y el texto queda dentro del viewport.
+  - error (500): lo mismo sobre el marco; "Reintentar" ≥ 44 × 44, `elementFromPoint` de su centro es el
+    botón, y `tap()` provoca un segundo `POST /pet/session/init` (`waitForRequest`): "se puede tocar".
+- **R-3** se queda (comprueba `pointer: coarse` y `orientation: portrait` del emulador); su mensaje pasa a
+  nombrar la variante `immersive-portrait` en lugar de `RotateHint`.
+- **CA-3 (ajustada):** el mismo arranque de hoy en horizontal (marca en el elemento, marca en la ventana,
+  contador de pedidos). En cada paso (horizontal → vertical → horizontal): barras ocultas y "Gira tu
+  teléfono" oculto; en vertical el iframe está girado (`frameBox`: caja 360 × 740, maquetación 740 × 360) y en
+  horizontal derecho (caja = maquetación = 740 × 360). Al final: misma marca, misma ventana y un solo pedido
+  a `/pet-game-stub`.
+- **CA-4 · "Salir" en vertical girado** (nuevo `describe`, mismos tres estados que el horizontal):
+  `expectExitReachable(page, PORTRAIT)`; además, la caja de "Salir" es más alta que ancha (gira con el
+  juego) y su centro está en la mitad izquierda y la mitad de abajo de la pantalla (esquina de arriba a la
+  izquierda del juego, 19.2); en error no se cruza con "Reintentar"; `tap()` lleva a `/home` y luego
+  `settle`.
+- **CA-13 · toques en el juego girado:** juego cargado en 360 × 740; para cada fila de la tabla de 19.6,
+  `page.touchscreen.tap(x, y)` y `expect.poll` sobre `data-pointer-count` (que sube) y `data-last-pointer`
+  (`x ≈ gx`, `y ≈ gy`, ±2 px). Además, `innerWidth`/`innerHeight` del iframe ≈ 740 / 360.
+- **Sin cambios:** CA-1, CA-4 horizontal, CA-5 (1280 × 800) y la ventana angosta (900 × 500): deben seguir
+  en verde tal como están.
+- **Rojo primero (P-17), con el código de hoy:** CA-2 en los tres estados (barras visibles, aviso visible,
+  marco sin girar), CA-3 (barras al pasar a vertical, iframe no girado), CA-4 vertical ("Salir" oculto) y
+  CA-13 (el aviso tapa el iframe: no llega ningún toque). T15 anota qué aserción falló en cada una. CA-13 y
+  la medida girada de CA-2 tienen que fallar **por aserción**, no por un error del helper.
+- **Otras suites:** `layout.spec.ts` (360, 390, 768) y `touch.spec.ts` (360) recorren `/pet` y deben seguir
+  verdes con el juego girado (los fijos no cuentan para el desborde; "Salir" y "Reintentar" girados siguen
+  midiendo ≥ 44 en los dos ejes). `games-play.spec.ts` debe seguir verde con el fixture nuevo.
+- **Capturas de escritorio** (`desktop-1280`): no se regeneran y deben pasar sin diferencias (ninguna
+  captura usa `/pet`; lo nuevo solo casa con puntero táctil).
+
+### 19.9 Rutas, contrato, datos, configuración, dependencias, PII
+
+- Ninguna ruta nueva; `matcher`, cuerpo del middleware y `routeAccess.ts` sin cambios (P-4). P-5 igual.
+- Sin `'use client'` nuevo (P-2), sin `params` (P-6), sin servicios, hooks ni `queryKey` (P-10), sin
+  formularios (P-11).
+- API: sin cambios ni dependencias (`POST /pet/session/init`, igual que hoy).
+- Configuración: sin variables nuevas, sin hosts de imágenes (P-3, P-7). `viewport-fit` sigue sin `cover` (D-3).
+- Dependencias: ninguna (P-1).
+- PII y tokens: sin cambios; el iframe sigue con su URL actual (deuda (e) de P-16). El fixture solo guarda
+  coordenadas de un toque, en el DOM de una página de relleno.
+- Llamadas salientes del servidor: ninguna (P-15 no aplica).
+- Lint: tope 348; ningún aviso nuevo (P-19). Textos al usuario: ninguno nuevo; comentarios en español (P-18).
+
+### 19.10 Efectos colaterales
+
+- **Vertical en `/pet` ya no muestra las barras:** desde la mascota en vertical se sale solo con "Salir" (o
+  el botón Atrás del sistema). El menú de Perfil abierto antes de entrar queda oculto (`immersive-portrait:hidden`),
+  como en horizontal.
+- **Unity cambia de tamaño al girar el teléfono con la rotación desbloqueada:** pasa de 740 × 360 girado a
+  740 × 360 derecho (en un 360 × 740): el tamaño del iframe en su propio sistema es casi el mismo, así que
+  el reajuste es menor que hoy (antes pasaba de 360 × ~600 a 740 × 360).
+- **Tableta táctil en vertical de menos de 1024 px** (por ejemplo 768 × 1024): también gira, como hace
+  `/games/play` (su `shouldRotate` usa el mismo corte). Ver D-10.
+- **`/games/play`, el resto de páginas y el escritorio:** sin cambios (`data-immersive="rotate"` solo existe
+  en `/pet`).
+- **Si una validación falla antes de la API:** no aplica.
+
+### 19.11 Trazabilidad del cambio
+
+| CA | Tareas | Cómo se verifica |
+|----|--------|------------------|
+| CA-2 (nuevo) | T14, T15, T16, T17 | `npx playwright test e2e/pet.spec.ts --project=mobile-360 -g "CA-2"` (roja en T15, verde en T17) |
+| CA-3 (ajustado) | T15, T16, T17 | `npx playwright test e2e/pet.spec.ts --project=mobile-360 -g "CA-3"` |
+| CA-4 (vertical) | T15, T17 | `npx playwright test e2e/pet.spec.ts --project=mobile-360 -g "CA-4"` (horizontal y vertical) |
+| CA-13 | T14, T15, T17 | `npx playwright test e2e/pet.spec.ts --project=mobile-360 -g "CA-13"`; con el juego real, CA-10 (U-1, filas de vertical) |
+| CA-1, CA-5, CA-6, CA-11 (no deben romperse) | T15, T18 | `pet.spec.ts` completo, `navbar.spec.ts`, `games-play.spec.ts`, la ventana angosta y `desktop-1280` sin diferencias |
+| CA-9 | T18, T19 | `npm run test:e2e` completo (dos corridas en frío), `desktop-1280`, `npm test`, `npm run lint:ci` (≤ 348), `npm run build`, `npx tsc --noEmit`, `npm run audit:ci` |
+| CA-10 | U-1 | Filas de vertical de la tabla de `spec.md` (girado sin barra de Safari quitando alto, toques del juego real, "Salir") |
+
+### 19.12 Riesgos del cambio
+
+- **R-11 · Toques de Unity con el iframe girado.** El navegador traduce el toque al sistema del iframe y el
+  fixture lo prueba en Chromium (CA-13). Lo que la prueba no puede ver: (a) que el build de Unity lea
+  `screen.orientation`, `screen.width/height` o `window.orientation`, que **dentro del iframe siguen diciendo
+  vertical**, y decida su interfaz o un aviso propio con eso en lugar del tamaño de su ventana (740 × 360,
+  que CA-13 sí comprueba); (b) WebKit en el iPhone. Evidencia a favor: `/games/play` usa la misma técnica y
+  el usuario la vio funcionar en su iPhone. Se confirma en CA-10 ("los toques en el juego real caen donde se
+  toca": alimentar, botones). Si falla, no se arregla en el front: es un cambio del build de Unity (fuera de
+  alcance), y se vuelve al usuario.
+- **R-12 · `100dvh` y `100dvw` con la barra de Safari en vertical.** `100dvh` es el alto visible con las
+  barras de Safari en su estado actual, y la sección se centra con `top/left: 50%` del bloque fijo. Si en
+  algún iPhone el bloque fijo y `100dvh` no coinciden, el juego quedaría corrido o con una franja. Mitigación:
+  es el mismo CSS que `/games/play`, que se ve completo en el iPhone del usuario; el `<main>` toma el fondo
+  oscuro del juego (`immersive-portrait:bg-[#231f20]`), así que una franja no se ve blanca. Alternativa si
+  CA-10 lo muestra: anclar arriba a la izquierda (`top-0 left-0`, `origin-top-left`,
+  `translateY(100dvh) rotate(-90deg)`), que no depende del centro del bloque fijo. En Chromium (CI) la
+  prueba de CA-2 mide la caja exacta.
+- **R-13 · Área segura en vertical girado.** Sin `viewport-fit=cover` (D-3) `env()` vale 0 y Safari mantiene
+  la página fuera de la muesca y la barra de estado (lado izquierdo del juego girado: su borde de arriba).
+  "Salir" queda abajo a la izquierda de la pantalla, 12 px sobre el borde inferior visible, que `100dvh`
+  pone por encima de la barra de Safari. Caso límite: si Safari compacta su barra (en `/pet` no hay scroll
+  que lo provoque), el borde inferior visible baja hasta la zona del indicador de inicio y "Salir" quedaría
+  cerca del gesto de inicio. Las clases ya traducen `env()` al eje girado por si un día se activa `cover`.
+  Se mira en CA-10.
+- **R-14 · `dvh` cambia cuando Safari muestra u oculta su barra.** Si cambia, cambia el **ancho** del juego
+  girado: el iframe se redimensiona y Unity se reajusta con su `resize` (sin recarga, sin render de React,
+  sin desmontar nada; RN-2 se mantiene). Mientras dura la animación de la barra puede verse un salto del
+  juego o una franja oscura (por el fondo del `<main>`). En `/pet` no hay scroll, así que la barra cambia
+  poco (por ejemplo, al tocar la barra de estado o la barra compacta). Se mira en CA-10.
+- **R-15 · Ventana de maquetación ensanchada en la emulación.** Antes del giro la sección mide 740 px de
+  ancho; los elementos `fixed` no cuentan para el desborde del documento y la caja girada cae dentro de la
+  pantalla. CA-2 comprueba `scrollWidth ≤ clientWidth`, y `layout.spec.ts` el desborde en 360, 390 y 768.
+- **R-16 · Esquina distinta entre `/pet` y `/games/play` en vertical** (19.2): "Salir" queda arriba a la
+  izquierda del juego (como pide la spec) y "Volver", abajo a la derecha del juego. Ver D-9.
+- **R-17 · `:has()` o `dvh` no soportados:** la variante no casa y la mascota en vertical queda como hoy
+  (barras y "Gira tu teléfono"), gracias a que `RotateHint` se queda (19.4). Chrome 105-107 tiene `:has()`
+  pero no `dvh`: la sección quedaría sin tamaño correcto; Chrome de Android se actualiza solo y esas
+  versiones son de 2022, se acepta.
+- **R-18 · `tablet-768` y el puntero:** si el emulador de `tablet-768` (`hasTouch`, `isMobile: false`) no
+  responde a `pointer: coarse`, esa corrida no ve el giro y no lo cubre; si responde, ve `/pet` girada.
+  `layout.spec.ts` debe pasar en los dos casos. T18 anota cuál fue.
+
+### 19.13 Decisiones para el usuario
+
+| Id | Decisión | Recomendación |
+|----|----------|---------------|
+| D-8 | `RotateHint`: **(a)** se queda con `immersive-portrait:hidden` (no se ve en el celular; queda para navegadores sin `:has()` y tabletas grandes en vertical), o **(b)** se borra. | **(a).** Es la degradación a lo de hoy si la variante no casa, cuesta una clase y no toca el iframe (19.4). |
+| D-9 | `/games/play` vertical pone "Volver" en la esquina de **abajo a la derecha** del juego girado (su comentario dice "arriba a la izquierda"). La mascota la pondrá arriba a la izquierda, como pide la spec. ¿Se iguala `/games/play` aquí? | **No en esta spec.** La spec dice que `/games/play` vertical no cambia, y moverlo exige tocar su rama girada (D-7). Que el usuario lo mire en CA-10 y, si molesta, una spec corta lo arregla. Mientras, el comentario equivocado queda como está (no se toca el archivo). |
+| D-10 | Una tableta táctil en vertical de menos de 1024 px (iPad mini, 768 × 1024) también ve la mascota girada a pantalla completa. | **Aceptarlo.** Es el criterio de "celular" de la spec (táctil y < 1024 px, donde se ven las barras del celular) y lo mismo que hace `/games/play`. Limitarlo exigiría otro corte de ancho que la spec no define. |
+
+### 19.14 Bloqueos
+
+Ninguno. La spec está en "Aprobada con cambio", no choca con `CLAUDE.md` ni con la constitución, no
+depende de la API y no crea rutas ni dependencias. T14-T19 asumen D-8 = (a); D-9 y D-10 no cambian ninguna
+tarea si se aceptan las recomendaciones.

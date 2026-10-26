@@ -1,6 +1,6 @@
 # 013 · Mascota a pantalla completa y Juegos en la barra del celular
 
-- **Estado:** Implementada y aprobada en revisión (ronda 3, 2026-10-24). Pendiente: pasada en celulares (U-1, CA-10), PR y CI.
+- **Estado:** Implementada y aprobada en revisión (ronda 3 y cambio de la mascota girada, ronda 1, 2026-10-24). Pendiente: pasada en celulares (U-1, CA-10), PR y CI.
 - **Fecha:** 2026-10-24
 - **Ticket:** SCRUM-<por crear>
 - **Origen:** Propia del front · pasada en celular después de la spec 012 (2026-10-24)
@@ -36,6 +36,28 @@ El usuario aprobó el plan con todas las recomendaciones de `plan.md`, de D-1 a 
 - **D-6:** se guardan en el repositorio tres medios de prueba mínimos, en `e2e/fixtures/media/`.
 - **D-7:** que `/games/play` recargue el juego al girar es previo a esta spec y queda fuera de ella.
   En CA-10, "el giro sin recarga" se comprueba solo en `/pet`.
+
+## Cambio después de la ronda 3 (2026-10-24): mascota girada en vertical
+
+En el iPhone, al poner el teléfono en horizontal, Safari muestra sus pestañas y su barra arriba, en
+el lado corto, y le quita alto al juego. Una página web no puede ocultarlas: la Fullscreen API del
+iPhone solo funciona con video, y `/pet` no tiene desplazamiento que haga encoger la barra.
+`/games/play` sí se ve completo, porque nunca pasa a horizontal: en vertical gira el juego 90° con
+CSS, a pantalla completa. Así la barra de Safari queda en el lado largo del teléfono, que es el
+ancho del juego girado y sobra.
+
+**Decisión del usuario:** la mascota hace lo mismo que `/games/play`. En el celular vertical, en
+lugar del aviso "Gira tu teléfono" con las barras, la mascota se ve a pantalla completa, girada
+90°, con "Salir". El horizontal real queda como lo aprobó la ronda 3. Se descartaron la app
+instalable (PWA), el aviso de "aA → Ocultar barra de herramientas", `viewport-fit=cover` y dejarlo
+como estaba.
+
+**Puerta 2 del cambio (2026-10-24):** el usuario aprobó las tareas T14 a T19 del plan (sección 19)
+con D-8 (el aviso "Gira tu teléfono" queda solo como respaldo), D-9 (el "Volver" de `/games/play` en
+vertical no se toca; se mira en CA-10) y D-10 (una tableta táctil en vertical de menos de 1024 px
+también ve la mascota girada).
+
+Cambian el paso 1 del flujo de `/pet`, RN-1, RN-3, CA-2, CA-3 y CA-4, y se agregan RN-10 y CA-13.
 
 ## Problema
 
@@ -77,15 +99,18 @@ Rutas existentes, ninguna nueva. No se toca el `matcher` del middleware ni `rout
 "Celular" aquí es el mismo criterio de la spec 012: ancho menor de 1024 px (donde se ven las barras
 del celular) y puntero táctil. Una ventana angosta de escritorio no se comporta como celular.
 
-1. **En vertical**, se ve igual que hoy: las dos barras y, encima del juego, el aviso "Gira tu
-   teléfono". Desde aquí el usuario navega con la barra inferior como siempre.
+1. **En vertical**, igual que `/games/play`: no se ven las barras de la app, y el marco del juego
+   ocupa toda la pantalla, girado 90° para que el juego se vea en horizontal al girar el teléfono
+   con la mano (con la rotación bloqueada, Safari sigue en vertical). El sentido del giro es el
+   mismo de `/games/play` (`rotate(-90deg)`). "Salir" se ve en la esquina que corresponde a arriba
+   a la izquierda del juego girado, girado con él. Ya no se muestra el aviso "Gira tu teléfono".
 2. **Al girar a horizontal**, desaparecen la barra superior y la inferior, y el marco del juego
    ocupa toda la pantalla: el alto y el ancho visibles, respetando el área segura del equipo (la
    muesca y la barra de gestos).
 3. **En horizontal** hay un botón flotante "Salir" en una esquina, sobre el juego, con fondo
    semitransparente. No tapa el centro del juego y se puede tocar con el dedo (44 × 44 px).
-4. **Al tocar "Salir"**, va a `/home`. **Al volver a vertical**,
-   reaparecen las dos barras sin recargar la página.
+4. **Al tocar "Salir"**, va a `/home`. **Al pasar entre vertical y horizontal**, el juego pasa de
+   girado a derecho, siempre a pantalla completa, sin recargar la página.
 5. **El juego no se recarga al girar.** Hoy el iframe de Unity sigue montado al rotar porque pesa
    unos 75 MB. Ocultar y mostrar las barras no lo puede desmontar ni recargar.
 
@@ -140,12 +165,12 @@ mascota). Sin dependencias de la API.
 
 ## Reglas de negocio
 
-- **RN-1 · Pantalla completa solo en celular horizontal.** En `/pet`, con el celular en horizontal,
-  no se ven la barra superior ni la inferior de la app. En vertical se ven las dos. En escritorio no
-  cambia nada.
+- **RN-1 · Pantalla completa en el celular.** En `/pet`, en un celular, no se ven la barra superior
+  ni la inferior de la app, ni en horizontal ni en vertical (en vertical, girado; ver RN-10). En
+  escritorio, y en una ventana angosta de escritorio, no cambia nada.
 - **RN-2 · Sin recarga.** Girar el teléfono, en cualquier sentido y las veces que sea, no recarga ni
   reinicia el juego.
-- **RN-3 · Salida siempre visible.** En horizontal, el botón "Salir" está visible en los tres
+- **RN-3 · Salida siempre visible.** En horizontal y en vertical girado, el botón "Salir" está visible en los tres
   estados (cargando, error y juego), mide al menos 44 × 44 px (D-5 de la spec 012) y queda dentro
   del área segura.
 - **RN-4 · Sin barras de scroll.** En horizontal, ni la página ni el marco del juego tienen scroll
@@ -156,6 +181,10 @@ mascota). Sin dependencias de la API.
   tiene `/home`.
 - **RN-7 · Lo demás de la spec 012 sigue valiendo.** El resto de vistas, el área táctil y el
   viewport no cambian.
+- **RN-10 · Mascota girada en vertical.** En `/pet`, en un celular en vertical, el marco del juego
+  (y sus estados de cargando y error) ocupa la pantalla girado -90°, igual que `/games/play`: su
+  ancho es el alto visible y su alto es el ancho visible, sin scroll. El giro se hace solo con CSS,
+  sin desmontar ni recargar el iframe (RN-2). Los toques llegan al juego en el punto correcto.
 - **RN-8 · `/games/play` horizontal.** Igual que RN-1, RN-3 y RN-4, con "Volver" en lugar de
   "Salir". En vertical no cambia.
 - **RN-9 · "Me gusta" alcanzable.** En `/ads`, en un celular, el botón "Me gusta" del final del
@@ -167,17 +196,20 @@ mascota). Sin dependencias de la API.
 - **CA-1:** Dada `/pet` en un celular (360 × 740) en horizontal, cuando carga el juego, entonces no
   se ven la barra superior ni la inferior de la app, y el marco del juego mide lo mismo que la
   ventana visible, sin scroll.
-- **CA-2:** Dada `/pet` en un celular en vertical, cuando carga, entonces se ven las dos barras y el
-  aviso "Gira tu teléfono", igual que hoy.
+- **CA-2:** Dada `/pet` en un celular en vertical (360 × 740), cuando carga, entonces no se ven las
+  barras de la app ni el aviso "Gira tu teléfono", y el marco del juego está girado -90° y cubre la
+  ventana visible (su caja en pantalla mide 360 × 740), sin scroll. Lo mismo en cargando y en
+  error, donde "Reintentar" se puede tocar.
 - **CA-3:** Dada `/pet` en horizontal con el juego cargado, cuando el teléfono pasa a vertical y
-  vuelve a horizontal, entonces el iframe del juego es el mismo (no se volvió a crear ni a cargar) y
-  las barras aparecen y desaparecen según la orientación.
-- **CA-4:** Dada `/pet` en horizontal, en cada estado (cargando, error y juego), entonces el botón
+  vuelve a horizontal, entonces el iframe del juego es el mismo (no se volvió a crear ni a cargar),
+  queda girado en vertical y derecho en horizontal, y las barras de la app no aparecen en ningún
+  momento.
+- **CA-4:** Dada `/pet` en horizontal y en vertical girado, en cada estado (cargando, error y juego), entonces el botón
   "Salir" está visible, mide al menos 44 × 44 px y, al tocarlo, lleva a `/home`. En
   error, "Salir" no se superpone a "Reintentar".
 - **CA-5:** Dada `/pet` en escritorio (1280 × 800), entonces se ve igual que hoy: la barra de
   escritorio y el juego en su marco, sin botón "Salir".
-- **CA-6:** Dada cualquier página del consumidor en un celular (360 de ancho), entonces la barra
+- **CA-6:** Dada cualquier página del consumidor en un celular (360 de ancho), salvo `/pet` (que en el celular no muestra barras, RN-1), entonces la barra
   inferior muestra, en orden, Inicio, Anuncios, Juegos, Mascota, Productos y Perfil, cada uno de al
   menos 44 × 44 px, y "Juegos" lleva a `/games`.
 - **CA-7:** Dada `/games` en un celular, entonces "Juegos" se ve activo en la barra inferior.
@@ -193,6 +225,10 @@ mascota). Sin dependencias de la API.
 - **CA-11:** Dada `/games/play` en un celular en horizontal, entonces no se ven las barras de la
   app, el juego ocupa la ventana visible sin scroll, y "Volver" está visible, mide al menos
   44 × 44 px y lleva a `/games`. En vertical, se ve igual que hoy.
+- **CA-13:** Dada `/pet` en un celular en vertical con el juego cargado, cuando el usuario toca un
+  punto del juego girado, entonces el juego recibe el toque en las coordenadas que corresponden a
+  ese punto del juego (lo comprueba la página de prueba que hace de juego). Con el juego real se
+  confirma en CA-10.
 - **CA-12:** Dada `/ads` en un celular (360 × 740 en vertical y 740 × 360 en horizontal), cuando
   termina un anuncio (de video y de imagen), entonces el botón "Me gusta" está completo dentro de la
   parte visible de la pantalla y por encima de la barra inferior, el elemento que recibe un toque en
@@ -200,6 +236,10 @@ mascota). Sin dependencias de la API.
   página no tiene más alto que la pantalla. La prueba falla con el código de hoy.
 
 ## Fuera de alcance
+
+- Quitar la barra de Safari cuando el teléfono **no** tiene la rotación bloqueada y pasa a
+  horizontal de verdad: ahí la mascota se ve derecha y sin las barras de la app, pero Safari sigue
+  mostrando las suyas. Pasa lo mismo con `/games/play`. Es una limitación conocida.
 
 - La pantalla completa del navegador (Fullscreen API) para ocultar también la barra de direcciones.
   En iPhone no funciona con un iframe. Se descartó por eso.
@@ -234,7 +274,9 @@ de pruebas.
 | "Salir" visible en error y lleva a `/home` | | | |
 | "Salir" visible con el juego en marcha y lleva a `/home` | | | |
 | Girar varias veces en `/pet` sin recarga (la mascota no reinicia; D-7: solo en `/pet`) | | | |
-| `/pet` en vertical: barras y aviso de girar | | | |
+| `/pet` en vertical (rotación bloqueada): sin barras, juego girado a pantalla completa, sin la barra de Safari quitándole alto | | | |
+| `/pet` en vertical: los toques en el juego real caen donde se toca (alimentar, botones de la mascota) | | | |
+| `/pet` en vertical: "Salir" visible y lleva a `/home` | | | |
 | `/games/play` en horizontal: sin barras, "Volver" lleva a `/games` | | | |
 | Barra inferior con Juegos resaltado hasta tocar "¡Jugar ahora!" | | | |
 | Rifas desde el menú de Perfil | | | |

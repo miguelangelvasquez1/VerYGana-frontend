@@ -151,3 +151,96 @@ Ninguno.
 
 1. En tableta, mientras el anuncio se reproduce, el marco ocupa todo el alto y el video vertical lleva franjas negras arriba y abajo. Es cosmético y coherente con el celular. Que el usuario lo vea en la pasada de CA-10.
 2. Siguen pendientes la sugerencia 3 de la ronda 1 (`handleSave` y `onSave` sin uso, para la spec de deuda) y la pasada manual en celulares reales (U-1), con un celular grande en horizontal en `/ads`.
+
+## Cambio: mascota girada, ronda 1: APROBADO
+
+Pruebas ✅ · lint:ci ✅ · build ✅ · tsc ✅ · audit:ci ✅ · test:e2e ✅ (dos corridas en frío) · desktop-1280 ✅
+
+Revisado sobre `git diff HEAD` (2026-10-24), centrado en el Bloque E (T14 a T19): `globals.css`, `NavBar.tsx`,
+`(consumer)/layout.tsx`, `pet/page.tsx`, `PetGame.tsx`, `e2e/pet.spec.ts`, `e2e/navbar.spec.ts` y
+`e2e/fixtures/pet-game.html`. No hay archivos sin seguimiento. El reviewer corrió todas las puertas con las
+variables ficticias de `CLAUDE.md`, y `.next` quedó con `npm run build`.
+
+| Puerta | Resultado |
+|--------|-----------|
+| `npm test` | 710 pasan (12 archivos) |
+| `npm run lint:ci` | 0 errores, 348 avisos; tope 348, `origin/main` 348 |
+| `npm run build` y después `npx tsc --noEmit` | pasan |
+| `npm run audit:ci` | sale con 0: las cuatro excepciones vigentes y ninguna nueva |
+| `npm run build:e2e && CI=1 npx playwright test --retries=0`, primera corrida | 271 pasan, 102 omitidas, 3,4 min (3 min 25 s en total) |
+| La misma, borrando antes `.next/standalone/.next/cache/images` | 271 pasan, 102 omitidas, 3,7 min (3 min 41 s en total) |
+| `npx playwright test --project=desktop-1280` (sin `--update-snapshots`) | 10 pasan, sin diferencias |
+
+`package.json`, el lockfile, `security/`, `.lint-max-warnings`, `src/middleware.ts`, `__tests__/`,
+`src/app/(consumer)/games/play/page.tsx`, `e2e/games-play.spec.ts` y `e2e/desktop.spec.ts` no cambian.
+
+| CA | Cumplido | Prueba o verificación |
+|----|----------|-----------------------|
+| CA-2 | ✅ | `e2e/pet.spec.ts`, "CA-2 · vertical 360 × 740, girada": juego, cargando y error. Caja en pantalla 360 × 740 y maquetación 740 × 360; barras y aviso ocultos (con `toHaveCount(1)`); sin scroll. "Reintentar" recibe el toque y provoca un segundo `POST` |
+| CA-3 | ✅ | `e2e/pet.spec.ts`, "CA-3": horizontal → vertical → horizontal con la misma marca en el elemento y en la ventana, y un solo pedido al juego; girado en vertical y derecho en horizontal |
+| CA-4 (vertical) | ✅ | `e2e/pet.spec.ts`, "CA-4 · 'Salir' en vertical girado": tres estados, ≥ 44 × 44, más alto que ancho, abajo a la izquierda de la pantalla, sin cruzarse con "Reintentar", lleva a `/home`. CA-4 horizontal sin cambios y en verde |
+| CA-13 | ✅ | `e2e/pet.spec.ts`, "CA-13": `innerWidth`/`innerHeight` del juego 740 × 360; los toques en (90, 580) y (300, 140) llegan al juego en (160, 90) y (600, 300), ±2 px. Con el juego real queda en CA-10 (R-11) |
+| CA-1, CA-5, CA-6, CA-11 | ✅ | Siguen en verde (`pet.spec.ts`, `navbar.spec.ts` con `/products` en lugar de `/pet`, `games-play.spec.ts`, la ventana angosta) |
+| CA-9 | ✅ | Las cinco puertas, las dos corridas de e2e y las capturas de escritorio |
+| CA-10 | ⏳ | Pasada manual del usuario (U-1), con las filas nuevas de vertical; no bloquea el código |
+
+Comprobaciones pedidas:
+
+1. **RN-2: el giro es solo CSS.** La variante `immersive-portrait` (`globals.css:18-24`) es una media query con
+   `:has()`. `PetGame.tsx` no gana estado, `matchMedia` ni `resize`, y `pet/page.tsx` sigue de servidor. El
+   giro va en la `<section>`, así que el iframe nunca cambia de padre.
+   - **CA-3 lo demuestra:** en una copia aislada (rsync sin `.git`) se le puso al iframe un `key` que cambia
+     con la orientación (por `matchMedia`). CA-3 falla en `toHaveAttribute('data-e2e-mark', 'misma-instancia')`
+     (recibe `""`).
+2. **P-17: rojo sin el cambio.** En otra copia aislada, los cinco archivos de `src` del Bloque E se volvieron a
+   la versión de `HEAD`, con las pruebas y el fixture nuevos, y se hizo `build:e2e`. Fallan 8, todas por
+   aserción, igual que anota T15:
+   - CA-2 (los tres estados) y CA-3: `toBeHidden` de la barra (se ve).
+   - Los tres CA-4 de vertical: `toBeVisible` de "Salir" (no existe).
+   - CA-13: `innerWidth` del juego (380 contra 740).
+   - Siguen verdes R-3, CA-1, CA-4 horizontal, CA-5, la ventana angosta y `navbar.spec.ts`.
+3. **Sentido del giro (CA-13 y "Salir").** Mutante con `rotate(90deg)` en lugar de `-90deg`:
+   - CA-13 falla en la coordenada del toque (x del juego 580 contra 160).
+   - Los tres CA-4 de vertical fallan porque "Salir" queda a la derecha (centro en x = 326).
+   - La geometría cuadra con el plan (19.6): con `rotate(-90deg)` el punto del juego (gx, gy) cae en
+     pantalla en (gy, vh − gx). Es el mismo sentido que `/games/play` (`games/play/page.tsx:170`).
+   - "Salir" usa `env(safe-area-inset-left)` como `top` y `env(safe-area-inset-bottom)` como `left`, que es la
+     traducción correcta al eje girado.
+4. **No afecta a nada más.** Con una prueba temporal fuera del árbol (en el scratchpad) se midieron `/pet` y
+   `/games/play` con el build actual y con el revertido (equivale a `HEAD`), en 360 × 740, 390 × 844,
+   768 × 1024 táctil, 740 × 360 táctil, 900 × 500 y 500 × 900 sin táctil, y 1280 × 800. Se midió la caja y la
+   maquetación del iframe, la barra inferior, "Salir", el aviso y el scroll.
+   - **Los 14 casos son idénticos** entre los dos builds, salvo `/pet` en vertical táctil (360, 390 y 768),
+     que es lo que pide el cambio.
+   - `/games/play` en vertical no cambia (D-9). Tampoco cambian la ventana angosta de escritorio (en las dos
+     orientaciones), el escritorio ni `/pet` en horizontal.
+   - `data-immersive="rotate"` solo existe en `/pet`, y `layout.spec.ts` y `smoke.spec.ts` pasan en todas las
+     páginas.
+5. **R-18: `tablet-768` sí ve la mascota girada.** En ese proyecto (`isMobile: false`, `hasTouch: true`),
+   `matchMedia('(pointer: coarse)')` da `true`. En `/pet`, el iframe mide 1024 × 768 de maquetación y llena
+   los 768 × 1024 de la pantalla, sin barras y con "Salir". Es lo que acepta D-10. `layout.spec.ts` pasa así
+   en `tablet-768`.
+6. **Constitución.** Sin `'use client'` nuevo (P-2), sin `any` ni `@ts-ignore` (P-9), sin `console.*`, `<img>`
+   ni `<a>` internos (P-7, P-16), sin rutas ni roles nuevos (P-4), y sin dependencias (P-1). Comentarios en
+   español (P-18). El fixture solo guarda coordenadas en su propio DOM, sin `postMessage` ni red (P-13).
+
+### Bloqueantes
+
+Ninguno.
+
+### Sugerencias (no bloquean)
+
+1. CA-6 dice "cualquier página del consumidor" a 360 de ancho. Con RN-1, `/pet` en vertical ya no tiene la
+   barra, y `navbar.spec.ts` la cambió por `/products`. Conviene que la spec exceptúe `/pet` en CA-6 (la
+   sección "Cambio después de la ronda 3" no lo nombra), para que el criterio y la prueba digan lo mismo.
+2. CA-2 por sí solo no fija el sentido del giro (pasa con `+90deg`). Lo fijan CA-13 y CA-4 vertical, así que
+   la cobertura está completa. Basta con saberlo si algún día se tocan esas pruebas.
+3. Los CA-4 de vertical tocan "Salir" y comprueban la URL `/home`, pero no que las barras vuelvan al salir de
+   `/pet`. Lo cubre en la práctica CA-6 sobre `/home`. Una aserción de la barra inferior visible tras el
+   `tap()` lo dejaría explícito.
+4. Como anota T16, Tailwind genera CSS de las clases que aparecen en los `.md` de `specs/`. Es inofensivo,
+   pero un `@source not "../../specs"` en `globals.css` lo evitaría (para la spec de deuda).
+5. En la pasada de CA-10 (U-1) hay que mirar R-11 (toques del build real de Unity, que dentro del iframe ve
+   `screen.orientation` en vertical), R-12 a R-14 (franja o salto con la barra de Safari, "Salir" cerca del
+   indicador de inicio) y D-9.
+6. Al cerrar, actualizar el `Estado` de `spec.md`, que todavía dice "en implementación".
