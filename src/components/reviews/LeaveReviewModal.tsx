@@ -24,7 +24,8 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
           key={star}
           type="button"
           onClick={() => onChange(star)}
-          className={`text-2xl transition-colors cursor-pointer ${star <= value ? "text-yellow-400" : "text-gray-300"}`}
+          aria-label={`${star} de 5 estrellas`}
+          className={`text-2xl min-h-11 min-w-11 transition-colors cursor-pointer ${star <= value ? "text-yellow-400" : "text-gray-300"}`}
         >
           ★
         </button>
@@ -85,7 +86,7 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
             {selected && (
-              <button onClick={handleBack} className="text-gray-400 hover:text-gray-700 text-lg leading-none cursor-pointer">
+              <button type="button" onClick={handleBack} aria-label="Volver" className="text-gray-400 hover:text-gray-700 text-lg leading-none cursor-pointer min-h-11 min-w-11 flex items-center justify-center">
                 ←
               </button>
             )}
@@ -93,7 +94,7 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
               {selected ? selected.productName : "Dejar una reseña"}
             </h2>
           </div>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-700 text-lg leading-none cursor-pointer">
+          <button type="button" onClick={handleClose} aria-label="Cerrar" className="text-gray-400 hover:text-gray-700 text-lg leading-none cursor-pointer min-h-11 min-w-11 flex items-center justify-center">
             ✕
           </button>
         </div>
@@ -147,13 +148,13 @@ export default function LeaveReviewModal({ open, onClose, items }: Props) {
               onChange={(e) => setComment(e.target.value)}
               placeholder="Escribe tu reseña (opcional)"
               rows={3}
-              className="w-full border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-300"
+              className="w-full border rounded-xl px-3 py-2 text-base lg:text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-300"
             />
 
             <button
               onClick={handleSubmit}
               disabled={rating === 0 || submitting}
-              className="w-full bg-gray-900 text-white rounded-full py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              className="w-full min-h-11 bg-gray-900 text-white rounded-full py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               {submitting ? "Enviando..." : "Enviar reseña"}
             </button>

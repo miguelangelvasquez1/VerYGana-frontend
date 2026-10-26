@@ -1,0 +1,26 @@
+{
+  "id": 1,
+  "name": "Casco de ciclismo profesional con visera y ventilación extendida edición limitada",
+  "description": "Descripción de prueba del producto, lo bastante larga para comprobar que el texto cabe y se corta en líneas sin desbordar la pantalla de un celular pequeño.",
+  "imageUrl": "/products/casco.png",
+  "price": 15000000,
+  "maxKeysAllowed": 20,
+  "minCashCents": 1500000,
+  "averageRate": 4.5,
+  "categoryName": "Deportes",
+  "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+  "companyName": "Tienda de Prueba S.A.S.",
+  "stock": 15,
+  "reviewCount": 1,
+  "reviews": [
+    {
+      "id": 1,
+      "comment": "Muy buen producto, llegó rápido.",
+      "rating": 5,
+      "consumerName": "Cliente Uno",
+      "createdAt": "2026-10-10T10:00:00"
+    }
+  ],
+  "isGameReward": false,
+  "productType": "PHYSICAL"
+}

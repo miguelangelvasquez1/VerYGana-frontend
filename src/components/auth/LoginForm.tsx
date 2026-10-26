@@ -469,7 +469,7 @@ const LoginForm = () => {
                   id={identifierId}
                   name="identifier"
                   type="text"
-                  inputMode="text"
+                  inputMode="email"
                   value={
                     formData.identifier
                   }
@@ -527,7 +527,7 @@ const LoginForm = () => {
                 border
                 bg-white
                 px-4
-                text-sm
+                text-base lg:text-sm
                 text-gray-900
                 shadow-sm
                 placeholder:text-gray-400
@@ -633,7 +633,7 @@ const LoginForm = () => {
                 <Link
                     href="/forgot-password"
                     className="
-                  shrink-0
+                  inline-flex min-h-11 items-center shrink-0
                   rounded-sm
                   text-sm
                   font-medium
@@ -691,7 +691,7 @@ const LoginForm = () => {
                   bg-white
                   px-4
                   pr-14
-                  text-sm
+                  text-base lg:text-sm
                   text-gray-900
                   shadow-sm
                   placeholder:text-gray-400
@@ -732,8 +732,8 @@ const LoginForm = () => {
                   right-1
                   top-1/2
                   flex
-                  h-10
-                  w-10
+                  h-11
+                  w-11
                   -translate-y-1/2
                   items-center
                   justify-center
@@ -842,7 +842,7 @@ const LoginForm = () => {
             <Link
                 href="/register"
                 className="
-              ml-1.5
+              inline-flex min-h-11 items-center ml-1.5
               rounded-sm
               font-semibold
               text-[#03548C]

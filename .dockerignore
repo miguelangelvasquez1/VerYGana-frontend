@@ -17,3 +17,12 @@ Dockerfile
 .dockerignore
 *.md
 skills-lock.json
+# Flujo de trabajo, pruebas y puertas de CI: no forman parte de la imagen.
+specs
+docs
+__tests__
+scripts
+security
+vitest.config.mts
+.lint-max-warnings
+.lint-report.json

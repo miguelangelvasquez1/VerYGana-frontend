@@ -91,7 +91,7 @@ export default function RaffleCard({ raffle }: Props) {
         {/* CTA */}
         <Link
           href={`/raffles/${raffle.id}`}
-          className="mt-4 w-full text-black text-sm font-bold py-2.5 rounded-xl transition text-center block cursor-pointer shadow-sm hover:opacity-90 active:scale-95"
+          className="mt-4 w-full min-h-11 flex items-center justify-center text-black text-sm font-bold py-2.5 rounded-xl transition text-center cursor-pointer shadow-sm hover:opacity-90 active:scale-95"
           style={{ background: "linear-gradient(to right, #fbbf24, #f59e0b)" }}
         >
           Ver detalles

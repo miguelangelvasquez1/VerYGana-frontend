@@ -1,0 +1,12 @@
+{
+  "publicId": "00000000-0000-4000-8000-000000000001",
+  "name": "Consumidor",
+  "lastName": "Prueba",
+  "email": "consumidor@example.test",
+  "phoneNumber": "3000000000",
+  "role": "ROLE_CONSUMER",
+  "accountStatus": "ACTIVE",
+  "userState": "ACTIVE",
+  "department": "Quindío",
+  "municipalityName": "Armenia"
+}

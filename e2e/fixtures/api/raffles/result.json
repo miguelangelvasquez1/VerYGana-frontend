@@ -1,0 +1,20 @@
+{
+  "raffleId": 1,
+  "raffleTitle": "Gran rifa de fin de año con premios increíbles para toda la familia",
+  "raffleImageUrl": "/categories/iphone13.jpg",
+  "raffleType": "PREMIUM",
+  "drawnAt": "2026-10-15T20:00:00",
+  "totalParticipants": 120,
+  "totalTicketsIssued": 350,
+  "winners": [
+    {
+      "userName": "Ganador Uno",
+      "ticketNumber": "000123",
+      "prizeTitle": "Teléfono de última generación",
+      "prizeImageUrl": "/products/casco.png",
+      "prizeType": "PHYSICAL",
+      "prizeValue": 4500000,
+      "position": 1
+    }
+  ]
+}

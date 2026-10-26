@@ -40,7 +40,7 @@ const ReportDeadlineModal = ({ open, onClose, onContinue, items }: Props) => {
             </span>
             <h2 className="text-base sm:text-lg font-semibold text-gray-900">Antes de reportar un problema</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 shrink-0 cursor-pointer">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="text-gray-400 hover:text-gray-700 shrink-0 cursor-pointer min-h-11 min-w-11 -mr-3 flex items-center justify-center">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -98,13 +98,13 @@ const ReportDeadlineModal = ({ open, onClose, onContinue, items }: Props) => {
         <div className="flex flex-col sm:flex-row gap-2 mt-5">
           <button
             onClick={onClose}
-            className="w-full sm:flex-1 px-4 py-2.5 rounded-full border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all cursor-pointer"
+            className="w-full sm:flex-1 min-h-11 px-4 py-2.5 rounded-full border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all cursor-pointer"
           >
             Cancelar
           </button>
           <button
             onClick={onContinue}
-            className="w-full sm:flex-1 px-4 py-2.5 rounded-full bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 active:scale-95 transition-all cursor-pointer"
+            className="w-full sm:flex-1 min-h-11 px-4 py-2.5 rounded-full bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 active:scale-95 transition-all cursor-pointer"
           >
             Entendido, continuar
           </button>

@@ -1,0 +1,23 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Gran rifa de fin de año con premios increíbles para toda la familia",
+      "imageUrl": "/categories/iphone13.jpg",
+      "raffleType": "PREMIUM",
+      "raffleStatus": "ACTIVE",
+      "drawDate": "2026-12-24T20:00:00",
+      "userTicketCount": 4,
+      "isWinner": false
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

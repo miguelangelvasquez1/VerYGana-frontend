@@ -1,0 +1,10 @@
+{
+  "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+  "status": "ACTIVE",
+  "balanceCents": 5000000,
+  "accumulatedThresholdCents": 8000000,
+  "totalAbsorbedCents": 3000000,
+  "totalReintegratedCents": 0,
+  "thresholds": [],
+  "disclaimer": "Texto de prueba."
+}

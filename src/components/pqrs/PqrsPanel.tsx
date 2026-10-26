@@ -41,8 +41,9 @@ const PqrsPanel = () => {
           <p className="text-sm text-gray-500">Peticiones, quejas, reclamos y sugerencias que has enviado</p>
         </div>
         <button
+          type="button"
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#024270] transition-colors cursor-pointer shrink-0"
+          className="flex items-center gap-2 min-h-11 lg:min-h-0 px-4 py-2.5 active:bg-[#024270] bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#024270] transition-colors cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
           Nueva solicitud

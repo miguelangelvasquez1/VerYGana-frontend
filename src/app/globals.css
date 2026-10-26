@@ -1,6 +1,17 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
+/* Pantalla completa del juego en celular horizontal (spec 013). Solo CSS: girar no provoca ningún render de
+   React y el iframe del juego no se desmonta (RN-2). La activa una página que marca un elemento con
+   `data-immersive`. "Celular" es táctil y de menos de 1024 px, como en la spec 012. */
+@custom-variant immersive {
+  @media (orientation: landscape) and (pointer: coarse) and (width < 64rem) {
+    :where(body:has([data-immersive])) & {
+      @slot;
+    }
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

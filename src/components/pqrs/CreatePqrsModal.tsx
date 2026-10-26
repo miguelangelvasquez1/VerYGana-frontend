@@ -50,7 +50,7 @@ const CreatePqrsModal = ({ onClose, onCreated }: Props) => {
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-base font-semibold text-gray-900">Nueva solicitud de PQRS</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="text-gray-400 hover:text-gray-600 cursor-pointer min-h-11 min-w-11 -mr-3 flex items-center justify-center lg:min-h-0 lg:min-w-0 lg:mr-0">
             <X size={20} />
           </button>
         </div>
@@ -61,7 +61,7 @@ const CreatePqrsModal = ({ onClose, onCreated }: Props) => {
             <select
               value={type}
               onChange={(e) => setType(e.target.value as PqrsType)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full min-h-11 lg:min-h-0 px-3 py-2 border border-gray-300 rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {Object.values(PqrsType).map((t) => (
                 <option key={t} value={t}>
@@ -79,7 +79,7 @@ const CreatePqrsModal = ({ onClose, onCreated }: Props) => {
               onChange={(e) => setSubject(e.target.value)}
               maxLength={150}
               placeholder="Ej: No me llega el dinero de mis ventas"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full min-h-11 lg:min-h-0 px-3 py-2 border border-gray-300 rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -91,7 +91,7 @@ const CreatePqrsModal = ({ onClose, onCreated }: Props) => {
               rows={4}
               maxLength={DESCRIPTION_MAX}
               placeholder="Cuéntanos con detalle qué sucedió..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
             <span className="text-xs text-gray-400 float-right">
               {description.length}/{DESCRIPTION_MAX}
@@ -102,15 +102,17 @@ const CreatePqrsModal = ({ onClose, onCreated }: Props) => {
 
           <div className="flex gap-3 pt-1">
             <button
+              type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+              className="flex-1 min-h-11 lg:min-h-0 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={!canSubmit}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#03548C] rounded-lg hover:bg-[#024270] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 min-h-11 lg:min-h-0 px-4 py-2 text-sm font-medium text-white bg-[#03548C] rounded-lg hover:bg-[#024270] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               Enviar solicitud

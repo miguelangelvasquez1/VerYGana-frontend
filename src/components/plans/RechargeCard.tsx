@@ -121,8 +121,14 @@ export const RechargeCard = ({ recharge }: { recharge: Recharge }) => {
         </div>
 
         {/* Botón */}
-        <button className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 cursor-pointer">
-          Recargar Ahora
+        {/* Próximamente: aún no hay flujo para recargar a un operador (spec 012, RN-4 fila 13) */}
+        <button
+          type="button"
+          disabled
+          aria-disabled="true"
+          className="w-full min-h-11 py-2 px-4 rounded-lg font-medium bg-gray-100 text-gray-400 cursor-default"
+        >
+          Próximamente
         </button>
       </div>
     </div>

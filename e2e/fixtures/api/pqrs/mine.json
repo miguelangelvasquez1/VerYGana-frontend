@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "based": "PQRS-0001",
+      "type": "PETICION",
+      "status": "RECIBIDA",
+      "subject": "Consulta sobre mi compra",
+      "description": "Descripción de prueba de la solicitud.",
+      "response": null,
+      "dueDate": "2026-11-05T00:00:00",
+      "createdAt": "2026-10-20T10:00:00",
+      "resolvedAt": null,
+      "purchaseItemId": null,
+      "reasonCode": null,
+      "action": null,
+      "assets": []
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

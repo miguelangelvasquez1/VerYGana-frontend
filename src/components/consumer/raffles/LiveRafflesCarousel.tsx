@@ -106,7 +106,8 @@ export default function LiveRafflesCarousel() {
       {/* Fullscreen button */}
       <button
         onClick={() => setShowFullImage(true)}
-        className="absolute top-3 right-3 z-20 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-lg transition cursor-pointer"
+        aria-label="Ver imagen completa"
+        className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-20 bg-black/50 hover:bg-black/70 text-white min-h-11 min-w-11 flex items-center justify-center rounded-lg transition cursor-pointer"
       >
         <Maximize2 className="w-3.5 h-3.5" />
       </button>
@@ -157,7 +158,7 @@ export default function LiveRafflesCarousel() {
 
             <Link
               href={`/raffles/${raffle.id}/live`}
-              className="shrink-0 inline-flex items-center gap-1.5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2 rounded-xl transition-all shadow-lg shadow-yellow-400/30 text-sm"
+              className="shrink-0 inline-flex items-center gap-1.5 min-h-11 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2 rounded-xl transition-all shadow-lg shadow-yellow-400/30 text-sm"
             >
               Ver sorteo →
             </Link>
@@ -274,7 +275,7 @@ export default function LiveRafflesCarousel() {
           >
             <button
               onClick={() => setShowFullImage(false)}
-              className="absolute -top-10 right-0 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition cursor-pointer"
+              className="absolute -top-12 right-0 min-h-11 flex items-center gap-1.5 text-white text-sm hover:text-gray-300 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
               Cerrar

@@ -282,7 +282,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                   else if (step === "email-otp") { setStep("email-contact"); setOtpCode(""); setOtpSent(false); }
                   else setStep("method");
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors mr-1 cursor-pointer"
+                className="text-gray-400 hover:text-gray-600 transition-colors mr-1 cursor-pointer min-h-11 min-w-11 flex items-center justify-center"
                 aria-label="Volver"
               >
                 ←
@@ -299,7 +299,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none cursor-pointer"
+            className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none cursor-pointer min-h-11 min-w-11 flex items-center justify-center"
             aria-label="Cerrar"
           >
             ✕
@@ -426,10 +426,12 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                   </label>
                   <input
                     type="email"
+                    inputMode="email"
+                    autoComplete="email"
                     value={customEmail}
                     onChange={(e) => { setCustomEmail(e.target.value); clearError(); }}
                     placeholder="ejemplo@correo.com"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] focus:border-transparent"
                     autoFocus
                   />
                 </div>
@@ -500,6 +502,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 <input
                   type="text"
                   inputMode="numeric"
+                  autoComplete="one-time-code"
                   maxLength={8}
                   value={otpCode}
                   onChange={(e) => { setOtpCode(e.target.value.replace(/\D/g, "")); clearError(); }}
@@ -515,7 +518,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 <button
                   onClick={handleResendEmailOtp}
                   disabled={loading || resendCooldown > 0}
-                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline cursor-pointer"
+                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline cursor-pointer min-h-11 px-3"
                 >
                   {resendCooldown > 0 ? `Reenviar código (${resendCooldown}s)` : "Reenviar código"}
                 </button>
@@ -587,10 +590,12 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                   </label>
                   <input
                     type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     value={customPhone}
                     onChange={(e) => { setCustomPhone(e.target.value); clearError(); }}
                     placeholder="+57 300 1234567"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] focus:border-transparent"
                     autoFocus
                   />
                 </div>
@@ -662,6 +667,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 <input
                   type="text"
                   inputMode="numeric"
+                  autoComplete="one-time-code"
                   maxLength={8}
                   value={otpCode}
                   onChange={(e) => { setOtpCode(e.target.value.replace(/\D/g, "")); clearError(); }}
@@ -677,7 +683,7 @@ export default function ClaimPrizeModal({ prize, registeredEmail, registeredPhon
                 <button
                   onClick={handleResendOtp}
                   disabled={loading || resendCooldown > 0}
-                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline cursor-pointer"
+                  className="text-sm text-[#03548C] hover:text-[#0b1440] font-semibold underline disabled:opacity-50 disabled:no-underline cursor-pointer min-h-11 px-3"
                 >
                   {resendCooldown > 0 ? `Reenviar código (${resendCooldown}s)` : "Reenviar código"}
                 </button>

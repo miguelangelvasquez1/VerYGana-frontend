@@ -77,11 +77,12 @@ const RefundBankDetailsForm = ({ purchaseItemId }: Props) => {
           <label className="block text-xs font-medium text-gray-600 mb-1">Nombre del titular *</label>
           <input
             name="accountHolderName"
+            autoComplete="name"
             value={form.accountHolderName}
             onChange={handleChange}
             required
             disabled={submitting}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+            className="w-full border border-gray-300 rounded-lg min-h-11 lg:min-h-0 px-3 py-2 text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
           />
         </div>
 
@@ -93,7 +94,7 @@ const RefundBankDetailsForm = ({ purchaseItemId }: Props) => {
               value={form.accountHolderDocType}
               onChange={handleChange}
               disabled={submitting}
-              className="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+              className="w-full border border-gray-300 rounded-lg min-h-11 lg:min-h-0 px-2 py-2 text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             >
               {Object.values(DocType).map((t) => (
                 <option key={t} value={t}>{docTypeLabel[t]}</option>
@@ -104,11 +105,13 @@ const RefundBankDetailsForm = ({ purchaseItemId }: Props) => {
             <label className="block text-xs font-medium text-gray-600 mb-1">Documento *</label>
             <input
               name="accountHolderDoc"
+              inputMode="numeric"
+              autoComplete="off"
               value={form.accountHolderDoc}
               onChange={handleChange}
               required
               disabled={submitting}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+              className="w-full border border-gray-300 rounded-lg min-h-11 lg:min-h-0 px-3 py-2 text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             />
           </div>
         </div>
@@ -121,7 +124,7 @@ const RefundBankDetailsForm = ({ purchaseItemId }: Props) => {
             onChange={handleChange}
             required
             disabled={submitting}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+            className="w-full border border-gray-300 rounded-lg min-h-11 lg:min-h-0 px-3 py-2 text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
           />
         </div>
 
@@ -133,7 +136,7 @@ const RefundBankDetailsForm = ({ purchaseItemId }: Props) => {
               value={form.accountType}
               onChange={handleChange}
               disabled={submitting}
-              className="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+              className="w-full border border-gray-300 rounded-lg min-h-11 lg:min-h-0 px-2 py-2 text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             >
               {Object.values(BankAccountType).map((t) => (
                 <option key={t} value={t}>{bankAccountTypeLabel[t]}</option>
@@ -144,11 +147,13 @@ const RefundBankDetailsForm = ({ purchaseItemId }: Props) => {
             <label className="block text-xs font-medium text-gray-600 mb-1">N.º de cuenta *</label>
             <input
               name="accountNumber"
+              inputMode="numeric"
+              autoComplete="off"
               value={form.accountNumber}
               onChange={handleChange}
               required
               disabled={submitting}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+              className="w-full border border-gray-300 rounded-lg min-h-11 lg:min-h-0 px-3 py-2 text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             />
           </div>
         </div>
@@ -157,7 +162,7 @@ const RefundBankDetailsForm = ({ purchaseItemId }: Props) => {
       <button
         type="submit"
         disabled={!isValid || submitting}
-        className="w-full bg-[#03548C] text-white text-sm font-semibold py-2 rounded-lg hover:bg-[#024270] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="w-full min-h-11 lg:min-h-0 bg-[#03548C] text-white text-sm font-semibold py-2 rounded-lg hover:bg-[#024270] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
         {submitting ? "Enviando..." : "Enviar datos bancarios"}
       </button>

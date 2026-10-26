@@ -50,7 +50,7 @@ export default function UnlockAccountPage() {
 
         </div>
       </div>
-      <Footer />
+      <Footer guest />
     </>
   );
 }

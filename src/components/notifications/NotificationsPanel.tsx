@@ -102,7 +102,8 @@ export function NotificationPanel({
                 </div>
                 <button
                     onClick={handleToggle}
-                    className="sm:hidden p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition cursor-pointer"
+                    aria-label="Cerrar notificaciones"
+                    className="sm:hidden inline-flex min-h-11 min-w-11 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 transition cursor-pointer"
                 >
                     <X className="w-4 h-4" />
                 </button>
@@ -140,7 +141,8 @@ export function NotificationPanel({
             {/* ── Campanita ── */}
             <button
                 onClick={handleToggle}
-                className={`cursor-pointer relative flex items-center gap-2 px-3 py-2 transition-all ${
+                aria-label="Notificaciones"
+                className={`cursor-pointer relative flex min-h-11 min-w-11 items-center justify-center gap-2 px-3 py-2 transition-all lg:min-h-0 lg:min-w-0 ${
                     variant === 'light'
                         ? 'rounded-lg hover:bg-gray-100'
                         : 'rounded-full bg-white/10 hover:bg-white/20'
@@ -175,8 +177,8 @@ export function NotificationPanel({
 
             {/* ── MOBILE: backdrop ── */}
             <div
-                className={`sm:hidden fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${
-                    isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                className={`sm:hidden fixed inset-0 bg-black/50 z-40 transition-[opacity,visibility] duration-300 ${
+                    isOpen ? 'opacity-100 pointer-events-auto' : 'invisible opacity-0 pointer-events-none'
                 }`}
                 onClick={handleToggle}
             />
@@ -184,8 +186,8 @@ export function NotificationPanel({
             {/* ── MOBILE: bottom sheet ── */}
             <div
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`sm:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl shadow-2xl overflow-hidden transition-transform duration-300 ${
-                    isOpen ? 'translate-y-0' : 'translate-y-full'
+                className={`sm:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl shadow-2xl overflow-hidden transition-[transform,visibility] duration-300 ${
+                    isOpen ? 'translate-y-0' : 'invisible translate-y-full'
                 }`}
             >
                 {/* Drag handle */}
@@ -199,7 +201,7 @@ export function NotificationPanel({
                     ref={mobileListRef}
                     onScroll={() => handleScroll(mobileListRef.current)}
                     style={{ maxHeight: '65vh', overflowY: 'scroll', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
-                    className="divide-y divide-gray-50 overscroll-contain"
+                    className="divide-y divide-gray-50 overscroll-contain pb-16"
                 >
                     <ListContent />
                 </div>

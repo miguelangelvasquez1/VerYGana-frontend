@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "id": "tx-1",
+      "type": "CREDIT_INTERACTION",
+      "purchaseKeysDelta": 5,
+      "connectivityKeysDelta": 5,
+      "reason": "Anuncio visto",
+      "referenceId": null,
+      "expiredAt": null,
+      "createdAt": "2026-10-20T10:00:00Z"
+    },
+    {
+      "id": "tx-2",
+      "type": "DEBIT_COPAYMENT",
+      "purchaseKeysDelta": -20,
+      "connectivityKeysDelta": 0,
+      "reason": "Copago de la compra REF-0001",
+      "referenceId": "1",
+      "expiredAt": null,
+      "createdAt": "2026-10-14T10:00:00Z"
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 20,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

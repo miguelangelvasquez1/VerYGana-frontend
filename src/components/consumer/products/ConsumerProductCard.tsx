@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { Star, Heart, Building2 } from "lucide-react";
 
@@ -18,7 +18,6 @@ interface ConsumerProductCardProps {
 }
 
 const ConsumerProductCard: React.FC<ConsumerProductCardProps> = ({ product }) => {
-  const router = useRouter();
   const { role } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { byProductId } = useActiveKeyPromotions();
@@ -27,10 +26,9 @@ const ConsumerProductCard: React.FC<ConsumerProductCardProps> = ({ product }) =>
   const keysPct = promotion ? Math.max(promotion.keysPct, product.maxKeysPct) : product.maxKeysPct;
 
   return (
-    <div
-      className="bg-white border border-gray-300 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer overflow-hidden flex flex-col"
-      onClick={() => router.push(`/products/${product.id}`)}
-    >
+    // Tarjeta con enlace extendido: un enlace vacío con `aria-label` cubre toda la tarjeta y navega al producto;
+    // los controles interactivos (favorito, comercio, agregar) quedan por encima con `relative z-10`.
+    <div className="relative bg-white border border-gray-300 rounded-2xl shadow-md hover:shadow-xl active:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer overflow-hidden flex flex-col">
       {/* Image */}
       <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
         <Image
@@ -53,11 +51,10 @@ const ConsumerProductCard: React.FC<ConsumerProductCardProps> = ({ product }) =>
 
         {role === "CONSUMER" && (
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFavorite(product.id);
-            }}
-            className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md hover:scale-110 transition-transform cursor-pointer"
+            type="button"
+            onClick={() => toggleFavorite(product.id)}
+            aria-label={isFavorite(product.id) ? "Quitar de favoritos" : "Agregar a favoritos"}
+            className="absolute z-10 top-1.5 right-1.5 lg:top-3 lg:right-3 min-h-11 min-w-11 flex items-center justify-center lg:min-h-0 lg:min-w-0 lg:p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform cursor-pointer"
           >
             <Heart
               className={`w-5 h-5 ${
@@ -105,16 +102,15 @@ const ConsumerProductCard: React.FC<ConsumerProductCardProps> = ({ product }) =>
 
         <div className="flex flex-wrap sm:flex-col items-start gap-1.5 sm:gap-1 w-full min-w-0">
           {product.companyName && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/commercial/${product.commercialPublicId}`);
-              }}
-              className="text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-blue-50 hover:border-blue-200 hover:text-cyan-500 transition cursor-pointer text-left"
+            <Link
+              href={`/commercial/${product.commercialPublicId}`}
+              className="relative z-10 inline-flex items-center min-h-11 lg:min-h-0 min-w-0 max-w-full text-left"
             >
-              <Building2 className="w-2.5 h-2.5 shrink-0" />
-              <span className="truncate">{product.companyName}</span>
-            </button>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-blue-50 hover:border-blue-200 hover:text-cyan-500 transition cursor-pointer">
+                <Building2 className="w-2.5 h-2.5 shrink-0" />
+                <span className="truncate">{product.companyName}</span>
+              </span>
+            </Link>
           )}
 
           <p
@@ -130,10 +126,12 @@ const ConsumerProductCard: React.FC<ConsumerProductCardProps> = ({ product }) =>
           </p>
         </div>
 
-        <div className="mt-auto pt-2" onClick={(e) => e.stopPropagation()}>
+        <div className="relative z-10 mt-auto pt-2">
           <AddToCartButton product={product} variant="primary" />
         </div>
       </div>
+
+      <Link href={`/products/${product.id}`} aria-label={product.name} className="absolute inset-0 z-[1]" />
     </div>
   );
 };

@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "referenceId": "REF-0001",
+  "items": [
+    {
+      "id": 1,
+      "productId": 2,
+      "productName": "Camiseta oficial",
+      "imageUrl": "/products/camiseta.png"
+    }
+  ],
+  "totalItems": 1,
+  "totalCents": 8000000,
+  "keyValueCents": 2000000,
+  "cashCents": 6000000,
+  "commissionCents": 0,
+  "status": "COMPLETED",
+  "createdAt": "2026-10-14T10:00:00",
+  "completedAt": "2026-10-14T10:05:00"
+}

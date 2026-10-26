@@ -3,19 +3,13 @@
 import { useState, useEffect } from "react";
 import { 
   Smartphone, 
-  Wifi, 
-  Phone, 
-  MessageSquare, 
   Zap, 
   CreditCard, 
   Check, 
-  Star,
   Filter,
   Search,
   ChevronDown,
   Signal,
-  Clock,
-  ShoppingCart
 } from "lucide-react";
 import { PlanCard } from "@/components/plans/PlanCard";
 import { RechargeCard } from "@/components/plans/RechargeCard";
@@ -328,7 +322,7 @@ export default function MobileServicesPage() {
             <div className="flex flex-wrap items-center gap-4 mb-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                className="flex items-center gap-2 min-h-11 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-50 transition-colors duration-200 cursor-pointer"
               >
                 <Filter className="w-4 h-4" />
                 Filtros
@@ -341,7 +335,7 @@ export default function MobileServicesPage() {
                 <select
                   value={selectedOperator}
                   onChange={(e) => setSelectedOperator(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="min-h-11 lg:min-h-0 px-3 py-2 text-base lg:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 >
                   {operators.map(op => (
                     <option key={op.name} value={op.name}>{op.name}</option>
@@ -356,7 +350,7 @@ export default function MobileServicesPage() {
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    className="min-h-11 lg:min-h-0 px-3 py-2 text-base lg:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   >
                     <option value="todos">Todos</option>
                     <option value="postpago">Postpago</option>
@@ -371,7 +365,7 @@ export default function MobileServicesPage() {
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    className="min-h-11 lg:min-h-0 px-3 py-2 text-base lg:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   >
                     <option value="todos">Todos</option>
                     <option value="saldo">Saldo</option>
@@ -387,7 +381,7 @@ export default function MobileServicesPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="min-h-11 lg:min-h-0 px-3 py-2 text-base lg:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 >
                   {activeTab === "planes" ? (
                     <>
@@ -636,26 +630,6 @@ export default function MobileServicesPage() {
             </div>
           </div>
         </section>
-
-        {/* Call to Action */}
-        {/* <section className="mb-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 text-white text-center">
-          <h3 className="text-2xl md:text-3xl font-bold mb-4">
-            ¿Necesitas ayuda personalizada?
-          </h3>
-          <p className="text-lg mb-8 text-blue-100">
-            Nuestro equipo de expertos está listo para ayudarte a encontrar el plan perfecto
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-3 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-100 transition-colors duration-200">
-              <Phone className="w-5 h-5 inline-block mr-2" />
-              Llamar Ahora
-            </button>
-            <button className="px-8 py-3 border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-200">
-              <MessageSquare className="w-5 h-5 inline-block mr-2" />
-              Chat en Vivo
-            </button>
-          </div>
-        </section> */}
       </div>
     </>
   );

@@ -1,0 +1,41 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Gran rifa de fin de año con premios increíbles para toda la familia",
+      "imageUrl": "/categories/iphone13.jpg",
+      "raffleType": "PREMIUM",
+      "raffleStatus": "ACTIVE",
+      "startDate": "2026-10-01T00:00:00",
+      "endDate": "2026-12-20T00:00:00",
+      "drawDate": "2026-12-24T20:00:00",
+      "totalTicketsIssued": 350,
+      "totalParticipants": 120,
+      "prizeCount": 2,
+      "requiresPet": false
+    },
+    {
+      "id": 2,
+      "title": "Rifa estándar",
+      "imageUrl": "/categories/iphone13.jpg",
+      "raffleType": "PREMIUM",
+      "raffleStatus": "ACTIVE",
+      "startDate": "2026-10-01T00:00:00",
+      "endDate": "2026-12-20T00:00:00",
+      "drawDate": "2026-12-24T20:00:00",
+      "totalTicketsIssued": 350,
+      "totalParticipants": 120,
+      "prizeCount": 2,
+      "requiresPet": false
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

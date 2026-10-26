@@ -74,7 +74,7 @@ export default function CommercialProfilePage() {
         <p className="text-lg font-semibold text-gray-600">Vendedor no encontrado</p>
         <button
           onClick={() => router.back()}
-          className="text-sm font-semibold underline underline-offset-2 transition hover:opacity-70 cursor-pointer"
+          className="min-h-11 px-4 text-sm font-semibold underline underline-offset-2 transition hover:opacity-70 cursor-pointer"
           style={{ color: "#014C92" }}
         >
           Volver

@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 
 export default function Page() {
     return <>
-        <HomePage />;
+        <HomePage />
         <Footer />
     </>
 }

@@ -34,6 +34,7 @@ import { useLogout } from '@/hooks/useLogout';
 import { useLevelProfile } from '@/hooks/useLevelProfile'
 import { XpRewardToast } from '@/components/levels/XpRewardToast'
 import { useXpReward } from '@/hooks/useXpReward'
+import { isMobileBarItemActive, MOBILE_BAR_ITEMS, MOBILE_MENU_ITEMS } from './mobileNav'
 
 const navItems = [
   { href: '/home',              label: 'Inicio',    Icon: Home          },
@@ -46,7 +47,6 @@ const navItems = [
   { href: '/plans/mobile-plans',label: 'Recargas',  Icon: Smartphone    },
   { href: '/forum',             label: 'Foro',      Icon: MessageSquare },
 ] as const;
-
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -70,6 +70,7 @@ export default function Navbar() {
 
   // refs independientes
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileProfileSheetRef = useRef<HTMLDivElement | null>(null);
   const keyWalletMenuRefDesktop = useRef<HTMLDivElement | null>(null);
   const keyWalletMenuRefMobile = useRef<HTMLDivElement | null>(null);
   const notificationsMenuRefDesktop = useRef<HTMLDivElement | null>(null);
@@ -82,7 +83,12 @@ export default function Navbar() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node | null;
-      if (profileMenuRef.current && !profileMenuRef.current.contains(target))
+      // La hoja del celular no cuelga de `profileMenuRef`: sin esta guarda, el `mousedown` de un toque en uno de
+      // sus enlaces la cerraba antes del clic y el enlace no navegaba.
+      if (
+        profileMenuRef.current && !profileMenuRef.current.contains(target) &&
+        !mobileProfileSheetRef.current?.contains(target)
+      )
         setOpenMenu(false);
       if (
         keyWalletMenuRefDesktop.current && !keyWalletMenuRefDesktop.current.contains(target) &&
@@ -122,11 +128,14 @@ export default function Navbar() {
           {/* NAV BUTTONS */}
           <div className="flex gap-2 2xl:gap-3">
             {navItems.map(({ href, label, Icon }) => (
-              <Link href={href} key={href}>
-                <button title={label} className={getNavClass(pathname === href)}>
-                  <Icon className="w-5 h-5 2xl:hidden" />
-                  <span className="hidden 2xl:inline">{label}</span>
-                </button>
+              <Link
+                href={href}
+                key={href}
+                title={label}
+                className={`${getNavClass(pathname === href)} inline-flex items-center justify-center`}
+              >
+                <Icon className="w-5 h-5 2xl:hidden" />
+                <span className="hidden 2xl:inline">{label}</span>
               </Link>
             ))}
           </div>
@@ -430,7 +439,7 @@ export default function Navbar() {
       </nav>
 
       {/* ---------- MOBILE TOP BAR ---------- */}
-      <div className="lg:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
+      <div data-app-bar="top" className="lg:hidden immersive:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
             <Image src="/logos/logoDorado.png" alt="VERyGANA" width={42} height={42} className="object-contain shrink-0" />
@@ -479,9 +488,9 @@ export default function Navbar() {
 
               <div
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`fixed inset-x-0 top-16 mx-4 overflow-hidden rounded-3xl bg-white shadow-2xl border border-white/20 transition-all duration-300 ${isKeyWalletOpen
+                className={`fixed inset-x-0 top-16 mx-4 max-h-[calc(100dvh-9rem)] overflow-y-auto rounded-3xl bg-white shadow-2xl border border-white/20 transition-all duration-300 ${isKeyWalletOpen
                     ? "opacity-100 scale-100 pointer-events-auto"
-                    : "opacity-0 scale-95 pointer-events-none"
+                    : "invisible opacity-0 scale-95 pointer-events-none"
                   }`}
               >
                 {/* HEADER */}
@@ -601,61 +610,30 @@ export default function Navbar() {
       </div>
 
       {/* ---------- MOBILE BOTTOM NAVIGATION ---------- */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] shadow-lg pb-safe">
+      <nav aria-label="Navegación inferior" data-app-bar="bottom" className="lg:hidden immersive:hidden fixed bottom-0 left-0 right-0 z-50 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] shadow-lg pb-safe">
         <div className="grid grid-cols-6 h-16">
 
-          {/* HOME */}
-          <Link href="/home" className="flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/home" ? "bg-white/20" : ""}`}>
-                <Home className={`w-5 h-5 transition-all duration-200 ${pathname === "/home" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/home" ? "text-[#00a4ff]" : "text-white/70"}`}>Inicio</span>
-            </div>
-          </Link>
-
-          {/* ANUNCIOS */}
-          <Link href="/ads" className="flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/ads" ? "bg-white/20" : ""}`}>
-                <Megaphone className={`w-5 h-5 transition-all duration-200 ${pathname === "/ads" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/ads" ? "text-[#00a4ff]" : "text-white/70"}`}>Anuncios</span>
-            </div>
-          </Link>
-
-          {/* RIFAS */}
-          <Link href="/raffles" className="flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/raffles" ? "bg-white/20" : ""}`}>
-                <Gift className={`w-5 h-5 transition-all duration-200 ${pathname === "/raffles" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/raffles" ? "text-[#00a4ff]" : "text-white/70"}`}>Rifas</span>
-            </div>
-          </Link>
-
-          {/* MASCOTA */}
-          <Link href="/pet" className="flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/pet" ? "bg-white/20" : ""}`}>
-                <PawPrint className={`w-5 h-5 transition-all duration-200 ${pathname === "/pet" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/pet" ? "text-[#00a4ff]" : "text-white/70"}`}>Mascota</span>
-            </div>
-          </Link>
-
-          {/* PRODUCTOS */}
-          <Link href="/products" className="flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className={`p-1.5 rounded-full transition-all duration-200 ${pathname === "/products" ? "bg-white/20" : ""}`}>
-                <Package className={`w-5 h-5 transition-all duration-200 ${pathname === "/products" ? "text-[#00a4ff]" : "text-white/70"}`} />
-              </div>
-              <span className={`text-[10px] font-semibold transition-all duration-200 ${pathname === "/products" ? "text-[#00a4ff]" : "text-white/70"}`}>Productos</span>
-            </div>
-          </Link>
+          {MOBILE_BAR_ITEMS.map((item) => {
+            const active = isMobileBarItemActive(pathname, item);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className="flex flex-col items-center justify-center active:bg-white/10 transition-colors"
+              >
+                <div className="flex flex-col items-center gap-0.5">
+                  <div className={`p-1.5 rounded-full transition-all duration-200 ${active ? "bg-white/20" : ""}`}>
+                    <item.Icon className={`w-5 h-5 transition-all duration-200 ${active ? "text-[#00a4ff]" : "text-white/70"}`} />
+                  </div>
+                  <span className={`text-[10px] font-semibold transition-all duration-200 ${active ? "text-[#00a4ff]" : "text-white/70"}`}>{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
 
           {/* PERFIL */}
-          <button onClick={() => setOpenMenu((v) => !v)} className="cursor-pointer flex flex-col items-center justify-center">
+          <button onClick={() => setOpenMenu((v) => !v)} className="cursor-pointer flex flex-col items-center justify-center active:bg-white/10 transition-colors">
             <div className="flex flex-col items-center gap-0.5">
               <div className={`p-1.5 rounded-full transition-all duration-200 ${openMenu ? "bg-white/20" : ""}`}>
                 <User className={`w-5 h-5 transition-all duration-200 ${openMenu ? "text-[#00a4ff]" : "text-white/70"}`} />
@@ -669,11 +647,12 @@ export default function Navbar() {
 
       {/* MOBILE PROFILE MENU (FULL SCREEN) */}
       <div
-        className={`lg:hidden fixed inset-0 z-60 bg-black/50 transition-opacity duration-300 ${openMenu ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        className={`lg:hidden immersive:hidden fixed inset-0 z-60 bg-black/50 transition-[opacity,visibility] duration-300 ${openMenu ? "opacity-100 pointer-events-auto" : "invisible opacity-0 pointer-events-none"}`}
         onClick={() => setOpenMenu(false)}
       >
         <div
-          className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl transition-transform duration-300 ${openMenu ? "translate-y-0" : "translate-y-full"}`}
+          ref={mobileProfileSheetRef}
+          className={`absolute bottom-0 left-0 right-0 max-h-[90dvh] overflow-y-auto bg-white rounded-t-3xl transition-transform duration-300 ${openMenu ? "translate-y-0" : "translate-y-full"}`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] p-6 rounded-t-3xl text-white">
@@ -721,26 +700,12 @@ export default function Navbar() {
             )}
           </div>
           <div className="py-2 pb-20">
-            <Link href="/explore/gamification" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
-              <Zap className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
-              <span className="font-medium group-hover:text-[#00a4ff]">Mi Nivel</span>
-            </Link>
-            <Link href="/explore/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
-              <UserCircle className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
-              <span className="font-medium group-hover:text-[#00a4ff]">Mi Perfil</span>
-            </Link>
-            <Link href="/purchases" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
-              <ShoppingBag className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
-              <span className="font-medium group-hover:text-[#00a4ff]">Mis compras</span>
-            </Link>
-            <Link href="/explore/referrals" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
-              <UserCircle className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
-              <span className="font-medium group-hover:text-[#00a4ff]">Mis Referidos</span>
-            </Link>
-            <Link href="/support" className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
-              <Headset className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
-              <span className="font-medium group-hover:text-[#00a4ff]">Soporte</span>
-            </Link>
+            {MOBILE_MENU_ITEMS.map(({ href, label, Icon }) => (
+              <Link key={href} href={href} className="flex items-center gap-4 px-6 py-4 hover:bg-[#00a4ff]/10 active:bg-[#00a4ff]/20 transition-all group" onClick={() => setOpenMenu(false)}>
+                <Icon className="w-6 h-6 text-gray-400 group-hover:text-[#00a4ff]" />
+                <span className="font-medium group-hover:text-[#00a4ff]">{label}</span>
+              </Link>
+            ))}
             <div className="border-t border-gray-200 mt-2 pt-2">
               <button className="w-full flex items-center gap-4 px-6 py-4 text-red-600 hover:bg-red-50 active:bg-red-100 transition-all cursor-pointer"
                 onClick={async () => {

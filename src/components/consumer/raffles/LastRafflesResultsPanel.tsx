@@ -91,7 +91,7 @@ export default function LastRafflesResultsPanel() {
               {/* CTA */}
               <Link
                 href={`/raffles/${result.raffleId}/results`}
-                className="ml-3 px-3 py-1.5 text-xs font-semibold text-white rounded-lg transition hover:opacity-80"
+                className="ml-3 inline-flex items-center justify-center min-h-11 min-w-11 px-3 py-1.5 text-xs font-semibold text-white rounded-lg transition hover:opacity-80"
                 style={{ background: "linear-gradient(to right, #0b1440, #03548C)" }}
               >
                 Ver

@@ -66,7 +66,7 @@ export default function VerifyPage() {
 
             {/* Mobile header */}
             <div className="lg:hidden bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] px-6 py-5 flex items-center gap-3">
-              <Link href="/">
+              <Link href="/" className="flex min-h-11 min-w-11 items-center justify-center">
                 <Image src="/logos/logo.png" alt="Ver y Gana" width={40} height={40} />
               </Link>
               <span className="text-white font-bold text-lg">Ver y Gana</span>
@@ -83,7 +83,7 @@ export default function VerifyPage() {
 
                 <p className="text-center text-sm text-gray-500 mt-5">
                   ¿Ya tienes cuenta verificada?{' '}
-                  <Link href="/login" className="text-[#03548C] font-semibold hover:underline">
+                  <Link href="/login" className="inline-flex min-h-11 items-center text-[#03548C] font-semibold hover:underline">
                     Inicia sesión
                   </Link>
                 </p>
@@ -93,7 +93,7 @@ export default function VerifyPage() {
 
         </div>
       </div>
-      <Footer />
+      <Footer guest />
     </>
   );
 }

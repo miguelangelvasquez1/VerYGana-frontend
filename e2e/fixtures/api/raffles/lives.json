@@ -1,0 +1,16 @@
+[
+  {
+    "id": 3,
+    "title": "Rifa en vivo",
+    "imageUrl": "/categories/iphone13.jpg",
+    "raffleType": "PREMIUM",
+    "raffleStatus": "LIVE",
+    "startDate": "2026-10-01T00:00:00",
+    "endDate": "2026-12-20T00:00:00",
+    "drawDate": "2026-12-24T20:00:00",
+    "totalTicketsIssued": 350,
+    "totalParticipants": 120,
+    "prizeCount": 2,
+    "requiresPet": false
+  }
+]

@@ -1,0 +1,68 @@
+{
+  "id": 1,
+  "imageUrl": "/categories/iphone13.jpg",
+  "title": "Gran rifa de fin de año con premios increíbles para toda la familia",
+  "description": "Descripción de prueba de la rifa.",
+  "raffleType": "PREMIUM",
+  "raffleStatus": "ACTIVE",
+  "startDate": "2026-10-01T00:00:00",
+  "endDate": "2026-12-20T00:00:00",
+  "drawDate": "2026-12-24T20:00:00",
+  "maxTicketsPerUser": 50,
+  "maxTotalTickets": 1000,
+  "totalTicketsIssued": 350,
+  "totalParticipants": 120,
+  "prizes": [
+    {
+      "id": 1,
+      "title": "Teléfono de última generación",
+      "description": "Premio de prueba.",
+      "brand": "Marca de Prueba",
+      "value": 4500000,
+      "imageUrl": "/products/casco.png",
+      "prizeType": "PHYSICAL",
+      "position": 1,
+      "quantity": 1
+    },
+    {
+      "id": 2,
+      "title": "Audífonos inalámbricos",
+      "description": "Premio de prueba.",
+      "brand": "Marca de Prueba",
+      "value": 600000,
+      "imageUrl": "/products/casco.png",
+      "prizeType": "PHYSICAL",
+      "position": 2,
+      "quantity": 1
+    }
+  ],
+  "rules": [
+    {
+      "id": 1,
+      "raffleId": 1,
+      "isActive": true,
+      "ticketEarningRuleResponseDTO": {
+        "id": 1,
+        "ruleName": "Compra",
+        "description": "Un ticket por cada compra.",
+        "ruleType": "PURCHASE",
+        "isActive": true,
+        "priority": 1,
+        "ticketsToAward": 1,
+        "minPurchaseAmount": 1000000,
+        "dailyLogin": null,
+        "referralAddedQuantity": null,
+        "createdAt": "2026-10-01T00:00:00",
+        "updatedAt": "2026-10-01T00:00:00"
+      },
+      "maxTicketsBySource": 20,
+      "currentTicketsBySource": 4,
+      "createdAt": "2026-10-01T00:00:00",
+      "updatedAt": "2026-10-01T00:00:00"
+    }
+  ],
+  "requiresPet": false,
+  "drawMethod": "SYSTEM_RANDOM",
+  "termsAndConditions": "Términos y condiciones de prueba.",
+  "targeting": null
+}

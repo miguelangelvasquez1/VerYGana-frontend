@@ -15,6 +15,9 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
+/blob-report
 
 # next.js
 /.next/
@@ -43,10 +46,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Claude skills
-.claude
+# Claude: se ignora todo salvo los agentes (versionados, spec 010).
+# Hay que ignorar el contenido (`.claude/*`) y no la carpeta: git no re-incluye
+# un archivo si su carpeta padre está ignorada.
+.claude/*
+!.claude/agents/
 .agents
 .playwright-mcp
 
 # Infisical local config
 .infisical.json
+# Reporte temporal de lint-ratchet
+.lint-report.json

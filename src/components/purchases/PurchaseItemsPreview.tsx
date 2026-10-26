@@ -42,7 +42,8 @@ const PurchaseItemsPreview = ({ items }: Props) => {
               <button
                 onClick={() => setCodeItem(item)}
                 title="Ver código entregado"
-                className="absolute bottom-1 right-1 w-7 h-7 flex items-center justify-center bg-[#03548C] text-white rounded-full shadow-sm hover:bg-[#03548C]/90 active:scale-95 transition-all cursor-pointer"
+                aria-label="Ver código entregado"
+                className="absolute bottom-0 right-0 w-11 h-11 flex items-center justify-center bg-[#03548C] text-white rounded-full shadow-sm hover:bg-[#03548C]/90 active:scale-95 transition-all cursor-pointer"
               >
                 <KeyRound className="w-3.5 h-3.5" />
               </button>

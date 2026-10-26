@@ -231,7 +231,8 @@ export default function SurveyPlayerModal({ surveyId, onClose, showReward }: Pro
             </div>
             <button
               onClick={onClose}
-              className="cursor-pointer shrink-0 rounded-xl p-2 text-gray-400 hover:bg-gray-100"
+              aria-label="Cerrar"
+              className="cursor-pointer flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100"
             >
               <X className="h-5 w-5" />
             </button>
@@ -375,7 +376,8 @@ function PreviewScreen({
         </div>
         <button
           onClick={onClose}
-          className="cursor-pointer ml-3 shrink-0 rounded-xl p-2 text-gray-400 hover:bg-gray-100"
+          aria-label="Cerrar"
+          className="cursor-pointer ml-3 flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100"
         >
           <X className="h-4 w-4" />
         </button>
@@ -466,14 +468,14 @@ function PreviewScreen({
         <div className="shrink-0 flex items-center gap-3 border-t border-gray-100 px-6 py-4">
           <button
             onClick={onClose}
-            className="cursor-pointer rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+            className="cursor-pointer min-h-11 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
           >
             Cancelar
           </button>
           <button
             onClick={onStart}
             disabled={isStarting}
-            className="cursor-pointer flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#03548C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0b1440] disabled:opacity-60 active:scale-95 transition-all"
+            className="cursor-pointer flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#03548C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0b1440] disabled:opacity-60 active:scale-95 transition-all"
           >
             {isStarting
               ? <><Loader2 className="h-4 w-4 animate-spin" /> Iniciando…</>

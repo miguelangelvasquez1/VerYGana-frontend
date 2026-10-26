@@ -9,6 +9,7 @@ import { purchaseService } from '@/services/PurchaseService';
 import { keyPromotionKeys, usePurchaseQuote } from '@/hooks/keys/useKeyPromotions';
 import { formatColombiaDateTime, formatCopCents, formatKeys, parseKeysError } from '@/utils/keys';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const formatCOP = (amount: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amount);
@@ -137,11 +138,12 @@ export default function CheckoutPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Tu carrito está vacío</h1>
           <p className="text-gray-500 mb-6">Agrega productos para continuar con la compra</p>
-          <Link href="/products">
-            <button className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-[#03548C] hover:bg-[#0b1440] text-white font-semibold rounded-xl transition-colors">
-              <Package className="w-4 h-4" />
-              Explorar productos
-            </button>
+          <Link
+            href="/products"
+            className="cursor-pointer inline-flex items-center justify-center gap-2 min-h-11 px-6 py-3 bg-[#03548C] hover:bg-[#0b1440] active:bg-[#0b1440] text-white font-semibold rounded-xl transition-colors"
+          >
+            <Package className="w-4 h-4" />
+            Explorar productos
           </Link>
         </div>
       </div>
@@ -374,9 +376,11 @@ export default function CheckoutPage() {
 
                 <input
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] transition"
+                  className="w-full min-h-11 px-4 py-2.5 border border-gray-300 rounded-xl text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] transition"
                   placeholder="tu@email.com"
                 />
                 <p className="text-xs text-gray-400">
@@ -432,9 +436,11 @@ export default function CheckoutPage() {
                   const quoteItem = quoteItemsById.get(item.productId);
                   return (
                   <div key={item.productId} className="flex gap-3 p-4">
-                    <img
+                    <Image
                       src={item.imageUrl}
                       alt={item.name}
+                      width={64}
+                      height={64}
                       className="w-16 h-16 rounded-xl object-cover shrink-0 border border-gray-100"
                     />
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">

@@ -1,0 +1,10 @@
+{
+  "currentLevel": "ORO",
+  "xpTotal": 1450,
+  "xpToNextLevel": 550,
+  "multiplier": 1.5,
+  "benefitsPaused": false,
+  "reactivationMissionActive": false,
+  "reactivationXpGoal": null,
+  "reactivationXpProgress": null
+}

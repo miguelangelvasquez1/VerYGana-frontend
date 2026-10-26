@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import { registerConsumer } from "@/services/ConsumerService";
 import { registerCommercial } from "@/services/AdvertiserService";
@@ -75,7 +76,7 @@ function FieldWrapper({
 }
 
 const inputCls = (hasError?: boolean) =>
-    `w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:bg-white transition ${
+    `w-full px-4 py-3 bg-gray-50 border rounded-xl text-base lg:text-sm focus:outline-none focus:ring-2 focus:bg-white transition ${
         hasError
             ? "border-red-400 focus:ring-red-300"
             : "border-gray-200 focus:ring-[#03548C]/40 focus:border-[#03548C]"
@@ -115,7 +116,7 @@ function PhoneInput({
             maxLength={10}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="flex-1 py-3 bg-transparent text-sm focus:outline-none min-w-0"
+            className="flex-1 py-3 bg-transparent text-base lg:text-sm focus:outline-none min-w-0"
             required
         />
       </div>
@@ -148,7 +149,8 @@ function PasswordInput({
             placeholder={placeholder}
             onChange={onChange}
             value={value}
-            className={`${inputCls(hasError)} pr-11`}
+            className={`${inputCls(hasError)} pr-12`}
+            autoComplete="new-password"
             required={required}
         />
         <button
@@ -156,7 +158,7 @@ function PasswordInput({
             onClick={() => setShow((s) => !s)}
             tabIndex={-1}
             aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+            className="absolute right-0 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center text-gray-400 hover:text-gray-600 transition cursor-pointer"
         >
           {show ? (
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -560,9 +562,9 @@ export default function RegisterForm() {
             </p>
             <p className="text-gray-400 text-xs mt-3">Este proceso puede tardar algunos días hábiles.</p>
           </div>
-          <a href="/login" className="text-[#03548C] text-sm hover:underline font-medium">
+          <Link href="/login" className="inline-flex min-h-11 items-center text-[#03548C] text-sm hover:underline font-medium">
             Ir al inicio de sesión
-          </a>
+          </Link>
         </div>
     );
   }
@@ -578,6 +580,7 @@ export default function RegisterForm() {
 
           <div className="grid gap-4">
             <button
+                type="button"
                 onClick={() => setRole("BENEFICIARIO")}
                 className="group flex items-center gap-4 p-5 border-2 border-blue-200 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left cursor-pointer"
             >
@@ -591,6 +594,7 @@ export default function RegisterForm() {
             </button>
 
             <button
+                type="button"
                 onClick={() => setRole("COMERCIANTE")}
                 className="group flex items-center gap-4 p-5 border-2 border-[#03548C]/30 rounded-2xl hover:border-[#03548C] hover:bg-blue-50 transition-all text-left cursor-pointer"
             >
@@ -606,9 +610,9 @@ export default function RegisterForm() {
 
           <p className="text-center text-sm text-gray-500">
             ¿Ya tienes cuenta?{" "}
-            <a href="/login" className="text-[#03548C] font-semibold hover:underline">
+            <Link href="/login" className="inline-flex min-h-11 items-center text-[#03548C] font-semibold hover:underline">
               Inicia sesión aquí
-            </a>
+            </Link>
           </p>
         </div>
     );
@@ -665,6 +669,7 @@ export default function RegisterForm() {
                       <FieldWrapper label="Nombre" required error={fieldErrors["name"]}>
                         <input
                             name="name"
+                            autoComplete="given-name"
                             placeholder="Tu nombre"
                             onChange={handleChange}
                             value={formData.name || ""}
@@ -675,6 +680,7 @@ export default function RegisterForm() {
                       <FieldWrapper label="Apellidos" required error={fieldErrors["lastNames"]}>
                         <input
                             name="lastNames"
+                            autoComplete="family-name"
                             placeholder="Tus apellidos"
                             onChange={handleChange}
                             value={formData.lastNames || ""}
@@ -706,6 +712,8 @@ export default function RegisterForm() {
                       >
                         <input
                             name="documentNumber"
+                            inputMode={formData.documentType === "PP" ? "text" : "numeric"}
+                            autoComplete="off"
                             placeholder="Ej. 1234567890"
                             onChange={handleChange}
                             value={formData.documentNumber || ""}
@@ -718,6 +726,8 @@ export default function RegisterForm() {
                     <FieldWrapper label="Nombre de usuario" required error={fieldErrors["userName"]}>
                       <input
                           name="userName"
+                          autoComplete="username"
+                          autoCapitalize="none"
                           placeholder="ej. juan_perez123"
                           onChange={handleChange}
                           value={formData.userName || ""}
@@ -834,6 +844,8 @@ export default function RegisterForm() {
                     <FieldWrapper label="Correo electrónico" required error={fieldErrors["email"]}>
                       <input
                           type="email"
+                          inputMode="email"
+                          autoComplete="email"
                           name="email"
                           placeholder="tu@correo.com"
                           onChange={handleChange}
@@ -1036,7 +1048,7 @@ export default function RegisterForm() {
                                   key={cat.id}
                                   type="button"
                                   onClick={() => handleCheckboxChange(cat)}
-                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all cursor-pointer
+                                  className={`inline-flex items-center gap-1.5 min-h-11 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all cursor-pointer
                           ${
                                       selected
                                           ? "bg-[#03548C] border-[#03548C] text-white shadow-sm shadow-blue-200"
@@ -1141,6 +1153,8 @@ export default function RegisterForm() {
                     <FieldWrapper label="Correo electrónico" required error={fieldErrors["email"]}>
                       <input
                           type="email"
+                          inputMode="email"
+                          autoComplete="email"
                           name="email"
                           placeholder="empresa@correo.com"
                           onChange={handleChange}
@@ -1266,15 +1280,15 @@ export default function RegisterForm() {
                   <span className="text-sm text-gray-700 leading-snug">
                     <span className="font-semibold text-gray-900">
                       Acepto los{" "}
-                      <a
+                      <Link
                         href="/terminos"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#03548C] underline hover:text-[#0b1440]"
+                        className="inline-flex min-h-11 items-center text-[#03548C] underline hover:text-[#0b1440]"
                         onClick={(e) => e.stopPropagation()}
                       >
                         Términos y Condiciones
-                      </a>
+                      </Link>
                       .
                     </span>{" "}
                     Confirmo que los he leído y acepto las condiciones de uso de Ver y Gana.
@@ -1340,7 +1354,7 @@ export default function RegisterForm() {
                   setFieldErrors({});
                 }}
                 disabled={isSubmitting}
-                className="w-full text-sm text-gray-400 hover:text-gray-600 hover:underline transition py-1 cursor-pointer"
+                className="w-full min-h-11 text-sm text-gray-400 hover:text-gray-600 hover:underline transition py-1 cursor-pointer"
             >
               ← Volver a selección de rol
             </button>

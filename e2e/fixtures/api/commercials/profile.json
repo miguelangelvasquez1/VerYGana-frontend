@@ -1,0 +1,85 @@
+{
+  "companyName": "Tienda de Prueba S.A.S.",
+  "departmentName": "Quindío",
+  "municipalityName": "Armenia",
+  "registeredDate": "2025-03-01T00:00:00",
+  "averageRate": 4.6,
+  "reviewCount": 31,
+  "totalActiveProducts": 3,
+  "productCategories": [
+    {
+      "id": 1,
+      "name": "Deportes",
+      "imageUrl": "/categories/deporte.jpg"
+    },
+    {
+      "id": 2,
+      "name": "Joyería",
+      "imageUrl": "/categories/joyeria.webp"
+    }
+  ],
+  "activeProducts": {
+    "data": [
+      {
+        "id": 1,
+        "name": "Casco de ciclismo profesional con visera y ventilación extendida edición limitada",
+        "imageUrl": "/products/casco.png",
+        "price": 15000000,
+        "maxKeysAllowed": 20,
+        "maxKeysPct": 40,
+        "minCashCents": 1500000,
+        "averageRate": 4.5,
+        "reviewCount": 12,
+        "categoryName": "Deportes",
+        "stock": 15,
+        "status": "ACTIVE",
+        "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+        "companyName": "Tienda de Prueba S.A.S.",
+        "isGameReward": false
+      },
+      {
+        "id": 2,
+        "name": "Camiseta oficial",
+        "imageUrl": "/products/camiseta.png",
+        "price": 8000000,
+        "maxKeysAllowed": 20,
+        "maxKeysPct": 40,
+        "minCashCents": 1500000,
+        "averageRate": 4.5,
+        "reviewCount": 12,
+        "categoryName": "Ropa",
+        "stock": 15,
+        "status": "ACTIVE",
+        "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+        "companyName": "Tienda de Prueba S.A.S.",
+        "isGameReward": false
+      },
+      {
+        "id": 3,
+        "name": "Anillos de plata",
+        "imageUrl": "/products/anillos.png",
+        "price": 22000000,
+        "maxKeysAllowed": 20,
+        "maxKeysPct": 40,
+        "minCashCents": 1500000,
+        "averageRate": 4.5,
+        "reviewCount": 12,
+        "categoryName": "Joyería",
+        "stock": 15,
+        "status": "ACTIVE",
+        "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+        "companyName": "Tienda de Prueba S.A.S.",
+        "isGameReward": false
+      }
+    ],
+    "meta": {
+      "page": 0,
+      "size": 10,
+      "totalElements": 3,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrevious": false,
+      "sorted": true
+    }
+  }
+}

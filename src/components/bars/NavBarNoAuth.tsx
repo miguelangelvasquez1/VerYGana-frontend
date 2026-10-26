@@ -18,16 +18,19 @@ export default function NavBarNoAuth() {
                 <a href="#como-funciona" className="text-gray-700 hover:text-blue-600 transition-colors">Cómo Funciona</a>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Link href="/login" className="hidden md:block">
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+            <div className="flex items-center gap-2 sm:gap-4">
+              {/* Enlaces con el aspecto del botón: navegar es un enlace, no un botón dentro de un enlace (RN-5) */}
+              <Link
+                href="/login"
+                className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-lg bg-blue-600 px-3 py-2 text-white transition-colors hover:bg-blue-700 active:bg-blue-800 sm:px-6 md:min-h-0"
+              >
                 Iniciar Sesión
-              </button>
               </Link>
-              <Link href="/register" >
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+              <Link
+                href="/register"
+                className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-lg bg-blue-600 px-3 py-2 text-white transition-colors hover:bg-blue-700 active:bg-blue-800 sm:px-6 md:min-h-0"
+              >
                 Crear Cuenta
-              </button>
               </Link>
             </div>
           </div>
