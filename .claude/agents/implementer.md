@@ -17,8 +17,8 @@ deshacer un cambio de prueba, edita el archivo.
 ## Antes de cada sesión
 
 Lee `spec.md`, `plan.md` y las tareas asignadas en `tasks.md`. Si no hay `node_modules`,
-corre `npm ci` (instala lo que dice el lockfile). Nunca `npm install <paquete>` ni cambios
-en `package.json` o `package-lock.json` que el plan no pida (P-1, P-14).
+corre `pnpm install --frozen-lockfile` (instala lo que dice el lockfile). Nunca `pnpm add <paquete>` ni cambios
+en `package.json` o `pnpm-lock.yaml` que el plan no pida (P-1, P-14).
 
 Para correr `lint:ci` y `build` exporta las variables públicas ficticias de `CLAUDE.md`
 (sección "Comandos"); nunca leas ni copies valores de `.env` (P-16).
@@ -27,7 +27,7 @@ Para correr `lint:ci` y `build` exporta las variables públicas ficticias de `CL
 
 1. **Test primero.** Si la tarea toca lógica sin interfaz (función pura, política,
    handler de `src/app/api`, script, middleware), escribe la prueba en `__tests__/` y
-   córrela con `npx vitest run <archivo>`: debe fallar por la razón correcta (no por un
+   córrela con `pnpm exec vitest run <archivo>`: debe fallar por la razón correcta (no por un
    error de importación ajeno). Si ya pasa, no prueba nada: reescríbela. Si la tarea
    dice "Debe fallar si", haz ese cambio a mano, mira la prueba en rojo y deshazlo
    editando el archivo (P-13, P-17).
@@ -35,7 +35,7 @@ Para correr `lint:ci` y `build` exporta las variables públicas ficticias de `CL
    dominio (nombres, estilo, densidad de comentarios, Tailwind). Lo que imitas es el estilo, no
    la deuda: si el código vecino incumple una regla con excepción en la constitución (por
    ejemplo `'use client'` en una página entera, o un token en una URL), lo nuevo la cumple.
-3. **Verifica** con el comando de la tarea (normalmente `npm test` y `npx tsc --noEmit`).
+3. **Verifica** con el comando de la tarea (normalmente `pnpm test` y `pnpm exec tsc --noEmit`).
    Si hay un fallo que no entiendes, busca la causa raíz antes de tocar nada (skill
    `systematic-debugging`). Para tareas de UI, si hay un servidor levantado, comprueba
    el flujo en el navegador; si no puedes, dilo en el reporte en vez de afirmar que
@@ -51,7 +51,7 @@ Para correr `lint:ci` y `build` exporta las variables públicas ficticias de `CL
   invalidaciones de cada mutación (P-10). No reimplementes el manejo global de 401/402/503.
 - Ruta protegida nueva: actualiza el `matcher` y la lógica por rol de `src/middleware.ts`
   **y** la tabla de `__tests__/middleware/routeAccess.ts`; corre
-  `npx vitest run __tests__/middleware/routeProtection.test.ts` (P-4). El middleware no
+  `pnpm exec vitest run __tests__/middleware/routeProtection.test.ts` (P-4). El middleware no
   basta: la API autoriza los datos (P-5).
 - No manejes tokens a mano ni los pongas en URLs, `localStorage` o logs; usa el flujo de
   next-auth existente (P-12, P-16). Los usuarios se identifican por `publicId`, nunca por
@@ -60,7 +60,7 @@ Para correr `lint:ci` y `build` exporta las variables públicas ficticias de `CL
   `any` para tapar un tipo que no conoces: míralo en la API. Un `any` nuevo es un aviso
   nuevo y `lint:ci` lo rechaza (P-9, P-19).
 - Si corriges avisos de lint, baja `.lint-max-warnings` al conteo nuevo que te indica
-  `npm run lint:ci`: nunca lo subas (P-19).
+  `pnpm run lint:ci`: nunca lo subas (P-19).
 - `'use client'` solo en el componente que necesita estado, efectos o eventos (P-2).
   `params` y `searchParams` de páginas y layouts se leen con `await` (P-6). `next/image`
   y `next/link` en vez de `<img>` y `<a>` internos; hosts de imágenes nuevos en

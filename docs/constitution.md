@@ -132,10 +132,10 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
   <https://nextjs.org/docs/15/app/api-reference/config/eslint>. Muestra exactamente esa
   configuración (`FlatCompat` con `extends: ['next/core-web-vitals', 'next/typescript']`).
 - **Versión:** `eslint` 9.39.4 y `eslint-config-next` 15.5.28.
-- **Excepción:** el comando `npm run lint` y el script `lint:ci` siguen usando `next lint`
+- **Excepción:** el comando `pnpm run lint` y el script `lint:ci` siguen usando `next lint`
   aunque en Next 15.5 está en desuso y desaparece en Next 16 (anuncio de la versión:
   <https://nextjs.org/blog/next-15-5>, apartado "next lint Deprecation"; el propio
-  `npx next lint --help` de la versión instalada lo avisa). Migrar el linter al CLI de ESLint
+  `pnpm exec next lint --help` de la versión instalada lo avisa). Migrar el linter al CLI de ESLint
   va atado a la decisión de pasar a Next 16 (frente D de la spec 010), no se hace aquí.
 
 ### P-9 · Sin `any`
@@ -243,21 +243,20 @@ afirma). Al subir de versión mayor de una tecnología hay que volver a comproba
 
 ### P-14 · Instalación reproducible y auditoría de producción
 
-- **Regla:** en CI y en la imagen se instala con `npm ci` y el `package-lock.json`. La
-  auditoría de dependencias de producción (`--omit=dev`) bloquea los avisos altos y críticos.
+- **Regla:** en CI y en la imagen se instala con `pnpm install --frozen-lockfile` y el
+  `pnpm-lock.yaml`. La auditoría de dependencias de producción (`--prod`) bloquea los avisos altos y críticos.
   Un aviso solo se tolera si tiene una excepción escrita en `security/audit-exceptions.json`
   con motivo, aprobador y fecha de revisión; una excepción vencida hace fallar el CI.
-- **Fuente:** documentación de npm 10, `npm ci`:
-  <https://docs.npmjs.com/cli/v10/commands/npm-ci> (pensado para entornos automatizados, falla
-  si el lockfile no coincide con `package.json`, nunca lo reescribe) y `npm audit`:
-  <https://docs.npmjs.com/cli/v10/commands/npm-audit> (sale con código distinto de cero si hay
-  vulnerabilidades, y en CI conviene `--audit-level` para fijar el umbral).
-- **Versión:** npm 10.9.3 (el local; el CI usa el npm que trae Node 22, de la serie 10); la
-  documentación consultada es la de la serie 10.
+- **Fuente:** documentación de pnpm, `pnpm install --frozen-lockfile`:
+  <https://pnpm.io/cli/install#--frozen-lockfile> (no escribe el lockfile y falla si no
+  coincide con `package.json`) y `pnpm audit`: <https://pnpm.io/cli/audit> (`--prod` audita solo
+  las dependencias de producción; sale con código distinto de cero si hay vulnerabilidades).
+- **Versión:** pnpm 10.28.0, la que fija `packageManager` en `package.json` (Corepack y
+  `pnpm/action-setup` la toman de ahí).
 - **Excepción:** `xlsx` (sin corrección publicada en npm) y el `postcss` anidado en Next
   (solo se corrige pasando a Next 16) tienen excepciones escritas con revisión el 2026-11-30.
   Para poder escribirlas por aviso sin bajar el umbral del resto, la puerta es el script propio
-  `scripts/audit-gate.mjs`, que no sustituye a `npm audit` sino que decide sobre su informe.
+  `scripts/audit-gate.mjs`, que no sustituye a `pnpm audit` sino que decide sobre su informe.
 
 ### P-15 · Toda llamada saliente del servidor lleva tiempo límite
 

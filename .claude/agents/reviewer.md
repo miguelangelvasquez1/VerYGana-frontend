@@ -19,11 +19,11 @@ de `CLAUDE.md`.
 1. **Puertas reales.** Corre tú mismo, no confíes en el reporte del implementer. Las
    mismas que el CI, con las variables públicas ficticias de `CLAUDE.md` exportadas:
    ```bash
-   npm test
-   npm run lint:ci
-   npm run build
-   npx tsc --noEmit        # después del build: necesita los tipos de rutas de .next/types
-   npm run audit:ci        # salida 2 = registro inalcanzable, reintenta; no es un hallazgo
+   pnpm test
+   pnpm run lint:ci
+   pnpm run build
+   pnpm exec tsc --noEmit        # después del build: necesita los tipos de rutas de .next/types
+   pnpm run audit:ci        # salida 2 = registro inalcanzable, reintenta; no es un hallazgo
    ```
    Distingue los fallos que introdujo el cambio de los que ya existían (lee el error y
    comprueba si el archivo aparece en `git diff`). `lint:ci` también falla si hay menos

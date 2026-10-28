@@ -1,185 +1,89 @@
 {
-  "auditReportVersion": 2,
-  "vulnerabilities": {
-    "next": {
-      "name": "next",
+  "actions": [],
+  "advisories": {
+    "1108110": {
+      "id": 1108110,
+      "module_name": "xlsx",
+      "severity": "high",
+      "title": "Prototype Pollution in sheetJS",
+      "url": "https://github.com/advisories/GHSA-4r6h-8v6p-xvw6",
+      "github_advisory_id": "GHSA-4r6h-8v6p-xvw6",
+      "vulnerable_versions": "<0.19.3",
+      "patched_versions": ""
+    },
+    "1108111": {
+      "id": 1108111,
+      "module_name": "xlsx",
+      "severity": "high",
+      "title": "SheetJS Regular Expression Denial of Service (ReDoS)",
+      "url": "https://github.com/advisories/GHSA-5pgg-2g8v-p4x9",
+      "github_advisory_id": "GHSA-5pgg-2g8v-p4x9",
+      "vulnerable_versions": "<0.20.2",
+      "patched_versions": ""
+    },
+    "1117015": {
+      "id": 1117015,
+      "module_name": "postcss",
       "severity": "moderate",
-      "isDirect": true,
-      "via": [
-        "postcss"
-      ],
-      "effects": [],
-      "range": "9.3.4-canary.0 - 16.3.0-preview.10",
-      "nodes": [
-        "node_modules/next"
-      ],
-      "fixAvailable": {
-        "name": "next",
-        "version": "16.4.0",
-        "isSemVerMajor": true
-      }
+      "title": "PostCSS has XSS via Unescaped </style> in its CSS Stringify Output",
+      "url": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
+      "github_advisory_id": "GHSA-qx2v-qp2m-jg93",
+      "vulnerable_versions": "<8.5.10",
+      "patched_versions": ""
     },
-    "postcss": {
-      "name": "postcss",
+    "1124252": {
+      "id": 1124252,
+      "module_name": "postcss",
       "severity": "high",
-      "isDirect": false,
-      "via": [
-        {
-          "source": 1117015,
-          "name": "postcss",
-          "dependency": "postcss",
-          "title": "PostCSS has XSS via Unescaped </style> in its CSS Stringify Output",
-          "url": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
-          "severity": "moderate",
-          "cwe": [
-            "CWE-79"
-          ],
-          "cvss": {
-            "score": 6.1,
-            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
-          },
-          "range": "<8.5.10"
-        },
-        {
-          "source": 1124252,
-          "name": "postcss",
-          "dependency": "postcss",
-          "title": "PostCSS: Arbitrary file read and information disclosure via attacker-controlled sourceMappingURL in CSS comments",
-          "url": "https://github.com/advisories/GHSA-6g55-p6wh-862q",
-          "severity": "high",
-          "cwe": [
-            "CWE-22",
-            "CWE-200"
-          ],
-          "cvss": {
-            "score": 7.5,
-            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
-          },
-          "range": "<=8.5.11"
-        },
-        {
-          "source": 1130709,
-          "name": "postcss",
-          "dependency": "postcss",
-          "title": "PostCSS: incomplete fix of GHSA-6g55-p6wh-862q — attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset",
-          "url": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
-          "severity": "moderate",
-          "cwe": [
-            "CWE-22",
-            "CWE-200"
-          ],
-          "cvss": {
-            "score": 0,
-            "vectorString": null
-          },
-          "range": "<=8.5.22"
-        },
-        {
-          "source": 1139510,
-          "name": "postcss",
-          "dependency": "postcss",
-          "title": "PostCSS: Path Traversal in Previous Source Map Auto-Loading (sourceMappingURL) leads to Arbitrary .map File Disclosure",
-          "url": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
-          "severity": "high",
-          "cwe": [
-            "CWE-22"
-          ],
-          "cvss": {
-            "score": 7.5,
-            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
-          },
-          "range": "<=8.5.17"
-        }
-      ],
-      "effects": [
-        "next"
-      ],
-      "range": "<=8.5.22",
-      "nodes": [
-        "node_modules/next/node_modules/postcss"
-      ],
-      "fixAvailable": {
-        "name": "next",
-        "version": "16.4.0",
-        "isSemVerMajor": true
-      }
+      "title": "PostCSS: Arbitrary file read and information disclosure via attacker-controlled sourceMappingURL in CSS comments",
+      "url": "https://github.com/advisories/GHSA-6g55-p6wh-862q",
+      "github_advisory_id": "GHSA-6g55-p6wh-862q",
+      "vulnerable_versions": "<=8.5.11",
+      "patched_versions": ""
     },
-    "xlsx": {
-      "name": "xlsx",
+    "1130709": {
+      "id": 1130709,
+      "module_name": "postcss",
+      "severity": "moderate",
+      "title": "PostCSS: incomplete fix of GHSA-6g55-p6wh-862q — attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset",
+      "url": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
+      "github_advisory_id": "GHSA-fxqj-rqcc-2cmp",
+      "vulnerable_versions": "<=8.5.22",
+      "patched_versions": ""
+    },
+    "1139510": {
+      "id": 1139510,
+      "module_name": "postcss",
       "severity": "high",
-      "isDirect": true,
-      "via": [
-        {
-          "source": 1108110,
-          "name": "xlsx",
-          "dependency": "xlsx",
-          "title": "Prototype Pollution in sheetJS",
-          "url": "https://github.com/advisories/GHSA-4r6h-8v6p-xvw6",
-          "severity": "high",
-          "cwe": [
-            "CWE-1321"
-          ],
-          "cvss": {
-            "score": 7.8,
-            "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
-          },
-          "range": "<0.19.3"
-        },
-        {
-          "source": 1108111,
-          "name": "xlsx",
-          "dependency": "xlsx",
-          "title": "SheetJS Regular Expression Denial of Service (ReDoS)",
-          "url": "https://github.com/advisories/GHSA-5pgg-2g8v-p4x9",
-          "severity": "high",
-          "cwe": [
-            "CWE-1333"
-          ],
-          "cvss": {
-            "score": 7.5,
-            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
-          },
-          "range": "<0.20.2"
-        },
-        {
-          "source": 9999999,
-          "name": "xlsx",
-          "dependency": "xlsx",
-          "title": "Aviso de ejemplo",
-          "url": "https://github.com/advisories/GHSA-xxxx-yyyy-zzzz",
-          "severity": "high",
-          "cwe": [],
-          "cvss": {
-            "score": 0,
-            "vectorString": null
-          },
-          "range": "*"
-        }
-      ],
-      "effects": [],
-      "range": "*",
-      "nodes": [
-        "node_modules/xlsx"
-      ],
-      "fixAvailable": false
+      "title": "PostCSS: Path Traversal in Previous Source Map Auto-Loading (sourceMappingURL) leads to Arbitrary .map File Disclosure",
+      "url": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
+      "github_advisory_id": "GHSA-r28c-9q8g-f849",
+      "vulnerable_versions": "<=8.5.17",
+      "patched_versions": ""
+    },
+    "9999999": {
+      "id": 9999999,
+      "module_name": "xlsx",
+      "severity": "high",
+      "title": "Aviso de ejemplo",
+      "url": "https://github.com/advisories/GHSA-xxxx-yyyy-zzzz",
+      "github_advisory_id": "GHSA-xxxx-yyyy-zzzz",
+      "vulnerable_versions": "*",
+      "patched_versions": ""
     }
   },
+  "muted": [],
   "metadata": {
     "vulnerabilities": {
       "info": 0,
       "low": 0,
-      "moderate": 1,
-      "high": 2,
-      "critical": 0,
-      "total": 3
+      "moderate": 2,
+      "high": 5,
+      "critical": 0
     },
-    "dependencies": {
-      "prod": 289,
-      "dev": 385,
-      "optional": 110,
-      "peer": 0,
-      "peerOptional": 0,
-      "total": 710
-    }
+    "dependencies": 0,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 0
   }
 }
