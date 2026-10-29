@@ -26,3 +26,7 @@ security
 vitest.config.mts
 .lint-max-warnings
 .lint-report.json
+e2e
+playwright.config.ts
+playwright-report
+test-results

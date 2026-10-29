@@ -95,7 +95,7 @@ quien la escribió. No la planifiques mientras siga en borrador.
 
 ### Fase 5: Cierre (tú)
 12. Informa al usuario: qué se construyó, archivos tocados, resultado de
-    `npm run lint:ci`, `npm test`, `npm run build`, `npx tsc --noEmit` y `npm run audit:ci`
+    `pnpm run lint:ci`, `pnpm test`, `pnpm run build`, `pnpm exec tsc --noEmit` y `pnpm run audit:ci`
     según el reviewer, y lo que quedó pendiente (incluida cualquier dependencia de la API).
     Recuérdale que debe commitear él: tú no haces git.
 13. Si la funcionalidad cambió un flujo de usuario, recuérdale la documentación en

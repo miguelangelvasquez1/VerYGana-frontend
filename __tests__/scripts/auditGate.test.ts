@@ -153,12 +153,22 @@ describe('evaluateAudit', () => {
     expect(text(r)).not.toMatch(/registro de npm/i);
   });
 
+  it('reporte real de pnpm del 2026-10-22: follow-redirects 1.16.0 (aviso nuevo) falla aunque las cuatro excepciones sigan vigentes', () => {
+    const r = evaluateAudit(load('audit-real-pnpm-2026-10-22.json'), ALL_FOUR, '2026-10-22');
+    expect(r.ok).toBe(false);
+    expect(r.code).toBe(AUDIT_EXIT.VULNERABILITIES);
+    expect(text(r)).toContain('GHSA-q3jh-wrc6-jgq8');
+    expect(text(r)).toContain('GHSA-8r9p-f939-6h3c');
+    expect(text(r)).not.toContain('GHSA-4r6h-8v6p-xvw6');
+    expect(r.active).toHaveLength(4);
+  });
+
   it('error del registro: el mensaje no habla del lockfile', () => {
     const r = evaluateAudit(load('audit-registry-error.json'), ALL_FOUR, TODAY);
     expect(text(r)).not.toMatch(/lockfile/i);
   });
 
-  it.each([[null], [{}], ['texto'], [{ vulnerabilities: 'x' }]])(
+  it.each([[null], [{}], ['texto'], [{ advisories: 'x' }]])(
     'salida irreconocible %j: se trata como registro inalcanzable',
     (report) => {
       const r = evaluateAudit(report, ALL_FOUR, TODAY);

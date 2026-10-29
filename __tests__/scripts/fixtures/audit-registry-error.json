@@ -1,7 +1,6 @@
 {
   "error": {
-    "code": "ENOTFOUND",
-    "summary": "request to https://registry.npmjs.org/-/npm/v1/security/advisories/bulk failed",
-    "detail": "getaddrinfo ENOTFOUND registry.npmjs.org"
+    "code": "ECONNREFUSED",
+    "message": "request to https://registry.npmjs.org/-/npm/v1/security/audits failed, reason: connect ECONNREFUSED"
   }
 }

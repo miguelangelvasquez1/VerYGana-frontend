@@ -12,7 +12,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const standalone = path.join(root, '.next/standalone');
 
 if (!existsSync(path.join(standalone, 'server.js'))) {
-  console.error('Falta .next/standalone/server.js: corre `npm run build:e2e` antes.');
+  console.error('Falta .next/standalone/server.js: corre `pnpm run build:e2e` antes.');
   process.exit(1);
 }
 if (!process.env.NEXTAUTH_SECRET) {

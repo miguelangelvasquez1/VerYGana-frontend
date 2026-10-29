@@ -9,6 +9,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { pnpmCommand } from './pnpm-command.mjs';
 
 export const CAP_FILE = '.lint-max-warnings';
 export const REPORT_FILE = '.lint-report.json';
@@ -93,7 +94,7 @@ const SHA_PATTERN = /^[0-9a-f]{40}$/;
 export function resolveBaseSource(env) {
   // El modo CI se detecta solo con `GITHUB_ACTIONS` (GitHub la fija en 'true'). `CI` ya no cuenta:
   // muchas terminales la tienen definida y anulaban `LINT_BASE_CAP`/`LINT_BASE_REF` en local.
-  // `GITHUB_ACTIONS` definida pero vacía (p. ej. `GITHUB_ACTIONS= npm run lint:ci`) sigue contando
+  // `GITHUB_ACTIONS` definida pero vacía (p. ej. `GITHUB_ACTIONS= pnpm run lint:ci`) sigue contando
   // como CI, para fallar cerrado. Límite conocido: quien la quite con `env -u` desactiva la detección; se ve en
   // el diff (`package.json` o el workflow) y GitHub no deja sobrescribir `GITHUB_*` desde `env:`.
   const inCi = env.GITHUB_ACTIONS !== undefined;
@@ -165,11 +166,13 @@ function main() {
 
     rmSync(REPORT_FILE, { force: true });
     // `next lint` sale con 1 si hay errores; el veredicto lo da el reporte, no su salida.
-    const run = spawnSync('npx', ['next', 'lint', '--format', 'json', '--output-file', REPORT_FILE], {
-      encoding: 'utf8',
-    });
+    // `pnpm exec` (y no node + el CLI de Next a mano): pnpm prepara el entorno de los binarios, y con
+    // su estructura estricta eslint-config-next no encuentra sus plugins sin él.
+    const { command, args } = pnpmCommand(['exec', 'next', 'lint', '--format', 'json', '--output-file', REPORT_FILE]);
+    const run = spawnSync(command, args, { encoding: 'utf8' });
     if (!existsSync(REPORT_FILE)) {
       console.error('`next lint` no produjo reporte.');
+      if (run.error) console.error(String(run.error));
       if (run.stderr) console.error(run.stderr.slice(0, 2000));
       process.exit(3);
     }

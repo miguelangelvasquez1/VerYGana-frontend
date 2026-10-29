@@ -1,8 +1,8 @@
 // Build de la app para las pruebas de navegador (spec 012, plan 7.2).
 // Las NEXT_PUBLIC_* quedan fijas al compilar (P-3), así que las pruebas necesitan su propio build,
 // apuntando a la API simulada en loopback. Todos los valores son ficticios y públicos.
-// Escribe en `.next` (el mismo directorio que `npm run build`): después hay que volver a correr
-// `npm run build` antes de `npx tsc --noEmit`.
+// Escribe en `.next` (el mismo directorio que `pnpm run build`): después hay que volver a correr
+// `pnpm run build` antes de `pnpm exec tsc --noEmit`.
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

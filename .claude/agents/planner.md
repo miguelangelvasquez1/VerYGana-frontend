@@ -73,29 +73,29 @@ anótalo en "Bloqueos" y termina, porque la aprueba quien trabaje el front.
 
 ## tasks.md
 
-El repo tiene Vitest (`npm test`, pruebas en `__tests__/`, entorno `node`): la lógica sin
+El repo tiene Vitest (`pnpm test`, pruebas en `__tests__/`, entorno `node`): la lógica sin
 interfaz (funciones puras, políticas, handlers de `src/app/api`, scripts, middleware) lleva
 **su prueba primero** (P-13, P-17). Hoy no hay pruebas de componentes: una tarea de interfaz se
-verifica con `npx tsc --noEmit` y una comprobación manual concreta en el navegador (qué abrir,
+verifica con `pnpm exec tsc --noEmit` y una comprobación manual concreta en el navegador (qué abrir,
 qué hacer, qué debe verse). Si la spec exige pruebas de componentes, la primera tarea es
 agregar sus herramientas y se avisa al usuario como decisión (P-1).
 
-Los comandos reales son: `npm ci`, `npm test` (o `npx vitest run <archivo>`),
-`npm run lint:ci`, `npm run build`, `npx tsc --noEmit` y `npm run audit:ci`. Para `lint:ci` y
+Los comandos reales son: `pnpm install --frozen-lockfile`, `pnpm test` (o `pnpm exec vitest run <archivo>`),
+`pnpm run lint:ci`, `pnpm run build`, `pnpm exec tsc --noEmit` y `pnpm run audit:ci`. Para `lint:ci` y
 `build` hacen falta las variables públicas ficticias que lista `CLAUDE.md`. Formato:
 
 ```markdown
 - [ ] T3 · Función pura: calcular el cobro de la mascota (CA-2, CA-4)
   - Archivos: src/lib/pet/charge.ts, __tests__/pet/charge.test.ts
   - Test primero: __tests__/pet/charge.test.ts (casos y por qué debe fallar antes)
-  - Verificar: npx vitest run __tests__/pet/charge.test.ts && npx tsc --noEmit
+  - Verificar: pnpm exec vitest run __tests__/pet/charge.test.ts && pnpm exec tsc --noEmit
   - Comprobar: en /pet, con la bolsa vacía se ve el cobro antes de confirmar
 ```
 
 Orden típico: tipos → servicio → hook → componentes → página / ruta → middleware,
 `routeAccess.ts` y roles → configuración. Si una tarea corrige avisos de lint, incluye bajar
-`.lint-max-warnings` al nuevo conteo (P-19). La última tarea siempre corre `npm test`,
-`npm run lint:ci`, `npm run build`, `npx tsc --noEmit` y `npm run audit:ci`.
+`.lint-max-warnings` al nuevo conteo (P-19). La última tarea siempre corre `pnpm test`,
+`pnpm run lint:ci`, `pnpm run build`, `pnpm exec tsc --noEmit` y `pnpm run audit:ci`.
 
 ## Respuesta al coordinator
 
