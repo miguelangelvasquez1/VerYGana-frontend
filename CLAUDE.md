@@ -194,7 +194,7 @@ como `/home`, `/products`, `/pet`), `commercial/`, `admin/`, `compliance/`, `gam
 más `(auth)` y páginas públicas. [src/middleware.ts](src/middleware.ts) aplica el acceso por
 rol con `withAuth` de next-auth, pero **no hace nada salvo con `MIDDLEWARE=ACTIVE`**. Hoy
 protege por prefijo `/admin`, `/commercial`, `/compliance` y `/game-designer` (menos las dos
-páginas públicas de contraseña del diseñador) y, para el consumidor, solo `/raffles` y `/ads`.
+páginas públicas de contraseña del diseñador) y, para el consumidor, solo `/raffles`, `/ads` y `/explore/recognitions`.
 Muchas páginas de consumidor no pasan por el middleware: están listadas como
 `UNPROTECTED_PENDING` en `__tests__/middleware/routeAccess.ts`, a la espera de una decisión.
 El middleware no es la única defensa: la API autoriza los datos (P-5).

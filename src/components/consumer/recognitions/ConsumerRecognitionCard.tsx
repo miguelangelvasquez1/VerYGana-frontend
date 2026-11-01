@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { CheckCircle, Copy, Gift, MapPin, Package, Store } from 'lucide-react';
 import type { ConsumerRecognition, ConsumerRecognitionItem } from '@/types/recognitions/Recognition.types';
 import { PurchaseItemStatus } from '@/types/purchases/purchaseItem.types';
@@ -98,9 +99,12 @@ export default function ConsumerRecognitionCard({ recognition }: { recognition: 
         <div className="flex gap-4">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
             {recognition.imageUrl ? (
-              <img
+              <Image
                 src={recognition.imageUrl}
                 alt={recognition.productName}
+                width={80}
+                height={80}
+                unoptimized
                 className={`h-full w-full object-cover ${closed ? 'grayscale' : ''}`}
               />
             ) : (

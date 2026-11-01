@@ -402,3 +402,29 @@ test.describe('Ventana angosta de escritorio (puntero fino) 900 × 500', () => {
     await expect(exitLink(page)).toBeHidden();
   });
 });
+
+test.describe('Puente postMessage del juego (seguridad)', () => {
+  test.use({ viewport: { width: 1280, height: 800 }, isMobile: false, hasTouch: false });
+
+  const authCount = (frame: import('@playwright/test').Frame) =>
+    frame.evaluate(() => Number(document.documentElement.dataset.authCount || 0));
+
+  test('PET_GAME_READY solo se atiende si viene del iframe del juego', async ({ page }) => {
+    await page.goto('/pet');
+    await settle(page);
+    const frameEl = page.locator(FRAME);
+    await expect(frameEl).toBeVisible();
+    const game = (await (await frameEl.elementHandle())!.contentFrame())!;
+    const before = await authCount(game);
+
+    // Ventana ajena (la propia página, no el iframe): no debe recibir respuesta con el JWT.
+    await page.evaluate(() => window.postMessage({ type: 'PET_GAME_READY' }, '*'));
+    // El iframe legítimo sí: los mensajes se procesan en orden, así que si el ajeno se hubiera atendido
+    // el contador llegaría a before + 2.
+    await game.evaluate(() => window.parent.postMessage({ type: 'PET_GAME_READY' }, '*'));
+
+    await expect.poll(() => authCount(game), 'el iframe legítimo no recibió PET_SET_AUTH').toBeGreaterThan(before);
+    await page.waitForTimeout(300);
+    expect(await authCount(game), 'un mensaje de otra ventana provocó PET_SET_AUTH').toBe(before + 1);
+  });
+});

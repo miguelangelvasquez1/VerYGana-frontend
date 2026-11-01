@@ -45,9 +45,10 @@ export const ROLE_RULES: readonly RoleRule[] = [
     role: 'ROLE_GAME_DESIGNER',
     except: ['/game-designer/reset-password', '/game-designer/setup-password'],
   },
-  // Consumidor: el middleware solo protege estas dos, y por ruta exacta.
+  // Consumidor: el middleware solo protege estas tres, y por ruta exacta.
   { path: '/raffles', match: 'exact', role: 'ROLE_CONSUMER' },
   { path: '/ads', match: 'exact', role: 'ROLE_CONSUMER' },
+  { path: '/explore/recognitions', match: 'exact', role: 'ROLE_CONSUMER' },
 ];
 
 /** Públicas de forma explícita (autenticación, aterrizaje, enlaces de correo). */
