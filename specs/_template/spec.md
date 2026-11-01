@@ -5,7 +5,8 @@
 - **Ticket:** SCRUM-<n>
 - **Origen:** Propia del front | API · specs/<NNN>-<slug> · SCRUM-<n>
 
-> El número `NNN` es propio del front y no tiene que coincidir con el de la API. Si la spec
+> El número `NNN` es propio del front y no tiene que coincidir con el de la API. Esta spec no
+> se versiona (`specs/` está en `.gitignore`): lo que se comparte es el ticket. Si la spec
 > llegó desde el flujo de la API, llega en `Borrador`: quien trabaje el front la revisa, la
 > completa y la aprueba antes de planificarla.
 

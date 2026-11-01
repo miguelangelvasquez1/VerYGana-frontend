@@ -18,6 +18,11 @@ Las URL de Next.js llevan `/docs/15/` a propósito: son las páginas de la versi
 instalada. Las comprobó una persona el 2026-10-12 (la página existe y dice lo que la regla
 afirma). Al subir de versión mayor de una tecnología hay que volver a comprobar sus fuentes.
 
+Las citas a una spec ("spec 010", "frente E de la spec 010", "CA-10 de la spec 012") apuntan a
+specs que ya no están en el repositorio: `specs/` dejó de versionarse. Siguen en el historial y
+se leen con `git show e7226e6:specs/<carpeta>/spec.md` (ver "Flujo de trabajo con specs" en
+`CLAUDE.md`).
+
 ---
 
 ### P-1 · Stack cerrado
