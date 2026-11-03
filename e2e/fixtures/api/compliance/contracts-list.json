@@ -1,0 +1,15 @@
+[
+  {
+    "contractId": 1,
+    "userId": 1,
+    "companyName": "Tienda de Prueba S.A.S.",
+    "email": "comercial@example.test",
+    "route": "B",
+    "version": 1,
+    "generatedAt": "2026-10-30T10:00:00",
+    "businessApprovedAt": "2026-10-30T11:00:00",
+    "status": "PENDING_VERYGANA_REVIEW",
+    "veryganaReviewedAt": null,
+    "pep": false
+  }
+]

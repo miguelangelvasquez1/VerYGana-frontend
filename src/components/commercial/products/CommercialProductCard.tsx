@@ -136,10 +136,10 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
                   e.stopPropagation();
                   router.push(`/commercial/profile`);
                 }}
-                className="text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-[#03548C]/5 hover:border-[#03548C]/20 hover:text-[#03548C] transition cursor-pointer text-left"
+                className="text-xs font-semibold px-2 py-0.5 tap rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-[#03548C]/5 hover:border-[#03548C]/20 hover:text-[#03548C] transition cursor-pointer text-left"
               >
                 <Building2 className="w-2.5 h-2.5 shrink-0" />
-                <span className="truncate">{product.companyName}</span>
+                <span className="truncate" title={product.companyName}>{product.companyName}</span>
               </button>
             )}
 
@@ -158,13 +158,13 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
 
           {/* Commercial actions */}
           <div
-            className="flex items-center gap-1.5 pt-2 border-t border-gray-200 mt-auto"
+            className="flex items-center gap-1.5 max-lg:flex-wrap pt-2 border-t border-gray-200 mt-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => onView?.(product.id)}
               title="Ver"
-              className="flex items-center justify-center w-7 h-7 shrink-0 bg-[#00a4ff]/10 text-[#00a4ff] rounded-md hover:bg-[#00a4ff]/20 transition cursor-pointer"
+              className="flex items-center justify-center w-7 h-7 tap-sq shrink-0 bg-[#00a4ff]/10 text-[#00a4ff] rounded-md hover:bg-[#00a4ff]/20 transition cursor-pointer"
             >
               <Eye className="w-3.5 h-3.5" />
             </button>
@@ -173,7 +173,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
               onClick={() => onEdit?.(product.id)}
               disabled={editBlocked}
               title={editBlocked ? WALLET_DORMANT_TOOLTIP : "Editar"}
-              className="flex items-center justify-center w-7 h-7 shrink-0 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center justify-center w-7 h-7 tap-sq shrink-0 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
@@ -181,7 +181,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
             <button
               onClick={() => onDelete?.(product.id)}
               title="Eliminar"
-              className="flex items-center justify-center w-7 h-7 shrink-0 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition cursor-pointer"
+              className="flex items-center justify-center w-7 h-7 tap-sq shrink-0 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition cursor-pointer"
             >
               <Trash className="w-3.5 h-3.5" />
             </button>
@@ -190,7 +190,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
               <button
                 onClick={() => onMarkAsReward?.(product.id)}
                 title={isGameReward ? "Desmarcar como recompensa" : "Marcar como recompensa"}
-                className={`flex items-center justify-center w-7 h-7 shrink-0 rounded-md transition cursor-pointer ${
+                className={`flex items-center justify-center w-7 h-7 tap-sq shrink-0 rounded-md transition cursor-pointer ${
                   isGameReward
                     ? "bg-[#03548C] text-white hover:bg-[#0b1440]"
                     : "bg-[#03548C]/10 text-[#03548C] hover:bg-[#03548C]/20"
@@ -203,7 +203,7 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
             <button
               onClick={() => setShowHelp(true)}
               title="Ayuda"
-              className="flex items-center justify-center w-7 h-7 shrink-0 bg-gray-100 text-gray-500 rounded-md hover:bg-gray-200 transition cursor-pointer ml-auto"
+              className="flex items-center justify-center w-7 h-7 tap-sq shrink-0 bg-gray-100 text-gray-500 rounded-md hover:bg-gray-200 transition cursor-pointer ml-auto"
             >
               <HelpCircle className="w-3.5 h-3.5" />
             </button>
@@ -218,12 +218,21 @@ const CommercialProductCard: React.FC<CommercialProductCardProps> = ({
           onClick={() => setShowHelp(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4 space-y-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Acciones del producto"
+            className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4 max-h-[90dvh] overflow-y-auto space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between">
+            {/* Encabezado fijo arriba: el botón de cerrar se ve siempre, la lista hace scroll debajo (RN-5) */}
+            <div className="sticky top-0 z-10 -mx-6 -mt-6 flex items-center justify-between rounded-t-2xl bg-white px-6 pt-6 pb-2">
               <h3 className="text-base font-bold text-gray-900">Acciones del producto</h3>
-              <button onClick={() => setShowHelp(false)} className="text-gray-400 hover:text-gray-600 transition cursor-pointer">
+              <button
+                type="button"
+                onClick={() => setShowHelp(false)}
+                aria-label="Cerrar"
+                className="-mr-2.5 text-gray-400 hover:text-gray-600 transition cursor-pointer max-lg:flex tap-sq max-lg:items-center max-lg:justify-center lg:mr-0"
+              >
                 <X className="w-5 h-5 cursor-pointer" />
               </button>
             </div>

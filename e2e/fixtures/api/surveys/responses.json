@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "userHash": "hash-ficticio-0001",
+      "status": "REWARDED",
+      "completedAt": "2026-10-05T10:00:00",
+      "answers": [
+        {
+          "questionId": 1,
+          "questionText": "¿Con qué frecuencia compras en línea?",
+          "questionType": "SINGLE_CHOICE",
+          "textAnswer": null,
+          "selectedOptionText": "Una vez al mes",
+          "selectedOptionTexts": []
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

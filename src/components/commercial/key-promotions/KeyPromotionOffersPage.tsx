@@ -302,7 +302,7 @@ export function KeyPromotionOffersPage() {
             <button
               type="button"
               onClick={() => refetch()}
-              className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
+              className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline tap"
             >
               <RefreshCw className="h-3.5 w-3.5" /> Reintentar
             </button>

@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
 
             {/* Mobile header */}
             <div className="lg:hidden bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] px-6 py-5 flex items-center gap-3">
-              <Link href="/">
+              <Link href="/" className="-m-0.5 p-0.5">
                 <Image src="/logos/logo.png" alt="Ver y Gana" width={40} height={40} />
               </Link>
               <span className="text-white font-bold text-lg">Ver y Gana</span>

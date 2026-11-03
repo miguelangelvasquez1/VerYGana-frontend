@@ -144,8 +144,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-          >
+            className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="Cerrar">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -163,7 +162,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
               onChange={(e) => setTitle(e.target.value)}
               maxLength={200}
               required
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 tap text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10"
             />
           </div>
 
@@ -175,7 +174,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               maxLength={1000}
               rows={3}
-              className="w-full resize-none rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10"
+              className="w-full resize-none rounded-xl border border-gray-200 px-3 py-2.5 tap text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10"
             />
           </div>
 
@@ -245,7 +244,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
               value={selectedDepartment ?? ''}
               onChange={(e) => setSelectedDepartment(e.target.value || null)}
               disabled={loadingDepartments}
-              className="mb-2 w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10 disabled:cursor-not-allowed disabled:bg-gray-50"
+              className="mb-2 w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 tap text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10 disabled:cursor-not-allowed disabled:bg-gray-50"
             >
               <option value="">— Selecciona un departamento —</option>
               {departments.map((d: { code: string; name: string }) => (
@@ -263,7 +262,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                   }
                 }}
                 disabled={loadingMunicipalities}
-                className="mb-3 w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10 disabled:cursor-not-allowed disabled:bg-gray-50"
+                className="mb-3 w-full cursor-pointer rounded-xl border border-gray-200 px-3 py-2.5 tap text-sm outline-none focus:border-[#03548C] focus:ring-2 focus:ring-[#03548C]/10 disabled:cursor-not-allowed disabled:bg-gray-50"
               >
                 <option value="">
                   {loadingMunicipalities ? 'Cargando municipios…' : '— Selecciona un municipio —'}
@@ -293,8 +292,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                     <button
                       type="button"
                       onClick={() => removeMunicipality(m.code)}
-                      className="cursor-pointer ml-0.5 text-emerald-500 hover:text-emerald-700"
-                    >
+                      className="cursor-pointer ml-0.5 text-emerald-500 hover:text-emerald-700 max-lg:-m-4 max-lg:p-4" aria-label="Quitar municipio">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -315,20 +313,20 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
             <div className="flex items-start gap-3">
               <div className="flex-1">
                 <input
-                  type="number" min={13} max={100} placeholder="Mín"
+                  type="number" inputMode="numeric" min={13} max={100} placeholder="Mín"
                   value={minAge}
                   onChange={(e) => { setMinAge(e.target.value); setAgeErrors((p) => ({ ...p, minAge: undefined })); }}
-                  className={`w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#03548C]/10 ${ageErrors.minAge ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-[#03548C]'}`}
+                  className={`w-full rounded-xl border px-3 py-2.5 tap text-sm outline-none focus:ring-2 focus:ring-[#03548C]/10 ${ageErrors.minAge ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-[#03548C]'}`}
                 />
                 {ageErrors.minAge && <p className="mt-1 text-xs text-red-500">{ageErrors.minAge}</p>}
               </div>
               <span className="mt-2.5 text-gray-400">–</span>
               <div className="flex-1">
                 <input
-                  type="number" min={13} max={100} placeholder="Máx"
+                  type="number" inputMode="numeric" min={13} max={100} placeholder="Máx"
                   value={maxAge}
                   onChange={(e) => { setMaxAge(e.target.value); setAgeErrors((p) => ({ ...p, maxAge: undefined })); }}
-                  className={`w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#03548C]/10 ${ageErrors.maxAge ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-[#03548C]'}`}
+                  className={`w-full rounded-xl border px-3 py-2.5 tap text-sm outline-none focus:ring-2 focus:ring-[#03548C]/10 ${ageErrors.maxAge ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-[#03548C]'}`}
                 />
                 {ageErrors.maxAge && <p className="mt-1 text-xs text-red-500">{ageErrors.maxAge}</p>}
               </div>
@@ -344,7 +342,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
                   key={g}
                   type="button"
                   onClick={() => setTargetGender(g)}
-                  className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  className={`cursor-pointer rounded-full border px-3 py-1 tap text-xs font-medium transition-colors ${
                     targetGender === g
                       ? 'border-[#03548C] bg-[#03548C]/5 text-[#03548C]'
                       : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40'
@@ -375,7 +373,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+            className="cursor-pointer rounded-xl border border-gray-200 px-4 py-2 tap text-sm font-medium text-gray-600 hover:bg-gray-50"
           >
             Cancelar
           </button>
@@ -383,7 +381,7 @@ export default function SurveyEditModal({ survey, onClose }: Props) {
             type="submit"
             disabled={updateMutation.isPending || editBlocked}
             title={editBlocked ? WALLET_DORMANT_TOOLTIP : undefined}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#03548C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#03548C] px-4 py-2 tap text-sm font-semibold text-white hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {updateMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

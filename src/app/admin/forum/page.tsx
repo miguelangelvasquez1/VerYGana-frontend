@@ -7,6 +7,7 @@ import ImpactStoryEditForm from '@/components/admin/forum/ImpactStoryEditForm';
 import StoryRow from '@/components/admin/forum/StoryRow';
 import { useImpactStories, useDeleteImpactStory } from '@/hooks/useImpactStory';
 import type { ImpactStoryResponse, StoryStatus, ImpactStoryFilters } from '@/types/impactStory.types';
+import TableScroll from '@/components/shared/TableScroll';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -77,7 +78,7 @@ export default function AdminImpactStoriesPage() {
 
   return (
     <AdminLayout>
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-4 lg:p-6 max-w-7xl mx-auto">
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
@@ -86,7 +87,7 @@ export default function AdminImpactStoriesPage() {
           </p>
           <button
             onClick={() => setView('create')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+            className="tap flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
@@ -103,19 +104,19 @@ export default function AdminImpactStoriesPage() {
                 <circle cx="11" cy="11" r="8"/><path strokeLinecap="round" d="M21 21l-4.35-4.35"/>
               </svg>
               <input
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 bg-white"
+                className="tap w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 bg-white"
                 placeholder="Buscar por título..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <button type="submit" className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium text-gray-600 transition-colors cursor-pointer">
+            <button type="submit" className="tap px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium text-gray-600 transition-colors cursor-pointer">
               Buscar
             </button>
           </form>
 
           <select
-            className="px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-emerald-500 bg-white text-gray-700"
+            className="tap px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-emerald-500 bg-white text-gray-700"
             value={filters.status ?? ''}
             onChange={(e) =>
               setFilters((f) => ({ ...f, status: (e.target.value as StoryStatus) || undefined, page: 0 }))
@@ -129,7 +130,7 @@ export default function AdminImpactStoriesPage() {
 
           {(filters.status || filters.search) && (
             <button
-              className="text-xs text-gray-400 hover:text-gray-600 underline transition-colors cursor-pointer"
+              className="tap px-2 text-xs text-gray-400 hover:text-gray-600 underline transition-colors cursor-pointer"
               onClick={() => { setFilters({ size: 10, page: 0 }); setSearch(''); }}
             >
               Limpiar filtros
@@ -174,7 +175,7 @@ export default function AdminImpactStoriesPage() {
               </p>
               <button
                 onClick={() => setView('create')}
-                className="mt-4 text-sm text-emerald-700 hover:text-emerald-900 font-semibold underline transition-colors cursor-pointer"
+                className="tap mt-4 px-3 text-sm text-emerald-700 hover:text-emerald-900 font-semibold underline transition-colors cursor-pointer"
               >
                 Crear la primera historia
               </button>
@@ -183,7 +184,7 @@ export default function AdminImpactStoriesPage() {
 
           {/* Table */}
           {!isLoading && stories.length > 0 && (
-            <div className="overflow-x-auto">
+            <TableScroll label="Tabla de historias de impacto, desplazable">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -208,12 +209,12 @@ export default function AdminImpactStoriesPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
           )}
 
           {/* Pagination */}
           {!isLoading && totalPages > 1 && (
-            <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/40">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 border-t border-gray-100 bg-gray-50/40">
               <p className="text-xs text-gray-400">
                 Página {currentPage + 1} de {totalPages}
               </p>
@@ -271,7 +272,7 @@ function PaginationBtn({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer
+      className={`tap px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer
         ${active
           ? 'bg-emerald-700 text-white border-emerald-700'
           : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}
@@ -292,7 +293,7 @@ function ConfirmDeleteModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 z-10">
+      <div className="relative bg-white rounded-2xl shadow-xl max-w-sm w-full max-h-[90dvh] overflow-y-auto p-4 sm:p-6 z-10">
         <div className="flex items-start gap-4 mb-5">
           <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
             <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -314,7 +315,7 @@ function ConfirmDeleteModal({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+            className="tap px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
           >
             Cancelar
           </button>
@@ -322,7 +323,7 @@ function ConfirmDeleteModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+            className="tap px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             {isLoading && (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">

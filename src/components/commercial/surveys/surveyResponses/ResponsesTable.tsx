@@ -70,14 +70,14 @@ export default function ResponsesTable({ query, page, size, onPageChange }: Prop
             <button
               disabled={page === 0}
               onClick={() => onPageChange(page - 1)}
-              className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+              className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-500 hover:bg-gray-100 disabled:opacity-40"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               disabled={page === data.meta.totalPages - 1}
               onClick={() => onPageChange(page + 1)}
-              className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+              className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-500 hover:bg-gray-100 disabled:opacity-40"
             >
               <ChevronRight className="h-4 w-4" />
             </button>

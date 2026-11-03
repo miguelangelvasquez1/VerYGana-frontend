@@ -84,7 +84,7 @@ export default function ProfileContactInfo() {
         <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Datos de contacto</h2>
         <Link
           href="/commercial/profile/edit"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#03548C] hover:text-[#0b1440] transition"
+          className="tap inline-flex items-center gap-1.5 text-sm font-semibold text-[#03548C] hover:text-[#0b1440] transition"
         >
           <Pencil className="w-3.5 h-3.5" />
           Editar perfil

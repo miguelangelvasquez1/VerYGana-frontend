@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "brandName": "Marca de Prueba",
+    "gameName": "Juego de Prueba",
+    "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+    "commercialName": "Tienda de Prueba S.A.S.",
+    "status": "PENDING_REVIEW",
+    "budgetCents": 100000000,
+    "estimatedSessions": 1000,
+    "adminNotes": null,
+    "assignedDesignerPublicId": null,
+    "assignedDesignerName": null,
+    "corporateResourceCount": 2,
+    "createdAt": "2026-10-01T10:00:00",
+    "updatedAt": "2026-10-02T10:00:00"
+  }
+]

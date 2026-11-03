@@ -12,7 +12,7 @@ export default function TerminosPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-gradient-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] text-white px-6 py-5 flex items-center gap-4">
-        <Link href="/">
+        <Link href="/" className="-m-0.5 p-0.5">
           <Image src="/logos/logoDorado.png" alt="Ver y Gana" width={40} height={40} />
         </Link>
         <span className="font-bold text-lg">Ver y Gana</span>
@@ -50,7 +50,7 @@ export default function TerminosPage() {
         <div className="mt-8 text-center">
           <Link
             href="/register"
-            className="inline-flex items-center gap-2 text-sm text-[#03548C] font-semibold hover:underline"
+            className="inline-flex min-h-11 items-center gap-2 text-sm text-[#03548C] lg:min-h-0 font-semibold hover:underline"
           >
             ← Volver al registro
           </Link>

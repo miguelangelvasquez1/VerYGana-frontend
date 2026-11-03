@@ -187,7 +187,7 @@ export default function ScreeningsPanel() {
         ) : (
           <>
             <Ledger>
-              <LedgerTable>
+              <LedgerTable label="Tabla de alertas de screening, desplazable">
                 <LedgerHead>
                   <ThSpine />
                   <Th>Nombre consultado</Th>

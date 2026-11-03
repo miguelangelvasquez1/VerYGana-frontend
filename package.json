@@ -11,7 +11,9 @@
     "audit:ci": "node scripts/audit-gate.mjs",
     "test": "vitest run",
     "build:e2e": "node e2e/support/build.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:consumer": "playwright test --grep-invert @paneles",
+    "test:e2e:panels": "playwright test --grep @paneles"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

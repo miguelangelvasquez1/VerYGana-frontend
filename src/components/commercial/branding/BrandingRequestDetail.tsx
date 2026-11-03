@@ -24,6 +24,7 @@ import {
   Puzzle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { StatusHint } from './StatusHint';
 import {
   getBrandingRequestDetail,
   getBriefRequirements,
@@ -162,7 +163,7 @@ const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, v
   </div>
 );
 
-const fieldCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+const fieldCls = 'tap w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -428,12 +429,12 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
   if (error || !detail) {
     return (
       <div className="space-y-4">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">
+        <button onClick={onBack} className="tap flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">
           <ChevronLeft size={18} /> Volver
         </button>
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-800 mb-4">{error}</p>
-          <button onClick={() => loadDetail()} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm cursor-pointer hover:bg-red-700 transition-colors">
+          <button onClick={() => loadDetail()} className="tap px-4 py-2 bg-red-600 text-white rounded-lg text-sm cursor-pointer hover:bg-red-700 transition-colors">
             Reintentar
           </button>
         </div>
@@ -456,13 +457,13 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
     <div className="space-y-4">
 
       {/* ── Header ── */}
-      <div className="flex items-center gap-3">
-        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0">
+      <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
+        <button onClick={onBack} aria-label="Volver" className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0">
           <ChevronLeft size={20} className="text-gray-600" />
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-xl font-semibold text-gray-900 truncate">{detail.brandName}</h2>
+            <h2 title={detail.brandName} className="text-xl font-semibold text-gray-900 truncate">{detail.brandName}</h2>
             <span className="text-gray-400 text-sm shrink-0">#{detail.id}</span>
           </div>
           <p className="text-xs text-gray-400 mt-0.5">Actualizado {formatDateTime(detail.updatedAt)}</p>
@@ -471,30 +472,25 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
           <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${meta.badge}`}>
             {meta.label}
           </span>
-          <div className="relative group">
-            <button type="button" className={`w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center cursor-pointer ${meta.badge}`}>
-              ?
-            </button>
-            <div className="absolute right-0 top-full mt-2 w-64 bg-gray-900 text-white text-xs rounded-lg px-3 py-2.5 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 space-y-1">
-              <p className="font-semibold">{meta.label}</p>
-              <p className="text-gray-300 leading-relaxed">{meta.message}</p>
-              {detail.status === 'REJECTED' && detail.adminNotes && (
-                <p className="text-red-300 mt-1">Motivo: {detail.adminNotes}</p>
-              )}
-            </div>
-          </div>
+          <StatusHint statusLabel={meta.label} badge={meta.badge}>
+            <p className="font-semibold">{meta.label}</p>
+            <p className="text-gray-300 leading-relaxed">{meta.message}</p>
+            {detail.status === 'REJECTED' && detail.adminNotes && (
+              <p className="text-red-300 mt-1">Motivo: {detail.adminNotes}</p>
+            )}
+          </StatusHint>
         </div>
         {canPreview && detail.status !== 'PENDING_ADVERTISER_APPROVAL' && (
           <button
             onClick={handlePreview}
             disabled={previewLoading}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-60 cursor-pointer shrink-0"
+            className="tap order-last w-full justify-center sm:order-none sm:w-auto flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-60 cursor-pointer shrink-0"
           >
             {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
             Ver diseño
           </button>
         )}
-        <button onClick={() => loadDetail()} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0" title="Actualizar">
+        <button onClick={() => loadDetail()} aria-label="Actualizar" className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0" title="Actualizar">
           <RefreshCw size={16} className="text-gray-500" />
         </button>
       </div>
@@ -518,14 +514,14 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
             <button
               onClick={() => setShowCancelModal(true)}
               disabled={submitting}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-60 cursor-pointer"
+              className="tap flex items-center gap-2 px-5 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-60 cursor-pointer"
             >
               Cancelar solicitud
             </button>
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 cursor-pointer"
+              className="tap flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 cursor-pointer"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               Enviar solicitud
@@ -545,21 +541,21 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
             <button
               onClick={handlePreview}
               disabled={previewLoading}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-700 bg-white border border-purple-300 rounded-lg hover:bg-purple-100 transition-colors disabled:opacity-60 cursor-pointer"
+              className="tap flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-700 bg-white border border-purple-300 rounded-lg hover:bg-purple-100 transition-colors disabled:opacity-60 cursor-pointer"
             >
               {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
               Ver diseño
             </button>
             <button
               onClick={() => setShowChangesModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-orange-700 bg-orange-50 border border-orange-300 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer"
+              className="tap flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-orange-700 bg-orange-50 border border-orange-300 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer"
             >
               Solicitar cambios
             </button>
             <button
               onClick={() => setShowApproveModal(true)}
               disabled={approvingDesign}
-              className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 cursor-pointer"
+              className="tap flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 cursor-pointer"
             >
               {approvingDesign && <Loader2 size={14} className="animate-spin" />}
               Aprobar diseño
@@ -582,7 +578,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
           </div>
           <button
             onClick={() => router.push(detail.campaignId != null ? `/commercial/branding/campaigns/${detail.campaignId}` : '/commercial/branding')}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors cursor-pointer shrink-0"
+            className="tap flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors cursor-pointer shrink-0"
           >
             Ver campaña
             <ArrowRight size={14} />
@@ -653,7 +649,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                   label="URL de destino"
                   value={
                     <a href={detail.targetUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-blue-600 hover:underline break-all">
+                      className="tap flex items-center gap-1 text-blue-600 hover:underline break-all">
                       <Globe size={13} className="shrink-0" />{detail.targetUrl}
                     </a>
                   }
@@ -767,7 +763,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="tap flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                     {uploading ? 'Subiendo…' : 'Subir archivo'}
@@ -807,7 +803,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                         {res.status === 'VALIDATED' ? 'OK' : res.status === 'PENDING' ? '…' : 'X'}
                       </span>
                     </div>
-                    <p className="text-[10px] text-gray-500 mt-1 truncate">{res.originalFileName}</p>
+                    <p title={res.originalFileName} className="text-[10px] text-gray-500 mt-1 truncate">{res.originalFileName}</p>
                     <p className="text-[10px] text-gray-400">{fileSizeLabel(res.sizeBytes)}</p>
                   </div>
                 ))}
@@ -870,10 +866,10 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                   />
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
-                  <button onClick={cancelEdit} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
+                  <button onClick={cancelEdit} className="tap flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
                     <X size={14} /> Cancelar
                   </button>
-                  <button onClick={handleSaveConfig} disabled={saving} className="flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 cursor-pointer">
+                  <button onClick={handleSaveConfig} disabled={saving} className="tap flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 cursor-pointer">
                     {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Guardar
                   </button>
                 </div>
@@ -887,7 +883,7 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                       onClick={() => setEditingConfig(true)}
                       disabled={editBlockedByBudget}
                       title={editBlockedByBudget ? WALLET_DORMANT_TOOLTIP : undefined}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-blue-600"
+                      className="tap flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-blue-600"
                     >
                       <Pencil size={13} /> Editar
                     </button>
@@ -936,10 +932,10 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
       {/* ── Modal: Confirm Approve Design ── */}
       {showApproveModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
+            <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-xl bg-white p-5 border-b border-gray-100">
               <h2 className="text-base font-semibold text-gray-900">Aprobar diseño</h2>
-              <button onClick={() => setShowApproveModal(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+              <button onClick={() => setShowApproveModal(false)} aria-label="Cerrar" className="tap-icon shrink-0 text-gray-400 hover:text-gray-600 cursor-pointer">
                 <X size={20} />
               </button>
             </div>
@@ -951,14 +947,14 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                 <button
                   onClick={() => setShowApproveModal(false)}
                   disabled={approvingDesign}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-60 cursor-pointer"
+                  className="tap flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-60 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleApproveDesign}
                   disabled={approvingDesign}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                  className="tap flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {approvingDesign && <Loader2 size={14} className="animate-spin" />}
                   Sí, aprobar diseño
@@ -972,10 +968,10 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
       {/* ── Modal: Request Changes ── */}
       {showChangesModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h2 className="text-base font-semibold text-gray-900">Solicitar cambios al diseñador</h2>
-              <button onClick={() => { setShowChangesModal(false); setChangesNote(''); }} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
+            <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-xl bg-white p-5 border-b border-gray-100">
+              <h2 className="min-w-0 text-base font-semibold text-gray-900">Solicitar cambios al diseñador</h2>
+              <button onClick={() => { setShowChangesModal(false); setChangesNote(''); }} aria-label="Cerrar" className="tap-icon shrink-0 text-gray-400 hover:text-gray-600 cursor-pointer">
                 <X size={20} />
               </button>
             </div>
@@ -995,13 +991,13 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                 <span className="text-xs text-gray-400 float-right">{changesNote.length}/1000</span>
               </div>
               <div className="flex gap-3 pt-1">
-                <button onClick={() => { setShowChangesModal(false); setChangesNote(''); }} className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
+                <button onClick={() => { setShowChangesModal(false); setChangesNote(''); }} className="tap flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
                   Cancelar
                 </button>
                 <button
                   onClick={handleRequestChanges}
                   disabled={sendingChanges || !changesNote.trim()}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                  className="tap flex-1 px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {sendingChanges && <Loader2 size={14} className="animate-spin" />}
                   Enviar feedback
@@ -1015,10 +1011,10 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
       {/* ── Modal: Confirm Cancel Request ── */}
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
+            <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-xl bg-white p-5 border-b border-gray-100">
               <h2 className="text-base font-semibold text-gray-900">Cancelar solicitud</h2>
-              <button onClick={() => setShowCancelModal(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+              <button onClick={() => setShowCancelModal(false)} aria-label="Cerrar" className="tap-icon shrink-0 text-gray-400 hover:text-gray-600 cursor-pointer">
                 <X size={20} />
               </button>
             </div>
@@ -1031,14 +1027,14 @@ export const BrandingRequestDetail: React.FC<Props> = ({ requestId, onBack }) =>
                 <button
                   onClick={() => setShowCancelModal(false)}
                   disabled={cancelling}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-60 cursor-pointer"
+                  className="tap flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-60 cursor-pointer"
                 >
                   Volver
                 </button>
                 <button
                   onClick={handleCancel}
                   disabled={cancelling}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                  className="tap flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {cancelling && <Loader2 size={14} className="animate-spin" />}
                   Sí, cancelar solicitud

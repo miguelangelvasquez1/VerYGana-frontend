@@ -92,7 +92,7 @@ export function AdminPetRequestDetail({
         <BackButton onBack={onBack} />
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-700 font-medium">No se pudo cargar la solicitud</p>
-          <button onClick={load} className="mt-3 text-sm text-red-600 underline cursor-pointer">
+          <button onClick={load} className="tap mt-3 px-3 text-sm text-red-600 underline cursor-pointer">
             Reintentar
           </button>
         </div>
@@ -192,14 +192,14 @@ export function AdminPetRequestDetail({
 
       {/* Acciones */}
       {(abierta || enDiseno) && (
-        <div className="bg-white rounded-xl shadow p-6 space-y-5">
+        <div className="bg-white rounded-xl shadow p-4 sm:p-6 space-y-5">
           <h2 className="font-semibold text-gray-800">Acciones</h2>
 
           {req.status === 'PENDING' && (
             <button
               onClick={() => run('review', () => adminMarkPetRequestInReview(req.id))}
               disabled={busy}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 disabled:opacity-50"
+              className="tap flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 disabled:opacity-50"
             >
               {running === 'review' ? <Loader2 size={15} className="animate-spin" /> : <Eye size={15} />}
               Marcar en revisión
@@ -216,7 +216,7 @@ export function AdminPetRequestDetail({
               value={designerId}
               onChange={e => setDesignerId(e.target.value)}
               disabled={busy || designers.length === 0}
-              className="w-full max-w-md cursor-pointer rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-50"
+              className="tap w-full max-w-md cursor-pointer rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-50"
             >
               <option value="">
                 {designers.length === 0 ? 'No hay diseñadores activos' : 'Elige un diseñador…'}
@@ -251,7 +251,7 @@ export function AdminPetRequestDetail({
                 }
                 disabled={busy || designerId === ''}
                 title={designerId === '' ? 'Elige un diseñador para poder aprobar' : undefined}
-                className="flex cursor-pointer items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                className="tap flex cursor-pointer items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 {running === 'approve' ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
                 Aprobar y asignar
@@ -262,7 +262,7 @@ export function AdminPetRequestDetail({
               <button
                 onClick={() => run('assign', () => assignPetDesigner(req.id, designerId))}
                 disabled={busy || designerId === '' || designerId === req.assignedDesignerPublicId}
-                className="flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                className="tap flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 {running === 'assign' ? <Loader2 size={15} className="animate-spin" /> : <UserCheck size={15} />}
                 {req.assignedDesignerPublicId ? 'Reasignar diseñador' : 'Asignar diseñador'}
@@ -273,7 +273,7 @@ export function AdminPetRequestDetail({
               <button
                 onClick={() => setRejecting(true)}
                 disabled={busy}
-                className="flex cursor-pointer items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                className="tap flex cursor-pointer items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
               >
                 <XCircle size={15} />
                 Rechazar
@@ -299,14 +299,14 @@ export function AdminPetRequestDetail({
                 <button
                   onClick={() => { setRejecting(false); setReason(''); }}
                   disabled={busy}
-                  className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+                  className="tap cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={() => run('reject', () => adminRejectPetRequest(req.id, reason.trim()))}
                   disabled={busy || !reason.trim()}
-                  className="flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                  className="tap flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                 >
                   {running === 'reject' ? <Loader2 size={15} className="animate-spin" /> : <XCircle size={15} />}
                   Confirmar rechazo
@@ -335,7 +335,7 @@ function BackButton({ onBack }: { onBack: () => void }) {
   return (
     <button
       onClick={onBack}
-      className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-800"
+      className="tap flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-800"
     >
       <ArrowLeft size={16} />
       Volver a la lista
@@ -347,7 +347,7 @@ function Row({ label, value, fallback = '—' }: { label: string; value?: string
   return (
     <div className="flex gap-2">
       <dt className="shrink-0 text-gray-400">{label}:</dt>
-      <dd className="min-w-0 truncate text-gray-800">{value || <span className="text-gray-300">{fallback}</span>}</dd>
+      <dd className="min-w-0 truncate text-gray-800" title={value || undefined}>{value || <span className="text-gray-300">{fallback}</span>}</dd>
     </div>
   );
 }

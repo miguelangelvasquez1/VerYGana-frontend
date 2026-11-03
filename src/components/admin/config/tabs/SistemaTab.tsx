@@ -136,9 +136,9 @@ function ConfirmModal({ feature, newStatus, isPending, onConfirm, onCancel }: Co
         className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-pointer"
         onClick={!isPending ? onCancel : undefined}
       />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90dvh] overflow-y-auto z-10">
         {/* Header */}
-        <div className={`px-6 pt-6 pb-5 ${isDestructive ? 'bg-red-50' : 'bg-gray-50'}`}>
+        <div className={`px-4 sm:px-6 pt-5 sm:pt-6 pb-5 ${isDestructive ? 'bg-red-50' : 'bg-gray-50'}`}>
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               newStatus === 'DISABLED' ? 'bg-red-100' :
@@ -161,7 +161,7 @@ function ConfirmModal({ feature, newStatus, isPending, onConfirm, onCancel }: Co
           </div>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-4 sm:px-6 py-5 space-y-4">
           <div className={`rounded-xl border p-4 ${isDestructive ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`}>
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Impacto</p>
             <p className="text-sm text-gray-700">{STATUS_DESCRIPTIONS[newStatus]}</p>
@@ -183,7 +183,7 @@ function ConfirmModal({ feature, newStatus, isPending, onConfirm, onCancel }: Co
                 onChange={(e) => setConfirmText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && canConfirm && !isPending && onConfirm()}
                 placeholder={newStatus}
-                className={`w-full px-3 py-2.5 text-sm font-mono border rounded-xl outline-none transition-colors ${
+                className={`tap w-full px-3 py-2.5 text-sm font-mono border rounded-xl outline-none transition-colors ${
                   confirmText && !canConfirm
                     ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
                     : 'border-gray-200 focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10'
@@ -193,18 +193,18 @@ function ConfirmModal({ feature, newStatus, isPending, onConfirm, onCancel }: Co
           )}
         </div>
 
-        <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-100">
+        <div className="flex flex-wrap justify-end gap-2 px-4 sm:px-6 py-4 border-t border-gray-100">
           <button
             onClick={onCancel}
             disabled={isPending}
-            className="cursor-pointer px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="tap cursor-pointer px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
             disabled={!canConfirm || isPending}
-            className={`cursor-pointer px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 ${
+            className={`tap cursor-pointer px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 ${
               newStatus === 'DISABLED' ? 'bg-red-600 hover:bg-red-700' :
               newStatus === 'MAINTENANCE' ? 'bg-orange-600 hover:bg-orange-700' :
               'bg-admin-blue hover:bg-admin-blue-dark'
@@ -268,7 +268,7 @@ function FeatureCard({ feature, isUpdating, onStatusChange }: FeatureCardProps) 
             <select
               value={feature.status}
               onChange={(e) => onStatusChange(feature, e.target.value as FeatureStatus)}
-              className="cursor-pointer text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10"
+              className="tap cursor-pointer text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10"
             >
               {(Object.keys(STATUS_CONFIG) as FeatureStatus[]).map((s) => (
                 <option key={s} value={s} className={STATUS_CONFIG[s].option}>
@@ -307,7 +307,7 @@ function CategorySection({ category, items, updatingId, onStatusChange, forceExp
       {/* Collapsible header */}
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="cursor-pointer w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors group"
+        className="tap cursor-pointer w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors group"
       >
         <div className="flex items-center gap-3">
           {hasAttention && (
@@ -449,7 +449,7 @@ export default function SistemaTab() {
         </div>
         <button
           onClick={() => refetch()}
-          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-admin-blue hover:bg-admin-blue-dark text-white text-sm font-semibold rounded-xl transition-colors"
+          className="tap cursor-pointer flex items-center gap-2 px-4 py-2 bg-admin-blue hover:bg-admin-blue-dark text-white text-sm font-semibold rounded-xl transition-colors"
         >
           <RefreshCw size={15} />
           Reintentar
@@ -481,7 +481,7 @@ export default function SistemaTab() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar módulo..."
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10 bg-white"
+            className="tap w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10 bg-white"
           />
         </div>
         <div className="flex gap-2 shrink-0">
@@ -493,7 +493,7 @@ export default function SistemaTab() {
             <button
               key={key}
               onClick={() => setStatusFilter(key)}
-              className={`cursor-pointer px-3 py-2 text-xs font-semibold rounded-xl border transition-colors ${
+              className={`tap cursor-pointer px-3 py-2 text-xs font-semibold rounded-xl border transition-colors ${
                 statusFilter === key
                   ? key === 'attention'
                     ? 'bg-orange-100 border-orange-300 text-orange-700'
@@ -519,7 +519,7 @@ export default function SistemaTab() {
           <p className="text-sm">No se encontraron módulos con ese criterio.</p>
           <button
             onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
-            className="cursor-pointer mt-2 text-sm text-admin-midnight hover:text-admin-blue hover:underline font-medium"
+            className="tap cursor-pointer mt-2 text-sm text-admin-midnight hover:text-admin-blue hover:underline font-medium"
           >
             Limpiar filtros
           </button>

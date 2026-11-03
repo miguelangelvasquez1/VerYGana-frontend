@@ -144,8 +144,7 @@ export default function EditCommercialProfilePage() {
         };
         setForm(loaded);
         setInitialForm(loaded);
-      } catch (error) {
-        console.error("Error cargando perfil comercial:", error);
+      } catch {
         setLoadError(true);
       } finally {
         setLoading(false);
@@ -218,7 +217,6 @@ export default function EditCommercialProfilePage() {
       router.push("/commercial/profile");
     } catch (error) {
       // El form no se toca: el usuario conserva lo que escribió.
-      console.error("Error actualizando perfil comercial:", error);
       const { message, fieldErrors } = resolveFieldErrors(error);
       setErrors(fieldErrors);
       toast.error(message);
@@ -266,7 +264,7 @@ export default function EditCommercialProfilePage() {
     <div className="max-w-2xl mx-auto space-y-6 pb-14">
       <Link
         href="/commercial/profile"
-        className="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-700 text-sm transition"
+        className="tap inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-700 text-sm transition"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver a mi perfil
@@ -307,6 +305,8 @@ export default function EditCommercialProfilePage() {
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 value={form.email}
                 onChange={(e) => onChange("email", e.target.value)}
                 className={`${inputCls(!!errors["email"])} pl-10`}
@@ -317,6 +317,9 @@ export default function EditCommercialProfilePage() {
             <div className="relative">
               <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
                 value={form.phoneNumber}
                 onChange={(e) => onChange("phoneNumber", e.target.value)}
                 placeholder="3001234567"
@@ -329,6 +332,7 @@ export default function EditCommercialProfilePage() {
             <div className="relative">
               <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input
+                autoComplete="street-address"
                 value={form.address}
                 onChange={(e) => onChange("address", e.target.value)}
                 maxLength={300}
@@ -396,6 +400,7 @@ export default function EditCommercialProfilePage() {
             </FieldWrapper>
             <FieldWrapper label="Número de documento" required error={errors["legalRepDocNumber"]}>
               <input
+                autoComplete="off"
                 value={form.legalRepDocNumber}
                 onChange={(e) => onChange("legalRepDocNumber", e.target.value)}
                 placeholder="1234567890"
@@ -443,6 +448,9 @@ export default function EditCommercialProfilePage() {
           {form.whatsappAvailable && (
             <FieldWrapper label="Número de WhatsApp" required error={errors["whatsappNumber"]}>
               <input
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
                 value={form.whatsappNumber}
                 onChange={(e) => onChange("whatsappNumber", e.target.value)}
                 placeholder="3001234567"

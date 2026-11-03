@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Encuesta de prueba 1",
+      "description": "Descripción de la encuesta.",
+      "rewardAmountPerQuestionCents": 50000,
+      "maxResponses": 100,
+      "totalQuestions": 2,
+      "status": "ACTIVE",
+      "alreadyCompleted": false,
+      "totalResponses": 20,
+      "createdAt": "2026-10-01T10:00:00"
+    },
+    {
+      "id": 2,
+      "title": "Encuesta de prueba 2",
+      "description": "Descripción de la encuesta.",
+      "rewardAmountPerQuestionCents": 50000,
+      "maxResponses": 100,
+      "totalQuestions": 2,
+      "status": "DRAFT",
+      "alreadyCompleted": false,
+      "totalResponses": 20,
+      "createdAt": "2026-10-01T10:00:00"
+    },
+    {
+      "id": 3,
+      "title": "Encuesta de prueba 3",
+      "description": "Descripción de la encuesta.",
+      "rewardAmountPerQuestionCents": 50000,
+      "maxResponses": 100,
+      "totalQuestions": 2,
+      "status": "PENDING_REVIEW",
+      "alreadyCompleted": false,
+      "totalResponses": 20,
+      "createdAt": "2026-10-01T10:00:00"
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 3,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

@@ -76,7 +76,7 @@ function ConfirmResolveModal({
           <button
             onClick={onCancel}
             disabled={loading}
-            className="cursor-pointer p-1 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+            className="tap-icon cursor-pointer p-1 rounded-lg hover:bg-gray-100 disabled:opacity-50"
           >
             <X className="w-4 h-4 text-gray-500" />
           </button>
@@ -91,14 +91,14 @@ function ConfirmResolveModal({
           <button
             onClick={onCancel}
             disabled={loading}
-            className="cursor-pointer flex-1 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
+            className="tap cursor-pointer flex-1 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="cursor-pointer flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
+            className="tap cursor-pointer flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             Confirmar
@@ -186,7 +186,7 @@ function NegotiationCard({
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="cursor-pointer inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-700 transition"
+        className="tap cursor-pointer inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-700 transition"
       >
         <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
         {expanded ? 'Ocultar detalle jurídico' : 'Ver detalle jurídico'}
@@ -240,7 +240,7 @@ function NegotiationCard({
         <button
           onClick={onRequestResolve}
           disabled={resolving}
-          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white text-xs font-semibold rounded-lg transition"
+          className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white text-xs font-semibold rounded-lg transition"
         >
           {resolving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
           Marcar como resuelto
@@ -307,7 +307,7 @@ export default function NegotiationsPanel({ onCountChange }: Props) {
           </p>
           <button
             onClick={load}
-            className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition"
+            className="tap cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Actualizar
@@ -322,7 +322,7 @@ export default function NegotiationsPanel({ onCountChange }: Props) {
           <div className="flex flex-col items-center gap-3 py-16 text-red-500">
             <AlertTriangle className="w-8 h-8" />
             <p className="text-sm font-medium">Error al cargar negociaciones.</p>
-            <button onClick={load} className="cursor-pointer text-xs text-indigo-600 hover:underline">
+            <button onClick={load} className="tap cursor-pointer text-xs text-indigo-600 hover:underline">
               Reintentar
             </button>
           </div>

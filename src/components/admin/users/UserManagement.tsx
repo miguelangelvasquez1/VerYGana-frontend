@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import {
   Eye, Pencil, Send, Ban, Unlock, Gamepad2, ShieldCheck, Users, Briefcase,
   ShieldAlert, Sparkles, RefreshCw, ChevronLeft, ChevronRight, Loader2,
@@ -17,12 +17,14 @@ import {
   getGameDesigners, getComplianceOfficers,
 } from '@/services/admin/AdminUserService';
 
-import RegisterGameDesignerModal from './RegisterGameDesignerModal';
-import RegisterComplianceOfficerModal from './RegisterComplianceOfficerModal';
-import UserDetailModal from './UserDetailModal';
-import EditUserModal from './EditUserModal';
-import BlockUnblockModal from './BlockUnblockModal';
-import NotifyUserModal from './NotifyUserModal';
+import TableScroll from '@/components/shared/TableScroll';
+// Los modales se cargan al abrirlos: no entran en el JavaScript inicial de la página (RN-8 de la spec 014).
+const RegisterGameDesignerModal = lazy(() => import('./RegisterGameDesignerModal'));
+const RegisterComplianceOfficerModal = lazy(() => import('./RegisterComplianceOfficerModal'));
+const UserDetailModal = lazy(() => import('./UserDetailModal'));
+const EditUserModal = lazy(() => import('./EditUserModal'));
+const BlockUnblockModal = lazy(() => import('./BlockUnblockModal'));
+const NotifyUserModal = lazy(() => import('./NotifyUserModal'));
 import {
   AnyUserRow, TabKey, roleLabel, roleBadgeColor, userStateLabel, userStateColor,
   levelLabel, planLabel, planBadgeColor, getRowRole, getRowTitle, isReactivable,
@@ -256,24 +258,25 @@ const UserManagement: React.FC = () => {
             {statsLoading ? 'Calculando usuarios activos...' : `${totalActive} usuarios activos en total`}
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={refreshAll}
             title="Actualizar"
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+            aria-label="Actualizar"
+            className="tap-icon p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
           >
             <RefreshCw size={18} />
           </button>
           <button
             onClick={() => setShowDesignerModal(true)}
-            className="bg-admin-gold text-white px-4 py-2 rounded-lg hover:bg-admin-gold/90 flex items-center space-x-2 cursor-pointer"
+            className="tap bg-admin-gold text-white px-4 py-2 rounded-lg hover:bg-admin-gold/90 flex items-center space-x-2 cursor-pointer"
           >
             <Gamepad2 size={20} />
             <span>Registrar Game Designer</span>
           </button>
           <button
             onClick={() => setShowComplianceModal(true)}
-            className="bg-admin-midnight text-white px-4 py-2 rounded-lg hover:bg-admin-midnight/90 flex items-center space-x-2 cursor-pointer"
+            className="tap bg-admin-midnight text-white px-4 py-2 rounded-lg hover:bg-admin-midnight/90 flex items-center space-x-2 cursor-pointer"
           >
             <ShieldCheck size={20} />
             <span>Registrar Oficial de Cumplimiento</span>
@@ -306,7 +309,7 @@ const UserManagement: React.FC = () => {
           <button
             key={key}
             onClick={() => handleTabChange(key)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
+            className={`tap flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
               activeTab === key
                 ? 'border-admin-blue text-admin-blue'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -328,7 +331,7 @@ const UserManagement: React.FC = () => {
                 type="date"
                 value={startDate}
                 onChange={(e) => { setDateRange((prev) => ({ ...prev, start: e.target.value })); setPage(0); }}
-                className="border px-3 py-1.5 rounded-lg text-sm"
+                className="tap border px-3 py-1.5 rounded-lg text-sm"
               />
             </div>
             <div>
@@ -337,7 +340,7 @@ const UserManagement: React.FC = () => {
                 type="date"
                 value={endDate}
                 onChange={(e) => { setDateRange((prev) => ({ ...prev, end: e.target.value })); setPage(0); }}
-                className="border px-3 py-1.5 rounded-lg text-sm"
+                className="tap border px-3 py-1.5 rounded-lg text-sm"
               />
             </div>
           </>
@@ -347,7 +350,7 @@ const UserManagement: React.FC = () => {
             <select
               value={stateFilter}
               onChange={(e) => { setStateFilter(e.target.value as UserState | ''); setPage(0); }}
-              className="border px-3 py-1.5 rounded-lg text-sm cursor-pointer"
+              className="tap border px-3 py-1.5 rounded-lg text-sm cursor-pointer"
             >
               <option value="">Todos</option>
               {Object.values(UserState).map((s) => (
@@ -363,7 +366,7 @@ const UserManagement: React.FC = () => {
             <select
               value={levelFilter}
               onChange={(e) => { setLevelFilter(e.target.value as UserLevel | ''); setPage(0); }}
-              className="border px-3 py-1.5 rounded-lg text-sm cursor-pointer"
+              className="tap border px-3 py-1.5 rounded-lg text-sm cursor-pointer"
             >
               <option value="">Todos</option>
               {Object.values(UserLevel).map((l) => (
@@ -379,7 +382,7 @@ const UserManagement: React.FC = () => {
             <select
               value={planFilter}
               onChange={(e) => { setPlanFilter(e.target.value as PlanCode | ''); setPage(0); }}
-              className="border px-3 py-1.5 rounded-lg text-sm cursor-pointer"
+              className="tap border px-3 py-1.5 rounded-lg text-sm cursor-pointer"
             >
               <option value="">Todos</option>
               {Object.values(PlanCode).map((p) => (
@@ -396,20 +399,20 @@ const UserManagement: React.FC = () => {
 
       {/* Bulk toolbar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between bg-admin-blue/5 border border-admin-blue/20 rounded-lg px-4 py-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-admin-blue/5 border border-admin-blue/20 rounded-lg px-4 py-2.5">
           <p className="text-sm text-admin-blue font-medium">
             {selectedIds.size} usuario{selectedIds.size === 1 ? '' : 's'} seleccionado{selectedIds.size === 1 ? '' : 's'}
           </p>
           <div className="flex gap-2">
             <button
               onClick={openNotifyBulk}
-              className="flex items-center gap-1 text-xs font-medium text-white bg-admin-blue px-3 py-1.5 rounded-lg hover:bg-admin-blue-dark cursor-pointer"
+              className="tap flex items-center gap-1 text-xs font-medium text-white bg-admin-blue px-3 py-1.5 rounded-lg hover:bg-admin-blue-dark cursor-pointer"
             >
               <Send size={14} /> Notificar seleccionados
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
-              className="text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
+              className="tap px-2 text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
             >
               Limpiar
             </button>
@@ -426,22 +429,25 @@ const UserManagement: React.FC = () => {
         ) : error ? (
           <div className="p-8 text-center">
             <p className="text-red-600 text-sm">{error}</p>
-            <button onClick={loadList} className="mt-3 text-sm text-red-600 underline cursor-pointer">Reintentar</button>
+            <button onClick={loadList} className="tap mt-3 text-sm text-red-600 underline cursor-pointer">Reintentar</button>
           </div>
         ) : items.length === 0 ? (
           <div className="p-12 text-center text-sm text-gray-500">No hay usuarios con estos filtros</div>
         ) : (
-          <div className="overflow-x-auto">
+          <TableScroll label="Tabla de usuarios, desplazable">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 w-10">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.size === items.length}
-                      onChange={toggleSelectAll}
-                      className="cursor-pointer"
-                    />
+                    <label className="tap-sq inline-flex items-center justify-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        aria-label="Seleccionar todos"
+                        checked={selectedIds.size === items.length}
+                        onChange={toggleSelectAll}
+                        className="cursor-pointer"
+                      />
+                    </label>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
@@ -457,12 +463,15 @@ const UserManagement: React.FC = () => {
                   return (
                     <tr key={user.publicId} className="hover:bg-gray-50">
                       <td className="px-4 py-4">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(user.publicId)}
-                          onChange={() => toggleSelect(user.publicId)}
-                          className="cursor-pointer"
-                        />
+                        <label className="tap-sq inline-flex items-center justify-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            aria-label={`Seleccionar a ${title}`}
+                            checked={selectedIds.has(user.publicId)}
+                            onChange={() => toggleSelect(user.publicId)}
+                            className="cursor-pointer"
+                          />
+                        </label>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -482,20 +491,21 @@ const UserManagement: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">{renderInfoCell(user)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-3">
-                          <button onClick={() => openDetail(user)} title="Ver detalle" className="text-gray-500 hover:text-admin-blue cursor-pointer">
+                        <div className="flex space-x-1 lg:space-x-3">
+                          <button onClick={() => openDetail(user)} title="Ver detalle" aria-label="Ver detalle" className="tap-icon text-gray-500 hover:text-admin-blue cursor-pointer">
                             <Eye size={16} />
                           </button>
-                          <button onClick={() => openEdit(user)} title="Editar" className="text-admin-midnight hover:text-admin-blue cursor-pointer">
+                          <button onClick={() => openEdit(user)} title="Editar" aria-label="Editar" className="tap-icon text-admin-midnight hover:text-admin-blue cursor-pointer">
                             <Pencil size={16} />
                           </button>
-                          <button onClick={() => openNotifySingle(user)} title="Enviar notificación" className="text-admin-blue hover:text-admin-blue-dark cursor-pointer">
+                          <button onClick={() => openNotifySingle(user)} title="Enviar notificación" aria-label="Enviar notificación" className="tap-icon text-admin-blue hover:text-admin-blue-dark cursor-pointer">
                             <Send size={16} />
                           </button>
                           <button
                             onClick={() => openBlockToggle(user)}
                             title={isReactivable(user.accountStatus) ? 'Reactivar' : 'Bloquear'}
-                            className={isReactivable(user.accountStatus) ? 'text-green-600 hover:text-green-800 cursor-pointer' : 'text-red-600 hover:text-red-800 cursor-pointer'}
+                            aria-label={isReactivable(user.accountStatus) ? 'Reactivar' : 'Bloquear'}
+                            className={isReactivable(user.accountStatus) ? 'tap-icon text-green-600 hover:text-green-800 cursor-pointer' : 'tap-icon text-red-600 hover:text-red-800 cursor-pointer'}
                           >
                             {isReactivable(user.accountStatus) ? <Unlock size={16} /> : <Ban size={16} />}
                           </button>
@@ -506,13 +516,13 @@ const UserManagement: React.FC = () => {
                 })}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         )}
       </div>
 
       {/* Pagination */}
       {meta.totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-gray-400">
             Página {page + 1} de {meta.totalPages} · {meta.totalElements} usuario{meta.totalElements === 1 ? '' : 's'}
           </p>
@@ -520,14 +530,14 @@ const UserManagement: React.FC = () => {
             <button
               onClick={() => goToPage(Math.max(0, page - 1))}
               disabled={page === 0}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+              className="tap flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
             >
               <ChevronLeft size={14} /> Anterior
             </button>
             <button
               onClick={() => goToPage(Math.min(meta.totalPages - 1, page + 1))}
               disabled={page >= meta.totalPages - 1}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+              className="tap flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
             >
               Siguiente <ChevronRight size={14} />
             </button>
@@ -536,61 +546,71 @@ const UserManagement: React.FC = () => {
       )}
 
       {/* Modals */}
-      <RegisterGameDesignerModal
-        isOpen={showDesignerModal}
-        onClose={() => { setShowDesignerModal(false); refreshAll(); }}
-      />
-      <RegisterComplianceOfficerModal
-        isOpen={showComplianceModal}
-        onClose={() => { setShowComplianceModal(false); refreshAll(); }}
-      />
+      <Suspense fallback={null}>
+        {showDesignerModal && (
+          <RegisterGameDesignerModal
+            isOpen
+            onClose={() => { setShowDesignerModal(false); refreshAll(); }}
+          />
+        )}
+        {showComplianceModal && (
+          <RegisterComplianceOfficerModal
+            isOpen
+            onClose={() => { setShowComplianceModal(false); refreshAll(); }}
+          />
+        )}
 
-      <UserDetailModal
-        isOpen={!!detailTarget}
-        role={detailTarget?.role ?? Role.CONSUMER}
-        publicId={detailTarget?.publicId ?? ''}
-        onClose={() => setDetailTarget(null)}
-        onEdit={() => { if (detailTarget) { setEditTarget(detailTarget); setDetailTarget(null); } }}
-        onNotify={() => {
-          if (detailTarget) {
-            setNotifyTarget({ publicIds: [detailTarget.publicId], recipientsLabel: detailTarget.displayName });
-            setDetailTarget(null);
-          }
-        }}
-        onToggleBlock={() => {
-          if (detailTarget) {
-            setBlockTarget({ ...detailTarget, action: isReactivable(detailTarget.accountStatus) ? 'unblock' : 'block' });
-            setDetailTarget(null);
-          }
-        }}
-      />
+        {detailTarget && (
+          <UserDetailModal
+            isOpen
+            role={detailTarget.role}
+            publicId={detailTarget.publicId}
+            onClose={() => setDetailTarget(null)}
+            onEdit={() => { setEditTarget(detailTarget); setDetailTarget(null); }}
+            onNotify={() => {
+              setNotifyTarget({ publicIds: [detailTarget.publicId], recipientsLabel: detailTarget.displayName });
+              setDetailTarget(null);
+            }}
+            onToggleBlock={() => {
+              setBlockTarget({ ...detailTarget, action: isReactivable(detailTarget.accountStatus) ? 'unblock' : 'block' });
+              setDetailTarget(null);
+            }}
+          />
+        )}
 
-      <EditUserModal
-        isOpen={!!editTarget}
-        role={editTarget?.role ?? Role.CONSUMER}
-        publicId={editTarget?.publicId ?? ''}
-        displayName={editTarget?.displayName ?? ''}
-        currentEmail={editTarget?.email ?? ''}
-        onClose={() => setEditTarget(null)}
-        onSuccess={loadList}
-      />
+        {editTarget && (
+          <EditUserModal
+            isOpen
+            role={editTarget.role}
+            publicId={editTarget.publicId}
+            displayName={editTarget.displayName}
+            currentEmail={editTarget.email}
+            onClose={() => setEditTarget(null)}
+            onSuccess={loadList}
+          />
+        )}
 
-      <BlockUnblockModal
-        isOpen={!!blockTarget}
-        action={blockTarget?.action ?? 'block'}
-        publicId={blockTarget?.publicId ?? ''}
-        displayName={blockTarget?.displayName ?? ''}
-        onClose={() => setBlockTarget(null)}
-        onSuccess={refreshAll}
-      />
+        {blockTarget && (
+          <BlockUnblockModal
+            isOpen
+            action={blockTarget.action}
+            publicId={blockTarget.publicId}
+            displayName={blockTarget.displayName}
+            onClose={() => setBlockTarget(null)}
+            onSuccess={refreshAll}
+          />
+        )}
 
-      <NotifyUserModal
-        isOpen={!!notifyTarget}
-        publicIds={notifyTarget?.publicIds ?? []}
-        recipientsLabel={notifyTarget?.recipientsLabel ?? ''}
-        onClose={() => setNotifyTarget(null)}
-        onSuccess={() => setSelectedIds(new Set())}
-      />
+        {notifyTarget && (
+          <NotifyUserModal
+            isOpen
+            publicIds={notifyTarget.publicIds}
+            recipientsLabel={notifyTarget.recipientsLabel}
+            onClose={() => setNotifyTarget(null)}
+            onSuccess={() => setSelectedIds(new Set())}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };

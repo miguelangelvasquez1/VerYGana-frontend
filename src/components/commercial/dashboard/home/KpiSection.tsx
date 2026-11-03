@@ -83,7 +83,7 @@ export function KpiSection({ sales, engagement, showProsperityCommissionLink = f
         footer: showProsperityCommissionLink ? (
           <Link
             href="/commercial/prosperity"
-            className="text-xs font-semibold text-[#03548C] hover:underline"
+            className="text-xs font-semibold text-[#03548C] hover:underline max-lg:-my-3 tap max-lg:inline-flex max-lg:items-center"
           >
             ¿Por qué pago menos comisión?
           </Link>

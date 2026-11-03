@@ -181,9 +181,9 @@ export function IncreaseBudgetModal({
         }}
       />
 
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="relative z-10 flex max-h-[90dvh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 border-b border-gray-100 px-6 py-5">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-gray-100 px-6 py-5">
           <div className="min-w-0">
             <h2 id={titleId} className="text-lg font-bold text-gray-900">
               Aumentar presupuesto
@@ -196,14 +196,14 @@ export function IncreaseBudgetModal({
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="cursor-pointer rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
+            className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="space-y-4 px-6 py-5">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
           {willReopen && (
             <div className="flex gap-2 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-800">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
@@ -251,7 +251,7 @@ export function IncreaseBudgetModal({
                   handleConfirm();
                 }
               }}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] disabled:bg-gray-50"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C] disabled:bg-gray-50"
             />
             <div className="mt-2 flex flex-wrap gap-1.5">
               {(isUnits ? mode.quickPicks : mode.quickPicksPesos).map((n) => (
@@ -260,7 +260,7 @@ export function IncreaseBudgetModal({
                   type="button"
                   disabled={submitting}
                   onClick={() => setValue(String(n))}
-                  className="cursor-pointer rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-[#03548C] hover:text-[#03548C] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="cursor-pointer rounded-full border border-gray-200 px-3 py-1 tap text-xs font-medium text-gray-600 hover:border-[#03548C] hover:text-[#03548C] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   +{isUnits ? formatInt(n) : formatCents(n * 100)}
                 </button>
@@ -321,12 +321,12 @@ export function IncreaseBudgetModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 border-t border-gray-100 bg-gray-50 px-6 py-4">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-gray-100 bg-gray-50 px-6 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-lg border border-gray-300 px-4 py-2 tap text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -334,7 +334,7 @@ export function IncreaseBudgetModal({
             type="button"
             onClick={handleConfirm}
             disabled={!canSubmit}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#03548C] px-4 py-2 tap text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlusCircle className="h-4 w-4" />}
             {submitting ? 'Procesando…' : 'Confirmar y pagar'}

@@ -1,0 +1,29 @@
+{
+  "content": [
+    {
+      "id": 1,
+      "userPublicId": "00000000-0000-4000-8000-000000000001",
+      "username": "usuario_prueba",
+      "userEmail": "consumidor@example.test",
+      "action": "LOGIN",
+      "level": "INFO",
+      "category": "AUTH",
+      "description": "Inicio de sesión (dato de prueba).",
+      "ipAddress": "127.0.0.1",
+      "userAgent": "Navegador de prueba",
+      "createdAt": "2026-10-30T10:00:00",
+      "success": true,
+      "entityType": "USER",
+      "entityId": 1,
+      "entityPublicId": "00000000-0000-4000-8000-000000000001",
+      "additionalData": null
+    }
+  ],
+  "totalElements": 1,
+  "totalPages": 1,
+  "size": 50,
+  "number": 0,
+  "first": true,
+  "last": true,
+  "empty": false
+}

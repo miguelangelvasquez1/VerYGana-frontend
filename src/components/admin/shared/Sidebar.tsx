@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, type Ref } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -22,11 +22,13 @@ import {
   PawPrint,
   KeyRound,
   Award,
+  Cog,
+  Server,
 } from 'lucide-react';
 
 interface MenuItem {
   title: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   href: string;
   color?: string;
 }
@@ -38,10 +40,26 @@ interface MenuGroup {
 
 interface SidebarProps {
   className?: string;
+  /** Por debajo de `lg` la barra es un cajón (D-11 de la spec 014). */
+  isMobile?: boolean;
+  open?: boolean;
+  onClose?: () => void;
+  /** Al elegir una entrada del cajón. */
+  onNavigate?: () => void;
+  drawerRef?: Ref<HTMLElement>;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+const Sidebar: React.FC<SidebarProps> = ({
+  className = '',
+  isMobile = false,
+  open = false,
+  onClose,
+  onNavigate,
+  drawerRef,
+}) => {
+  const [isCollapsedDesktop, setIsCollapsed] = useState(false);
+  // En el cajón nunca se colapsa: el botón de colapsar es solo de escritorio.
+  const isCollapsed = isCollapsedDesktop && !isMobile;
   const pathname = usePathname();
 
   const menuGroups: MenuGroup[] = [
@@ -109,11 +127,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           href: '/admin/security-events',
         },
         {
-          title: 'Reportes',
-          icon: BarChart3,
-          href: '/admin/reports',
-        },
-        {
           title: 'Finanzas',
           icon: DollarSign,
           href: '/admin/finance',
@@ -127,14 +140,32 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           title: 'Reconocimientos',
           icon: Award,
           href: '/admin/recognitions',
-        }
+        },
+        {
+          title: 'Configuración',
+          icon: Cog,
+          href: '/admin/config',
+        },
+        {
+          title: 'Sistema',
+          icon: Server,
+          href: '/admin/system',
+        },
       ],
     },
   ];
 
   return (
       <aside
-          className={`bg-[#041521] shadow-lg h-screen flex flex-col transition-all duration-300 shrink-0 ${
+          id="admin-sidebar"
+          ref={drawerRef}
+          // Por debajo de `lg` es un diálogo; cerrado, `inert` lo saca del orden de tabulación.
+          {...(isMobile
+            ? { role: 'dialog', 'aria-modal': open, 'aria-label': 'Menú', inert: !open }
+            : {})}
+          className={`bg-[#041521] shadow-lg flex flex-col transition-all duration-300 shrink-0 fixed inset-y-0 left-0 z-50 h-dvh lg:static lg:z-auto lg:h-screen ${
+              open ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full'
+          } ${
               isCollapsed
                   ? 'w-16 xl:w-20'
                   : 'w-64 xl:w-72 2xl:w-80'
@@ -159,9 +190,19 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
                 </div>
               </div>
           )}
+          {/* Cajón: cerrar. */}
+          <button
+              type="button"
+              onClick={onClose}
+              aria-label="Cerrar menú"
+              className="tap-icon shrink-0 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors cursor-pointer lg:hidden"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          {/* Escritorio: colapsar. */}
           <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className={`p-2 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors cursor-pointer ${
+              className={`p-2 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors cursor-pointer max-lg:hidden ${
                   isCollapsed ? 'mx-auto' : ''
               }`}
               title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
@@ -191,8 +232,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
                         <Link
                             key={item.href}
                             href={item.href}
+                            onClick={onNavigate}
                             title={isCollapsed ? item.title : undefined}
-                            className={`flex items-center px-3 py-2.5 xl:px-4 xl:py-3 rounded-lg border-r-4 whitespace-nowrap text-sm xl:text-base 2xl:text-lg font-medium transition-all duration-200 ${
+                            className={`tap flex items-center px-3 py-2.5 xl:px-4 xl:py-3 rounded-lg border-r-4 whitespace-nowrap text-sm xl:text-base 2xl:text-lg font-medium transition-all duration-200 ${
                                 isActive
                                     ? 'bg-white/10 border-admin-gold text-white font-semibold'
                                     : 'border-transparent text-white/60 hover:bg-white/5 hover:text-white'

@@ -180,7 +180,7 @@ export function ReportTableCard({
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <h4 className="px-6 pt-6 pb-3 text-sm font-semibold text-gray-900">{title}</h4>
-      <div className="overflow-x-auto">{children}</div>
+      <div>{children}</div>
       {footnote && (
         <p className="border-t border-gray-100 px-6 py-2.5 text-xs text-gray-400">{footnote}</p>
       )}

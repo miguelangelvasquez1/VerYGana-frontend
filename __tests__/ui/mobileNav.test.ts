@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DESKTOP_NAV_ITEMS,
   isMobileBarItemActive,
   MOBILE_BAR_ITEMS,
   MOBILE_MENU_ITEMS,
@@ -72,5 +73,21 @@ describe('menú de Perfil del celular', () => {
       ]),
     );
     expect(MOBILE_MENU_ITEMS).toHaveLength(12);
+  });
+});
+
+describe('barra de escritorio', () => {
+  it('tiene, en orden, los nueve accesos del consumidor', () => {
+    expect(DESKTOP_NAV_ITEMS.map((item) => [item.label, item.href])).toEqual([
+      ['Inicio', '/home'],
+      ['Rifas', '/raffles'],
+      ['Juegos', '/games'],
+      ['Mascota', '/pet'],
+      ['Anuncios', '/ads'],
+      ['Encuestas', '/surveys'],
+      ['Productos', '/products'],
+      ['Recargas', '/plans/mobile-plans'],
+      ['Foro', '/forum'],
+    ]);
   });
 });

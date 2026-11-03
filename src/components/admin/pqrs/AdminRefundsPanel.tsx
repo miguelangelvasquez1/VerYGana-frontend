@@ -7,6 +7,7 @@ import { getRefunds, markPaid } from '@/services/admin/AdminCashRefundService';
 import { CashRefundResponseDTO, CashRefundStatus } from '@/types/finance/Treasury.types';
 import { bankAccountTypeLabel, cashRefundStatusColor, cashRefundStatusLabel, docTypeLabel } from '@/utils/bankDetailsMeta';
 import { formatPesos } from '@/utils/currency';
+import TableScroll from '@/components/shared/TableScroll';
 
 const PAGE_SIZE = 10;
 
@@ -87,8 +88,8 @@ const AdminRefundsPanel: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-gray-800">Reembolsos</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Gestiona los reembolsos en efectivo aprobados desde reclamos de productos
@@ -97,7 +98,8 @@ const AdminRefundsPanel: React.FC = () => {
         <button
           onClick={load}
           title="Actualizar"
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+          aria-label="Actualizar"
+          className="tap-icon shrink-0 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
         >
           <RefreshCw size={18} />
         </button>
@@ -110,7 +112,7 @@ const AdminRefundsPanel: React.FC = () => {
             <button
               key={f.value}
               onClick={() => { setStatusFilter(f.value); setPage(0); }}
-              className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
+              className={`tap px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
                 statusFilter === f.value
                   ? 'bg-admin-blue text-white'
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -120,22 +122,22 @@ const AdminRefundsPanel: React.FC = () => {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <input
             type="date"
             value={startDate}
             onChange={(e) => { setStartDate(e.target.value); setPage(0); }}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 bg-white"
+            className="tap min-w-0 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 bg-white"
           />
           <span className="text-gray-400 text-sm">a</span>
           <input
             type="date"
             value={endDate}
             onChange={(e) => { setEndDate(e.target.value); setPage(0); }}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 bg-white"
+            className="tap min-w-0 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 bg-white"
           />
           {(startDate || endDate) && (
-            <button onClick={clearDates} className="text-xs text-gray-400 hover:text-gray-600 underline cursor-pointer">
+            <button onClick={clearDates} className="tap text-xs text-gray-400 hover:text-gray-600 underline cursor-pointer">
               Limpiar
             </button>
           )}
@@ -150,7 +152,7 @@ const AdminRefundsPanel: React.FC = () => {
       ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-700 font-medium">{error}</p>
-          <button onClick={load} className="mt-3 text-sm text-red-600 underline cursor-pointer">
+          <button onClick={load} className="tap mt-3 text-sm text-red-600 underline cursor-pointer">
             Reintentar
           </button>
         </div>
@@ -164,6 +166,7 @@ const AdminRefundsPanel: React.FC = () => {
       ) : (
         <>
           <div className="bg-white rounded-lg shadow overflow-hidden">
+            <TableScroll label="Tabla de reembolsos, desplazable">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -200,11 +203,12 @@ const AdminRefundsPanel: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            </TableScroll>
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs text-gray-400">
                 {totalElements} reembolso{totalElements === 1 ? '' : 's'} · Página {page + 1} de {totalPages}
               </p>
@@ -212,14 +216,14 @@ const AdminRefundsPanel: React.FC = () => {
                 <button
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                  className="tap flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   <ChevronLeft size={14} /> Anterior
                 </button>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                  className="tap flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   Siguiente <ChevronRight size={14} />
                 </button>
@@ -236,17 +240,17 @@ const AdminRefundsPanel: React.FC = () => {
           onClick={() => setSelected(null)}
         >
           <div
-            className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4"
+            className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto p-4 lg:p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="sticky top-0 z-10 -mt-4 lg:-mt-6 -mx-4 lg:-mx-6 px-4 lg:px-6 pt-4 lg:pt-6 pb-2 bg-white rounded-t-xl flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-gray-800">Reembolso · Ítem #{selected.purchaseItemId}</h2>
                 <span className={`inline-flex mt-1.5 px-2.5 py-0.5 text-xs font-semibold rounded-full ${cashRefundStatusColor[selected.status]}`}>
                   {cashRefundStatusLabel[selected.status]}
                 </span>
               </div>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none shrink-0 cursor-pointer">×</button>
+              <button type="button" onClick={() => setSelected(null)} aria-label="Cerrar" className="tap-icon text-gray-400 hover:text-gray-600 text-2xl leading-none shrink-0 cursor-pointer">×</button>
             </div>
 
             <div className="space-y-2 pt-2 border-t border-gray-100">
@@ -272,7 +276,7 @@ const AdminRefundsPanel: React.FC = () => {
                   onClick={() => handleMarkPaid(selected)}
                   disabled={markingPaid || !selected.bankDetailsSubmittedAt}
                   title={!selected.bankDetailsSubmittedAt ? 'El comprador aún no envía sus datos bancarios' : undefined}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  className="tap flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {markingPaid ? <Loader2 size={14} className="animate-spin" /> : <CheckCheck size={14} />}
                   Marcar como pagado

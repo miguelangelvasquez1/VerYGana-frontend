@@ -47,8 +47,9 @@ const CreatePqrsModal = ({ onClose, onCreated }: Props) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
+        {/* Encabezado fijo arriba: el botón de cerrar se ve siempre aunque el formulario haga scroll (RN-5) */}
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-xl bg-white p-5 border-b border-gray-100">
           <h2 className="text-base font-semibold text-gray-900">Nueva solicitud de PQRS</h2>
           <button type="button" onClick={onClose} aria-label="Cerrar" className="text-gray-400 hover:text-gray-600 cursor-pointer min-h-11 min-w-11 -mr-3 flex items-center justify-center lg:min-h-0 lg:min-w-0 lg:mr-0">
             <X size={20} />

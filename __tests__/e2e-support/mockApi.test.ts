@@ -253,3 +253,53 @@ describe('ROUTES (la tabla real)', () => {
     expect(String(body.url)).toContain('/pet-game-stub');
   });
 });
+
+describe('ROUTES · coincidencias ambiguas de los paneles (spec 014)', () => {
+  const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../e2e/fixtures');
+  const router = createMockRouter({
+    readFixture: (name: string) => {
+      try {
+        return readFileSync(path.join(root, name), 'utf8');
+      } catch {
+        return undefined;
+      }
+    },
+  }) as Router;
+  const body = (url: string, method = 'GET') => {
+    const r = router.handle({ method, url });
+    return { status: r.status, json: r.status === 200 ? JSON.parse(String(r.body)) : null };
+  };
+
+  it('las rutas fijas ganan a la de detalle con :id (encuestas, productos, reconocimientos, branding)', () => {
+    // `/surveys/:id` es el detalle del consumidor: sin entradas propias, estas caerían en él.
+    expect(body('/surveys/commercial').json.data[0].totalQuestions).toBe(2);
+    expect(body('/surveys/admin').json.data[0].totalResponses).toBe(20);
+    expect(body('/products/my-products').json.data).toHaveLength(3);
+    expect(body('/products/total-products').json).toBe(12);
+    expect(body('/admin/recognitions/fund').json.purchasedCount).toBe(3);
+    expect(body('/admin/recognitions/00000000-0000-4000-8000-0000000000e1').json.publicId).toBeTruthy();
+    expect(body('/branding-requests/campaign-goals').json).toEqual(['Reconocimiento de marca', 'Ventas']);
+    expect(body('/api/admin/pet-requests/designers').json[0].designerCode).toBe('D-001');
+    expect(body('/admin/users/stats').json).toBe(128);
+    // T31: la pestaña Precios de /admin/config pide los precios vigentes.
+    expect(body('/admin/pricing-configs').json).toHaveLength(2);
+  });
+
+  it('el id 999 en el detalle de un panel responde 500 (estado de error)', () => {
+    expect(body('/surveys/commercial/999').status).toBe(500);
+    expect(body('/products/edit/999').status).toBe(500);
+    expect(body('/admin/key-promotions/999').status).toBe(500);
+  });
+
+  it('el detalle y los likes de un anuncio no caen en las rutas fijas de /ads ni de /adLike (spec 014, T21)', () => {
+    expect(body('/ads/my-ads/filter').json.data).toHaveLength(3);
+    expect(body('/ads/1/details').json.id).toBe(1);
+    expect(body('/adLike/next').json).toBeTruthy();
+    expect(body('/adLike/1/likes').json.data[0].userName).toBeTruthy();
+    expect(body('/ads/999/details').status).toBe(500);
+  });
+
+  it('POST /purchases/quote responde la cotización del checkout', () => {
+    expect(body('/purchases/quote', 'POST').json.usableKeys).toBe(120);
+  });
+});

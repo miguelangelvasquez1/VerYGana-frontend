@@ -12,7 +12,7 @@ const PAGE_FILES = ['page.tsx', 'layout.tsx'];
 const EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js', '/index.tsx', '/index.ts'];
 
 /** Archivos `page.tsx` y `layout.tsx` bajo una carpeta (recursivo), como rutas relativas a la raíz. */
-function pageFilesUnder(root: string, dir: string): string[] {
+export function pageFilesUnder(root: string, dir: string): string[] {
   const abs = path.join(root, dir);
   if (!existsSync(abs)) return [];
   const found: string[] = [];
@@ -48,12 +48,13 @@ function resolveImport(root: string, from: string, specifier: string): string | 
 }
 
 /**
- * Archivos `.tsx` alcanzables desde los puntos de entrada, como rutas relativas a la raíz
- * (con `/`) y ordenadas. Se siguen los imports `@/` y relativos, también a través de archivos `.ts`.
+ * Archivos `.tsx` alcanzables desde unos puntos de entrada (rutas relativas a la raíz), como rutas relativas
+ * a la raíz (con `/`) y ordenadas. Se siguen los imports `@/` y relativos, también a través de archivos `.ts`.
+ * Lo comparten el alcance del consumidor (spec 012) y el de los paneles (spec 014).
  */
-export function consumerScope(root: string = REPO_ROOT): string[] {
+export function importClosure(root: string, entries: string[]): string[] {
   const seen = new Set<string>();
-  const stack = scopeEntries(root).map((rel) => path.join(root, rel));
+  const stack = entries.map((rel) => path.join(root, rel));
   while (stack.length > 0) {
     const file = stack.pop() as string;
     if (seen.has(file)) continue;
@@ -69,4 +70,9 @@ export function consumerScope(root: string = REPO_ROOT): string[] {
     .filter((f) => f.endsWith('.tsx'))
     .map((f) => path.relative(root, f).split(path.sep).join('/'))
     .sort();
+}
+
+/** Alcance del consumidor: el cierre de imports desde sus puntos de entrada. */
+export function consumerScope(root: string = REPO_ROOT): string[] {
+  return importClosure(root, scopeEntries(root));
 }

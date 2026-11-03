@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
+import { BudgetAndPlan } from './Header';
 import {
   BarChart3,
   CreditCard,
@@ -19,7 +20,7 @@ import {
   Sprout,
   KeyRound,
 } from 'lucide-react';
-import { PlanCode } from '@/types/finance/plans/Plan.types';
+import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
 import { useLogout } from '@/hooks/useLogout';
 import { useProsperitySummary } from '@/hooks/prosperity/useProsperity';
 import { isProsperityVisible } from '@/utils/prosperity';
@@ -42,6 +43,8 @@ interface MenuItem {
 
 interface SidebarProps {
   onClose?: () => void;
+  /** Para el bloque de presupuesto y plan del celular (D-5). */
+  planState?: EffectivePlanStateResponseDTO | null;
   effectivePlan?: PlanCode | null;
   hasActivePlan?: boolean;
   pathname?: string;
@@ -106,6 +109,7 @@ const menuItems: MenuItem[] = [
 
 export function Sidebar({
   onClose,
+  planState = null,
   effectivePlan = null,
   hasActivePlan = false,
   pathname = '',
@@ -145,7 +149,7 @@ export function Sidebar({
   };
 
   return (
-    <div className="bg-[#041521] text-white w-64 h-screen flex flex-col border-r border-white/6">
+    <div className="bg-[#041521] text-white w-64 h-dvh flex flex-col border-r border-white/6">
 
       {/* ── Header ── */}
       <div className="px-4 py-4 border-b border-white/[0.07]">
@@ -163,13 +167,20 @@ export function Sidebar({
           </div>
           {onClose && (
             <button
+              type="button"
               onClick={onClose}
-              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              aria-label="Cerrar menú"
+              className="lg:hidden -my-2 -mr-2 flex size-11 items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
+      </div>
+
+      {/* ── Presupuesto y plan (D-5): en el celular el encabezado no los muestra ── */}
+      <div className="sm:hidden mx-3 mt-3 flex flex-col items-stretch gap-2 rounded-xl bg-white p-2">
+        <BudgetAndPlan planState={planState} inDrawer onNavigate={onClose} />
       </div>
 
       {/* ── Nav ── */}
@@ -184,7 +195,7 @@ export function Sidebar({
           return (
             <div key={item.href}>
               {locked ? (
-                <div className="flex items-center px-3 py-2.5 rounded-lg text-slate-600 cursor-not-allowed select-none">
+                <div className="flex min-h-11 items-center px-3 py-2.5 rounded-lg text-slate-600 cursor-not-allowed select-none lg:min-h-0" aria-disabled="true">
                   <Icon className="w-4 h-4 mr-3 text-slate-700 shrink-0" />
                   <span className="text-sm font-medium flex-1">{item.label}</span>
                   <Lock className="w-3 h-3 text-slate-700" />
@@ -194,7 +205,7 @@ export function Sidebar({
                   href={item.href}
                   onClick={onClose}
                   className={`
-                    flex items-center px-3 py-2.5 rounded-lg transition-colors duration-100 group
+                    flex min-h-11 items-center px-3 py-2.5 rounded-lg transition-colors duration-100 group lg:min-h-0
                     ${active
                       ? 'bg-admin-blue/15 text-admin-blue border border-admin-blue/25'
                       : 'text-slate-400 hover:bg-white/6 hover:text-white border border-transparent'
@@ -214,7 +225,7 @@ export function Sidebar({
 
       {/* ── Footer ── */}
       <div className="p-3 border-t border-white/[0.07]">
-        <button className="w-full flex items-center px-3 py-2 text-slate-500 hover:text-white hover:bg-white/6 rounded-lg transition-colors text-sm group cursor-pointer"
+        <button className="w-full flex min-h-11 items-center px-3 py-2 lg:min-h-0 text-slate-500 hover:text-white hover:bg-white/6 rounded-lg transition-colors text-sm group cursor-pointer"
           onClick={async () => {
             await logout();
           }}

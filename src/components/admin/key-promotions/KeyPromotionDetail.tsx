@@ -37,6 +37,7 @@ import { Th } from '@/components/prosperity/ProsperityUI';
 import { ProsperityModalShell, inputClass } from '@/components/admin/prosperity/ProsperityModalShell';
 import { KeyPromotionFormModal } from './KeyPromotionFormModal';
 import { OfferStatusBadge, PromotionBudgetBar, PromotionStatusBadge } from './KeyPromotionShared';
+import TableScroll from '@/components/shared/TableScroll';
 
 // ─── Invitar producto ────────────────────────────────────────────────────────
 
@@ -89,7 +90,7 @@ function InviteProductModal({
             type="button"
             onClick={onClose}
             disabled={mutation.isPending}
-            className="cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
+            className="tap cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
           >
             Cerrar
           </button>
@@ -134,8 +135,8 @@ function InviteProductModal({
                   className="h-10 w-10 shrink-0 rounded-lg border border-gray-100 object-cover"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-gray-900">{product.name}</p>
-                  <p className="truncate text-xs text-gray-500">
+                  <p className="truncate text-sm font-semibold text-gray-900" title={product.name}>{product.name}</p>
+                  <p className="truncate text-xs text-gray-500" title={`#${product.id} · ${product.companyName} · ${formatBudget(product.price)}`}>
                     #{product.id} · {product.companyName} · {formatBudget(product.price)}
                   </p>
                 </div>
@@ -146,7 +147,7 @@ function InviteProductModal({
                     mutation.mutate(product.id);
                   }}
                   disabled={alreadyInvited || mutation.isPending}
-                  className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-admin-blue px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="tap inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-admin-blue px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {inviting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   {alreadyInvited ? 'Invitado' : 'Invitar'}
@@ -273,7 +274,7 @@ export default function KeyPromotionDetail({ promotionId }: { promotionId: numbe
   const backLink = (
     <Link
       href="/admin/key-promotions"
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+      className="tap inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
     >
       <ArrowLeft className="h-4 w-4" />
       Promociones de llaves
@@ -300,7 +301,7 @@ export default function KeyPromotionDetail({ promotionId }: { promotionId: numbe
           <button
             type="button"
             onClick={() => refetch()}
-            className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
+            className="tap inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Reintentar
           </button>
@@ -360,7 +361,7 @@ export default function KeyPromotionDetail({ promotionId }: { promotionId: numbe
                 onClick={() => setConfirm({ kind: 'transition', transition: 'authorize' })}
                 disabled={draftProblems.length > 0}
                 title={draftProblems.length > 0 ? 'Resuelve los pendientes antes de autorizar' : undefined}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="tap inline-flex cursor-pointer items-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ShieldCheck className="h-4 w-4" />
                 Autorizar
@@ -391,7 +392,7 @@ export default function KeyPromotionDetail({ promotionId }: { promotionId: numbe
             <button
               type="button"
               onClick={() => setConfirm({ kind: 'transition', transition: 'end' })}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-50"
+              className="tap inline-flex cursor-pointer items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-50"
             >
               <Ban className="h-4 w-4" />
               Cerrar
@@ -501,7 +502,7 @@ export default function KeyPromotionDetail({ promotionId }: { promotionId: numbe
             {isDraft ? 'Aún no has invitado productos.' : 'Esta promoción no tiene ofertas.'}
           </p>
         ) : (
-          <div className="overflow-x-auto">
+          <TableScroll label="Tabla de productos de la promoción, desplazable">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -555,7 +556,7 @@ export default function KeyPromotionDetail({ promotionId }: { promotionId: numbe
                         <button
                           type="button"
                           onClick={() => setConfirm({ kind: 'removeOffer', offer })}
-                          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50"
+                          className="tap inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           Quitar
@@ -566,7 +567,7 @@ export default function KeyPromotionDetail({ promotionId }: { promotionId: numbe
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         )}
       </section>
 

@@ -26,7 +26,7 @@ function SectionButton({
   return (
     <button
       onClick={onClick}
-      className={`cursor-pointer flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+      className={`tap cursor-pointer flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
         active
           ? 'border-admin-blue text-admin-blue'
           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'

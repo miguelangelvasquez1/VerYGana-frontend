@@ -7,6 +7,7 @@ import {
   type AdminBrandingRequestSummary,
   type BrandingStatus,
 } from '@/services/BrandingRequestService';
+import TableScroll from '@/components/shared/TableScroll';
 import { AdminBrandingDetail } from './AdminBrandingDetail';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -86,8 +87,8 @@ const AdminBrandingPanel: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-gray-800">Solicitudes de Branding</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Gestiona las solicitudes de integración de marca en juegos
@@ -96,7 +97,8 @@ const AdminBrandingPanel: React.FC = () => {
         <button
           onClick={load}
           title="Actualizar"
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+          aria-label="Actualizar"
+          className="tap-icon shrink-0 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
         >
           <RefreshCw size={18} />
         </button>
@@ -139,7 +141,7 @@ const AdminBrandingPanel: React.FC = () => {
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
+            className={`tap px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
               filter === f.value
                 ? 'bg-admin-blue text-white'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -163,7 +165,7 @@ const AdminBrandingPanel: React.FC = () => {
       ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-700 font-medium">{error}</p>
-          <button onClick={load} className="mt-3 text-sm text-red-600 underline cursor-pointer">
+          <button onClick={load} className="tap mt-3 px-3 text-sm text-red-600 underline cursor-pointer">
             Reintentar
           </button>
         </div>
@@ -179,7 +181,7 @@ const AdminBrandingPanel: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <TableScroll label="Tabla de solicitudes de branding, desplazable" className="bg-white rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -205,7 +207,7 @@ const AdminBrandingPanel: React.FC = () => {
                     <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">
                       #{req.id}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap max-w-[160px] truncate">
+                    <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap max-w-[160px] truncate" title={req.commercialName}>
                       {req.commercialName}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -236,7 +238,7 @@ const AdminBrandingPanel: React.FC = () => {
               })}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
       )}
     </div>
   );

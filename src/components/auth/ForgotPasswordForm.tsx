@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, RefreshCw, ArrowLeft, CheckCircle, ArrowRight } from 'lucide-react';
 import { forgotPassword, resetPassword } from '@/services/AuthService';
 
@@ -240,6 +241,7 @@ export default function ForgotPasswordForm() {
           <button
             type="button"
             onClick={() => setStep('email')}
+            className="min-h-11 lg:min-h-0"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               background: 'none', border: 'none', cursor: 'pointer',
@@ -318,6 +320,7 @@ export default function ForgotPasswordForm() {
               type="button"
               onClick={handleResend}
               disabled={!canResend}
+              className="min-h-11 lg:min-h-0"
               style={{
                 background: highlightResend && canResend ? '#eff6ff' : 'none',
                 border: highlightResend && canResend ? '1px solid #bfdbfe' : 'none',
@@ -407,11 +410,12 @@ export default function ForgotPasswordForm() {
                   onChange={(e) => { setNewPassword(e.target.value); setPasswordError(null); }}
                   placeholder="Mínimo 6 caracteres"
                   autoComplete="new-password"
+                  className="text-[14px] max-lg:text-[16px]"
                   style={{
                     width: '100%', boxSizing: 'border-box',
                     padding: '12px 44px 12px 38px',
                     border: `1.5px solid ${passwordError ? '#fca5a5' : '#e5e7eb'}`,
-                    borderRadius: 10, fontSize: 14, outline: 'none',
+                    borderRadius: 10, outline: 'none',
                     background: passwordError ? '#fef2f2' : '#fff',
                   }}
                   onFocus={(e) => { if (!passwordError) e.target.style.borderColor = '#00a4ff'; }}
@@ -420,6 +424,8 @@ export default function ForgotPasswordForm() {
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
+                  aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  className="max-lg:-mr-3 max-lg:flex max-lg:size-11 max-lg:items-center max-lg:justify-center"
                   style={{
                     position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
@@ -447,11 +453,12 @@ export default function ForgotPasswordForm() {
                   onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(null); }}
                   placeholder="Repite tu nueva contraseña"
                   autoComplete="new-password"
+                  className="text-[14px] max-lg:text-[16px]"
                   style={{
                     width: '100%', boxSizing: 'border-box',
                     padding: '12px 44px 12px 38px',
                     border: `1.5px solid ${passwordError ? '#fca5a5' : '#e5e7eb'}`,
-                    borderRadius: 10, fontSize: 14, outline: 'none',
+                    borderRadius: 10, outline: 'none',
                     background: passwordError ? '#fef2f2' : '#fff',
                   }}
                   onFocus={(e) => { if (!passwordError) e.target.style.borderColor = '#00a4ff'; }}
@@ -460,6 +467,8 @@ export default function ForgotPasswordForm() {
                 <button
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
+                  aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  className="max-lg:-mr-3 max-lg:flex max-lg:size-11 max-lg:items-center max-lg:justify-center"
                   style={{
                     position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
@@ -536,11 +545,12 @@ export default function ForgotPasswordForm() {
             onChange={(e) => { setEmail(e.target.value); setEmailError(null); }}
             placeholder="tu@correo.com"
             autoComplete="email"
+            className="text-[14px] max-lg:text-[16px]"
             style={{
               width: '100%', boxSizing: 'border-box',
               padding: '12px 12px 12px 38px',
               border: `1.5px solid ${emailError ? '#fca5a5' : '#e5e7eb'}`,
-              borderRadius: 10, fontSize: 14, outline: 'none',
+              borderRadius: 10, outline: 'none',
               background: emailError ? '#fef2f2' : '#fff',
             }}
             onFocus={(e) => { if (!emailError) e.target.style.borderColor = '#00a4ff'; }}
@@ -576,9 +586,13 @@ export default function ForgotPasswordForm() {
       </button>
 
       <p style={{ textAlign: 'center', fontSize: 13, color: '#6b7280' }}>
-        <a href="/login" style={{ color: '#03548C', fontWeight: 600, textDecoration: 'none' }}>
+        <Link
+          href="/login"
+          className="inline-flex min-h-11 items-center lg:min-h-0"
+          style={{ color: '#03548C', fontWeight: 600, textDecoration: 'none' }}
+        >
           ← Volver al inicio de sesión
-        </a>
+        </Link>
       </p>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

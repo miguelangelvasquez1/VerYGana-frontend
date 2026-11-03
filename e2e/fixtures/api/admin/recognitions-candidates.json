@@ -1,0 +1,22 @@
+{
+  "data": [
+    {
+      "publicId": "00000000-0000-4000-8000-000000000001",
+      "fullName": "Consumidor Prueba",
+      "metricValue": 340,
+      "level": "ORO",
+      "lastActivityAt": "2026-10-30T10:00:00",
+      "recognitionsReceived": 1,
+      "lastRecognitionAt": "2026-09-01T10:00:00"
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

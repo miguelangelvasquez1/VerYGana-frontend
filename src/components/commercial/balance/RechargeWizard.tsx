@@ -134,10 +134,10 @@ export function RechargeWizard() {
         return;
       }
       if (creditedIfNone) refreshPlanState();
-    } catch (err) {
+    } catch {
       // Si /current falla caemos al formulario: el preview también trae
       // `openRecharge` y nos devuelve a la tarjeta si hay una en curso.
-      console.error('Error consultando la recarga en curso:', err);
+      console.error('Error consultando la recarga en curso');
     }
     setOpenRecharge(null);
     setContract(null);
@@ -476,7 +476,7 @@ export function RechargeWizard() {
       type="button"
       onClick={handleCancelRecharge}
       disabled={cancelling || submitting || checking || reconciling}
-      className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold text-gray-500 hover:text-red-600 transition disabled:opacity-50 cursor-pointer"
+      className="flex items-center justify-center gap-2 w-full py-2.5 tap text-sm font-semibold text-gray-500 hover:text-red-600 transition disabled:opacity-50 cursor-pointer"
     >
       {cancelling ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
       {cancelling ? 'Cancelando recarga...' : 'Cancelar recarga'}
@@ -505,7 +505,7 @@ export function RechargeWizard() {
           </p>
           <Link
             href="/plans"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 tap bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
           >
             Ver planes
           </Link>
@@ -662,7 +662,7 @@ export function RechargeWizard() {
                   type="button"
                   onClick={handleReconcile}
                   disabled={reconciling}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 tap border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 cursor-pointer"
                 >
                   {reconciling ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                   Actualizar
@@ -727,7 +727,7 @@ export function RechargeWizard() {
               type="button"
               onClick={handleCheckSignature}
               disabled={checking}
-              className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 tap border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 cursor-pointer"
             >
               {checking ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               Ya firmé, verificar estado
@@ -776,7 +776,7 @@ export function RechargeWizard() {
             )}
             <Link
               href="/commercial/products"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 tap bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
             >
               Volver al panel
             </Link>

@@ -86,25 +86,26 @@ const RegisterComplianceOfficerModal: React.FC<Props> = ({ isOpen, onClose }) =>
   };
 
   const inputCls = (hasError?: boolean) =>
-    `w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-midnight ${
+    `tap w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-midnight ${
       hasError ? 'border-red-400' : 'border-gray-300'
     }`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90dvh] overflow-y-auto">
+        {/* Encabezado fijo arriba: el botón de cerrar se ve siempre aunque el formulario haga scroll (RN-5) */}
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-t-xl bg-white p-4 lg:p-6 border-b">
           <div className="flex items-center gap-2">
             <ShieldCheck className="text-admin-midnight" size={22} />
-            <h2 className="text-lg font-semibold text-gray-900">Registrar Oficial de Cumplimiento</h2>
+            <h2 className="text-lg font-semibold text-gray-900 min-w-0">Registrar Oficial de Cumplimiento</h2>
           </div>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+          <button type="button" onClick={handleClose} aria-label="Cerrar" className="tap-icon shrink-0 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
             <X size={22} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4" noValidate>
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="p-4 lg:p-6 space-y-4" noValidate>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre <span className="text-red-500">*</span>
@@ -140,6 +141,8 @@ const RegisterComplianceOfficerModal: React.FC<Props> = ({ isOpen, onClose }) =>
             </label>
             <input
               type="email"
+              inputMode="email"
+              autoComplete="off"
               value={form.email}
               onChange={e => handleField('email', e.target.value)}
               placeholder="oficial@verygana.com"
@@ -154,6 +157,8 @@ const RegisterComplianceOfficerModal: React.FC<Props> = ({ isOpen, onClose }) =>
             </label>
             <input
               type="tel"
+              inputMode="tel"
+              autoComplete="off"
               value={form.phoneNumber}
               onChange={e => handleField('phoneNumber', e.target.value)}
               placeholder="3001234567"
@@ -168,6 +173,7 @@ const RegisterComplianceOfficerModal: React.FC<Props> = ({ isOpen, onClose }) =>
             </label>
             <input
               type="password"
+              autoComplete="new-password"
               value={form.password}
               onChange={e => handleField('password', e.target.value)}
               placeholder="Mínimo 6 caracteres"
@@ -180,14 +186,14 @@ const RegisterComplianceOfficerModal: React.FC<Props> = ({ isOpen, onClose }) =>
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+              className="tap flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-admin-midnight rounded-lg hover:bg-admin-midnight/90 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="tap flex-1 px-4 py-2 text-sm font-medium text-white bg-admin-midnight rounded-lg hover:bg-admin-midnight/90 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? 'Registrando...' : 'Registrar Oficial'}
             </button>

@@ -60,6 +60,8 @@ interface Props {
   statusLabels?: Partial<Record<string, string>>;
   accent?: Accent;
   placeholder?: string;
+  /** Clases extra del botón "Enviar"; comercial y admin pasan `tap` (área táctil de 44 px), el diseñador no. */
+  sendButtonClassName?: string;
 }
 
 export const CommentThread: React.FC<Props> = ({
@@ -71,6 +73,7 @@ export const CommentThread: React.FC<Props> = ({
   statusLabels = CYCLE_LABEL,
   accent = 'violet',
   placeholder = 'Escribe un mensaje… (Enter para enviar, Shift+Enter para nueva línea)',
+  sendButtonClassName = '',
 }) => {
   const theme = ACCENT[accent];
   const [text, setText] = useState('');
@@ -180,7 +183,7 @@ export const CommentThread: React.FC<Props> = ({
           <button
             onClick={handleSend}
             disabled={!text.trim() || sending}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white ${theme.button} rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 self-end cursor-pointer`}
+            className={`${sendButtonClassName} flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white ${theme.button} rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 self-end cursor-pointer`.trim()}
           >
             {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
             Enviar

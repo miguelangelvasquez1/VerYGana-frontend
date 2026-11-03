@@ -30,12 +30,12 @@ export default defineConfig({
     },
     {
       name: 'mobile-390',
-      testMatch: /(layout|smoke)\.spec\.ts/,
+      testMatch: /(layout|smoke|landing)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 }, ...touch },
     },
     {
       name: 'tablet-768',
-      testMatch: /(layout|smoke)\.spec\.ts/,
+      testMatch: /(layout|smoke|landing)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 768, height: 1024 },

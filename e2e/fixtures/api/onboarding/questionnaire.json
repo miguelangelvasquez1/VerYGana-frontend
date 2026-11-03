@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "openingMessage": "Cuéntanos sobre tu negocio para recomendarte la modalidad que mejor se ajusta.",
+  "openingActions": [
+    "Responde con calma",
+    "Puedes revisar tus respuestas antes de enviar"
+  ],
+  "sections": [
+    {
+      "code": "NEGOCIO",
+      "title": "Tu negocio",
+      "subtitle": "Datos generales de la operación",
+      "questions": [
+        {
+          "code": "Q1",
+          "fieldName": "salesChannel",
+          "text": "¿Por qué canal vendes hoy principalmente?",
+          "helpText": "Nos ayuda a entender cómo llegan tus clientes.",
+          "type": "SINGLE_CHOICE",
+          "required": true,
+          "maxSelections": null,
+          "ordered": false,
+          "dependsOn": null,
+          "options": [
+            {
+              "value": "STORE",
+              "label": "Tienda física",
+              "exclusive": false
+            },
+            {
+              "value": "ONLINE",
+              "label": "Tienda en línea",
+              "exclusive": false
+            },
+            {
+              "value": "BOTH",
+              "label": "Ambos",
+              "exclusive": false
+            }
+          ]
+        },
+        {
+          "code": "Q2",
+          "fieldName": "goals",
+          "text": "¿Qué quieres lograr con VerYGana?",
+          "helpText": null,
+          "type": "MULTI_CHOICE",
+          "required": true,
+          "maxSelections": 2,
+          "ordered": true,
+          "dependsOn": null,
+          "options": [
+            {
+              "value": "SALES",
+              "label": "Vender más",
+              "exclusive": false
+            },
+            {
+              "value": "BRAND",
+              "label": "Dar a conocer mi marca",
+              "exclusive": false
+            },
+            {
+              "value": "NONE",
+              "label": "Ninguno",
+              "exclusive": true
+            }
+          ]
+        },
+        {
+          "code": "Q3",
+          "fieldName": "hasEcommerce",
+          "text": "¿Tienes un sitio web propio?",
+          "helpText": null,
+          "type": "BOOLEAN",
+          "required": true,
+          "maxSelections": null,
+          "ordered": false,
+          "dependsOn": null,
+          "options": []
+        }
+      ]
+    }
+  ]
+}

@@ -32,7 +32,7 @@ export function ProsperityReconciliationCard() {
           type="button"
           onClick={() => mutation.mutate()}
           disabled={mutation.isPending}
-          className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="tap inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
           {mutation.isPending ? 'Ejecutando…' : 'Ejecutar conciliación'}

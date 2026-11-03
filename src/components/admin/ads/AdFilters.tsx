@@ -25,16 +25,16 @@ export const AdFilters: React.FC<AdFiltersProps> = ({
             placeholder="Buscar por título o descripción..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-blue focus:border-transparent"
+            className="tap w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-blue focus:border-transparent"
           />
         </div>
         
-        <div className="flex items-center gap-2">
-          <Filter className="text-gray-500 w-5 h-5" />
+        <div className="flex items-center gap-2 min-w-0">
+          <Filter className="text-gray-500 w-5 h-5 shrink-0" />
           <select
             value={statusFilter}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="cursor-pointer px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-blue focus:border-transparent"
+            className="tap cursor-pointer px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-blue focus:border-transparent"
           >
             {STATUS_FILTER_OPTIONS.map(option => (
               <option key={option.value} value={option.value}>

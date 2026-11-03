@@ -5,6 +5,7 @@ import type { PlanCode } from "@/types/finance/plans/Plan.types";
 import { useKeysReservePct } from "@/hooks/useTreasuryConfig";
 import { DUAL_COMMISSION_NOTE, formatCOP, HelpTooltip, planCommissions, StepButton } from "../onboarding.shared";
 import { ProsperityThresholdPreview } from "@/components/prosperity/ProsperityThresholdPreview";
+import TableScroll from "@/components/shared/TableScroll";
 
 export interface AcceptPlanData {
   investmentAmountCents?: number;
@@ -198,7 +199,8 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
         </div>
       )}
 
-      <div className="overflow-x-auto -mx-1 px-1">
+      <div>
+        <TableScroll label="Comparación de planes, desplazable" className="-mx-1 px-1">
         <table className="w-full border-separate border-spacing-0 text-sm min-w-[560px]">
           <thead>
             <tr>
@@ -267,6 +269,7 @@ export function PlanStep({ catalog, selectedPlanCode, onSelectPlan, submitting, 
             ))}
           </tbody>
         </table>
+        </TableScroll>
         {catalog.plans.some((p) => planCommissions(p).dual) && (
           <p className="mt-2 text-xs text-gray-400">{DUAL_COMMISSION_NOTE}</p>
         )}

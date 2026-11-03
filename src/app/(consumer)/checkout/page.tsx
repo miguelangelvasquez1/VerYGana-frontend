@@ -279,13 +279,14 @@ export default function CheckoutPage() {
                           <input
                             id="keys-to-use"
                             type="number"
+                            inputMode="numeric"
                             min={0}
                             max={maxSelectableKeys}
                             value={appliedKeys || ''}
                             placeholder="0"
                             onChange={(e) => handleKeysChange(Number(e.target.value) || 0)}
                             disabled={keysLocked}
-                            className={`w-28 px-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                            className={`w-28 px-3 py-1.5 border rounded-lg text-base lg:text-sm focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${
                               keysInputError ? 'border-red-400 focus:ring-red-200' : 'border-gray-300 focus:ring-[#03548C]'
                             }`}
                           />

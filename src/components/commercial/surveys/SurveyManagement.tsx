@@ -52,7 +52,7 @@ export default function SurveyManagement() {
                 placeholder="Buscar encuestas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                className="pl-9 pr-4 py-2 tap w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
               />
             </div>
 
@@ -66,7 +66,7 @@ export default function SurveyManagement() {
                   setStatusFilter(v === 'all' ? undefined : (v as SurveyStatus));
                   setPage(0);
                 }}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                className="px-3 py-2 tap border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
               >
                 <option value="all">Todos los estados</option>
                 {ALL_STATUSES.map((s) => (
@@ -84,7 +84,7 @@ export default function SurveyManagement() {
                 type="button"
                 disabled
                 title={createBlockedTitle}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 tap text-sm font-semibold text-gray-400 cursor-not-allowed"
               >
                 <Plus className="h-4 w-4" />
                 Nueva encuesta
@@ -92,7 +92,7 @@ export default function SurveyManagement() {
             ) : (
               <button
                 onClick={() => router.push('/commercial/surveys/new')}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 tap text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
               >
                 <Plus className="h-4 w-4" />
                 Nueva encuesta

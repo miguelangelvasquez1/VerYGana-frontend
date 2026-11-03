@@ -73,7 +73,7 @@ export default function AllyStorefrontPage() {
         <p className="text-lg font-semibold text-gray-600">Vendedor no encontrado</p>
         <button
           onClick={() => router.back()}
-          className="text-sm font-semibold underline underline-offset-2 transition hover:opacity-70 text-[#03548C] cursor-pointer"
+          className="tap text-sm font-semibold underline underline-offset-2 transition hover:opacity-70 text-[#03548C] cursor-pointer"
         >
           Volver
         </button>

@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "name": "Producto de prueba",
+  "description": "Descripción del producto de prueba.",
+  "productCategoryId": 1,
+  "price": 125000,
+  "imageUrl": "/products/casco.png",
+  "totalStockItems": 15,
+  "availableStockItems": 12,
+  "targeting": {
+    "municipalityCodes": [],
+    "minAge": null,
+    "maxAge": null,
+    "targetGender": "ALL"
+  },
+  "productType": "DIGITAL"
+}

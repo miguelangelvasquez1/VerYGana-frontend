@@ -33,7 +33,7 @@ export const ResumenTab: React.FC<Props> = ({ campaign, spentPct, onIncreaseBudg
         <button
           type="button"
           onClick={onIncreaseBudget}
-          className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-blue-200 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer"
+          className="tap mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-blue-200 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer"
           title={campaign.status === 'COMPLETED' ? 'Agrega presupuesto para reactivar esta campaña' : 'Agregar presupuesto a la campaña'}
         >
           <PlusCircle size={16} />

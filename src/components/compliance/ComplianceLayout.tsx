@@ -9,11 +9,11 @@
  * cian que marca dónde está parado. Nada compite con los expedientes.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   AlertTriangle,
   ArrowLeftRight,
@@ -37,7 +37,6 @@ const NAV = [
 ];
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
-const EASE_DRAWER = [0.32, 0.72, 0, 1] as const;
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + '/');
@@ -47,10 +46,13 @@ function NavList({
   pathname,
   collapsed,
   onNavigate,
+  spineId,
 }: {
   pathname: string;
   collapsed: boolean;
   onNavigate?: () => void;
+  /** Cada lista (riel y cajón) lleva su propia guía: dos con el mismo `layoutId` se pelean entre sí. */
+  spineId: string;
 }) {
   const reduce = useReducedMotion();
   return (
@@ -65,7 +67,7 @@ function NavList({
             onClick={onNavigate}
             title={collapsed ? item.title : undefined}
             aria-current={active ? 'page' : undefined}
-            className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors duration-150 ${
+            className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 tap text-[13px] font-medium transition-colors duration-150 ${
               active ? 'bg-cmp-ink-2 text-white' : 'text-[#93A7B8] hover:bg-cmp-ink-2/60 hover:text-white'
             } ${collapsed ? 'justify-center' : ''}`}
           >
@@ -73,7 +75,7 @@ function NavList({
                 mueve, en vez de apagarse aquí y encenderse allá. */}
             {active && (
               <motion.span
-                layoutId="cmp-nav-spine"
+                layoutId={spineId}
                 transition={reduce ? { duration: 0 } : { duration: 0.26, ease: EASE_OUT }}
                 className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-cmp-cian"
               />
@@ -109,15 +111,19 @@ function RailFooter({ collapsed }: { collapsed: boolean }) {
             {initials}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-medium text-white">{name || 'Oficial'}</p>
-            <p className="cmp-label mt-0.5 truncate text-[#6F8497]">Oficial de cumplimiento</p>
+            <p className="truncate text-[13px] font-medium text-white" title={name || undefined}>
+              {name || 'Oficial'}
+            </p>
+            <p className="cmp-label mt-0.5 truncate text-[#6F8497]" title="Oficial de cumplimiento">
+              Oficial de cumplimiento
+            </p>
           </div>
         </div>
       )}
       <button
         onClick={logout}
         title={collapsed ? 'Cerrar sesión' : undefined}
-        className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-[#93A7B8] hover:bg-cmp-flag/20 hover:text-[#FF9C93] ${
+        className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 tap text-[13px] font-medium text-[#93A7B8] hover:bg-cmp-flag/20 hover:text-[#FF9C93] ${
           collapsed ? 'justify-center' : ''
         }`}
       >
@@ -156,12 +162,34 @@ export default function ComplianceLayout({ children }: { children: React.ReactNo
 
   const section = NAV.find((n) => isActive(pathname, n.href));
 
+  // El foco vuelve al botón de menú al cerrar el cajón (CA-7).
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const drawerRef = useRef<HTMLElement | null>(null);
+
+  const closeDrawer = () => {
+    setDrawerOpen(false);
+    menuButtonRef.current?.focus();
+  };
+
   useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
 
+  // Abierto, el foco entra al primer enlace y Escape lo cierra.
+  useEffect(() => {
+    if (!drawerOpen) return;
+    drawerRef.current?.querySelector<HTMLElement>('nav a')?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setDrawerOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [drawerOpen]);
+
   return (
-    <div className="compliance-root flex h-screen overflow-hidden bg-cmp-paper">
+    <div className="compliance-root panel-touch flex h-dvh md:h-screen overflow-hidden bg-cmp-paper">
       {/* Riel fijo — escritorio */}
       <aside
         className={`hidden shrink-0 flex-col bg-cmp-ink md:flex ${
@@ -178,8 +206,9 @@ export default function ComplianceLayout({ children }: { children: React.ReactNo
               aria-label="Expandir menú"
               className="group relative mx-auto grid h-9 w-9 cursor-pointer place-items-center rounded-lg bg-cmp-cian/15 hover:bg-cmp-ink-3"
             >
-              <ShieldCheck className="h-[18px] w-[18px] text-cmp-cian transition-opacity duration-150 group-hover:opacity-0" />
-              <PanelLeft className="absolute h-4 w-4 text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
+              <ShieldCheck className="h-[18px] w-[18px] text-cmp-cian transition-opacity duration-150 group-hover:opacity-0 group-focus-visible:opacity-0 max-lg:opacity-0" />
+              {/* Con puntero o con teclado el ícono cambia; en pantallas táctiles (menos de lg) queda fijo. */}
+              <PanelLeft className="absolute h-4 w-4 text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 max-lg:opacity-100" />
             </button>
           ) : (
             <>
@@ -189,60 +218,64 @@ export default function ComplianceLayout({ children }: { children: React.ReactNo
               <button
                 onClick={() => setCollapsed(true)}
                 aria-label="Contraer menú"
-                className="cursor-pointer rounded-lg p-1.5 text-[#7F94A6] hover:bg-white/5 hover:text-white"
+                className="tap-icon cursor-pointer rounded-lg p-1.5 text-[#7F94A6] hover:bg-white/5 hover:text-white"
               >
                 <PanelLeftClose className="h-4 w-4" />
               </button>
             </>
           )}
         </div>
-        <NavList pathname={pathname} collapsed={collapsed} />
+        <NavList pathname={pathname} collapsed={collapsed} spineId="cmp-nav-spine-rail" />
         <RailFooter collapsed={collapsed} />
       </aside>
 
-      {/* Riel deslizante — móvil */}
-      <AnimatePresence>
-        {drawerOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              onClick={() => setDrawerOpen(false)}
-              className="fixed inset-0 z-40 bg-cmp-ink/50 backdrop-blur-[2px] md:hidden"
-            />
-            <motion.aside
-              initial={reduce ? { opacity: 0 } : { transform: 'translateX(-100%)' }}
-              animate={reduce ? { opacity: 1 } : { transform: 'translateX(0%)' }}
-              exit={reduce ? { opacity: 0 } : { transform: 'translateX(-100%)' }}
-              transition={{ duration: 0.3, ease: EASE_DRAWER }}
-              className="fixed inset-y-0 left-0 z-50 flex w-[268px] flex-col bg-cmp-ink md:hidden"
-            >
-              <div className="flex h-16 items-center justify-between border-b border-white/10 px-3">
-                <Wordmark />
-                <button
-                  onClick={() => setDrawerOpen(false)}
-                  aria-label="Cerrar menú"
-                  className="cursor-pointer rounded-lg p-1.5 text-[#7F94A6] hover:bg-white/5 hover:text-white"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <NavList pathname={pathname} collapsed={false} onNavigate={() => setDrawerOpen(false)} />
-              <RailFooter collapsed={false} />
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
+      {/* Riel deslizante — móvil. Siempre montado: cerrado, `inert` lo saca del orden de tabulación. */}
+      {drawerOpen && (
+        <button
+          type="button"
+          aria-label="Cerrar menú"
+          tabIndex={-1}
+          onClick={closeDrawer}
+          className="fixed inset-0 z-40 cursor-default bg-cmp-ink/50 backdrop-blur-[2px] md:hidden"
+        />
+      )}
+      <aside
+        id="compliance-sidebar"
+        ref={drawerRef}
+        role="dialog"
+        aria-modal={drawerOpen}
+        aria-label="Menú"
+        inert={!drawerOpen}
+        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-[268px] max-w-[85vw] flex-col bg-cmp-ink md:hidden ${
+          reduce ? '' : 'transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]'
+        } ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        <div className="flex h-16 items-center justify-between border-b border-white/10 px-3">
+          <Wordmark />
+          <button
+            onClick={closeDrawer}
+            aria-label="Cerrar menú"
+            className="tap-icon cursor-pointer rounded-lg p-1.5 text-[#7F94A6] hover:bg-white/5 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <NavList pathname={pathname} collapsed={false} onNavigate={() => setDrawerOpen(false)} spineId="cmp-nav-spine-drawer" />
+        </div>
+        <RailFooter collapsed={false} />
+      </aside>
 
       {/* Contenido */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-3 border-b border-cmp-rule bg-white/70 px-4 backdrop-blur-sm md:px-8">
           <button
+            ref={menuButtonRef}
             onClick={() => setDrawerOpen(true)}
             aria-label="Abrir menú"
-            className="cursor-pointer rounded-lg p-2 text-cmp-slate hover:bg-cmp-rule-soft md:hidden"
+            aria-expanded={drawerOpen}
+            aria-controls="compliance-sidebar"
+            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-lg p-2 text-cmp-slate hover:bg-cmp-rule-soft md:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import { Megaphone, Heart, Wallet, TrendingUp } from 'lucide-react';
 import { MetricStatCard } from '../MetricStatCard';
 import { getAdsReport } from '@/services/commercial/analyticsReportService';
@@ -88,70 +89,72 @@ export function AdsMetricsSection({ dateRange }: AdsMetricsSectionProps) {
           />
 
           <ReportTableCard title="Rendimiento por anuncio">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-                <tr>
-                  <th className="px-6 py-3 font-semibold">Anuncio</th>
-                  <th className="px-4 py-3 font-semibold">Estado</th>
-                  <th className="px-4 py-3 font-semibold text-right">Interacciones</th>
-                  <th className="px-4 py-3 font-semibold w-48">Avance</th>
-                  <th className="px-4 py-3 font-semibold text-right">Recompensa / like</th>
-                  <th className="px-4 py-3 font-semibold text-right">Presupuesto</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {data.perAd.length === 0 ? (
+            <TableScroll label="Tabla de rendimiento por anuncio, desplazable">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                   <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-400">
-                      No tienes anuncios en este período.
-                    </td>
+                    <th className="px-6 py-3 font-semibold">Anuncio</th>
+                    <th className="px-4 py-3 font-semibold">Estado</th>
+                    <th className="px-4 py-3 font-semibold text-right">Interacciones</th>
+                    <th className="px-4 py-3 font-semibold w-48">Avance</th>
+                    <th className="px-4 py-3 font-semibold text-right">Recompensa / like</th>
+                    <th className="px-4 py-3 font-semibold text-right">Presupuesto</th>
                   </tr>
-                ) : (
-                  data.perAd.map((ad) => (
-                    <tr key={ad.adId} className="hover:bg-gray-50">
-                      <td className="px-6 py-3">
-                        <span className="font-medium text-gray-900">{ad.title}</span>
-                        <span className="block text-xs text-gray-400">
-                          Creado {formatDate(ad.createdAt)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusChipClass(
-                            ad.status,
-                          )}`}
-                        >
-                          {statusLabel(ad.status)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatInt(ad.interactions)}
-                        <span className="block text-xs text-gray-400">
-                          {formatInt(ad.lifetimeLikes)} / {formatInt(ad.maxLikes)} de por vida
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <ProgressBar pct={ad.completionRatePct} className="flex-1" />
-                          <span className="w-12 shrink-0 text-right text-xs text-gray-500 tabular-nums">
-                            {formatPct(ad.completionRatePct)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatCOP(ad.rewardPerLikeCents)}
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatCOP(ad.spentBudgetCents)}
-                        <span className="block text-xs text-gray-400">
-                          de {formatCOP(ad.totalBudgetCents)}
-                        </span>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {data.perAd.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-400">
+                        No tienes anuncios en este período.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    data.perAd.map((ad) => (
+                      <tr key={ad.adId} className="hover:bg-gray-50">
+                        <td className="px-6 py-3">
+                          <span className="font-medium text-gray-900">{ad.title}</span>
+                          <span className="block text-xs text-gray-400">
+                            Creado {formatDate(ad.createdAt)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusChipClass(
+                              ad.status,
+                            )}`}
+                          >
+                            {statusLabel(ad.status)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatInt(ad.interactions)}
+                          <span className="block text-xs text-gray-400">
+                            {formatInt(ad.lifetimeLikes)} / {formatInt(ad.maxLikes)} de por vida
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <ProgressBar pct={ad.completionRatePct} className="flex-1" />
+                            <span className="w-12 shrink-0 text-right text-xs text-gray-500 tabular-nums">
+                              {formatPct(ad.completionRatePct)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatCOP(ad.rewardPerLikeCents)}
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatCOP(ad.spentBudgetCents)}
+                          <span className="block text-xs text-gray-400">
+                            de {formatCOP(ad.totalBudgetCents)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </TableScroll>
           </ReportTableCard>
         </>
       )}

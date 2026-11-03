@@ -186,7 +186,7 @@ export default function CreateTicketEarningRuleForm({
      ============================================================ */
 
   const inputClass = (field: keyof FormErrors) =>
-      `w-full border-2 rounded-xl px-4 py-2.5 mt-1 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 ${
+      `tap w-full border-2 rounded-xl px-4 py-2.5 mt-1 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 ${
           errors[field]
               ? "border-rose-300 bg-rose-50 text-rose-900 focus:border-rose-500"
               : "border-slate-200 bg-white hover:border-slate-300 focus:border-emerald-400"
@@ -213,7 +213,7 @@ export default function CreateTicketEarningRuleForm({
           SCROLLABLE CONTENT
       ================================================== */}
 
-        <div className="max-h-[calc(80vh-200px)] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+        <div className="max-h-[calc(80dvh-200px)] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
           {/* NOMBRE */}
           <div>
             <label className="block text-sm font-semibold text-slate-700">
@@ -316,6 +316,7 @@ export default function CreateTicketEarningRuleForm({
               </span>
                   <input
                       type="number"
+                      inputMode="decimal"
                       name="minPurchaseAmount"
                       value={formData.minPurchaseAmount ?? ""}
                       onChange={handleChange}
@@ -359,6 +360,7 @@ export default function CreateTicketEarningRuleForm({
                 </label>
                 <input
                     type="number"
+                    inputMode="numeric"
                     name="referralAddedQuantity"
                     value={formData.referralAddedQuantity ?? ""}
                     onChange={handleChange}
@@ -383,6 +385,7 @@ export default function CreateTicketEarningRuleForm({
               </label>
               <input
                   type="number"
+                  inputMode="numeric"
                   name="priority"
                   value={formData.priority}
                   onChange={handleChange}
@@ -409,6 +412,7 @@ export default function CreateTicketEarningRuleForm({
               </label>
               <input
                   type="number"
+                  inputMode="numeric"
                   name="ticketsToAward"
                   value={formData.ticketsToAward}
                   onChange={handleChange}
@@ -435,7 +439,7 @@ export default function CreateTicketEarningRuleForm({
                   type="button"
                   onClick={onCancel}
                   disabled={isSubmitting}
-                  className="flex-1 cursor-pointer px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition-all border-2 border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="tap flex-1 cursor-pointer px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition-all border-2 border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Cancelar
               </button>
@@ -444,7 +448,7 @@ export default function CreateTicketEarningRuleForm({
           <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 cursor-pointer px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="tap flex-1 cursor-pointer px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
                 <>

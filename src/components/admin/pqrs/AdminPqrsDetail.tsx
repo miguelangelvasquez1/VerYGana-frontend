@@ -147,12 +147,12 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
   if (error || !detail) {
     return (
       <div className="space-y-4">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">
+        <button onClick={onBack} className="tap flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">
           <ChevronLeft size={18} /> Volver
         </button>
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-800 mb-4">{error}</p>
-          <button onClick={loadDetail} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm cursor-pointer hover:bg-red-700 transition-colors">
+          <button onClick={loadDetail} className="tap px-4 py-2 bg-red-600 text-white rounded-lg text-sm cursor-pointer hover:bg-red-700 transition-colors">
             Reintentar
           </button>
         </div>
@@ -167,7 +167,7 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0">
+        <button onClick={onBack} aria-label="Volver" className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0">
           <ChevronLeft size={20} className="text-gray-600" />
         </button>
         <div className="flex-1 min-w-0">
@@ -182,7 +182,7 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
         <span className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 ${pqrsStatusColor[detail.status]}`}>
           {pqrsStatusLabel[detail.status]}
         </span>
-        <button onClick={loadDetail} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0" title="Actualizar">
+        <button onClick={loadDetail} aria-label="Actualizar" className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0" title="Actualizar">
           <RefreshCw size={16} className="text-gray-500" />
         </button>
       </div>
@@ -197,7 +197,7 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
           <button
             onClick={handleMarkUnderReview}
             disabled={reviewing}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-60 cursor-pointer shrink-0"
+            className="tap flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-60 cursor-pointer shrink-0"
           >
             {reviewing ? <Loader2 size={14} className="animate-spin" /> : <ClipboardCheck size={14} />}
             Marcar en revisión
@@ -333,7 +333,7 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
                   <button
                     onClick={handleMarkPaid}
                     disabled={markingPaid}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 cursor-pointer"
+                    className="tap flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 cursor-pointer"
                   >
                     {markingPaid ? <Loader2 size={14} className="animate-spin" /> : <CheckCheck size={14} />}
                     Marcar como pagado
@@ -376,7 +376,7 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
                         key={opt}
                         type="button"
                         onClick={() => handleSelectAction(opt)}
-                        className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors cursor-pointer ${
+                        className={`tap flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors cursor-pointer ${
                           action === opt
                             ? opt === PqrsResolutionAction.REFUND
                               ? 'bg-green-600 border-green-600 text-white'
@@ -402,7 +402,7 @@ export const AdminPqrsDetail: React.FC<Props> = ({ pqrsId, onBack }) => {
                 <button
                   onClick={handleRespond}
                   disabled={responding || !responseText.trim() || (isProductClaim && !action)}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors disabled:opacity-60 cursor-pointer"
+                  className="tap flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors disabled:opacity-60 cursor-pointer"
                 >
                   {responding && <Loader2 size={14} className="animate-spin" />}
                   Enviar respuesta

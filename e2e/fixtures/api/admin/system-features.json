@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "featureKey": "MARKETPLACE",
+    "endpointPrefix": "/marketplace",
+    "status": "ENABLED",
+    "category": "COMMERCE",
+    "description": "Módulo MARKETPLACE (dato de prueba).",
+    "updatedAt": "2026-10-01T10:00:00"
+  },
+  {
+    "id": 2,
+    "featureKey": "RAFFLES",
+    "endpointPrefix": "/raffles",
+    "status": "READ_ONLY",
+    "category": "GAMING",
+    "description": "Módulo RAFFLES (dato de prueba).",
+    "updatedAt": "2026-10-01T10:00:00"
+  },
+  {
+    "id": 3,
+    "featureKey": "SURVEYS",
+    "endpointPrefix": "/surveys",
+    "status": "MAINTENANCE",
+    "category": "GAMING",
+    "description": "Módulo SURVEYS (dato de prueba).",
+    "updatedAt": "2026-10-01T10:00:00"
+  }
+]

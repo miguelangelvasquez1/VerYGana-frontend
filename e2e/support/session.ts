@@ -7,11 +7,25 @@ import { TEST_SECRET } from '../../__tests__/middleware/session';
 // para la API: el front no verifica la firma del JWT de acceso (P-12), y eso es lo que permite
 // probar sin la API. Nada de esto sale del navegador de la prueba ni va en una URL.
 
-export type TestRole = 'ROLE_CONSUMER' | 'ROLE_COMMERCIAL' | 'ROLE_ADMIN' | 'ROLE_GAME_DESIGNER';
+export type TestRole =
+  | 'ROLE_CONSUMER'
+  | 'ROLE_COMMERCIAL'
+  | 'ROLE_ADMIN'
+  | 'ROLE_COMPLIANCE_OFFICER'
+  | 'ROLE_GAME_DESIGNER';
 
 export const TEST_ORIGIN = 'http://127.0.0.1:3100';
 export const TEST_PUBLIC_ID = '00000000-0000-4000-8000-000000000001';
 export const TEST_EMAIL = 'consumidor@example.test';
+
+/** Correo ficticio por rol (spec 014): el `sub` del JWT de acceso falso. */
+export const TEST_EMAIL_BY_ROLE: Record<TestRole, string> = {
+  ROLE_CONSUMER: TEST_EMAIL,
+  ROLE_COMMERCIAL: 'comercial@example.test',
+  ROLE_ADMIN: 'admin@example.test',
+  ROLE_COMPLIANCE_OFFICER: 'cumplimiento@example.test',
+  ROLE_GAME_DESIGNER: TEST_EMAIL, // sin cambio: la captura game-designer-home de la 012 ya lo usa
+};
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 // El `exp` del JWT de acceso no puede ser lejano de verdad: `usePetSession` programa su renovación con un
@@ -23,7 +37,7 @@ const b64url = (value: object) => Buffer.from(JSON.stringify(value)).toString('b
 /** JWT de acceso falso: forma válida, firma inválida, `exp` a siete días. */
 export function fakeAccessToken(role: TestRole): string {
   const exp = Math.floor((Date.now() + ACCESS_TOKEN_LIFETIME_MS) / 1000);
-  const payload = { sub: TEST_EMAIL, publicId: TEST_PUBLIC_ID, scope: role, exp };
+  const payload = { sub: TEST_EMAIL_BY_ROLE[role], publicId: TEST_PUBLIC_ID, scope: role, exp };
   return `${b64url({ alg: 'none', typ: 'JWT' })}.${b64url(payload)}.firma-ficticia`;
 }
 
@@ -32,7 +46,7 @@ export async function sessionCookieValue(role: TestRole = 'ROLE_CONSUMER'): Prom
   return encode({
     token: {
       sub: TEST_PUBLIC_ID,
-      email: TEST_EMAIL,
+      email: TEST_EMAIL_BY_ROLE[role],
       role,
       publicId: TEST_PUBLIC_ID,
       accessToken: fakeAccessToken(role),

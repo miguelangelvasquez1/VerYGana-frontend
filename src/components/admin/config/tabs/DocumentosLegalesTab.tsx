@@ -33,6 +33,7 @@ import {
   useLegalDocumentHistory,
   useLegalDocuments,
 } from '@/hooks/legal/legalDocumentsQueries';
+import TableScroll from '@/components/shared/TableScroll';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -62,18 +63,18 @@ function HistoryModal({ type, onClose }: { type: LegalDocumentType; onClose: () 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90dvh] overflow-y-auto">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-t-2xl bg-white px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100">
           <div>
             <h2 className="text-sm font-bold text-gray-900">Historial de versiones</h2>
             <p className="text-xs text-gray-400 mt-0.5">{LEGAL_DOCUMENT_TYPE_LABELS[type]}</p>
           </div>
-          <button onClick={onClose} className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 text-gray-400">
+          <button onClick={onClose} aria-label="Cerrar" className="tap-icon shrink-0 cursor-pointer p-2 rounded-lg hover:bg-gray-100 text-gray-400">
             <X size={17} />
           </button>
         </div>
 
-        <div className="px-6 py-5">
+        <div className="px-4 sm:px-6 py-5">
           {isLoading ? (
             <div className="flex items-center justify-center py-10 gap-2 text-gray-400">
               <Loader2 size={16} className="animate-spin" />
@@ -83,7 +84,7 @@ function HistoryModal({ type, onClose }: { type: LegalDocumentType; onClose: () 
             <div className="flex flex-col items-center gap-3 py-10 text-red-500">
               <AlertTriangle size={20} />
               <p className="text-sm font-medium">Error al cargar el historial.</p>
-              <button onClick={() => refetch()} className="cursor-pointer text-xs text-admin-midnight hover:text-admin-blue hover:underline">Reintentar</button>
+              <button onClick={() => refetch()} className="tap cursor-pointer text-xs text-admin-midnight hover:text-admin-blue hover:underline">Reintentar</button>
             </div>
           ) : history.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-10">
@@ -113,7 +114,7 @@ function HistoryModal({ type, onClose }: { type: LegalDocumentType; onClose: () 
                     href={doc.documentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-admin-midnight hover:text-admin-blue hover:underline"
+                    className="tap tap-w shrink-0 inline-flex items-center justify-center gap-1 text-xs font-semibold text-admin-midnight hover:text-admin-blue hover:underline"
                   >
                     Ver <ExternalLink size={12} />
                   </a>
@@ -257,8 +258,8 @@ function PublishModal({
         className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer"
         onClick={!isPending ? handleClose : undefined}
       />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-t-2xl bg-white px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center">
               <UploadCloud size={16} className="text-emerald-600" />
@@ -268,13 +269,14 @@ function PublishModal({
           <button
             onClick={handleClose}
             disabled={isPending}
-            className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 text-gray-400 disabled:opacity-50"
+            aria-label="Cerrar"
+            className="tap-icon shrink-0 cursor-pointer p-2 rounded-lg hover:bg-gray-100 text-gray-400 disabled:opacity-50"
           >
             <X size={17} />
           </button>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-4 sm:px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Tipo de documento</label>
             <div className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium">
@@ -298,14 +300,14 @@ function PublishModal({
               <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
                 <FileText size={16} className="text-gray-400 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{file.name}</p>
+                  <p className="text-sm font-medium text-gray-800 truncate" title={file.name}>{file.name}</p>
                   <p className="text-xs text-gray-500">{formatBytes(file.size)}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => { discardPending(); setFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
                   disabled={isPending}
-                  className="cursor-pointer text-xs font-semibold text-gray-500 hover:text-red-600 disabled:opacity-50"
+                  className="tap cursor-pointer text-xs font-semibold text-gray-500 hover:text-red-600 disabled:opacity-50"
                 >
                   Cambiar
                 </button>
@@ -315,7 +317,7 @@ function PublishModal({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isPending}
-                className={`cursor-pointer w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-dashed text-sm font-semibold transition disabled:opacity-50 ${
+                className={`tap cursor-pointer w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-dashed text-sm font-semibold transition disabled:opacity-50 ${
                   errors.file
                     ? 'border-red-300 text-red-500 hover:bg-red-50'
                     : 'border-gray-200 text-gray-500 hover:border-admin-blue/40 hover:bg-admin-blue/5 hover:text-admin-blue'
@@ -359,18 +361,18 @@ function PublishModal({
           )}
         </div>
 
-        <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-100">
+        <div className="flex flex-wrap justify-end gap-2 px-4 sm:px-6 py-4 border-t border-gray-100">
           <button
             onClick={handleClose}
             disabled={isPending}
-            className="cursor-pointer px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
+            className="tap cursor-pointer px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
             disabled={isPending || (requiresConfirmation && !confirmReplace)}
-            className="cursor-pointer px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="tap cursor-pointer px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isPending && <Loader2 size={14} className="animate-spin" />}
             {STAGE_LABELS[stage]}
@@ -412,7 +414,7 @@ export default function DocumentosLegalesTab() {
         </div>
         <button
           onClick={() => refetch()}
-          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-admin-blue hover:bg-admin-blue-dark text-white text-sm font-semibold rounded-xl transition-colors"
+          className="tap cursor-pointer flex items-center gap-2 px-4 py-2 bg-admin-blue hover:bg-admin-blue-dark text-white text-sm font-semibold rounded-xl transition-colors"
         >
           Reintentar
         </button>
@@ -428,7 +430,7 @@ export default function DocumentosLegalesTab() {
       </p>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <TableScroll label="Tabla de documentos legales, desplazable">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
@@ -470,7 +472,7 @@ export default function DocumentosLegalesTab() {
                           href={active.documentUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-admin-midnight hover:text-admin-blue hover:underline text-xs font-semibold"
+                          className="tap inline-flex items-center gap-1 text-admin-midnight hover:text-admin-blue hover:underline text-xs font-semibold"
                         >
                           Ver PDF <ExternalLink size={11} />
                         </a>
@@ -482,14 +484,14 @@ export default function DocumentosLegalesTab() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setHistoryType(type)}
-                          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:border-admin-blue/40 hover:bg-admin-blue/5 text-gray-600 hover:text-admin-blue text-xs font-semibold rounded-lg transition-colors"
+                          className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:border-admin-blue/40 hover:bg-admin-blue/5 text-gray-600 hover:text-admin-blue text-xs font-semibold rounded-lg transition-colors"
                         >
                           <History size={13} />
                           Historial
                         </button>
                         <button
                           onClick={() => setPublishType(type)}
-                          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors"
+                          className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors"
                         >
                           <UploadCloud size={13} />
                           Publicar
@@ -501,7 +503,7 @@ export default function DocumentosLegalesTab() {
               })}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
       </div>
 
       <p className="text-xs text-gray-400 flex items-center gap-1.5">

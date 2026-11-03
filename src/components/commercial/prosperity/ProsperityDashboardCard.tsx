@@ -31,7 +31,7 @@ export function ProsperityDashboardCard() {
         </div>
         <Link
           href="/commercial/prosperity"
-          className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#03548C] hover:underline"
+          className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[#03548C] hover:underline max-lg:-my-3 tap"
         >
           Ver detalle
           <ArrowUpRight className="h-3.5 w-3.5" />

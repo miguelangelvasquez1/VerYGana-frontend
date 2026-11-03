@@ -92,7 +92,7 @@ export default function CreateProductForm() {
   useEffect(() => {
     getActiveProductCategories()
       .then(setCategories)
-      .catch((err) => console.error('Error cargando categorías:', err));
+      .catch(() => console.error('Error cargando categorías'));
   }, []);
 
   // ── Cargar cantidad de productos actuales (para validar el límite del plan) ──
@@ -289,7 +289,7 @@ export default function CreateProductForm() {
             name="name"
             value={form.name}
             onChange={handleChange}
-            className="w-full border border-gray-200 p-2 rounded-lg"
+            className="w-full border border-gray-200 p-2 tap rounded-lg"
             required
             disabled={isSubmitting}
           />
@@ -298,11 +298,11 @@ export default function CreateProductForm() {
         <div>
           <label className="block text-sm font-medium mb-1">Precio (COP) *</label>
           <input
-            type="number"
+            type="number" inputMode="decimal"
             name="price"
             value={form.price}
             onChange={handleChange}
-            className="w-full border border-gray-200 p-2 rounded-lg"
+            className="w-full border border-gray-200 p-2 tap rounded-lg"
             required
             min="1"
             disabled={isSubmitting}
@@ -315,7 +315,7 @@ export default function CreateProductForm() {
             name="productCategoryId"
             value={form.productCategoryId}
             onChange={handleChange}
-            className="w-full border border-gray-200 p-2 rounded-lg"
+            className="w-full border border-gray-200 p-2 tap rounded-lg"
             required
             disabled={isSubmitting}
           >
@@ -334,7 +334,7 @@ export default function CreateProductForm() {
             name="productType"
             value={form.productType}
             onChange={handleChange}
-            className="w-full border border-gray-200 p-2 rounded-lg"
+            className="w-full border border-gray-200 p-2 tap rounded-lg"
             required
             disabled={isSubmitting}
           >
@@ -355,7 +355,7 @@ export default function CreateProductForm() {
           name="description"
           value={form.description}
           onChange={handleChange}
-          className="w-full border border-gray-200 p-2 rounded-lg"
+          className="w-full border border-gray-200 p-2 tap rounded-lg"
           rows={4}
           required
           disabled={isSubmitting}

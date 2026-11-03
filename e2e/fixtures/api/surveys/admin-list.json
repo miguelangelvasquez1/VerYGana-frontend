@@ -1,0 +1,39 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Encuesta de prueba 1",
+      "description": null,
+      "rewardAmountPerQuestionCents": 50000,
+      "totalResponses": 20,
+      "totalQuestions": 2,
+      "maxResponses": 100,
+      "status": "ACTIVE",
+      "createdAt": "2026-10-01T10:00:00",
+      "startsAt": "2026-10-02T10:00:00",
+      "endsAt": null
+    },
+    {
+      "id": 2,
+      "title": "Encuesta de prueba 2",
+      "description": "Pendiente de revisión",
+      "rewardAmountPerQuestionCents": 40000,
+      "totalResponses": 0,
+      "totalQuestions": 3,
+      "maxResponses": null,
+      "status": "PENDING_REVIEW",
+      "createdAt": "2026-10-03T10:00:00",
+      "startsAt": null,
+      "endsAt": null
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 15,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

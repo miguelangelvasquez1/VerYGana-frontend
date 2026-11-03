@@ -66,7 +66,7 @@ const CampaignCard: React.FC<{ campaign: CampaignSummary; onClick: () => void }>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex items-center gap-2">
             <Gamepad2 size={15} className="text-gray-400 shrink-0" />
-            <h3 className="text-base font-bold text-gray-900 truncate leading-snug group-hover:text-blue-600 transition-colors duration-150">
+            <h3 title={campaign.gameTitle ?? `Campaña #${campaign.id}`} className="text-base font-bold text-gray-900 truncate leading-snug group-hover:text-blue-600 transition-colors duration-150">
               {campaign.gameTitle ?? `Campaña #${campaign.id}`}
             </h3>
           </div>
@@ -102,7 +102,7 @@ const CampaignCard: React.FC<{ campaign: CampaignSummary; onClick: () => void }>
             <Users size={12} className="text-gray-400" />
             {(campaign.uniquePlayersCount ?? 0).toLocaleString('es-CO')} jugadores
           </span>
-          <span className="ml-auto text-blue-500 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+          <span className="ml-auto text-blue-500 flex items-center gap-0.5 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-150">
             Ver <ChevronRight size={12} />
           </span>
         </div>
@@ -167,15 +167,15 @@ export const CampaignPanel: React.FC = () => {
                 placeholder="Buscar por juego..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="tap pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 lg:flex-nowrap">
               <Filter size={16} className="text-gray-500 shrink-0" />
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value as CampaignStatus | 'all')}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="tap px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {STATUS_FILTER_OPTIONS.map(o => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -183,7 +183,7 @@ export const CampaignPanel: React.FC = () => {
               </select>
               <button
                 onClick={() => router.push('/commercial/branding/requests')}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+                className="tap flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
               >
                 <ClipboardList size={15} />
                 Ver solicitudes
@@ -217,7 +217,7 @@ export const CampaignPanel: React.FC = () => {
         </p>
         <button
           onClick={() => load()}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
+          className="tap flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
         >
           <RefreshCw size={14} />
           Actualizar
@@ -234,7 +234,7 @@ export const CampaignPanel: React.FC = () => {
           <p className="text-red-800 mb-4">{error}</p>
           <button
             onClick={() => load()}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
+            className="tap px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
           >
             Reintentar
           </button>

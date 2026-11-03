@@ -28,12 +28,12 @@ export default function AdminRafflesPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-1 border-b border-gray-200">
+      <div className="flex gap-1 border-b border-gray-200 max-lg:overflow-x-auto max-lg:overscroll-x-contain">
         {TABS.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition border-b-2 -mb-px cursor-pointer ${
+            className={`tap flex max-lg:shrink-0 items-center gap-2 max-lg:whitespace-nowrap px-4 py-2 text-sm font-medium transition border-b-2 -mb-px cursor-pointer ${
               tab === key
                 ? "border-admin-blue text-admin-blue"
                 : "border-transparent text-gray-500 hover:text-gray-700"

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { guestHref } from '@/lib/auth/returnPath';
 import {
   Megaphone,
   Gift,
@@ -32,6 +33,8 @@ interface FeatureCardProps {
   href: string;
   gradient: string;
   badge?: string;
+  /** Visitante sin sesión (`/`): el acceso lleva a `/login?from=<ruta>` y no se precarga. */
+  guest?: boolean;
 }
 
 interface StatProps {
@@ -119,7 +122,11 @@ const HOW_IT_WORKS = [
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function HomePage() {
+// `guest`: `/` sin sesión pinta este mismo home, pero cada acceso pasa por el login y vuelve a su sección (spec 014).
+export default function HomePage({ guest = false }: { guest?: boolean } = {}) {
+  const hrefOf = (href: string) => (guest ? guestHref(href) : href);
+  const prefetch = guest ? false : undefined;
+
   const [animateHero, setAnimateHero] = useState(false);
 
   useEffect(() => {
@@ -166,11 +173,11 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Link href="/ads" className="min-h-11 active:scale-95 flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer">
+                <Link href={hrefOf('/ads')} prefetch={prefetch} className="min-h-11 active:scale-95 flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-6 py-3 rounded-full shadow-lg hover:scale-105 transition-all cursor-pointer">
                     Empezar a ganar
                     <ArrowRight className="w-4 h-4" />
                   </Link>
-                <Link href="/explore/profile" className="min-h-11 active:scale-95 flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-6 py-3 rounded-full transition-all cursor-pointer">
+                <Link href={hrefOf('/explore/profile')} prefetch={prefetch} className="min-h-11 active:scale-95 flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-6 py-3 rounded-full transition-all cursor-pointer">
                     Ver mi perfil
                   </Link>
               </div>
@@ -225,7 +232,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
             {FEATURES.map((f) => (
-              <FeatureCard key={f.title} {...f} />
+              <FeatureCard key={f.title} {...f} guest={guest} />
             ))}
           </div>
         </section>
@@ -257,7 +264,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <Link href="/surveys" className="min-h-11 active:scale-95 flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer shrink-0">
+              <Link href={hrefOf('/surveys')} prefetch={prefetch} className="min-h-11 active:scale-95 flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer shrink-0">
                   Ver encuestas
                   <ChevronRight className="w-4 h-4" />
                 </Link>
@@ -317,7 +324,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <Link href="/forum" className="min-h-11 active:scale-95 flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer shrink-0">
+              <Link href={hrefOf('/forum')} prefetch={prefetch} className="min-h-11 active:scale-95 flex items-center gap-2 bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 font-bold px-5 py-3 rounded-full shadow-lg hover:scale-105 transition-all whitespace-nowrap cursor-pointer shrink-0">
                   Ir al foro
                   <ChevronRight className="w-4 h-4" />
                 </Link>
@@ -373,9 +380,9 @@ export default function HomePage() {
 
 // ─── FeatureCard ──────────────────────────────────────────────────────────────
 
-function FeatureCard({ icon, title, description, href, gradient, badge }: FeatureCardProps) {
+function FeatureCard({ icon, title, description, href, gradient, badge, guest = false }: FeatureCardProps) {
   return (
-    <Link href={href}>
+    <Link href={guest ? guestHref(href) : href} prefetch={guest ? false : undefined}>
       <div className="group relative bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer h-full flex flex-col">
         {badge && (
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">

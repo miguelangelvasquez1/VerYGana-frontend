@@ -11,6 +11,7 @@ import {
   getMovementTypeMeta,
 } from '@/utils/prosperity';
 import { ProsperityPagination, Th } from '@/components/prosperity/ProsperityUI';
+import TableScroll from '@/components/shared/TableScroll';
 
 // Libro Mayor: solo lectura, sin editar ni borrar (el libro es inmutable).
 // La única acción es compensar un asiento con un ajuste nuevo.
@@ -47,7 +48,7 @@ function AdjustButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-xs font-medium text-admin-blue transition hover:bg-admin-blue/10"
+      className="tap inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-xs font-medium text-admin-blue transition hover:bg-admin-blue/10"
     >
       <SlidersHorizontal className="h-3.5 w-3.5" />
       Ajustar este asiento
@@ -87,7 +88,7 @@ export function ProsperityLedgerTable({ publicId, page, onPageChange, onAdjustEn
           <button
             type="button"
             onClick={() => refetch()}
-            className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold hover:underline"
+            className="tap inline-flex cursor-pointer items-center gap-1 text-xs font-semibold hover:underline"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Reintentar
           </button>
@@ -97,7 +98,7 @@ export function ProsperityLedgerTable({ publicId, page, onPageChange, onAdjustEn
       ) : (
         <>
           {/* Escritorio */}
-          <div className="hidden overflow-x-auto lg:block">
+          <TableScroll label="Tabla del libro de prosperidad, desplazable" className="hidden lg:block">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -170,7 +171,7 @@ export function ProsperityLedgerTable({ publicId, page, onPageChange, onAdjustEn
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
 
           {/* Móvil / tablet */}
           <ul className="divide-y divide-gray-100 lg:hidden">

@@ -58,7 +58,8 @@ const PAGES = [
 
 const REQUIRED_COMPONENTS = [
   'src/components/bars/NavBar.tsx',
-  'src/components/bars/NavBarNoAuth.tsx',
+  'src/components/bars/GuestNavBar.tsx',
+  'src/components/bars/NavBarFrame.tsx',
   'src/components/Footer.tsx',
   'src/components/consumer/raffles/RaffleDetail.tsx',
   'src/components/plans/PlanCard.tsx',

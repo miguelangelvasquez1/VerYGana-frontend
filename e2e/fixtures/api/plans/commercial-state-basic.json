@@ -1,0 +1,20 @@
+{
+  "effectivePlan": "BASIC",
+  "hasActivePlan": true,
+  "remainingBudgetCents": 0,
+  "budgetSuspended": false,
+  "budgetDormant": false,
+  "commissionRate": 8,
+  "canAdvertise": false,
+  "canUseGames": false,
+  "canUseSurveys": false,
+  "canViewPerformanceMetrics": false,
+  "canViewPageVisitMetrics": false,
+  "maxProducts": 10,
+  "maxAds": 0,
+  "maxBrandedGames": 0,
+  "maxSurveys": 0,
+  "maxKeysPct": 20,
+  "subscriptionDaysRemaining": 21,
+  "walletStatus": "ACTIVE"
+}

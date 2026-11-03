@@ -14,6 +14,7 @@ import {
 } from '@/utils/bankDetailsMeta';
 import ConfirmDialog from '@/components/generic/ConfirmDialog';
 import { useAuthenticatedAssetSrc } from '@/hooks/useAuthenticatedAssetSrc';
+import TableScroll from '@/components/shared/TableScroll';
 
 const PAGE_SIZE = 10;
 
@@ -124,8 +125,8 @@ const AdminPayoutMethodsPanel: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-gray-800">Verificación de métodos de pago</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Revisa y aprueba los métodos de pago registrados por los comerciantes para habilitar sus pagos
@@ -134,7 +135,8 @@ const AdminPayoutMethodsPanel: React.FC = () => {
         <button
           onClick={load}
           title="Actualizar"
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+          aria-label="Actualizar"
+          className="tap-icon shrink-0 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
         >
           <RefreshCw size={18} />
         </button>
@@ -146,7 +148,7 @@ const AdminPayoutMethodsPanel: React.FC = () => {
           <button
             key={f.value}
             onClick={() => { setStatusFilter(f.value); setPage(0); }}
-            className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
+            className={`tap px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
               statusFilter === f.value
                 ? 'bg-admin-blue text-white'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -165,7 +167,7 @@ const AdminPayoutMethodsPanel: React.FC = () => {
       ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-700 font-medium">{error}</p>
-          <button onClick={load} className="mt-3 text-sm text-red-600 underline cursor-pointer">
+          <button onClick={load} className="tap mt-3 text-sm text-red-600 underline cursor-pointer">
             Reintentar
           </button>
         </div>
@@ -179,6 +181,7 @@ const AdminPayoutMethodsPanel: React.FC = () => {
       ) : (
         <>
           <div className="bg-white rounded-lg shadow overflow-hidden">
+            <TableScroll label="Tabla de métodos de pago, desplazable">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -215,7 +218,7 @@ const AdminPayoutMethodsPanel: React.FC = () => {
                           certificateUrl={method.certificateUrl}
                           label="Ver"
                           onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-xs font-medium text-admin-blue hover:underline"
+                          className="tap inline-flex items-center gap-1 text-xs font-medium text-admin-blue hover:underline"
                         />
                       ) : (
                         <span className="inline-flex items-center gap-1 text-xs text-red-500">
@@ -235,11 +238,12 @@ const AdminPayoutMethodsPanel: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            </TableScroll>
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs text-gray-400">
                 {totalElements} método{totalElements === 1 ? '' : 's'} · Página {page + 1} de {totalPages}
               </p>
@@ -247,14 +251,14 @@ const AdminPayoutMethodsPanel: React.FC = () => {
                 <button
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                  className="tap flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   <ChevronLeft size={14} /> Anterior
                 </button>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                  className="tap flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   Siguiente <ChevronRight size={14} />
                 </button>
@@ -271,17 +275,17 @@ const AdminPayoutMethodsPanel: React.FC = () => {
           onClick={() => setSelected(null)}
         >
           <div
-            className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4"
+            className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto p-4 lg:p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="sticky top-0 z-10 -mt-4 lg:-mt-6 -mx-4 lg:-mx-6 px-4 lg:px-6 pt-4 lg:pt-6 pb-2 bg-white rounded-t-xl flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-gray-800">{selected.alias}</h2>
                 <span className={`inline-flex mt-1.5 px-2.5 py-0.5 text-xs font-semibold rounded-full ${verificationStatusColor[selected.verificationStatus]}`}>
                   {verificationStatusLabel[selected.verificationStatus]}
                 </span>
               </div>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none shrink-0 cursor-pointer">×</button>
+              <button type="button" onClick={() => setSelected(null)} aria-label="Cerrar" className="tap-icon text-gray-400 hover:text-gray-600 text-2xl leading-none shrink-0 cursor-pointer">×</button>
             </div>
 
             <div className="space-y-2 pt-2 border-t border-gray-100">
@@ -328,7 +332,7 @@ const AdminPayoutMethodsPanel: React.FC = () => {
                 <button
                   onClick={() => setConfirmingReject(true)}
                   disabled={verifying}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  className="tap flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <ShieldX size={14} />
                   Rechazar
@@ -341,7 +345,7 @@ const AdminPayoutMethodsPanel: React.FC = () => {
                       ? 'El comerciante debe enviar la certificación bancaria antes de poder verificarse'
                       : undefined
                   }
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  className="tap flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <ShieldCheck size={14} />
                   Verificar

@@ -19,6 +19,7 @@ import {
   Coins,
 } from 'lucide-react';
 
+import { returnPathFromCallbackUrl } from '@/lib/auth/returnPath';
 import RecaptchaProvider from '@/components/auth/RecaptchaProvider';
 
 
@@ -40,9 +41,27 @@ function CallbackUrlCleaner() {
               window.location.href
           );
 
+      // Lo que pide el middleware llega como `callbackUrl` absoluto: si es del mismo origen se
+      // conserva solo su ruta como `from`; de otro origen se descarta (RN-6b, CA-4c).
+      const returnPath =
+          returnPathFromCallbackUrl(
+              url.searchParams.get('callbackUrl'),
+              window.location.origin
+          );
+
       url.searchParams.delete(
           'callbackUrl'
       );
+
+      if (
+          returnPath &&
+          !url.searchParams.has('from')
+      ) {
+        url.searchParams.set(
+            'from',
+            returnPath
+        );
+      }
 
       router.replace(
           url.pathname + url.search,

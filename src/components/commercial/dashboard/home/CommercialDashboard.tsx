@@ -50,7 +50,7 @@ export function CommercialDashboard() {
         <button
           type="button"
           onClick={() => refetch()}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#03548C] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0b1440] cursor-pointer"
+          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#03548C] px-4 py-2 tap text-sm font-semibold text-white transition-colors hover:bg-[#0b1440] cursor-pointer"
         >
           <RefreshCw className="w-4 h-4" />
           Reintentar

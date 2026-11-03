@@ -22,7 +22,7 @@ const STATUS_OPTIONS: { value: StoryStatus; label: string }[] = [
 
 const inputCls = (err?: string) =>
   [
-    'w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-gray-800 bg-white outline-none',
+    'tap w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-gray-800 bg-white outline-none',
     'transition-all duration-150 placeholder:font-normal placeholder:text-gray-400',
     'disabled:opacity-50 disabled:cursor-not-allowed',
     err
@@ -122,7 +122,7 @@ export default function ImpactStoryEditForm({
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-admin-blue/5 to-slate-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-admin-blue/5 to-slate-100 py-4 sm:py-8 px-4">
       <div className="max-w-2xl mx-auto">
 
         {/* Header */}
@@ -131,7 +131,7 @@ export default function ImpactStoryEditForm({
             <button
               type="button"
               onClick={onCancel}
-              className="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+              className="tap w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
               title="Volver"
             >
               <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -184,7 +184,7 @@ export default function ImpactStoryEditForm({
             <div className="mb-4">
               <label className={labelCls}>Descripción <Req /></label>
               <textarea
-                className={`${inputCls(errors.description)} resize-none`}
+                className={`tap ${inputCls(errors.description)} resize-none`}
                 rows={5}
                 placeholder="Describe el impacto de la historia..."
                 value={values.description}
@@ -249,8 +249,8 @@ export default function ImpactStoryEditForm({
                   </label>
                 </div>
                 <input
-                  type="number" min="0"
-                  className={`${inputCls(errors.beneficiariesCount)} text-lg font-bold`}
+                  type="number" inputMode="numeric" min="0"
+                  className={`tap ${inputCls(errors.beneficiariesCount)} text-lg font-bold`}
                   placeholder="0"
                   value={values.beneficiariesCount}
                   disabled={isBusy}
@@ -271,7 +271,7 @@ export default function ImpactStoryEditForm({
                 </div>
                 <div className="flex gap-2">
                   <select
-                    className={`w-24 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700
+                    className={`tap w-24 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700
                                 shadow-sm focus:outline-none focus:ring-2 focus:ring-admin-blue
                                 focus:border-admin-blue transition-colors disabled:opacity-50 cursor-pointer`}
                     value={values.investedCurrency}
@@ -285,7 +285,7 @@ export default function ImpactStoryEditForm({
                     ))}
                   </select>
                   <input
-                    type="number" min="0" step="0.01"
+                    type="number" inputMode="decimal" min="0" step="0.01"
                     className={inputCls() + ' text-lg font-bold'}
                     placeholder="0.00"
                     value={values.investedAmount}
@@ -319,7 +319,7 @@ export default function ImpactStoryEditForm({
                     type="button"
                     disabled={isBusy}
                     onClick={() => set('status', opt.value)}
-                    className={`py-3 px-4 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 cursor-pointer ${colorMap[opt.value]}`}
+                    className={`tap py-3 px-4 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 cursor-pointer ${colorMap[opt.value]}`}
                   >
                     {opt.label}
                   </button>
@@ -358,7 +358,7 @@ export default function ImpactStoryEditForm({
           <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100 flex-wrap">
             <button
               type="button"
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40 cursor-pointer"
+              className="tap px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40 cursor-pointer"
               disabled={isBusy}
               onClick={onCancel}
             >
@@ -366,7 +366,7 @@ export default function ImpactStoryEditForm({
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark transition-colors disabled:opacity-40 flex items-center gap-2 cursor-pointer"
+              className="tap px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark transition-colors disabled:opacity-40 flex items-center gap-2 cursor-pointer"
               disabled={isBusy}
               onClick={handleSubmit}
             >

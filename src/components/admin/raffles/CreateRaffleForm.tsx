@@ -38,7 +38,7 @@ interface Props {
 /* ================= SHARED STYLES ================= */
 
 const inputCls = (error?: string | boolean) =>
-  `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
+  `tap w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
     error ? "border-red-400 bg-red-50" : "border-gray-300"
   }`;
 
@@ -343,7 +343,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
   /* ================= UI ================= */
 
   return (
-    <div className="flex flex-col max-h-[80vh] w-full bg-white rounded-2xl overflow-hidden">
+    <div className="flex flex-col max-h-[90dvh] w-full bg-white rounded-2xl overflow-hidden">
       {/* ===== CABECERA FIJA ===== */}
       <div className="px-6 pr-12 py-4 border-b border-gray-100 bg-white sticky top-0 z-20">
         <h2 className="text-lg font-bold text-admin-navy">Crear Rifa</h2>
@@ -356,7 +356,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
       <form
         id="create-raffle-form"
         onSubmit={handleSubmit}
-        className="flex-1 overflow-y-auto p-6 space-y-6"
+        className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6"
       >
         {/* Título */}
         <div>
@@ -392,14 +392,14 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
         </div>
 
         {/* Tipo + Método */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Tipo de Rifa</label>
             <select
               name="raffleType"
               value={formData.raffleType}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white cursor-pointer"
+              className="tap w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white cursor-pointer"
             >
               <option value="STANDARD">Estándar</option>
               <option value="PREMIUM">Premium</option>
@@ -411,7 +411,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
               name="drawMethod"
               value={formData.drawMethod}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white cursor-pointer"
+              className="tap w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white cursor-pointer"
             >
               <option value="SYSTEM_RANDOM">Sistema interno</option>
               <option value="RANDOM_ORG">Random.org</option>
@@ -441,7 +441,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                   markTouched("startDate");
                   markTouched("endDate");
                 }}
-                className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
+                className={`tap w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
                   showError("startDate") ? "border-red-400 bg-red-50" : "border-gray-300"
                 }`}
               />
@@ -471,7 +471,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                   markTouched("endDate");
                   markTouched("startDate");
                 }}
-                className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
+                className={`tap w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
                   showError("endDate") ? "border-red-400 bg-red-50" : "border-gray-300"
                 }`}
               />
@@ -500,7 +500,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                 }))
               }
               onCalendarClose={() => markTouched("drawDate")}
-              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors bg-white ${
+              className={`tap w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors bg-white ${
                 showError("drawDate") ? "border-red-400 bg-red-50" : "border-amber-300"
               }`}
             />
@@ -511,11 +511,12 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
         </div>
 
         {/* Tickets */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Máximo Tickets Totales</label>
             <input
               type="number"
+              inputMode="numeric"
               name="maxTotalTickets"
               value={formData.maxTotalTickets}
               onChange={handleChange}
@@ -533,6 +534,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
             <label className={labelCls}>Máximo Tickets por Usuario</label>
             <input
               type="number"
+              inputMode="numeric"
               name="maxTicketsPerUser"
               value={formData.maxTicketsPerUser}
               onChange={handleChange}
@@ -659,7 +661,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                   <button
                     type="button"
                     onClick={() => removePrize(index)}
-                    className="cursor-pointer text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
+                    className="tap cursor-pointer text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
                   >
                     <Trash2 size={14} />
                     Eliminar
@@ -690,7 +692,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelCls}>Marca</label>
                       <input
@@ -705,7 +707,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                       <select
                         value={prize.prizeType}
                         onChange={(e) => handlePrizeChange(index, "prizeType", e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white"
+                        className="tap w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white"
                       >
                         <option value="PHYSICAL">Físico</option>
                         <option value="DIGITAL">Digital</option>
@@ -713,11 +715,12 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className={labelCls}>Valor ($)</label>
                       <input
                         type="number"
+                        inputMode="decimal"
                         value={prize.value}
                         onChange={(e) =>
                           handlePrizeChange(index, "value", Number(e.target.value))
@@ -732,6 +735,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                       <label className={labelCls}>Cantidad</label>
                       <input
                         type="number"
+                        inputMode="numeric"
                         value={prize.quantity}
                         onChange={(e) =>
                           handlePrizeChange(index, "quantity", Number(e.target.value))
@@ -746,6 +750,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                       <label className={labelCls}>Posición</label>
                       <input
                         type="number"
+                        inputMode="numeric"
                         value={prize.position}
                         onChange={(e) =>
                           handlePrizeChange(index, "position", Number(e.target.value))
@@ -820,7 +825,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
             <button
               type="button"
               onClick={addPrize}
-              className="cursor-pointer w-full border-2 border-dashed border-admin-gold/40 hover:border-admin-gold hover:bg-admin-gold/5 text-admin-gold px-4 py-3 rounded-xl text-sm font-semibold flex gap-2 items-center justify-center transition-colors"
+              className="tap cursor-pointer w-full border-2 border-dashed border-admin-gold/40 hover:border-admin-gold hover:bg-admin-gold/5 text-admin-gold px-4 py-3 rounded-xl text-sm font-semibold flex gap-2 items-center justify-center transition-colors"
             >
               <Plus size={15} />
               Agregar Premio
@@ -857,7 +862,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                   <span className="text-sm font-semibold text-gray-700">Regla #{index + 1}</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Regla de tickets</label>
                     <select
@@ -865,7 +870,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                       onChange={(e) =>
                         handleRuleChange(index, "ticketEarningRuleId", Number(e.target.value))
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white"
+                      className="tap w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white"
                       required
                     >
                       <option value="">Seleccionar regla</option>
@@ -880,13 +885,14 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                     <label className="block text-xs text-gray-500 mb-1">Máx. tickets por fuente</label>
                     <input
                       type="number"
+                      inputMode="numeric"
                       placeholder="Ej: 5"
                       value={rule.maxTicketsBySource}
                       onChange={(e) =>
                         handleRuleChange(index, "maxTicketsBySource", Number(e.target.value))
                       }
                       min={1}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors"
+                      className="tap w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors"
                       required
                     />
                   </div>
@@ -895,7 +901,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
                 <button
                   type="button"
                   onClick={() => removeRule(index)}
-                  className="cursor-pointer text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
+                  className="tap cursor-pointer text-red-400 hover:text-red-600 flex gap-1 items-center text-sm transition-colors"
                 >
                   <Trash2 size={14} />
                   Eliminar regla
@@ -906,7 +912,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
             <button
               type="button"
               onClick={addRule}
-              className="cursor-pointer w-full border-2 border-dashed border-admin-midnight/30 hover:border-admin-midnight hover:bg-admin-midnight/5 text-admin-midnight px-4 py-3 rounded-xl text-sm font-semibold flex gap-2 items-center justify-center transition-colors"
+              className="tap cursor-pointer w-full border-2 border-dashed border-admin-midnight/30 hover:border-admin-midnight hover:bg-admin-midnight/5 text-admin-midnight px-4 py-3 rounded-xl text-sm font-semibold flex gap-2 items-center justify-center transition-colors"
             >
               <Plus size={15} />
               Agregar Regla
@@ -922,7 +928,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className="cursor-pointer flex-1 border border-gray-300 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition disabled:opacity-40"
+            className="tap cursor-pointer flex-1 border border-gray-300 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition disabled:opacity-40"
           >
             Cancelar
           </button>
@@ -931,7 +937,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
           type="submit"
           form="create-raffle-form"
           disabled={loading}
-          className="cursor-pointer flex-1 bg-admin-gradient hover:opacity-90 text-white py-2.5 rounded-xl font-semibold text-sm shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="tap cursor-pointer flex-1 bg-admin-gradient hover:opacity-90 text-white py-2.5 rounded-xl font-semibold text-sm shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {loading ? "Creando rifa..." : "Crear Rifa"}
         </button>

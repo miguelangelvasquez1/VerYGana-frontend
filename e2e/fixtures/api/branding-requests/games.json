@@ -1,0 +1,19 @@
+{
+  "content": [
+    {
+      "id": 1,
+      "title": "Juego de Prueba",
+      "description": "Descripción larga del juego de prueba para ver cómo se comporta el texto en una pantalla angosta y comprobar que no se corta.",
+      "frontPageUrl": "/logos/logo.png",
+      "url": "/logos/logo.png",
+      "averageRewardPerSessionCents": 50000,
+      "averageDurationSeconds": 120
+    }
+  ],
+  "totalElements": 1,
+  "totalPages": 1,
+  "number": 0,
+  "size": 12,
+  "first": true,
+  "last": true
+}

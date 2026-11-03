@@ -177,7 +177,7 @@ export function KeyPromotionFormModal({ promotion, onClose, onSaved }: Props) {
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
+            className="tap cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -185,7 +185,7 @@ export function KeyPromotionFormModal({ promotion, onClose, onSaved }: Props) {
             type="button"
             onClick={handleSubmit}
             disabled={busy}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-admin-blue px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="tap inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-admin-blue px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             {busy ? 'Guardando…' : editing ? 'Guardar cambios' : 'Crear borrador'}

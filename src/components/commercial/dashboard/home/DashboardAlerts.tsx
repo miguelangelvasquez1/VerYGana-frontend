@@ -69,7 +69,7 @@ function AlertBanner({ alert }: { alert: DashboardAlert }) {
       {alert.actionHint && href && (
         <Link
           href={href}
-          className={`shrink-0 inline-flex items-center gap-1.5 self-center rounded-lg px-3 py-1.5 text-xs font-bold transition-colors whitespace-nowrap ${styles.cta}`}
+          className={`shrink-0 inline-flex items-center gap-1.5 self-center rounded-lg px-3 py-1.5 tap text-xs font-bold transition-colors whitespace-nowrap ${styles.cta}`}
         >
           {alert.actionHint}
           <ArrowRight className="w-3.5 h-3.5" />

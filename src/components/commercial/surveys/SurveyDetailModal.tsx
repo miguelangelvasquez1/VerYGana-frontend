@@ -60,7 +60,7 @@ export default function SurveyDetailModal({ surveyId, onClose }: Props) {
                 <button
                   onClick={() => setShowEdit(true)}
                   disabled={editBlocked}
-                  className="cursor-pointer rounded-lg p-1.5 text-[#03548C] hover:bg-[#03548C]/5 hover:text-[#03548C] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="cursor-pointer rounded-lg p-1.5 tap-icon text-[#03548C] hover:bg-[#03548C]/5 hover:text-[#03548C] disabled:cursor-not-allowed disabled:opacity-40"
                   title={editBlocked ? WALLET_DORMANT_TOOLTIP : 'Editar encuesta'}
                 >
                   <Pencil className="h-4 w-4" />
@@ -68,8 +68,7 @@ export default function SurveyDetailModal({ surveyId, onClose }: Props) {
               )}
               <button
                 onClick={onClose}
-                className="cursor-pointer rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-              >
+                className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-400 hover:bg-gray-100 hover:text-gray-600" aria-label="Cerrar">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -201,7 +200,7 @@ function SurveyContent({
           <button
             type="button"
             onClick={onIncreaseBudget}
-            className="mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-[#03548C]/20 px-4 py-2 text-sm font-semibold text-[#03548C] transition-colors hover:border-[#03548C]/40 hover:bg-[#03548C]/5"
+            className="mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-[#03548C]/20 px-4 py-2 tap text-sm font-semibold text-[#03548C] transition-colors hover:border-[#03548C]/40 hover:bg-[#03548C]/5"
             title={survey.status === 'COMPLETED' ? 'Agrega respuestas para reactivar esta encuesta' : 'Agregar más respuestas a la encuesta'}
           >
             <PlusCircle className="h-4 w-4" />

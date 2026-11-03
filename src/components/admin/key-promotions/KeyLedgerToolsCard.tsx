@@ -11,7 +11,7 @@ import { centsToKeys, colombiaInputToIso, formatColombiaDateTime, formatKeys, pa
 const IS_DEV = process.env.NODE_ENV === 'development';
 
 const buttonClass =
-  'inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50';
+  'tap inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50';
 
 // ─── Vencimiento ─────────────────────────────────────────────────────────────
 
@@ -58,7 +58,7 @@ function KeyExpiryCard() {
             value={asOf}
             onChange={(e) => setAsOf(e.target.value)}
             disabled={mutation.isPending}
-            className="mt-1.5 rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-amber-200"
+            className="tap mt-1.5 rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-amber-200"
           />
           <p className="mt-1 text-xs text-amber-700">
             Vence las llaves como si fuera esa fecha. Déjalo vacío para usar la fecha actual.

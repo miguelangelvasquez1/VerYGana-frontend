@@ -38,7 +38,8 @@ export function TopProductsCard({
               <div className="flex-1 min-w-0">
                 <Link
                   href={`/commercial/products/${product.id}`}
-                  className="block truncate text-sm font-medium text-gray-900 hover:text-[#03548C]"
+                  title={product.name}
+                  className="block truncate text-sm font-medium text-gray-900 hover:text-[#03548C] max-lg:-my-3 max-lg:py-3"
                 >
                   {product.name}
                 </Link>

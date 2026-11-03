@@ -1,0 +1,21 @@
+{
+  "data": [
+    {
+      "userName": "Persona Ficticia Uno",
+      "likedAt": "2026-10-03T10:00:00"
+    },
+    {
+      "userName": "Persona Ficticia Dos",
+      "likedAt": "2026-10-04T10:00:00"
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

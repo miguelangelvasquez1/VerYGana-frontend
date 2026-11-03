@@ -47,7 +47,8 @@ export const GameCatalog: React.FC<Props> = ({ onBack, onSelect }) => {
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+          aria-label="Volver"
+          className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <ChevronLeft size={20} className="text-gray-600" />
         </button>
@@ -69,7 +70,7 @@ export const GameCatalog: React.FC<Props> = ({ onBack, onSelect }) => {
           <p className="text-red-800 mb-3">{error}</p>
           <button
             onClick={() => setPage(0)}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
+            className="tap px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
           >
             Reintentar
           </button>
@@ -95,8 +96,9 @@ export const GameCatalog: React.FC<Props> = ({ onBack, onSelect }) => {
             <div className="flex justify-center items-center space-x-2">
               <button
                 onClick={() => setPage(p => p - 1)}
+                aria-label="Página anterior"
                 disabled={page === 0}
-                className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer transition-colors"
+                className="tap-icon p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 <ChevronLeft size={18} />
               </button>
@@ -105,8 +107,9 @@ export const GameCatalog: React.FC<Props> = ({ onBack, onSelect }) => {
               </span>
               <button
                 onClick={() => setPage(p => p + 1)}
+                aria-label="Página siguiente"
                 disabled={page >= totalPages - 1}
-                className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer transition-colors"
+                className="tap-icon p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 <ChevronRight size={18} />
               </button>

@@ -29,7 +29,7 @@ export function PlanUsageCard({ usage }: { usage: DashboardPlanUsage }) {
           anyFull ? (
             <Link
               href="/plans"
-              className="inline-flex items-center gap-1 rounded-lg bg-[#03548C] px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#0b1440] whitespace-nowrap"
+              className="inline-flex items-center gap-1 rounded-lg bg-[#03548C] px-3 py-1.5 tap text-xs font-bold text-white transition-colors hover:bg-[#0b1440] whitespace-nowrap"
             >
               Mejorar plan
               <ArrowUpRight className="w-3.5 h-3.5" />

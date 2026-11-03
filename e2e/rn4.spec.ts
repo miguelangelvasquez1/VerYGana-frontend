@@ -25,69 +25,8 @@ const PROFILE_MENU_LINKS: [string, string][] = [
 const FOOTER_SESSION_HREFS = ['/raffles', '/products', '/plans/mobile-plans', '/ads', '/forum'];
 const GUEST_FOOTER_PAGES = ['/', '/login', '/register', '/verify?email=consumidor%40example.test', '/forgot-password', '/unlock-account'];
 
-// RN-4 y CA-5 (spec 012): ningún botón muerto en la landing y entrada visible sin sesión a 360 px.
-// Cada botón que antes no hacía nada ahora es un enlace con el destino decidido en la tabla de RN-4.
-
-test.describe('RN-4 · landing sin sesión', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await settle(page);
-  });
-
-  const toRegister = ['Empezar Ahora', '🚀 Crear Cuenta Gratis'];
-  const toLogin = ['Participar Ahora', 'Ver Todas las Rifas', 'Agregar al Carrito', 'Ver Toda la Tienda'];
-
-  for (const name of toRegister) {
-    test(`"${name}" lleva a /register`, async ({ page }) => {
-      const links = page.getByRole('link', { name, exact: true });
-      expect(await links.count()).toBeGreaterThan(0);
-      await links.first().click();
-      await expect(page).toHaveURL(/\/register$/);
-    });
-  }
-
-  for (const name of toLogin) {
-    test(`"${name}" lleva a /login`, async ({ page }) => {
-      const links = page.getByRole('link', { name, exact: true });
-      expect(await links.count()).toBeGreaterThan(0);
-      // Cada copia (hay tres rifas y tres productos) apunta al mismo destino.
-      for (const href of await links.evaluateAll((els) => els.map((el) => el.getAttribute('href')))) {
-        expect(href).toBe('/login');
-      }
-      await links.last().click();
-      await expect(page).toHaveURL(/\/login$/);
-    });
-  }
-
-  test('"Ver Rifas Activas" baja a #rifas y la URL sigue en /', async ({ page }) => {
-    await page.getByRole('link', { name: 'Ver Rifas Activas', exact: true }).click();
-    await expect(page).toHaveURL(/\/(#rifas)?$/);
-    await expect(page.locator('#rifas')).toBeInViewport();
-  });
-
-  test('"Descargar App" no existe', async ({ page }) => {
-    await expect(page.getByText('Descargar App')).toHaveCount(0);
-  });
-
-  test('"Empezar a Referir" lleva a /register (D-8)', async ({ page }) => {
-    await page.getByRole('link', { name: 'Empezar a Referir', exact: true }).click();
-    await expect(page).toHaveURL(/\/register$/);
-  });
-
-  test('los puntos del carrusel cambian de testimonio y tienen nombre', async ({ page }) => {
-    const dot = page.getByRole('button', { name: 'Ver testimonio 2' });
-    await expect(dot).toBeVisible();
-    await dot.click();
-    await expect(dot).toHaveAttribute('aria-current', 'true');
-  });
-
-  test('CA-5 · "Iniciar sesión" está visible sin abrir menús y lleva a /login', async ({ page }) => {
-    const login = page.getByRole('link', { name: 'Iniciar Sesión', exact: true });
-    await expect(login).toBeInViewport();
-    await login.click();
-    await expect(page).toHaveURL(/\/login$/);
-  });
-});
+// RN-4 (spec 012): ningún botón muerto. Las pruebas de la landing morada se quitaron (spec 014, T44): `/` es ahora
+// el home del consumidor con accesos de visitante y lo cubre `landing.spec.ts`.
 
 test.describe('RN-4 · con sesión', () => {
   test('fila 1: "Participar ahora" no existe en el detalle de la rifa', async ({ page, context }) => {

@@ -1,0 +1,15 @@
+{
+  "totalCents": 25000000,
+  "availableKeys": 120,
+  "maxApplicableKeys": 500,
+  "usableKeys": 120,
+  "keyValueCents": 1000,
+  "backingSufficient": true,
+  "items": [
+    {
+      "productId": 1,
+      "maxKeysPct": 50,
+      "promotionEndsAt": null
+    }
+  ]
+}

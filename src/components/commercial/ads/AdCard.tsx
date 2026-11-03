@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import Image from 'next/image';
 import { 
   Play, 
@@ -19,7 +19,10 @@ import {
 } from 'lucide-react';
 import { AdResponseDTO } from '@/types/ads/commercial';
 import { canIncreaseBudget } from '@/types/BudgetIncrease.types';
-import { AdDetailModal } from './AdDetailModal';
+
+// Se carga al abrirlo: no entra en el JavaScript inicial de la página (RN-8 de la spec 014). Con `lazy` de React,
+// que no suma el cargador de `next/dynamic` al paquete.
+const AdDetailModal = lazy(() => import('./AdDetailModal').then((m) => ({ default: m.AdDetailModal })));
 
 interface AdCardProps {
   ad: AdResponseDTO;
@@ -150,8 +153,8 @@ export function AdCard({
           
           {/* Overlay para indicar que se puede ampliar */}
           {ad.contentUrl && (
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-              <Maximize2 className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-black/10 lg:bg-black/0 lg:group-hover:bg-black/20 transition-colors flex items-center justify-center">
+              <Maximize2 className="w-8 h-8 text-white transition-opacity lg:opacity-0 lg:group-hover:opacity-100" />
             </div>
           )}
 
@@ -262,7 +265,7 @@ export function AdCard({
             {canEdit && !editBlocked && (
               <button
                 onClick={() => onEdit(ad)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm cursor-pointer"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 tap bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm cursor-pointer"
               >
                 <Edit2 className="w-4 h-4" />
                 Editar
@@ -273,7 +276,7 @@ export function AdCard({
             {(!canEdit || editBlocked) && (
               <button
                 disabled
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-300 text-gray-500 text-sm font-semibold rounded-lg cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 tap bg-gray-300 text-gray-500 text-sm font-semibold rounded-lg cursor-not-allowed"
                 title={
                   editBlocked
                     ? (editBlockedReason ?? 'No disponible ahora')
@@ -289,7 +292,7 @@ export function AdCard({
             {canPause && (
               <button
                 onClick={() => onPause(ad.id)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-yellow-500 text-white text-sm font-semibold rounded-lg hover:bg-yellow-600 active:bg-yellow-700 transition-colors shadow-sm cursor-pointer"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 tap bg-yellow-500 text-white text-sm font-semibold rounded-lg hover:bg-yellow-600 active:bg-yellow-700 transition-colors shadow-sm cursor-pointer"
                 title="Pausar anuncio"
               >
                 <Pause className="w-4 h-4" />
@@ -302,7 +305,7 @@ export function AdCard({
               canReactivate ? (
                 <button
                   onClick={() => onResume(ad.id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 tap bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm cursor-pointer"
                   title="Reanudar anuncio"
                 >
                   <PlayCircle className="w-4 h-4" />
@@ -311,7 +314,7 @@ export function AdCard({
               ) : (
                 <button
                   disabled
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-300 text-gray-500 text-sm font-semibold rounded-lg cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 tap bg-gray-300 text-gray-500 text-sm font-semibold rounded-lg cursor-not-allowed"
                   title={reactivateDisabledReason ?? 'No disponible ahora'}
                 >
                   <PlayCircle className="w-4 h-4" />
@@ -324,7 +327,7 @@ export function AdCard({
             <div className="relative">
               <button
                 onClick={() => setShowDetailModal(true)}
-                className="p-2.5 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer"
+                className="p-2.5 tap-icon border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer"
                 title="Ver detalles"
               >
                 <MoreVertical className="w-5 h-5" />
@@ -338,7 +341,7 @@ export function AdCard({
             <button
               type="button"
               onClick={() => onIncreaseBudget(ad)}
-              className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 border-2 border-[#03548C]/20 text-[#03548C] text-sm font-semibold rounded-lg hover:bg-[#03548C]/5 hover:border-[#03548C]/40 transition-colors cursor-pointer"
+              className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 tap border-2 border-[#03548C]/20 text-[#03548C] text-sm font-semibold rounded-lg hover:bg-[#03548C]/5 hover:border-[#03548C]/40 transition-colors cursor-pointer"
               title={ad.status === 'COMPLETED' ? 'Agrega likes para reactivar este anuncio' : 'Agregar más likes al anuncio'}
             >
               <PlusCircle className="w-4 h-4" />
@@ -375,8 +378,7 @@ export function AdCard({
         >
           <button
             onClick={() => setShowMediaModal(false)}
-            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
-          >
+            className="absolute top-4 right-4 p-2 tap-icon bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer" aria-label="Cerrar">
             <X className="w-6 h-6 text-white" />
           </button>
 
@@ -414,10 +416,12 @@ export function AdCard({
       )}
 
       {showDetailModal && (
-        <AdDetailModal
-          adId={ad.id}
-          onClose={() => setShowDetailModal(false)}
-        />
+        <Suspense fallback={null}>
+          <AdDetailModal
+            adId={ad.id}
+            onClose={() => setShowDetailModal(false)}
+          />
+        </Suspense>
       )}
     </>
   );

@@ -1,0 +1,27 @@
+{
+  "currentStep": "CONTRACT_PENDING",
+  "termsAccepted": true,
+  "legalIdentificationCompleted": true,
+  "diagnosticCompleted": true,
+  "routeClassified": true,
+  "routeConfirmed": true,
+  "classification": {
+    "route": "B",
+    "routeLabel": "Ruta B",
+    "modalityLabel": "Empresa Tipo B",
+    "explanation": "Por el tamaño y el tipo de tu negocio, la modalidad recomendada es la de Empresa Tipo B.",
+    "preliminary": false,
+    "verificationRequired": false,
+    "confirmed": true
+  },
+  "planAccepted": true,
+  "documentsCompleted": true,
+  "contractGenerated": false,
+  "contractStatus": null,
+  "businessApproved": false,
+  "veryganaReviewed": false,
+  "completed": false,
+  "requiresSpecialNegotiation": false,
+  "rejectionReason": null,
+  "rejectedAt": null
+}

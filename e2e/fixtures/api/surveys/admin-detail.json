@@ -1,0 +1,64 @@
+{
+  "id": 1,
+  "title": "Encuesta de hábitos de compra",
+  "description": "Cuéntanos cómo compras en línea.",
+  "status": "ACTIVE",
+  "rewardAmountPerQuestionCents": 50000,
+  "maxResponses": 100,
+  "responseCount": 20,
+  "startsAt": "2026-10-02T10:00:00",
+  "endsAt": null,
+  "createdAt": "2026-10-01T10:00:00",
+  "updatedAt": "2026-10-02T10:00:00",
+  "categoryNames": [
+    "Tecnología"
+  ],
+  "municipalityNames": [
+    "Medellín"
+  ],
+  "minAge": 18,
+  "maxAge": 60,
+  "targetGender": "ALL",
+  "totalQuestions": 2,
+  "questions": [
+    {
+      "id": 1,
+      "text": "¿Con qué frecuencia compras en línea?",
+      "type": "SINGLE_CHOICE",
+      "required": true,
+      "orderIndex": 1,
+      "options": [
+        {
+          "id": 10,
+          "text": "Todas las semanas",
+          "orderIndex": 0
+        },
+        {
+          "id": 11,
+          "text": "Una vez al mes",
+          "orderIndex": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "text": "¿Qué te gustaría mejorar?",
+      "type": "TEXT",
+      "required": true,
+      "orderIndex": 2,
+      "options": []
+    }
+  ],
+  "creatorPublicId": "00000000-0000-4000-8000-0000000000c1",
+  "companyName": "Tienda de Prueba S.A.S.",
+  "creatorEmail": "comercial@example.test",
+  "totalSessions": 30,
+  "activeSessions": 2,
+  "completedSessions": 20,
+  "expiredSessions": 5,
+  "abandonedSessions": 3,
+  "totalBudgetCents": 10000000,
+  "spentCents": 2000000,
+  "completionRate": 20,
+  "rejectionReason": null
+}

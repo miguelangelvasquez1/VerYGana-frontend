@@ -70,7 +70,7 @@ export function PayoutMethodsSection() {
         <h3 className="text-lg font-semibold text-gray-900">Métodos de pago</h3>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-1.5 text-sm font-medium text-white bg-[#03548C] hover:bg-[#024270] px-3 py-2 rounded-lg transition-colors cursor-pointer"
+          className="flex items-center justify-center gap-1.5 text-sm font-medium text-white bg-[#03548C] hover:bg-[#024270] px-3 py-2 tap rounded-lg transition-colors cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           Agregar método de pago
@@ -86,7 +86,7 @@ export function PayoutMethodsSection() {
       ) : error ? (
         <div className="py-8 text-center space-y-2">
           <p className="text-sm text-red-500">Error al cargar los métodos de pago.</p>
-          <button onClick={() => load(page)} className="text-sm text-[#03548C] hover:underline cursor-pointer">
+          <button onClick={() => load(page)} className="text-sm text-[#03548C] hover:underline cursor-pointer tap">
             Reintentar
           </button>
         </div>
@@ -108,7 +108,7 @@ export function PayoutMethodsSection() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{m.alias}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate" title={m.alias}>{m.alias}</p>
                       {m.defaultMethod && (
                         <span
                           title="Aquí recibirás tus pagos diarios"
@@ -119,12 +119,18 @@ export function PayoutMethodsSection() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 truncate">
+                    <p
+                      className="text-xs text-gray-500 truncate"
+                      title={`${payoutMethodTypeLabel[m.type]}${m.accountNumber ? ` · ${m.accountNumber}` : ''}${m.phoneNumber ? ` · ${m.phoneNumber}` : ''}`}
+                    >
                       {payoutMethodTypeLabel[m.type]}
                       {m.accountNumber ? ` · ${m.accountNumber}` : ''}
                       {m.phoneNumber ? ` · ${m.phoneNumber}` : ''}
                     </p>
-                    <p className="text-xs text-gray-400 truncate">
+                    <p
+                      className="text-xs text-gray-400 truncate"
+                      title={`${m.accountHolderName} · ${docTypeLabel[m.accountHolderDocType]} ${m.accountHolderDoc}`}
+                    >
                       {m.accountHolderName} · {docTypeLabel[m.accountHolderDocType]} {m.accountHolderDoc}
                     </p>
                   </div>
@@ -141,7 +147,7 @@ export function PayoutMethodsSection() {
                   {canVerifyOtp(m) && (
                     <button
                       onClick={() => setVerifyingMethod(m)}
-                      className="flex items-center gap-1 text-xs font-medium text-white bg-[#03548C] hover:bg-[#024270] px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                      className="flex items-center gap-1 text-xs font-medium text-white bg-[#03548C] hover:bg-[#024270] px-2.5 py-1.5 tap rounded-lg transition-colors cursor-pointer"
                     >
                       <ShieldCheck className="w-3.5 h-3.5" />
                       Verificar código
@@ -151,7 +157,7 @@ export function PayoutMethodsSection() {
                     <button
                       onClick={() => handleSetDefault(m)}
                       disabled={settingDefaultId === m.id}
-                      className="flex items-center gap-1 text-xs font-medium text-[#03548C] border border-[#03548C]/30 hover:bg-[#03548C]/10 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      className="flex items-center gap-1 text-xs font-medium text-[#03548C] border border-[#03548C]/30 hover:bg-[#03548C]/10 px-2.5 py-1.5 tap rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                       <Star className="w-3.5 h-3.5" />
                       {settingDefaultId === m.id ? 'Actualizando...' : 'Establecer como predeterminado'}

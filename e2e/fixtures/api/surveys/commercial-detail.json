@@ -1,0 +1,68 @@
+{
+  "id": 1,
+  "title": "Encuesta de hábitos de compra",
+  "description": "Cuéntanos cómo compras en línea.",
+  "status": "ACTIVE",
+  "rewardAmountPerQuestionCents": 50000,
+  "maxResponses": 100,
+  "responseCount": 20,
+  "startsAt": "2026-10-02T10:00:00",
+  "createdAt": "2026-10-01T10:00:00",
+  "categories": [
+    {
+      "id": 1,
+      "name": "Tecnología"
+    },
+    {
+      "id": 2,
+      "name": "Deportes"
+    }
+  ],
+  "targetMunicipalities": [
+    {
+      "code": "05001",
+      "name": "Medellín",
+      "departmentCode": "05",
+      "departmentName": "Antioquia"
+    }
+  ],
+  "minAge": 18,
+  "maxAge": 60,
+  "targetGender": "ALL",
+  "questions": [
+    {
+      "id": 1,
+      "text": "¿Con qué frecuencia compras en línea?",
+      "type": "SINGLE_CHOICE",
+      "required": true,
+      "orderIndex": 0,
+      "options": [
+        {
+          "id": 1,
+          "text": "Cada semana",
+          "orderIndex": 0
+        },
+        {
+          "id": 2,
+          "text": "Cada mes",
+          "orderIndex": 1
+        },
+        {
+          "id": 3,
+          "text": "Casi nunca",
+          "orderIndex": 2
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "text": "Cuéntanos qué te gustaría encontrar.",
+      "type": "TEXT",
+      "required": false,
+      "orderIndex": 1,
+      "options": []
+    }
+  ],
+  "totalBudgetCents": 10000000,
+  "rejectionReason": null
+}

@@ -26,7 +26,7 @@ const PqrsCard = ({ pqrs, onClick }: Props) => {
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
               {pqrsTypeLabel[pqrs.type]} · #{pqrs.id}
             </p>
-            <p className="font-semibold text-gray-900 truncate">{pqrs.subject}</p>
+            <p title={pqrs.subject} className="font-semibold text-gray-900 truncate">{pqrs.subject}</p>
             <p className="text-xs sm:text-sm text-gray-400">
               Creada el <span className="text-gray-600">{formatPqrsDate(pqrs.createdAt)}</span>
             </p>

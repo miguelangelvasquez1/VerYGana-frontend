@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import { Eye, Users, ArrowUpRight, ArrowDownRight, Minus, Percent, ExternalLink } from 'lucide-react';
 import { MetricStatCard } from '../MetricStatCard';
 import { getPageVisitsReport } from '@/services/commercial/analyticsReportService';
@@ -89,34 +90,36 @@ export function ReferralMetricsSection({ dateRange }: ReferralMetricsSectionProp
           />
 
           <ReportTableCard title="Visitas por anuncio">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-                <tr>
-                  <th className="px-6 py-3 font-semibold">Anuncio</th>
-                  <th className="px-4 py-3 font-semibold text-right">Visitas</th>
-                  <th className="px-4 py-3 font-semibold text-right">Visitantes únicos</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {data.visitsByAd.length === 0 ? (
+            <TableScroll label="Tabla de visitas por anuncio, desplazable">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                   <tr>
-                    <td colSpan={3} className="px-6 py-10 text-center text-sm text-gray-400">
-                      Todavía no hay visitas atribuidas a tus anuncios.
-                    </td>
+                    <th className="px-6 py-3 font-semibold">Anuncio</th>
+                    <th className="px-4 py-3 font-semibold text-right">Visitas</th>
+                    <th className="px-4 py-3 font-semibold text-right">Visitantes únicos</th>
                   </tr>
-                ) : (
-                  data.visitsByAd.map((row) => (
-                    <tr key={row.adId} className="hover:bg-gray-50">
-                      <td className="px-6 py-3 font-medium text-gray-900">{row.adTitle}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{formatInt(row.visits)}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatInt(row.uniqueVisitors)}
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {data.visitsByAd.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-10 text-center text-sm text-gray-400">
+                        Todavía no hay visitas atribuidas a tus anuncios.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    data.visitsByAd.map((row) => (
+                      <tr key={row.adId} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 font-medium text-gray-900">{row.adTitle}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{formatInt(row.visits)}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatInt(row.uniqueVisitors)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </TableScroll>
           </ReportTableCard>
 
           <div className="bg-white rounded-lg shadow-md p-6">

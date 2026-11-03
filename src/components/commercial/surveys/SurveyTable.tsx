@@ -1,6 +1,7 @@
 ﻿'use client';
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import { useRouter } from 'next/navigation';
 import {
   Eye,
@@ -25,8 +26,11 @@ import {
   formatDate
 } from '@/hooks/surveys/surveyUtils';
 import { SurveyApiError } from '@/services/surveyService';
-import SurveyDetailModal from './SurveyDetailModal';
 import type { SurveySummary, SurveyStatus } from '@/types/survey.types';
+
+// Se carga al abrirlo: no entra en el JavaScript inicial de la página (RN-8 de la spec 014). Con `lazy` de React,
+// que no suma el cargador de `next/dynamic` al paquete.
+const SurveyDetailModal = lazy(() => import('./SurveyDetailModal'));
 
 interface Props {
   surveys: SurveySummary[];
@@ -112,45 +116,47 @@ export default function SurveyTable({
       )}
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-100">
-          <thead>
-            <tr className="bg-gray-50">
-              {['Encuesta', 'Estado', 'Recompensa', 'Respuestas', 'Creada', 'Acciones'].map(
-                (h) => (
-                  <th
-                    key={h}
-                    className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
-                  >
-                    {h}
-                  </th>
-                ),
-              )}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {surveys.map((survey) => (
-              <SurveyRow
-                key={survey.id}
-                survey={survey}
-                onView={() => setDetailId(survey.id)}
-                onViewResponses={() =>
-                  router.push(`/commercial/surveys/${survey.id}`)
-                }
-                onPublish={() => handlePublish(survey.id)}
-                onSubmitForReview={() => handleSubmitForReview(survey.id)}
-                onStatusChange={handleStatusChange}
-                isUpdating={
-                  (publishMutation.isPending &&
-                    publishMutation.variables === survey.id) ||
-                  (submitMutation.isPending &&
-                    submitMutation.variables === survey.id) ||
-                  (statusMutation.isPending &&
-                    statusMutation.variables?.surveyId === survey.id)
-                }
-              />
-            ))}
-          </tbody>
-        </table>
+        <TableScroll label="Tabla de encuestas, desplazable">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead>
+              <tr className="bg-gray-50">
+                {['Encuesta', 'Estado', 'Recompensa', 'Respuestas', 'Creada', 'Acciones'].map(
+                  (h) => (
+                    <th
+                      key={h}
+                      className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
+                    >
+                      {h}
+                    </th>
+                  ),
+                )}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {surveys.map((survey) => (
+                <SurveyRow
+                  key={survey.id}
+                  survey={survey}
+                  onView={() => setDetailId(survey.id)}
+                  onViewResponses={() =>
+                    router.push(`/commercial/surveys/${survey.id}`)
+                  }
+                  onPublish={() => handlePublish(survey.id)}
+                  onSubmitForReview={() => handleSubmitForReview(survey.id)}
+                  onStatusChange={handleStatusChange}
+                  isUpdating={
+                    (publishMutation.isPending &&
+                      publishMutation.variables === survey.id) ||
+                    (submitMutation.isPending &&
+                      submitMutation.variables === survey.id) ||
+                    (statusMutation.isPending &&
+                      statusMutation.variables?.surveyId === survey.id)
+                  }
+                />
+              ))}
+            </tbody>
+          </table>
+        </TableScroll>
 
         {/* Pagination */}
         {totalPages > 1 && (
@@ -162,14 +168,14 @@ export default function SurveyTable({
               <button
                 disabled={page === 0}
                 onClick={() => onPageChange(page - 1)}
-                className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-500 hover:bg-gray-100 disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 disabled={page >= totalPages - 1}
                 onClick={() => onPageChange(page + 1)}
-                className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-500 hover:bg-gray-100 disabled:opacity-40"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -179,10 +185,12 @@ export default function SurveyTable({
       </div>
 
       {detailId !== null && (
-        <SurveyDetailModal
-          surveyId={detailId}
-          onClose={() => setDetailId(null)}
-        />
+        <Suspense fallback={null}>
+          <SurveyDetailModal
+            surveyId={detailId}
+            onClose={() => setDetailId(null)}
+          />
+        </Suspense>
       )}
     </>
   );
@@ -244,7 +252,7 @@ function SurveyRow({
 
       {/* Actions */}
       <td className="px-5 py-4">
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 transition-opacity lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100">
           <ActionBtn tooltip="Ver detalle" onClick={onView}>
             <Eye className="h-3.5 w-3.5" />
           </ActionBtn>
@@ -349,9 +357,10 @@ function ActionBtn({
   return (
     <button
       title={tooltip}
+      aria-label={tooltip}
       onClick={onClick}
       disabled={loading}
-      className={`cursor-pointer rounded-lg p-1.5 transition-colors disabled:opacity-50 ${className}`}
+      className={`cursor-pointer rounded-lg p-1.5 tap-icon transition-colors disabled:opacity-50 ${className}`}
     >
       {loading ? (
         <Loader2 className="h-3.5 w-3.5 animate-spin" />

@@ -101,7 +101,7 @@ const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, v
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="space-y-3">
     <h3 className="text-sm font-semibold text-gray-700 border-b pb-2">{title}</h3>
-    <div className="grid grid-cols-2 gap-4">{children}</div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{children}</div>
   </div>
 );
 
@@ -132,13 +132,13 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div
-        className={`bg-white rounded-xl shadow-xl w-full max-h-[90vh] overflow-y-auto transition-[max-width] ${
+        className={`bg-white rounded-xl shadow-xl w-full max-h-[90dvh] overflow-y-auto transition-[max-width] ${
           prosperityTab ? 'max-w-6xl' : 'max-w-2xl'
         }`}
       >
-        <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
-          <div>
-            <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2 p-4 lg:p-6 border-b sticky top-0 bg-white z-10">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-semibold text-gray-900">
                 {data ? getDetailTitle(role, data) : 'Detalle del usuario'}
               </h2>
@@ -153,15 +153,15 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
                 </span>
               )}
             </div>
-            {data && <p className="text-sm text-gray-500 mt-0.5">{data.email}</p>}
+            {data && <p className="text-sm text-gray-500 mt-0.5 break-all">{data.email}</p>}
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="tap-icon shrink-0 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
             <X size={22} />
           </button>
         </div>
 
         {showTabs && (
-          <div className="flex gap-1 border-b px-6" role="tablist">
+          <div className="flex gap-1 border-b px-4 lg:px-6" role="tablist">
             {DETAIL_TABS.map((t) => (
               <button
                 key={t.key}
@@ -169,7 +169,7 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
                 role="tab"
                 aria-selected={tab === t.key}
                 onClick={() => setTab(t.key)}
-                className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                className={`tap -mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
                   tab === t.key
                     ? 'border-admin-blue text-admin-blue'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -192,7 +192,7 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
             <CommercialProsperityPanel publicId={(data as CommercialResponseDTO).publicId ?? null} />
           </div>
         ) : (
-          <div className="p-6 space-y-6">
+          <div className="p-4 lg:p-6 space-y-6">
             <Section title="Información de cuenta">
               <InfoRow label="Teléfono" value={data.phoneNumber} />
               <InfoRow label="Registrado el" value={formatDate(data.registeredDate)} />
@@ -309,19 +309,19 @@ const UserDetailModal: React.FC<Props> = ({ isOpen, role, publicId, onClose, onE
             <div className="flex flex-wrap gap-3 pt-2 border-t">
               <button
                 onClick={onEdit}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-admin-midnight bg-admin-midnight/10 rounded-lg hover:bg-admin-midnight/20 transition-colors cursor-pointer"
+                className="tap flex items-center gap-2 px-4 py-2 text-sm font-medium text-admin-midnight bg-admin-midnight/10 rounded-lg hover:bg-admin-midnight/20 transition-colors cursor-pointer"
               >
                 <Pencil size={16} /> Editar datos
               </button>
               <button
                 onClick={onNotify}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-admin-blue bg-admin-blue/10 rounded-lg hover:bg-admin-blue/20 transition-colors cursor-pointer"
+                className="tap flex items-center gap-2 px-4 py-2 text-sm font-medium text-admin-blue bg-admin-blue/10 rounded-lg hover:bg-admin-blue/20 transition-colors cursor-pointer"
               >
                 <Send size={16} /> Enviar notificación
               </button>
               <button
                 onClick={onToggleBlock}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+                className={`tap flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
                   isBlocked ? 'text-green-700 bg-green-100 hover:bg-green-200' : 'text-red-700 bg-red-100 hover:bg-red-200'
                 }`}
               >

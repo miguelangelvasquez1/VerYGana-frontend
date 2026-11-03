@@ -1,4 +1,5 @@
 import React from "react";
+import HelpHint from '@/components/shared/HelpHint';
 
 export type FieldErrors = Record<string, string>;
 
@@ -52,30 +53,19 @@ export function extractApiError(err: unknown): { message: string; details: Field
   };
 }
 
-// Botón "?" con un pequeño tooltip flotante — click para togglear (funciona
-// en touch) además de hover, y se cierra al mover el mouse fuera o volver a
-// hacer click.
+// Botón "?" con un pequeño tooltip flotante: hover y foco en escritorio, un
+// toque para abrir y otro para cerrar en el celular (ver HelpHint).
 export function HelpTooltip({ text }: { text: string }) {
-  const [open, setOpen] = React.useState(false);
   return (
-    <span className="relative inline-flex items-center">
-      <button
-        type="button"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        onClick={() => setOpen((o) => !o)}
-        className="w-4 h-4 ml-1.5 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold flex items-center justify-center hover:bg-gray-300 transition cursor-help shrink-0"
-        aria-label="Ayuda"
-      >
+    <HelpHint
+      label="Ayuda"
+      text={text}
+      className="group -my-3.5 -mr-3.5 -ml-2 size-11 cursor-help lg:m-0 lg:ml-1.5 lg:size-4"
+    >
+      <span className="w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold flex items-center justify-center group-hover:bg-gray-300 transition">
         ?
-      </button>
-      {open && (
-        <div className="absolute z-20 left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 max-w-[80vw] p-3 bg-gray-900 text-white text-xs font-normal not-italic leading-relaxed rounded-lg shadow-lg pointer-events-none">
-          {text}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
-        </div>
-      )}
-    </span>
+      </span>
+    </HelpHint>
   );
 }
 

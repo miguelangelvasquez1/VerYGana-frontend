@@ -1,0 +1,24 @@
+{
+  "data": [
+    {
+      "publicId": "00000000-0000-4000-8000-0000000000e1",
+      "status": "PURCHASED",
+      "beneficiaryPublicId": "00000000-0000-4000-8000-000000000001",
+      "beneficiaryName": "Consumidor Prueba",
+      "productName": "Producto de prueba",
+      "commercialName": "Tienda de Prueba S.A.S.",
+      "quantity": 1,
+      "totalCents": 12500000,
+      "createdAt": "2026-10-20T10:00:00"
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

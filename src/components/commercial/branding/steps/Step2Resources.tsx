@@ -106,7 +106,7 @@ export const Step2Resources: React.FC<Props> = ({
               className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">{f.file.name}</p>
+                <p title={f.file.name} className="text-sm font-medium text-gray-800 truncate">{f.file.name}</p>
                 <p className="text-xs text-gray-400">{(f.file.size / 1024).toFixed(0)} KB</p>
               </div>
               {f.status === 'uploading' && (
@@ -118,13 +118,14 @@ export const Step2Resources: React.FC<Props> = ({
               {f.status === 'error' && (
                 <div className="flex items-center gap-1 shrink-0">
                   <AlertCircle size={18} className="text-red-500" />
-                  <span className="text-xs text-red-500 max-w-30 truncate">{f.error}</span>
+                  <span title={f.error} className="text-xs text-red-500 max-w-30 truncate">{f.error}</span>
                 </div>
               )}
               {f.status !== 'uploading' && (
                 <button
                   onClick={() => onRemoveFile(f.localId)}
-                  className="text-gray-400 hover:text-gray-600 cursor-pointer shrink-0"
+                  aria-label="Quitar archivo"
+                  className="tap-icon text-gray-400 hover:text-gray-600 cursor-pointer shrink-0"
                 >
                   <X size={16} />
                 </button>
@@ -147,14 +148,14 @@ export const Step2Resources: React.FC<Props> = ({
       <div className="flex justify-between pt-2">
         <button
           onClick={onBack}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+          className="tap px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
         >
           Atrás
         </button>
         <button
           onClick={onNext}
           disabled={hasUploading}
-          className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          className="tap px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
           Siguiente
         </button>

@@ -2,11 +2,11 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { 
   Users, 
   Gift, 
   DollarSign, 
-  TrendingUp,
   Activity,
   Calendar,
   Trophy,
@@ -122,10 +122,10 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-linear-to-br from-[#041521] to-admin-midnight rounded-lg p-6 text-white">
+      <div className="bg-linear-to-br from-[#041521] to-admin-midnight rounded-lg p-4 lg:p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">¡Bienvenido al Panel de Administración!</h1>
         <p className="text-white/70">Aquí tienes un resumen de la actividad de tu sistema</p>
-        <div className="mt-4 flex items-center space-x-4 text-sm">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <div className="flex items-center space-x-2">
             <Activity className="h-4 w-4 text-admin-gold" />
             <span>Sistema: Operativo</span>
@@ -190,9 +190,6 @@ const Dashboard: React.FC = () => {
                 );
               })}
             </div>
-            <button className="mt-4 text-sm text-admin-midnight hover:text-admin-blue font-medium cursor-pointer">
-              Ver toda la actividad →
-            </button>
           </div>
         </div>
 
@@ -224,9 +221,12 @@ const Dashboard: React.FC = () => {
                 </div>
               ))}
             </div>
-            <button className="mt-4 text-sm text-admin-midnight hover:text-admin-blue font-medium cursor-pointer">
+            <Link
+              href="/admin/raffles"
+              className="tap mt-4 inline-flex items-center text-sm text-admin-midnight hover:text-admin-blue font-medium cursor-pointer"
+            >
               Ver todas las rifas →
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -237,30 +237,24 @@ const Dashboard: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900">Acciones Rápidas</h3>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-admin-gold/40 hover:bg-admin-gold/5 transition-colors cursor-pointer">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link href="/admin/raffles" className="tap block p-4 text-left border border-gray-200 rounded-lg hover:border-admin-gold/40 hover:bg-admin-gold/5 transition-colors cursor-pointer">
               <Gift className="h-8 w-8 text-admin-gold mb-2" />
               <h4 className="font-medium text-gray-900">Nueva Rifa</h4>
               <p className="text-sm text-gray-600">Crear una nueva rifa</p>
-            </button>
+            </Link>
 
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-admin-blue/40 hover:bg-admin-blue/5 transition-colors cursor-pointer">
+            <Link href="/admin/users" className="tap block p-4 text-left border border-gray-200 rounded-lg hover:border-admin-blue/40 hover:bg-admin-blue/5 transition-colors cursor-pointer">
               <Users className="h-8 w-8 text-admin-blue mb-2" />
               <h4 className="font-medium text-gray-900">Gestionar Usuarios</h4>
               <p className="text-sm text-gray-600">Ver y editar usuarios</p>
-            </button>
+            </Link>
 
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-admin-midnight/40 hover:bg-admin-midnight/5 transition-colors cursor-pointer">
-              <TrendingUp className="h-8 w-8 text-admin-midnight mb-2" />
-              <h4 className="font-medium text-gray-900">Ver Reportes</h4>
-              <p className="text-sm text-gray-600">Analizar métricas</p>
-            </button>
-
-            <button className="p-4 text-left border border-gray-200 rounded-lg hover:border-admin-navy/40 hover:bg-admin-navy/5 transition-colors cursor-pointer">
+            <Link href="/admin/config" className="tap block p-4 text-left border border-gray-200 rounded-lg hover:border-admin-navy/40 hover:bg-admin-navy/5 transition-colors cursor-pointer">
               <Activity className="h-8 w-8 text-admin-navy mb-2" />
               <h4 className="font-medium text-gray-900">Configuración</h4>
               <p className="text-sm text-gray-600">Ajustes del sistema</p>
-            </button>
+            </Link>
           </div>
         </div>
       </div>

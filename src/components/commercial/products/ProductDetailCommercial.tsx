@@ -47,7 +47,7 @@ const ProductDetailCommercial: React.FC<Props> = ({ product }) => {
             type="button"
             disabled
             title={WALLET_DORMANT_TOOLTIP}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 tap rounded-xl font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
           >
             <Pencil className="w-4 h-4" />
             Editar producto
@@ -55,7 +55,7 @@ const ProductDetailCommercial: React.FC<Props> = ({ product }) => {
         ) : (
           <Link
             href={`/commercial/products/edit/${product.id}`}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white transition hover:opacity-90"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 tap rounded-xl font-semibold text-white transition hover:opacity-90"
             style={{ background: "linear-gradient(to right, #014C92, #1EA5BD)" }}
           >
             <Pencil className="w-4 h-4" />
@@ -67,7 +67,7 @@ const ProductDetailCommercial: React.FC<Props> = ({ product }) => {
       <button
         onClick={handleToggleReward}
         disabled={rewardLoading}
-        className={`cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold border-2 transition disabled:opacity-60 disabled:cursor-not-allowed ${
+        className={`cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 tap rounded-xl font-semibold border-2 transition disabled:opacity-60 disabled:cursor-not-allowed ${
           isReward
             ? "bg-purple-600 border-purple-600 text-white hover:bg-purple-700"
             : "border-purple-600 text-purple-600 hover:bg-purple-50"

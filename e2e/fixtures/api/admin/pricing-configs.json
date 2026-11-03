@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "version": 3,
+    "type": "SURVEY_REWARD_PER_QUESTION_CENTS",
+    "amountInCents": 5000,
+    "currency": "COP",
+    "active": true,
+    "description": "Recompensa por pregunta (dato de prueba).",
+    "createdAt": "2026-10-01T10:00:00"
+  },
+  {
+    "id": 2,
+    "version": 1,
+    "type": "AD_COST_PER_SECOND_CENTS",
+    "amountInCents": 200,
+    "currency": "COP",
+    "active": true,
+    "description": "Costo por segundo (dato de prueba).",
+    "createdAt": "2026-10-01T10:00:00"
+  }
+]

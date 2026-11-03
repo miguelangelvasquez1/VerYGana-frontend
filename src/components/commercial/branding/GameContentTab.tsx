@@ -81,7 +81,7 @@ export const GameContentTab: React.FC<Props> = ({
         <button
           onClick={onSave}
           disabled={saving}
-          className="flex items-center gap-1.5 px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          className="tap flex items-center gap-1.5 px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
           {saving && <Loader2 size={14} className="animate-spin" />}
           {saving ? 'Guardando…' : 'Guardar contenido'}

@@ -1,0 +1,9 @@
+{
+  "route": "B",
+  "routeLabel": "Ruta B",
+  "modalityLabel": "Empresa Tipo B",
+  "explanation": "Por el tamaño y el tipo de tu negocio, la modalidad recomendada es la de Empresa Tipo B.",
+  "preliminary": false,
+  "verificationRequired": false,
+  "confirmed": true
+}

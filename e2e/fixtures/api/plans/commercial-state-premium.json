@@ -1,0 +1,20 @@
+{
+  "effectivePlan": "PREMIUM",
+  "hasActivePlan": true,
+  "remainingBudgetCents": 50000000,
+  "budgetSuspended": false,
+  "budgetDormant": false,
+  "commissionRate": 3,
+  "canAdvertise": true,
+  "canUseGames": true,
+  "canUseSurveys": true,
+  "canViewPerformanceMetrics": true,
+  "canViewPageVisitMetrics": true,
+  "maxProducts": -1,
+  "maxAds": -1,
+  "maxBrandedGames": -1,
+  "maxSurveys": -1,
+  "maxKeysPct": -1,
+  "subscriptionDaysRemaining": null,
+  "walletStatus": "ACTIVE"
+}

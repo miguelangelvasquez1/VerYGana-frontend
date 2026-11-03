@@ -66,7 +66,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
       { surveyId, status: pendingTransition.next },
       {
         onSuccess: () => setPendingTransition(null),
-        onError: (err:any) => {
+        onError: (err: unknown) => {
           setMutationError(
             err instanceof SurveyApiError
               ? err.message
@@ -81,7 +81,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
   const handleApprove = () => {
     setMutationError(null);
     approveSurvey.mutate(surveyId, {
-      onError: (err: any) => setMutationError(
+      onError: (err: unknown) => setMutationError(
         err instanceof SurveyApiError ? err.message : 'Error al aprobar la encuesta',
       ),
     });
@@ -99,7 +99,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
       { surveyId, reason: rejectReason.trim() },
       {
         onSuccess: closeRejectModal,
-        onError: (err: any) => setMutationError(
+        onError: (err: unknown) => setMutationError(
           err instanceof SurveyApiError ? err.message : 'Error al rechazar la encuesta',
         ),
       },
@@ -114,7 +114,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
       {/* Back */}
       <button
         onClick={() => router.push('/admin/surveys')}
-        className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+        className="tap flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
       >
         <ArrowLeft className="h-4 w-4" />
         Volver a encuestas
@@ -175,7 +175,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
                 <button
                   onClick={handleApprove}
                   disabled={approveSurvey.isPending}
-                  className="cursor-pointer flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-500 disabled:opacity-50 active:scale-95"
+                  className="tap cursor-pointer flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-500 disabled:opacity-50 active:scale-95"
                 >
                   {approveSurvey.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                   Aprobar encuesta
@@ -183,7 +183,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
                 <button
                   onClick={() => setShowRejectModal(true)}
                   disabled={rejectSurvey.isPending}
-                  className="cursor-pointer flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition-all hover:bg-red-50 disabled:opacity-50 active:scale-95"
+                  className="tap cursor-pointer flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition-all hover:bg-red-50 disabled:opacity-50 active:scale-95"
                 >
                   <XCircle className="h-4 w-4" />
                   Rechazar encuesta
@@ -199,7 +199,7 @@ export default function AdminSurveyDetail({ surveyId }: Props) {
                     key={t.next}
                     onClick={() => setPendingTransition(t)}
                     disabled={updateStatus.isPending}
-                    className={`cursor-pointer flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all disabled:opacity-50 active:scale-95 ${t.btnClass}`}
+                    className={`tap cursor-pointer flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all disabled:opacity-50 active:scale-95 ${t.btnClass}`}
                   >
                     {updateStatus.isPending && updateStatus.variables?.status === t.next
                       ? <Loader2 className="h-4 w-4 animate-spin" />

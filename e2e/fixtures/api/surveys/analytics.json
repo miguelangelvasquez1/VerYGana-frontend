@@ -1,0 +1,39 @@
+{
+  "surveyId": 1,
+  "surveyTitle": "Encuesta de hábitos de compra",
+  "totalResponses": 20,
+  "questionStats": [
+    {
+      "questionId": 1,
+      "questionText": "¿Con qué frecuencia compras en línea?",
+      "questionType": "SINGLE_CHOICE",
+      "totalAnswers": 20,
+      "optionStats": [
+        {
+          "optionText": "Todas las semanas",
+          "count": 12,
+          "percentage": 60
+        },
+        {
+          "optionText": "Una vez al mes",
+          "count": 8,
+          "percentage": 40
+        }
+      ],
+      "averageRating": null,
+      "textAnswers": []
+    },
+    {
+      "questionId": 2,
+      "questionText": "¿Qué te gustaría mejorar?",
+      "questionType": "TEXT",
+      "totalAnswers": 2,
+      "optionStats": [],
+      "averageRating": null,
+      "textAnswers": [
+        "Más variedad",
+        "Envíos más rápidos"
+      ]
+    }
+  ]
+}

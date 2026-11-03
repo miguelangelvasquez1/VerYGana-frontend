@@ -32,8 +32,8 @@ export default function CommercialPayoutsList({ year, month }: Props) {
           page
         );
         setData(response);
-      } catch (error) {
-        console.error("Error loading payouts", error);
+      } catch {
+        console.error("Error cargando los pagos");
       } finally {
         setLoading(false);
       }
@@ -122,7 +122,7 @@ export default function CommercialPayoutsList({ year, month }: Props) {
             <button
               disabled={!data.meta.hasPrevious}
               onClick={() => setPage((p) => p - 1)}
-              className="text-sm px-3 py-1 rounded border disabled:opacity-40 cursor-pointer"
+              className="text-sm px-3 py-1 tap rounded border disabled:opacity-40 cursor-pointer"
             >
               Anterior
             </button>
@@ -134,7 +134,7 @@ export default function CommercialPayoutsList({ year, month }: Props) {
             <button
               disabled={!data.meta.hasNext}
               onClick={() => setPage((p) => p + 1)}
-              className="text-sm px-3 py-1 rounded border disabled:opacity-40 cursor-pointer"
+              className="text-sm px-3 py-1 tap rounded border disabled:opacity-40 cursor-pointer"
             >
               Siguiente
             </button>

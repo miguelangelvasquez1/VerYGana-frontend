@@ -179,7 +179,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
         <input
           value={sharedFields.additionalInfo}
           onChange={(e) => updateSharedField('additionalInfo', e.target.value)}
-          className="w-full border border-gray-200 p-2 rounded-lg"
+          className="w-full border border-gray-200 p-2 tap rounded-lg"
           placeholder="Opcional"
           disabled={disabled}
         />
@@ -190,7 +190,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
           type="date"
           value={sharedFields.expirationDate_date}
           onChange={(e) => updateSharedField('expirationDate_date', e.target.value)}
-          className="w-full border border-gray-200 p-2 rounded-lg"
+          className="w-full border border-gray-200 p-2 tap rounded-lg"
           disabled={disabled}
         />
       </div>
@@ -200,7 +200,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
           type="time"
           value={sharedFields.expirationDate_time}
           onChange={(e) => updateSharedField('expirationDate_time', e.target.value)}
-          className="w-full border border-gray-200 p-2 rounded-lg"
+          className="w-full border border-gray-200 p-2 tap rounded-lg"
           disabled={disabled}
         />
       </div>
@@ -255,7 +255,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
               type="button"
               onClick={() => handleModeChange(m)}
               disabled={disabled}
-              className={`cursor-pointer px-3 py-1 rounded-lg text-sm font-medium transition ${
+              className={`cursor-pointer px-3 py-1 tap rounded-lg text-sm font-medium transition ${
                 mode === m
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -276,7 +276,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
           <textarea
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
-            className="w-full border border-gray-200 p-2 rounded-lg font-mono text-sm resize-none"
+            className="w-full border border-gray-200 p-2 tap rounded-lg font-mono text-sm resize-none"
             rows={8}
             placeholder={'CODE001\nCODE002\nCODE003'}
             disabled={disabled}
@@ -287,7 +287,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
               type="button"
               onClick={processBulk}
               disabled={disabled || !bulkText.trim()}
-              className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+              className="cursor-pointer bg-blue-600 text-white px-4 py-2 tap rounded-lg text-sm font-medium disabled:opacity-50"
             >
               Procesar códigos
             </button>
@@ -368,10 +368,10 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
             <div>
               <label className="block text-sm font-medium mb-1">Cantidad de unidades *</label>
               <input
-                type="number"
+                type="number" inputMode="numeric"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className="border border-gray-200 p-2 rounded-lg w-36"
+                className="border border-gray-200 p-2 tap rounded-lg w-36"
                 min="1"
                 max={MAX_QUANTITY}
                 placeholder="ej: 100"
@@ -387,7 +387,7 @@ export default function StockInputSection({ value, onChange, disabled }: StockIn
                 parseInt(quantity) <= 0 ||
                 parseInt(quantity) > MAX_QUANTITY
               }
-              className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+              className="cursor-pointer bg-blue-600 text-white px-4 py-2 tap rounded-lg text-sm font-medium disabled:opacity-50"
             >
               Generar códigos
             </button>

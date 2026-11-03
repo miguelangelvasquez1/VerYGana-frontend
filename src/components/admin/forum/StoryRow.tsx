@@ -110,8 +110,8 @@ export default function StoryRow({ story, onEdit, onDelete }: StoryRowProps) {
 
       {/* ── Title + meta ── */}
       <td className="px-4 py-3 max-w-xs">
-        <p className="font-semibold text-gray-800 truncate">{story.title}</p>
-        <p className="text-xs text-gray-400 truncate mt-0.5">{story.description}</p>
+        <p className="font-semibold text-gray-800 truncate" title={story.title}>{story.title}</p>
+        <p className="text-xs text-gray-400 truncate mt-0.5" title={story.description}>{story.description}</p>
         {story.location && (
           <span className="inline-flex items-center gap-1 text-xs text-gray-400 mt-0.5">
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -166,7 +166,7 @@ export default function StoryRow({ story, onEdit, onDelete }: StoryRowProps) {
             disabled={isTogglingStatus}
             onClick={handleToggleStatus}
             className={`
-              inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md
+              tap inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md
               border border-transparent text-gray-400 cursor-pointer
               transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed
               ${transition.cls}
@@ -200,7 +200,7 @@ export default function StoryRow({ story, onEdit, onDelete }: StoryRowProps) {
 
       {/* ── Actions ── */}
       <td className="px-4 py-3">
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 max-lg:opacity-100 transition-opacity">
           <ActionBtn onClick={onEdit} title="Editar" color="blue">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -235,8 +235,9 @@ function ActionBtn({
     <button
       type="button"
       title={title}
+      aria-label={title}
       onClick={onClick}
-      className={`w-7 h-7 flex items-center justify-center rounded-lg border border-transparent transition-all cursor-pointer ${cls}`}
+      className={`tap-icon w-7 h-7 flex items-center justify-center rounded-lg border border-transparent transition-all cursor-pointer ${cls}`}
     >
       {children}
     </button>

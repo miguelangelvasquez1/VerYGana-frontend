@@ -12,7 +12,7 @@ interface PeriodSelectorProps {
 
 export function PeriodSelector({ value, onChange, loading }: PeriodSelectorProps) {
   return (
-    <div className="flex items-center gap-1.5" role="group" aria-label="Periodo">
+    <div className="flex items-center gap-2 lg:gap-1.5" role="group" aria-label="Periodo">
       {DASHBOARD_PERIOD_OPTIONS.map((option) => {
         const active = option.value === value;
         return (
@@ -22,7 +22,7 @@ export function PeriodSelector({ value, onChange, loading }: PeriodSelectorProps
             aria-pressed={active}
             disabled={loading && active}
             onClick={() => onChange(option.value)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 tap rounded-lg text-sm font-medium transition-colors cursor-pointer ${
               active
                 ? "bg-[#03548C] text-white"
                 : "text-gray-600 border border-gray-200 hover:bg-gray-50"

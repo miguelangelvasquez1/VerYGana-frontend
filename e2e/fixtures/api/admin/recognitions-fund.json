@@ -1,0 +1,8 @@
+{
+  "fortificationBalanceCents": 120000000,
+  "activeSpentCents": 15000000,
+  "purchasedCount": 3,
+  "deliveredCount": 5,
+  "expiredCount": 1,
+  "cancelledCount": 0
+}

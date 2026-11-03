@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "gameTitle": "Juego de Prueba",
+    "budgetCents": 100000000,
+    "spentCents": 25000000,
+    "status": "ACTIVE",
+    "completedSessions": 320,
+    "uniquePlayersCount": 210
+  },
+  {
+    "id": 2,
+    "gameTitle": "Otro juego",
+    "budgetCents": 50000000,
+    "spentCents": null,
+    "status": "DRAFT",
+    "completedSessions": null,
+    "uniquePlayersCount": null
+  }
+]

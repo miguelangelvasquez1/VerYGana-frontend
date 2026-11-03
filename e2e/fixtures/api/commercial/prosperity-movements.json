@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "sequence": 1,
+      "type": "THRESHOLD_GENERATED",
+      "amountCents": 400000000,
+      "balanceBeforeCents": 0,
+      "balanceAfterCents": 400000000,
+      "originType": null,
+      "originId": null,
+      "thresholdId": 1,
+      "relatedEntryId": null,
+      "saleAmountCents": null,
+      "uncoveredCents": null,
+      "effectiveAt": "2026-02-01T10:00:00",
+      "cause": null,
+      "supportRef": null,
+      "performedBy": null
+    },
+    {
+      "id": 2,
+      "sequence": 2,
+      "type": "SALE_ABSORPTION",
+      "amountCents": -100000000,
+      "balanceBeforeCents": 400000000,
+      "balanceAfterCents": 300000000,
+      "originType": "PURCHASE",
+      "originId": "1",
+      "thresholdId": null,
+      "relatedEntryId": null,
+      "saleAmountCents": 100000000,
+      "uncoveredCents": 0,
+      "effectiveAt": "2026-03-01T10:00:00",
+      "cause": null,
+      "supportRef": null,
+      "performedBy": null
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

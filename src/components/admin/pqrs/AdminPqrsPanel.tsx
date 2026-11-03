@@ -6,6 +6,7 @@ import { getAssignedPqrs } from '@/services/admin/AdminPqrsService';
 import { PqrsAdminDetailDTO, PqrsStatus, PqrsType } from '@/types/Pqrs.types';
 import { marketPlaceIssueReasonLabel, pqrsStatusColor, pqrsStatusLabel, pqrsTypeLabel } from '@/components/pqrs/pqrsMeta';
 import { AdminPqrsDetail } from './AdminPqrsDetail';
+import TableScroll from '@/components/shared/TableScroll';
 
 const PAGE_SIZE = 10;
 
@@ -64,8 +65,8 @@ const AdminPqrsPanel: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-gray-800">PQRS</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Gestiona las peticiones, quejas, reclamos y sugerencias de usuarios y comercios
@@ -74,7 +75,8 @@ const AdminPqrsPanel: React.FC = () => {
         <button
           onClick={load}
           title="Actualizar"
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+          aria-label="Actualizar"
+          className="tap-icon shrink-0 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
         >
           <RefreshCw size={18} />
         </button>
@@ -87,7 +89,7 @@ const AdminPqrsPanel: React.FC = () => {
             <button
               key={f.value}
               onClick={() => { setStatusFilter(f.value); setPage(0); }}
-              className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
+              className={`tap px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
                 statusFilter === f.value
                   ? 'bg-admin-blue text-white'
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -100,7 +102,7 @@ const AdminPqrsPanel: React.FC = () => {
         <select
           value={typeFilter}
           onChange={(e) => { setTypeFilter(e.target.value as PqrsType | 'ALL'); setPage(0); }}
-          className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 bg-white cursor-pointer"
+          className="tap px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 bg-white cursor-pointer"
         >
           <option value="ALL">Todos los tipos</option>
           {Object.values(PqrsType).map((t) => (
@@ -117,7 +119,7 @@ const AdminPqrsPanel: React.FC = () => {
       ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-700 font-medium">{error}</p>
-          <button onClick={load} className="mt-3 text-sm text-red-600 underline cursor-pointer">
+          <button onClick={load} className="tap mt-3 text-sm text-red-600 underline cursor-pointer">
             Reintentar
           </button>
         </div>
@@ -131,6 +133,7 @@ const AdminPqrsPanel: React.FC = () => {
       ) : (
         <>
           <div className="bg-white rounded-lg shadow overflow-hidden">
+            <TableScroll label="Tabla de solicitudes PQRS, desplazable">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -149,7 +152,7 @@ const AdminPqrsPanel: React.FC = () => {
                     className="hover:bg-gray-50 cursor-pointer transition-colors"
                   >
                     <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">#{item.id}</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900 max-w-[220px] truncate">{item.subject}</td>
+                    <td title={item.subject} className="px-4 py-3 text-sm font-medium text-gray-900 max-w-[220px] truncate">{item.subject}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <p className="text-sm text-gray-700">{item.requesterName}</p>
                       <p className="text-xs text-gray-400">{item.requesterEmail}</p>
@@ -180,11 +183,12 @@ const AdminPqrsPanel: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            </TableScroll>
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs text-gray-400">
                 {totalElements} solicitud{totalElements === 1 ? '' : 'es'} · Página {page + 1} de {totalPages}
               </p>
@@ -192,14 +196,14 @@ const AdminPqrsPanel: React.FC = () => {
                 <button
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                  className="tap flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   <ChevronLeft size={14} /> Anterior
                 </button>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                  className="tap flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   Siguiente <ChevronRight size={14} />
                 </button>

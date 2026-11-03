@@ -54,6 +54,7 @@ import { dateToZonedIsoEnd, dateToZonedIsoStart } from '@/lib/utils/dateTime';
 import { levelLabel } from '@/components/admin/users/userMeta';
 import { ProsperityPagination, Th } from '@/components/prosperity/ProsperityUI';
 import { FieldError, inputClass } from '@/components/admin/prosperity/ProsperityModalShell';
+import TableScroll from '@/components/shared/TableScroll';
 
 // ─── Tipos locales ───────────────────────────────────────────────────────────
 
@@ -87,9 +88,9 @@ const FIELD_STEP: Record<string, Step> = {
 };
 
 const primaryButton =
-  'inline-flex cursor-pointer items-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50';
+  'tap inline-flex cursor-pointer items-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50';
 const secondaryButton =
-  'inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50';
+  'tap inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50';
 
 // ─── Stepper ─────────────────────────────────────────────────────────────────
 
@@ -100,7 +101,7 @@ function Stepper({ current }: { current: Step }) {
         const done = step < current;
         const active = step === current;
         return (
-          <li key={step} className="flex items-center gap-2 sm:gap-4">
+          <li key={step} aria-current={active ? 'step' : undefined} className="flex items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-2">
               <span
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
@@ -113,7 +114,7 @@ function Stepper({ current }: { current: Step }) {
               >
                 {done ? <Check className="h-3.5 w-3.5" /> : step}
               </span>
-              <span className={`text-sm font-medium ${active ? 'text-gray-900' : 'text-gray-500'}`}>{label}</span>
+              <span className={`text-sm font-medium ${active ? 'text-gray-900' : 'max-sm:sr-only text-gray-500'}`}>{label}</span>
             </div>
             {i < STEPS.length - 1 && <span className="h-px w-6 bg-gray-200 sm:w-12" />}
           </li>
@@ -233,7 +234,7 @@ function BeneficiaryStep({
           <p className="py-10 text-center text-sm text-gray-400">No hay candidatos para este criterio y periodo.</p>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <TableScroll label="Tabla de usuarios candidatos, desplazable">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -297,7 +298,7 @@ function BeneficiaryStep({
                   })}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
             {data && <ProsperityPagination meta={data.meta} onPageChange={setPage} loading={isFetching} />}
           </>
         )}
@@ -389,7 +390,7 @@ function ProductStep({
                         type="button"
                         disabled={noStock}
                         onClick={() => onProduct(p)}
-                        className={`flex w-full items-center gap-3 p-3 text-left transition-colors ${
+                        className={`tap flex w-full items-center gap-3 p-3 text-left transition-colors ${
                           isSelected ? 'bg-admin-blue/10' : 'hover:bg-gray-50'
                         } ${noStock ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                       >
@@ -402,8 +403,8 @@ function ProductStep({
                           className="h-11 w-11 shrink-0 rounded-lg border border-gray-100 object-cover"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-gray-900">{p.name}</p>
-                          <p className="truncate text-xs text-gray-500">
+                          <p className="truncate text-sm font-semibold text-gray-900" title={p.name}>{p.name}</p>
+                          <p className="truncate text-xs text-gray-500" title={`${p.companyName} · ${noStock ? 'Sin stock' : `${p.stock} en stock`}`}>
                             {p.companyName} · {noStock ? 'Sin stock' : `${p.stock} en stock`}
                           </p>
                         </div>
@@ -539,7 +540,7 @@ function SummaryRow({
           <button
             type="button"
             onClick={onEdit}
-            className="mt-0.5 cursor-pointer text-xs font-semibold text-admin-blue hover:underline"
+            className="tap mt-0.5 cursor-pointer text-xs font-semibold text-admin-blue hover:underline"
           >
             Corregir
           </button>
@@ -653,7 +654,7 @@ export default function NewRecognitionWizard() {
     <div className="mx-auto max-w-6xl space-y-6 p-6">
       <Link
         href="/admin/recognitions"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+        className="tap inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
       >
         <ArrowLeft className="h-4 w-4" />
         Reconocimientos

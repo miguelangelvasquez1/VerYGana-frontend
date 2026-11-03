@@ -229,7 +229,7 @@ function PlanChangeDetailModal({
             href={detail.downloadUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="cmp-pressable inline-flex items-center gap-1.5 rounded-lg border border-cmp-azul/25 bg-white px-3 py-2 text-xs font-semibold text-cmp-azul hover:bg-[#E8F1FA]"
+            className="tap cmp-pressable inline-flex items-center gap-1.5 rounded-lg border border-cmp-azul/25 bg-white px-3 py-2 text-xs font-semibold text-cmp-azul hover:bg-[#E8F1FA]"
           >
             <FileText className="h-3.5 w-3.5" />
             Ver otrosí
@@ -405,7 +405,7 @@ export default function PlanChangesReviewPanel() {
           <EmptyState icon={Inbox} title="Nada por aquí" hint={emptyHint} />
         ) : (
           <Ledger>
-            <LedgerTable>
+            <LedgerTable label="Tabla de cambios de plan, desplazable">
               <LedgerHead>
                 <ThSpine />
                 <Th>Empresa</Th>

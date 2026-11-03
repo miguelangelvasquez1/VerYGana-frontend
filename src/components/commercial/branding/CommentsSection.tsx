@@ -57,6 +57,7 @@ export const CommentsSection: React.FC<Props> = ({ requestId }) => {
           loading={loading}
           sending={sending}
           currentUserRole="COMMERCIAL"
+          sendButtonClassName="tap"
           onSend={handleSend}
         />
       </div>

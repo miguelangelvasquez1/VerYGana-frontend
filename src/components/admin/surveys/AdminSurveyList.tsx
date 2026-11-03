@@ -30,6 +30,7 @@ import { TRANSITIONS, ConfirmDialog, type Transition } from './surveyStatusTrans
 import { RejectSurveyModal } from './RejectSurveyModal';
 import type { SurveyStatus } from '@/types/survey.types';
 import type { AdminSurveySummary } from '@/types/survey.types';
+import TableScroll from '@/components/shared/TableScroll';
 
 // ─── Status filter pills ──────────────────────────────────────────────────────
 
@@ -60,7 +61,7 @@ export default function AdminSurveyList() {
       { surveyId: pendingAction.surveyId, status: pendingAction.transition.next },
       {
         onSuccess: () => setPendingAction(null),
-        onError: (err:any) => {
+        onError: (err: unknown) => {
           setErrorMsg(
             err instanceof SurveyApiError
               ? err.message
@@ -75,7 +76,7 @@ export default function AdminSurveyList() {
   const handleApprove = (surveyId: number) => {
     setErrorMsg(null);
     approveSurvey.mutate(surveyId, {
-      onError: (err: any) => setErrorMsg(
+      onError: (err: unknown) => setErrorMsg(
         err instanceof SurveyApiError ? err.message : 'Error al aprobar la encuesta',
       ),
     });
@@ -93,7 +94,7 @@ export default function AdminSurveyList() {
       { surveyId: rejectTarget.id, reason: rejectReason.trim() },
       {
         onSuccess: closeRejectModal,
-        onError: (err: any) => setErrorMsg(
+        onError: (err: unknown) => setErrorMsg(
           err instanceof SurveyApiError ? err.message : 'Error al rechazar la encuesta',
         ),
       },
@@ -127,7 +128,8 @@ export default function AdminSurveyList() {
           {errorMsg}
           <button
             onClick={() => setErrorMsg(null)}
-            className="ml-auto text-red-400 hover:text-red-600 cursor-pointer"
+            aria-label="Cerrar aviso"
+            className="tap-icon ml-auto text-red-400 hover:text-red-600 cursor-pointer"
           >
             ✕
           </button>
@@ -162,6 +164,7 @@ export default function AdminSurveyList() {
       {!isLoading && !isError && data && data.data?.length > 0 && (
         <>
           <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <TableScroll label="Tabla de encuestas, desplazable">
             <table className="min-w-full divide-y divide-gray-100">
               <thead>
                 <tr className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -171,7 +174,7 @@ export default function AdminSurveyList() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {data.data.map((survey:any) => (
+                {data.data.map((survey) => (
                   <SurveyRow
                     key={survey.id}
                     survey={survey}
@@ -192,10 +195,11 @@ export default function AdminSurveyList() {
                 ))}
               </tbody>
             </table>
+            </TableScroll>
 
             {/* Pagination */}
             {data.meta.totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 px-5 py-3">
                 <p className="text-xs text-gray-500">
                   {data.meta.totalElements.toLocaleString('es-CO')} encuestas ·
                   Página {page + 1} de {data.meta.totalPages}
@@ -203,15 +207,17 @@ export default function AdminSurveyList() {
                 <div className="flex gap-1">
                   <button
                     disabled={page === 0}
+                    aria-label="Página anterior"
                     onClick={() => setPage((p) => p - 1)}
-                    className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
+                    className="tap-icon rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <button
                     disabled={page >= data.meta.totalPages - 1}
+                    aria-label="Página siguiente"
                     onClick={() => setPage((p) => p + 1)}
-                    className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
+                    className="tap-icon rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
@@ -289,9 +295,9 @@ function SurveyRow({
       <td className="max-w-[260px] px-5 py-4">
         <button
           onClick={onViewDetail}
-          className="text-left cursor-pointer"
+          className="tap text-left cursor-pointer"
         >
-          <p className="truncate text-sm font-semibold text-gray-900 group-hover:text-admin-blue transition-colors">
+          <p title={survey.title} className="truncate text-sm font-semibold text-gray-900 group-hover:text-admin-blue transition-colors">
             {survey.title}
           </p>
         </button>
@@ -340,7 +346,7 @@ function SurveyRow({
 
       {/* Actions */}
       <td className="px-5 py-4">
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 max-lg:opacity-100 transition-opacity">
 
           {/* Detail */}
           <ActionBtn tooltip="Ver detalle" onClick={onViewDetail}>
@@ -403,7 +409,7 @@ function FilterPill({
   return (
     <button
       onClick={onClick}
-      className={`cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
+      className={`tap cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
         active
           ? 'bg-admin-blue text-white shadow-sm'
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -429,9 +435,10 @@ function ActionBtn({
   return (
     <button
       title={tooltip}
+      aria-label={tooltip}
       onClick={onClick}
       disabled={loading}
-      className={`cursor-pointer rounded-lg p-1.5 transition-colors disabled:opacity-50 ${className}`}
+      className={`tap-icon cursor-pointer rounded-lg p-1.5 transition-colors disabled:opacity-50 ${className}`}
     >
       {loading
         ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

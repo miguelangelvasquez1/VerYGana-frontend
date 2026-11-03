@@ -348,7 +348,7 @@ export default function CommercialProfileSeller() {
                 <button
                   onClick={loadMore}
                   disabled={productsLoading}
-                  className="px-8 py-2.5 rounded-xl bg-[#03548C] text-white font-semibold text-sm hover:bg-[#0b1440] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="tap px-8 py-2.5 rounded-xl bg-[#03548C] text-white font-semibold text-sm hover:bg-[#0b1440] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {productsLoading ? "Cargando..." : "Cargar más productos"}
                 </button>

@@ -137,14 +137,16 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={submitting ? undefined : onClose} />
-      <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between">
+      <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 space-y-5 max-h-[90dvh] overflow-y-auto">
+        {/* Encabezado fijo arriba: el botón de cerrar se ve siempre, el formulario hace scroll debajo (RN-5) */}
+        <div className="sticky top-0 z-10 -mx-6 -mt-6 flex items-center justify-between rounded-t-2xl bg-white px-6 pt-6 pb-3">
           <h2 className="text-lg font-bold text-gray-900">Nuevo método de pago</h2>
           <button
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50"
+            aria-label="Cerrar"
+            className="p-1.5 tap-icon rounded-lg hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -158,7 +160,7 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
               value={form.type}
               onChange={handleChange}
               disabled={submitting}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             >
               {Object.values(PayoutMethodType).map((t) => (
                 <option key={t} value={t}>{payoutMethodTypeLabel[t]}</option>
@@ -175,7 +177,7 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
               required
               disabled={submitting}
               placeholder="Ej. Mi cuenta principal"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             />
           </div>
 
@@ -188,7 +190,7 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
                   value={form.bankCode}
                   onChange={handleChange}
                   disabled={submitting || banksLoading}
-                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                  className="w-full border border-gray-300 rounded-lg px-2 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                 >
                   <option value="">
                     {banksLoading ? 'Cargando bancos...' : 'Selecciona un banco'}
@@ -221,7 +223,7 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
                   value={form.bankAccountType}
                   onChange={handleChange}
                   disabled={submitting}
-                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                  className="w-full border border-gray-300 rounded-lg px-2 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                 >
                   {Object.values(BankAccountType).map((t) => (
                     <option key={t} value={t}>{bankAccountTypeLabel[t]}</option>
@@ -232,11 +234,13 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
                 <label className="block text-xs font-medium text-gray-600 mb-1">N.º de cuenta *</label>
                 <input
                   name="accountNumber"
+                  inputMode="numeric"
+                  autoComplete="off"
                   value={form.accountNumber}
                   onChange={handleChange}
                   required
                   disabled={submitting}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -271,12 +275,15 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
               <label className="block text-xs font-medium text-gray-600 mb-1">Número de celular *</label>
               <input
                 name="phoneNumber"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
                 value={form.phoneNumber}
                 onChange={handleChange}
                 required
                 disabled={submitting}
                 placeholder="Ej. 3001234567"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
               />
             </div>
           )}
@@ -290,7 +297,7 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
                 onChange={handleChange}
                 required
                 disabled={submitting}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -301,7 +308,7 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
                   value={form.accountHolderDocType}
                   onChange={handleChange}
                   disabled={submitting}
-                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                  className="w-full border border-gray-300 rounded-lg px-2 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                 >
                   {Object.values(DocType).map((t) => (
                     <option key={t} value={t}>{docTypeLabel[t]}</option>
@@ -312,11 +319,13 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
                 <label className="block text-xs font-medium text-gray-600 mb-1">Documento *</label>
                 <input
                   name="accountHolderDoc"
+                  inputMode="numeric"
+                  autoComplete="off"
                   value={form.accountHolderDoc}
                   onChange={handleChange}
                   required
                   disabled={submitting}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                 />
               </div>
             </div>
@@ -327,14 +336,14 @@ export function CreatePayoutMethodModal({ onClose, onCreated }: Props) {
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 tap rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={!isValid || submitting}
-              className="px-4 py-2 rounded-lg text-white bg-[#03548C] hover:bg-[#024270] transition disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 tap rounded-lg text-white bg-[#03548C] hover:bg-[#024270] transition disabled:opacity-50 cursor-pointer"
             >
               {submitStage === 'uploading-certificate'
                 ? 'Subiendo certificación...'

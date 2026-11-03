@@ -26,8 +26,8 @@ export default function TopSellingProducts() {
 
       setProducts(response.data);
       setMeta(response.meta);
-    } catch (error) {
-      console.error("Error loading top selling products", error);
+    } catch {
+      console.error("Error cargando los productos más vendidos");
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export default function TopSellingProducts() {
           <button
             onClick={() => setPage((p) => p - 1)}
             disabled={!meta?.hasPrevious || loading}
-            className="cursor-pointer p-2 border border-gray-200 rounded-lg disabled:opacity-40"
+            className="cursor-pointer p-2 tap-icon border border-gray-200 rounded-lg disabled:opacity-40"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -60,7 +60,7 @@ export default function TopSellingProducts() {
           <button
             onClick={() => setPage((p) => p + 1)}
             disabled={!meta?.hasNext || loading}
-            className="cursor-pointer p-2 border border-gray-200 rounded-lg disabled:opacity-40"
+            className="cursor-pointer p-2 tap-icon border border-gray-200 rounded-lg disabled:opacity-40"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

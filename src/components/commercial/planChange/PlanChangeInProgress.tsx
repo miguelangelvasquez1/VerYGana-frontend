@@ -153,7 +153,7 @@ export function PlanChangeInProgressBlock({
         {backHref && (
           <Link
             href={backHref}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 tap text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100"
           >
             {backLabel ?? 'Volver'}
           </Link>

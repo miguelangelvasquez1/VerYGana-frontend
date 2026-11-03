@@ -18,6 +18,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, usePresence, useReducedMotion } from 'framer-motion';
 import { Loader2, RefreshCw, ShieldAlert, X } from 'lucide-react';
+import TableScroll from '@/components/shared/TableScroll';
 
 /* ── Veredictos ──────────────────────────────────────────────────────── */
 
@@ -98,7 +99,7 @@ export function Btn({
     <button
       {...props}
       disabled={props.disabled || loading}
-      className={`inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg font-medium disabled:cursor-not-allowed disabled:opacity-70 ${
+      className={`tap inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg font-medium disabled:cursor-not-allowed disabled:opacity-70 ${
         size === 'sm' ? 'px-2.5 py-1.5 text-xs' : 'px-3.5 py-2 text-sm'
       } ${BTN[variant]} ${className}`}
     >
@@ -179,7 +180,7 @@ export function RefreshButton({ onClick, loading }: { onClick: () => void; loadi
     <button
       onClick={onClick}
       disabled={loading}
-      className="group inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-cmp-rule bg-white px-3 py-2 text-xs font-medium text-cmp-slate hover:border-cmp-mute hover:text-cmp-ink disabled:opacity-60"
+      className="tap group inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-cmp-rule bg-white px-3 py-2 text-xs font-medium text-cmp-slate hover:border-cmp-mute hover:text-cmp-ink disabled:opacity-60"
     >
       <RefreshCw
         className={`h-3.5 w-3.5 transition-transform duration-300 ${
@@ -196,13 +197,18 @@ export function RefreshButton({ onClick, loading }: { onClick: () => void; loadi
 export function Ledger({ children }: { children: React.ReactNode }) {
   return (
     <div className="overflow-hidden rounded-xl border border-cmp-rule bg-white shadow-[0_1px_2px_rgba(11,31,51,0.04)]">
-      <div className="overflow-x-auto">{children}</div>
+      {children}
     </div>
   );
 }
 
-export function LedgerTable({ children }: { children: React.ReactNode }) {
-  return <table className="w-full text-sm">{children}</table>;
+/** La tabla se desliza dentro de su caja en el celular (RN-4); `label` nombra la región para quien usa lector de pantalla. */
+export function LedgerTable({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <TableScroll label={label}>
+      <table className="w-full text-sm">{children}</table>
+    </TableScroll>
+  );
 }
 
 export function Th({
@@ -346,7 +352,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry: () 
       <p className="mt-3 text-sm font-semibold text-cmp-ink">{message}</p>
       <button
         onClick={onRetry}
-        className="cmp-label mt-4 cursor-pointer rounded-lg border border-cmp-flag/30 px-3 py-2 text-cmp-flag hover:bg-white"
+        className="tap cmp-label mt-4 cursor-pointer rounded-lg border border-cmp-flag/30 px-3 py-2 text-cmp-flag hover:bg-white"
       >
         Reintentar
       </button>
@@ -404,7 +410,7 @@ export function Tabs<T extends string>({
 }) {
   const reduce = useReducedMotion();
   return (
-    <div className="flex gap-1 border-b border-cmp-rule">
+    <div className="flex flex-wrap gap-x-1 border-b border-cmp-rule">
       {options.map((opt) => {
         const active = opt.value === value;
         return (
@@ -412,7 +418,7 @@ export function Tabs<T extends string>({
             key={opt.value}
             aria-pressed={active}
             onClick={() => onChange(opt.value)}
-            className={`relative cursor-pointer px-3 pb-2.5 pt-1 text-sm font-medium ${
+            className={`tap relative cursor-pointer px-3 pb-2.5 pt-1 text-sm font-medium ${
               active ? 'text-cmp-ink' : 'text-cmp-slate hover:text-cmp-ink'
             }`}
           >
@@ -492,7 +498,7 @@ export function Modal({
   if (!mounted) return null;
 
   return createPortal(
-    <div className="compliance-root fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="compliance-root panel-touch fixed inset-0 z-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: isPresent ? 1 : 0 }}
@@ -524,7 +530,7 @@ export function Modal({
         onAnimationComplete={() => {
           if (!isPresent) safeToRemove?.();
         }}
-        className={`relative flex max-h-[86vh] w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_-12px_rgba(11,31,51,0.35)] focus:outline-none ${
+        className={`relative flex max-h-[86dvh] w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_-12px_rgba(11,31,51,0.35)] focus:outline-none ${
           size === 'lg' ? 'max-w-2xl' : 'max-w-md'
         }`}
       >
@@ -536,7 +542,7 @@ export function Modal({
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="-mr-1 cursor-pointer rounded-lg p-1.5 text-cmp-mute hover:bg-cmp-rule-soft hover:text-cmp-ink"
+            className="tap-icon -mr-1 shrink-0 cursor-pointer rounded-lg p-1.5 text-cmp-mute hover:bg-cmp-rule-soft hover:text-cmp-ink"
           >
             <X className="h-4 w-4" />
           </button>
@@ -583,4 +589,4 @@ export function Field({
 }
 
 export const inputClass =
-  'w-full rounded-lg border border-cmp-rule bg-white px-3 py-2 text-sm text-cmp-ink placeholder:text-cmp-mute focus:border-cmp-cian focus:outline-none';
+  'tap w-full rounded-lg border border-cmp-rule bg-white px-3 py-2 text-sm text-cmp-ink placeholder:text-cmp-mute focus:border-cmp-cian focus:outline-none';

@@ -22,26 +22,27 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onMediaError, 
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-bold text-gray-900 line-clamp-1">{ad.title}</h2>
+        <div className="sticky top-0 bg-white z-10 flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b border-gray-100">
+          <div className="flex min-w-0 items-center gap-3">
+            <h2 className="text-lg font-bold text-gray-900 line-clamp-1" title={ad.title}>{ad.title}</h2>
             <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${AD_STATUS_STYLES[ad.status as keyof typeof AD_STATUS_STYLES]}`}>
               {AD_STATUS_LABELS[ad.status as keyof typeof AD_STATUS_LABELS]}
             </span>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition cursor-pointer"
+            aria-label="Cerrar"
+            className="tap-icon shrink-0 p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
 
           {/* Media */}
           <div className="rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
@@ -72,7 +73,7 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onMediaError, 
           </div>
 
           {/* Media type + target URL */}
-          <div className="flex items-center gap-4 text-sm text-gray-600">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600">
             <span className="flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full font-medium">
               {ad.mediaType === 'VIDEO' ? <Video className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
               {ad.mediaType === 'VIDEO' ? 'Video' : 'Imagen'}
@@ -88,7 +89,7 @@ export const AdDetailModal: React.FC<AdDetailModalProps> = ({ ad, onMediaError, 
                 href={ad.targetUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-admin-midnight hover:text-admin-blue hover:underline truncate"
+                className="flex min-w-0 items-center gap-1.5 text-admin-midnight hover:text-admin-blue hover:underline truncate max-lg:min-h-11"
               >
                 <LinkIcon className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">{ad.targetUrl}</span>

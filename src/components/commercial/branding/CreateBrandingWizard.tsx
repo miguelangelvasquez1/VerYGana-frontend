@@ -270,7 +270,8 @@ export const CreateBrandingWizard: React.FC<Props> = ({ onBack, onComplete }) =>
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+          aria-label="Volver"
+          className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <ChevronLeft size={20} className="text-gray-600" />
         </button>

@@ -67,7 +67,7 @@ export function LimitReachedBlock({ resourceLabel, max, backHref, backLabel }: L
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link
             href="/plans"
-            className="inline-flex items-center gap-2 bg-[#03548C] text-white font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-[#0b1440] transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-[#03548C] text-white font-semibold text-sm px-5 py-2.5 tap rounded-lg hover:bg-[#0b1440] transition-colors shadow-sm"
           >
             Ver planes disponibles
             <ArrowRight className="w-4 h-4" />
@@ -75,7 +75,7 @@ export function LimitReachedBlock({ resourceLabel, max, backHref, backLabel }: L
           {backHref && (
             <Link
               href={backHref}
-              className="inline-flex items-center gap-2 text-slate-600 font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center gap-2 text-slate-600 font-semibold text-sm px-5 py-2.5 tap rounded-lg hover:bg-slate-100 transition-colors"
             >
               {backLabel ?? 'Volver'}
             </Link>

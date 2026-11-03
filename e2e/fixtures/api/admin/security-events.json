@@ -1,0 +1,43 @@
+{
+  "events": {
+    "data": [
+      {
+        "id": 1,
+        "username": "usuario_prueba",
+        "action": "BRUTE_FORCE_ATTEMPT",
+        "level": "WARNING",
+        "description": "Varios intentos fallidos de inicio de sesión (dato de prueba).",
+        "ipAddress": "127.0.0.1",
+        "userAgent": "Navegador de prueba",
+        "createdAt": "2026-10-30T10:00:00",
+        "success": false,
+        "additionalData": null
+      },
+      {
+        "id": 2,
+        "username": "sistema",
+        "action": "IP_AUTO_BLOCKED",
+        "level": "CRITICAL",
+        "description": "Bloqueo automático de una dirección de prueba.",
+        "ipAddress": "127.0.0.2",
+        "userAgent": null,
+        "createdAt": "2026-10-30T11:00:00",
+        "success": true,
+        "additionalData": null
+      }
+    ],
+    "meta": {
+      "page": 0,
+      "size": 50,
+      "totalElements": 2,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrevious": false,
+      "sorted": true
+    }
+  },
+  "summary": {
+    "BRUTE_FORCE_ATTEMPT": 1,
+    "IP_AUTO_BLOCKED": 1
+  }
+}

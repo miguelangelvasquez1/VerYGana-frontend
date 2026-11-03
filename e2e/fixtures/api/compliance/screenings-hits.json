@@ -1,0 +1,22 @@
+{
+  "content": [
+    {
+      "id": 1,
+      "userPublicId": "00000000-0000-4000-8000-000000000001",
+      "queriedName": "Persona Ficticia",
+      "queriedDocument": "1000000000",
+      "restrictiveList": "OFAC_SDN",
+      "status": "FUZZY_HIT",
+      "referenceId": "REF-0001",
+      "rawResponse": "{}",
+      "createdAt": "2026-10-30T10:00:00"
+    }
+  ],
+  "totalElements": 1,
+  "totalPages": 1,
+  "size": 20,
+  "number": 0,
+  "first": true,
+  "last": true,
+  "empty": false
+}

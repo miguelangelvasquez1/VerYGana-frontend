@@ -1,0 +1,148 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Anuncio de prueba 1",
+      "description": "Descripción del anuncio de prueba.",
+      "rewardPerLike": 50,
+      "maxLikes": 1000,
+      "maxLikesPerUserPerDay": 3,
+      "currentLikes": 450,
+      "status": "ACTIVE",
+      "createdAt": "2026-10-01T10:00:00",
+      "updatedAt": "2026-10-02T10:00:00",
+      "startDate": "2026-10-02T10:00:00",
+      "endDate": "2026-12-02T10:00:00",
+      "totalBudget": 50000,
+      "spentBudget": 22500,
+      "remainingBudget": 27500,
+      "remainingLikes": 550,
+      "completionPercentage": 45,
+      "contentUrl": "/logos/logo.png",
+      "targetUrl": "https://example.test",
+      "categories": [
+        {
+          "id": 1,
+          "name": "Tecnología"
+        },
+        {
+          "id": 2,
+          "name": "Deportes"
+        }
+      ],
+      "minAge": 18,
+      "maxAge": 45,
+      "targetGender": "ALL",
+      "rejectionReason": null,
+      "mediaType": "IMAGE",
+      "durationSeconds": 10,
+      "targetMunicipalities": [
+        {
+          "code": "05001",
+          "name": "Medellín",
+          "departmentCode": "05",
+          "departmentName": "Antioquia"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Anuncio de prueba 2",
+      "description": "Descripción del anuncio de prueba.",
+      "rewardPerLike": 50,
+      "maxLikes": 1000,
+      "maxLikesPerUserPerDay": 3,
+      "currentLikes": 0,
+      "status": "PENDING",
+      "createdAt": "2026-10-01T10:00:00",
+      "updatedAt": "2026-10-02T10:00:00",
+      "startDate": null,
+      "endDate": "2026-12-02T10:00:00",
+      "totalBudget": 50000,
+      "spentBudget": 0,
+      "remainingBudget": 50000,
+      "remainingLikes": 550,
+      "completionPercentage": 0,
+      "contentUrl": "/logos/logo.png",
+      "targetUrl": "https://example.test",
+      "categories": [
+        {
+          "id": 1,
+          "name": "Tecnología"
+        },
+        {
+          "id": 2,
+          "name": "Deportes"
+        }
+      ],
+      "minAge": 18,
+      "maxAge": 45,
+      "targetGender": "ALL",
+      "rejectionReason": null,
+      "mediaType": "IMAGE",
+      "durationSeconds": 10,
+      "targetMunicipalities": [
+        {
+          "code": "05001",
+          "name": "Medellín",
+          "departmentCode": "05",
+          "departmentName": "Antioquia"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Anuncio de prueba 3",
+      "description": "Descripción del anuncio de prueba.",
+      "rewardPerLike": 50,
+      "maxLikes": 1000,
+      "maxLikesPerUserPerDay": 3,
+      "currentLikes": 450,
+      "status": "REJECTED",
+      "createdAt": "2026-10-01T10:00:00",
+      "updatedAt": "2026-10-02T10:00:00",
+      "startDate": "2026-10-02T10:00:00",
+      "endDate": "2026-12-02T10:00:00",
+      "totalBudget": 50000,
+      "spentBudget": 22500,
+      "remainingBudget": 27500,
+      "remainingLikes": 550,
+      "completionPercentage": 45,
+      "contentUrl": "/logos/logo.png",
+      "targetUrl": "https://example.test",
+      "categories": [
+        {
+          "id": 1,
+          "name": "Tecnología"
+        },
+        {
+          "id": 2,
+          "name": "Deportes"
+        }
+      ],
+      "minAge": 18,
+      "maxAge": 45,
+      "targetGender": "ALL",
+      "rejectionReason": "El contenido no cumple las políticas.",
+      "mediaType": "IMAGE",
+      "durationSeconds": 10,
+      "targetMunicipalities": [
+        {
+          "code": "05001",
+          "name": "Medellín",
+          "departmentCode": "05",
+          "departmentName": "Antioquia"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 3,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

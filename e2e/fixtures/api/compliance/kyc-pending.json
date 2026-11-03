@@ -1,0 +1,26 @@
+[
+  {
+    "publicId": "00000000-0000-4000-8000-000000000001",
+    "email": "consumidor@example.test",
+    "phoneNumber": "3000000000",
+    "role": "CONSUMER",
+    "registeredDate": "2026-10-01T10:00:00",
+    "name": "Consumidor",
+    "lastName": "Prueba",
+    "documentType": "CC",
+    "documentNumber": "1000000000",
+    "isPep": false
+  },
+  {
+    "publicId": "00000000-0000-4000-8000-0000000000c1",
+    "email": "comercial@example.test",
+    "phoneNumber": "3000000001",
+    "role": "COMMERCIAL",
+    "registeredDate": "2026-10-02T10:00:00",
+    "companyName": "Tienda de Prueba S.A.S.",
+    "nit": "900000000-1",
+    "ciiuCode": "4711",
+    "legalRepDocType": "CC",
+    "legalRepDocNumber": "1000000000"
+  }
+]

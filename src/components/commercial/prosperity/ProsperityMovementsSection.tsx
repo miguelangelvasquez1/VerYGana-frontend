@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, History, Loader2, RefreshCw, X } from 'lucide-react';
 import { useProsperityMovements } from '@/hooks/prosperity/useProsperity';
@@ -53,7 +54,7 @@ export function ProsperityMovementsSection() {
           <button
             type="button"
             onClick={() => refetch()}
-            className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
+            className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline tap"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Reintentar
           </button>
@@ -63,7 +64,7 @@ export function ProsperityMovementsSection() {
       ) : (
         <>
           {/* Escritorio: tabla */}
-          <div className="hidden overflow-x-auto md:block">
+          <TableScroll label="Tabla de movimientos de prosperidad, desplazable" className="hidden md:block">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -104,7 +105,7 @@ export function ProsperityMovementsSection() {
                 })}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
 
           {/* Móvil: tarjetas */}
           <ul className="divide-y divide-gray-100 md:hidden">
@@ -198,7 +199,7 @@ function MovementDetailDrawer({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
           >
             <X className="h-5 w-5" />
           </button>

@@ -1,0 +1,10 @@
+{
+  "contractId": 1,
+  "version": 1,
+  "status": "APPROVED",
+  "generatedAt": "2026-02-02T10:00:00",
+  "downloadUrl": "http://127.0.0.1:4010/media/contrato.pdf",
+  "businessApprovedAt": "2026-02-02T11:00:00",
+  "veryganaReviewedAt": "2026-02-03T09:00:00",
+  "veryganaDecisionNotes": null
+}

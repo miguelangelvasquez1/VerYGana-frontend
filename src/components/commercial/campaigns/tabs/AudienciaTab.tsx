@@ -82,10 +82,10 @@ export const AudienciaTab: React.FC<Props> = ({ campaign, editing, form, onChang
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button onClick={onCancel} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
+            <button onClick={onCancel} className="tap flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
               <X size={14} /> Cancelar
             </button>
-            <button onClick={onSave} disabled={saving} className="flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 cursor-pointer">
+            <button onClick={onSave} disabled={saving} className="tap flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 cursor-pointer">
               {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Guardar
             </button>
           </div>
@@ -98,7 +98,7 @@ export const AudienciaTab: React.FC<Props> = ({ campaign, editing, form, onChang
               onClick={onEdit}
               disabled={editBlocked}
               title={editBlocked ? editBlockedReason : undefined}
-              className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-blue-600"
+              className="tap flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-blue-600"
             >
               <Pencil size={13} /> Editar
             </button>

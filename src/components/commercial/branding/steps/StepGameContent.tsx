@@ -111,14 +111,14 @@ export const StepGameContent: React.FC<Props> = ({
         <button
           onClick={onBack}
           disabled={submitting}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-60 cursor-pointer"
+          className="tap px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-60 cursor-pointer"
         >
           Atrás
         </button>
         <button
           onClick={onNext}
           disabled={submitting}
-          className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          className="tap px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
           {submitting ? 'Guardando…' : 'Siguiente'}
         </button>

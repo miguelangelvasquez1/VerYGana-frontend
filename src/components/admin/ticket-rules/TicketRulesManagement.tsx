@@ -72,8 +72,8 @@ export default function TicketRulesManagement() {
     try {
       const active = await countActiveTicketEarningRules();
       setStats((prev) => ({ ...prev, active }));
-    } catch (err) {
-      console.error("Error loading stats:", err);
+    } catch {
+      // Sin el contador activo la pantalla sigue funcionando (P-16 c: no se imprime el error).
     }
   };
 
@@ -91,8 +91,7 @@ export default function TicketRulesManagement() {
 
       setRules(data ?? []);
       setStats((prev) => ({ ...prev, total: data?.length ?? 0 }));
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Error al cargar las reglas de tickets");
       toast.error("Error al cargar las reglas");
     } finally {
@@ -144,8 +143,7 @@ export default function TicketRulesManagement() {
       setShowCreate(false);
       await loadRules();
       await loadStats();
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.dismiss(loadingToast);
       toast.error("Error al crear la regla");
     }
@@ -187,7 +185,7 @@ export default function TicketRulesManagement() {
 
           <button
               onClick={() => setShowCreate(true)}
-              className="
+              className="tap 
     inline-flex
     items-center
     gap-2
@@ -278,7 +276,7 @@ export default function TicketRulesManagement() {
                           e.target.value === "" ? undefined : e.target.value
                       );
                     }}
-                    className="
+                    className="tap 
                   border
                   border-slate-200
                   rounded-xl
@@ -324,7 +322,7 @@ export default function TicketRulesManagement() {
                         setActiveFilter(e.target.value === "true");
                       }
                     }}
-                    className="
+                    className="tap 
                   border
                   border-slate-200
                   rounded-xl
@@ -348,7 +346,7 @@ export default function TicketRulesManagement() {
 
               <button
                   onClick={resetFilters}
-                  className="
+                  className="tap 
                 inline-flex
                 items-center
                 gap-1.5
@@ -407,7 +405,7 @@ export default function TicketRulesManagement() {
               </div>
               <button
                   onClick={loadRules}
-                  className="
+                  className="tap 
               ml-auto
               shrink-0
               px-3
@@ -458,7 +456,7 @@ export default function TicketRulesManagement() {
               {!typeFilter && activeFilter === undefined && (
                   <button
                       onClick={() => setShowCreate(true)}
-                      className="
+                      className="tap 
                 mt-4
                 inline-flex
                 items-center
@@ -510,7 +508,7 @@ export default function TicketRulesManagement() {
               <button
                   disabled={page === 0}
                   onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                  className="
+                  className="tap 
               cursor-pointer
               px-4
               py-2
@@ -536,7 +534,7 @@ export default function TicketRulesManagement() {
               <button
                   disabled={rules.length < size}
                   onClick={() => setPage((prev) => prev + 1)}
-                  className="
+                  className="tap 
               cursor-pointer
               px-4
               py-2
@@ -581,7 +579,7 @@ export default function TicketRulesManagement() {
             relative
             shadow-2xl
             overflow-hidden
-            max-h-[90vh]
+            max-h-[90dvh]
             flex
             flex-col
             border
@@ -594,7 +592,7 @@ export default function TicketRulesManagement() {
                 <button
                     type="button"
                     onClick={() => setShowCreate(false)}
-                    className="
+                    className="tap-icon 
                 cursor-pointer
                 absolute
                 top-4
@@ -613,7 +611,7 @@ export default function TicketRulesManagement() {
                   <X className="w-5 h-5" />
                 </button>
 
-                <div className="p-6">
+                <div className="p-4 sm:p-6 overflow-y-auto">
                   <CreateTicketEarningRuleForm onSubmit={handleCreateRule} />
                 </div>
               </div>

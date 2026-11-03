@@ -64,7 +64,7 @@ function QuickActionButton({ action }: { action: DashboardQuickAction }) {
 
   const Icon = config.icon;
   const base =
-    "flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors";
+    "flex items-center gap-2 rounded-lg border px-3.5 py-2 tap text-sm font-semibold transition-colors";
 
   if (!action.enabled) {
     return (

@@ -27,6 +27,7 @@ import { TreasuryBalanceResponseDTO, TreasuryMovementResponseDTO } from '@/types
 import { ProsperityReconciliationCard } from '@/components/admin/prosperity/ProsperityReconciliationCard';
 import { ProsperityCommercialSection } from '@/components/admin/prosperity/ProsperityCommercialSection';
 import { KeyLedgerToolsCard } from '@/components/admin/key-promotions/KeyLedgerToolsCard';
+import TableScroll from '@/components/shared/TableScroll';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -240,7 +241,7 @@ export default function TreasuryPanel() {
         <button
           onClick={() => refetchBalance()}
           disabled={balanceLoading}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+          className="tap flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className={`w-4 h-4 ${balanceLoading ? 'animate-spin' : ''}`} />
           Actualizar
@@ -316,7 +317,7 @@ export default function TreasuryPanel() {
             <button
               key={code}
               onClick={() => setSelectedAccount(isSelected ? null : code)}
-              className={`text-left w-full p-5 rounded-2xl border-2 transition-all shadow-sm cursor-pointer ${
+              className={`tap text-left w-full p-5 rounded-2xl border-2 transition-all shadow-sm cursor-pointer ${
                 isSelected
                   ? `${c.border} ${c.bg} shadow-md ring-2 ring-offset-1 ${c.ring}`
                   : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow'
@@ -464,7 +465,7 @@ export default function TreasuryPanel() {
           <select
             value={selectedAccount ?? ''}
             onChange={(e) => setSelectedAccount(e.target.value || null)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/20 bg-white text-gray-700"
+            className="tap w-full max-w-full sm:w-auto px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/20 bg-white text-gray-700"
           >
             <option value="">Seleccionar cuenta...</option>
             {ACCOUNTS.map((a) => (
@@ -521,7 +522,7 @@ export default function TreasuryPanel() {
         {/* Table */}
         {selectedAccount && !movementsLoading && movements && movements.data.length > 0 && (
           <>
-            <div className="overflow-x-auto">
+            <TableScroll label="Tabla de movimientos de finanzas, desplazable">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -551,7 +552,7 @@ export default function TreasuryPanel() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
             <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40">
               <p className="text-xs text-gray-400">
                 {movements.data.length} movimiento{movements.data.length !== 1 ? 's' : ''} encontrado

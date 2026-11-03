@@ -35,13 +35,13 @@ export function ProsperityModalShell({
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] flex items-end justify-center p-0 sm:items-center sm:p-4">
+    <div className="panel-touch fixed inset-0 z-[999] flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div className="absolute inset-0 bg-black/50" onClick={() => !busy && onClose()} />
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-2xl"
+        className="relative flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-2xl"
       >
         <div className="flex items-start justify-between gap-3 border-b p-5">
           <div>
@@ -53,7 +53,7 @@ export function ProsperityModalShell({
             onClick={onClose}
             disabled={busy}
             aria-label="Cerrar"
-            className="cursor-pointer text-gray-400 transition-colors hover:text-gray-600 disabled:opacity-50"
+            className="tap-icon shrink-0 cursor-pointer text-gray-400 transition-colors hover:text-gray-600 disabled:opacity-50"
           >
             <X size={22} />
           </button>
@@ -72,7 +72,7 @@ export function FieldError({ message }: { message?: string }) {
 }
 
 export const inputClass = (hasError: boolean) =>
-  `w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
+  `tap w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
     hasError
       ? 'border-red-400 focus:ring-red-200'
       : 'border-gray-200 focus:border-admin-blue focus:ring-admin-blue/20'

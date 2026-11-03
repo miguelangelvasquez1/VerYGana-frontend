@@ -23,6 +23,7 @@ import {
     ShieldCheck,
     RefreshCw,
 } from "lucide-react";
+import TableScroll from "@/components/shared/TableScroll";
 
 interface Props {
     raffles: RaffleSummaryResponseDTO[];
@@ -115,7 +116,7 @@ export default function RaffleCard({
 
     return (
         <>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
+            <TableScroll label="Tabla de rifas, desplazable" className="bg-white rounded-xl border border-gray-200 shadow-xs">
                 <table className="w-full text-sm text-left">
                     <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
                     <tr>
@@ -134,7 +135,7 @@ export default function RaffleCard({
                             key={raffle.id}
                             className="hover:bg-gray-50/60 transition-colors"
                         >
-                            <td className="p-4 font-semibold text-gray-900">
+                            <td className="p-4 font-semibold text-gray-900 min-w-[10rem]">
                                 {raffle.title}
                             </td>
                             <td className="p-4 text-xs font-medium text-gray-500">
@@ -150,7 +151,7 @@ export default function RaffleCard({
                             <td className="p-4 text-center text-gray-600">{raffle.prizeCount}</td>
 
                             <td className="p-4 text-right">
-                                <div className="inline-flex items-center justify-end gap-1.5">
+                                <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                                     {/* DRAFT -> Activar (Verde semántico suave y profesional) */}
                                     {raffle.raffleStatus === "DRAFT" && (
                                         <button
@@ -158,7 +159,7 @@ export default function RaffleCard({
                                                 setSelectedRaffle(raffle);
                                                 setActionType("activate");
                                             }}
-                                            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all"
+                                            className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all"
                                         >
                                             <Play size={13} />
                                             Activar
@@ -172,7 +173,7 @@ export default function RaffleCard({
                                                 setSelectedRaffle(raffle);
                                                 setActionType("close");
                                             }}
-                                            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition-all"
+                                            className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition-all"
                                         >
                                             <Lock size={13} />
                                             Cerrar
@@ -186,7 +187,7 @@ export default function RaffleCard({
                                                 setSelectedRaffle(raffle);
                                                 setActionType("draw");
                                             }}
-                                            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-all"
+                                            className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-all"
                                         >
                                             <Dices size={13} />
                                             Sortear
@@ -199,7 +200,7 @@ export default function RaffleCard({
                                             onClick={() =>
                                                 router.push(`/admin/raffles/${raffle.id}`)
                                             }
-                                            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 transition-all"
+                                            className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 transition-all"
                                         >
                                             <RefreshCw size={13} />
                                             Reactivar
@@ -214,7 +215,7 @@ export default function RaffleCard({
                                                     setSelectedRaffle(raffle);
                                                     setActionType("verify");
                                                 }}
-                                                className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition-all"
+                                                className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition-all"
                                             >
                                                 <ShieldCheck size={13} />
                                                 Verificar
@@ -223,7 +224,7 @@ export default function RaffleCard({
                                             {onViewStats && (
                                                 <button
                                                     onClick={() => onViewStats(raffle)}
-                                                    className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 transition-all"
+                                                    className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 transition-all"
                                                 >
                                                     <BarChart3 size={13} />
                                                     Estadísticas
@@ -237,7 +238,7 @@ export default function RaffleCard({
                                         onClick={() =>
                                             router.push(`/admin/raffles/${raffle.id}`)
                                         }
-                                        className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all"
+                                        className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all"
                                     >
                                         <Eye size={13} className="text-gray-400" />
                                         Ver
@@ -249,8 +250,9 @@ export default function RaffleCard({
                                             setSelectedRaffle(raffle);
                                             setActionType("delete");
                                         }}
-                                        className="cursor-pointer p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                        className="tap-icon cursor-pointer p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                                         title="Eliminar rifa"
+                                        aria-label="Eliminar rifa"
                                     >
                                         <Trash2 size={15} />
                                     </button>
@@ -260,7 +262,7 @@ export default function RaffleCard({
                     ))}
                     </tbody>
                 </table>
-            </div>
+            </TableScroll>
 
             <ConfirmDialog
                 isOpen={!!selectedRaffle}

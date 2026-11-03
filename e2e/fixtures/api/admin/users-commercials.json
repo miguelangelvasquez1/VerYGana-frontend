@@ -1,0 +1,44 @@
+{
+  "data": [
+    {
+      "publicId": "00000000-0000-4000-8000-0000000000c1",
+      "role": "COMMERCIAL",
+      "email": "comercial@example.test",
+      "accountStatus": "ACTIVE",
+      "companyName": "Tienda de Prueba S.A.S.",
+      "nit": "900000000-1",
+      "departmentName": "Quindío",
+      "municipalityName": "Armenia",
+      "currentPlan": {
+        "planCode": "STANDARD",
+        "planName": "Estándar",
+        "description": "Plan Estándar",
+        "monthlyFeeCents": null,
+        "minInvestmentCents": 100000000,
+        "maxInvestmentCents": 1000000000,
+        "investmentAmountCents": 200000000,
+        "contractDurationMonths": null,
+        "saleCommissionPct": 5,
+        "maxKeysPct": 40,
+        "requiresSpecialNegotiation": false,
+        "specialNegotiationResolvedAt": null,
+        "specialNegotiationDetails": null,
+        "accepted": true,
+        "acceptedAt": "2026-02-01T09:00:00",
+        "grossAmountCents": 238000000,
+        "excludedTaxesCents": 38000000,
+        "benefits": null,
+        "prosperityThresholdCents": null
+      }
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

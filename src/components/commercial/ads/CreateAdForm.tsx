@@ -1,7 +1,8 @@
 // components/forms/CreateAdForm.tsx
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import HelpHint from '@/components/shared/HelpHint';
 import {
   Upload, X, DollarSign, Eye, MapPin, Tag,
   Link as LinkIcon, Loader2, Clock, Info, CheckCircle2,
@@ -113,7 +114,6 @@ export function CreateAdForm() {
     { code: string; name: string; departmentName: string }[]
   >([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
-  const [showTargetUrlTip, setShowTargetUrlTip] = useState(false);
 
   const { categories, loading: loadingCategories } = useCategories();
   const { departments, loading: loadingDepartments } = useDepartments();
@@ -300,7 +300,8 @@ export function CreateAdForm() {
         <button
           type="button"
           onClick={() => router.push('/commercial/ads')}
-          className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0 cursor-pointer"
+          aria-label="Volver a mis anuncios"
+          className="w-9 tap-sq h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0 cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -379,7 +380,7 @@ export function CreateAdForm() {
                     type="button"
                     onClick={() => setFormData((prev) => ({ ...prev, type: t, file: null }))}
                     disabled={isUploading}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border-2 flex items-center justify-center gap-2 transition-all cursor-pointer
+                    className={`flex-1 py-2.5 tap rounded-xl text-sm font-semibold border-2 flex items-center justify-center gap-2 transition-all cursor-pointer
                       ${formData.type === t
                         ? 'border-[#03548C] bg-[#03548C]/10 text-[#03548C]'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300'
@@ -406,7 +407,7 @@ export function CreateAdForm() {
                       value={formData.imageDurationSeconds}
                       onChange={(e) => setFormData((prev) => ({ ...prev, imageDurationSeconds: Number(e.target.value) }))}
                       disabled={isUploading}
-                      className="flex-1 accent-[#03548C] disabled:opacity-50"
+                      className="flex-1 accent-[#03548C] disabled:opacity-50 max-lg:h-11"
                     />
                     <div className="w-20 text-center bg-[#03548C]/5 border-2 border-[#03548C]/20 rounded-xl py-2">
                       <span className="text-xl font-bold text-[#03548C]">{formData.imageDurationSeconds}</span>
@@ -463,8 +464,8 @@ export function CreateAdForm() {
                     type="button"
                     onClick={() => setFormData((prev) => ({ ...prev, file: null }))}
                     disabled={isUploading}
-                    className="text-gray-400 hover:text-red-500 transition disabled:opacity-50 cursor-pointer"
-                  >
+                    aria-label="Quitar archivo"
+                    className="text-gray-400 hover:text-red-500 transition disabled:opacity-50 cursor-pointer max-lg:-m-3 max-lg:p-3">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -569,7 +570,7 @@ export function CreateAdForm() {
                     key={val}
                     type="button"
                     onClick={() => setFormData((prev) => ({ ...prev, pricePerLike: val }))}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all cursor-pointer
+                    className={`px-3 py-1.5 tap rounded-full text-xs font-bold border-2 transition-all cursor-pointer
                       ${formData.pricePerLike === val
                         ? 'border-[#03548C] bg-[#03548C] text-white shadow-sm'
                         : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40 hover:text-[#03548C]'
@@ -588,7 +589,7 @@ export function CreateAdForm() {
                     ...prev,
                     pricePerLike: Math.max(pricingInfo.minPricePerLike, prev.pricePerLike - 10),
                   }))}
-                  className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 cursor-pointer"
+                  className="w-10 tap-sq h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 cursor-pointer"
                 >
                   <ChevronDown className="w-4 h-4" />
                 </button>
@@ -598,14 +599,14 @@ export function CreateAdForm() {
                     type="text"
                     readOnly
                     value={(formData.pricePerLike / 100).toFixed(2).replace('.', ',')}
-                    className="w-full pl-8 pr-4 py-2.5 border-2 border-gray-200 rounded-xl text-center font-bold text-gray-900
+                    className="w-full pl-8 pr-4 py-2.5 tap border-2 border-gray-200 rounded-xl text-center font-bold text-gray-900
                       focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C] bg-gray-50 cursor-default"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, pricePerLike: prev.pricePerLike + 10 }))}
-                  className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 cursor-pointer"
+                  className="w-10 tap-sq h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 cursor-pointer"
                 >
                   <ChevronUp className="w-4 h-4" />
                 </button>
@@ -626,7 +627,7 @@ export function CreateAdForm() {
                 Máximo de visualizaciones <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
+                type="number" inputMode="numeric"
                 value={formData.maxViews || ''}
                 onChange={(e) => setFormData((prev) => ({ ...prev, maxViews: Number(e.target.value) }))}
                 onBlur={() => setFormData((prev) => ({ ...prev, maxViews: Math.max(1, prev.maxViews || 1) }))}
@@ -646,7 +647,7 @@ export function CreateAdForm() {
                 Máximo de vistas por usuario al día <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
+                type="number" inputMode="numeric"
                 value={formData.maxViewsPerUserPerDay || ''}
                 onChange={(e) => setFormData((prev) => ({ ...prev, maxViewsPerUserPerDay: Number(e.target.value) }))}
                 onBlur={() => setFormData((prev) => ({ ...prev, maxViewsPerUserPerDay: Math.max(1, prev.maxViewsPerUserPerDay || 1) }))}
@@ -727,28 +728,13 @@ export function CreateAdForm() {
                   <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
                     <LinkIcon className="w-3.5 h-3.5" />
                     URL de destino <span className="text-gray-400 text-xs font-normal">(opcional)</span>
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onMouseEnter={() => setShowTargetUrlTip(true)}
-                        onMouseLeave={() => setShowTargetUrlTip(false)}
-                        onFocus={() => setShowTargetUrlTip(true)}
-                        onBlur={() => setShowTargetUrlTip(false)}
-                        className="text-gray-400 hover:text-[#03548C] transition-colors cursor-pointer"
-                        aria-label="Ayuda para: URL de destino"
-                      >
-                        <HelpCircle className="h-3.5 w-3.5" />
-                      </button>
-                      {showTargetUrlTip && (
-                        <div
-                          role="tooltip"
-                          className="absolute bottom-full left-1/2 z-20 mb-2 w-60 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2.5 text-xs font-normal leading-relaxed text-white shadow-xl"
-                        >
-                          Será el destino al que irán los usuarios al ver el anuncio y darle al botón correspondiente.
-                          <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-                        </div>
-                      )}
-                    </div>
+                    <HelpHint
+                      label="Ayuda para: URL de destino"
+                      text="Será el destino al que irán los usuarios al ver el anuncio y darle al botón correspondiente."
+                      className="-m-[15px] size-11 text-gray-400 transition-colors hover:text-[#03548C] lg:m-0 lg:size-auto lg:h-6"
+                    >
+                      <HelpCircle className="h-3.5 w-3.5" />
+                    </HelpHint>
                   </label>
                   <input
                     type="url" value={formData.targetUrl}
@@ -782,7 +768,7 @@ export function CreateAdForm() {
                           key={cat.id} type="button"
                           onClick={() => toggleCategory(cat.id)}
                           disabled={isSubmitting}
-                          className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all cursor-pointer
+                          className={`px-3 py-1.5 tap rounded-full text-xs font-bold border-2 transition-all cursor-pointer
                             ${selected
                               ? 'border-[#03548C] bg-[#03548C] text-white shadow-sm shadow-blue-100'
                               : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40 hover:text-[#03548C]'
@@ -820,16 +806,16 @@ export function CreateAdForm() {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Rango de edad</label>
                   <div className="flex items-center gap-3">
                     <input
-                      type="number" value={formData.targetAudience.ageRange[0]}
+                      type="number" inputMode="numeric" value={formData.targetAudience.ageRange[0]}
                       onChange={(e) => setFormData((p) => ({ ...p, targetAudience: { ...p.targetAudience, ageRange: [Number(e.target.value), p.targetAudience.ageRange[1]] } }))}
-                      className="w-20 px-3 py-2 border-2 border-gray-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                      className="w-20 px-3 py-2 tap border-2 border-gray-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                       min={13} max={100} disabled={isSubmitting}
                     />
                     <span className="text-gray-400">a</span>
                     <input
-                      type="number" value={formData.targetAudience.ageRange[1]}
+                      type="number" inputMode="numeric" value={formData.targetAudience.ageRange[1]}
                       onChange={(e) => setFormData((p) => ({ ...p, targetAudience: { ...p.targetAudience, ageRange: [p.targetAudience.ageRange[0], Number(e.target.value)] } }))}
-                      className="w-20 px-3 py-2 border-2 border-gray-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                      className="w-20 px-3 py-2 tap border-2 border-gray-200 rounded-xl text-center text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                       min={13} max={100} disabled={isSubmitting}
                     />
                     <span className="text-gray-500 text-sm">años</span>
@@ -851,7 +837,7 @@ export function CreateAdForm() {
                         key={g.v} type="button"
                         onClick={() => setFormData((p) => ({ ...p, targetAudience: { ...p.targetAudience, gender: g.v as any } }))}
                         disabled={isSubmitting}
-                        className={`flex-1 py-2 rounded-xl border-2 text-sm font-semibold transition-all cursor-pointer
+                        className={`flex-1 py-2 tap rounded-xl border-2 text-sm font-semibold transition-all cursor-pointer
                           ${formData.targetAudience.gender === g.v
                             ? 'border-[#03548C] bg-[#03548C]/10 text-[#03548C]'
                             : 'border-gray-200 text-gray-500 hover:border-gray-300'
@@ -873,7 +859,7 @@ export function CreateAdForm() {
                     <select
                       value={selectedDepartment || ''}
                       onChange={(e) => setSelectedDepartment(e.target.value || null)}
-                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                      className="w-full px-3 py-2.5 tap border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                       disabled={loadingDepartments || isSubmitting}
                     >
                       <option value="">— Selecciona un departamento —</option>
@@ -882,7 +868,7 @@ export function CreateAdForm() {
                     {selectedDepartment && (
                       <select
                         onChange={(e) => { if (e.target.value) { addMunicipality(e.target.value); e.target.value = ''; } }}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+                        className="w-full px-3 py-2.5 tap border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
                         disabled={loadingMunicipalities || isSubmitting}
                       >
                         <option value="">— Selecciona un municipio —</option>
@@ -899,7 +885,7 @@ export function CreateAdForm() {
                       {selectedMunicipalitiesData.map((m) => (
                         <span key={m.code} className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full">
                           📍 {m.name}, {m.departmentName}
-                          <button type="button" onClick={() => removeMunicipality(m.code)} disabled={isSubmitting} className="cursor-pointer">
+                          <button type="button" onClick={() => removeMunicipality(m.code)} disabled={isSubmitting} className="cursor-pointer max-lg:-m-4 max-lg:p-4" aria-label="Quitar municipio">
                             <X className="w-3 h-3" />
                           </button>
                         </span>

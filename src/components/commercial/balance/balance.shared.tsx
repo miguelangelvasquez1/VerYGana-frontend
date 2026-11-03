@@ -152,7 +152,7 @@ export function WizardConfirmModal({
         className="absolute inset-0 bg-[#0b1440]/40 backdrop-blur-sm"
         onClick={() => !loading && onClose()}
       />
-      <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 sm:p-7 text-center space-y-4">
+      <div role="dialog" aria-modal="true" aria-label={title} className="relative w-full max-w-sm max-h-[90dvh] overflow-y-auto bg-white rounded-2xl shadow-xl p-6 sm:p-7 text-center space-y-4">
         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto ${t.iconWrap}`}>
           {t.icon}
         </div>
@@ -181,7 +181,7 @@ export function WizardConfirmModal({
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="w-full py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 transition disabled:opacity-50 cursor-pointer"
+            className="w-full py-2.5 tap text-sm font-semibold text-gray-500 hover:text-gray-700 transition disabled:opacity-50 cursor-pointer"
           >
             {cancelLabel}
           </button>

@@ -1,0 +1,31 @@
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-0000000000a1",
+      "grossAmountCents": 100000000,
+      "commissionCents": 5000000,
+      "netAmountCents": 95000000,
+      "status": "PAID",
+      "scheduledAt": "2026-10-05T00:00:00",
+      "paidAt": "2026-10-05T10:00:00"
+    },
+    {
+      "id": "00000000-0000-4000-8000-0000000000a2",
+      "grossAmountCents": 80000000,
+      "commissionCents": 4000000,
+      "netAmountCents": 76000000,
+      "status": "SCHEDULED",
+      "scheduledAt": "2026-11-05T00:00:00",
+      "paidAt": ""
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

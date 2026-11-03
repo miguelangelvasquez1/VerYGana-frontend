@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "type": "USERS_TERMS_AND_CONDITIONS",
+    "version": "3",
+    "documentUrl": "https://example.test/terminos.pdf",
+    "status": "ACTIVE",
+    "publishedDate": "2026-09-01T10:00:00",
+    "active": true
+  },
+  {
+    "id": 2,
+    "type": "PRIVACY_POLICY",
+    "version": "1",
+    "documentUrl": "https://example.test/privacidad.pdf",
+    "status": "ACTIVE",
+    "publishedDate": "2026-09-01T10:00:00",
+    "active": true
+  }
+]

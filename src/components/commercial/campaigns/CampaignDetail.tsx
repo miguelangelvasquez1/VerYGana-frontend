@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import {
   ChevronLeft,
   Loader2,
@@ -13,6 +13,7 @@ import {
   Eye,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { StatusHint } from '@/components/commercial/branding/StatusHint';
 import {
   getCampaignDetail,
   increaseCampaignBudget,
@@ -36,7 +37,10 @@ import { RendimientoTab } from './tabs/RendimientoTab';
 import { AudienciaTab } from './tabs/AudienciaTab';
 import { usePlanState } from '../layout/DashboardLayout';
 import { isBudgetDormant, WALLET_DORMANT_TOOLTIP } from '../plans/WalletBudgetAlerts';
-import { IncreaseBudgetModal } from '../budget/IncreaseBudgetModal';
+
+// Se carga al abrirlo: no entra en el JavaScript inicial de la página (RN-8 de la spec 014). Con `lazy` de React,
+// que no suma el cargador de `next/dynamic` al paquete.
+const IncreaseBudgetModal = lazy(() => import('../budget/IncreaseBudgetModal').then((m) => ({ default: m.IncreaseBudgetModal })));
 
 type Tab = 'resumen' | 'rendimiento' | 'audiencia';
 
@@ -169,12 +173,12 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
   if (error || !campaign) {
     return (
       <div className="space-y-4">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">
+        <button onClick={onBack} className="tap flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">
           <ChevronLeft size={18} /> Volver
         </button>
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-800 mb-4">{error}</p>
-          <button onClick={() => loadCampaign()} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm cursor-pointer hover:bg-red-700 transition-colors">
+          <button onClick={() => loadCampaign()} className="tap px-4 py-2 bg-red-600 text-white rounded-lg text-sm cursor-pointer hover:bg-red-700 transition-colors">
             Reintentar
           </button>
         </div>
@@ -195,13 +199,13 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
     <div className="space-y-4">
 
       {/* ── Header ── */}
-      <div className="flex items-center gap-3">
-        <button onClick={onBack} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0">
+      <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
+        <button onClick={onBack} aria-label="Volver" className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0">
           <ChevronLeft size={20} className="text-gray-600" />
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-xl font-semibold text-gray-900 truncate">{campaign.brandName ?? `Campaña #${campaign.id}`}</h2>
+            <h2 title={campaign.brandName ?? `Campaña #${campaign.id}`} className="text-xl font-semibold text-gray-900 truncate">{campaign.brandName ?? `Campaña #${campaign.id}`}</h2>
             <span className="text-gray-400 text-sm shrink-0">#{campaign.id}</span>
           </div>
           <p className="text-xs text-gray-400 mt-0.5">{campaign.gameTitle ?? '—'} · Actualizada {formatDateTime(campaign.updatedAt)}</p>
@@ -210,27 +214,22 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
           <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${meta.badge}`}>
             {meta.label}
           </span>
-          <div className="relative group">
-            <button type="button" className={`w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center cursor-pointer ${meta.badge}`}>
-              ?
-            </button>
-            <div className="absolute right-0 top-full mt-2 w-64 bg-gray-900 text-white text-xs rounded-lg px-3 py-2.5 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 space-y-1">
-              <p className="font-semibold">{meta.label}</p>
-              <p className="text-gray-300 leading-relaxed">{meta.message}</p>
-            </div>
-          </div>
+          <StatusHint statusLabel={meta.label} badge={meta.badge}>
+            <p className="font-semibold">{meta.label}</p>
+            <p className="text-gray-300 leading-relaxed">{meta.message}</p>
+          </StatusHint>
         </div>
         {campaign.status !== 'COMPLETED' && campaign.status !== 'CANCELLED' && (
           <button
             onClick={handlePreview}
             disabled={previewLoading}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-60 cursor-pointer shrink-0"
+            className="tap order-last w-full justify-center sm:order-none sm:w-auto flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-60 cursor-pointer shrink-0"
           >
             {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
             Ver diseño
           </button>
         )}
-        <button onClick={() => loadCampaign()} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0" title="Actualizar">
+        <button onClick={() => loadCampaign()} aria-label="Actualizar" className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0" title="Actualizar">
           <RefreshCw size={16} className="text-gray-500" />
         </button>
       </div>
@@ -253,7 +252,7 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
                 onClick={() => handleStatusChange('ACTIVE')}
                 disabled={statusUpdating || activateBlocked}
                 title={activateBlocked ? `Completa ${missingFields.join(', ')} antes de activar` : undefined}
-                className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="tap flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {statusUpdating ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
                 {campaign.status === 'PAUSED' ? 'Reactivar' : 'Activar'}
@@ -263,7 +262,7 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
               <button
                 onClick={() => handleStatusChange('PAUSED')}
                 disabled={statusUpdating}
-                className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-amber-700 bg-white border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors disabled:opacity-50 cursor-pointer"
+                className="tap flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-amber-700 bg-white border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {statusUpdating ? <Loader2 size={14} className="animate-spin" /> : <Pause size={14} />}
                 Pausar
@@ -283,7 +282,7 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`cursor-pointer flex items-center gap-2 px-5 py-3.5 text-sm font-medium shrink-0 transition-colors border-b-2 ${
+                  className={`tap cursor-pointer flex items-center gap-2 px-5 py-3.5 text-sm font-medium shrink-0 transition-colors border-b-2 ${
                     active ? 'text-blue-600 border-blue-600' : 'text-gray-500 hover:text-gray-700 border-transparent'
                   }`}
                 >
@@ -321,6 +320,7 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
           aumento ya lo cambió el backend responde 409 sin cobrar (anti doble cobro). El gasto por
           sesión mueve `spentCents`, no `budgetCents`, así que no lo invalida. */}
       {showIncrease && (
+        <Suspense fallback={null}>
         <IncreaseBudgetModal
           assetLabel="campaña"
           assetName={campaign.brandName ?? `Campaña #${campaign.id}`}
@@ -345,6 +345,7 @@ export const CampaignDetail: React.FC<Props> = ({ campaignId, onBack }) => {
           }}
           onClose={() => setShowIncrease(false)}
         />
+        </Suspense>
       )}
     </div>
   );

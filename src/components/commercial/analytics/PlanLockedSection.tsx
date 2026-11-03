@@ -33,7 +33,7 @@ export function PlanLockedSection({
       <p className="mt-1 text-sm text-gray-500 max-w-md mx-auto">{message}</p>
       <Link
         href={ctaHref}
-        className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#03548C] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0b1440]"
+        className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#03548C] px-4 py-2 tap text-sm font-semibold text-white transition-colors hover:bg-[#0b1440]"
       >
         <Sparkles className="h-4 w-4" />
         {ctaLabel}

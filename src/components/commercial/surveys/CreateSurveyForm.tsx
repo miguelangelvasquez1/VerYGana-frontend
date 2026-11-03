@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import React, { useState, useEffect } from 'react';
+import HelpHint from '@/components/shared/HelpHint';
 import {
   X,
   Plus,
@@ -249,7 +250,8 @@ export default function SurveyFormModal() {
         <button
           type="button"
           onClick={() => router.push('/commercial/surveys')}
-          className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0 cursor-pointer"
+          aria-label="Volver a mis encuestas"
+          className="w-9 tap-sq h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0 cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -317,7 +319,7 @@ export default function SurveyFormModal() {
                         key={val}
                         type="button"
                         onClick={() => setPricePerQuestion(val)}
-                        className={`cursor-pointer px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${
+                        className={`cursor-pointer px-3 py-1.5 tap rounded-full text-xs font-bold border-2 transition-all ${
                           pricePerQuestion === val
                             ? 'border-[#03548C] bg-[#03548C] text-white shadow-sm'
                             : 'border-gray-200 text-gray-600 hover:border-[#03548C]/40 hover:text-[#03548C]'
@@ -335,7 +337,7 @@ export default function SurveyFormModal() {
                     type="button"
                     onClick={() => setPricePerQuestion((p) => Math.max(minPrice, p - 5))}
                     disabled={loadingCost || pricePerQuestion <= minPrice}
-                    className="cursor-pointer w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
+                    className="cursor-pointer w-10 h-10 tap-sq rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
                   >
                     <ChevronDown className="w-4 h-4" />
                   </button>
@@ -344,14 +346,14 @@ export default function SurveyFormModal() {
                       type="text"
                       readOnly
                       value={loadingCost ? 'Cargando…' : COP.format(pricePerQuestion)}
-                      className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-center font-bold text-gray-900 bg-gray-50 cursor-default focus:outline-none"
+                      className="w-full px-4 py-2.5 tap border-2 border-gray-200 rounded-xl text-center font-bold text-gray-900 bg-gray-50 cursor-default focus:outline-none"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => setPricePerQuestion((p) => p + 5)}
                     disabled={loadingCost}
-                    className="cursor-pointer w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
+                    className="cursor-pointer w-10 h-10 tap-sq rounded-xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-300 transition text-gray-600 disabled:opacity-40"
                   >
                     <ChevronUp className="w-4 h-4" />
                   </button>
@@ -371,7 +373,7 @@ export default function SurveyFormModal() {
                 tooltip="Número máximo de respuestas que la encuesta aceptará. Una vez alcanzado este límite, la encuesta se cerrará automáticamente."
               >
                 <input
-                  type="number"
+                  type="number" inputMode="numeric"
                   min={1}
                   max={10000000}
                   value={form.maxResponses}
@@ -525,8 +527,8 @@ export default function SurveyFormModal() {
                         <button
                           type="button"
                           onClick={() => removeMunicipality(m.code)}
-                          className="ml-0.5 text-emerald-500 hover:text-emerald-700"
-                        >
+                          aria-label="Quitar municipio"
+                          className="ml-0.5 text-emerald-500 hover:text-emerald-700 max-lg:-m-4 max-lg:p-4">
                           <X className="h-3 w-3" />
                         </button>
                       </span>
@@ -543,7 +545,7 @@ export default function SurveyFormModal() {
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Edad mínima *">
                   <input
-                    type="number" min={13} max={100}
+                    type="number" inputMode="numeric" min={13} max={100}
                     value={form.minAge}
                     onChange={(e) => setField('minAge', e.target.value)}
                     onBlur={() => touchField('minAge')}
@@ -554,7 +556,7 @@ export default function SurveyFormModal() {
                 </Field>
                 <Field label="Edad máxima *">
                   <input
-                    type="number" min={13} max={100}
+                    type="number" inputMode="numeric" min={13} max={100}
                     value={form.maxAge}
                     onChange={(e) => setField('maxAge', e.target.value)}
                     onBlur={() => touchField('maxAge')}
@@ -668,7 +670,7 @@ export default function SurveyFormModal() {
                           <button
                             type="button"
                             onClick={() => removeQuestion(q.id)}
-                            className="cursor-pointer ml-auto rounded-lg p-1 text-red-400 hover:bg-red-50"
+                            className="cursor-pointer ml-auto rounded-lg p-1 tap-icon text-red-400 hover:bg-red-50"
                             title="Eliminar pregunta"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -716,8 +718,8 @@ export default function SurveyFormModal() {
                               <button
                                 type="button"
                                 onClick={() => removeOption(q.id, oi)}
-                                className="cursor-pointer text-gray-300 hover:text-red-400"
-                              >
+                                aria-label="Quitar opción"
+                                className="cursor-pointer text-gray-300 hover:text-red-400 max-lg:-m-[15px] max-lg:p-[15px]">
                                 <X className="h-3.5 w-3.5" />
                               </button>
                             )}
@@ -861,35 +863,18 @@ function Field({
   tooltip?: string;
   children: React.ReactNode;
 }) {
-  const [showTip, setShowTip] = React.useState(false);
-
   return (
     <div className="relative">
       <div className="mb-1 flex items-center gap-1.5">
         <label className="text-xs font-medium text-gray-600">{label}</label>
         {tooltip && (
-          <div className="relative">
-            <button
-              type="button"
-              onMouseEnter={() => setShowTip(true)}
-              onMouseLeave={() => setShowTip(false)}
-              onFocus={() => setShowTip(true)}
-              onBlur={() => setShowTip(false)}
-              className="cursor-pointer text-gray-400 hover:text-[#03548C] transition-colors"
-              aria-label={`Ayuda para: ${label}`}
-            >
-              <HelpCircle className="h-3.5 w-3.5" />
-            </button>
-            {showTip && (
-              <div
-                role="tooltip"
-                className="absolute bottom-full left-1/2 z-20 mb-2 w-60 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2.5 text-xs leading-relaxed text-white shadow-xl"
-              >
-                {tooltip}
-                <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-              </div>
-            )}
-          </div>
+          <HelpHint
+            label={`Ayuda para: ${label}`}
+            text={tooltip}
+            className="-m-[15px] size-11 text-gray-400 transition-colors hover:text-[#03548C] lg:m-0 lg:size-auto lg:h-6"
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+          </HelpHint>
         )}
       </div>
       {children}
@@ -934,7 +919,7 @@ function StepAccordion({
 // ─── Input class helper ───────────────────────────────────────────────────────
 
 function inputCls(hasError: boolean) {
-  return `w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors ${
+  return `w-full rounded-lg border px-3 py-2 tap text-sm outline-none transition-colors ${
     hasError
       ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-1 focus:ring-red-500'
       : 'border-gray-200 bg-white focus:border-[#03548C] focus:ring-1 focus:ring-[#03548C]/40'

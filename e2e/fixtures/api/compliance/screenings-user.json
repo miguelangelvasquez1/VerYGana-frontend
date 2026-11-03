@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "userPublicId": "00000000-0000-4000-8000-000000000001",
+    "queriedName": "Consumidor Prueba",
+    "queriedDocument": "1000000000",
+    "restrictiveList": "OFAC_SDN",
+    "status": "NO_HIT",
+    "referenceId": "REF-0001",
+    "rawResponse": "{}",
+    "createdAt": "2026-10-30T10:00:00",
+    "reviewedAt": "2026-10-30T12:00:00",
+    "reviewedByOfficerPublicId": "00000000-0000-4000-8000-0000000000b1",
+    "officerNotes": "Sin coincidencias (dato de prueba)."
+  }
+]

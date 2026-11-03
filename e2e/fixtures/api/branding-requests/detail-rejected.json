@@ -1,0 +1,61 @@
+{
+  "id": 1,
+  "status": "REJECTED",
+  "brandName": "Marca de Prueba",
+  "brandDescription": "Descripción de la marca de prueba.",
+  "targetUrl": "https://example.test",
+  "gameId": 1,
+  "gameName": "Juego de Prueba",
+  "gameFrontPageUrl": "/logos/logo.png",
+  "budgetCents": 100000000,
+  "scoreRewardFactor": 1.5,
+  "averageRewardPerSessionCents": 50000,
+  "estimatedSessions": 1000,
+  "completionRewardCents": 20000,
+  "maxRewardPerSessionCents": 100000,
+  "maxSessionsPerUserPerDay": 3,
+  "startDate": null,
+  "endDate": null,
+  "categories": [
+    {
+      "id": 1,
+      "name": "Tecnología"
+    },
+    {
+      "id": 2,
+      "name": "Deportes"
+    }
+  ],
+  "targetMunicipalities": [
+    {
+      "code": "05001",
+      "name": "Medellín",
+      "departmentCode": "05",
+      "departmentName": "Antioquia"
+    }
+  ],
+  "minAge": 18,
+  "maxAge": 45,
+  "targetGender": "ALL",
+  "adminNotes": "Motivo ficticio del rechazo para la prueba.",
+  "reviewedByAdminName": null,
+  "assignedDesignerName": null,
+  "assignedDesignerCode": null,
+  "corporateResources": [
+    {
+      "id": 1,
+      "originalFileName": "logo-ficticio.png",
+      "contentType": "image/png",
+      "sizeBytes": 20480,
+      "status": "VALIDATED",
+      "temporalUrl": "/logos/logo.png",
+      "createdAt": "2026-10-01T10:00:00"
+    }
+  ],
+  "campaignGoal": "Reconocimiento de marca",
+  "hasCompleteTargeting": true,
+  "campaignId": null,
+  "briefData": null,
+  "createdAt": "2026-10-01T10:00:00",
+  "updatedAt": "2026-10-02T10:00:00"
+}

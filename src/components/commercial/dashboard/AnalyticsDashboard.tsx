@@ -153,13 +153,13 @@ export function AnalyticsDashboard() {
             {/* RANGE PRESETS */}
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-gray-500 shrink-0" />
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-2 lg:gap-1.5">
                 {RANGE_PRESETS.map((preset) => (
                   <button
                     key={preset.id}
                     type="button"
                     onClick={() => applyPreset(preset.id)}
-                    className={`px-2.5 py-1.5 text-xs font-medium rounded-md border transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1.5 tap text-xs font-medium rounded-md border transition-colors cursor-pointer ${
                       rangePreset === preset.id
                         ? "bg-[#03548C] text-white border-[#03548C]"
                         : "text-gray-600 border-gray-200 hover:bg-gray-50"
@@ -183,7 +183,7 @@ export function AnalyticsDashboard() {
                     onChange={(e) =>
                       setDateRange((r) => ({ ...r, startDate: e.target.value }))
                     }
-                    className="px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                    className="px-2 py-2 tap border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                   />
                 </label>
                 <label className="flex items-center gap-1.5 text-sm text-gray-600">
@@ -196,7 +196,7 @@ export function AnalyticsDashboard() {
                     onChange={(e) =>
                       setDateRange((r) => ({ ...r, endDate: e.target.value }))
                     }
-                    className="px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                    className="px-2 py-2 tap border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                   />
                 </label>
               </div>
@@ -208,7 +208,7 @@ export function AnalyticsDashboard() {
             type="button"
             disabled={!canExportPdf}
             title={exportBlockedTitle}
-            className={`flex items-center px-4 py-2 rounded-md transition-colors cursor-pointer ${
+            className={`flex items-center justify-center px-4 py-2 tap rounded-md transition-colors cursor-pointer ${
               canExportPdf
                 ? "bg-[#03548C] text-white hover:bg-[#0b1440]"
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -235,7 +235,7 @@ export function AnalyticsDashboard() {
                 key={section.id}
                 type="button"
                 onClick={() => setActiveSection(section.id)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-2 tap rounded-md text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
                   isActive
                     ? "bg-[#03548C] text-white"
                     : unlocked

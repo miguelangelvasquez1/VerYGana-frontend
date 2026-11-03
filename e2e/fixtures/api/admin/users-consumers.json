@@ -1,0 +1,41 @@
+{
+  "data": [
+    {
+      "publicId": "00000000-0000-4000-8000-000000000001",
+      "role": "CONSUMER",
+      "email": "consumidor@example.test",
+      "accountStatus": "ACTIVE",
+      "userName": "consumidor_prueba",
+      "name": "Consumidor",
+      "lastName": "Prueba",
+      "departmentName": "Quindío",
+      "municipalityName": "Armenia",
+      "age": 28,
+      "gender": "FEMALE",
+      "lastDailyLoginDate": "2026-10-30"
+    },
+    {
+      "publicId": "00000000-0000-4000-8000-000000000002",
+      "role": "CONSUMER",
+      "email": "otro@example.test",
+      "accountStatus": "SUSPENDED",
+      "userName": "otro_usuario",
+      "name": "Otro",
+      "lastName": "Usuario",
+      "departmentName": "Antioquia",
+      "municipalityName": "Medellín",
+      "age": 41,
+      "gender": "MALE",
+      "lastDailyLoginDate": "2026-10-20"
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "productName": "Ítem de mascota 1",
+    "description": "Descripción del ítem de prueba.",
+    "imageObjectKey": null,
+    "imageUrl": "/logos/logo.png",
+    "desiredEffects": "Efecto de prueba",
+    "status": "PENDING",
+    "createdAt": "2026-10-01T10:00:00",
+    "updatedAt": "2026-10-02T10:00:00",
+    "companyName": "Tienda de Prueba S.A.S.",
+    "assignedDesignerPublicId": null,
+    "assignedDesignerName": null,
+    "adminNotes": null,
+    "budgetCents": 1500000,
+    "spentCents": 0
+  },
+  {
+    "id": 2,
+    "productName": "Ítem de mascota 2",
+    "description": "Descripción del ítem de prueba.",
+    "imageObjectKey": null,
+    "imageUrl": "/logos/logo.png",
+    "desiredEffects": "Efecto de prueba",
+    "status": "APPROVED",
+    "createdAt": "2026-10-01T10:00:00",
+    "updatedAt": "2026-10-02T10:00:00",
+    "companyName": "Tienda de Prueba S.A.S.",
+    "assignedDesignerPublicId": null,
+    "assignedDesignerName": null,
+    "adminNotes": null,
+    "budgetCents": 1500000,
+    "spentCents": 0
+  }
+]

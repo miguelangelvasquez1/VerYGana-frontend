@@ -104,7 +104,9 @@ export NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_API_URL=https://api.example.test \
 | `npm test` | Vitest (`vitest run`, una pasada): todo `__tests__/**/*.test.ts` |
 | `npx vitest run <archivo>` | una sola prueba |
 | `npm run build:e2e` | `next build` con las `NEXT_PUBLIC_*` de las pruebas de navegador (API simulada en `127.0.0.1:4010`); **reemplaza `.next`**: vuelve a correr `npm run build` antes de `npx tsc --noEmit` |
-| `npm run test:e2e` | Playwright (Chromium) sobre `e2e/`, contra el build de `build:e2e`: levanta solo la API simulada (4010) y la app (3100) |
+| `npm run test:e2e` | Playwright (Chromium) sobre `e2e/`, contra el build de `build:e2e`: levanta solo la API simulada (4010) y la app (3100). Corre todo; el CI lo reparte en los dos siguientes |
+| `npm run test:e2e:consumer` | lo mismo sin las pruebas con título `@paneles` (landing, consumidor, autenticación): el job `Pruebas en navegador` |
+| `npm run test:e2e:panels` | solo las pruebas con título `@paneles` (`e2e/panels/`: paneles de comercial, administrador y cumplimiento): el job `Pruebas en navegador (paneles)` |
 | `npx playwright test <archivo> -g "<ruta>"` | una sola prueba de navegador, por ejemplo `e2e/layout.spec.ts -g "/home"` |
 | `npx playwright test --project=desktop-1280 --update-snapshots` | regenera las capturas de escritorio de referencia (solo local; ver `e2e/desktop.spec.ts`) |
 | `npm run lint` | `next lint` tal cual, para ver los avisos |
@@ -122,15 +124,19 @@ qué ruta agregar.
 
 ## Puertas de CI
 
-`.github/workflows/ci.yml` tiene cuatro checks, cada uno con tiempo límite de 10 minutos y sin
-secretos de GitHub. Para el merge a `main` los cuatro deben pasar (el cuarto lo agrega Miguel a la
-protección de `main`; mientras no lo haga avisa pero no bloquea):
+`.github/workflows/ci.yml` tiene cinco checks, cada uno con tiempo límite de 10 minutos y sin
+secretos de GitHub. Para el merge a `main` los cinco deben pasar (el cuarto y el quinto los agrega Miguel a la
+protección de `main`; mientras no lo haga avisan pero no bloquean):
 
 1. **`Lint, tipos y build`**: `npm run lint:ci`, `npm run build`, `npx tsc --noEmit`.
 2. **`Pruebas`**: `npm test`.
 3. **`Auditoría de dependencias`**: `npm run audit:ci`.
-4. **`Pruebas en navegador`**: `npm run build:e2e` y `npm run test:e2e` (solo Chromium; Safari se
-   comprueba a mano; las capturas de escritorio no corren aquí).
+4. **`Pruebas en navegador`**: `npm run build:e2e` y `npm run test:e2e:consumer` (todo `e2e/` salvo las
+   pruebas `@paneles`; solo Chromium; Safari se comprueba a mano; las capturas de escritorio no corren aquí).
+5. **`Pruebas en navegador (paneles)`**: `npm run build:e2e` y `npm run test:e2e:panels` (solo las pruebas
+   `@paneles` de `e2e/panels/`). Las pruebas de navegador se reparten en dos jobs para que cada uno quepa en
+   los 10 minutos; cada uno hace su propio build. Una prueba de navegador nueva de un panel lleva `@paneles` en el título del
+   `test` o del `describe`; sin esa etiqueta corre en el job de consumidor.
 
 No les cambies el nombre sin cambiar la protección de la rama `main`.
 
@@ -309,7 +315,7 @@ Para cambios triviales (un typo, un texto) no hace falta el flujo completo.
 
 ## Qué revisar en cada PR
 
-- Los cuatro checks de CI en verde. Un `.lint-max-warnings` que sube, o una excepción de
+- Los cinco checks de CI en verde. Un `.lint-max-warnings` que sube, o una excepción de
   auditoría nueva sin aprobación escrita, se rechaza (P-19, P-14).
 - Una ruta protegida nueva: `matcher`, cuerpo del middleware y `routeAccess.ts` coherentes, y la
   prueba de protección en verde (P-4). Marca siempre cualquier cambio en los roles que exige una

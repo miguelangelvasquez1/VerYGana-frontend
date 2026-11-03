@@ -111,7 +111,7 @@ export const Step1BrandInfo: React.FC<Props> = ({
         />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-blue-900">{selectedGame.title}</p>
-          <p className="text-xs text-blue-600 truncate">{selectedGame.description}</p>
+          <p title={selectedGame.description} className="text-xs text-blue-600 truncate">{selectedGame.description}</p>
         </div>
         {requestId === null && (
           <button
@@ -279,7 +279,7 @@ export const Step1BrandInfo: React.FC<Props> = ({
         <button
           onClick={onNext}
           disabled={submitting}
-          className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+          className="tap px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
         >
           {submitting && <Loader2 size={16} className="animate-spin" />}
           {requestId !== null ? 'Continuar' : 'Siguiente'}

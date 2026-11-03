@@ -47,8 +47,9 @@ export function VerifyOtpModal({ method, onClose, onVerified }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={submitting ? undefined : onClose} />
-      <div className="relative bg-white w-full max-w-sm rounded-2xl shadow-xl p-6 space-y-5">
-        <div className="flex items-center justify-between">
+      <div className="relative bg-white w-full max-w-sm rounded-2xl shadow-xl p-6 space-y-5 max-h-[90dvh] overflow-y-auto">
+        {/* Encabezado fijo arriba: el botón de cerrar se ve siempre, el formulario hace scroll debajo (RN-5) */}
+        <div className="sticky top-0 z-10 -mx-6 -mt-6 flex items-center justify-between rounded-t-2xl bg-white px-6 pt-6 pb-3">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-[#03548C]" />
             Verificar código OTP
@@ -57,7 +58,8 @@ export function VerifyOtpModal({ method, onClose, onVerified }: Props) {
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50"
+            aria-label="Cerrar"
+            className="p-1.5 tap-icon rounded-lg hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -79,8 +81,9 @@ export function VerifyOtpModal({ method, onClose, onVerified }: Props) {
               disabled={submitting}
               autoFocus
               inputMode="numeric"
+              autoComplete="one-time-code"
               placeholder="Ej. 123456"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 tap text-sm tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             />
           </div>
 
@@ -89,7 +92,7 @@ export function VerifyOtpModal({ method, onClose, onVerified }: Props) {
               type="button"
               onClick={handleResend}
               disabled={resending || submitting}
-              className="text-sm text-[#03548C] hover:underline disabled:opacity-50 cursor-pointer"
+              className="text-sm tap text-[#03548C] hover:underline disabled:opacity-50 cursor-pointer"
             >
               {resending ? 'Reenviando...' : 'Reenviar código'}
             </button>
@@ -100,14 +103,14 @@ export function VerifyOtpModal({ method, onClose, onVerified }: Props) {
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 tap rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={!code.trim() || submitting}
-              className="px-4 py-2 rounded-lg text-white bg-[#03548C] hover:bg-[#024270] transition disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 tap rounded-lg text-white bg-[#03548C] hover:bg-[#024270] transition disabled:opacity-50 cursor-pointer"
             >
               {submitting ? 'Verificando...' : 'Verificar'}
             </button>

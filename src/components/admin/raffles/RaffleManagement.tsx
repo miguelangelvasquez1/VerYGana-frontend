@@ -106,8 +106,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
 
       setRaffles(response?.data ?? []);
       setTotalPages(response?.meta?.totalPages ?? 0);
-    } catch (err: any) {
-      console.error(err);
+    } catch {
       setError("Error al cargar rifas");
     } finally {
       setIsLoading(false);
@@ -261,7 +260,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
           <p className="text-red-600 font-medium">{error}</p>
           <button
               onClick={loadRaffles}
-              className="cursor-pointer mt-4 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+              className="tap cursor-pointer mt-4 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
           >
             Reintentar
           </button>
@@ -272,8 +271,8 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
   return (
       <div className="space-y-6 relative">
         {/* ===== CABECERA Y ACCIÓN PRINCIPAL ===== */}
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
             <h1 className="text-2xl font-bold text-gray-900">Gestión de Rifas</h1>
             <p className="text-sm text-gray-500 mt-0.5">
               Administra el ciclo de vida y estado de los sorteos
@@ -281,7 +280,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
           </div>
           <button
               onClick={() => setShowCreateRaffle(true)}
-              className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark rounded-lg shadow-xs transition-all"
+              className="tap cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark rounded-lg shadow-xs transition-all"
           >
             <Plus size={18} />
             Crear Rifa
@@ -332,7 +331,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
                   setStatusFilter(e.target.value);
                   setPage(0);
                 }}
-                className="py-1.5 px-3 text-sm bg-gray-50/50 border border-gray-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-gray-700 cursor-pointer font-medium"
+                className="tap py-1.5 px-3 text-sm bg-gray-50/50 border border-gray-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-gray-700 cursor-pointer font-medium"
             >
               <option value="">Todos</option>
               <option value="DRAFT">Borradores</option>
@@ -354,7 +353,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
                   setTypeFilter(e.target.value);
                   setPage(0);
                 }}
-                className="py-1.5 px-3 text-sm bg-gray-50/50 border border-gray-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-gray-700 cursor-pointer font-medium"
+                className="tap py-1.5 px-3 text-sm bg-gray-50/50 border border-gray-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-gray-700 cursor-pointer font-medium"
             >
               <option value="">Todos</option>
               <option value="STANDARD">Estándar</option>
@@ -372,7 +371,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
                   setDrawDateFilter(e.target.value);
                   setPage(0);
                 }}
-                className="py-1.5 px-2.5 text-sm bg-gray-50/50 border border-gray-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-gray-700 cursor-pointer font-medium"
+                className="tap py-1.5 px-2.5 text-sm bg-gray-50/50 border border-gray-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-gray-700 cursor-pointer font-medium"
             />
           </div>
 
@@ -380,8 +379,9 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
           {(statusFilter || typeFilter || drawDateFilter) && (
               <button
                   onClick={handleResetFilters}
-                  className="cursor-pointer p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ml-auto"
+                  className="tap-icon cursor-pointer p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ml-auto"
                   title="Limpiar filtros"
+                  aria-label="Limpiar filtros"
               >
                 <RotateCcw size={16} />
               </button>
@@ -397,7 +397,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
 
         {/* ===== PAGINADOR ===== */}
         {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
           <span className="text-sm text-gray-500">
             Página <strong className="text-gray-800">{page + 1}</strong> de{" "}
             <strong className="text-gray-800">{totalPages}</strong>
@@ -406,14 +406,14 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
                 <button
                     onClick={() => setPage((p) => p - 1)}
                     disabled={page === 0}
-                    className="cursor-pointer text-sm px-3.5 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition font-medium text-gray-700"
+                    className="tap cursor-pointer text-sm px-3.5 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition font-medium text-gray-700"
                 >
                   Anterior
                 </button>
                 <button
                     onClick={() => setPage((p) => p + 1)}
                     disabled={page >= totalPages - 1}
-                    className="cursor-pointer text-sm px-3.5 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition font-medium text-gray-700"
+                    className="tap cursor-pointer text-sm px-3.5 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition font-medium text-gray-700"
                 >
                   Siguiente
                 </button>
@@ -424,11 +424,11 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
         {/* ===== MODAL ===== */}
         {showCreateRaffle && (
             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-              <div className="bg-white rounded-2xl max-w-2xl w-full relative shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-slate-100 animate-in zoom-in-95 duration-200">
+              <div className="bg-white rounded-2xl max-w-2xl w-full relative shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col border border-slate-100 animate-in zoom-in-95 duration-200">
                 <button
                     type="button"
                     onClick={() => setShowCreateRaffle(false)}
-                    className="cursor-pointer absolute top-4 right-4 z-50 p-2 text-slate-400 hover:text-slate-700 bg-white/80 hover:bg-slate-100 rounded-xl transition-all"
+                    className="tap-icon cursor-pointer absolute top-4 right-4 z-50 p-2 text-slate-400 hover:text-slate-700 bg-white/80 hover:bg-slate-100 rounded-xl transition-all"
                     aria-label="Cerrar creación"
                 >
                   <X className="w-5 h-5" />

@@ -15,7 +15,7 @@ export interface JsxViolation {
 
 const MAX_TEXT = 80;
 
-type OpeningLike = ts.JsxOpeningElement | ts.JsxSelfClosingElement;
+export type OpeningLike = ts.JsxOpeningElement | ts.JsxSelfClosingElement;
 
 const collapse = (value: string) => value.replace(/\s+/g, ' ').trim();
 const clip = (value: string) => (value.length > MAX_TEXT ? `${value.slice(0, MAX_TEXT)}…` : value);
@@ -27,7 +27,7 @@ function attrs(opening: OpeningLike): ts.JsxAttribute[] {
   return opening.attributes.properties.filter(ts.isJsxAttribute);
 }
 
-function findAttr(opening: OpeningLike, name: string): ts.JsxAttribute | undefined {
+export function findAttr(opening: OpeningLike, name: string): ts.JsxAttribute | undefined {
   return attrs(opening).find((a) => a.name.getText() === name);
 }
 
@@ -36,7 +36,7 @@ function hasSpread(opening: OpeningLike): boolean {
 }
 
 /** Valor de un atributo cuando es una cadena literal (`x="a"` o `x={"a"}`); si no, undefined. */
-function literalValue(attr: ts.JsxAttribute): string | undefined {
+export function literalValue(attr: ts.JsxAttribute): string | undefined {
   const init = attr.initializer;
   if (!init) return undefined;
   if (ts.isStringLiteral(init)) return init.text;
@@ -64,7 +64,7 @@ function isEmptyHandler(attr: ts.JsxAttribute): boolean {
 }
 
 /** Texto visible: JsxText y expresiones `{…}` de los hijos, sin etiquetas; vacío si no hay. */
-function visibleText(node: ts.JsxElement | ts.JsxSelfClosingElement): string {
+export function visibleText(node: ts.JsxElement | ts.JsxSelfClosingElement): string {
   if (ts.isJsxSelfClosingElement(node)) return '';
   const parts: string[] = [];
   const walk = (child: ts.Node) => {
@@ -94,7 +94,7 @@ function containsJsx(node: ts.Node): boolean {
   return found;
 }
 
-function labelOf(node: ts.JsxElement | ts.JsxSelfClosingElement, opening: OpeningLike): string {
+export function labelOf(node: ts.JsxElement | ts.JsxSelfClosingElement, opening: OpeningLike): string {
   const text = visibleText(node);
   if (text) return clip(text);
   const label = findAttr(opening, 'aria-label');

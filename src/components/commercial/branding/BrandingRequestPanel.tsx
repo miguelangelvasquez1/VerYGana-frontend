@@ -82,10 +82,10 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
         {/* Brand + status */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-base font-bold text-gray-900 truncate leading-snug group-hover:text-[#03548C] transition-colors duration-150">
+            <h3 title={req.brandName} className="text-base font-bold text-gray-900 truncate leading-snug group-hover:text-[#03548C] transition-colors duration-150">
               {req.brandName}
             </h3>
-            <p className="text-xs text-gray-400 mt-0.5 truncate">{req.gameName}</p>
+            <p title={req.gameName} className="text-xs text-gray-400 mt-0.5 truncate">{req.gameName}</p>
           </div>
           <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border shrink-0 ${cfg.badge}`}>
             {cfg.label}
@@ -113,7 +113,7 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
             <Calendar size={12} className="text-gray-400" />
             {formatDate(req.createdAt)}
           </span>
-          <span className="ml-auto text-[#03548C] flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+          <span className="ml-auto text-[#03548C] flex items-center gap-0.5 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-150">
             Ver <ChevronRight size={12} />
           </span>
         </div>
@@ -122,13 +122,13 @@ const BrandingCard: React.FC<{ req: BrandingRequest; onClick: () => void }> = ({
         {(req.assignedDesignerName || req.adminNotes) && (
           <div className="border-t border-gray-100 pt-3 space-y-1.5">
             {req.assignedDesignerName && (
-              <p className="text-xs text-gray-500 flex items-center gap-1.5 truncate">
+              <p title={req.assignedDesignerName} className="text-xs text-gray-500 flex items-center gap-1.5 truncate">
                 <User size={11} className="text-gray-400 shrink-0" />
                 {req.assignedDesignerName}
               </p>
             )}
             {req.adminNotes && (
-              <p className="text-xs text-amber-600 flex items-center gap-1.5 truncate">
+              <p title={req.adminNotes} className="text-xs text-amber-600 flex items-center gap-1.5 truncate">
                 <AlertCircle size={11} className="shrink-0" />
                 {req.adminNotes}
               </p>
@@ -212,7 +212,7 @@ const filtered = requests.filter(r => {
     <div className="space-y-6">
       <button
         onClick={() => router.push('/commercial/branding')}
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors"
+        className="tap flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors"
       >
         <ChevronLeft size={18} /> Volver
       </button>
@@ -229,7 +229,7 @@ const filtered = requests.filter(r => {
                 placeholder="Buscar por marca o juego..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                className="tap pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
               />
             </div>
             {/* Status filter */}
@@ -238,7 +238,7 @@ const filtered = requests.filter(r => {
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value as BrandingStatus | 'all')}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                className="tap px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
               >
                 {STATUS_FILTER_OPTIONS.map(o => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -254,7 +254,7 @@ const filtered = requests.filter(r => {
                 type="button"
                 disabled
                 title={createBlockedTitle}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 text-sm font-semibold rounded-md cursor-not-allowed"
+                className="tap flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 text-sm font-semibold rounded-md cursor-not-allowed"
               >
                 <Plus size={16} />
                 Nueva solicitud
@@ -262,7 +262,7 @@ const filtered = requests.filter(r => {
             ) : (
               <button
                 onClick={() => setView('create')}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-[#03548C] text-white text-sm font-semibold rounded-md hover:bg-[#0b1440] transition-colors cursor-pointer shadow-sm"
+                className="tap flex items-center justify-center gap-2 px-4 py-2 bg-[#03548C] text-white text-sm font-semibold rounded-md hover:bg-[#0b1440] transition-colors cursor-pointer shadow-sm"
               >
                 <Plus size={16} />
                 Nueva solicitud
@@ -302,7 +302,7 @@ const filtered = requests.filter(r => {
         </p>
         <button
           onClick={() => load()}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
+          className="tap flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
         >
           <RefreshCw size={14} />
           Actualizar
@@ -319,7 +319,7 @@ const filtered = requests.filter(r => {
           <p className="text-red-800 mb-4">{error}</p>
           <button
             onClick={() => load()}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
+            className="tap px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
           >
             Reintentar
           </button>
@@ -344,7 +344,7 @@ const filtered = requests.filter(r => {
               type="button"
               disabled
               title={createBlockedTitle}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 rounded-md text-sm cursor-not-allowed"
+              className="tap inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 rounded-md text-sm cursor-not-allowed"
             >
               <Plus size={16} />
               Nueva solicitud
@@ -352,7 +352,7 @@ const filtered = requests.filter(r => {
           ) : (
             <button
               onClick={() => setView('create')}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440] text-sm cursor-pointer"
+              className="tap inline-flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-md hover:bg-[#0b1440] text-sm cursor-pointer"
             >
               <Plus size={16} />
               Nueva solicitud

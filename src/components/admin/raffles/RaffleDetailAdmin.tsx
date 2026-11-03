@@ -270,8 +270,7 @@ export default function RaffleDetailCard({
        ======================================================== */
 
     const handleAction = async <T,>(
-        action: () => Promise<T>,
-        successMessage?: string
+        action: () => Promise<T>
     ): Promise<T | undefined> => {
         setIsLoading(true);
         setErrorMessage(null);
@@ -279,17 +278,10 @@ export default function RaffleDetailCard({
         try {
             const result = await action();
 
-            // Si hay mensaje de éxito, mostrarlo (puedes usar toast)
-            if (successMessage) {
-                console.log('✅', successMessage);
-                // toast.success(successMessage); // Descomenta si usas toast
-            }
-
             return result;
         } catch (err) {
             const friendlyMessage = getFriendlyErrorMessage(err);
             setErrorMessage(friendlyMessage);
-            console.error('❌ Error en acción:', err);
             throw err;
         } finally {
             setIsLoading(false);
@@ -330,8 +322,7 @@ export default function RaffleDetailCard({
                 case "activate":
                     if (onActivate) {
                         await handleAction(
-                            () => onActivate(raffle.id),
-                            '¡Rifa activada exitosamente!'
+                            () => onActivate(raffle.id)
                         );
                     }
                     break;
@@ -339,8 +330,7 @@ export default function RaffleDetailCard({
                 case "close":
                     if (onCloseRaffle) {
                         await handleAction(
-                            () => onCloseRaffle(raffle.id),
-                            'Rifa cerrada correctamente.'
+                            () => onCloseRaffle(raffle.id)
                         );
                     }
                     break;
@@ -348,8 +338,7 @@ export default function RaffleDetailCard({
                 case "cancel":
                     if (onCancel) {
                         await handleAction(
-                            () => onCancel(raffle.id),
-                            'Rifa cancelada correctamente.'
+                            () => onCancel(raffle.id)
                         );
                     }
                     break;
@@ -357,8 +346,7 @@ export default function RaffleDetailCard({
                 case "delete":
                     if (onDelete) {
                         await handleAction(
-                            () => onDelete(raffle.id),
-                            'Rifa eliminada permanentemente.'
+                            () => onDelete(raffle.id)
                         );
                     }
                     break;
@@ -366,8 +354,7 @@ export default function RaffleDetailCard({
                 case "verify":
                     if (onVerify) {
                         await handleAction(
-                            () => onVerify(raffle.id),
-                            'Sorteo verificado correctamente.'
+                            () => onVerify(raffle.id)
                         );
                     }
                     break;
@@ -403,7 +390,8 @@ export default function RaffleDetailCard({
             border
             border-slate-100
             shadow-xl/5
-            p-6
+            p-4
+            sm:p-6
             md:p-8
             space-y-8
             relative
@@ -423,7 +411,7 @@ export default function RaffleDetailCard({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="
+                        className="tap 
                             inline-flex
                             items-center
                             gap-2
@@ -803,7 +791,7 @@ export default function RaffleDetailCard({
                     <button
                         type="button"
                         onClick={() => setErrorMessage(null)}
-                        className="
+                        className="tap 
                             shrink-0
                             text-rose-400
                             hover:text-rose-600
@@ -975,7 +963,7 @@ export default function RaffleDetailCard({
                         relative
                         shadow-2xl
                         overflow-hidden
-                        max-h-[90vh]
+                        max-h-[90dvh]
                         flex
                         flex-col
                         border
@@ -990,7 +978,7 @@ export default function RaffleDetailCard({
                             onClick={() =>
                                 setIsEditOpen(false)
                             }
-                            className="
+                            className="tap-icon 
                                 cursor-pointer
                                 absolute
                                 top-4
@@ -1024,8 +1012,7 @@ export default function RaffleDetailCard({
                             onSubmit={async (data) => {
                                 try {
                                     await handleAction(
-                                        () => onUpdate(raffle.id, data),
-                                        'Rifa actualizada correctamente.'
+                                        () => onUpdate(raffle.id, data)
                                     );
                                     setIsEditOpen(false);
                                 } catch (error) {
@@ -1063,7 +1050,7 @@ function TabButton({
         <button
             type="button"
             onClick={() => onChange(value)}
-            className={`
+            className={`tap 
                 flex-1
                 min-w-[120px]
                 cursor-pointer
@@ -1102,7 +1089,7 @@ function EditButton({
         <button
             type="button"
             onClick={onClick}
-            className="
+            className="tap 
                 inline-flex
                 items-center
                 gap-2
@@ -1147,7 +1134,7 @@ function ActivateButton({
             onClick={onClick}
             disabled={disabled}
             title={title}
-            className="
+            className="tap 
                 inline-flex
                 items-center
                 gap-2
@@ -1190,7 +1177,7 @@ function CloseButton({
             type="button"
             onClick={onClick}
             disabled={disabled}
-            className="
+            className="tap 
                 inline-flex
                 items-center
                 gap-2
@@ -1229,7 +1216,7 @@ function CancelButton({
             type="button"
             onClick={onClick}
             disabled={disabled}
-            className="
+            className="tap 
                 inline-flex
                 items-center
                 gap-2
@@ -1269,7 +1256,7 @@ function DeleteButton({
             type="button"
             onClick={onClick}
             disabled={disabled}
-            className="
+            className="tap 
                 inline-flex
                 items-center
                 gap-2
@@ -1312,7 +1299,7 @@ function VerifyButton({
             type="button"
             onClick={onClick}
             disabled={disabled}
-            className="
+            className="tap 
                 inline-flex
                 items-center
                 gap-2
@@ -1351,7 +1338,7 @@ function StatisticsButton({
             type="button"
             onClick={onClick}
             disabled={disabled}
-            className="
+            className="tap 
                 inline-flex
                 items-center
                 gap-2
@@ -1695,7 +1682,7 @@ function DetailRow({
                     {icon}
                 </span>
 
-                <span className="
+                <span title={label} className="
                     text-slate-500
                     text-xs
                     md:text-sm

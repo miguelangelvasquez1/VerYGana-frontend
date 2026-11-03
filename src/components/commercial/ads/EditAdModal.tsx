@@ -181,9 +181,8 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/50 rounded-lg transition-colors cursor-pointer"
-            disabled={submitting}
-          >
+            className="p-2 tap-icon hover:bg-white/50 rounded-lg transition-colors cursor-pointer"
+            disabled={submitting} aria-label="Cerrar">
             <X className="w-6 h-6 text-gray-600" />
           </button>
         </div>
@@ -201,7 +200,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 tap border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
                 minLength={5}
                 maxLength={100}
@@ -216,7 +215,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 rows={3}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 tap border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
                 minLength={10}
                 maxLength={1000}
@@ -234,7 +233,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                 type="url"
                 value={formData.targetUrl}
                 onChange={(e) => setFormData(prev => ({ ...prev, targetUrl: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 tap border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 maxLength={500}
               />
             </div>
@@ -286,7 +285,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                     type="text"
                     value={`$${formatMoney(ad.rewardPerLike)}`}
                     disabled
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed pr-10"
+                    className="w-full px-4 py-2.5 tap border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed pr-10"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
                 </div>
@@ -301,7 +300,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                     type="text"
                     value={ad.maxLikes.toLocaleString('es-CO')}
                     disabled
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed pr-10"
+                    className="w-full px-4 py-2.5 tap border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed pr-10"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
                 </div>
@@ -316,7 +315,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                     type="text"
                     value={ad.maxLikesPerUserPerDay ?? '—'}
                     disabled
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed pr-10"
+                    className="w-full px-4 py-2.5 tap border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed pr-10"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
                 </div>
@@ -394,7 +393,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                 </label>
                 <div className="flex items-center space-x-2">
                   <input
-                    type="number"
+                    type="number" inputMode="numeric"
                     value={formData.targetAudience.ageRange[0]}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
@@ -403,13 +402,13 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                         ageRange: [Number(e.target.value), prev.targetAudience.ageRange[1]]
                       }
                     }))}
-                    className="w-20 px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-20 px-3 py-2 tap border border-gray-300 rounded-lg"
                     min="13"
                     max="100"
                   />
                   <span className="text-gray-600 font-medium">a</span>
                   <input
-                    type="number"
+                    type="number" inputMode="numeric"
                     value={formData.targetAudience.ageRange[1]}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
@@ -418,7 +417,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                         ageRange: [prev.targetAudience.ageRange[0], Number(e.target.value)]
                       }
                     }))}
-                    className="w-20 px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-20 px-3 py-2 tap border border-gray-300 rounded-lg"
                     min="13"
                     max="100"
                   />
@@ -445,7 +444,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                       gender: e.target.value as 'all' | 'male' | 'female'
                     }
                   }))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                  className="w-full px-4 py-2.5 tap border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                 >
                   <option value="all">Todos</option>
                   <option value="male">Masculino</option>
@@ -471,7 +470,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                 <select
                   value={selectedDepartment || ''}
                   onChange={(e) => setSelectedDepartment(e.target.value || null)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 tap border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer disabled:cursor-not-allowed"
                   disabled={loadingDepartments}
                 >
                   <option value="">-- Selecciona un departamento --</option>
@@ -496,7 +495,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                         e.target.value = '';
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 tap border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer disabled:cursor-not-allowed"
                     disabled={loadingMunicipalities}
                   >
                     <option value="">
@@ -528,8 +527,7 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
                         <button
                           type="button"
                           onClick={() => removeMunicipality(municipality.code)}
-                          className="ml-2 text-green-600 hover:text-green-800 cursor-pointer"
-                        >
+                          className="ml-2 text-green-600 hover:text-green-800 cursor-pointer max-lg:-m-4 max-lg:p-4" aria-label="Quitar municipio">
                           <X className="w-3 h-3" />
                         </button>
                       </div>
@@ -569,14 +567,14 @@ export function EditAdModal({ ad, isOpen, onClose, onSuccess }: EditAdModalProps
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              className="px-6 py-2.5 tap border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               disabled={submitting}
             >
               Cancelar
             </button>
             <button
               onClick={handleSubmit}
-              className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2 cursor-pointer"
+              className="px-6 py-2.5 tap bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2 cursor-pointer"
               disabled={submitting || ageRangeInvalid || editBlocked}
               title={editBlocked ? WALLET_DORMANT_TOOLTIP : undefined}
             >

@@ -84,7 +84,7 @@ export default function ConfirmDialog({
 
   return createPortal(
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
-        <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 space-y-6">
+        <div className="bg-white w-full max-w-md rounded-2xl shadow-xl max-h-[90dvh] overflow-y-auto p-4 sm:p-6 space-y-6">
           {/* Title */}
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
 
@@ -107,18 +107,18 @@ export default function ConfirmDialog({
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className="tap w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="Escribe aquí..."
                 />
               </div>
           )}
 
           {/* Actions */}
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-wrap justify-end gap-3">
             <button
                 onClick={onClose}
                 disabled={loading}
-                className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
+                className="tap px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
             >
               {cancelText}
             </button>
@@ -126,7 +126,7 @@ export default function ConfirmDialog({
             <button
                 onClick={handleConfirm}
                 disabled={loading || !isTextValid}
-                className={`px-4 py-2 rounded-lg text-white transition focus:ring-2 cursor-pointer ${getButtonStyle()} disabled:opacity-50`}
+                className={`tap px-4 py-2 rounded-lg text-white transition focus:ring-2 cursor-pointer ${getButtonStyle()} disabled:opacity-50`}
             >
               {loading ? "Procesando..." : confirmText}
             </button>

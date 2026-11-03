@@ -84,10 +84,10 @@ const AllyProductCard: React.FC<AllyProductCardProps> = ({
         {product.companyName && (
           <button
             onClick={() => router.push(`/commercial/allies/${product.commercialPublicId}`)}
-            className="text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-blue-50 hover:border-blue-200 hover:text-cyan-500 transition cursor-pointer text-left w-fit"
+            className="tap text-xs font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1 min-w-0 max-w-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-blue-50 hover:border-blue-200 hover:text-cyan-500 transition cursor-pointer text-left w-fit"
           >
             <Building2 className="w-2.5 h-2.5 shrink-0" />
-            <span className="truncate">{product.companyName}</span>
+            <span title={product.companyName} className="truncate">{product.companyName}</span>
           </button>
         )}
 
@@ -96,7 +96,7 @@ const AllyProductCard: React.FC<AllyProductCardProps> = ({
             onClick={() => onTogglePromote(product.id)}
             disabled={disablePromote}
             title={blocked && !isPromoted ? 'Recarga tu saldo para seguir creando' : undefined}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer ${
+            className={`tap w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer ${
               isPromoted
                 ? "bg-emerald-50 text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-100"
                 : "text-white hover:opacity-90"

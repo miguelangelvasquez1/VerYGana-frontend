@@ -209,7 +209,7 @@ function ModalitiesComparison({
                   <button
                     type="button"
                     onClick={() => setDetail({ plan, label: m.label })}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] cursor-pointer"
+                    className="inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] cursor-pointer lg:min-h-0"
                   >
                     Ver detalle del plan <ChevronRight className="w-3.5 h-3.5" />
                   </button>
@@ -1060,7 +1060,7 @@ export function DiagnosticStep({
           <button
             type="button"
             onClick={() => setPhase("special")}
-            className="text-xs font-medium text-[#03548C] hover:text-[#0b1440] underline underline-offset-2 cursor-pointer"
+            className="inline-flex min-h-11 items-center lg:min-h-0 text-xs font-medium text-[#03548C] hover:text-[#0b1440] underline underline-offset-2 cursor-pointer"
           >
             ¿Necesitas una integración especial?
           </button>

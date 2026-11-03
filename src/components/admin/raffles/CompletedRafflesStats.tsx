@@ -48,8 +48,8 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
         );
         setRaffles(response?.data ?? []);
         setTotalPages(response?.meta?.totalPages ?? 0);
-      } catch (err) {
-        console.error("Error cargando rifas completadas:", err);
+      } catch {
+        // La lista queda vacía; el error no se imprime (P-16 c).
       } finally {
         setIsLoadingList(false);
       }
@@ -64,8 +64,8 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
     try {
       const data = await getRaffleStats(raffle.id);
       setStats(data);
-    } catch (err) {
-      console.error("Error cargando estadísticas de la rifa:", err);
+    } catch {
+      // Sin estadísticas se muestra el estado vacío; el error no se imprime (P-16 c).
     } finally {
       setIsLoadingStats(false);
     }
@@ -135,7 +135,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
                 key={raffle.id}
                 type="button"
                 onClick={() => handleSelectRaffle(raffle)}
-                className={`w-full text-left px-5 py-3 transition cursor-pointer ${
+                className={`tap w-full text-left px-5 py-3 transition cursor-pointer ${
                   selectedRaffle?.id === raffle.id ? "bg-admin-midnight/10" : "hover:bg-gray-50"
                 }`}
               >
@@ -160,7 +160,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
               type="button"
               onClick={() => setPage((p) => p - 1)}
               disabled={page === 0}
-              className="cursor-pointer text-xs px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+              className="tap cursor-pointer text-xs px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
             >
               Anterior
             </button>
@@ -171,7 +171,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
               type="button"
               onClick={() => setPage((p) => p + 1)}
               disabled={page >= totalPages - 1}
-              className="cursor-pointer text-xs px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
+              className="tap cursor-pointer text-xs px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition"
             >
               Siguiente
             </button>

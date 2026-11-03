@@ -79,6 +79,7 @@ export function LegalIdentificationStep({ form, errors, submitting, onChange, on
         >
           <input
             value={form.companyName || ""}
+            autoComplete="organization"
             onChange={(e) => onChange("companyName", e.target.value)}
             placeholder="Nombre de la empresa"
             maxLength={100}
@@ -92,6 +93,7 @@ export function LegalIdentificationStep({ form, errors, submitting, onChange, on
         >
           <input
             value={form.nit || ""}
+            inputMode="numeric"
             onChange={(e) => onChange("nit", e.target.value)}
             placeholder="900.000.000-0"
             maxLength={10}
@@ -113,6 +115,7 @@ export function LegalIdentificationStep({ form, errors, submitting, onChange, on
         <FieldWrapper label="Nombres del representante legal" required error={errors["legalRepFirstName"]}>
           <input
             value={form.legalRepFirstName || ""}
+            autoComplete="given-name"
             onChange={(e) => onChange("legalRepFirstName", e.target.value)}
             placeholder="Nombres"
             maxLength={50}
@@ -122,6 +125,7 @@ export function LegalIdentificationStep({ form, errors, submitting, onChange, on
         <FieldWrapper label="Apellidos del representante legal" required error={errors["legalRepLastName"]}>
           <input
             value={form.legalRepLastName || ""}
+            autoComplete="family-name"
             onChange={(e) => onChange("legalRepLastName", e.target.value)}
             placeholder="Apellidos"
             maxLength={50}
@@ -146,6 +150,8 @@ export function LegalIdentificationStep({ form, errors, submitting, onChange, on
         <FieldWrapper label="Número de documento" required error={errors["legalRepDocNumber"]}>
           <input
             value={form.legalRepDocNumber || ""}
+            // El pasaporte (PP) puede llevar letras: el teclado numérico solo para CC y CE.
+            inputMode={form.legalRepDocType === "PP" ? "text" : "numeric"}
             onChange={(e) => onChange("legalRepDocNumber", e.target.value)}
             placeholder="1234567890"
             maxLength={20}
@@ -213,6 +219,7 @@ export function LegalIdentificationStep({ form, errors, submitting, onChange, on
       <FieldWrapper label="Dirección" required error={errors["address"]}>
         <input
           value={form.address || ""}
+          autoComplete="street-address"
           onChange={(e) => onChange("address", e.target.value)}
           placeholder="Ej. Calle 10 # 20-30"
           maxLength={100}

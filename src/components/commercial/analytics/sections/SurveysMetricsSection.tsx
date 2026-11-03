@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import { ClipboardList, Users, CheckCircle2, CalendarRange } from 'lucide-react';
 import { MetricStatCard } from '../MetricStatCard';
 import { getSurveysReport } from '@/services/commercial/analyticsReportService';
@@ -109,67 +110,69 @@ export function SurveysMetricsSection({ dateRange }: SurveysMetricsSectionProps)
           />
 
           <ReportTableCard title="Rendimiento por encuesta">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-                <tr>
-                  <th className="px-6 py-3 font-semibold">Encuesta</th>
-                  <th className="px-4 py-3 font-semibold">Estado</th>
-                  <th className="px-4 py-3 font-semibold text-right">Preguntas</th>
-                  <th className="px-4 py-3 font-semibold w-52">Cupo</th>
-                  <th className="px-4 py-3 font-semibold text-right">Sesiones</th>
-                  <th className="px-4 py-3 font-semibold text-right">Finalización</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {data.perSurvey.length === 0 ? (
+            <TableScroll label="Tabla de rendimiento por encuesta, desplazable">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                   <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-400">
-                      No tienes encuestas en este período.
-                    </td>
+                    <th className="px-6 py-3 font-semibold">Encuesta</th>
+                    <th className="px-4 py-3 font-semibold">Estado</th>
+                    <th className="px-4 py-3 font-semibold text-right">Preguntas</th>
+                    <th className="px-4 py-3 font-semibold w-52">Cupo</th>
+                    <th className="px-4 py-3 font-semibold text-right">Sesiones</th>
+                    <th className="px-4 py-3 font-semibold text-right">Finalización</th>
                   </tr>
-                ) : (
-                  data.perSurvey.map((s) => (
-                    <tr key={s.surveyId} className="hover:bg-gray-50">
-                      <td className="px-6 py-3">
-                        <span className="font-medium text-gray-900">{s.title}</span>
-                        <span className="block text-xs text-gray-400">
-                          Creada {formatDate(s.createdAt)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusChipClass(
-                            s.status,
-                          )}`}
-                        >
-                          {statusLabel(s.status)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatInt(s.questionCount)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <ProgressBar pct={s.fillRatePct} className="flex-1" />
-                          <span className="w-20 shrink-0 text-right text-xs text-gray-500 tabular-nums">
-                            {formatInt(s.responseCount)} / {formatInt(s.maxResponses)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatInt(s.completedSessions)} / {formatInt(s.startedSessions)}
-                        <span className="block text-xs text-gray-400">
-                          {formatInt(s.abandonedSessions)} abandonadas
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatPct(s.completionRatePct)}
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {data.perSurvey.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-400">
+                        No tienes encuestas en este período.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    data.perSurvey.map((s) => (
+                      <tr key={s.surveyId} className="hover:bg-gray-50">
+                        <td className="px-6 py-3">
+                          <span className="font-medium text-gray-900">{s.title}</span>
+                          <span className="block text-xs text-gray-400">
+                            Creada {formatDate(s.createdAt)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusChipClass(
+                              s.status,
+                            )}`}
+                          >
+                            {statusLabel(s.status)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatInt(s.questionCount)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <ProgressBar pct={s.fillRatePct} className="flex-1" />
+                            <span className="w-20 shrink-0 text-right text-xs text-gray-500 tabular-nums">
+                              {formatInt(s.responseCount)} / {formatInt(s.maxResponses)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatInt(s.completedSessions)} / {formatInt(s.startedSessions)}
+                          <span className="block text-xs text-gray-400">
+                            {formatInt(s.abandonedSessions)} abandonadas
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatPct(s.completionRatePct)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </TableScroll>
           </ReportTableCard>
         </>
       )}

@@ -147,14 +147,14 @@ export function UserSearchSelect({
     return (
       <div className="flex items-center justify-between gap-2 rounded-lg border border-admin-blue/40 bg-admin-blue/5 px-3 py-2 text-sm">
         <div className="min-w-0">
-          <p className="truncate font-medium text-gray-900">{value.label}</p>
-          {value.hint && <p className="truncate text-xs text-gray-500">{value.hint}</p>}
+          <p className="truncate font-medium text-gray-900" title={value.label}>{value.label}</p>
+          {value.hint && <p className="truncate text-xs text-gray-500" title={value.hint}>{value.hint}</p>}
         </div>
         <button
           type="button"
           onClick={() => onChange(null)}
           aria-label="Quitar filtro"
-          className="shrink-0 cursor-pointer rounded p-0.5 text-gray-400 transition-colors hover:bg-white hover:text-gray-700"
+          className="tap shrink-0 cursor-pointer rounded p-0.5 text-gray-400 transition-colors hover:bg-white hover:text-gray-700"
         >
           <X className="h-4 w-4" />
         </button>
@@ -198,10 +198,10 @@ export function UserSearchSelect({
                   setInput('');
                   setOpen(false);
                 }}
-                className="block w-full cursor-pointer px-3 py-2 text-left transition-colors hover:bg-admin-blue/5"
+                className="tap block w-full cursor-pointer px-3 py-2 text-left transition-colors hover:bg-admin-blue/5"
               >
-                <p className="truncate text-sm font-medium text-gray-900">{opt.label}</p>
-                {opt.hint && <p className="truncate text-xs text-gray-500">{opt.hint}</p>}
+                <p className="truncate text-sm font-medium text-gray-900" title={opt.label}>{opt.label}</p>
+                {opt.hint && <p className="truncate text-xs text-gray-500" title={opt.hint}>{opt.hint}</p>}
               </button>
             ))
           )}

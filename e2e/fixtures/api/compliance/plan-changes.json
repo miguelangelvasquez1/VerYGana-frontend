@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+    "companyName": "Tienda de Prueba S.A.S.",
+    "email": "comercial@example.test",
+    "fromPlanCode": "BASIC",
+    "toPlanCode": "STANDARD",
+    "requiredTopUpAmountCents": 100000000,
+    "status": "CONTRACT_PENDING_REVIEW",
+    "contractId": 2,
+    "contractStatus": "PENDING_VERYGANA_REVIEW",
+    "requestedAt": "2026-10-30T10:00:00",
+    "appliedAt": null
+  }
+]

@@ -119,7 +119,7 @@ export default function AlliesDashboard() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition cursor-pointer ${
+              className={`tap flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition cursor-pointer ${
                 active
                   ? "border-[#03548C] text-[#03548C]"
                   : "border-transparent text-gray-500 hover:text-gray-700"
@@ -141,7 +141,7 @@ export default function AlliesDashboard() {
             <select
               value={`${sortBy}:${sortDirection}`}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="px-3 py-2 border-2 border-gray-200 bg-white rounded-xl text-sm font-medium focus:outline-none focus:border-[#014C92] transition"
+              className="tap px-3 py-2 border-2 border-gray-200 bg-white rounded-xl text-sm font-medium focus:outline-none focus:border-[#014C92] transition"
             >
               <option value="createdAt:DESC">Más recientes</option>
               <option value="priceCents:ASC">Precio: menor a mayor</option>
@@ -153,7 +153,7 @@ export default function AlliesDashboard() {
           <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setSelectedCategoryId(null)}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap cursor-pointer ${
+              className={`tap shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap cursor-pointer ${
                 selectedCategoryId === null
                   ? "text-white border-[#014C92]"
                   : "border-gray-200 text-gray-600 bg-white hover:border-gray-300"
@@ -168,7 +168,7 @@ export default function AlliesDashboard() {
                 onClick={() =>
                   setSelectedCategoryId(selectedCategoryId === cat.id ? null : cat.id)
                 }
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap bg-white cursor-pointer ${
+                className={`tap shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition whitespace-nowrap bg-white cursor-pointer ${
                   selectedCategoryId === cat.id
                     ? "border-[#014C92] text-[#014C92] bg-blue-50"
                     : "border-gray-200 text-gray-600 hover:border-gray-300"
@@ -242,8 +242,8 @@ export default function AlliesDashboard() {
                   className="w-14 h-14 rounded-lg object-cover shrink-0 bg-gray-100"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate">{promo.productName}</p>
-                  <p className="text-xs text-gray-500 truncate">{promo.allyCommercialName}</p>
+                  <p title={promo.productName} className="font-semibold text-gray-900 truncate">{promo.productName}</p>
+                  <p title={promo.allyCommercialName} className="text-xs text-gray-500 truncate">{promo.allyCommercialName}</p>
                   <p className="text-sm font-bold text-[#03548C] mt-0.5">
                     ${formatPesos(promo.priceCents)}
                   </p>
@@ -251,8 +251,9 @@ export default function AlliesDashboard() {
                 <button
                   onClick={() => handleTogglePromote(promo.productId)}
                   disabled={togglingIds.has(promo.productId)}
-                  className="shrink-0 p-2 rounded-lg text-red-500 hover:bg-red-50 transition disabled:opacity-50 cursor-pointer"
+                  className="tap-icon shrink-0 p-2 rounded-lg text-red-500 hover:bg-red-50 transition disabled:opacity-50 cursor-pointer"
                   title="Quitar promoción"
+                  aria-label="Quitar promoción"
                 >
                   <X className="w-4 h-4" />
                 </button>

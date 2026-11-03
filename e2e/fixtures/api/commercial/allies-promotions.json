@@ -1,0 +1,11 @@
+[
+  {
+    "productId": 1,
+    "productName": "Producto de aliado de prueba",
+    "productImageUrl": "/products/casco.png",
+    "allyCommercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+    "allyCommercialName": "Aliado de Prueba S.A.S.",
+    "priceCents": 12500000,
+    "promotedAt": "2026-10-01T10:00:00"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "ruleName": "Regla de prueba",
+    "description": "Regla de tickets de prueba (dato ficticio).",
+    "ruleType": "PURCHASE",
+    "isActive": true,
+    "priority": 1,
+    "ticketsToAward": 2,
+    "minPurchaseAmount": 50000,
+    "dailyLogin": null,
+    "referralAddedQuantity": null,
+    "createdAt": "2026-10-01T10:00:00",
+    "updatedAt": "2026-10-01T10:00:00"
+  }
+]

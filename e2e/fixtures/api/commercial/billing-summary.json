@@ -1,0 +1,13 @@
+{
+  "balanceCents": 50000000,
+  "walletStatus": "ACTIVE",
+  "spentThisMonthCents": 12000000,
+  "earnedThisMonthCents": 456000000,
+  "currentPlan": {
+    "planName": "Estándar",
+    "planCode": "STANDARD",
+    "endDate": null,
+    "daysRemaining": null,
+    "status": "ACTIVE"
+  }
+}

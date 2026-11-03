@@ -19,7 +19,7 @@ import {
 } from '@/lib/auth/authService';
 
 import { getCommercialInitialDataWithToken } from '@/services/commercial/commercialService';
-import { getRoleHomePath } from '@/lib/auth/roleRedirect';
+import { postLoginPath } from '@/lib/auth/returnPath';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -206,8 +206,15 @@ const LoginForm = () => {
         return;
       }
 
+      // Sección guardada por la landing (`?from=`): se lee al enviar, sin `useSearchParams`. Solo el
+      // consumidor vuelve a ella y solo si es una ruta interna válida (RN-6b, CA-4c).
       const homePath =
-          getRoleHomePath(role);
+          postLoginPath(
+              role,
+              new URLSearchParams(
+                  window.location.search
+              ).get('from')
+          );
 
       if (homePath) {
         router.push(

@@ -151,7 +151,7 @@ function LogRow({ log, index }: { log: AuditLogDTO; index: number }) {
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-label={open ? 'Ocultar detalle' : 'Ver detalle'}
-              className="cursor-pointer rounded-lg p-1.5 text-cmp-mute hover:bg-cmp-rule-soft hover:text-cmp-ink"
+              className="tap-icon cursor-pointer rounded-lg p-1.5 text-cmp-mute hover:bg-cmp-rule-soft hover:text-cmp-ink"
             >
               <ChevronRight
                 className={`h-4 w-4 transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
@@ -282,7 +282,7 @@ export default function AuditLogsPanel() {
           <button
             onClick={() => setFiltersOpen((v) => !v)}
             aria-expanded={filtersOpen}
-            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium ${
+            className={`tap inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium ${
               filtersOpen || activeFilters
                 ? 'border-cmp-azul/30 bg-[#E8F1FA] text-cmp-azul'
                 : 'border-cmp-rule bg-white text-cmp-slate hover:border-cmp-mute hover:text-cmp-ink'
@@ -459,7 +459,7 @@ export default function AuditLogsPanel() {
       ) : (
         <>
           <Ledger>
-            <LedgerTable>
+            <LedgerTable label="Tabla de registros de auditoría, desplazable">
               <LedgerHead>
                 <ThSpine />
                 <Th>ID</Th>

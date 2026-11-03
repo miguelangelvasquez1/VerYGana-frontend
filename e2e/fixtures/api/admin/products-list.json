@@ -1,0 +1,64 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Producto de prueba 1",
+      "imageUrl": "/products/casco.png",
+      "price": 12500000,
+      "maxKeysAllowed": 20,
+      "maxKeysPct": 40,
+      "minCashCents": 1500000,
+      "averageRate": 4.5,
+      "reviewCount": 12,
+      "categoryName": "Deportes",
+      "stock": 15,
+      "status": "ACTIVE",
+      "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+      "companyName": "Tienda de Prueba S.A.S.",
+      "isGameReward": false
+    },
+    {
+      "id": 2,
+      "name": "Producto de prueba 2",
+      "imageUrl": "/products/casco.png",
+      "price": 12500000,
+      "maxKeysAllowed": 20,
+      "maxKeysPct": 40,
+      "minCashCents": 1500000,
+      "averageRate": 4.5,
+      "reviewCount": 12,
+      "categoryName": "Deportes",
+      "stock": 15,
+      "status": "PENDING",
+      "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+      "companyName": "Tienda de Prueba S.A.S.",
+      "isGameReward": false
+    },
+    {
+      "id": 3,
+      "name": "Producto de prueba 3",
+      "imageUrl": "/products/casco.png",
+      "price": 12500000,
+      "maxKeysAllowed": 20,
+      "maxKeysPct": 40,
+      "minCashCents": 1500000,
+      "averageRate": 4.5,
+      "reviewCount": 12,
+      "categoryName": "Deportes",
+      "stock": 15,
+      "status": "REJECTED",
+      "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+      "companyName": "Tienda de Prueba S.A.S.",
+      "isGameReward": false
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 3,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

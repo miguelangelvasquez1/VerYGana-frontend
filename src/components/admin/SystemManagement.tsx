@@ -5,6 +5,11 @@ import React, { useState } from 'react';
 import { SystemModule } from '../../types/SystemModule';
 import { Shield, ToggleLeft, ToggleRight, Settings, AlertTriangle } from 'lucide-react';
 
+// Etiqueta de las acciones que todavía no existen (RN-7 de la spec 014, D-6): el botón queda deshabilitado.
+const SoonBadge: React.FC = () => (
+  <span className="rounded-full bg-black/20 px-2 py-0.5 text-xs font-medium">Próximamente</span>
+);
+
 const SystemManagement: React.FC = () => {
   const [modules, setModules] = useState<SystemModule[]>([
     {
@@ -65,21 +70,33 @@ const SystemManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div className="flex space-x-2">
-          <button className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 flex items-center space-x-2 cursor-pointer">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled
+            aria-disabled="true"
+            className="tap bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 cursor-not-allowed opacity-60"
+          >
             <AlertTriangle size={20} />
             <span>Modo Mantenimiento</span>
+            <SoonBadge />
           </button>
-          <button className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center space-x-2 cursor-pointer">
+          <button
+            type="button"
+            disabled
+            aria-disabled="true"
+            className="tap bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 cursor-not-allowed opacity-60"
+          >
             <Settings size={20} />
             <span>Configuración Avanzada</span>
+            <SoonBadge />
           </button>
         </div>
       </div>
 
       {/* System Status Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-4 lg:p-6 rounded-lg shadow">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded">
               <Shield className="h-6 w-6 text-green-600" />
@@ -91,7 +108,7 @@ const SystemManagement: React.FC = () => {
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-4 lg:p-6 rounded-lg shadow">
           <div className="flex items-center">
             <div className="p-2 bg-admin-blue/10 rounded">
               <Settings className="h-6 w-6 text-admin-blue" />
@@ -103,7 +120,7 @@ const SystemManagement: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-4 lg:p-6 rounded-lg shadow">
           <div className="flex items-center">
             <div className="p-2 bg-admin-gold/10 rounded">
               <AlertTriangle className="h-6 w-6 text-admin-gold" />
@@ -126,7 +143,7 @@ const SystemManagement: React.FC = () => {
         <div className="p-6">
           <div className="space-y-4">
             {modules.map((module) => (
-              <div key={module.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+              <div key={module.id} className="flex flex-wrap items-center justify-between gap-3 p-4 border rounded-lg hover:bg-gray-50">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3">
                     <div className={`w-3 h-3 rounded-full ${module.isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -148,8 +165,10 @@ const SystemManagement: React.FC = () => {
                   </span>
                   
                   <button
+                    type="button"
                     onClick={() => toggleModule(module.id)}
-                    className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                    aria-label={`${module.isActive ? 'Desactivar' : 'Activar'} ${module.name}`}
+                    className={`tap tap-w p-2 rounded-lg transition-colors cursor-pointer ${
                       module.isActive
                         ? 'text-green-600 hover:bg-green-50'
                         : 'text-gray-400 hover:bg-gray-50'
@@ -177,42 +196,66 @@ const SystemManagement: React.FC = () => {
         
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button className="p-4 border-2 border-dashed border-orange-300 rounded-lg hover:border-orange-400 hover:bg-orange-50 text-left cursor-pointer">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="tap p-4 border-2 border-dashed border-orange-300 rounded-lg text-left cursor-not-allowed opacity-60"
+            >
               <div className="flex items-center space-x-3">
                 <AlertTriangle className="h-8 w-8 text-orange-500" />
                 <div>
                   <h4 className="font-medium text-gray-900">Modo Mantenimiento</h4>
                   <p className="text-sm text-gray-600">Poner el sistema en mantenimiento</p>
+                  <SoonBadge />
                 </div>
               </div>
             </button>
             
-            <button className="p-4 border-2 border-dashed border-admin-blue/30 rounded-lg hover:border-admin-blue/50 hover:bg-admin-blue/5 text-left cursor-pointer">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="tap p-4 border-2 border-dashed border-admin-blue/30 rounded-lg text-left cursor-not-allowed opacity-60"
+            >
               <div className="flex items-center space-x-3">
                 <Settings className="h-8 w-8 text-admin-blue" />
                 <div>
                   <h4 className="font-medium text-gray-900">Reiniciar Servicios</h4>
                   <p className="text-sm text-gray-600">Reiniciar todos los servicios del sistema</p>
+                  <SoonBadge />
                 </div>
               </div>
             </button>
             
-            <button className="p-4 border-2 border-dashed border-green-300 rounded-lg hover:border-green-400 hover:bg-green-50 text-left cursor-pointer">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="tap p-4 border-2 border-dashed border-green-300 rounded-lg text-left cursor-not-allowed opacity-60"
+            >
               <div className="flex items-center space-x-3">
                 <Shield className="h-8 w-8 text-green-500" />
                 <div>
                   <h4 className="font-medium text-gray-900">Backup Completo</h4>
                   <p className="text-sm text-gray-600">Crear respaldo de toda la información</p>
+                  <SoonBadge />
                 </div>
               </div>
             </button>
             
-            <button className="p-4 border-2 border-dashed border-red-300 rounded-lg hover:border-red-400 hover:bg-red-50 text-left cursor-pointer">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="tap p-4 border-2 border-dashed border-red-300 rounded-lg text-left cursor-not-allowed opacity-60"
+            >
               <div className="flex items-center space-x-3">
                 <AlertTriangle className="h-8 w-8 text-red-500" />
                 <div>
                   <h4 className="font-medium text-gray-900">Limpiar Cache</h4>
                   <p className="text-sm text-gray-600">Limpiar toda la caché del sistema</p>
+                  <SoonBadge />
                 </div>
               </div>
             </button>

@@ -1,0 +1,44 @@
+[
+  {
+    "date": "2026-10-22",
+    "unitsSold": 0,
+    "keysSpent": 0,
+    "revenueCents": 0
+  },
+  {
+    "date": "2026-10-23",
+    "unitsSold": 1,
+    "keysSpent": 50,
+    "revenueCents": 15000
+  },
+  {
+    "date": "2026-10-24",
+    "unitsSold": 2,
+    "keysSpent": 100,
+    "revenueCents": 30000
+  },
+  {
+    "date": "2026-10-25",
+    "unitsSold": 3,
+    "keysSpent": 150,
+    "revenueCents": 45000
+  },
+  {
+    "date": "2026-10-26",
+    "unitsSold": 4,
+    "keysSpent": 200,
+    "revenueCents": 60000
+  },
+  {
+    "date": "2026-10-27",
+    "unitsSold": 5,
+    "keysSpent": 250,
+    "revenueCents": 75000
+  },
+  {
+    "date": "2026-10-28",
+    "unitsSold": 6,
+    "keysSpent": 300,
+    "revenueCents": 90000
+  }
+]

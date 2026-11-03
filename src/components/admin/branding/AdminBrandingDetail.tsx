@@ -91,7 +91,7 @@ const SectionCard: React.FC<{ title: string; children: React.ReactNode }> = ({ t
 );
 
 const fieldCls =
-  'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue resize-none';
+  'tap w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue resize-none';
 
 // ─── Designer Selector ────────────────────────────────────────────────────────
 
@@ -189,17 +189,17 @@ const ApproveModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-t-xl bg-white p-4 sm:p-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <CheckCircle size={18} className="text-green-600" />
             <h2 className="text-base font-semibold text-gray-900">Aprobar solicitud</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="tap-icon shrink-0 text-gray-400 hover:text-gray-600 cursor-pointer">
             <X size={20} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
           <div className="bg-gray-50 rounded-lg p-3 text-sm">
             <p className="font-medium text-gray-800">{brandName}</p>
             <p className="text-gray-500">#{requestId}</p>
@@ -228,14 +228,14 @@ const ApproveModal: React.FC<{
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+              className="tap flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting || !selectedPublicId}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+              className="tap flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               Aprobar
@@ -275,17 +275,17 @@ const RejectModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-t-xl bg-white p-4 sm:p-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <XCircle size={18} className="text-red-600" />
             <h2 className="text-base font-semibold text-gray-900">Rechazar solicitud</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="tap-icon shrink-0 text-gray-400 hover:text-gray-600 cursor-pointer">
             <X size={20} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
           <div className="bg-gray-50 rounded-lg p-3 text-sm">
             <p className="font-medium text-gray-800">{brandName}</p>
             <p className="text-gray-500">#{requestId}</p>
@@ -308,14 +308,14 @@ const RejectModal: React.FC<{
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+              className="tap flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting || !adminNotes.trim()}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+              className="tap flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               Rechazar
@@ -359,17 +359,17 @@ const ReassignModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-t-xl bg-white p-4 sm:p-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <UserCog size={18} className="text-admin-blue" />
             <h2 className="text-base font-semibold text-gray-900">Reasignar diseñador</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="tap-icon shrink-0 text-gray-400 hover:text-gray-600 cursor-pointer">
             <X size={20} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
           <div className="bg-gray-50 rounded-lg p-3 text-sm">
             <p className="font-medium text-gray-800">{brandName}</p>
             {currentDesignerName && (
@@ -395,14 +395,14 @@ const ReassignModal: React.FC<{
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+              className="tap flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting || !selectedPublicId || sameDesigner}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+              className="tap flex-1 px-4 py-2 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               Reasignar
@@ -468,7 +468,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
       <div className="space-y-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors"
+          className="tap flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 cursor-pointer transition-colors"
         >
           <ChevronLeft size={18} /> Volver
         </button>
@@ -476,7 +476,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
           <p className="text-red-800 mb-4">{error}</p>
           <button
             onClick={() => loadDetail()}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm cursor-pointer hover:bg-red-700 transition-colors"
+            className="tap px-4 py-2 bg-red-600 text-white rounded-lg text-sm cursor-pointer hover:bg-red-700 transition-colors"
           >
             Reintentar
           </button>
@@ -492,16 +492,17 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
   return (
     <div className="space-y-5">
       {/* ── Header ── */}
-      <div className="flex items-start gap-3">
+      <div className="flex flex-wrap items-start gap-3">
         <button
           onClick={onBack}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0 mt-0.5"
+          aria-label="Volver"
+          className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0 mt-0.5"
         >
           <ChevronLeft size={20} className="text-gray-600" />
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-xl font-semibold text-gray-900 truncate">{detail.brandName}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 truncate" title={detail.brandName}>{detail.brandName}</h2>
             <span className="text-gray-400 text-sm shrink-0">#{detail.id}</span>
             <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border shrink-0 ${meta.badge}`}>
               {meta.label}
@@ -511,18 +512,18 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
             {detail.commercialName} · Actualizado {formatDateTime(detail.updatedAt)}
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+        <div className="flex w-full items-center gap-2 flex-wrap sm:w-auto sm:shrink-0 sm:justify-end">
           {canApproveReject && (
             <>
               <button
                 onClick={() => setModal('approve')}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors cursor-pointer"
+                className="tap flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors cursor-pointer"
               >
                 <CheckCircle size={15} /> Aprobar
               </button>
               <button
                 onClick={() => setModal('reject')}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
+                className="tap flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
               >
                 <XCircle size={15} /> Rechazar
               </button>
@@ -531,15 +532,16 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
           {canReassign && (
             <button
               onClick={() => setModal('reassign')}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors cursor-pointer"
+              className="tap flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-admin-blue rounded-lg hover:bg-admin-blue-dark transition-colors cursor-pointer"
             >
               <UserCog size={15} /> Reasignar diseñador
             </button>
           )}
           <button
             onClick={() => loadDetail()}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+            className="tap-icon p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
             title="Actualizar"
+            aria-label="Actualizar"
           >
             <RefreshCw size={16} className="text-gray-500" />
           </button>
@@ -610,7 +612,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
                   href={detail.targetUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-admin-midnight hover:text-admin-blue hover:underline break-all"
+                  className="tap flex items-center gap-1 text-admin-midnight hover:text-admin-blue hover:underline break-all"
                 >
                   <Globe size={13} className="shrink-0" />
                   {detail.targetUrl}
@@ -753,7 +755,7 @@ export const AdminBrandingDetail: React.FC<Props> = ({ requestId, onBack }) => {
                     {res.status === 'VALIDATED' ? 'OK' : res.status === 'PENDING' ? '...' : 'X'}
                   </span>
                 </div>
-                <p className="text-[10px] text-gray-500 mt-1 truncate">{res.originalFileName}</p>
+                <p className="text-[10px] text-gray-500 mt-1 truncate" title={res.originalFileName}>{res.originalFileName}</p>
                 <p className="text-[10px] text-gray-400">{fileSizeLabel(res.sizeBytes)}</p>
               </div>
             ))}

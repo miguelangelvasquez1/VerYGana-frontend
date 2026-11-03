@@ -30,7 +30,7 @@ const INITIAL_VALUES: ImpactStoryFormValues = {
 // ─── Shared field classes ─────────────────────────────────────────────────────
 
 const inputCls = (err?: string) =>
-  `w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-gray-800 bg-white/70
+  `tap w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-gray-800 bg-white/70
    outline-none transition-all duration-150
    ${err
      ? 'border-red-400 focus:ring-2 focus:ring-red-200'
@@ -158,7 +158,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-admin-blue/5 to-slate-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-admin-blue/5 to-slate-100 py-4 sm:py-8 px-4">
       <div className="max-w-3xl mx-auto">
 
         {/* ── Header card ── */}
@@ -228,7 +228,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
             <div className="mb-4">
               <label className={labelCls}>Descripción <Required /></label>
               <textarea
-                className={`${inputCls(errors.description)} resize-none`}
+                className={`tap ${inputCls(errors.description)} resize-none`}
                 placeholder="Describe el contexto, las acciones realizadas y los resultados obtenidos..."
                 rows={5}
                 value={values.description}
@@ -291,7 +291,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
                   <label className={labelCls + ' mb-0'}>Beneficiados <Required /></label>
                 </div>
                 <input
-                  type="number" min="0"
+                  type="number" inputMode="numeric" min="0"
                   className={inputCls(errors.beneficiariesCount) + ' text-lg font-bold'}
                   placeholder="0"
                   value={values.beneficiariesCount}
@@ -314,7 +314,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
                 </div>
                 <div className="flex gap-2">
                   <select
-                    className={`w-24 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700
+                    className={`tap w-24 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700
                                 shadow-sm focus:outline-none focus:ring-2 focus:ring-admin-blue
                                 focus:border-admin-blue transition-colors disabled:opacity-50 cursor-pointer`}
                     value={values.investedCurrency}
@@ -328,7 +328,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
                     ))}
                   </select>
                   <input
-                    type="number" min="0" step="0.01"
+                    type="number" inputMode="decimal" min="0" step="0.01"
                     className={inputCls() + ' text-lg font-bold'}
                     placeholder="0.00"
                     value={values.investedAmount}
@@ -422,7 +422,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
           <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100 flex-wrap">
             <button
               type="button"
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40 cursor-pointer"
+              className="tap px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40 cursor-pointer"
               disabled={isBusy}
               onClick={onCancel}
             >
@@ -430,7 +430,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-admin-midnight bg-white border border-admin-midnight hover:bg-admin-midnight/10 transition-colors disabled:opacity-40 cursor-pointer"
+              className="tap px-5 py-2.5 rounded-xl text-sm font-semibold text-admin-midnight bg-white border border-admin-midnight hover:bg-admin-midnight/10 transition-colors disabled:opacity-40 cursor-pointer"
               disabled={isBusy}
               onClick={() => handleSubmit('DRAFT')}
             >
@@ -438,7 +438,7 @@ export default function ImpactStoryForm({ initialData, onSuccess, onCancel }: Im
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark transition-colors disabled:opacity-40 flex items-center gap-2 cursor-pointer"
+              className="tap px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark transition-colors disabled:opacity-40 flex items-center gap-2 cursor-pointer"
               disabled={isBusy}
               onClick={() => handleSubmit('PUBLISHED')}
             >
@@ -547,7 +547,7 @@ function MediaCard({ media, disabled, onRemove, onSetCover, onAltText }: {
           {hasError && <span className="text-red-500 font-semibold">✕</span>}
         </p>
         <input
-          className="w-full px-2 py-1 text-[11px] rounded-lg border border-gray-200 outline-none focus:border-admin-blue bg-gray-50 placeholder:text-gray-300 disabled:opacity-50"
+          className="tap w-full px-2 py-1 text-[11px] rounded-lg border border-gray-200 outline-none focus:border-admin-blue bg-gray-50 placeholder:text-gray-300 disabled:opacity-50"
           placeholder="Texto alternativo"
           value={media.altText}
           onChange={(e) => onAltText(e.target.value)}
@@ -560,7 +560,7 @@ function MediaCard({ media, disabled, onRemove, onSetCover, onAltText }: {
         {!media.isCover && (
           <button
             type="button"
-            className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-admin-blue/40 hover:text-admin-blue hover:bg-admin-blue/10 transition-colors disabled:opacity-40 cursor-pointer"
+            className="tap-icon w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-admin-blue/40 hover:text-admin-blue hover:bg-admin-blue/10 transition-colors disabled:opacity-40 cursor-pointer"
             onClick={onSetCover} disabled={disabled} title="Usar como portada"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -570,7 +570,7 @@ function MediaCard({ media, disabled, onRemove, onSetCover, onAltText }: {
         )}
         <button
           type="button"
-          className="w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 cursor-pointer"
+          className="tap-icon w-7 h-7 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 cursor-pointer"
           onClick={onRemove} disabled={disabled} title="Eliminar"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

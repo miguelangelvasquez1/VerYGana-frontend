@@ -78,7 +78,7 @@ export function ProsperityPage() {
         <button
           type="button"
           onClick={() => refetch()}
-          className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#03548C] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0b1440]"
+          className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#03548C] px-4 py-2 tap text-sm font-semibold text-white transition-colors hover:bg-[#0b1440]"
         >
           <RefreshCw className="h-4 w-4" />
           Reintentar
@@ -99,7 +99,7 @@ export function ProsperityPage() {
         </p>
         <Link
           href="/commercial/dashboard"
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#03548C] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0b1440]"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#03548C] px-5 py-2.5 tap text-sm font-semibold text-white transition-colors hover:bg-[#0b1440]"
         >
           Volver al inicio
         </Link>

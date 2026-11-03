@@ -69,7 +69,7 @@ export function ConfirmDialog({ from, transition, loading, onConfirm, onCancel }
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onCancel}
       />
-      <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="relative z-10 w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-2xl bg-white p-4 sm:p-6 shadow-2xl">
         <h3 className="text-base font-bold text-gray-900">
           {STATUS_LABELS[from]} → {STATUS_LABELS[transition.next]}
         </h3>
@@ -79,14 +79,14 @@ export function ConfirmDialog({ from, transition, loading, onConfirm, onCancel }
         <div className="mt-6 flex gap-3">
           <button
             onClick={onCancel}
-            className="cursor-pointer flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            className="tap cursor-pointer flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="cursor-pointer flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 bg-admin-blue hover:bg-admin-blue-dark"
+            className="tap cursor-pointer flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 bg-admin-blue hover:bg-admin-blue-dark"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Confirmar

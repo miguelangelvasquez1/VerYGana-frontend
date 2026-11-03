@@ -1,0 +1,56 @@
+{
+  "publicId": "00000000-0000-4000-8000-0000000000e1",
+  "status": "PURCHASED",
+  "criterion": "KEYS_EARNED",
+  "metricValue": 340,
+  "periodFrom": "2026-10-01",
+  "periodTo": "2026-10-31",
+  "reason": "Usuario destacado del mes (dato de prueba).",
+  "createdByAdminPublicId": "00000000-0000-4000-8000-0000000000a0",
+  "createdAt": "2026-10-20T10:00:00",
+  "deliveredAt": null,
+  "closedAt": null,
+  "cancelCause": null,
+  "buyer": "VERYGANA",
+  "beneficiaryPublicId": "00000000-0000-4000-8000-000000000001",
+  "beneficiaryName": "Consumidor Prueba",
+  "commercialPublicId": "00000000-0000-4000-8000-0000000000c1",
+  "commercialName": "Tienda de Prueba S.A.S.",
+  "purchaseId": 1,
+  "fundingRef": "FUND-0001",
+  "totalCents": 12500000,
+  "prosperityAbsorbedCents": 0,
+  "commissionCents": 625000,
+  "netToCommercialCents": 11875000,
+  "items": [
+    {
+      "itemId": 1,
+      "productName": "Producto de prueba",
+      "status": "PENDING_CLAIM",
+      "computableStatus": "PENDING",
+      "recognizedAt": null,
+      "subtotalCents": 12500000,
+      "prosperityAbsorbedCents": 0,
+      "commissionBaseCents": 12500000,
+      "commissionPctApplied": 5,
+      "commissionCents": 625000,
+      "commissionVatCents": 118750,
+      "netToCommercialCents": 11875000,
+      "deliveredAt": null,
+      "claimedAt": null,
+      "claimExpiresAt": "2026-12-20T10:00:00",
+      "paidOut": false,
+      "components": [
+        {
+          "type": "VERYGANA_PAYMENT",
+          "payer": "VERYGANA",
+          "sourceRef": "FUND-0001",
+          "amountCents": 12500000,
+          "status": "RECOGNIZED",
+          "cause": null,
+          "createdAt": "2026-10-20T10:00:00"
+        }
+      ]
+    }
+  ]
+}

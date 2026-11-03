@@ -1,0 +1,45 @@
+{
+  "contractId": 1,
+  "version": 1,
+  "status": "PENDING_VERYGANA_REVIEW",
+  "generatedAt": "2026-10-30T10:00:00",
+  "downloadUrl": "http://127.0.0.1:4010/media/contrato.pdf",
+  "businessApprovedAt": "2026-10-30T11:00:00",
+  "veryganaReviewedAt": null,
+  "veryganaDecisionNotes": null,
+  "esignatureSentAt": null,
+  "esignatureSignedAt": null,
+  "documents": [
+    {
+      "id": 1,
+      "documentType": "RUT",
+      "originalFileName": "rut-ficticio.pdf",
+      "sizeBytes": 120400,
+      "status": "CONFIRMED",
+      "uploadedAt": "2026-10-01T10:00:00",
+      "downloadUrl": null
+    }
+  ],
+  "businessProfile": {
+    "personType": "JURIDICA",
+    "companyName": "Tienda de Prueba S.A.S.",
+    "nit": "900000000-1",
+    "mercantileRegistration": "0000001",
+    "legalRepFirstName": "Persona",
+    "legalRepLastName": "Ficticia",
+    "legalRepDocType": "CC",
+    "legalRepDocNumber": "1000000000",
+    "legalRepPepDeclaration": false,
+    "annualIncomeRange": "LESS_THAN_500_SMMLV",
+    "ciiuCode": "4711",
+    "economicActivityDescription": "Comercio de prueba",
+    "commercialActivityType": "PRODUCTS",
+    "address": "Calle Falsa 123",
+    "municipalityName": "Bogotá",
+    "departmentName": "Bogotá D.C."
+  },
+  "diagnosticAnswers": {
+    "salesChannel": "BOTH",
+    "hasEcommerce": true
+  }
+}

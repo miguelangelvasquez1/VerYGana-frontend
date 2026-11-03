@@ -1,0 +1,237 @@
+{
+  "period": {
+    "type": "LAST_30_DAYS",
+    "startDate": "2026-10-02",
+    "endDate": "2026-10-31",
+    "previousStartDate": "2026-09-02",
+    "previousEndDate": "2026-10-01"
+  },
+  "plan": {
+    "code": "STANDARD",
+    "canAdvertise": true,
+    "canUseGames": true,
+    "canUseSurveys": true,
+    "canSellDirectly": true,
+    "canPromoteAllyProducts": false,
+    "canExportReport": true,
+    "budgetSuspended": false
+  },
+  "sales": {
+    "current": {
+      "salesAmountCents": 480000000,
+      "salesCount": 32,
+      "netEarningsCents": 456000000,
+      "platformCommissionsCents": 24000000
+    },
+    "previous": {
+      "salesAmountCents": 400000000,
+      "salesCount": 28,
+      "netEarningsCents": 380000000,
+      "platformCommissionsCents": 20000000
+    },
+    "salesAmountDeltaPct": 20,
+    "salesCountDeltaPct": 14.3,
+    "netEarningsDeltaPct": 20,
+    "platformCommissionsDeltaPct": null
+  },
+  "salesTrend": [
+    {
+      "date": "2026-10-02",
+      "amountCents": 30000000,
+      "count": 2
+    },
+    {
+      "date": "2026-10-03",
+      "amountCents": 34000000,
+      "count": 3
+    },
+    {
+      "date": "2026-10-04",
+      "amountCents": 38000000,
+      "count": 4
+    },
+    {
+      "date": "2026-10-05",
+      "amountCents": 42000000,
+      "count": 2
+    },
+    {
+      "date": "2026-10-06",
+      "amountCents": 46000000,
+      "count": 3
+    },
+    {
+      "date": "2026-10-07",
+      "amountCents": 50000000,
+      "count": 4
+    },
+    {
+      "date": "2026-10-08",
+      "amountCents": 54000000,
+      "count": 2
+    },
+    {
+      "date": "2026-10-09",
+      "amountCents": 58000000,
+      "count": 3
+    },
+    {
+      "date": "2026-10-10",
+      "amountCents": 62000000,
+      "count": 4
+    },
+    {
+      "date": "2026-10-11",
+      "amountCents": 66000000,
+      "count": 2
+    }
+  ],
+  "topProducts": [
+    {
+      "id": 1,
+      "name": "Producto de prueba con un nombre bastante largo",
+      "imageUrl": null,
+      "price": 125000,
+      "averageRate": 4.5,
+      "totalSales": 18
+    },
+    {
+      "id": 2,
+      "name": "Otro producto de prueba",
+      "imageUrl": null,
+      "price": 89000,
+      "averageRate": 4,
+      "totalSales": 9
+    }
+  ],
+  "engagement": {
+    "adLikes": {
+      "current": 340,
+      "previous": 300,
+      "deltaPct": 13.3
+    },
+    "surveyResponses": {
+      "current": 40,
+      "previous": 55,
+      "deltaPct": -27.3
+    },
+    "gamePlays": {
+      "current": 120,
+      "previous": 0,
+      "deltaPct": null
+    }
+  },
+  "channelBreakdown": [
+    {
+      "channel": "MARKETPLACE",
+      "unit": "SALES",
+      "value": 32
+    },
+    {
+      "channel": "ADS",
+      "unit": "INTERACTIONS",
+      "value": 340
+    },
+    {
+      "channel": "SURVEYS",
+      "unit": "INTERACTIONS",
+      "value": 40
+    },
+    {
+      "channel": "GAMES",
+      "unit": "INTERACTIONS",
+      "value": 120
+    }
+  ],
+  "planUsage": {
+    "code": "STANDARD",
+    "slots": [
+      {
+        "slot": "PRODUCTS",
+        "used": 12,
+        "max": 50
+      },
+      {
+        "slot": "ADS",
+        "used": 3,
+        "max": 20
+      },
+      {
+        "slot": "BRANDED_GAMES",
+        "used": 1,
+        "max": 2
+      },
+      {
+        "slot": "SURVEYS",
+        "used": 2,
+        "max": 10
+      }
+    ]
+  },
+  "activeAssets": {
+    "ads": [
+      {
+        "id": 1,
+        "title": "Anuncio de prueba",
+        "status": "ACTIVE",
+        "progressPct": 45,
+        "secondaryLabel": "450 de 1000 vistas"
+      }
+    ],
+    "brandedGames": [],
+    "surveys": [
+      {
+        "id": 1,
+        "title": "Encuesta de hábitos de compra",
+        "status": "ACTIVE",
+        "progressPct": 20,
+        "secondaryLabel": "20 de 100 respuestas"
+      }
+    ],
+    "products": [
+      {
+        "id": 1,
+        "title": "Producto de prueba",
+        "status": "ACTIVE",
+        "progressPct": null,
+        "secondaryLabel": "5 en stock"
+      }
+    ]
+  },
+  "allyPromotions": null,
+  "quickActions": [
+    {
+      "action": "CREATE_AD",
+      "enabled": true,
+      "disabledReason": null
+    },
+    {
+      "action": "CREATE_SURVEY",
+      "enabled": true,
+      "disabledReason": null
+    },
+    {
+      "action": "ADD_PRODUCT",
+      "enabled": true,
+      "disabledReason": null
+    },
+    {
+      "action": "EXPORT_REPORT",
+      "enabled": false,
+      "disabledReason": "Disponible en el plan Premium"
+    },
+    {
+      "action": "RECHARGE_WALLET",
+      "enabled": true,
+      "disabledReason": null
+    }
+  ],
+  "alerts": [
+    {
+      "type": "LOW_BALANCE",
+      "severity": "WARNING",
+      "message": "Tu saldo publicitario está por agotarse.",
+      "actionHint": "Recargar saldo"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "gameId": 1,
+  "gameName": "Juego de Prueba",
+  "jsonSchema": {
+    "type": "object",
+    "required": [
+      "slogan"
+    ],
+    "properties": {
+      "slogan": {
+        "type": "string",
+        "title": "Eslogan de la marca"
+      },
+      "description": {
+        "type": "string",
+        "title": "Descripción corta"
+      }
+    }
+  },
+  "uiSchema": {},
+  "requiredResourceCount": 1,
+  "requiredResourceLabel": "Logo de la marca"
+}

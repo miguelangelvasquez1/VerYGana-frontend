@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "type": "BUSINESS_OWNER_TERMS_AND_CONDITIONS",
+  "version": "1.0",
+  "documentUrl": "http://127.0.0.1:4010/media/terminos.pdf",
+  "status": "PUBLISHED",
+  "publishedDate": "2026-01-15T00:00:00",
+  "active": true
+}

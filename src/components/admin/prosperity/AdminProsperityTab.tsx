@@ -55,7 +55,7 @@ export function AdminProsperityTab({ publicId }: Props) {
         <button
           type="button"
           onClick={() => refetch()}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-admin-blue/10 px-4 py-2 text-sm font-medium text-admin-blue hover:bg-admin-blue/20"
+          className="tap inline-flex cursor-pointer items-center gap-2 rounded-lg bg-admin-blue/10 px-4 py-2 text-sm font-medium text-admin-blue hover:bg-admin-blue/20"
         >
           <RefreshCw className="h-4 w-4" /> Reintentar
         </button>
@@ -77,7 +77,7 @@ export function AdminProsperityTab({ publicId }: Props) {
             type="button"
             onClick={() => setUncoveredAlert(null)}
             aria-label="Descartar alerta"
-            className="cursor-pointer text-red-400 hover:text-red-600"
+            className="tap cursor-pointer text-red-400 hover:text-red-600"
           >
             <X className="h-4 w-4" />
           </button>
@@ -98,7 +98,7 @@ export function AdminProsperityTab({ publicId }: Props) {
         <button
           type="button"
           onClick={() => setAdjusting({ relatedEntryId: null })}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-admin-blue px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+          className="tap inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-admin-blue px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
         >
           <Plus className="h-4 w-4" /> Registrar ajuste
         </button>
@@ -126,7 +126,7 @@ export function AdminProsperityTab({ publicId }: Props) {
               <button
                 type="button"
                 onClick={() => setReversing(t)}
-                className="inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                className="tap inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50"
               >
                 <Undo2 className="h-3.5 w-3.5" /> Revertir
               </button>

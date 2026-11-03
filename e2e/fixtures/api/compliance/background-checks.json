@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "contractId": 1,
+    "checkId": "CHK-0001",
+    "checkType": "PERSON",
+    "country": "CO",
+    "subjectName": "Representante Prueba",
+    "subjectDocument": "1000000001",
+    "status": "COMPLETED",
+    "score": 1,
+    "pdfReportUrl": null,
+    "requestedByOfficerPublicId": "00000000-0000-4000-8000-0000000000b1",
+    "requestedAt": "2026-10-30T10:00:00",
+    "completedAt": "2026-10-30T10:05:00"
+  }
+]

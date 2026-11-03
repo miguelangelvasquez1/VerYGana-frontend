@@ -1,11 +1,15 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, lazy, Suspense } from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import { ChevronLeft, ChevronRight, Gift, Loader2, PackageCheck, PackageSearch, Search, X } from 'lucide-react';
 import { getPendingClaims } from '@/services/PurchaseItemService';
 import { CommercialPendingClaimResponseDTO } from '@/types/purchases/purchaseItem.types';
 import { DocumentType } from '@/types/User.types';
-import ClaimPinModal from './ClaimPinModal';
+
+// Se carga al abrirlo: no entra en el JavaScript inicial de la página (RN-8 de la spec 014). Con `lazy` de React,
+// que no suma el cargador de `next/dynamic` al paquete.
+const ClaimPinModal = lazy(() => import('./ClaimPinModal'));
 
 const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   [DocumentType.CC]: 'Cédula de ciudadanía',
@@ -92,7 +96,7 @@ export default function PendingClaimsPanel() {
           <select
             value={documentType}
             onChange={(e) => setDocumentType(e.target.value as DocumentType)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+            className="border border-gray-200 rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
           >
             {Object.values(DocumentType).map((type) => (
               <option key={type} value={type}>
@@ -111,7 +115,7 @@ export default function PendingClaimsPanel() {
               value={documentNumber}
               onChange={(e) => setDocumentNumber(e.target.value)}
               placeholder="Filtrar por documento..."
-              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+              className="w-full pl-9 pr-3 py-2 tap border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
             />
           </div>
         </div>
@@ -119,7 +123,7 @@ export default function PendingClaimsPanel() {
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 bg-[#03548C] text-white rounded-lg font-semibold text-sm hover:bg-[#0b1440] transition disabled:opacity-50 cursor-pointer"
+          className="px-4 py-2 tap bg-[#03548C] text-white rounded-lg font-semibold text-sm hover:bg-[#0b1440] transition disabled:opacity-50 cursor-pointer"
         >
           Buscar
         </button>
@@ -129,8 +133,7 @@ export default function PendingClaimsPanel() {
             type="button"
             onClick={handleClearFilter}
             disabled={isLoading}
-            className="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50 cursor-pointer"
-          >
+            className="flex items-center gap-1 px-3 py-2 tap text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50 cursor-pointer">
             <X className="w-3.5 h-3.5" />
             Limpiar filtro
           </button>
@@ -146,7 +149,7 @@ export default function PendingClaimsPanel() {
           <p className="text-red-600">{error}</p>
           <button
             onClick={() => loadClaims(documentType, appliedDocumentNumber, page)}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
+            className="mt-4 px-4 py-2 tap bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
           >
             Reintentar
           </button>
@@ -162,67 +165,69 @@ export default function PendingClaimsPanel() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-100">
-            <thead>
-              <tr className="bg-gray-50">
-                {['Producto', 'Comprador / Beneficiario', 'Documento', 'Precio', 'Fecha de compra', 'Acciones'].map((h) => (
-                  <th
-                    key={h}
-                    className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {claims.map((claim) => (
-                <tr key={claim.id} className="group hover:bg-gray-50 transition-colors">
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={claim.imageUrl}
-                        alt={claim.productName}
-                        className="w-10 h-10 rounded-lg object-cover border border-gray-100"
-                      />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{claim.productName}</p>
-                        {claim.buyerType === 'VERYGANA' && (
-                          <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-admin-gold/40 bg-admin-yellow/10 px-2 py-0.5 text-[11px] font-semibold text-admin-midnight">
-                            <Gift className="h-3 w-3" />
-                            Reconocimiento VERYGANA
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-sm text-gray-700">
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                      {claim.buyerType === 'VERYGANA' ? 'Beneficiario' : 'Comprador'}
-                    </p>
-                    {claim.buyerName}
-                  </td>
-                  <td className="px-5 py-4 text-sm text-gray-700">
-                    {DOCUMENT_TYPE_LABELS[claim.documentType]} {claim.documentNumber}
-                  </td>
-                  <td className="px-5 py-4 text-sm font-semibold text-[#03548C]">
-                    {formatPrice(claim.unitPriceCents)}
-                  </td>
-                  <td className="px-5 py-4 text-xs text-gray-500">{formatDate(claim.purchasedAt)}</td>
-                  <td className="px-5 py-4">
-                    <button
-                      title="Entregar producto"
-                      onClick={() => setClaimTarget(claim)}
-                      className="cursor-pointer inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+          <TableScroll label="Tabla de entregas pendientes, desplazable">
+            <table className="min-w-full divide-y divide-gray-100">
+              <thead>
+                <tr className="bg-gray-50">
+                  {['Producto', 'Comprador / Beneficiario', 'Documento', 'Precio', 'Fecha de compra', 'Acciones'].map((h) => (
+                    <th
+                      key={h}
+                      className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
                     >
-                      <PackageCheck className="h-3.5 w-3.5" />
-                      Entregar producto
-                    </button>
-                  </td>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {claims.map((claim) => (
+                  <tr key={claim.id} className="group hover:bg-gray-50 transition-colors">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={claim.imageUrl}
+                          alt={claim.productName}
+                          className="w-10 h-10 rounded-lg object-cover border border-gray-100"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{claim.productName}</p>
+                          {claim.buyerType === 'VERYGANA' && (
+                            <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-admin-gold/40 bg-admin-yellow/10 px-2 py-0.5 text-[11px] font-semibold text-admin-midnight">
+                              <Gift className="h-3 w-3" />
+                              Reconocimiento VERYGANA
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-700">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                        {claim.buyerType === 'VERYGANA' ? 'Beneficiario' : 'Comprador'}
+                      </p>
+                      {claim.buyerName}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-700">
+                      {DOCUMENT_TYPE_LABELS[claim.documentType]} {claim.documentNumber}
+                    </td>
+                    <td className="px-5 py-4 text-sm font-semibold text-[#03548C]">
+                      {formatPrice(claim.unitPriceCents)}
+                    </td>
+                    <td className="px-5 py-4 text-xs text-gray-500">{formatDate(claim.purchasedAt)}</td>
+                    <td className="px-5 py-4">
+                      <button
+                        title="Entregar producto"
+                        onClick={() => setClaimTarget(claim)}
+                        className="cursor-pointer inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 tap text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+                      >
+                        <PackageCheck className="h-3.5 w-3.5" />
+                        Entregar producto
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableScroll>
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
@@ -233,14 +238,14 @@ export default function PendingClaimsPanel() {
                 <button
                   disabled={page === 0}
                   onClick={() => handlePageChange(page - 1)}
-                  className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                  className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-500 hover:bg-gray-100 disabled:opacity-40"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   disabled={page >= totalPages - 1}
                   onClick={() => handlePageChange(page + 1)}
-                  className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-40"
+                  className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-500 hover:bg-gray-100 disabled:opacity-40"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -251,11 +256,13 @@ export default function PendingClaimsPanel() {
       )}
 
       {claimTarget && (
-        <ClaimPinModal
-          item={claimTarget}
-          onClose={() => setClaimTarget(null)}
-          onClaimed={handleClaimed}
-        />
+        <Suspense fallback={null}>
+          <ClaimPinModal
+            item={claimTarget}
+            onClose={() => setClaimTarget(null)}
+            onClaimed={handleClaimed}
+          />
+        </Suspense>
       )}
     </div>
   );

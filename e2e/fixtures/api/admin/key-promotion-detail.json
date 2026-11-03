@@ -1,0 +1,42 @@
+{
+  "id": 1,
+  "name": "Promoción de prueba 1",
+  "coveragePct": 40,
+  "startsAt": "2026-11-01T00:00:00",
+  "endsAt": "2026-12-01T00:00:00",
+  "status": "AUTHORIZED",
+  "configVersion": 1,
+  "termsText": "Términos de prueba",
+  "budgetCents": 100000000,
+  "reservedCents": 20000000,
+  "consumedCents": 5000000,
+  "availableBudgetCents": 75000000,
+  "maxExcessCentsPerUser": null,
+  "guaranteeDrawnCents": 10000000,
+  "guaranteeReturnedAt": null,
+  "authorizedAt": "2026-10-30T10:00:00",
+  "offers": [
+    {
+      "offerId": 1,
+      "status": "PENDING_ACCEPTANCE",
+      "respondedAt": null,
+      "promotionId": 1,
+      "promotionName": "Promoción de prueba",
+      "promotionStatus": "AUTHORIZED",
+      "startsAt": "2026-11-01T00:00:00",
+      "endsAt": "2026-12-01T00:00:00",
+      "termsText": "Términos de prueba",
+      "productId": 1,
+      "productName": "Producto de prueba",
+      "priceCents": 12500000,
+      "ordinaryKeysPct": 20,
+      "promotionKeysPct": 40,
+      "maxKeysCoverageCents": 5000000,
+      "minUserCashCents": 7500000,
+      "commissionPct": 5,
+      "estimatedCommissionCents": 625000,
+      "estimatedNetToCommercialCents": 11875000,
+      "prosperityBalanceCents": 300000000
+    }
+  ]
+}

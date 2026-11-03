@@ -49,8 +49,8 @@ export function ProsperityCommercialSection() {
         <>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-admin-blue/20 bg-admin-blue/5 px-4 py-3">
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-gray-900">{selected.companyName || selected.email}</p>
-              <p className="truncate text-xs text-gray-500">
+              <p className="truncate text-sm font-semibold text-gray-900" title={selected.companyName || selected.email}>{selected.companyName || selected.email}</p>
+              <p className="truncate text-xs text-gray-500" title={`${selected.nit ? `NIT ${selected.nit} · ` : ''}${selected.email}`}>
                 {selected.nit ? `NIT ${selected.nit} · ` : ''}
                 {selected.email}
               </p>
@@ -58,7 +58,7 @@ export function ProsperityCommercialSection() {
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50"
+              className="tap inline-flex cursor-pointer items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50"
             >
               <X className="h-3.5 w-3.5" /> Cambiar empresario
             </button>
@@ -77,7 +77,7 @@ export function ProsperityCommercialSection() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar empresario por email..."
-              className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-9 text-sm text-gray-700 outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/20"
+              className="tap w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-9 text-sm text-gray-700 outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/20"
             />
             {isFetching && (
               <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-300" />
@@ -102,11 +102,11 @@ export function ProsperityCommercialSection() {
                   <button
                     type="button"
                     onClick={() => setSelected(c)}
-                    className="flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
+                    className="tap flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-gray-900">{c.companyName || c.email}</p>
-                      <p className="truncate text-xs text-gray-500">
+                      <p className="truncate text-sm font-medium text-gray-900" title={c.companyName || c.email}>{c.companyName || c.email}</p>
+                      <p className="truncate text-xs text-gray-500" title={`${c.nit ? `NIT ${c.nit} · ` : ''}${c.email}`}>
                         {c.nit ? `NIT ${c.nit} · ` : ''}
                         {c.email}
                       </p>

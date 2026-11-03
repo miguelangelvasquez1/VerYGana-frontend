@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import {
   Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
@@ -48,10 +49,10 @@ export function PetStoreMetrics({ dateRange }: { dateRange: DateRangeFilter }) {
       getMyPetDailySales(dateRange, controller.signal),
     ])
       .then(([p, s]) => { setProducts(p); setSeries(s); })
-      .catch((err) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
         setError('No pudimos cargar las métricas de la tienda de mascotas.');
-        console.error(err);
+        console.error('Error cargando las métricas de la tienda de mascotas');
       })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
 
@@ -116,7 +117,7 @@ export function PetStoreMetrics({ dateRange }: { dateRange: DateRangeFilter }) {
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
+          <TableScroll label="Tabla de productos del juego, desplazable">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                 <tr>
@@ -150,7 +151,7 @@ export function PetStoreMetrics({ dateRange }: { dateRange: DateRangeFilter }) {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
           {products.some((p) => p.unitsSold === 0) && (
             <p className="border-t border-gray-100 px-4 py-2.5 text-xs text-gray-400">
               Los productos en gris están publicados pero aún no registran ventas en este periodo.

@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "type": "BANK_ACCOUNT",
+      "alias": "Cuenta de prueba",
+      "bankCode": "007",
+      "accountNumber": "0000000000",
+      "bankAccountType": "SAVINGS",
+      "accountHolderName": "Persona Ficticia",
+      "accountHolderDoc": "1000000000",
+      "accountHolderDocType": "CC",
+      "verificationStatus": "UNDER_REVIEW",
+      "active": true,
+      "defaultMethod": false,
+      "firstPayoutCompleted": false,
+      "createdAt": "2026-02-01T10:00:00"
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

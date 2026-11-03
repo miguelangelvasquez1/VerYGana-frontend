@@ -12,6 +12,7 @@ import { dateToZonedIsoEnd, dateToZonedIsoStart } from '@/lib/utils/dateTime';
 import { ProsperityPagination, Th } from '@/components/prosperity/ProsperityUI';
 import { inputClass } from '@/components/admin/prosperity/ProsperityModalShell';
 import { RecognitionFundCards, RecognitionStatusBadge, UserSearchSelect, type UserOption } from './RecognitionShared';
+import TableScroll from '@/components/shared/TableScroll';
 
 // Reconocimientos de VERYGANA: listado del admin.
 export default function RecognitionsPanel() {
@@ -71,7 +72,7 @@ export default function RecognitionsPanel() {
         </div>
         <Link
           href="/admin/recognitions/new"
-          className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+          className="tap inline-flex cursor-pointer items-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
           Nuevo reconocimiento
@@ -148,7 +149,7 @@ export default function RecognitionsPanel() {
           <button
             type="button"
             onClick={clearFilters}
-            className="mt-3 inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-900"
+            className="tap mt-3 inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-900"
           >
             <X className="h-3.5 w-3.5" />
             Limpiar filtros
@@ -181,7 +182,7 @@ export default function RecognitionsPanel() {
             <button
               type="button"
               onClick={() => refetch()}
-              className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
+              className="tap inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
             >
               <RefreshCw className="h-3.5 w-3.5" /> Reintentar
             </button>
@@ -192,7 +193,7 @@ export default function RecognitionsPanel() {
           </p>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <TableScroll label="Tabla de reconocimientos, desplazable">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -229,7 +230,7 @@ export default function RecognitionsPanel() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
             {data && <ProsperityPagination meta={data.meta} onPageChange={setPage} loading={isFetching} />}
           </>
         )}

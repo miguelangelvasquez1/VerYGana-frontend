@@ -1,0 +1,24 @@
+{
+  "fromPlanCode": "STANDARD",
+  "toPlanCode": "BASIC",
+  "eligible": false,
+  "message": "Para bajar al plan Básico debes finalizar 3 anuncios activos y retirar el saldo publicitario.",
+  "requiredTopUpAmountPesos": null,
+  "requiredTopUpVatAmountPesos": null,
+  "requiredTopUpTotalPesos": null,
+  "currentWalletBalancePesos": 500000,
+  "targetMonthlyPricePesos": 49900,
+  "targetMinInvestmentPesos": null,
+  "targetMaxInvestmentPesos": null,
+  "targetSaleCommissionPct": 8,
+  "blockers": [
+    {
+      "assetType": "ADS",
+      "assetLabel": "anuncios",
+      "currentCount": 5,
+      "allowedByTargetPlan": 2,
+      "excessCount": 3,
+      "message": "Espera a que finalicen o contacta al soporte para cancelarlos."
+    }
+  ]
+}

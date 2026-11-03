@@ -3,21 +3,26 @@
 // components/layout/DashboardLayout.tsx
 // Versión con carga de EffectivePlanState y propagación a Sidebar/Header
 
-import React, { useState, useEffect, useRef, createContext, useContext, useMemo } from 'react';
-import Link from 'next/link';
-import { Lock, Sparkles, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef, createContext, useContext, useMemo, lazy, Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { getEffectivePlanState } from '@/services/planService';
 import { getCommercialInitialData } from '@/services/commercial/commercialService';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
-import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
-import { WalletStatus } from '@/types/finance/Wallet.types';
-import { isWalletExhausted, isBudgetDormant, WalletExhaustedBanner, WalletDormantBanner } from '../plans/WalletBudgetAlerts';
 import { PaymentRequiredModal } from '../plans/PaymentRequiredModal';
 import { PlanChangeBlockedModal } from '../planChange/PlanChangeBlockedModal';
+import { EffectivePlanStateResponseDTO, PlanCode } from '@/types/finance/plans/Plan.types';
+import { WalletStatus } from '@/types/finance/Wallet.types';
+import { isWalletExhausted, isBudgetDormant } from '../plans/WalletBudgetAlerts';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+
+// Los avisos y las pantallas de estado se cargan solo cuando hacen falta: no entran en el JavaScript inicial (RN-8 de la spec 014).
+const LockedPage = lazy(() => import('./LayoutStates').then((m) => ({ default: m.LockedPage })));
+const OnboardingErrorState = lazy(() => import('./LayoutStates').then((m) => ({ default: m.OnboardingErrorState })));
+const WalletExhaustedBanner = lazy(() => import('../plans/WalletBanners').then((m) => ({ default: m.WalletExhaustedBanner })));
+const WalletDormantBanner = lazy(() => import('../plans/WalletBanners').then((m) => ({ default: m.WalletDormantBanner })));
 
 // ─── Route protection ─────────────────────────────────────────────────────────
 
@@ -33,12 +38,6 @@ const PROTECTED_ROUTES: { path: string; requiredPlans: PlanCode[] }[] = [
   { path: '/commercial/billing',   requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM] },
 ];
 
-const PLAN_LABELS: Record<PlanCode, string> = {
-  [PlanCode.BASIC]:    'Personal',
-  [PlanCode.STANDARD]: 'Estándar',
-  [PlanCode.PREMIUM]:  'Premium',
-};
-
 function getRouteAccess(
   path: string,
   planState: EffectivePlanStateResponseDTO | null,
@@ -53,54 +52,6 @@ function getRouteAccess(
   const ok = planState.effectivePlan != null
     && matched.requiredPlans.includes(planState.effectivePlan as PlanCode);
   return { ok, requiredPlans: matched.requiredPlans };
-}
-
-function LockedPage({ requiredPlans }: { requiredPlans: PlanCode[] }) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-      <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
-        <Lock className="w-8 h-8 text-gray-400" />
-      </div>
-      <h2 className="text-xl font-bold text-gray-900 mb-2">Sección no disponible</h2>
-      <p className="text-sm text-gray-500 mb-4 max-w-xs">
-        Esta funcionalidad requiere uno de los siguientes planes:
-      </p>
-      <div className="flex gap-2 mb-6">
-        {requiredPlans.map(p => (
-          <span key={p} className="px-3 py-1 bg-[#03548C]/10 text-[#03548C] text-xs font-bold rounded-full border border-[#03548C]/20">
-            {PLAN_LABELS[p]}
-          </span>
-        ))}
-      </div>
-      <Link
-        href="/plans"
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
-      >
-        <Sparkles className="w-4 h-4" />
-        Ver planes disponibles
-      </Link>
-    </div>
-  );
-}
-
-function OnboardingErrorState({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-      <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
-        <Lock className="w-8 h-8 text-gray-400" />
-      </div>
-      <h2 className="text-xl font-bold text-gray-900 mb-2">No pudimos cargar tu registro</h2>
-      <p className="text-sm text-gray-500 mb-4 max-w-xs">
-        Ocurrió un error al verificar el estado de tu registro comercial. Intenta de nuevo.
-      </p>
-      <button
-        onClick={onRetry}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors cursor-pointer"
-      >
-        Reintentar
-      </button>
-    </div>
-  );
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -157,6 +108,9 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile]       = useState(false);
+  // Cajón del menú (CA-7): el foco entra al abrir y vuelve al botón al cerrar.
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const drawerRef = useRef<HTMLDivElement | null>(null);
   const [planState, setPlanState]     = useState<EffectivePlanStateResponseDTO | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
   const [commercialData, setCommercialData]           = useState<CommercialInitialDataResponseDTO | null>(null);
@@ -227,12 +181,31 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // Cierra el cajón y devuelve el foco al botón de menú.
+  const closeMenu = () => {
+    setSidebarOpen(false);
+    menuButtonRef.current?.focus();
+  };
+
+  // Abierto, el foco entra al primer enlace y Escape lo cierra.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    drawerRef.current?.querySelector<HTMLElement>('nav a')?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setSidebarOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [sidebarOpen]);
+
   const loadPlan = async () => {
     try {
       const state = await getEffectivePlanState();
       setPlanState(state);
-    } catch (err) {
-      console.error('Error cargando estado del plan:', err);
+    } catch {
+      console.error('Error cargando estado del plan');
       setPlanState(NO_PLAN_STATE);
     } finally {
       setLoadingPlan(false);
@@ -247,8 +220,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         const state = await getEffectivePlanState();
         setPlanState(state);
         if (!isWalletExhausted(state)) return true;
-      } catch (err) {
-        console.error('Error re-consultando estado del plan tras recarga:', err);
+      } catch {
+        console.error('Error re-consultando estado del plan tras recarga');
       }
       if (i < MAX_TRIES - 1) {
         await new Promise((resolve) => setTimeout(resolve, INTERVAL_MS));
@@ -268,8 +241,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       } else {
         setLoadingPlan(false);
       }
-    } catch (err) {
-      console.error('Error cargando datos del comercial:', err);
+    } catch {
+      console.error('Error cargando datos del comercial');
       setCommercialDataError(true);
       setLoadingPlan(false);
     } finally {
@@ -306,19 +279,26 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <PlanContext.Provider value={{ planState, loadingPlan, refreshPlanState: loadPlan, pollPlanStateAfterRecharge }}>
-      <div className="min-h-screen bg-gray-50">
+      <div className="panel-touch min-h-screen bg-gray-50">
 
         <PaymentRequiredModal />
         <PlanChangeBlockedModal />
 
         {isMobile && sidebarOpen && (
           <div
+            aria-hidden="true"
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
+            onClick={closeMenu}
           />
         )}
 
         <div
+          id="commercial-sidebar"
+          ref={drawerRef}
+          // En el celular es un diálogo; cerrado, `inert` lo saca del orden de tabulación.
+          {...(isMobile
+            ? { role: 'dialog', 'aria-modal': sidebarOpen, 'aria-label': 'Menú', inert: !sidebarOpen }
+            : {})}
           className={`
             fixed top-0 left-0 h-full w-64 z-50
             transition-transform duration-300 ease-in-out
@@ -326,7 +306,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           `}
         >
           <Sidebar
-            onClose={() => setSidebarOpen(false)}
+            onClose={closeMenu}
+            planState={planState}
             effectivePlan={planState?.effectivePlan as PlanCode | null ?? null}
             hasActivePlan={planState?.hasActivePlan ?? false}
             pathname={currentPath}
@@ -337,6 +318,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <Header
             title={title}
             onMenuClick={() => setSidebarOpen(true)}
+            menuOpen={sidebarOpen}
+            menuButtonRef={menuButtonRef}
             showMenuButton={isMobile}
             planState={planState}
             commercialData={commercialData}
@@ -351,7 +334,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 );
               }
               if (commercialDataError) {
-                return <OnboardingErrorState onRetry={loadCommercialData} />;
+                return <Suspense fallback={null}><OnboardingErrorState onRetry={loadCommercialData} /></Suspense>;
               }
               if (commercialData && !onboardingCompleted) {
                 // Redirigiendo a /commercial-onboarding (ver efecto arriba).
@@ -369,16 +352,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 );
               }
               const access = getRouteAccess(currentPath, planState);
-              if (!access.ok) return <LockedPage requiredPlans={access.requiredPlans!} />;
+              if (!access.ok) return <Suspense fallback={null}><LockedPage requiredPlans={access.requiredPlans!} /></Suspense>;
               // No repetir el aviso dentro del propio flujo de recarga.
               const showBudgetBanner = !currentPath.startsWith('/commercial/balance');
               return (
                 <>
                   {showBudgetBanner && isBudgetDormant(planState) && (
-                    <div className="mb-4"><WalletDormantBanner /></div>
+                    <div className="mb-4"><Suspense fallback={null}><WalletDormantBanner /></Suspense></div>
                   )}
                   {showBudgetBanner && isWalletExhausted(planState) && !isBudgetDormant(planState) && (
-                    <div className="mb-4"><WalletExhaustedBanner /></div>
+                    <div className="mb-4"><Suspense fallback={null}><WalletExhaustedBanner /></Suspense></div>
                   )}
                   {children}
                 </>

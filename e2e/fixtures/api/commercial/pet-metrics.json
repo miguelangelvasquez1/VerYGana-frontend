@@ -1,0 +1,16 @@
+[
+  {
+    "catalogItemId": 1,
+    "externalId": 10,
+    "productName": "Ítem de mascota 2",
+    "priceKeys": 50,
+    "active": true,
+    "unitsSold": 12,
+    "keysSpent": 600,
+    "revenueCents": 180000,
+    "uniqueBuyers": 9,
+    "repeatBuyers": 2,
+    "firstSale": "2026-10-05",
+    "lastSale": "2026-10-28"
+  }
+]

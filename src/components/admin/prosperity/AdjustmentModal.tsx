@@ -91,7 +91,7 @@ export function AdjustmentModal({ publicId, balanceCents, relatedEntryId, onClos
             type="button"
             onClick={onClose}
             disabled={mutation.isPending}
-            className="cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
+            className="tap cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -99,7 +99,7 @@ export function AdjustmentModal({ publicId, balanceCents, relatedEntryId, onClos
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-admin-blue px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="tap inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-admin-blue px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             {mutation.isPending ? 'Registrando…' : 'Registrar ajuste'}

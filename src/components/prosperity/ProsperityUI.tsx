@@ -8,6 +8,7 @@ import type {
 } from '@/types/commercial/Prosperity.types';
 import type { PagedResponse } from '@/types/Generic.types';
 import { formatProsperityCents, formatProsperityDate, formatProsperityDateTime } from '@/utils/prosperity';
+import TableScroll from '@/components/shared/TableScroll';
 
 // Componentes compartidos del Saldo de Prosperidad (panel del empresario y
 // pestaña del admin). Recordatorio: el Saldo NO es dinero — sin íconos de
@@ -116,7 +117,7 @@ export function ProsperityThresholdsTable({
   return (
     <>
       {/* Escritorio */}
-      <div className="hidden overflow-x-auto md:block">
+      <TableScroll label="Tabla de umbrales de prosperidad, desplazable" className="hidden md:block">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -147,7 +148,7 @@ export function ProsperityThresholdsTable({
             ))}
           </tbody>
         </table>
-      </div>
+      </TableScroll>
 
       {/* Móvil */}
       <ul className="space-y-2 md:hidden">
@@ -215,7 +216,7 @@ export function ProsperityPagination({
           onClick={() => onPageChange(meta.page - 1)}
           disabled={!meta.hasPrevious || loading}
           aria-label="Página anterior"
-          className="cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="cursor-pointer rounded-lg p-1.5 tap-icon transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -224,7 +225,7 @@ export function ProsperityPagination({
           onClick={() => onPageChange(meta.page + 1)}
           disabled={!meta.hasNext || loading}
           aria-label="Página siguiente"
-          className="cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="cursor-pointer rounded-lg p-1.5 tap-icon transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronRight className="h-4 w-4" />
         </button>

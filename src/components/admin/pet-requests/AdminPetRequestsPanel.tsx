@@ -7,6 +7,7 @@ import {
   type PetRequest,
   type PetRequestStatus,
 } from '@/services/PetRequestService';
+import TableScroll from '@/components/shared/TableScroll';
 import { AdminPetRequestDetail } from './AdminPetRequestDetail';
 import { PET_STATUS_CONFIG, PET_STATUS_FILTERS, formatPetDate } from './petRequestStatus';
 
@@ -49,8 +50,8 @@ const AdminPetRequestsPanel: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-gray-800">Solicitudes de mascotas</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Productos que los comercios quieren integrar al juego. Aprobar una solicitud
@@ -60,7 +61,8 @@ const AdminPetRequestsPanel: React.FC = () => {
         <button
           onClick={() => load(filter)}
           title="Actualizar"
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+          aria-label="Actualizar"
+          className="tap-icon shrink-0 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
         >
           <RefreshCw size={18} />
         </button>
@@ -87,7 +89,7 @@ const AdminPetRequestsPanel: React.FC = () => {
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
+            className={`tap px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-pointer ${
               filter === f.value
                 ? 'bg-blue-600 text-white'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -106,7 +108,7 @@ const AdminPetRequestsPanel: React.FC = () => {
       ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-700 font-medium">{error}</p>
-          <button onClick={() => load(filter)} className="mt-3 text-sm text-red-600 underline cursor-pointer">
+          <button onClick={() => load(filter)} className="tap mt-3 px-3 text-sm text-red-600 underline cursor-pointer">
             Reintentar
           </button>
         </div>
@@ -122,7 +124,7 @@ const AdminPetRequestsPanel: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <TableScroll label="Tabla de solicitudes de mascotas, desplazable" className="bg-white rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -163,12 +165,12 @@ const AdminPetRequestsPanel: React.FC = () => {
                             <PawPrint size={14} className="text-gray-300" />
                           </div>
                         )}
-                        <p className="text-sm font-medium text-gray-900 max-w-[220px] truncate">
+                        <p className="text-sm font-medium text-gray-900 max-w-[220px] truncate" title={req.productName}>
                           {req.productName}
                         </p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 max-w-[160px] truncate">
+                    <td className="px-4 py-3 text-sm text-gray-700 max-w-[160px] truncate" title={req.companyName ?? undefined}>
                       {req.companyName ??<span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -194,7 +196,7 @@ const AdminPetRequestsPanel: React.FC = () => {
               })}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
       )}
     </div>
   );

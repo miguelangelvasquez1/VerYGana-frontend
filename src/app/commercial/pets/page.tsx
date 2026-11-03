@@ -185,7 +185,7 @@ function RequestCard({ req }: { req: PetRequest }) {
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 className="truncate font-semibold" style={{ color: INK }}>{req.productName}</h3>
+              <h3 title={req.productName} className="truncate font-semibold" style={{ color: INK }}>{req.productName}</h3>
               <p className="mt-0.5 line-clamp-2 text-sm text-gray-500">{req.description}</p>
             </div>
             <span
@@ -203,7 +203,7 @@ function RequestCard({ req }: { req: PetRequest }) {
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="flex cursor-pointer items-center gap-1 self-start text-xs font-semibold hover:underline"
+            className="tap flex cursor-pointer items-center gap-1 self-start text-xs font-semibold hover:underline"
             style={{ color: DEEP }}
             aria-expanded={expanded}
           >
@@ -305,12 +305,12 @@ function ImageField({ upload }: { upload: ReturnType<typeof usePetImageUpload> }
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent px-3 pb-3 pt-8">
                 <span className="flex items-center gap-1.5 truncate text-xs font-medium text-white">
                   <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{state.fileName}</span>
+                  <span title={state.fileName} className="truncate">{state.fileName}</span>
                 </span>
                 <button
                   type="button"
                   onClick={clear}
-                  className="shrink-0 cursor-pointer rounded-lg bg-white/20 p-1.5 text-white transition hover:bg-white/35"
+                  className="tap-icon shrink-0 cursor-pointer rounded-lg bg-white/20 p-1.5 text-white transition hover:bg-white/35"
                   aria-label="Quitar imagen"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -344,7 +344,7 @@ function ImageField({ upload }: { upload: ReturnType<typeof usePetImageUpload> }
           ref={inputRef}
           type="file"
           accept={ACCEPT_ATTR}
-          className="sr-only"
+          className="hidden"
           onChange={(e) => { pick(e.target.files); e.target.value = ''; }}
         />
       </div>
@@ -362,7 +362,7 @@ function ImageField({ upload }: { upload: ReturnType<typeof usePetImageUpload> }
             <button
               type="button"
               onClick={retry}
-              className="cursor-pointer text-xs font-semibold hover:underline"
+              className="tap cursor-pointer text-xs font-semibold hover:underline"
               style={{ color: DEEP }}
             >
               Reintentar subida
@@ -371,7 +371,7 @@ function ImageField({ upload }: { upload: ReturnType<typeof usePetImageUpload> }
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="cursor-pointer text-xs font-semibold hover:underline"
+            className="tap cursor-pointer text-xs font-semibold hover:underline"
             style={{ color: DEEP }}
           >
             {state.status === 'ready' ? 'Cambiar imagen' : 'Elegir otra imagen'}
@@ -539,7 +539,7 @@ function NewRequestDialog({ onClose, onCreated }: { onClose: () => void; onCreat
 
       <form
         onSubmit={submit}
-        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        className="relative flex max-h-[90dvh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
       >
         <header className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5">
           <div>
@@ -553,7 +553,7 @@ function NewRequestDialog({ onClose, onCreated }: { onClose: () => void; onCreat
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-lg p-1.5 transition hover:bg-gray-100"
+            className="tap-icon shrink-0 -m-1 cursor-pointer rounded-lg p-1.5 transition hover:bg-gray-100"
             aria-label="Cerrar"
           >
             <X className="h-4 w-4 text-gray-500" />
@@ -612,14 +612,14 @@ function NewRequestDialog({ onClose, onCreated }: { onClose: () => void; onCreat
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 cursor-pointer rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+              className="tap flex-1 cursor-pointer rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading || upload.busy}
-              className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50"
+              className="tap flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-50"
               style={{ background: `linear-gradient(135deg, ${AZUL}, ${AZUL_D})` }}
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -687,7 +687,7 @@ export default function PetsPage() {
               type="button"
               disabled
               title={WALLET_EXHAUSTED_TOOLTIP}
-              className="flex items-center gap-2 rounded-xl bg-gray-200 px-5 py-2.5 text-sm font-bold text-gray-400 cursor-not-allowed"
+              className="tap flex items-center gap-2 rounded-xl bg-gray-200 px-5 py-2.5 text-sm font-bold text-gray-400 cursor-not-allowed"
             >
               <Plus className="h-4 w-4" /> Nueva solicitud
             </button>
@@ -695,7 +695,7 @@ export default function PetsPage() {
             <button
               type="button"
               onClick={() => setDialogOpen(true)}
-              className="flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:opacity-90"
+              className="tap flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:opacity-90"
               style={{ background: `linear-gradient(135deg, ${AZUL}, ${AZUL_D})` }}
             >
               <Plus className="h-4 w-4" /> Nueva solicitud
@@ -720,7 +720,7 @@ export default function PetsPage() {
                 <button
                   type="button"
                   onClick={load}
-                  className="cursor-pointer text-xs font-semibold hover:underline"
+                  className="tap cursor-pointer text-xs font-semibold hover:underline"
                 >
                   Reintentar
                 </button>
@@ -744,7 +744,7 @@ export default function PetsPage() {
                     type="button"
                     disabled
                     title={WALLET_EXHAUSTED_TOOLTIP}
-                    className="rounded-xl bg-gray-200 px-5 py-2.5 text-sm font-bold text-gray-400 cursor-not-allowed"
+                    className="tap rounded-xl bg-gray-200 px-5 py-2.5 text-sm font-bold text-gray-400 cursor-not-allowed"
                   >
                     Crear la primera
                   </button>
@@ -752,7 +752,7 @@ export default function PetsPage() {
                   <button
                     type="button"
                     onClick={() => setDialogOpen(true)}
-                    className="cursor-pointer rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+                    className="tap cursor-pointer rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
                     style={{ background: `linear-gradient(135deg, ${AZUL}, ${AZUL_D})` }}
                   >
                     Crear la primera

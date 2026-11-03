@@ -1,0 +1,19 @@
+{
+  "currentStep": "LEGAL_IDENTIFICATION_PENDING",
+  "termsAccepted": true,
+  "legalIdentificationCompleted": false,
+  "diagnosticCompleted": false,
+  "routeClassified": false,
+  "routeConfirmed": false,
+  "classification": null,
+  "planAccepted": false,
+  "documentsCompleted": false,
+  "contractGenerated": false,
+  "contractStatus": null,
+  "businessApproved": false,
+  "veryganaReviewed": false,
+  "completed": false,
+  "requiresSpecialNegotiation": false,
+  "rejectionReason": null,
+  "rejectedAt": null
+}

@@ -1,10 +1,8 @@
 // components/ads/AdsList.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { AdCard } from './AdCard';
-import { EditAdModal } from './EditAdModal';
-import { IncreaseBudgetModal } from '../budget/IncreaseBudgetModal';
 import { Search, Filter, Plus, FileImage, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { AdResponseDTO } from '@/types/ads/commercial';
@@ -19,6 +17,11 @@ import { PlanSlotCounter } from '../plans/PlanSlotCounter';
 import { usePlanChangeRequest } from '@/hooks/planChange/usePlanChangeRequest';
 import { PlanChangeInProgressBanner, PLAN_CHANGE_BLOCK_TOOLTIP } from '../planChange/PlanChangeInProgress';
 import toast from 'react-hot-toast';
+
+// Se carga al abrirlo: no entra en el JavaScript inicial de la página (RN-8 de la spec 014). Con `lazy` de React,
+// que no suma el cargador de `next/dynamic` al paquete.
+const EditAdModal = lazy(() => import('./EditAdModal').then((m) => ({ default: m.EditAdModal })));
+const IncreaseBudgetModal = lazy(() => import('../budget/IncreaseBudgetModal').then((m) => ({ default: m.IncreaseBudgetModal })));
 
 /** Tope de likes de un anuncio (mismo que el backend: CreateAdRequestDTO / Ad.maxLikes). */
 const MAX_AD_LIKES = 10_000_000;
@@ -118,7 +121,7 @@ export function AdsList() {
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
+          className="px-4 py-2 tap bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
         >
           Reintentar
         </button>
@@ -141,7 +144,7 @@ export function AdsList() {
                   placeholder="Buscar anuncios..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                  className="pl-9 pr-4 py-2 tap w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                 />
               </div>
 
@@ -151,7 +154,7 @@ export function AdsList() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+                  className="px-3 py-2 tap border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
                 >
                   <option value="all">Todos los estados</option>
                   <option value="pending">Pendientes</option>
@@ -172,7 +175,7 @@ export function AdsList() {
                   type="button"
                   disabled
                   title={createBlockedTitle}
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 tap text-sm font-semibold text-gray-400 cursor-not-allowed"
                 >
                   <Plus className="h-4 w-4" />
                   Crear Anuncio
@@ -180,7 +183,7 @@ export function AdsList() {
               ) : (
                 <Link
                   href="/commercial/ads/create"
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 tap text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
                 >
                   <Plus className="h-4 w-4" />
                   Crear Anuncio
@@ -256,7 +259,7 @@ export function AdsList() {
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 0}
-                  className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                  className="p-2 tap-icon border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -264,7 +267,7 @@ export function AdsList() {
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage >= totalPages - 1}
-                  className="p-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                  className="p-2 tap-icon border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -285,7 +288,7 @@ export function AdsList() {
                 type="button"
                 disabled
                 title={createBlockedTitle}
-                className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed"
+                className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-gray-200 px-4 py-2 tap text-sm font-semibold text-gray-400 cursor-not-allowed"
               >
                 <Plus className="h-4 w-4" />
                 Crear Anuncio
@@ -293,7 +296,7 @@ export function AdsList() {
             ) : (
               <Link
                 href="/commercial/ads/create"
-                className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
+                className="mt-1 inline-flex items-center justify-center gap-2 rounded-md bg-[#03548C] px-4 py-2 tap text-sm font-semibold text-white shadow-sm hover:bg-[#0b1440] active:scale-95 transition-all cursor-pointer"
               >
                 <Plus className="h-4 w-4" />
                 Crear Anuncio
@@ -306,47 +309,51 @@ export function AdsList() {
       {/* Modal de aumento de presupuesto. `expectedMaxLikes` es el maxLikes que se está viendo: si
           otro aumento ya lo cambió el backend responde 409 sin cobrar (anti doble cobro). */}
       {increasingAd && (
-        <IncreaseBudgetModal
-          assetLabel="anuncio"
-          assetName={increasingAd.title}
-          mode={{
-            kind: 'units',
-            unitSingular: 'like',
-            unitPlural: 'likes',
-            unitCostCents: Math.round(Number(increasingAd.rewardPerLike) * 100), // rewardPerLike llega en pesos
-            currentTotal: increasingAd.maxLikes,
-            maxTotal: MAX_AD_LIKES,
-            quickPicks: [100, 500, 1000, 5000],
-          }}
-          willReopen={increasingAd.status === 'COMPLETED'}
-          balanceCents={planState?.remainingBudgetCents}
-          onSubmit={(additionalLikes) =>
-            increaseBudgetMutation.mutateAsync({
-              id: increasingAd.id,
-              expectedMaxLikes: increasingAd.maxLikes,
-              additionalLikes,
-            })
-          }
-          onSuccess={() => {
-            refreshPlanState();
-            setIncreasingAd(null);
-          }}
-          onStale={() => {
-            refetch();
-            refreshPlanState();
-          }}
-          onClose={() => setIncreasingAd(null)}
-        />
+        <Suspense fallback={null}>
+          <IncreaseBudgetModal
+            assetLabel="anuncio"
+            assetName={increasingAd.title}
+            mode={{
+              kind: 'units',
+              unitSingular: 'like',
+              unitPlural: 'likes',
+              unitCostCents: Math.round(Number(increasingAd.rewardPerLike) * 100), // rewardPerLike llega en pesos
+              currentTotal: increasingAd.maxLikes,
+              maxTotal: MAX_AD_LIKES,
+              quickPicks: [100, 500, 1000, 5000],
+            }}
+            willReopen={increasingAd.status === 'COMPLETED'}
+            balanceCents={planState?.remainingBudgetCents}
+            onSubmit={(additionalLikes) =>
+              increaseBudgetMutation.mutateAsync({
+                id: increasingAd.id,
+                expectedMaxLikes: increasingAd.maxLikes,
+                additionalLikes,
+              })
+            }
+            onSuccess={() => {
+              refreshPlanState();
+              setIncreasingAd(null);
+            }}
+            onStale={() => {
+              refetch();
+              refreshPlanState();
+            }}
+            onClose={() => setIncreasingAd(null)}
+          />
+        </Suspense>
       )}
 
       {/* Modal de edición */}
       {editingAd && (
-        <EditAdModal
-          ad={editingAd}
-          isOpen={!!editingAd}
-          onClose={handleCloseModal}
-          onSuccess={() => {}}
-        />
+        <Suspense fallback={null}>
+          <EditAdModal
+            ad={editingAd}
+            isOpen={!!editingAd}
+            onClose={handleCloseModal}
+            onSuccess={() => {}}
+          />
+        </Suspense>
       )}
     </>
   );

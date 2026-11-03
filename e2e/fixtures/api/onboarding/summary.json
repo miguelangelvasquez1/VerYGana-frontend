@@ -1,0 +1,88 @@
+{
+  "termsVersion": "1.0",
+  "termsAcceptedAt": "2026-02-01T08:00:00",
+  "legalIdentification": {
+    "personType": "JURIDICA",
+    "companyName": "Tienda de Prueba S.A.S.",
+    "nit": "900000000-1",
+    "mercantileRegistration": "0000001",
+    "legalRepFirstName": "Persona",
+    "legalRepLastName": "Ficticia",
+    "legalRepDocType": "CC",
+    "legalRepDocNumber": "1000000000",
+    "legalRepPepDeclaration": false,
+    "annualIncomeRange": "LESS_THAN_500_SMMLV",
+    "ciiuCode": "4711",
+    "economicActivityDescription": "Comercio al por menor de productos de prueba",
+    "address": "Calle Falsa 123",
+    "municipalityName": "Bogotá",
+    "departmentName": "Bogotá D.C."
+  },
+  "plan": {
+    "planCode": "STANDARD",
+    "planName": "Estándar",
+    "description": "Plan Estándar para impulsar tu negocio.",
+    "monthlyFeeCents": null,
+    "minInvestmentCents": 100000000,
+    "maxInvestmentCents": 1000000000,
+    "investmentAmountCents": 200000000,
+    "contractDurationMonths": null,
+    "saleCommissionPct": 5,
+    "maxKeysPct": 40,
+    "requiresSpecialNegotiation": false,
+    "specialNegotiationResolvedAt": null,
+    "specialNegotiationDetails": null,
+    "accepted": true,
+    "acceptedAt": "2026-02-01T09:00:00",
+    "grossAmountCents": 238000000,
+    "excludedTaxesCents": 38000000,
+    "benefits": {
+      "canAdvertise": true,
+      "canUseGames": true,
+      "canUseSurveys": true,
+      "canUsePets": false,
+      "maxProducts": 50,
+      "maxAds": 20,
+      "maxBrandedGames": 2,
+      "maxSurveys": 10,
+      "visibilityBoostPct": 10
+    },
+    "prosperityThresholdCents": null
+  },
+  "documents": {
+    "documents": [
+      {
+        "id": 1,
+        "documentType": "RUT",
+        "originalFileName": "rut-ficticio.pdf",
+        "sizeBytes": 120400,
+        "status": "CONFIRMED",
+        "uploadedAt": "2026-02-01T10:00:00",
+        "downloadUrl": null
+      }
+    ],
+    "checklist": [
+      {
+        "documentType": "RUT",
+        "required": true,
+        "uploaded": true
+      },
+      {
+        "documentType": "CAMARA_COMERCIO",
+        "required": true,
+        "uploaded": false
+      },
+      {
+        "documentType": "CEDULA_REPRESENTANTE",
+        "required": true,
+        "uploaded": false
+      },
+      {
+        "documentType": "PERMISO_SECTORIAL",
+        "required": false,
+        "uploaded": false
+      }
+    ],
+    "allRequiredUploaded": true
+  }
+}

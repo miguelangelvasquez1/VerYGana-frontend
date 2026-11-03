@@ -60,7 +60,7 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
             <Info className="w-5 h-5 text-blue-600" />
             <h2 className="text-lg font-bold text-gray-900">Detalle del anuncio</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+          <button onClick={onClose} className="p-1.5 tap-icon hover:bg-gray-100 rounded-lg transition-colors cursor-pointer" aria-label="Cerrar">
             <X className="w-5 h-5 text-gray-500 cursor-pointer" />
           </button>
         </div>
@@ -227,8 +227,8 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
               {ad.targetUrl && (
                 <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg text-sm text-purple-700 overflow-hidden">
                   <span className="shrink-0">🔗</span>
-                  <a href={ad.targetUrl} target="_blank" rel="noreferrer"
-                    className="truncate hover:underline">{ad.targetUrl}</a>
+                  <a href={ad.targetUrl} target="_blank" rel="noreferrer" title={ad.targetUrl}
+                    className="truncate hover:underline max-lg:-my-3.5 max-lg:py-3.5">{ad.targetUrl}</a>
                 </div>
               )}
 
@@ -270,7 +270,7 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
                         <button
                           onClick={() => setLikesPage(p => Math.max(0, p - 1))}
                           disabled={likesPage === 0}
-                          className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          className="flex items-center gap-1 px-3 py-1.5 tap border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                           <ChevronLeft className="w-4 h-4" /> Anterior
                         </button>
@@ -280,7 +280,7 @@ export function AdDetailModal({ adId, onClose }: AdDetailModalProps) {
                         <button
                           onClick={() => setLikesPage(p => Math.min(likesData.meta.totalPages - 1, p + 1))}
                           disabled={likesPage >= likesData.meta.totalPages - 1}
-                          className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          className="flex items-center gap-1 px-3 py-1.5 tap border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                           Siguiente <ChevronRight className="w-4 h-4" />
                         </button>

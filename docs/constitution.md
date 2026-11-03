@@ -242,7 +242,8 @@ se leen con `git show e7226e6:specs/<carpeta>/spec.md` (ver "Flujo de trabajo co
   (`next/experimental/testing/server`) y puede cambiar sin aviso; es la única forma de
   comprobar el `matcher` real y, si cambia, se arregla la prueba, no el middleware. (c) El
   script es `"test": "vitest run"` y no `vitest` como en la guía: el CI no puede quedarse en
-  modo de vigilancia. (d) El CI solo corre Chromium; Safari se comprueba a mano (CA-10 de la spec
+  modo de vigilancia. (d) El CI solo corre Chromium, repartido en dos jobs por la etiqueta `@paneles` del título (`Pruebas en
+  navegador` sin ella y `Pruebas en navegador (paneles)` con ella) para que cada uno quepa en 10 minutos; Safari se comprueba a mano (CA-10 de la spec
   012). Las capturas de escritorio (`e2e/desktop.spec.ts`) dependen del sistema operativo y solo
   corren en local.
 
@@ -377,13 +378,13 @@ se leen con `git show e7226e6:specs/<carpeta>/spec.md` (ver "Flujo de trabajo co
 
 ### P-19 · Un cambio no llega a `main` si falla una puerta de CI
 
-- **Regla:** el CI tiene cuatro checks que deben pasar: `Lint, tipos y build`, `Pruebas`,
-  `Auditoría de dependencias` y `Pruebas en navegador`. El tope de avisos de lint (`.lint-max-warnings`) solo baja: un
+- **Regla:** el CI tiene cinco checks que deben pasar: `Lint, tipos y build`, `Pruebas`,
+  `Auditoría de dependencias`, `Pruebas en navegador` y `Pruebas en navegador (paneles)`. El tope de avisos de lint (`.lint-max-warnings`) solo baja: un
   PR que agrega avisos falla, y uno que corrige avisos sin bajar el tope también falla.
 - **Fuente:** Regla del equipo (RN-1 y RN-2 de la spec 010; D-10).
 - **Versión:** `eslint` 9.39.4, `next` 15.5.28 (`next lint`), Node 22.
 - **Excepción:** temporal: mientras Miguel no active la protección de `main` (tarea M-1 de la
-  spec 010; Miguel agrega también "Pruebas en navegador") los cuatro checks avisan pero no impiden el
+  spec 010; Miguel agrega también "Pruebas en navegador" y "Pruebas en navegador (paneles)") los cinco checks avisan pero no impiden el
   merge ni un push directo. Es el cierre de
   la primera entrega de la spec 010, no deuda del código.
 

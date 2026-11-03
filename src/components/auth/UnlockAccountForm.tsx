@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authService } from "@/lib/auth/authService";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -97,13 +98,14 @@ const UnlockAccountForm = () => {
               onChange={(e) => setIdentifier(e.target.value)}
               required
               autoComplete="username"
+              inputMode="email"
               placeholder="ej. usuario@correo.com o 3001234567"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm
                          focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]
                          transition-all duration-200 ease-in-out
                          hover:border-gray-400
                          text-gray-900 placeholder-gray-500
-                         bg-white text-sm"
+                         bg-white text-base lg:text-sm"
               disabled={isUnlocking}
             />
           </div>
@@ -129,7 +131,7 @@ const UnlockAccountForm = () => {
                          transition-all duration-200 ease-in-out
                          hover:border-gray-400
                          text-gray-900 placeholder-gray-500
-                         bg-white text-sm tracking-[0.3em] text-center font-mono"
+                         bg-white text-base lg:text-sm tracking-[0.3em] text-center font-mono"
               disabled={isUnlocking}
             />
           </div>
@@ -155,7 +157,7 @@ const UnlockAccountForm = () => {
               type="button"
               onClick={handleResend}
               disabled={isResending || isUnlocking}
-              className="w-full text-[#03548C] hover:text-[#0b1440] font-semibold py-2
+              className="w-full min-h-11 lg:min-h-0 text-[#03548C] hover:text-[#0b1440] font-semibold py-2
                          disabled:opacity-50 disabled:cursor-not-allowed
                          text-sm transition-colors cursor-pointer"
             >
@@ -166,9 +168,9 @@ const UnlockAccountForm = () => {
 
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm">
-            <a href="/login" className="text-[#03548C] hover:text-[#0b1440] font-semibold underline decoration-2 underline-offset-2">
+            <Link href="/login" className="inline-flex min-h-11 items-center lg:min-h-0 text-[#03548C] hover:text-[#0b1440] font-semibold underline decoration-2 underline-offset-2">
               Volver a iniciar sesión
-            </a>
+            </Link>
           </p>
         </div>
       </div>

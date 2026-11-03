@@ -1,0 +1,8 @@
+[
+  {
+    "id": 9,
+    "name": "Categoría inactiva",
+    "imageUrl": "/categories/deporte.jpg",
+    "active": false
+  }
+]

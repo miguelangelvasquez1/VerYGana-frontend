@@ -44,8 +44,7 @@ export default function ClaimPinModal({ item, onClose, onClaimed }: Props) {
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50"
-          >
+            className="p-1.5 tap-icon rounded-lg hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50" aria-label="Cerrar">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -66,8 +65,9 @@ export default function ClaimPinModal({ item, onClose, onClaimed }: Props) {
               disabled={submitting}
               autoFocus
               inputMode="numeric"
+              autoComplete="one-time-code"
               placeholder="Ej. 123456"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 tap text-sm tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-[#03548C]/40"
             />
           </div>
 
@@ -76,14 +76,14 @@ export default function ClaimPinModal({ item, onClose, onClaimed }: Props) {
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 tap rounded-lg border text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={!pin.trim() || submitting}
-              className="px-4 py-2 rounded-lg text-white bg-[#03548C] hover:bg-[#024270] transition disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 tap rounded-lg text-white bg-[#03548C] hover:bg-[#024270] transition disabled:opacity-50 cursor-pointer"
             >
               {submitting ? 'Confirmando...' : 'Confirmar entrega'}
             </button>

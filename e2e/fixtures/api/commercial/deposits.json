@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "type": "INVESTMENT",
+      "description": "Inversión inicial plan Estándar",
+      "amountCents": 200000000,
+      "referenceId": "REF-0001",
+      "date": "2026-02-01T09:30:00",
+      "status": "ACTIVE"
+    },
+    {
+      "type": "SUBSCRIPTION",
+      "description": "Mensualidad de prueba",
+      "amountCents": 9900000,
+      "referenceId": "REF-0002",
+      "date": "2026-03-01T09:30:00",
+      "status": "ACTIVE"
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 10,
+    "totalElements": 2,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrevious": false,
+    "sorted": true
+  }
+}

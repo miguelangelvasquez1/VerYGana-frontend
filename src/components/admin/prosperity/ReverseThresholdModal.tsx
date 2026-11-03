@@ -82,7 +82,7 @@ export function ReverseThresholdModal({ threshold, balanceCents, onClose, onReve
             type="button"
             onClick={confirming ? () => setConfirming(false) : onClose}
             disabled={mutation.isPending}
-            className="cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
+            className="tap cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
           >
             {confirming ? 'Volver' : 'Cancelar'}
           </button>
@@ -90,7 +90,7 @@ export function ReverseThresholdModal({ threshold, balanceCents, onClose, onReve
             type="button"
             onClick={handlePrimary}
             disabled={mutation.isPending || causeMissing}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="tap inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             {mutation.isPending ? 'Revirtiendo…' : confirming ? 'Sí, revertir definitivamente' : 'Revertir Umbral'}

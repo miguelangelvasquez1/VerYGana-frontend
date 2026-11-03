@@ -12,6 +12,7 @@ import {
   TicketAuditLogResponseDTO,
   SuspiciousIpActivityResponseDTO,
 } from "@/types/raffles/ticketAuditLog.types";
+import TableScroll from "@/components/shared/TableScroll";
 
 const PAGE_SIZE = 10;
 
@@ -106,13 +107,13 @@ export default function AuditLogPanel() {
               value={ticketId}
               onChange={(e) => setTicketId(e.target.value)}
               placeholder="Ej: 1024"
-              className="border px-3 py-2 rounded-lg text-sm w-48"
+              className="tap border px-3 py-2 rounded-lg text-sm w-48"
             />
           </div>
           <button
             onClick={handleSearchTicket}
             disabled={!ticketId || loadingTicket}
-            className="px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark disabled:opacity-50 cursor-pointer"
+            className="tap px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark disabled:opacity-50 cursor-pointer"
           >
             {loadingTicket ? "Buscando..." : "Buscar"}
           </button>
@@ -140,7 +141,7 @@ export default function AuditLogPanel() {
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="border px-3 py-2 rounded-lg text-sm"
+              className="tap border px-3 py-2 rounded-lg text-sm"
             />
           </div>
           <div>
@@ -149,13 +150,13 @@ export default function AuditLogPanel() {
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="border px-3 py-2 rounded-lg text-sm"
+              className="tap border px-3 py-2 rounded-lg text-sm"
             />
           </div>
           <button
             onClick={() => loadLogs(0)}
             disabled={!from || !to || loadingLogs}
-            className="px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark disabled:opacity-50 cursor-pointer"
+            className="tap px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark disabled:opacity-50 cursor-pointer"
           >
             {loadingLogs ? "Cargando..." : "Consultar"}
           </button>
@@ -176,14 +177,14 @@ export default function AuditLogPanel() {
                     <button
                       onClick={() => loadLogs(logsPage - 1)}
                       disabled={logsPage === 0}
-                      className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                      className="tap text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
                     >
                       Anterior
                     </button>
                     <button
                       onClick={() => loadLogs(logsPage + 1)}
                       disabled={logsPage >= logsTotalPages - 1}
-                      className="text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                      className="tap text-xs px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
                     >
                       Siguiente
                     </button>
@@ -208,7 +209,7 @@ export default function AuditLogPanel() {
               type="date"
               value={since}
               onChange={(e) => setSince(e.target.value)}
-              className="border px-3 py-2 rounded-lg text-sm"
+              className="tap border px-3 py-2 rounded-lg text-sm"
             />
           </div>
           <div>
@@ -218,13 +219,13 @@ export default function AuditLogPanel() {
               min={1}
               value={threshold}
               onChange={(e) => setThreshold(Number(e.target.value))}
-              className="border px-3 py-2 rounded-lg text-sm w-32"
+              className="tap border px-3 py-2 rounded-lg text-sm w-32"
             />
           </div>
           <button
             onClick={loadSuspicious}
             disabled={!since || loadingSuspicious}
-            className="px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark disabled:opacity-50 cursor-pointer"
+            className="tap px-4 py-2 bg-admin-blue text-white rounded-lg text-sm hover:bg-admin-blue-dark disabled:opacity-50 cursor-pointer"
           >
             {loadingSuspicious ? "Cargando..." : "Consultar"}
           </button>
@@ -234,7 +235,7 @@ export default function AuditLogPanel() {
           suspicious.length === 0 ? (
             <p className="text-sm text-gray-400">No se encontró actividad sospechosa con estos parámetros.</p>
           ) : (
-            <div className="overflow-x-auto">
+            <TableScroll label="Tabla de IP y boletos emitidos, desplazable">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
@@ -251,7 +252,7 @@ export default function AuditLogPanel() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
           )
         )}
       </section>
@@ -267,7 +268,7 @@ function AuditLogTable({
   showTicketId?: boolean;
 }) {
   return (
-    <div className="overflow-x-auto">
+    <TableScroll label="Tabla de eventos de auditoría, desplazable">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
@@ -302,6 +303,6 @@ function AuditLogTable({
           ))}
         </tbody>
       </table>
-    </div>
+    </TableScroll>
   );
 }

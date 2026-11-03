@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import { Wallet, TrendingDown, TrendingUp, Crown, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { getBillingSummary, getDeposits, getPayouts } from '@/services/WalletService';
 import {
@@ -126,7 +127,7 @@ function YearMonthFilter({ filters, onChange }: { filters: FiltersState; onChang
       <select
         value={filters.year}
         onChange={(e) => onChange({ ...filters, year: Number(e.target.value), page: 0 })}
-        className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+        className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 tap bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]"
       >
         {YEARS.map((y) => (
           <option key={y} value={y}>{y}</option>
@@ -135,7 +136,7 @@ function YearMonthFilter({ filters, onChange }: { filters: FiltersState; onChang
       <select
         value={filters.month}
         onChange={(e) => onChange({ ...filters, month: Number(e.target.value), page: 0 })}
-        className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+        className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 tap bg-white focus:outline-none focus:ring-2 focus:ring-[#03548C]"
       >
         {MONTHS.map((m, i) => (
           <option key={i + 1} value={i + 1}>{m}</option>
@@ -157,14 +158,14 @@ function Pagination({ meta, page, onPageChange }: { meta: Meta; page: number; on
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={!meta.hasPrevious}
-          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1.5 tap-icon rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={!meta.hasNext}
-          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1.5 tap-icon rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -321,7 +322,7 @@ export function BillingDashboard() {
           <ErrorMessage onRetry={() => loadDeposits(depositFilters)} />
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <TableScroll label="Tabla de movimientos de la billetera, desplazable">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
@@ -369,7 +370,7 @@ export function BillingDashboard() {
                   )}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
             {(depositsData?.meta?.totalPages ?? 0) > 1 && (
               <Pagination
                 meta={depositsData!.meta}
@@ -394,7 +395,7 @@ export function BillingDashboard() {
           <ErrorMessage onRetry={() => loadPayouts(payoutFilters)} />
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <TableScroll label="Tabla de pagos y comisiones, desplazable">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
@@ -443,7 +444,7 @@ export function BillingDashboard() {
                   )}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
             {(payoutsData?.meta?.totalPages ?? 0) > 1 && (
               <Pagination
                 meta={payoutsData!.meta}

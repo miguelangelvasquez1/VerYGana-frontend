@@ -305,7 +305,7 @@ export function PlanChangeWizard() {
           <p className="text-sm text-gray-500">Puedes pedir un cambio de plan desde la página de planes.</p>
           <Link
             href="/plans"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 tap bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
           >
             Ver planes
           </Link>
@@ -406,7 +406,7 @@ export function PlanChangeWizard() {
                   type="button"
                   onClick={handleReloadDoc}
                   disabled={reloadingDoc}
-                  className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-white transition disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 tap border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-white transition disabled:opacity-50 cursor-pointer"
                 >
                   {reloadingDoc ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                   Recargar
@@ -437,7 +437,7 @@ export function PlanChangeWizard() {
                   type="button"
                   onClick={handleCancel}
                   disabled={submitting}
-                  className="w-full py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 hover:underline transition disabled:opacity-50 cursor-pointer"
+                  className="w-full py-2.5 tap text-sm font-semibold text-gray-500 hover:text-gray-700 hover:underline transition disabled:opacity-50 cursor-pointer"
                 >
                   Cancelar solicitud
                 </button>
@@ -462,7 +462,7 @@ export function PlanChangeWizard() {
               type="button"
               onClick={handleRefreshAwait}
               disabled={submitting}
-              className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 tap border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 cursor-pointer"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               Verificar estado
@@ -472,7 +472,7 @@ export function PlanChangeWizard() {
                 type="button"
                 onClick={handleCancel}
                 disabled={submitting}
-                className="block w-full py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-700 hover:underline transition disabled:opacity-50 cursor-pointer"
+                className="block w-full py-2.5 tap text-sm font-semibold text-gray-500 hover:text-gray-700 hover:underline transition disabled:opacity-50 cursor-pointer"
               >
                 Cancelar solicitud
               </button>
@@ -516,7 +516,7 @@ export function PlanChangeWizard() {
             </div>
             <Link
               href="/commercial/products"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 tap bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
             >
               Volver al panel
             </Link>
@@ -556,7 +556,7 @@ export function PlanChangeWizard() {
             ) : (
               <Link
                 href="/plans"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 tap bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
               >
                 Ver planes
               </Link>
@@ -575,7 +575,7 @@ export function PlanChangeWizard() {
             </div>
             <Link
               href="/plans"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 tap bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors"
             >
               Ver planes
             </Link>

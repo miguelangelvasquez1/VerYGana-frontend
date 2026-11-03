@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import {
   BarChart,
   Bar,
@@ -17,13 +18,16 @@ import { PlanCode } from "@/types/finance/plans/Plan.types";
 
 import TopSellingProducts from "@/components/commercial/products/commercialStats/TopSellingProducts";
 import { MetricStatCard } from "./MetricStatCard";
-import MonthlySalesReportModal from "./MonthlySalesReportModal";
 import * as commercialService from "@/services/commercial/commercialService";
 import { getTotalCommercialSales } from "@/services/PurchaseItemService";
 import { useAuth } from "@/hooks/useAuth";
 import { SalesReportResponseDTO, DailySaleResponseDTO } from "@/types/Commercial.types";
 import { PagedResponse } from "@/types/Generic.types";
 import type { DateRangeFilter } from "./analytics.types";
+
+// Se carga al abrirlo: no entra en el JavaScript inicial de la página (RN-8 de la spec 014). Con `lazy` de React,
+// que no suma el cargador de `next/dynamic` al paquete.
+const MonthlySalesReportModal = lazy(() => import('./MonthlySalesReportModal'));
 
 interface SalesAnalyticsProps {
   dateRange: DateRangeFilter;
@@ -63,6 +67,7 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
   const isStandard = planState?.effectivePlan === PlanCode.STANDARD;
 
   // ================== VENTAS TOTALES (rango de fechas) ==================
+  const [openCoverageHint, setOpenCoverageHint] = useState<number | null>(null);
   const [salesCount, setSalesCount] = useState<number | null>(null);
   const [salesCountLoading, setSalesCountLoading] = useState(false);
 
@@ -89,7 +94,7 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
     commercialService
       .getSalesCountByDateRange(dateRange.startDate, dateRange.endDate)
       .then(setSalesCount)
-      .catch((error) => console.error("Error loading sales count", error))
+      .catch(() => console.error("No se pudo cargar el conteo de ventas"))
       .finally(() => setSalesCountLoading(false));
   }, [dateRange.startDate, dateRange.endDate]);
 
@@ -97,7 +102,7 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
     setHistoricalSalesLoading(true);
     getTotalCommercialSales()
       .then(setHistoricalSalesCount)
-      .catch((error) => console.error("Error loading historical sales count", error))
+      .catch(() => console.error("No se pudo cargar el conteo histórico de ventas"))
       .finally(() => setHistoricalSalesLoading(false));
   }, []);
 
@@ -107,7 +112,7 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
     commercialService
       .getCommercialProfile(commercialPublicId)
       .then((profile) => setReviewCount(profile.reviewCount))
-      .catch((error) => console.error("Error loading review count", error))
+      .catch(() => console.error("No se pudo cargar el conteo de reseñas"))
       .finally(() => setReviewCountLoading(false));
   }, [commercialPublicId]);
   useEffect(() => {
@@ -115,7 +120,7 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
     commercialService
       .getAnuallySalesReport(reportYear)
       .then((data) => setSalesReport([...data].sort((a, b) => a.month - b.month)))
-      .catch((error) => console.error("Error loading sales report", error))
+      .catch(() => console.error("No se pudo cargar el reporte de ventas"))
       .finally(() => setReportLoading(false));
   }, [reportYear]);
 
@@ -128,7 +133,7 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
     commercialService
       .getDailySales(dateRange.startDate, dateRange.endDate, dailyPage, DAILY_SALES_PAGE_SIZE)
       .then(setDailySales)
-      .catch((error) => console.error("Error loading daily sales", error))
+      .catch(() => console.error("No se pudo cargar las ventas diarias"))
       .finally(() => setDailyLoading(false));
   }, [dateRange.startDate, dateRange.endDate, dailyPage]);
 
@@ -183,7 +188,7 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
           <p className="text-center text-gray-500 py-8">Cargando ventas...</p>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <TableScroll label="Tabla de ventas por día, desplazable">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
@@ -213,14 +218,27 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
                         </td>
                         {isStandard && sale.commissionCents === 0 ? (
                           <td className="py-3 px-4 text-right whitespace-nowrap">
-                            <span
+                            {/* La ayuda se abre y se cierra con un toque (RN-2); `title` queda para el puntero */}
+                            <button
+                              type="button"
                               title="Comisión cubierta por tu Saldo de Prosperidad"
-                              className="inline-flex items-center gap-1 text-gray-600 cursor-help"
+                              aria-label="Comisión cubierta por tu Saldo de Prosperidad"
+                              aria-expanded={openCoverageHint === sale.purchaseItemId}
+                              onClick={() =>
+                                setOpenCoverageHint((current) =>
+                                  current === sale.purchaseItemId ? null : sale.purchaseItemId,
+                                )
+                              }
+                              className="inline-flex items-center gap-1 text-gray-600 cursor-help tap"
                             >
                               {formatCents(0)}
                               <Info className="w-3.5 h-3.5 text-emerald-600" />
-                              <span className="sr-only">Comisión cubierta por tu Saldo de Prosperidad</span>
-                            </span>
+                            </button>
+                            {openCoverageHint === sale.purchaseItemId && (
+                              <span className="block whitespace-normal text-right text-xs text-emerald-700">
+                                Comisión cubierta por tu Saldo de Prosperidad
+                              </span>
+                            )}
                           </td>
                         ) : (
                           <td className="py-3 px-4 text-right text-red-500 whitespace-nowrap">
@@ -235,7 +253,7 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
                   )}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
 
             {dailySales && dailySales.meta.totalPages > 1 && (
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
@@ -247,14 +265,14 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
                   <button
                     onClick={() => setDailyPage((p) => p - 1)}
                     disabled={!dailySales.meta.hasPrevious}
-                    className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                    className="p-1.5 max-lg:flex tap-sq max-lg:items-center max-lg:justify-center rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setDailyPage((p) => p + 1)}
                     disabled={!dailySales.meta.hasNext}
-                    className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                    className="p-1.5 max-lg:flex tap-sq max-lg:items-center max-lg:justify-center rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -279,7 +297,7 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
             <select
               value={reportYear}
               onChange={(e) => setReportYear(Number(e.target.value))}
-              className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+              className="border rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]"
             >
               {[currentYear, currentYear - 1, currentYear - 2].map((year) => (
                 <option key={year} value={year}>{year}</option>
@@ -354,10 +372,12 @@ export default function SalesAnalytics({ dateRange }: SalesAnalyticsProps) {
       <TopSellingProducts />
 
       {selectedReport && (
-        <MonthlySalesReportModal
-          report={selectedReport}
-          onClose={() => setSelectedReport(null)}
-        />
+        <Suspense fallback={null}>
+          <MonthlySalesReportModal
+            report={selectedReport}
+            onClose={() => setSelectedReport(null)}
+          />
+        </Suspense>
       )}
     </div>
   );

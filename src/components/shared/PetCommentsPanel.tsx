@@ -112,6 +112,7 @@ export function PetCommentsPanel({
         currentUserRole={role}
         statusLabels={PET_STATUS_LABEL}
         accent={accent}
+        sendButtonClassName={role === 'DESIGNER' ? undefined : 'tap'}
         placeholder="Escribe un mensaje… (Enter para enviar, Shift+Enter para nueva línea)"
         onSend={handleSend}
       />

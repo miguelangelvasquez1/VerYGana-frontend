@@ -64,7 +64,7 @@ export function PlanGuard({ requiredPlans, children, featureName }: PlanGuardPro
 
         <Link
           href="/plans"
-          className="inline-flex items-center gap-2 bg-white text-slate-900 font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 bg-white text-slate-900 font-semibold text-sm px-5 py-2.5 tap rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
         >
           Ver planes disponibles
           <ArrowRight className="w-4 h-4" />

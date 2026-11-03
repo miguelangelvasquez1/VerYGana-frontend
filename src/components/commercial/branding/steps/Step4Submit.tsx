@@ -130,14 +130,14 @@ export const Step4Submit: React.FC<Props> = ({
       <div className="flex justify-between pt-2">
         <button
           onClick={onBack}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+          className="tap px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
         >
           Atrás
         </button>
         <button
           onClick={() => onSubmit(note)}
           disabled={submitting}
-          className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+          className="tap px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
         >
           {submitting && <Loader2 size={16} className="animate-spin" />}
           Enviar solicitud

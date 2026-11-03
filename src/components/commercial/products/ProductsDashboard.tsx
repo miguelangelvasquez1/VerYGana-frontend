@@ -95,9 +95,6 @@ export default function ProductsDashboard() {
       if (productsRes.status === "fulfilled") {
         const content = productsRes.value?.data ?? [];
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Products:", content);
-        }
 
         const mapped = content.map((p) => ({
           id: p.id,
@@ -119,7 +116,7 @@ export default function ProductsDashboard() {
         setProducts(mapped);
       }
     } catch (err: any) {
-      console.error("❌ Error loading dashboard:", err);
+      console.error("Error cargando el dashboard de productos");
       setError(err?.response?.data?.message || "Error al cargar dashboard");
     } finally {
       setIsLoading(false);
@@ -203,7 +200,7 @@ export default function ProductsDashboard() {
           <p className="text-red-600">{error}</p>
           <button
             onClick={loadDashboardData}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
+            className="mt-4 px-4 py-2 tap bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
           >
             Reintentar
           </button>
@@ -220,8 +217,8 @@ export default function ProductsDashboard() {
   const renderProducts = () => {
     return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-      <h2 className="text-3xl font-bold text-gray-900">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+      <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">
         Todos tus productos
       </h2>
       <div className="flex items-center gap-3">
@@ -231,7 +228,7 @@ export default function ProductsDashboard() {
             type="button"
             disabled
             title={createBlockedTitle}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-400 rounded-xl font-semibold text-sm cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 tap bg-gray-200 text-gray-400 rounded-xl font-semibold text-sm cursor-not-allowed"
           >
             <PlusCircle className="w-4 h-4" />
             Crear producto
@@ -239,7 +236,7 @@ export default function ProductsDashboard() {
         ) : (
           <button
             onClick={() => setShowCreateForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 tap bg-[#03548C] text-white rounded-xl font-semibold text-sm hover:bg-[#0b1440] transition cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             Crear producto
@@ -262,7 +259,7 @@ export default function ProductsDashboard() {
             placeholder="Buscar..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]"
+            className="w-full pl-10 pr-4 py-2 tap border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]"
           />
         </div>
       </div>
@@ -277,7 +274,7 @@ export default function ProductsDashboard() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredProducts.map((product) => (
             <CommercialProductCard
               key={product.id}
@@ -356,7 +353,7 @@ export default function ProductsDashboard() {
           <button
             key={tab.key}
             onClick={() => router.push(`/commercial/products?section=${tab.key}`)}
-            className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors cursor-pointer ${
+            className={`px-4 py-2.5 tap text-sm font-semibold border-b-2 transition-colors cursor-pointer ${
               section === tab.key
                 ? "border-[#03548C] text-[#03548C]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
@@ -382,8 +379,7 @@ export default function ProductsDashboard() {
               <h2 className="text-lg font-bold text-gray-900">Crear producto</h2>
               <button
                 onClick={() => setShowCreateForm(false)}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition cursor-pointer"
-              >
+                className="p-2 tap-icon rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition cursor-pointer" aria-label="Cerrar">
                 <X className="w-5 h-5" />
               </button>
             </div>

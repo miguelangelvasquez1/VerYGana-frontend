@@ -55,17 +55,22 @@ export default function MonthlySalesReportModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Reporte mensual de ventas"
+        className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[85vh] max-lg:max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
-          className="relative px-6 pt-6 pb-5 rounded-t-3xl text-white"
+          className="sticky top-0 z-10 px-6 pt-6 pb-5 rounded-t-3xl text-white"
           style={{ background: "linear-gradient(135deg, #0b1440, #03548C)" }}
         >
           <button
+            type="button"
             onClick={onClose}
-            className="absolute right-4 top-4 p-1.5 rounded-full hover:bg-white/10 transition cursor-pointer"
+            aria-label="Cerrar"
+            className="absolute right-4 top-4 p-1.5 max-lg:right-2 max-lg:top-2 max-lg:flex tap-sq max-lg:items-center max-lg:justify-center rounded-full hover:bg-white/10 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -127,7 +132,7 @@ export default function MonthlySalesReportModal({
                       className="w-11 h-11 rounded-lg object-cover shrink-0 bg-gray-100"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{p.name}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate" title={p.name}>{p.name}</p>
                       <div className="flex items-center gap-1 text-xs text-gray-400">
                         <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                         {p.averageRate.toFixed(1)}

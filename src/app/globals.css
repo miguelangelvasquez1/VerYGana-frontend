@@ -283,3 +283,58 @@ input:-webkit-autofill:active {
     transform: rotate(-90deg);
   }
 }
+
+/* Señal de desplazamiento de las tablas anchas (spec 014, RN-4), sin JavaScript. Dos capas: una sombra fija
+   en cada borde (`scroll`) y, encima, un tapón del color del fondo que se mueve con el contenido (`local`).
+   Si la tabla cabe, los tapones cubren las sombras y no se ve nada; si hay contenido oculto a un lado, el
+   tapón de ese lado se aleja y la sombra aparece. `--table-scroll-bg` es el fondo de la caja (blanco por
+   defecto): una tabla sobre otro color lo sobrescribe en su `className`, igual que `--table-scroll-shadow`. */
+.table-scroll {
+  background-image:
+    linear-gradient(to right, var(--table-scroll-bg, #fff) 30%, transparent),
+    linear-gradient(to left, var(--table-scroll-bg, #fff) 30%, transparent),
+    radial-gradient(farthest-side at 0 50%, var(--table-scroll-shadow, rgb(0 0 0 / 0.22)), transparent),
+    radial-gradient(farthest-side at 100% 50%, var(--table-scroll-shadow, rgb(0 0 0 / 0.22)), transparent);
+  background-position: left center, right center, left center, right center;
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+/* Campos de los paneles a 16 px en el celular (spec 014, RN-3, D-3 = b). iOS hace zoom al enfocar un campo de
+   menos de 16 px. La clase `panel-touch` va en la raíz de los layouts de comercial, admin y cumplimiento, del
+   onboarding y de /plans. Va fuera de `@layer` para ganarle a las utilidades de Tailwind (`text-sm`) sin tocar
+   cada campo, incluidos los widgets de JSON Schema del diseñador cuando se ven en el panel comercial. Solo por
+   debajo de `lg`: el escritorio y el consumidor no cambian (mismo punto de quiebre que la spec 012). */
+@media (width < 64rem) {
+  .panel-touch :is(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea) {
+    font-size: max(1rem, 1em);
+  }
+}
+
+/* Áreas táctiles de 44 px por debajo de lg (spec 014, RN-2), en los componentes de comercial y los compartidos con
+   él. Son atajos de `max-lg:min-h-11`, `max-lg:size-11` y `max-lg:inline-flex max-lg:size-11 max-lg:items-center
+   max-lg:justify-center`: la cadena corta en cada botón mantiene el JavaScript de las páginas igual o menor que en
+   la línea base (RN-8). Van fuera de `@layer`, como `.panel-touch`, para ganarle a las utilidades de la caja del
+   botón (`p-1.5`, `w-7`) sin depender del orden en que Tailwind las emite. Desde lg no hacen nada. `.tap-icon` además fija `display`, y al ir
+   fuera de `@layer` le gana a `hidden`, `md:hidden` y a cualquier `display` responsive por debajo de lg: no se combina
+   con ellos (un botón que se oculta en `md` usa `flex size-11 ... md:hidden`). */
+@media (width < 64rem) {
+  .tap {
+    min-height: 2.75rem;
+  }
+  .tap-w {
+    min-width: 2.75rem;
+  }
+  .tap-sq {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .tap-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}

@@ -22,7 +22,7 @@ interface Props {
 }
 
 const inputCls = (error?: string | boolean) =>
-    `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
+    `tap w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
         error ? "border-red-400 bg-red-50" : "border-gray-300"
     }`;
 
@@ -206,7 +206,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
   const showError = (field: string) => (submitted || touched[field]) && errors[field];
 
   return (
-      <div className="flex flex-col max-h-[80vh] w-full bg-white rounded-2xl overflow-hidden">
+      <div className="flex flex-col max-h-[90dvh] w-full bg-white rounded-2xl overflow-hidden">
         {/* ===== CABECERA FIJA ===== */}
         <div className="px-6 pr-12 py-4 border-b border-gray-100 bg-white sticky top-0 z-20">
           {onBack && (
@@ -214,7 +214,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
               type="button"
               onClick={onBack}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 mb-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-40"
+              className="tap inline-flex items-center gap-1.5 mb-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-40"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver a las rifas
@@ -230,7 +230,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
         <form
             id="edit-raffle-form"
             onSubmit={handleSubmit}
-            className="flex-1 overflow-y-auto p-6 space-y-6"
+            className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6"
         >
           <div>
             <label className={labelCls}>Título</label>
@@ -269,7 +269,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
                 name="raffleType"
                 value={formData.raffleType}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white cursor-pointer"
+                className="tap w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors bg-white cursor-pointer"
             >
               <option value={RaffleType.STANDARD}>Estándar</option>
               <option value={RaffleType.PREMIUM}>Premium</option>
@@ -298,7 +298,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
                       markTouched("startDate");
                       markTouched("endDate");
                     }}
-                    className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
+                    className={`tap w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
                         showError("startDate") ? "border-red-400 bg-red-50" : "border-gray-300"
                     }`}
                 />
@@ -330,7 +330,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
                       markTouched("endDate");
                       markTouched("startDate");
                     }}
-                    className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
+                    className={`tap w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-admin-blue focus:border-transparent transition-colors ${
                         showError("endDate") ? "border-red-400 bg-red-50" : "border-gray-300"
                     }`}
                 />
@@ -361,7 +361,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
                     }));
                   }}
                   onCalendarClose={() => markTouched("drawDate")}
-                  className={`w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors bg-white ${
+                  className={`tap w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors bg-white ${
                       showError("drawDate") ? "border-red-400 bg-red-50" : "border-amber-300"
                   }`}
               />
@@ -396,7 +396,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
               type="button"
               onClick={onCancel}
               disabled={loading}
-              className="cursor-pointer flex-1 border border-gray-300 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition disabled:opacity-40"
+              className="tap cursor-pointer flex-1 border border-gray-300 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition disabled:opacity-40"
           >
             Cancelar
           </button>
@@ -404,7 +404,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
               type="submit"
               form="edit-raffle-form"
               disabled={loading}
-              className="cursor-pointer flex-1 bg-admin-gradient hover:opacity-90 text-white py-2.5 rounded-xl font-semibold text-sm shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="tap cursor-pointer flex-1 bg-admin-gradient hover:opacity-90 text-white py-2.5 rounded-xl font-semibold text-sm shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? "Guardando..." : "Guardar cambios"}
           </button>

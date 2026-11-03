@@ -38,8 +38,9 @@ export const AdCard: React.FC<AdCardProps> = ({
   isLoading,
 }) => {
   return (
-    <div className="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 px-5 py-4">
+    <div className="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-4">
 
+      <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
       {/* Thumbnail */}
       <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
         {ad.contentUrl && ad.mediaType === 'IMAGE' ? (
@@ -59,13 +60,13 @@ export const AdCard: React.FC<AdCardProps> = ({
       {/* Main info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h3 className="text-sm font-bold text-gray-900 truncate">{ad.title}</h3>
+          <h3 className="text-sm font-bold text-gray-900 truncate" title={ad.title}>{ad.title}</h3>
           <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold border ${AD_STATUS_STYLES[ad.status as keyof typeof AD_STATUS_STYLES]}`}>
             {AD_STATUS_LABELS[ad.status as keyof typeof AD_STATUS_LABELS]}
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-gray-500">
+        <div className="flex flex-wrap lg:flex-nowrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
           {/* Type badge */}
           <span className="flex items-center gap-1">
             {ad.mediaType === 'VIDEO'
@@ -92,7 +93,7 @@ export const AdCard: React.FC<AdCardProps> = ({
           <span>{ad.currentLikes}/{ad.maxLikes} likes</span>
 
           {/* Advertiser */}
-          <span className="truncate max-w-[120px]">{ad.commercialName || `ID ${ad.commercialPublicId}`}</span>
+          <span className="truncate max-w-[120px]" title={ad.commercialName || `ID ${ad.commercialPublicId}`}>{ad.commercialName || `ID ${ad.commercialPublicId}`}</span>
 
           {/* Date */}
           <span>{formatDate(ad.startDate)}</span>
@@ -100,19 +101,22 @@ export const AdCard: React.FC<AdCardProps> = ({
 
         {/* Rejection reason inline */}
         {ad.status === 'REJECTED' && ad.rejectionReason && (
-          <p className="text-xs text-red-600 mt-1 truncate">
+          <p className="text-xs text-red-600 mt-1 truncate" title={`Razón: ${ad.rejectionReason}`}>
             <span className="font-semibold">Razón: </span>{ad.rejectionReason}
           </p>
         )}
       </div>
 
+      </div>
+
       {/* Actions */}
-      <div className="flex-shrink-0 flex items-center gap-2">
+      <div className="flex flex-wrap sm:flex-shrink-0 items-center gap-2">
         {/* Detail button — always visible */}
         <button
           onClick={() => onViewDetail(ad)}
           title="Ver detalle completo"
-          className="cursor-pointer p-2 rounded-lg border border-gray-200 text-gray-500 hover:border-admin-blue/40 hover:text-admin-blue hover:bg-admin-blue/10 transition-all"
+          aria-label="Ver detalle completo"
+          className="tap-icon cursor-pointer p-2 rounded-lg border border-gray-200 text-gray-500 hover:border-admin-blue/40 hover:text-admin-blue hover:bg-admin-blue/10 transition-all"
         >
           <Info className="w-4 h-4" />
         </button>
@@ -150,9 +154,9 @@ interface AdCardActionsProps {
 }
 
 const btn = {
-  green: 'cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
-  red:   'cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
-  amber: 'cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+  green: 'tap cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+  red:   'tap cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+  amber: 'tap cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
 };
 
 const AdCardActions: React.FC<AdCardActionsProps> = ({

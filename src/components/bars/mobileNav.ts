@@ -18,6 +18,19 @@ import {
 
 // Navegación del celular (spec 013): datos y lógica pura, sin JSX, para poder probarla en Vitest.
 
+// Barra de escritorio: los nueve accesos del consumidor, que comparte la barra sin sesión de `/`.
+export const DESKTOP_NAV_ITEMS = [
+  { href: '/home',              label: 'Inicio',    Icon: Home          },
+  { href: '/raffles',           label: 'Rifas',     Icon: Gift          },
+  { href: '/games',             label: 'Juegos',    Icon: Gamepad2      },
+  { href: '/pet',               label: 'Mascota',    Icon: PawPrint     },
+  { href: '/ads',               label: 'Anuncios',  Icon: Megaphone     },
+  { href: '/surveys',           label: 'Encuestas', Icon: ClipboardList },
+  { href: '/products',          label: 'Productos', Icon: Package       },
+  { href: '/plans/mobile-plans',label: 'Recargas',  Icon: Smartphone    },
+  { href: '/forum',             label: 'Foro',      Icon: MessageSquare },
+] as const;
+
 // Barra inferior. Perfil no está aquí: es el botón que abre el menú. Juegos ocupa el lugar de Rifas.
 export const MOBILE_BAR_ITEMS = [
   { href: "/home", label: "Inicio", Icon: Home },
@@ -26,8 +39,6 @@ export const MOBILE_BAR_ITEMS = [
   { href: "/pet", label: "Mascota", Icon: PawPrint },
   { href: "/products", label: "Productos", Icon: Package },
 ] as const;
-
-export type MobileBarItem = (typeof MOBILE_BAR_ITEMS)[number];
 
 // Menú de perfil del celular: incluye las páginas que la barra inferior no alcanza (rifas, encuestas,
 // recargas, foro, favoritos y participaciones), que en escritorio sí están en la barra superior.
@@ -47,7 +58,7 @@ export const MOBILE_MENU_ITEMS = [
 ] as const;
 
 /** Juegos se marca activo en /games y sus subrutas; los demás, solo en su ruta exacta. */
-export function isMobileBarItemActive(pathname: string, item: Pick<MobileBarItem, "href">): boolean {
+export function isMobileBarItemActive(pathname: string, item: (typeof MOBILE_BAR_ITEMS)[number]): boolean {
   if (item.href === "/games") return pathname === "/games" || pathname.startsWith("/games/");
   return pathname === item.href;
 }

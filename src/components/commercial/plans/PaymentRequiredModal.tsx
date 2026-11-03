@@ -53,7 +53,7 @@ export function PaymentRequiredModal() {
       onClick={() => setOpen(false)}
     >
       <div
-        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl"
+        className="max-h-[90dvh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between">
@@ -62,7 +62,7 @@ export function PaymentRequiredModal() {
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="cursor-pointer rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+            className="cursor-pointer rounded-lg p-1.5 tap-icon text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
             aria-label="Cerrar"
           >
             <X className="h-4 w-4" />
@@ -77,13 +77,13 @@ export function PaymentRequiredModal() {
         <div className="mt-5 flex gap-3">
           <button
             onClick={() => setOpen(false)}
-            className="flex-1 cursor-pointer rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+            className="flex-1 cursor-pointer rounded-xl border border-gray-200 py-2.5 tap text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
           >
             Ahora no
           </button>
           <button
             onClick={goToRecharge}
-            className="flex-1 cursor-pointer rounded-xl bg-[#03548C] py-2.5 text-sm font-bold text-white transition hover:bg-[#0b1440]"
+            className="flex-1 cursor-pointer rounded-xl bg-[#03548C] py-2.5 tap text-sm font-bold text-white transition hover:bg-[#0b1440]"
           >
             Recargar
           </button>

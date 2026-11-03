@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import TableScroll from '@/components/shared/TableScroll';
 import { editProduct, getProductEditInfo, getProductStock, getProductStockCode, deleteStockItem, addBulkStockItems } from "@/services/ProductService";
 import { getActiveProductCategories } from "@/services/ProductCategoryService";
 import { useProductImageUpdate } from "@/hooks/products/useProductImageUpdate";
@@ -123,8 +124,8 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
         setForm(product);
         setTargeting(product.targeting ?? {});
         setCategories(cats);
-      } catch (err) {
-        console.error('Error cargando datos del producto:', err);
+      } catch {
+        console.error('Error cargando datos del producto');
       } finally {
         setLoading(false);
       }
@@ -142,8 +143,8 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
         soldDate: soldDateFilter || undefined,
       });
       setPagedStock(result);
-    } catch (err) {
-      console.error('Error cargando stock:', err);
+    } catch {
+      console.error('Error cargando stock');
     } finally {
       setLoadingStock(false);
     }
@@ -355,7 +356,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               type="button"
               onClick={handleRemoveNewImage}
               disabled={isUploadingImage}
-              className="absolute top-7 right-2 bg-white text-red-600 border border-red-300 text-xs px-2 py-1 rounded-lg hover:bg-red-50 disabled:opacity-40 cursor-pointer"
+              className="absolute top-7 right-2 bg-white text-red-600 border border-red-300 text-xs px-2 py-1 tap rounded-lg hover:bg-red-50 disabled:opacity-40 cursor-pointer"
             >
               Quitar
             </button>
@@ -397,7 +398,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
             type="button"
             onClick={handleImageUpdate}
             disabled={isUploadingImage}
-            className="w-full bg-[#03548C] text-white py-2 rounded-lg hover:bg-[#0b1440] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full bg-[#03548C] text-white py-2 tap rounded-lg hover:bg-[#0b1440] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {isUploadingImage ? imageStatusLabel[imageState.status] : 'Actualizar imagen'}
           </button>
@@ -417,7 +418,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               name="name"
               value={form.name}
               onChange={handleChange}
-              className="w-full border border-gray-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+              className="w-full border border-gray-200 p-2 tap rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
               required
               disabled={isAnythingLoading}
             />
@@ -429,7 +430,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               name="description"
               value={form.description}
               onChange={handleChange}
-              className="w-full border border-gray-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+              className="w-full border border-gray-200 p-2 tap rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
               rows={4}
               required
               disabled={isAnythingLoading}
@@ -440,11 +441,11 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
             <div>
               <label className="block text-sm font-medium mb-1">Precio (COP) *</label>
               <input
-                type="number"
+                type="number" inputMode="decimal"
                 name="price"
                 value={form.price}
                 onChange={handleChange}
-                className="w-full border border-gray-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+                className="w-full border border-gray-200 p-2 tap rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
                 min={1}
                 step="0.01"
                 required
@@ -458,7 +459,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                 name="productCategoryId"
                 value={form.productCategoryId}
                 onChange={handleChange}
-                className="w-full border border-gray-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+                className="w-full border border-gray-200 p-2 tap rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
                 required
                 disabled={isAnythingLoading}
               >
@@ -516,7 +517,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value as StockStatus | ''); setStockPage(0); }}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
             >
               <option value="">Todos los estados</option>
               {(Object.keys(STATUS_LABELS) as StockStatus[]).map((s) => (
@@ -532,13 +533,13 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                 type="date"
                 value={soldDateFilter}
                 onChange={(e) => { setSoldDateFilter(e.target.value); setStockPage(0); }}
-                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 tap text-sm focus:outline-none focus:ring-2 focus:ring-[#03548C]/40 focus:border-[#03548C]"
               />
               <button
                 type="button"
                 onClick={() => { setStatusFilter(''); setSoldDateFilter(''); setStockPage(0); }}
                 title="Limpiar filtros"
-                className="px-2 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-gray-500 self-end cursor-pointer"
+                className="px-2 py-2 tap tap-w border border-gray-200 rounded-lg hover:bg-gray-50 transition text-gray-500 self-end cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -547,7 +548,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
         </div>
 
         {/* Tabla */}
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
+        <TableScroll label="Tabla de códigos del stock, desplazable" className="rounded-xl border border-gray-200">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -587,7 +588,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                             type="button"
                             onClick={() => handleCopyCode(revealedCodes[item.id])}
                             title="Copiar código"
-                            className="p-1 text-gray-400 hover:text-gray-600 rounded transition cursor-pointer"
+                            className="p-1 tap-icon text-gray-400 hover:text-gray-600 rounded transition cursor-pointer"
                           >
                             <Copy className="w-3.5 h-3.5" />
                           </button>
@@ -595,7 +596,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                             type="button"
                             onClick={() => handleToggleCode(item.id)}
                             title="Ocultar código"
-                            className="p-1 text-gray-400 hover:text-gray-600 rounded transition cursor-pointer"
+                            className="p-1 tap-icon text-gray-400 hover:text-gray-600 rounded transition cursor-pointer"
                           >
                             <EyeOff className="w-3.5 h-3.5" />
                           </button>
@@ -605,7 +606,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                           type="button"
                           onClick={() => handleToggleCode(item.id)}
                           disabled={loadingCodeId === item.id}
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#03548C] hover:text-[#0b1440] disabled:opacity-40 transition cursor-pointer"
+                          className="inline-flex items-center gap-1.5 tap text-xs font-semibold text-[#03548C] hover:text-[#0b1440] disabled:opacity-40 transition cursor-pointer"
                         >
                           {loadingCodeId === item.id ? (
                             <span className="w-3 h-3 border-2 border-[#03548C] border-t-transparent rounded-full animate-spin" />
@@ -628,7 +629,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
                         type="button"
                         onClick={() => handleDeleteStockItem(item.id)}
                         title="Eliminar código"
-                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                        className="p-1.5 tap-icon text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -638,7 +639,7 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               )}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
 
         {/* Paginación */}
         {totalPages > 1 && (
@@ -650,14 +651,14 @@ export default function EditProductForm({ productId, onSuccess, onCancel }: Prop
               <button
                 onClick={() => setStockPage((p) => p - 1)}
                 disabled={stockPage === 0}
-                className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition cursor-pointer"
+                className="p-1.5 tap-icon border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setStockPage((p) => p + 1)}
                 disabled={stockPage >= totalPages - 1}
-                className="p-1.5 border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition cursor-pointer"
+                className="p-1.5 tap-icon border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import TableScroll from '@/components/shared/TableScroll';
 import { Gamepad2, Users, Trophy, CheckCircle2, Clock, Wallet } from 'lucide-react';
 import { MetricStatCard } from '../MetricStatCard';
 import { getGamesReport } from '@/services/commercial/analyticsReportService';
@@ -96,73 +97,75 @@ export function GamesMetricsSection({ dateRange }: GamesMetricsSectionProps) {
           />
 
           <ReportTableCard title="Rendimiento por campaña">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-                <tr>
-                  <th className="px-6 py-3 font-semibold">Juego</th>
-                  <th className="px-4 py-3 font-semibold">Estado</th>
-                  <th className="px-4 py-3 font-semibold text-right">Partidas</th>
-                  <th className="px-4 py-3 font-semibold text-right">Jugadores</th>
-                  <th className="px-4 py-3 font-semibold w-44">Finalización</th>
-                  <th className="px-4 py-3 font-semibold text-right">Tiempo</th>
-                  <th className="px-4 py-3 font-semibold text-right">Presupuesto</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {data.perCampaign.length === 0 ? (
+            <TableScroll label="Tabla de rendimiento por campaña, desplazable">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-400">
-                      No tienes campañas de juegos en este período.
-                    </td>
+                    <th className="px-6 py-3 font-semibold">Juego</th>
+                    <th className="px-4 py-3 font-semibold">Estado</th>
+                    <th className="px-4 py-3 font-semibold text-right">Partidas</th>
+                    <th className="px-4 py-3 font-semibold text-right">Jugadores</th>
+                    <th className="px-4 py-3 font-semibold w-44">Finalización</th>
+                    <th className="px-4 py-3 font-semibold text-right">Tiempo</th>
+                    <th className="px-4 py-3 font-semibold text-right">Presupuesto</th>
                   </tr>
-                ) : (
-                  data.perCampaign.map((c) => (
-                    <tr key={c.campaignId} className="hover:bg-gray-50">
-                      <td className="px-6 py-3">
-                        <span className="font-medium text-gray-900">{c.gameTitle}</span>
-                        {(c.startDate || c.endDate) && (
-                          <span className="block text-xs text-gray-400">
-                            {formatDate(c.startDate)} – {formatDate(c.endDate)}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusChipClass(
-                            c.status,
-                          )}`}
-                        >
-                          {statusLabel(c.status)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatInt(c.completedSessions)} / {formatInt(c.sessionsPlayed)}
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatInt(c.uniquePlayers)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <ProgressBar pct={c.completionRatePct} className="flex-1" />
-                          <span className="w-12 shrink-0 text-right text-xs text-gray-500 tabular-nums">
-                            {formatPct(c.completionRatePct)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatDuration(c.totalPlayTimeSeconds)}
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatCOP(c.spentCents)}
-                        <span className="block text-xs text-gray-400">
-                          de {formatCOP(c.budgetCents)}
-                        </span>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {data.perCampaign.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-400">
+                        No tienes campañas de juegos en este período.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    data.perCampaign.map((c) => (
+                      <tr key={c.campaignId} className="hover:bg-gray-50">
+                        <td className="px-6 py-3">
+                          <span className="font-medium text-gray-900">{c.gameTitle}</span>
+                          {(c.startDate || c.endDate) && (
+                            <span className="block text-xs text-gray-400">
+                              {formatDate(c.startDate)} – {formatDate(c.endDate)}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusChipClass(
+                              c.status,
+                            )}`}
+                          >
+                            {statusLabel(c.status)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatInt(c.completedSessions)} / {formatInt(c.sessionsPlayed)}
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatInt(c.uniquePlayers)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <ProgressBar pct={c.completionRatePct} className="flex-1" />
+                            <span className="w-12 shrink-0 text-right text-xs text-gray-500 tabular-nums">
+                              {formatPct(c.completionRatePct)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatDuration(c.totalPlayTimeSeconds)}
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatCOP(c.spentCents)}
+                          <span className="block text-xs text-gray-400">
+                            de {formatCOP(c.budgetCents)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </TableScroll>
           </ReportTableCard>
         </>
       )}

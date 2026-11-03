@@ -94,29 +94,30 @@ function EditModal({ config, isPending, onSave, onClose }: EditModalProps) {
         className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer"
         onClick={!isPending ? onClose : undefined}
       />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm z-10">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm max-h-[90dvh] overflow-y-auto z-10">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-t-2xl bg-white px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-admin-blue/10 flex items-center justify-center">
               <Edit2 size={15} className="text-admin-blue" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-gray-900">Editar precio</h2>
-              <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[180px]">{typeLabel}</p>
+              <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[180px]" title={typeLabel}>{typeLabel}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             disabled={isPending}
-            className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Cerrar"
+            className="tap-icon shrink-0 cursor-pointer p-2 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X size={17} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-4 sm:px-6 py-5 space-y-4">
           {/* Current value */}
           <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -142,6 +143,7 @@ function EditModal({ config, isPending, onSave, onClose }: EditModalProps) {
               <input
                 autoFocus
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 min={0.01}
                 value={inputCOP}
@@ -151,7 +153,7 @@ function EditModal({ config, isPending, onSave, onClose }: EditModalProps) {
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && !isPending && handleSave()}
                 placeholder="0"
-                className="w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10"
+                className="tap w-full pl-7 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-admin-blue focus:ring-2 focus:ring-admin-blue/10"
               />
             </div>
             {parsedCOP > 0 && (
@@ -174,14 +176,14 @@ function EditModal({ config, isPending, onSave, onClose }: EditModalProps) {
           <button
             onClick={onClose}
             disabled={isPending}
-            className="cursor-pointer px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="tap cursor-pointer px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="cursor-pointer px-4 py-2 text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="tap cursor-pointer px-4 py-2 text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isPending && <Loader2 size={14} className="animate-spin" />}
             Guardar cambio
@@ -233,7 +235,7 @@ function PricingCard({ config, onEdit }: PricingCardProps) {
         </div>
         <button
           onClick={() => onEdit(config)}
-          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:border-admin-blue/40 hover:bg-admin-blue/5 text-gray-600 hover:text-admin-blue text-xs font-semibold rounded-lg transition-colors"
+          className="tap cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:border-admin-blue/40 hover:bg-admin-blue/5 text-gray-600 hover:text-admin-blue text-xs font-semibold rounded-lg transition-colors"
         >
           <Edit2 size={13} />
           Editar
@@ -284,7 +286,7 @@ export default function PreciosTab() {
         </div>
         <button
           onClick={() => refetch()}
-          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-admin-blue hover:bg-admin-blue-dark text-white text-sm font-semibold rounded-xl transition-colors"
+          className="tap cursor-pointer flex items-center gap-2 px-4 py-2 bg-admin-blue hover:bg-admin-blue-dark text-white text-sm font-semibold rounded-xl transition-colors"
         >
           <RefreshCw size={15} />
           Reintentar

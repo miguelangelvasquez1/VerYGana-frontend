@@ -132,7 +132,7 @@ export function PlanDetailModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative w-full max-w-md max-h-[85vh] overflow-y-auto bg-white rounded-2xl shadow-2xl shadow-gray-900/30 ring-1 ring-black/5">
+      <div className="relative w-full max-w-md max-h-[85dvh] overflow-y-auto bg-white rounded-2xl shadow-2xl shadow-gray-900/30 ring-1 ring-black/5">
         <div className="sticky top-0 bg-white px-6 pt-5 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-[#03548C]">{modalityLabel}</p>
@@ -142,7 +142,7 @@ export function PlanDetailModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="p-1.5 -mr-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition cursor-pointer"
+            className="-m-1.5 p-3 lg:m-0 lg:-mr-1.5 lg:p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

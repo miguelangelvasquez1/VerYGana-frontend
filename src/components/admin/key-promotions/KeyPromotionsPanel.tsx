@@ -10,6 +10,7 @@ import { formatColombiaDateTime, parseKeysError } from '@/utils/keys';
 import { ProsperityPagination, Th } from '@/components/prosperity/ProsperityUI';
 import { KeyPromotionFormModal } from './KeyPromotionFormModal';
 import { PromotionBudgetBar, PromotionStatusBadge } from './KeyPromotionShared';
+import TableScroll from '@/components/shared/TableScroll';
 
 // Promociones especiales de llaves (MP-12): listado del admin.
 export default function KeyPromotionsPanel() {
@@ -34,7 +35,7 @@ export default function KeyPromotionsPanel() {
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+          className="tap inline-flex cursor-pointer items-center gap-2 rounded-xl bg-admin-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
           Nueva promoción
@@ -65,7 +66,7 @@ export default function KeyPromotionsPanel() {
             <button
               type="button"
               onClick={() => refetch()}
-              className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
+              className="tap inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
             >
               <RefreshCw className="h-3.5 w-3.5" /> Reintentar
             </button>
@@ -74,7 +75,7 @@ export default function KeyPromotionsPanel() {
           <p className="py-12 text-center text-sm text-gray-400">Todavía no hay promociones. Crea la primera.</p>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <TableScroll label="Tabla de promociones de llaves, desplazable">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -114,7 +115,7 @@ export default function KeyPromotionsPanel() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
             {data && <ProsperityPagination meta={data.meta} onPageChange={setPage} loading={isFetching} />}
           </>
         )}

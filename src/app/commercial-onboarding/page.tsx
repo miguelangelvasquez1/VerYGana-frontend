@@ -21,7 +21,7 @@ function OnboardingErrorState({ onRetry }: { onRetry: () => void }) {
       </p>
       <button
         onClick={onRetry}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors cursor-pointer"
+        className="inline-flex min-h-11 items-center gap-2 px-5 py-2.5 lg:min-h-0 bg-[#03548C] text-white text-sm font-semibold rounded-xl hover:bg-[#0b1440] transition-colors cursor-pointer"
       >
         Reintentar
       </button>
@@ -53,8 +53,7 @@ export default function CommercialOnboardingPage() {
         return;
       }
       setStatus(result);
-    } catch (err) {
-      console.error('Error cargando estado de onboarding:', err);
+    } catch {
       setError(true);
     } finally {
       setLoading(false);
@@ -73,7 +72,7 @@ export default function CommercialOnboardingPage() {
   }, [sessionStatus, router]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="panel-touch min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white border-b border-gray-100 px-6 h-16 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <Image src="/logos/logoDorado.png" alt="Ver y Gana" width={32} height={32} />
@@ -81,7 +80,7 @@ export default function CommercialOnboardingPage() {
         </div>
         <button
           onClick={logout}
-          className="cursor-pointer text-sm font-medium text-gray-500 hover:text-red-600 transition-colors"
+          className="cursor-pointer -mr-2 min-h-11 px-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors lg:mr-0 lg:min-h-0 lg:px-0"
         >
           Cerrar sesión
         </button>

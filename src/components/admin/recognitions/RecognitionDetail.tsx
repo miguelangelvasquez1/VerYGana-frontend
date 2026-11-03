@@ -37,6 +37,7 @@ import { Th } from '@/components/prosperity/ProsperityUI';
 import { FieldError, ProsperityModalShell, inputClass } from '@/components/admin/prosperity/ProsperityModalShell';
 import UserDetailModal from '@/components/admin/users/UserDetailModal';
 import { Badge, ComputableStatusBadge, InfoItem, PaidOutBadge, RecognitionStatusBadge } from './RecognitionShared';
+import TableScroll from '@/components/shared/TableScroll';
 
 // Anular solo si está vigente y nada se le ha pagado aún al comercio.
 export const canCancelRecognition = (r: Pick<RecognitionDetailDTO, 'status' | 'items'>) =>
@@ -92,7 +93,7 @@ function CancelRecognitionModal({
             type="button"
             onClick={onClose}
             disabled={mutation.isPending}
-            className="cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
+            className="tap cursor-pointer rounded-lg border px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -100,7 +101,7 @@ function CancelRecognitionModal({
             type="button"
             onClick={submit}
             disabled={mutation.isPending || (touched && !!causeError)}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="tap inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             Anular
@@ -210,6 +211,7 @@ function ItemRow({ item }: { item: RecognitionDetailItem }) {
             {item.components.length === 0 ? (
               <p className="text-xs text-gray-400">Sin componentes registrados.</p>
             ) : (
+              <TableScroll label="Tabla de componentes de la venta, desplazable">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="text-left text-gray-500">
@@ -240,6 +242,7 @@ function ItemRow({ item }: { item: RecognitionDetailItem }) {
                   })}
                 </tbody>
               </table>
+              </TableScroll>
             )}
           </td>
         </tr>
@@ -258,7 +261,7 @@ function Participant({
 }: {
   icon: React.ElementType;
   role: string;
-  name: React.ReactNode;
+  name: string;
   action?: React.ReactNode;
 }) {
   return (
@@ -268,7 +271,7 @@ function Participant({
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-xs text-gray-500">{role}</p>
-        <div className="truncate text-sm font-semibold text-gray-900">{name}</div>
+        <div className="truncate text-sm font-semibold text-gray-900" title={name}>{name}</div>
       </div>
       {action}
     </div>
@@ -285,7 +288,7 @@ export default function RecognitionDetail({ publicId }: { publicId: string }) {
   const backLink = (
     <Link
       href="/admin/recognitions"
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+      className="tap inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
     >
       <ArrowLeft className="h-4 w-4" />
       Reconocimientos
@@ -312,7 +315,7 @@ export default function RecognitionDetail({ publicId }: { publicId: string }) {
           <button
             type="button"
             onClick={() => refetch()}
-            className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
+            className="tap inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold hover:underline"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Reintentar
           </button>
@@ -355,7 +358,7 @@ export default function RecognitionDetail({ publicId }: { publicId: string }) {
           <button
             type="button"
             onClick={() => setCancelling(true)}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-50"
+            className="tap inline-flex cursor-pointer items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-50"
           >
             <Ban className="h-4 w-4" />
             Anular
@@ -397,7 +400,7 @@ export default function RecognitionDetail({ publicId }: { publicId: string }) {
                 type="button"
                 onClick={() => setShowBeneficiary(true)}
                 title="Ver detalle del usuario"
-                className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-admin-blue transition-colors hover:bg-admin-blue/10"
+                className="tap inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-admin-blue transition-colors hover:bg-admin-blue/10"
               >
                 Ver usuario
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -444,12 +447,12 @@ export default function RecognitionDetail({ publicId }: { publicId: string }) {
           </dl>
           <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-3">
             <span className="text-[11px] text-gray-400">Ref. de financiación</span>
-            <code className="min-w-0 flex-1 select-all truncate font-mono text-[11px] text-gray-600">{r.fundingRef}</code>
+            <code className="min-w-0 flex-1 select-all truncate font-mono text-[11px] text-gray-600" title={r.fundingRef}>{r.fundingRef}</code>
             <button
               type="button"
               onClick={copyFundingRef}
               aria-label="Copiar referencia de financiación"
-              className="shrink-0 cursor-pointer rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+              className="tap-icon shrink-0 cursor-pointer rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
             >
               {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
             </button>
@@ -463,7 +466,7 @@ export default function RecognitionDetail({ publicId }: { publicId: string }) {
           <h2 className="text-base font-semibold text-gray-900">Ítems ({r.items.length})</h2>
           <p className="text-xs text-gray-500">Haz clic en un ítem para ver sus componentes de venta</p>
         </div>
-        <div className="overflow-x-auto">
+        <TableScroll label="Tabla de aportes del reconocimiento, desplazable">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -484,7 +487,7 @@ export default function RecognitionDetail({ publicId }: { publicId: string }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
       </section>
 
       {cancelling && (

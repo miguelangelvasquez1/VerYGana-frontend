@@ -1,0 +1,36 @@
+{
+  "documents": [
+    {
+      "id": 1,
+      "documentType": "RUT",
+      "originalFileName": "rut-ficticio.pdf",
+      "sizeBytes": 120400,
+      "status": "CONFIRMED",
+      "uploadedAt": "2026-02-01T10:00:00",
+      "downloadUrl": null
+    }
+  ],
+  "checklist": [
+    {
+      "documentType": "RUT",
+      "required": true,
+      "uploaded": true
+    },
+    {
+      "documentType": "CAMARA_COMERCIO",
+      "required": true,
+      "uploaded": false
+    },
+    {
+      "documentType": "CEDULA_REPRESENTANTE",
+      "required": true,
+      "uploaded": false
+    },
+    {
+      "documentType": "PERMISO_SECTORIAL",
+      "required": false,
+      "uploaded": false
+    }
+  ],
+  "allRequiredUploaded": false
+}

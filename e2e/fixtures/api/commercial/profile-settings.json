@@ -1,0 +1,15 @@
+{
+  "companyName": "Tienda de Prueba S.A.S.",
+  "nit": "900000000-1",
+  "mercantileRegistration": "0000001",
+  "email": "comercial@example.test",
+  "phoneNumber": "3000000000",
+  "address": "Calle Falsa 123",
+  "legalRepFirstName": "Persona",
+  "legalRepLastName": "Ficticia",
+  "legalRepDocType": "CC",
+  "legalRepDocNumber": "1000000000",
+  "legalRepPepDeclaration": false,
+  "whatsappAvailable": true,
+  "whatsappNumber": "3000000000"
+}

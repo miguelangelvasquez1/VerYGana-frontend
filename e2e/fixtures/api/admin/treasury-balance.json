@@ -1,0 +1,15 @@
+{
+  "keysReserveCents": 500000000,
+  "fortificationCents": 120000000,
+  "operationsCents": 250000000,
+  "payoutsPendingCents": 80000000,
+  "taxReserveCents": 60000000,
+  "connectivityCents": 20000000,
+  "infrastructureCents": 30000000,
+  "payrollCents": 40000000,
+  "promotionsReserveCents": 10000000,
+  "totalCents": 1110000000,
+  "keysReserveHealthPct": 92,
+  "keysReserveStatus": "HEALTHY",
+  "hasNegativeBalance": false
+}

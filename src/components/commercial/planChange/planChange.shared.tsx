@@ -73,7 +73,7 @@ export function ChangePlanButton({ className }: { className?: string }) {
       disabled={loading}
       className={
         className ??
-        "inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border-2 border-[#03548C]/25 text-[#03548C] font-bold text-sm rounded-xl shadow-sm hover:bg-[#03548C]/5 hover:border-[#03548C]/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+        "inline-flex items-center justify-center gap-2 px-5 py-2.5 tap bg-white border-2 border-[#03548C]/25 text-[#03548C] font-bold text-sm rounded-xl shadow-sm hover:bg-[#03548C]/5 hover:border-[#03548C]/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
       }
     >
       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRightLeft className="w-4 h-4" />}
