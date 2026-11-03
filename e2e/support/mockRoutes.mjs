@@ -75,6 +75,7 @@ export const ROUTES = [
 
   // Otros roles (solo las capturas de escritorio de CA-8)
   { method: 'GET', path: '/commercials/initialData', fixture: 'api/commercials/initial-data.json' },
+  { method: 'GET', path: '/commercials/information-requests', fixture: 'api/commercials/information-requests.json' },
   { method: 'GET', path: '/plans/commercial/state', fixture: 'api/plans/commercial-state.json' },
   { method: 'GET', path: '/commercial/prosperity', fixture: 'api/commercial/prosperity-summary.json' },
   { method: 'GET', path: '/game-designers/me/branding-requests', fixture: 'api/game-designers/branding-requests.json' },

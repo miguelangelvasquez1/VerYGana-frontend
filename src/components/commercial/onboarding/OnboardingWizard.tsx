@@ -3,10 +3,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Check, Loader2, PhoneCall } from "lucide-react";
 import toast from "react-hot-toast";
+import { useApproveContract } from "@/hooks/commercial/useApproveContract";
+import { readApiError } from "@/lib/api/apiError";
+import { approveErrorMessage, resolveApproveFailure } from "@/lib/formalization/contractApproval";
+import type { ContractApproveRequest } from "@/types/commercial/Declaration.types";
 import {
   OnboardingService,
   OnboardingStatus,
-  OnboardingStep,
   ClassificationResult,
   LegalIdentificationRequest,
   DiagnosticQuestionnaire,
@@ -32,6 +35,7 @@ import { LegalIdentificationStep, LegalIdentificationForm } from "./steps/2-Lega
 import { DiagnosticStep, ClassificationStep } from "./steps/3-DiagnosticStep";
 import { PlanStep, AcceptPlanData } from "./steps/4-PlanStep";
 import { DocumentsStep } from "./steps/5-DocumentsStep";
+import { TaxProfileStep } from "./steps/5b-TaxProfileStep";
 import {
   ContractGenerateStep,
   ContractReviewStep,
@@ -39,32 +43,8 @@ import {
   SignatureStep,
 } from "./steps/6-ContractStep";
 import { PaymentStep } from "./steps/7-PaymentStep";
-
-const STEP_LABELS = ["Términos", "Identificación", "Diagnóstico", "Plan", "Documentos", "Contrato", "Pago"];
-
-type WizardStep = Exclude<OnboardingStep, "COMPLETED">;
-
-// Clasificación se muestra como parte de "Diagnóstico" y Firma como parte de
-// "Contrato" — comparten el mismo índice del stepper que su paso anterior en
-// vez de tener su propia burbuja.
-// ADVISOR_CONTACT_PENDING (Ruta D) es terminal: se renderiza como pantalla
-// completa sin stepper (ver el return temprano junto a `underReview` más
-// abajo), así que este índice nunca se usa — solo existe para satisfacer el
-// tipo Record<WizardStep, number>.
-const STEP_INDEX: Record<WizardStep, number> = {
-  TERMS_PENDING: 0,
-  LEGAL_IDENTIFICATION_PENDING: 1,
-  DIAGNOSTIC_PENDING: 2,
-  CLASSIFICATION_PENDING: 2,
-  ADVISOR_CONTACT_PENDING: 2,
-  PLAN_PENDING: 3,
-  DOCUMENTS_PENDING: 4,
-  CONTRACT_PENDING: 5,
-  BUSINESS_REVIEW_PENDING: 5,
-  VERYGANA_REVIEW_PENDING: 5,
-  SIGNATURE_PENDING: 5,
-  PAYMENT_PENDING: 6,
-};
+import { OnboardingRequestsNotice } from "@/components/commercial/information-requests/OnboardingRequestsNotice";
+import { STEP_INDEX, STEP_LABELS, type WizardStep } from "./onboardingSteps";
 
 // Modal bloqueante — se muestra una sola vez por cada rechazo nuevo
 // (comparando rejectedAt contra localStorage), sin importar si el rechazo
@@ -185,6 +165,8 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   const hasLoadedContractRef = useRef(false);
   const hasLoadedContractRecoveryRef = useRef(false);
   const hasLoadedSummaryRef = useRef(false);
+  const approval = useApproveContract();
+  const approvingRef = useRef(false);
 
   const handleApiError = (err: unknown) => {
     const { message, details } = extractApiError(err);
@@ -493,6 +475,23 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
     }
   };
 
+  // Tras guardar la ficha el asistente relee el estado y va al paso que indique
+  // la API (normalmente el contrato). La ficha ya quedó guardada: si la relectura
+  // falla, se avisa sin pedir que se vuelva a enviar.
+  const handleTaxProfileSaved = async () => {
+    try {
+      const status = await OnboardingService.getStatus();
+      syncRejectionState(status);
+      if (status.completed) {
+        onCompleted();
+        return;
+      }
+      setStep(status.currentStep as WizardStep);
+    } catch {
+      toast.error("Tu ficha quedó guardada, pero no pudimos continuar. Recarga la página.");
+    }
+  };
+
   const handleGenerateContract = async () => {
     if (submitting) return;
     setSubmitting(true);
@@ -522,16 +521,38 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
     }
   };
 
-  const handleApproveContract = async () => {
-    if (submitting) return;
+  // Aprobación con el compromiso de formalización (spec 015). Ante cualquier error se relee el
+  // estado: si la aprobación ya se aplicó se avanza sin error (RN-9); si no, se avisa y la
+  // decisión se conserva porque el paso sigue montado.
+  const handleApproveContract = async (body: ContractApproveRequest) => {
+    // Guarda síncrona: `submitting` no frena un doble clic dentro del mismo render.
+    if (approvingRef.current || submitting) return;
+    approvingRef.current = true;
     setSubmitting(true);
     try {
-      const result = await OnboardingService.approveContract();
+      const result = await approval.approve(body);
       setContract(result);
       setStep("VERYGANA_REVIEW_PENDING");
     } catch (err) {
-      handleApiError(err);
+      // El interceptor ya cerró la sesión y redirige a /login.
+      if (readApiError(err).status === 401) return;
+      let status: OnboardingStatus | null = null;
+      try {
+        status = await OnboardingService.getStatus();
+        syncRejectionState(status);
+      } catch {
+        status = null;
+      }
+      const action = resolveApproveFailure(status);
+      if (status && action === "completed") {
+        onCompleted();
+      } else if (status && action === "advance") {
+        setStep(status.currentStep as WizardStep);
+      } else {
+        toast.error(approveErrorMessage(err));
+      }
     } finally {
+      approvingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -645,6 +666,9 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   if (underReview) {
     return (
       <div className="max-w-2xl mx-auto pb-14">
+        <div className="mb-4">
+          <OnboardingRequestsNotice />
+        </div>
         <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8">
           <div className="flex flex-col items-center gap-6 text-center py-4">
             <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
@@ -674,6 +698,9 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
   if (step === "ADVISOR_CONTACT_PENDING") {
     return (
       <div className="max-w-2xl mx-auto pb-14">
+        <div className="mb-4">
+          <OnboardingRequestsNotice />
+        </div>
         <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8">
           <div className="flex flex-col items-center gap-6 text-center py-4">
             <div className="w-16 h-16 bg-[#03548C]/10 rounded-full flex items-center justify-center">
@@ -759,6 +786,8 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
         </div>
       </div>
 
+      <OnboardingRequestsNotice />
+
       <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8">
         {step === "TERMS_PENDING" && (
           <TermsStep
@@ -829,6 +858,8 @@ export function OnboardingWizard({ initialStatus, onCompleted }: Props) {
             <Loader2 className="w-6 h-6 animate-spin text-gray-300" />
           </div>
         )}
+
+        {step === "TAX_PROFILE_PENDING" && <TaxProfileStep onSaved={handleTaxProfileSaved} />}
 
         {step === "CONTRACT_PENDING" && (
           <ContractGenerateStep

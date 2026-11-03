@@ -7,6 +7,7 @@ import {
   CreditCard,
   FileImage,
   Headset,
+  Inbox,
   LayoutDashboard,
   Package,
   ClipboardList,
@@ -23,6 +24,8 @@ import { PlanCode } from '@/types/finance/plans/Plan.types';
 import { useLogout } from '@/hooks/useLogout';
 import { useProsperitySummary } from '@/hooks/prosperity/useProsperity';
 import { isProsperityVisible } from '@/utils/prosperity';
+import { PendingRequestsBadge } from '@/components/commercial/information-requests/PendingRequestsBadge';
+import { INFORMATION_REQUESTS_PATH } from '@/lib/notifications/informationRequestNotifications';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,6 +41,8 @@ interface MenuItem {
   exactMatch?: boolean;
   /** Solo visible si el comercial tiene Saldo de Prosperidad (ACTIVE o FROZEN), sin importar el plan actual. */
   prosperityOnly?: boolean;
+  /** Muestra la insignia de solicitudes de información que esperan respuesta. */
+  pendingRequestsBadge?: boolean;
 }
 
 interface SidebarProps {
@@ -98,6 +103,10 @@ const menuItems: MenuItem[] = [
     href: '/commercial/billing', icon: CreditCard, label: 'Facturación',
     requiredPlans: [PlanCode.BASIC, PlanCode.STANDARD, PlanCode.PREMIUM],
     lockIfUnavailable: true,
+  },
+  {
+    href: INFORMATION_REQUESTS_PATH, icon: Inbox, label: 'Solicitudes de información',
+    pendingRequestsBadge: true,
   },
   { href: '/commercial/support', icon: Headset, label: 'Soporte' },
 ];
@@ -205,6 +214,7 @@ export function Sidebar({
                     active ? 'text-admin-blue' : 'text-slate-500 group-hover:text-slate-300'
                   }`} />
                   <span className="text-sm font-medium">{item.label}</span>
+                  {item.pendingRequestsBadge && <PendingRequestsBadge variant="sidebar" />}
                 </Link>
               )}
             </div>

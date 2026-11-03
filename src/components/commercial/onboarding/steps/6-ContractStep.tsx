@@ -22,6 +22,9 @@ import {
 } from "@/services/commercial/OnboardingService";
 import { formatCOP, StepButton } from "../onboarding.shared";
 import { PROSPERITY_MULTIPLIER } from "@/utils/prosperity";
+import { useFormalizationCommitment } from "@/hooks/commercial/useFormalizationCommitment";
+import type { ContractApproveRequest } from "@/types/commercial/Declaration.types";
+import { FormalizationCommitmentBlock } from "../contract/FormalizationCommitmentBlock";
 
 // ─── Paso 9: revisar resumen y generar el contrato ─────────────────────────
 
@@ -98,7 +101,6 @@ export function ContractGenerateStep({
   submitting,
   onGenerate,
   onRequestChanges,
-  rejectionNotes,
   requiresSpecialNegotiation,
   onRefreshStatus,
 }: ContractGenerateProps) {
@@ -393,11 +395,12 @@ interface ContractReviewProps {
   contract: OnboardingContract;
   submitting: boolean;
   onOpenContract: () => Promise<void>;
-  onApprove: () => void;
+  onApprove: (body: ContractApproveRequest) => void;
 }
 
 export function ContractReviewStep({ contract, submitting, onOpenContract, onApprove }: ContractReviewProps) {
   const [opening, setOpening] = useState(false);
+  const commitment = useFormalizationCommitment(contract.contractId);
 
   const handleOpen = async () => {
     setOpening(true);
@@ -448,7 +451,13 @@ export function ContractReviewStep({ contract, submitting, onOpenContract, onApp
         </p>
       </div>
 
-      <StepButton submitting={submitting} onClick={onApprove} label="Aprobar contrato" />
+      <FormalizationCommitmentBlock commitment={commitment} submitting={submitting} />
+
+      <StepButton
+        submitting={submitting}
+        onClick={() => onApprove(commitment.buildRequest())}
+        label="Aprobar contrato"
+      />
     </div>
   );
 }

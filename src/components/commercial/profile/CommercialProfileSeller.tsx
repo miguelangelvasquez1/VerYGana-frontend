@@ -28,6 +28,7 @@ import { AllyCommercialResponseDTO } from "@/types/Allies.types";
 import CommercialProductCard from "@/components/commercial/products/CommercialProductCard";
 import AlliesSummarySection from "@/components/commercial/profile/AlliesSummarySection";
 import ProfileContactInfo from "@/components/commercial/profile/ProfileContactInfo";
+import TaxAndEstablishmentsLinks from "@/components/commercial/profile/TaxAndEstablishmentsLinks";
 import { ChangePlanButton } from "@/components/commercial/planChange/planChange.shared";
 import toast from "react-hot-toast";
 
@@ -275,6 +276,9 @@ export default function CommercialProfileSeller() {
         </div>
         <ChangePlanButton />
       </div>
+
+      {/* ── INFORMACIÓN TRIBUTARIA Y SEDES ── */}
+      <TaxAndEstablishmentsLinks />
 
       {/* ── CATEGORÍAS ── */}
       {profile.productCategories.length > 0 && (

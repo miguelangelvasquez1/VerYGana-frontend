@@ -242,19 +242,39 @@ export function LedgerBody({ children }: { children: React.ReactNode }) {
   return <tbody className="divide-y divide-cmp-rule-soft">{children}</tbody>;
 }
 
-/** Fila con guía de estado y entrada escalonada (máx. 12 pasos de 22 ms). */
+/**
+ * Fila con guía de estado y entrada escalonada (máx. 12 pasos de 22 ms).
+ * Con `onActivate` la fila es enfocable y responde a clic y a Enter.
+ */
 export function LedgerRow({
   tone,
   index = 0,
   children,
+  onActivate,
+  ariaLabel,
 }: {
   tone?: Tone;
   index?: number;
   children: React.ReactNode;
+  onActivate?: () => void;
+  ariaLabel?: string;
 }) {
+  const activatable = onActivate
+    ? {
+        tabIndex: 0,
+        'aria-label': ariaLabel,
+        onClick: onActivate,
+        onKeyDown: (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+          if (e.key === 'Enter' && e.target === e.currentTarget) onActivate();
+        },
+      }
+    : {};
   return (
     <tr
-      className="cmp-row-in group relative transition-colors duration-150 hover:bg-cmp-rule-soft/40"
+      {...activatable}
+      className={`cmp-row-in group relative transition-colors duration-150 hover:bg-cmp-rule-soft/40 ${
+        onActivate ? 'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-cmp-cian' : ''
+      }`}
       style={{ animationDelay: `${Math.min(index, 12) * 22}ms` }}
     >
       {tone && (

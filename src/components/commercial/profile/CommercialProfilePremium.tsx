@@ -23,6 +23,7 @@ import { CommercialProfileResponseDTO } from "@/types/Commercial.types";
 import { AllyCommercialResponseDTO } from "@/types/Allies.types";
 import AlliesSummarySection from "@/components/commercial/profile/AlliesSummarySection";
 import ProfileContactInfo from "@/components/commercial/profile/ProfileContactInfo";
+import TaxAndEstablishmentsLinks from "@/components/commercial/profile/TaxAndEstablishmentsLinks";
 import { ChangePlanButton } from "@/components/commercial/planChange/planChange.shared";
 
 function formatDate(iso: string) {
@@ -213,6 +214,9 @@ export default function CommercialProfilePremium() {
         </div>
         <ChangePlanButton />
       </div>
+
+      {/* ── INFORMACIÓN TRIBUTARIA Y SEDES ── */}
+      <TaxAndEstablishmentsLinks />
 
       {/* ── ALIADOS ── */}
       <AlliesSummarySection

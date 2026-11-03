@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useRef, useCallback, useState } from "react";
+import Link from "next/link";
 import { Bell, Loader2, ChevronDown, ChevronUp, X } from "lucide-react";
 import { NotificationResponseDTO } from "@/types/Generic.types";
 
@@ -18,9 +19,17 @@ interface Props {
     onLoadMore: () => void;
     menuRef: React.RefObject<HTMLDivElement | null>;
     variant?: 'dark' | 'light';
+    // Si devuelve una ruta, el título y el mensaje de esa notificación llevan allí. Sin la prop, no hay enlaces.
+    getNotificationHref?: (notification: NotificationResponseDTO) => string | null;
 }
 
-function NotificationItem({ notification }: { notification: NotificationResponseDTO }) {
+function NotificationItem({
+    notification, href, onNavigate,
+}: {
+    notification: NotificationResponseDTO;
+    href: string | null;
+    onNavigate: () => void;
+}) {
     const [expanded, setExpanded] = useState(false);
 
     const isLong = notification.message.length > MESSAGE_TRUNCATE_LENGTH;
@@ -39,6 +48,17 @@ function NotificationItem({ notification }: { notification: NotificationResponse
         return date.toLocaleDateString("es-CO", { day: "numeric", month: "short" });
     };
 
+    const content = (
+        <>
+                <p className={`text-sm leading-snug ${notification.isRead ? "text-gray-700" : "text-gray-900 font-semibold"}`}>
+                    {notification.title}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed whitespace-pre-wrap wrap-break-word">
+                    {displayMessage}
+                </p>
+        </>
+    );
+
     return (
         <div className={`flex items-start gap-3 px-4 py-3 transition-colors ${notification.isRead ? "bg-white hover:bg-gray-50" : "bg-[#00a4ff]/5"}`}>
             <div className="mt-1.5 shrink-0">
@@ -48,12 +68,11 @@ function NotificationItem({ notification }: { notification: NotificationResponse
                 }
             </div>
             <div className="flex-1 min-w-0">
-                <p className={`text-sm leading-snug ${notification.isRead ? "text-gray-700" : "text-gray-900 font-semibold"}`}>
-                    {notification.title}
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed whitespace-pre-wrap wrap-break-word">
-                    {displayMessage}
-                </p>
+                {href ? (
+                    <Link href={href} onClick={onNavigate} className="block rounded hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#03548C]">
+                        {content}
+                    </Link>
+                ) : content}
                 {isLong && (
                     <button
                         type="button"
@@ -75,7 +94,7 @@ function NotificationItem({ notification }: { notification: NotificationResponse
 export function NotificationPanel({
     notifications, unreadCount, loading, hasMore,
     isOpen, onToggle, onMarkAllAsRead, onLoadMore, menuRef,
-    variant = 'dark',
+    variant = 'dark', getNotificationHref,
 }: Props) {
 
     const desktopListRef = useRef<HTMLDivElement>(null);
@@ -120,7 +139,12 @@ export function NotificationPanel({
                 </div>
             )}
             {notifications.map((n) => (
-                <NotificationItem key={n.id} notification={n} />
+                <NotificationItem
+                    key={n.id}
+                    notification={n}
+                    href={getNotificationHref?.(n) ?? null}
+                    onNavigate={onToggle}
+                />
             ))}
             {loading && (
                 <div className="flex justify-center py-4">

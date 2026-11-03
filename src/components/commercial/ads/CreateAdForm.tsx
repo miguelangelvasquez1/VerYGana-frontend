@@ -1,7 +1,7 @@
 // components/forms/CreateAdForm.tsx
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Upload, X, DollarSign, Eye, MapPin, Tag,
   Link as LinkIcon, Loader2, Clock, Info, CheckCircle2,

@@ -4,11 +4,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Menu, User, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { CommercialInitialDataResponseDTO } from '@/types/ads/commercial';
-import { getCommercialInitialData } from '@/services/commercial/commercialService';
 import { EffectivePlanStateResponseDTO } from '@/types/finance/plans/Plan.types';
 import { formatBudget, formatCents } from '@/utils/currency';
 import { NotificationPanel } from '@/components/notifications/NotificationsPanel';
 import { useNotifications } from '@/hooks/useNotifications';
+import { commercialNotificationHref } from '@/lib/notifications/informationRequestNotifications';
 
 interface HeaderProps {
   title?: string;
@@ -138,6 +138,7 @@ export function Header({ title, onMenuClick, showMenuButton, planState, commerci
               onLoadMore={loadMore}
               menuRef={notificationsMenuRef}
               variant="light"
+              getNotificationHref={commercialNotificationHref}
             />
 
             <div className="flex items-center gap-2.5">

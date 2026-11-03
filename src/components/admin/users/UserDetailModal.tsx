@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { X, Loader2, Pencil, Send, Ban, Unlock, PawPrint } from 'lucide-react';
-import { Role, UserState, ConsumerResponseDTO, AdminResponseDTO, CommercialResponseDTO, GameDesignerResponseDTO, ComplianceOfficerResponseDTO } from '@/types/User.types';
+import { Role, ConsumerResponseDTO, AdminResponseDTO, CommercialResponseDTO, GameDesignerResponseDTO, ComplianceOfficerResponseDTO } from '@/types/User.types';
 import {
   getConsumer,
   getAdmin,

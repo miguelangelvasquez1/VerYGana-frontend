@@ -17,13 +17,18 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   AlertTriangle,
   ArrowLeftRight,
+  Bell,
+  BookOpen,
+  ClipboardList,
   FileSignature,
+  FileSpreadsheet,
   LogOut,
   Menu,
   PanelLeft,
   PanelLeftClose,
   ScrollText,
   ShieldCheck,
+  SlidersHorizontal,
   X,
 } from 'lucide-react';
 import { useLogout } from '@/hooks/useLogout';
@@ -32,6 +37,11 @@ const NAV = [
   { title: 'Revisión KYC', short: 'KYC', href: '/compliance/kyc', icon: ShieldCheck },
   { title: 'Alertas de screening', short: 'Screening', href: '/compliance/screenings', icon: AlertTriangle },
   { title: 'Contratos comerciales', short: 'Contratos', href: '/compliance/contracts', icon: FileSignature },
+  { title: 'Fichas tributarias', short: 'Fichas', href: '/compliance/tax-profiles', icon: FileSpreadsheet },
+  { title: 'Requerimientos', short: 'Requerimientos', href: '/compliance/information-requests', icon: ClipboardList },
+  { title: 'Alertas', short: 'Alertas', href: '/compliance/alerts', icon: Bell },
+  { title: 'Reglas de alerta', short: 'Reglas', href: '/compliance/alert-rules', icon: SlidersHorizontal },
+  { title: 'Catálogo tributario', short: 'Catálogo', href: '/compliance/tax-catalog', icon: BookOpen },
   { title: 'Cambios de plan', short: 'Cambios plan', href: '/compliance/plan-changes', icon: ArrowLeftRight },
   { title: 'Logs de auditoría', short: 'Auditoría', href: '/compliance/audit-logs', icon: ScrollText },
 ];

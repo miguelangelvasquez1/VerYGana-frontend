@@ -1,4 +1,5 @@
 import apiClient from "@/lib/api/client";
+import type { ContractApproveRequest } from "@/types/commercial/Declaration.types";
 import { PlanCode, PlanSummaryResponseDTO } from "@/types/finance/plans/Plan.types";
 import { WompiCheckoutResponseDTO } from "@/types/finance/wompi/Wompi.types";
 
@@ -12,6 +13,7 @@ export type OnboardingStep =
   | "ADVISOR_CONTACT_PENDING"
   | "PLAN_PENDING"
   | "DOCUMENTS_PENDING"
+  | "TAX_PROFILE_PENDING"
   | "CONTRACT_PENDING"
   | "BUSINESS_REVIEW_PENDING"
   | "VERYGANA_REVIEW_PENDING"
@@ -494,8 +496,13 @@ export const OnboardingService = {
     return response.data;
   },
 
-  async approveContract(): Promise<OnboardingContract> {
-    const response = await apiClient.post(`${BASE}/contract/approve`);
+  async approveContract(
+    body: ContractApproveRequest,
+    idempotencyKey: string,
+  ): Promise<OnboardingContract> {
+    const response = await apiClient.post(`${BASE}/contract/approve`, body, {
+      headers: { "Idempotency-Key": idempotencyKey },
+    });
     return response.data;
   },
 
