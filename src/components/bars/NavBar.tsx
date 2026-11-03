@@ -439,7 +439,7 @@ export default function Navbar() {
       </nav>
 
       {/* ---------- MOBILE TOP BAR ---------- */}
-      <div data-app-bar="top" className="lg:hidden immersive:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
+      <div data-app-bar="top" className="lg:hidden immersive:hidden immersive-portrait:hidden sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
             <Image src="/logos/logoDorado.png" alt="VERyGANA" width={42} height={42} className="object-contain shrink-0" />
@@ -610,7 +610,7 @@ export default function Navbar() {
       </div>
 
       {/* ---------- MOBILE BOTTOM NAVIGATION ---------- */}
-      <nav aria-label="Navegación inferior" data-app-bar="bottom" className="lg:hidden immersive:hidden fixed bottom-0 left-0 right-0 z-50 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] shadow-lg pb-safe">
+      <nav aria-label="Navegación inferior" data-app-bar="bottom" className="lg:hidden immersive:hidden immersive-portrait:hidden fixed bottom-0 left-0 right-0 z-50 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] shadow-lg pb-safe">
         <div className="grid grid-cols-6 h-16">
 
           {MOBILE_BAR_ITEMS.map((item) => {
@@ -647,7 +647,7 @@ export default function Navbar() {
 
       {/* MOBILE PROFILE MENU (FULL SCREEN) */}
       <div
-        className={`lg:hidden immersive:hidden fixed inset-0 z-60 bg-black/50 transition-[opacity,visibility] duration-300 ${openMenu ? "opacity-100 pointer-events-auto" : "invisible opacity-0 pointer-events-none"}`}
+        className={`lg:hidden immersive:hidden immersive-portrait:hidden fixed inset-0 z-60 bg-black/50 transition-[opacity,visibility] duration-300 ${openMenu ? "opacity-100 pointer-events-auto" : "invisible opacity-0 pointer-events-none"}`}
         onClick={() => setOpenMenu(false)}
       >
         <div

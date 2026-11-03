@@ -48,7 +48,6 @@ export const ROLE_RULES: readonly RoleRule[] = [
   // Consumidor: el middleware solo protege estas tres, y por ruta exacta.
   { path: '/raffles', match: 'exact', role: 'ROLE_CONSUMER' },
   { path: '/ads', match: 'exact', role: 'ROLE_CONSUMER' },
-  // Reconocimientos del consumidor: ruta exacta, ya protegida por el middleware.
   { path: '/explore/recognitions', match: 'exact', role: 'ROLE_CONSUMER' },
 ];
 

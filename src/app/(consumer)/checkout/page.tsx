@@ -221,7 +221,7 @@ export default function CheckoutPage() {
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440] flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                    <img src="/logos/llave.png" alt="llave" className="w-5 h-5 object-contain" />
+                    <Image src="/logos/llave.png" alt="llave" width={20} height={20} className="w-5 h-5 object-contain" />
                   </div>
                   <h2 className="font-semibold text-white text-sm">Pagar con llaves</h2>
                   {quoteFetching && <Loader2 className="ml-auto w-4 h-4 text-white/70 animate-spin" />}

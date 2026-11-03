@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -124,9 +125,12 @@ function InviteProductModal({
             const inviting = mutation.isPending && mutation.variables === product.id;
             return (
               <li key={product.id} className="flex items-center gap-3 p-3">
-                <img
+                <Image
                   src={product.imageUrl}
                   alt={product.name}
+                  width={40}
+                  height={40}
+                  unoptimized
                   className="h-10 w-10 shrink-0 rounded-lg border border-gray-100 object-cover"
                 />
                 <div className="min-w-0 flex-1">

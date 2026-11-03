@@ -12,6 +12,17 @@
   }
 }
 
+/* Mascota girada en el celular en vertical (spec 013, RN-10). Gemela de `immersive`: solo CSS, así que
+   girar no cambia el árbol de React ni desmonta el iframe (RN-2). La activa solo una página que marca un
+   elemento con `data-immersive="rotate"` (hoy, `/pet`); `/games/play` vertical no cambia. */
+@custom-variant immersive-portrait {
+  @media (orientation: portrait) and (pointer: coarse) and (width < 64rem) {
+    :where(body:has([data-immersive="rotate"])) & {
+      @slot;
+    }
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

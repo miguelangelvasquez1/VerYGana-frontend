@@ -75,11 +75,16 @@ export function usePetSession() {
   // session_token/user_hash de la sesión activa: el juego los necesita junto al
   // JWT en cada inyección, y no se pueden releer de la URL del iframe.
   const sessionParams = useRef<PetSessionParams | null>(null);
+  // Origen del build (en local, el del proxy /pet-game; en beta/prod, el dominio
+  // de R2). El JWT solo se entrega a ese origen: con '*' llegaría a cualquier
+  // página que terminara cargada en el iframe.
+  const gameOrigin = useRef<string | null>(null);
 
   const pushAuth = useCallback((bearerToken: string | null) => {
     const target = iframeRef.current?.contentWindow;
     const params = sessionParams.current;
-    if (!target || !params || !bearerToken) return;
+    const origin = gameOrigin.current;
+    if (!target || !params || !bearerToken || !origin) return;
 
     target.postMessage(
       {
@@ -90,7 +95,7 @@ export function usePetSession() {
           userHash: params.userHash,
         },
       },
-      '*',
+      origin,
     );
   }, []);
 
@@ -112,8 +117,11 @@ export function usePetSession() {
         return;
       }
 
+      const gameBase = GAME_BASE_URL ?? base;
+      // Relativa (/pet-game/...) resuelve contra la página; absoluta, a su dominio.
+      gameOrigin.current = new URL(gameBase, window.location.href).origin;
       sessionParams.current = params;
-      setIframeUrl(buildIframeUrl(GAME_BASE_URL ?? base, params, getAccessToken()));
+      setIframeUrl(buildIframeUrl(gameBase, params, getAccessToken()));
     } catch {
       setError('No pudimos iniciar tu mascota. Intenta de nuevo.');
     } finally {
@@ -192,6 +200,11 @@ export function usePetSession() {
   // como red de seguridad por si la renovación proactiva llega tarde.
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
+      // Solo se le hace caso al iframe del juego: cualquier otra ventana podría
+      // mandar PET_AUTH_EXPIRED en bucle y forzar un refresh tras otro.
+      if (event.source !== iframeRef.current?.contentWindow) return;
+      if (event.origin !== gameOrigin.current) return;
+
       if (event.data?.type === 'PET_GAME_READY') {
         pushAuth(getAccessToken());
         return;

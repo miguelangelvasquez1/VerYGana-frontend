@@ -194,7 +194,7 @@ como `/home`, `/products`, `/pet`), `commercial/`, `admin/`, `compliance/`, `gam
 más `(auth)` y páginas públicas. [src/middleware.ts](src/middleware.ts) aplica el acceso por
 rol con `withAuth` de next-auth, pero **no hace nada salvo con `MIDDLEWARE=ACTIVE`**. Hoy
 protege por prefijo `/admin`, `/commercial`, `/compliance` y `/game-designer` (menos las dos
-páginas públicas de contraseña del diseñador) y, para el consumidor, solo `/raffles` y `/ads`.
+páginas públicas de contraseña del diseñador) y, para el consumidor, solo `/raffles`, `/ads` y `/explore/recognitions`.
 Muchas páginas de consumidor no pasan por el middleware: están listadas como
 `UNPROTECTED_PENDING` en `__tests__/middleware/routeAccess.ts`, a la espera de una decisión.
 El middleware no es la única defensa: la API autoriza los datos (P-5).
@@ -272,6 +272,19 @@ ejecución, solo al arrancar el contenedor.
 
 Las funcionalidades se llevan con desarrollo guiado por specs, igual que en la API. La
 numeración de `specs/` es **propia del front** e independiente de la de la API.
+
+**Las specs no se versionan.** `specs/` está en `.gitignore` salvo `specs/_template/`: cada quien
+tiene las suyas en su disco. El número `NNN` es el mayor de tu carpeta `specs/` más uno; si dos
+personas usan el mismo número no pasa nada, porque nunca se juntan. Lo que se comparte con el
+equipo es el ticket SCRUM del campo `Ticket` de la spec (y el PR que lo cierra).
+
+Las specs 001, 010, 011, 012 y 013, que el código, las pruebas y `docs/constitution.md` citan
+por número (por ejemplo "CA-10 de la spec 012"), quedaron en el historial de git. Se leen así:
+
+```bash
+git ls-tree --name-only e7226e6 specs/                  # qué carpetas hay
+git show e7226e6:specs/010-frontend-review/spec.md      # una spec
+```
 
 ```bash
 claude --agent coordinator    # desde la raíz del repositorio

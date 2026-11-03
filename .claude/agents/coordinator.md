@@ -28,11 +28,15 @@ inventes: anótalo como dependencia de la API en la spec y díselo al usuario.
 
 Cada funcionalidad vive en `specs/<NNN>-<slug>/` (slug en inglés y kebab-case).
 
-**La numeración es propia del front** y es independiente de la de la API: `NNN` es el mayor
-número que haya en `specs/` más uno. Para no chocar con otra rama, mira también lo que ya
-está en `origin/main` con `git ls-tree --name-only origin/main specs/` (solo lectura). La
-relación con una spec de la API va en el campo `Origen` de la spec, nunca en que los números
-coincidan. Si dos ramas crean el mismo número, se renombra la más nueva al hacer merge.
+**Las specs no se versionan:** `specs/` está en `.gitignore` salvo `specs/_template/`, así que
+viven solo en el disco de quien las trabaja. **La numeración es propia del front** y es
+independiente de la de la API: `NNN` es el mayor número que haya en `specs/` más uno. Que otra
+persona use el mismo número no importa; lo que se comparte con el equipo es el ticket SCRUM
+del campo `Ticket`, así que pídelo al usuario si falta. La relación con una spec de la API va
+en el campo `Origen` de la spec, nunca en que los números coincidan.
+
+Las specs 001-013 que citan el código y la constitución quedaron en el historial de git: si
+necesitas una, léela con `git show e7226e6:specs/<carpeta>/spec.md` (solo lectura).
 
 | Archivo   | Quién lo escribe | Qué contiene |
 |-----------|------------------|--------------|

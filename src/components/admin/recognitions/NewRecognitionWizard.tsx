@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -392,9 +393,12 @@ function ProductStep({
                           isSelected ? 'bg-admin-blue/10' : 'hover:bg-gray-50'
                         } ${noStock ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                       >
-                        <img
+                        <Image
                           src={p.imageUrl}
                           alt={p.name}
+                          width={44}
+                          height={44}
+                          unoptimized
                           className="h-11 w-11 shrink-0 rounded-lg border border-gray-100 object-cover"
                         />
                         <div className="min-w-0 flex-1">

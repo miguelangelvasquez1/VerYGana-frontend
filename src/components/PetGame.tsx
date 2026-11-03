@@ -12,7 +12,7 @@ const PetGame: React.FC = () => {
   // build de Unity: el juego se enmarca solo a 16:9, así que las franjas
   // sobrantes se funden con el contenedor en vez de verse como borde blanco.
   const frame =
-    'h-full w-full overflow-hidden bg-[#231f20] shadow-sm sm:rounded-2xl sm:border sm:border-gray-200 immersive:rounded-none immersive:border-0 immersive:shadow-none';
+    'h-full w-full overflow-hidden bg-[#231f20] shadow-sm sm:rounded-2xl sm:border sm:border-gray-200 immersive:rounded-none immersive:border-0 immersive:shadow-none immersive-portrait:rounded-none immersive-portrait:border-0 immersive-portrait:shadow-none';
 
   if (loading) {
     return (
@@ -64,13 +64,18 @@ const PetGame: React.FC = () => {
  * estado de React, cada giro provocaría un render que puede tocar el iframe.
  *   · landscape       → oculto (el juego ya se ve bien)
  *   · puntero fino    → oculto (una ventana angosta de escritorio no se gira)
+ *   · celular vertical → oculto (`immersive-portrait`: la mascota se ve girada, spec 013, RN-10)
+ *
+ * Se queda como respaldo (D-8): en un navegador sin `:has()` la variante `immersive-portrait` no aplica y la
+ * página queda en vertical con las barras; y una tableta táctil de 1024 px o más en vertical tampoco es
+ * "celular". En esos casos sigue pidiendo girar el teléfono.
  */
 function RotateHint() {
   return (
     // Sin `pointer-events-none`: mientras el aviso está arriba tiene que
     // bloquear los toques, o el usuario le estaría pegando a un juego que no
     // ve.
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-[#231f20] px-8 text-center landscape:hidden pointer-fine:hidden">
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-[#231f20] px-8 text-center landscape:hidden pointer-fine:hidden immersive-portrait:hidden">
       <Smartphone
         className="pet-rotate-hint h-11 w-11 text-white/85"
         strokeWidth={1.25}
