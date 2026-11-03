@@ -133,13 +133,13 @@ atEverySize('CA-4b · cada acceso lleva al login con su sección', async (page, 
   expect(guest.content.map((l) => l.href)).toEqual(home.content.map((l) => guestHref(l.href!)));
 });
 
-test('CA-4b · tocar la tarjeta "Rifas", iniciar sesión y volver a /raffles', async ({ page }, info) => {
+test('CA-4b · tocar la tarjeta "Sorteos", iniciar sesión y volver a /raffles', async ({ page }, info) => {
   test.skip(info.project.name !== 'mobile-360' || widthOf(page) !== 360, 'basta una vez, a 360');
   await stubRecaptcha(page);
   await stubLogin(page, 'ROLE_CONSUMER');
   await page.goto('/');
   await settle(page);
-  // La tarjeta de Rifas (su nombre accesible incluye la insignia y la descripción).
+  // La tarjeta de Sorteos (su nombre accesible incluye la insignia y la descripción).
   await page.locator('main a[href="/login?from=%2Fraffles"]').first().click();
   await expect(page).toHaveURL(/\/login\?from=%2Fraffles$/);
   await submitLogin(page, 'ROLE_CONSUMER');

@@ -17,7 +17,7 @@ import {
 // páginas protegidas (spec 012, D-12).
 const FOOTER_LINKS = [
   { href: '/', label: 'Inicio', Icon: Home, needsSession: false },
-  { href: '/raffles', label: 'Rifas', Icon: Ticket, needsSession: true },
+  { href: '/raffles', label: 'Sorteos', Icon: Ticket, needsSession: true },
   { href: '/products', label: 'Marketplace', Icon: ShoppingCart, needsSession: true },
   { href: '/plans/mobile-plans', label: 'Recargas', Icon: Smartphone, needsSession: true },
   { href: '/ads', label: 'Anuncios', Icon: Megaphone, needsSession: true },
@@ -41,7 +41,7 @@ export default function Footer({ guest = false }: { guest?: boolean }) {
             <h3 className="text-xl font-bold">VerYGana</h3>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-gray-300">
-            Tu plataforma integral donde puedes participar en rifas emocionantes, comprar productos increíbles,
+            Tu plataforma integral donde puedes participar en sorteos emocionantes, comprar productos increíbles,
             recargar tu celular y descubrir historias de impacto social en nuestra comunidad.
           </p>
         </div>

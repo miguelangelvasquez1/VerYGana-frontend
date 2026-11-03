@@ -31,7 +31,7 @@ export default function RafflesPage() {
             Compra boletos y gana premios increíbles
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight">
-            Participa en rifas
+            Participa en sorteos
           </h1>
           <p className="text-blue-100 text-sm sm:text-base max-w-lg mx-auto">
             Usa tus llaves para participar y ganar premios en efectivo y productos exclusivos.

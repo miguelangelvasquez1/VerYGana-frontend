@@ -175,7 +175,7 @@ const ADMIN_MENU: MenuLink[] = [
   { name: 'Branding', href: '/admin/branding' },
   { name: 'Mascotas', href: '/admin/pet-requests' },
   { name: 'Productos', href: '/admin/products' },
-  { name: 'Rifas', href: '/admin/raffles' },
+  { name: 'Sorteos', href: '/admin/raffles' },
   { name: 'Encuestas', href: '/admin/surveys' },
   { name: 'Foro', href: '/admin/forum' },
   { name: 'PQRS', href: '/admin/pqrs' },

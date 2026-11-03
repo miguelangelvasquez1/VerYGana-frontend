@@ -13,10 +13,10 @@ export const getFriendlyErrorMessage = (error: any): string => {
                 'No se puede realizar el sorteo antes de la fecha programada. Por favor, actualiza la fecha del sorteo en la sección de edición.',
 
             'Raffle is not active':
-                'La rifa no está activa. Solo se pueden realizar sorteos en rifas activas.',
+                'El sorteo debe estar activo para elegir al ganador.',
 
             'Raffle has already been drawn':
-                'Esta rifa ya ha sido sorteada. No se puede repetir el proceso.',
+                'Este sorteo ya tiene ganador. No se puede repetir el proceso.',
 
             'Not enough participants':
                 'No hay suficientes participantes para realizar el sorteo. Se necesitan al menos 2 participantes.',
@@ -25,25 +25,25 @@ export const getFriendlyErrorMessage = (error: any): string => {
                 'La fecha del sorteo no es válida. Verifica que la fecha sea correcta y esté en el futuro.',
 
             'Max tickets exceeded':
-                'Se ha superado el límite máximo de tickets para esta rifa.',
+                'Se ha superado el límite máximo de tickets para este sorteo.',
 
             'User not eligible':
-                'El usuario no cumple con los requisitos para participar en esta rifa.',
+                'El usuario no cumple con los requisitos para participar en este sorteo.',
 
             'Duplicate entry':
                 'Ya existe un registro con esta información. Por favor, verifica los datos.',
 
             'Raffle not found':
-                'La rifa no existe o fue eliminada. Por favor, recarga la página.',
+                'El sorteo no existe o fue eliminado. Por favor, recarga la página.',
 
             'Raffle is already active':
-                'La rifa ya se encuentra activa. No es necesario activarla nuevamente.',
+                'El sorteo ya se encuentra activo. No es necesario activarlo nuevamente.',
 
             'Raffle has been cancelled':
-                'La rifa está cancelada. No se puede realizar esta acción.',
+                'El sorteo está cancelado. No se puede realizar esta acción.',
 
             'Draw date must be after start date':
-                'La fecha del sorteo debe ser posterior a la fecha de inicio de la rifa.',
+                'La fecha del sorteo debe ser posterior a la fecha de inicio.',
 
             'End date must be before draw date':
                 'La fecha de cierre debe ser anterior a la fecha del sorteo.',
@@ -52,7 +52,7 @@ export const getFriendlyErrorMessage = (error: any): string => {
                 'La fecha de inicio no puede ser en el pasado.',
 
             'Invalid status transition':
-                'No es posible cambiar la rifa a este estado. Verifica el estado actual.',
+                'No es posible cambiar el sorteo a este estado. Verifica el estado actual.',
 
             'Network Error':
                 'Error de conexión. Verifica tu conexión a internet e intenta nuevamente.',

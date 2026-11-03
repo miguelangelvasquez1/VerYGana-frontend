@@ -283,7 +283,7 @@ export default function ReferralPageShell({ info }: Props) {
               {[
                 { Icon: Share2,   bg: '#03548C', title: '1. Comparte tu código', desc: 'Envía tu código único a amigos y familiares'              },
                 { Icon: UserPlus, bg: '#0b1440', title: '2. Ellos se registran', desc: 'Tus amigos usan tu código al crear su cuenta'             },
-                { Icon: Ticket,   bg: '#00a4ff', title: '3. Ganas tickets',      desc: 'Recibe tickets de rifa por cada amigo que se registre'    },
+                { Icon: Ticket,   bg: '#00a4ff', title: '3. Ganas tickets',      desc: 'Recibe tickets de sorteo por cada amigo que se registre'    },
               ].map(({ Icon, bg, title, desc }) => (
                 <div key={title} className="text-center">
                   <div
@@ -453,7 +453,7 @@ export default function ReferralPageShell({ info }: Props) {
                   <CheckCircle className="w-5 h-5 text-green-600" /> Beneficios
                 </h4>
                 <ul className="space-y-2 text-gray-600 text-sm">
-                  <li>• 1 ticket de rifa por cada amigo que se registre</li>
+                  <li>• 1 ticket de sorteo por cada amigo que se registre</li>
                   <li>• Más tickets al subir de nivel</li>
                   <li>• Sin límite de referidos</li>
                   <li>• Los tickets se acreditan inmediatamente</li>
@@ -467,7 +467,7 @@ export default function ReferralPageShell({ info }: Props) {
                   <li>• El referido debe completar su registro</li>
                   <li>• No se permite auto-referido</li>
                   <li>• Cada usuario solo puede ser referido una vez</li>
-                  <li>• Los tickets son válidos para la rifa activa</li>
+                  <li>• Los tickets son válidos para el sorteo activo</li>
                 </ul>
               </div>
             </div>
@@ -484,7 +484,7 @@ export default function ReferralPageShell({ info }: Props) {
         <div className="relative">
           <h3 className="text-2xl md:text-3xl font-bold mb-4">¡Gana tickets invitando amigos!</h3>
           <p className="text-lg mb-8 text-white/70">
-            Cada amigo que se registre con tu código te da {currentTier?.ticketsPerReferral ?? 1} ticket{(currentTier?.ticketsPerReferral ?? 1) > 1 ? 's' : ''} de rifa
+            Cada amigo que se registre con tu código te da {currentTier?.ticketsPerReferral ?? 1} ticket{(currentTier?.ticketsPerReferral ?? 1) > 1 ? 's' : ''} de sorteo
           </p>
           <motion.button
             onClick={() => setActiveTab('invite')}

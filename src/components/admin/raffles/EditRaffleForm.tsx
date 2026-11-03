@@ -217,10 +217,10 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
               className="tap inline-flex items-center gap-1.5 mb-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-40"
             >
               <ArrowLeft className="w-4 h-4" />
-              Volver a las rifas
+              Volver a los sorteos
             </button>
           )}
-          <h2 className="text-lg font-bold text-admin-navy">Editar Rifa</h2>
+          <h2 className="text-lg font-bold text-admin-navy">Editar Sorteo</h2>
           <p className="text-xs text-gray-500">
             Ajusta la información, fechas y restricciones
           </p>
@@ -264,7 +264,7 @@ export default function EditRaffleForm({ raffle, onSubmit, onCancel, onBack }: P
           </div>
 
           <div>
-            <label className={labelCls}>Tipo de Rifa</label>
+            <label className={labelCls}>Tipo de Sorteo</label>
             <select
                 name="raffleType"
                 value={formData.raffleType}

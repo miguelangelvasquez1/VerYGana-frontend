@@ -64,6 +64,8 @@ const REQUIRED_COMPONENTS = [
   'src/components/consumer/raffles/RaffleDetail.tsx',
   'src/components/plans/PlanCard.tsx',
   'src/components/plans/RechargeCard.tsx',
+  'src/components/plans/MobilePlansCatalog.tsx',
+  'src/components/shared/UnderDevelopmentNotice.tsx',
   'src/components/consumer/ads/Sidebar.tsx',
   'src/components/consumer/home/HomePage.tsx',
 ];

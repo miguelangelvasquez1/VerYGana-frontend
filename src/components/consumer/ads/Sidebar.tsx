@@ -52,7 +52,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             {[
               { icon: '▶️', title: 'Mira anuncios', desc: 'Completa la visualización para ganar puntos.' },
               { icon: '❤️', title: 'Dale like', desc: 'Confirma que viste el anuncio con un like.' },
-              { icon: '🎁', title: 'Canjea premios', desc: 'Usa tus puntos en la tienda o rifas diarias.' },
+              { icon: '🎁', title: 'Canjea premios', desc: 'Usa tus puntos en la tienda o en sorteos diarios.' },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-3">
                 <span className="text-base leading-none mt-0.5">{item.icon}</span>

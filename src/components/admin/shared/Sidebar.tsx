@@ -102,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           href: '/admin/products',
         },
         {
-          title: 'Rifas',
+          title: 'Sorteos',
           icon: Gift,
           href: '/admin/raffles',
         },

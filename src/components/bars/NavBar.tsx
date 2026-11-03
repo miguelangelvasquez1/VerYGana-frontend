@@ -189,7 +189,7 @@ export default function Navbar() {
                           </p>
 
                           <p className="text-xs text-gray-500 mt-0.5">
-                            Disponibles para productos y rifas
+                            Disponibles para productos y sorteos
                           </p>
                         </div>
                       </div>
@@ -270,7 +270,8 @@ export default function Navbar() {
                     <User className="text-white w-5 h-5" />
                   )}
               </div>
-                <div className="min-w-0">
+                {/* De 1024 a 1279 px solo el avatar: nombre y barra de XP quedan para lectores (sr-only) y vuelven desde xl */}
+                <div className="min-w-0 sr-only xl:not-sr-only">
                 <div className="font-semibold leading-tight">
                   {loadingUser ? "Cargando..." : consumer?.name ?? "Usuario"}
                 </div>
@@ -476,7 +477,7 @@ export default function Navbar() {
                           </p>
 
                           <p className="text-[11px] text-gray-500">
-                            Productos y rifas
+                            Productos y sorteos
                           </p>
                         </div>
                       </div>

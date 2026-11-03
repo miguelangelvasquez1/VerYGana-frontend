@@ -65,8 +65,8 @@ export const PANEL_MODALS: PanelModal[] = [
   { id: 'admin-users-edit', page: '/admin/users', open: ['Editar'], close: 'Cancelar' },
   { id: 'admin-users-notify', page: '/admin/users', open: ['Enviar notificación'], close: 'Cancelar' },
   // T29 a T31: los que se abren desde una lista con fixtures.
-  { id: 'admin-raffles-create', page: '/admin/raffles', open: ['Crear Rifa'], close: 'Cerrar creación' },
-  { id: 'admin-raffles-delete', page: '/admin/raffles', open: ['Eliminar rifa'], close: 'Cancelar' },
+  { id: 'admin-raffles-create', page: '/admin/raffles', open: ['Crear Sorteo'], close: 'Cerrar creación' },
+  { id: 'admin-raffles-delete', page: '/admin/raffles', open: ['Eliminar sorteo'], close: 'Cancelar' },
   { id: 'admin-ticket-rule-new', page: '/admin/raffles', open: ['Reglas de boletos', 'Crear Regla'], close: 'Cerrar' },
   { id: 'admin-ticket-rule-delete', page: '/admin/raffles', open: ['Reglas de boletos', 'Eliminar'], close: 'Cancelar' },
   { id: 'admin-surveys-reject', page: '/admin/surveys', open: ['Rechazar encuesta'], close: 'Cancelar' },

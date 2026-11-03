@@ -179,7 +179,7 @@ export default function TicketRulesManagement() {
               Reglas de Tickets
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Gestiona las reglas para la asignación de tickets en las rifas
+              Gestiona las reglas para la asignación de tickets en los sorteos
             </p>
           </div>
 

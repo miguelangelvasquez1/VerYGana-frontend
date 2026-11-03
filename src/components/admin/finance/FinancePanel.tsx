@@ -86,7 +86,7 @@ const ACCOUNTS: {
 ];
 
 const REF_TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  RAFFLE:   { label: 'Rifa',     color: 'bg-admin-gold/10 text-admin-gold'         },
+  RAFFLE:   { label: 'Sorteo',   color: 'bg-admin-gold/10 text-admin-gold'         },
   PAYOUT:   { label: 'Pago',     color: 'bg-admin-navy/10 text-admin-navy'         },
   DEPOSIT:  { label: 'Depósito', color: 'bg-admin-midnight/10 text-admin-midnight' },
   FEE:      { label: 'Comisión', color: 'bg-admin-blue/10 text-admin-blue'         },

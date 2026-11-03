@@ -92,7 +92,7 @@ export default function MyParticipationsPage() {
               Mis participaciones
             </h1>
             <p className="text-white/70 text-sm max-w-md mb-7">
-              Consulta tus boletos activos, rifas finalizadas y todos los premios que has ganado.
+              Consulta tus boletos activos, sorteos finalizados y todos los premios que has ganado.
             </p>
 
             {/* Main tab switcher — integrated in hero */}
@@ -129,12 +129,12 @@ export default function MyParticipationsPage() {
           <>
             <div className="flex gap-2 mb-5">
               <FilterPill
-                label={`Activas${raffleSubTab === "ACTIVE" ? ` (${count})` : ""}`}
+                label={`Activos${raffleSubTab === "ACTIVE" ? ` (${count})` : ""}`}
                 active={raffleSubTab === "ACTIVE"}
                 onClick={() => setRaffleSubTab("ACTIVE")}
               />
               <FilterPill
-                label={`Finalizadas${raffleSubTab === "COMPLETED" ? ` (${count})` : ""}`}
+                label={`Finalizados${raffleSubTab === "COMPLETED" ? ` (${count})` : ""}`}
                 active={raffleSubTab === "COMPLETED"}
                 onClick={() => setRaffleSubTab("COMPLETED")}
               />
@@ -356,9 +356,9 @@ function RaffleCard({
             <div className="flex items-start justify-between gap-2">
               <h2 className="font-semibold text-sm md:text-base leading-tight">{raffle.title}</h2>
               {raffle.raffleStatus === "ACTIVE" ? (
-                <span className="shrink-0 text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">Activa</span>
+                <span className="shrink-0 text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">Activo</span>
               ) : (
-                <span className="shrink-0 text-xs bg-gray-100 text-gray-500 font-semibold px-2 py-0.5 rounded-full">Finalizada</span>
+                <span className="shrink-0 text-xs bg-gray-100 text-gray-500 font-semibold px-2 py-0.5 rounded-full">Finalizado</span>
               )}
             </div>
 
@@ -369,7 +369,7 @@ function RaffleCard({
             </div>
 
             {raffle.isWinner && (
-              <p className="text-xs text-[#c9a227] font-semibold mt-1.5">🏆 ¡Ganaste esta rifa!</p>
+              <p className="text-xs text-[#c9a227] font-semibold mt-1.5">🏆 ¡Ganaste este sorteo!</p>
             )}
           </div>
 

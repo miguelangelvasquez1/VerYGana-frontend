@@ -2,7 +2,7 @@ import { expect, test } from './support/network';
 import { MIN_TOUCH_PX, settle } from './support/measure';
 import { signIn } from './support/session';
 
-// CA-6, CA-7 y CA-8 (spec 013): la barra inferior del celular tiene Juegos en el lugar de Rifas, y Rifas
+// CA-6, CA-7 y CA-8 (spec 013): la barra inferior del celular tiene Juegos en el lugar de Sorteos, y Sorteos
 // está en el menú de Perfil. Se mide a 360 px de ancho, en vertical.
 
 const BAR_LABELS = ['Inicio', 'Anuncios', 'Juegos', 'Mascota', 'Productos', 'Perfil'];
@@ -30,7 +30,7 @@ test.describe('CA-6 · barra inferior', () => {
         expect(box!.height, `alto de "${label}"`).toBeGreaterThanOrEqual(MIN_TOUCH_PX);
       }
       await expect(bar.getByRole('link', { name: 'Juegos', exact: true })).toHaveAttribute('href', '/games');
-      await expect(bar.getByRole('link', { name: 'Rifas' })).toHaveCount(0);
+      await expect(bar.getByRole('link', { name: 'Sorteos' })).toHaveCount(0);
     });
   }
 
@@ -52,11 +52,11 @@ test('CA-7 · en /games, Juegos se ve activo', async ({ page }) => {
   );
 });
 
-test('CA-8 · el menú de Perfil tiene Rifas y lleva a /raffles', async ({ page }) => {
+test('CA-8 · el menú de Perfil tiene Sorteos y lleva a /raffles', async ({ page }) => {
   await page.goto('/home');
   await settle(page);
   await page.getByRole('button', { name: 'Perfil', exact: true }).click();
-  const link = page.locator('div.py-2.pb-20').getByRole('link', { name: 'Rifas', exact: true });
+  const link = page.locator('div.py-2.pb-20').getByRole('link', { name: 'Sorteos', exact: true });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute('href', '/raffles');
   await link.click();

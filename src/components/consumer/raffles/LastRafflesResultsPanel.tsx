@@ -48,7 +48,7 @@ export default function LastRafflesResultsPanel() {
         style={{ background: "linear-gradient(135deg, #0b1440, #03548C)" }}
       >
         <span className="text-lg">🏆</span>
-        <h3 className="text-base font-bold text-white">Resultados de Rifas</h3>
+        <h3 className="text-base font-bold text-white">Resultados de Sorteos</h3>
       </div>
 
       {/* Lista */}

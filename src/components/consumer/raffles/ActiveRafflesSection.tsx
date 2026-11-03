@@ -60,7 +60,7 @@ export default function ActiveRafflesSection() {
           style={{ background: "linear-gradient(to bottom, #0b1440, #03548C)" }}
         />
         <h2 className="text-2xl font-bold text-gray-900">
-          Rifas disponibles
+          Sorteos disponibles
         </h2>
       </div>
 
@@ -72,7 +72,7 @@ export default function ActiveRafflesSection() {
             onClick={() => handleFilterChange(type)}
             className={`cursor-pointer min-h-11 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterButtonClass(filter, type)}`}
           >
-            {type === "ALL" ? "Todas" : type === "STANDARD" ? "Estándar" : "Premium"}
+            {type === "ALL" ? "Todos" : type === "STANDARD" ? "Estándar" : "Premium"}
           </button>
         ))}
       </div>
@@ -100,12 +100,12 @@ export default function ActiveRafflesSection() {
           <div className="relative z-10">
             <div className="text-6xl mb-4">🎟️</div>
             <h3 className="text-xl font-bold text-white mb-2">
-              No hay rifas disponibles
+              No hay sorteos disponibles
             </h3>
             <p className="text-white/70 text-sm max-w-xs mx-auto">
               {filter === "ALL"
-                ? "Por el momento no hay rifas activas. ¡Vuelve pronto para participar!"
-                : `No hay rifas ${filter === "STANDARD" ? "estándar" : "premium"} disponibles en este momento.`}
+                ? "Por el momento no hay sorteos activos. ¡Vuelve pronto para participar!"
+                : `No hay sorteos ${filter === "STANDARD" ? "estándar" : "premium"} disponibles en este momento.`}
             </p>
           </div>
         </div>

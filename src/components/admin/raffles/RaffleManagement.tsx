@@ -48,7 +48,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  const { searchTerm } = useAdminSectionSearch("Buscar rifas por título...");
+  const { searchTerm } = useAdminSectionSearch("Buscar sorteos por título...");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
       setRaffles(response?.data ?? []);
       setTotalPages(response?.meta?.totalPages ?? 0);
     } catch {
-      setError("Error al cargar rifas");
+      setError("Error al cargar sorteos");
     } finally {
       setIsLoading(false);
     }
@@ -138,7 +138,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
   const handleCreateRaffle = async (
       payload: CreateRaffleFormSubmitPayload
   ) => {
-    const loadingToast = toast.loading("Creando rifa...");
+    const loadingToast = toast.loading("Creando sorteo...");
 
     try {
       const { raffleData, raffleImageFile, prizeImageFiles } = payload;
@@ -175,7 +175,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
       const result = await confirmRaffleCreation(confirmRequest);
 
       toast.dismiss(loadingToast);
-      toast.success("🎉 Rifa creada exitosamente");
+      toast.success("🎉 Sorteo creado exitosamente");
 
       setShowCreateRaffle(false);
       await loadDashboardData();
@@ -183,7 +183,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
       return result;
     } catch (err: any) {
       toast.dismiss(loadingToast);
-      toast.error(err?.response?.data?.message || "Error al crear la rifa");
+      toast.error(err?.response?.data?.message || "Error al crear el sorteo");
       throw err;
     }
   };
@@ -207,7 +207,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
       isLive: false,
     },
     {
-      label: "Rifas Activas",
+      label: "Sorteos Activos",
       count: stats.activeRaffles,
       icon: PlayCircle,
       borderColor: "border-t-emerald-500",
@@ -216,7 +216,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
       isLive: false,
     },
     {
-      label: "Rifas En Vivo",
+      label: "Sorteos En Vivo",
       count: stats.liveRaffles,
       icon: Radio,
       borderColor: "border-t-red-600",
@@ -225,7 +225,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
       isLive: true,
     },
     {
-      label: "Rifas Cerradas",
+      label: "Sorteos Cerrados",
       count: stats.closedRaffles,
       icon: Lock,
       borderColor: "border-t-blue-500",
@@ -234,7 +234,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
       isLive: false,
     },
     {
-      label: "Finalizadas",
+      label: "Finalizados",
       count: stats.completedRaffles,
       icon: CheckCircle2,
       borderColor: "border-t-slate-400",
@@ -273,7 +273,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
         {/* ===== CABECERA Y ACCIÓN PRINCIPAL ===== */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-gray-900">Gestión de Rifas</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Gestión de Sorteos</h1>
             <p className="text-sm text-gray-500 mt-0.5">
               Administra el ciclo de vida y estado de los sorteos
             </p>
@@ -283,7 +283,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
               className="tap cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-admin-blue hover:bg-admin-blue-dark rounded-lg shadow-xs transition-all"
           >
             <Plus size={18} />
-            Crear Rifa
+            Crear Sorteo
           </button>
         </div>
 
@@ -335,11 +335,11 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
             >
               <option value="">Todos</option>
               <option value="DRAFT">Borradores</option>
-              <option value="ACTIVE">Activas</option>
-              <option value="CLOSED">Cerradas</option>
+              <option value="ACTIVE">Activos</option>
+              <option value="CLOSED">Cerrados</option>
               <option value="LIVE">En vivo</option>
-              <option value="COMPLETED">Completadas</option>
-              <option value="CANCELLED">Canceladas</option>
+              <option value="COMPLETED">Completados</option>
+              <option value="CANCELLED">Cancelados</option>
               <option value="MISSED_DRAW">Sorteo no realizado</option>
             </select>
           </div>
@@ -363,7 +363,7 @@ export default function AdminRafflesDashboard({ onViewStats }: Props) {
 
           {/* Filtro Fecha */}
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-600">Sorteo:</label>
+            <label className="text-sm font-medium text-gray-600">Fecha del sorteo:</label>
             <input
                 type="date"
                 value={drawDateFilter}

@@ -56,17 +56,17 @@ export default function RaffleCard({
             switch (actionType) {
                 case "activate":
                     await activateRaffle(selectedRaffle.id);
-                    toast.success("Rifa activada correctamente");
+                    toast.success("Sorteo activado correctamente");
                     break;
 
                 case "close":
                     await closeRaffle(selectedRaffle.id);
-                    toast.success("Rifa cerrada correctamente");
+                    toast.success("Sorteo cerrado correctamente");
                     break;
 
                 case "delete":
                     await deleteRaffle(selectedRaffle.id);
-                    toast.success("Rifa eliminada correctamente");
+                    toast.success("Sorteo eliminado correctamente");
                     break;
 
                 case "draw":
@@ -116,7 +116,7 @@ export default function RaffleCard({
 
     return (
         <>
-            <TableScroll label="Tabla de rifas, desplazable" className="bg-white rounded-xl border border-gray-200 shadow-xs">
+            <TableScroll label="Tabla de sorteos, desplazable" className="bg-white rounded-xl border border-gray-200 shadow-xs">
                 <table className="w-full text-sm text-left">
                     <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
                     <tr>
@@ -251,8 +251,8 @@ export default function RaffleCard({
                                             setActionType("delete");
                                         }}
                                         className="tap-icon cursor-pointer p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                        title="Eliminar rifa"
-                                        aria-label="Eliminar rifa"
+                                        title="Eliminar sorteo"
+                                        aria-label="Eliminar sorteo"
                                     >
                                         <Trash2 size={15} />
                                     </button>
@@ -269,11 +269,11 @@ export default function RaffleCard({
                 title="Confirmar acción"
                 description={
                     actionType === "delete"
-                        ? "Esta acción eliminará la rifa permanentemente."
+                        ? "Esta acción eliminará el sorteo permanentemente."
                         : actionType === "activate"
-                            ? "La rifa pasará a estado ACTIVE."
+                            ? "El sorteo pasará a estado ACTIVE."
                             : actionType === "close"
-                                ? "La rifa pasará a estado CLOSED."
+                                ? "El sorteo pasará a estado CLOSED."
                                 : actionType === "draw"
                                     ? "Se realizará el sorteo oficial."
                                     : "Se verificará la integridad del sorteo."

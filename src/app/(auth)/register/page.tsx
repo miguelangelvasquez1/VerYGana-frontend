@@ -28,7 +28,7 @@ export default function RegisterPage() {
               </div>
               <div className="bg-white/10 rounded-lg p-2">
                 <span className="text-lg">🎁</span>
-                <span className="block text-xs mt-1">Rifas diarias</span>
+                <span className="block text-xs mt-1">Sorteos diarios</span>
               </div>
               <div className="bg-white/10 rounded-lg p-2">
                 <span className="text-lg">📱</span>
@@ -72,7 +72,7 @@ export default function RegisterPage() {
                       <span className="text-lg">🎁</span>
                     </div>
                     <div className="text-left">
-                      <h3 className="font-semibold text-sm">Rifas diarias</h3>
+                      <h3 className="font-semibold text-sm">Sorteos diarios</h3>
                       <p className="text-blue-100 text-xs">Gana premios increíbles</p>
                     </div>
                   </div>

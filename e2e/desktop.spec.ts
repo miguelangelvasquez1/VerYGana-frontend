@@ -9,6 +9,9 @@ import { signIn, type TestRole } from './support/session';
 // compartidos con otros roles, a 1280 × 800. Se generan sobre el código sin cambios y después de tocar los
 // compartidos se comparan. Dependen del sistema operativo: solo corren en local (el proyecto `desktop-1280`
 // no corre en el CI). Para regenerar: `npx playwright test --project=desktop-1280 --update-snapshots`.
+// 2026-11-03 (spec 016, aprobado por el usuario): se regeneraron 27 capturas (consumer-home, landing-820,
+// landing-1440, admin-home, las 21 panel-admin-*, panel-forgot-password y panel-unlock-account) porque "Rifa(s)"
+// pasó a "Sorteo(s)" y su concordancia; el header a 1280 y más no cambió. Detalle en specs/016-*/baseline.md.
 
 interface DesktopPage {
   name: string;

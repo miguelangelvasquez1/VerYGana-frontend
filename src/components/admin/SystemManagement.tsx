@@ -14,8 +14,8 @@ const SystemManagement: React.FC = () => {
   const [modules, setModules] = useState<SystemModule[]>([
     {
       id: '1',
-      name: 'Sistema de Rifas',
-      description: 'Permite crear y gestionar rifas en el sistema',
+      name: 'Sistema de Sorteos',
+      description: 'Permite crear y gestionar sorteos en el sistema',
       isActive: true,
       path: '/raffles'
     },

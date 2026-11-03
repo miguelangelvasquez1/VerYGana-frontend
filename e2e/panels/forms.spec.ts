@@ -448,16 +448,16 @@ test.describe('@paneles · admin · usuarios · formularios', () => {
 });
 
 // T30 y T31 (CA-10): formularios de admin que se abren con un clic. Cantidades con teclado numérico, montos con teclado
-// decimal, fechas con su tipo y campos de 16 px. Sin escribir nada (P-16). El selector de fechas de la rifa
+// decimal, fechas con su tipo y campos de 16 px. Sin escribir nada (P-16). El selector de fechas del sorteo
 // (react-datepicker) es un campo de texto propio: lleva `autocomplete="off"`; el paso 2 del asistente de
 // reconocimientos (cantidad) necesita elegir un beneficiario y un producto y queda para la pasada manual.
 test.describe('@paneles · admin · formularios de T30 y T31', () => {
   type Field = { selector: string; type?: string; inputMode?: string; autoComplete?: string };
   const CASES: { name: string; route: string; open: string[]; fields: Field[] }[] = [
     {
-      name: 'rifas · crear rifa',
+      name: 'sorteos · crear sorteo',
       route: '/admin/raffles',
-      open: ['Crear Rifa'],
+      open: ['Crear Sorteo'],
       fields: [
         { selector: 'input[name="maxTotalTickets"]', type: 'number', inputMode: 'numeric' },
         { selector: 'input[name="maxTicketsPerUser"]', type: 'number', inputMode: 'numeric' },
@@ -465,7 +465,7 @@ test.describe('@paneles · admin · formularios de T30 y T31', () => {
       ],
     },
     {
-      name: 'rifas · regla de boletos',
+      name: 'sorteos · regla de boletos',
       route: '/admin/raffles',
       open: ['Reglas de boletos', 'Crear Regla'],
       fields: [
@@ -500,7 +500,7 @@ test.describe('@paneles · admin · formularios de T30 y T31', () => {
       fields: [{ selector: 'input[type="number"]', type: 'number', inputMode: 'decimal' }],
     },
     {
-      name: 'rifas · editar rifa',
+      name: 'sorteos · editar sorteo',
       route: '/admin/raffles/[id]',
       open: ['Editar'],
       fields: [

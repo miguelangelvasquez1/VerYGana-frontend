@@ -233,7 +233,7 @@ export function DrawCompletedScreen({ payload, onGoToRaffles }: Props) {
       {/* Barra de redirección */}
       <div className="w-full">
         <p className="text-gray-500 text-xs text-center mb-2">
-          Volviendo a rifas en {remaining}s
+          Volviendo a los sorteos en {remaining}s
         </p>
         <div className="w-full bg-gray-200 rounded-full h-1">
           <motion.div

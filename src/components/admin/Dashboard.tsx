@@ -24,7 +24,7 @@ const Dashboard: React.FC = () => {
       color: 'blue'
     },
     {
-      title: 'Rifas Activas',
+      title: 'Sorteos Activos',
       value: '24',
       change: '+3',
       changeType: 'positive',
@@ -61,7 +61,7 @@ const Dashboard: React.FC = () => {
     {
       id: 2,
       type: 'raffle_created',
-      message: 'Nueva rifa creada: "MacBook Pro M3"',
+      message: 'Nuevo sorteo creado: "MacBook Pro M3"',
       time: 'Hace 15 minutos',
       icon: Gift,
       color: 'gold'
@@ -196,7 +196,7 @@ const Dashboard: React.FC = () => {
         {/* Top Performing Raffles */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Rifas Destacadas</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Sorteos Destacados</h3>
           </div>
           <div className="p-6">
             <div className="space-y-4">
@@ -225,7 +225,7 @@ const Dashboard: React.FC = () => {
               href="/admin/raffles"
               className="tap mt-4 inline-flex items-center text-sm text-admin-midnight hover:text-admin-blue font-medium cursor-pointer"
             >
-              Ver todas las rifas →
+              Ver todos los sorteos →
             </Link>
           </div>
         </div>
@@ -240,8 +240,8 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link href="/admin/raffles" className="tap block p-4 text-left border border-gray-200 rounded-lg hover:border-admin-gold/40 hover:bg-admin-gold/5 transition-colors cursor-pointer">
               <Gift className="h-8 w-8 text-admin-gold mb-2" />
-              <h4 className="font-medium text-gray-900">Nueva Rifa</h4>
-              <p className="text-sm text-gray-600">Crear una nueva rifa</p>
+              <h4 className="font-medium text-gray-900">Nuevo Sorteo</h4>
+              <p className="text-sm text-gray-600">Crear un nuevo sorteo</p>
             </Link>
 
             <Link href="/admin/users" className="tap block p-4 text-left border border-gray-200 rounded-lg hover:border-admin-blue/40 hover:bg-admin-blue/5 transition-colors cursor-pointer">

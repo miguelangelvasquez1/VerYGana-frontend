@@ -404,7 +404,7 @@ export default function Login() {
         text-white
       "
                         >
-                          Rifas y premios
+                          Sorteos y premios
                         </p>
 
                         <p

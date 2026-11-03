@@ -275,7 +275,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
     if (Object.keys(errors).length > 0) return;
 
     if (!raffleImageFile) {
-      alert("Debes subir la imagen principal de la rifa");
+      alert("Debes subir la imagen principal del sorteo");
       return;
     }
     if (formData.prizes.length === 0) {
@@ -346,9 +346,9 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
     <div className="flex flex-col max-h-[90dvh] w-full bg-white rounded-2xl overflow-hidden">
       {/* ===== CABECERA FIJA ===== */}
       <div className="px-6 pr-12 py-4 border-b border-gray-100 bg-white sticky top-0 z-20">
-        <h2 className="text-lg font-bold text-admin-navy">Crear Rifa</h2>
+        <h2 className="text-lg font-bold text-admin-navy">Crear Sorteo</h2>
         <p className="text-xs text-gray-500">
-          Completa la información, premios y reglas de la nueva rifa
+          Completa la información, premios y reglas del nuevo sorteo
         </p>
       </div>
 
@@ -366,7 +366,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
             value={formData.title}
             onChange={handleChange}
             onBlur={() => markTouched("title")}
-            placeholder="Nombre de la rifa"
+            placeholder="Nombre del sorteo"
             className={inputCls(showError("title"))}
             required
           />
@@ -382,7 +382,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
             onChange={handleChange}
             onBlur={() => markTouched("description")}
             rows={3}
-            placeholder="Describe la rifa brevemente..."
+            placeholder="Describe el sorteo brevemente..."
             className={`${inputCls(showError("description"))} resize-none`}
             required
           />
@@ -394,7 +394,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
         {/* Tipo + Método */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelCls}>Tipo de Rifa</label>
+            <label className={labelCls}>Tipo de Sorteo</label>
             <select
               name="raffleType"
               value={formData.raffleType}
@@ -559,7 +559,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
             onChange={handleChange}
             onBlur={() => markTouched("termsAndConditions")}
             rows={4}
-            placeholder="Escribe aquí los términos y condiciones de la rifa..."
+            placeholder="Escribe aquí los términos y condiciones del sorteo..."
             className={`${inputCls(showError("termsAndConditions"))} resize-none`}
             required
           />
@@ -592,7 +592,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
           <div className="bg-linear-to-r from-admin-blue/10 to-white px-6 py-4 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <span className="text-xl">🖼️</span>
-              <h2 className="text-lg font-bold text-gray-800">Imagen de la Rifa</h2>
+              <h2 className="text-lg font-bold text-gray-800">Imagen del Sorteo</h2>
             </div>
           </div>
 
@@ -939,7 +939,7 @@ export default function CreateRaffleForm({ onSubmit, onCancel }: Props) {
           disabled={loading}
           className="tap cursor-pointer flex-1 bg-admin-gradient hover:opacity-90 text-white py-2.5 rounded-xl font-semibold text-sm shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
-          {loading ? "Creando rifa..." : "Crear Rifa"}
+          {loading ? "Creando sorteo..." : "Crear Sorteo"}
         </button>
       </div>
     </div>

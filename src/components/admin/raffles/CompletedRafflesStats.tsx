@@ -26,7 +26,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
   const [stats, setStats] = useState<RaffleStatsResponseDTO | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
 
-  const { searchTerm } = useAdminSectionSearch("Buscar rifa completada por título...");
+  const { searchTerm } = useAdminSectionSearch("Buscar sorteo completado por título...");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
@@ -118,16 +118,16 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
       {/* ===== Lista de rifas completadas ===== */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden h-fit">
         <div className="px-5 py-4 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-sm font-bold text-admin-navy">Rifas completadas</h3>
+          <h3 className="text-sm font-bold text-admin-navy">Sorteos completados</h3>
           <p className="text-xs text-gray-500 mt-0.5">Selecciona una para ver sus estadísticas</p>
         </div>
 
         <div className="divide-y divide-gray-100 max-h-[520px] overflow-y-auto">
           {isLoadingList ? (
-            <div className="p-6 text-center text-sm text-gray-400">Cargando rifas...</div>
+            <div className="p-6 text-center text-sm text-gray-400">Cargando sorteos...</div>
           ) : raffles.length === 0 ? (
             <div className="p-6 text-center text-sm text-gray-400">
-              No hay rifas completadas{debouncedSearch ? " con ese título" : ""}.
+              No hay sorteos completados{debouncedSearch ? " con ese título" : ""}.
             </div>
           ) : (
             raffles.map((raffle) => (
@@ -147,7 +147,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
                   {raffle.title}
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  Sorteada el {new Date(raffle.drawDate).toLocaleDateString("es-CO")} · {raffle.prizeCount} premio(s)
+                  Realizado el {new Date(raffle.drawDate).toLocaleDateString("es-CO")} · {raffle.prizeCount} premio(s)
                 </p>
               </button>
             ))
@@ -184,7 +184,7 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
         {!selectedRaffle ? (
           <div className="h-full min-h-[320px] flex flex-col items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-200 text-center p-10">
             <Sparkles className="w-10 h-10 text-gray-300 mb-3" />
-            <p className="text-sm text-gray-500">Selecciona una rifa completada para ver sus estadísticas.</p>
+            <p className="text-sm text-gray-500">Selecciona un sorteo completado para ver sus estadísticas.</p>
           </div>
         ) : isLoadingStats ? (
           <div className="h-full min-h-[320px] flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-200">
@@ -192,16 +192,16 @@ export default function CompletedRafflesStats({ initialRaffle, onInitialRaffleCo
           </div>
         ) : !stats ? (
           <div className="h-full min-h-[320px] flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-200 p-10 text-center">
-            <p className="text-sm text-gray-500">No se pudieron cargar las estadísticas de esta rifa.</p>
+            <p className="text-sm text-gray-500">No se pudieron cargar las estadísticas de este sorteo.</p>
           </div>
         ) : (
           <div className="space-y-6">
             {/* Header */}
             <div className="bg-admin-navy-gradient rounded-2xl p-6 text-white">
-              <p className="text-xs uppercase tracking-wide text-white/60 font-semibold">Rifa completada</p>
+              <p className="text-xs uppercase tracking-wide text-white/60 font-semibold">Sorteo completado</p>
               <h2 className="text-xl font-bold mt-1">{selectedRaffle.title}</h2>
               <p className="text-sm text-white/70 mt-1">
-                Sorteada el{" "}
+                Realizado el{" "}
                 {new Date(selectedRaffle.drawDate).toLocaleDateString("es-CO", {
                   day: "numeric",
                   month: "long",

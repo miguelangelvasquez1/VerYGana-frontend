@@ -17,7 +17,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/users': 'Gestión de Usuarios',
   '/admin/ads': 'Gestión de Anuncios',
   '/admin/products': 'Gestión de Productos',
-  '/admin/raffles': 'Gestión de Rifas',
+  '/admin/raffles': 'Gestión de Sorteos',
   '/admin/surveys': 'Encuestas',
   '/admin/forum': 'Historias de Impacto',
   '/admin/system': 'Gestión del Sistema',

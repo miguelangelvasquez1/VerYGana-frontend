@@ -21,9 +21,9 @@ describe('barra inferior del celular', () => {
     ]);
   });
 
-  it('Juegos lleva a /games y Rifas ya no está en la barra', () => {
+  it('Juegos lleva a /games y Sorteos ya no está en la barra', () => {
     expect(bar('Juegos').href).toBe('/games');
-    expect(MOBILE_BAR_ITEMS.map((item) => item.label)).not.toContain('Rifas');
+    expect(MOBILE_BAR_ITEMS.map((item) => item.label)).not.toContain('Sorteos');
   });
 
   it('Juegos se marca activo en /games y en sus subrutas, y no en /gamesx ni /home', () => {
@@ -46,13 +46,13 @@ describe('barra inferior del celular', () => {
 describe('menú de Perfil del celular', () => {
   const entries = MOBILE_MENU_ITEMS.map((item) => [item.label, item.href]);
 
-  it('agrega Rifas hacia /raffles', () => {
-    expect(entries).toContainEqual(['Rifas', '/raffles']);
+  it('agrega Sorteos hacia /raffles', () => {
+    expect(entries).toContainEqual(['Sorteos', '/raffles']);
   });
 
-  it('pone Rifas justo después de Juegos', () => {
+  it('pone Sorteos justo después de Juegos', () => {
     const labels = MOBILE_MENU_ITEMS.map((item) => item.label);
-    expect(labels.indexOf('Rifas')).toBe(labels.indexOf('Juegos') + 1);
+    expect(labels.indexOf('Sorteos')).toBe(labels.indexOf('Juegos') + 1);
   });
 
   it('conserva Juegos y los once enlaces de antes con sus destinos', () => {
@@ -80,7 +80,7 @@ describe('barra de escritorio', () => {
   it('tiene, en orden, los nueve accesos del consumidor', () => {
     expect(DESKTOP_NAV_ITEMS.map((item) => [item.label, item.href])).toEqual([
       ['Inicio', '/home'],
-      ['Rifas', '/raffles'],
+      ['Sorteos', '/raffles'],
       ['Juegos', '/games'],
       ['Mascota', '/pet'],
       ['Anuncios', '/ads'],

@@ -160,14 +160,14 @@ const STATUS_CONFIG: Record<
     },
 
     ACTIVE: {
-        label: "Activa",
+        label: "Activo",
         badge:
             "bg-emerald-50 text-emerald-700 border-emerald-200",
         dot: "bg-emerald-500 animate-pulse",
     },
 
     CLOSED: {
-        label: "Cerrada",
+        label: "Cerrado",
         badge:
             "bg-rose-50 text-rose-700 border-rose-200",
         dot: "bg-rose-500",
@@ -181,21 +181,21 @@ const STATUS_CONFIG: Record<
     },
 
     DRAWING: {
-        label: "En Sorteo",
+        label: "Eligiendo ganador",
         badge:
             "bg-amber-50 text-amber-700 border-amber-200",
         dot: "bg-amber-500 animate-ping",
     },
 
     COMPLETED: {
-        label: "Completada",
+        label: "Completado",
         badge:
             "bg-blue-50 text-blue-700 border-blue-200",
         dot: "bg-blue-500",
     },
 
     CANCELLED: {
-        label: "Cancelada",
+        label: "Cancelado",
         badge:
             "bg-slate-100 text-slate-600 border-slate-200",
         dot: "bg-slate-400",
@@ -431,7 +431,7 @@ export default function RaffleDetailCard({
                     >
                         <ArrowLeft className="w-4 h-4" />
 
-                        Volver a las rifas
+                        Volver a los sorteos
                     </button>
                 </div>
             )}
@@ -688,7 +688,7 @@ export default function RaffleDetailCard({
                             disabled={datesNeedUpdate || isLoading}
                             title={
                                 datesNeedUpdate
-                                    ? "Actualiza las fechas de la rifa antes de reactivarla"
+                                    ? "Actualiza las fechas del sorteo antes de reactivarlo"
                                     : undefined
                             }
                             onClick={() =>
@@ -735,8 +735,8 @@ export default function RaffleDetailCard({
                     " />
 
                     <p className="leading-relaxed">
-                        Esta rifa superó la fecha de sorteo
-                        sin ejecutarse. Actualiza las fechas
+                        Este sorteo pasó su fecha
+                        sin elegir ganador. Actualiza las fechas
                         con el botón{" "}
                         <strong className="
                             font-semibold
@@ -896,14 +896,14 @@ export default function RaffleDetailCard({
 
                 description={
                     confirmAction === "activate"
-                        ? "La rifa pasará a estado ACTIVA. Asegúrate de que las fechas y la configuración sean correctas antes de continuar."
+                        ? "El sorteo pasará a estado ACTIVO. Asegúrate de que las fechas y la configuración sean correctas antes de continuar."
                         : confirmAction === "close"
-                            ? "La rifa pasará a estado CERRADA. Esta acción finalizará el período activo de la rifa."
+                            ? "El sorteo pasará a estado CERRADO. Esta acción finalizará el período activo del sorteo."
                             : confirmAction === "delete"
-                                ? "Esta acción eliminará permanentemente la rifa. Esta operación no se puede deshacer."
+                                ? "Esta acción eliminará permanentemente el sorteo. Esta operación no se puede deshacer."
                                 : confirmAction === "verify"
                                     ? "Se verificará la integridad de la información asociada al sorteo."
-                                    : "La rifa pasará a estado CANCELADA. Esta acción interrumpirá el flujo normal de la rifa."
+                                    : "El sorteo pasará a estado CANCELADO. Esta acción interrumpirá el flujo normal del sorteo."
                 }
 
                 variant={
@@ -917,9 +917,9 @@ export default function RaffleDetailCard({
                     confirmAction === "delete"
                         ? "Eliminar"
                         : confirmAction === "cancel"
-                            ? "Cancelar rifa"
+                            ? "Cancelar sorteo"
                             : confirmAction === "close"
-                                ? "Cerrar rifa"
+                                ? "Cerrar sorteo"
                                 : confirmAction === "activate"
                                     ? "Activar"
                                     : "Verificar"
@@ -1739,7 +1739,7 @@ function PrizesTab({
                     font-medium
                 ">
                     No hay premios configurados
-                    para esta rifa.
+                    para este sorteo.
                 </p>
             </div>
         );
@@ -2389,7 +2389,7 @@ function DrawTab({
                     overflow-y-auto
                 ">
                     {raffle.termsAndConditions ||
-                        "No se han estipulado términos y condiciones especiales para esta rifa."}
+                        "No se han estipulado términos y condiciones especiales para este sorteo."}
                 </div>
             </div>
         </div>

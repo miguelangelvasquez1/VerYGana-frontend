@@ -11,7 +11,7 @@ import { RaffleSummaryResponseDTO } from "@/types/raffles/raffle.types";
 type TabKey = "raffles" | "ticket-rules" | "stats" | "audit";
 
 const TABS: { key: TabKey; label: string; icon: typeof Gift }[] = [
-  { key: "raffles", label: "Rifas", icon: Gift },
+  { key: "raffles", label: "Sorteos", icon: Gift },
   { key: "ticket-rules", label: "Reglas de boletos", icon: TicketIcon },
   { key: "stats", label: "Estadísticas", icon: BarChart3 },
   { key: "audit", label: "Auditoría", icon: ShieldAlert },

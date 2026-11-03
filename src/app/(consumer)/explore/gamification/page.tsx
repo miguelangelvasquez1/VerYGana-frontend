@@ -515,7 +515,7 @@ export default function GamificationPage() {
                         <p className="text-sm font-bold text-gray-700" style={{ fontVariantNumeric: 'tabular-nums' }}>{lc.referralTickets}</p>
                       </div>
                       <div className="text-center border-l border-gray-100">
-                        <p className="text-[11px] text-gray-400 uppercase" style={{ letterSpacing: '0.1em' }}>Tickets rifa</p>
+                        <p className="text-[11px] text-gray-400 uppercase" style={{ letterSpacing: '0.1em' }}>Tickets de sorteo</p>
                         <p className="text-sm font-bold text-gray-700" style={{ fontVariantNumeric: 'tabular-nums' }}>{lc.raffleTickets}</p>
                       </div>
                     </div>

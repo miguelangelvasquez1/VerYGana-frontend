@@ -30,7 +30,7 @@ test.describe('@paneles · CA-11 · las clases de celular no llegan al escritori
     test.skip(testInfo.project.name !== MOBILE_360, 'una sola vez: fija su propio viewport');
     await gotoPanelPage(page, context, entryOf('/admin/raffles'));
     await settle(page);
-    const tab = page.getByRole('button', { name: 'Rifas', exact: true });
+    const tab = page.getByRole('button', { name: 'Sorteos', exact: true });
     const bar = tab.locator('xpath=..');
 
     const desktop = await styleOf(bar);

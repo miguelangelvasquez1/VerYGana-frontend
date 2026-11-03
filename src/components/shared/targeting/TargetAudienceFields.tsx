@@ -251,7 +251,7 @@ export default function TargetAudienceFields({ value, onChange, mode, disabled }
       ? {
           title: "Disponibilidad",
           subtitle:
-            "Restringe quién puede ver la rifa y reclamar tickets. Si no configuras nada, estará disponible para todo el mundo.",
+            "Restringe quién puede ver el sorteo y reclamar tickets. Si no configuras nada, estará disponible para todo el mundo.",
         }
       : {
           title: "Preferencia de audiencia de catálogo",

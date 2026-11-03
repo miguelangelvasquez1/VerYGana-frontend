@@ -15,3 +15,8 @@ export function getRoleHomePath(role?: string | null): string | null {
   if (!role) return null;
   return ROLE_HOME_PATHS[role] ?? null;
 }
+
+// Destino de "Volver al inicio" del aviso "En desarrollo": el panel del rol, o la landing sin sesión.
+export function getUnderDevelopmentExitHref(role?: string | null): string {
+  return getRoleHomePath(role) ?? '/';
+}

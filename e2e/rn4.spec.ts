@@ -14,7 +14,7 @@ const PROFILE_MENU_LINKS: [string, string][] = [
   ['Mis participaciones', '/explore/participations'],
   ['Mis Referidos', '/explore/referrals'],
   ['Juegos', '/games'],
-  ['Rifas', '/raffles'],
+  ['Sorteos', '/raffles'],
   ['Encuestas', '/surveys'],
   ['Recargas', '/plans/mobile-plans'],
   ['Foro', '/forum'],
@@ -29,7 +29,7 @@ const GUEST_FOOTER_PAGES = ['/', '/login', '/register', '/verify?email=consumido
 // el home del consumidor con accesos de visitante y lo cubre `landing.spec.ts`.
 
 test.describe('RN-4 · con sesión', () => {
-  test('fila 1: "Participar ahora" no existe en el detalle de la rifa', async ({ page, context }) => {
+  test('fila 1: "Participar ahora" no existe en el detalle del sorteo', async ({ page, context }) => {
     await signIn(context);
     await page.goto('/raffles/1');
     await settle(page);
@@ -52,9 +52,10 @@ test.describe('RN-4 · con sesión', () => {
     await signIn(context);
     await page.goto('/plans/mobile-plans');
     await settle(page);
-    await expect(page.getByText('Contratar Plan')).toHaveCount(0);
-    await expect(page.getByText('Recargar Ahora')).toHaveCount(0);
-    const soon = page.getByRole('button', { name: 'Próximamente', exact: true });
+    const blocked = page.locator('[data-blocked-content]');
+    await expect(blocked.getByText('Contratar Plan')).toHaveCount(0);
+    await expect(blocked.getByText('Recargar Ahora')).toHaveCount(0);
+    const soon = page.getByRole('button', { name: 'Próximamente', exact: true, includeHidden: true });
     expect(await soon.count()).toBeGreaterThan(0);
     for (const button of await soon.all()) {
       await expect(button).toBeDisabled();

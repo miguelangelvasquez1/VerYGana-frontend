@@ -50,7 +50,7 @@ export default function RaffleDetailPage() {
 
     useEffect(() => {
         if (!raffleId || isNaN(raffleId)) {
-            setError("ID de rifa inválido");
+            setError("ID de sorteo inválido");
             setLoading(false);
             return;
         }
@@ -60,7 +60,7 @@ export default function RaffleDetailPage() {
     const handleCloseRaffle = async (id: number) => {
         try {
             await closeRaffle(id);
-            toast.success("Rifa cerrada correctamente");
+            toast.success("Sorteo cerrado correctamente");
             await fetchRaffle();
         } catch (err: any) {
             const friendlyMessage = getFriendlyErrorMessage(err);
@@ -85,7 +85,7 @@ export default function RaffleDetailPage() {
     const handleCancel = async (id: number) => {
         try {
             await cancelRaffle(id);
-            toast.success("Rifa cancelada correctamente");
+            toast.success("Sorteo cancelado correctamente");
             await fetchRaffle();
         } catch (err: any) {
             const friendlyMessage = getFriendlyErrorMessage(err);
@@ -96,7 +96,7 @@ export default function RaffleDetailPage() {
     const handleActivate = async (id: number) => {
         try {
             await activateRaffle(id);
-            toast.success("Rifa reactivada correctamente");
+            toast.success("Sorteo reactivado correctamente");
             await fetchRaffle();
         } catch (err: any) {
             const friendlyMessage = getFriendlyErrorMessage(err);
@@ -107,7 +107,7 @@ export default function RaffleDetailPage() {
     const handleDelete = async (id: number) => {
         try {
             await deleteRaffle(id);
-            toast.success("Rifa eliminada correctamente");
+            toast.success("Sorteo eliminado correctamente");
             router.push("/admin/raffles");
         } catch (err: any) {
             const friendlyMessage = getFriendlyErrorMessage(err);
@@ -118,7 +118,7 @@ export default function RaffleDetailPage() {
     const handleUpdate = async (id: number, data: UpdateRaffleRequestDTO) => {
         try {
             await updateRaffle(id, data);
-            toast.success("Rifa actualizada correctamente");
+            toast.success("Sorteo actualizado correctamente");
             await fetchRaffle();
         } catch (err: any) {
             const friendlyMessage = getFriendlyErrorMessage(err);
@@ -152,7 +152,7 @@ export default function RaffleDetailPage() {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-gray-900">Error al cargar la rifa</h2>
+                                    <h2 className="text-xl font-bold text-gray-900">Error al cargar el sorteo</h2>
                                     <p className="text-gray-600 mt-2 max-w-md">{error}</p>
                                 </div>
                                 <div className="flex gap-3">

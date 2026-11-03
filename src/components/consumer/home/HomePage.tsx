@@ -56,8 +56,8 @@ const FEATURES: FeatureCardProps[] = [
   },
   {
     icon: <Gift className="w-7 h-7" />,
-    title: 'Rifas',
-    description: 'Participa en rifas increíbles con premios en efectivo y productos exclusivos.',
+    title: 'Sorteos',
+    description: 'Participa en sorteos increíbles con premios en efectivo y productos exclusivos.',
     href: '/raffles',
     gradient: 'from-[#00a4ff] to-[#0089d6]',
     badge: 'En vivo',
@@ -86,7 +86,7 @@ const FEATURES: FeatureCardProps[] = [
   {
     icon: <Heart className="w-7 h-7" />,
     title: 'Favoritos',
-    description: 'Guarda tus productos, rifas y anuncios favoritos en un solo lugar.',
+    description: 'Guarda tus productos, sorteos y anuncios favoritos en un solo lugar.',
     href: '/explore/favorites',
     gradient: 'from-[#00a4ff] to-[#0089d6]',
   },
@@ -95,7 +95,7 @@ const FEATURES: FeatureCardProps[] = [
 const STATS: StatProps[] = [
   { value: '50K+', label: 'Usuarios activos', icon: <Users className="w-5 h-5" /> },
   { value: '$2.3M', label: 'Recompensas pagadas', icon: <Coins className="w-5 h-5" /> },
-  { value: '1,200+', label: 'Rifas completadas', icon: <Gift className="w-5 h-5" /> },
+  { value: '1,200+', label: 'Sorteos completados', icon: <Gift className="w-5 h-5" /> },
   { value: '4.9★', label: 'Calificación', icon: <Star className="w-5 h-5" /> },
 ];
 
@@ -115,7 +115,7 @@ const HOW_IT_WORKS = [
   {
     step: '03',
     title: 'Canjea tus ganancias',
-    desc: 'Usa tu saldo en recargas, productos, rifas o retíralo.',
+    desc: 'Usa tu saldo en recargas, productos, sorteos o retíralo.',
     color: 'text-amber-600 bg-amber-50',
   },
 ];
@@ -168,7 +168,7 @@ export default function HomePage({ guest = false }: { guest?: boolean } = {}) {
               </h1>
 
               <p className="text-blue-100 text-base lg:text-lg leading-relaxed max-w-xl mb-8">
-                Ve anuncios, responde encuestas, juega y participa en rifas.
+                Ve anuncios, responde encuestas, juega y participa en sorteos.
                 Acumula llaves y canjéalas cuando quieras.
               </p>
 

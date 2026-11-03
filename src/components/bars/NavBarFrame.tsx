@@ -5,6 +5,7 @@ import { DESKTOP_NAV_ITEMS, isMobileBarItemActive, MOBILE_BAR_ITEMS } from './mo
 
 // Marco visual de la barra del consumidor (escritorio, barra superior y barra inferior del celular). Lo comparten
 // `NavBar` (con sesión, con sus acciones) y `GuestNavBar` (sin sesión, en `/`). Sin hooks ni estado: es HTML de servidor.
+// La compactación de 1024 a 1279 px (spec 016, D-2) es solo de la barra con sesión: con `minimal` quedan las clases de antes.
 // Con `minimal` (barra sin sesión) solo quedan el logo, que lleva a `/`, y las acciones: sin accesos de sección y sin
 // barra inferior en el celular.
 
@@ -20,7 +21,7 @@ interface NavBarFrameProps {
   bottomExtra?: ReactNode
 }
 
-const btnBase = 'cursor-pointer rounded-full transform transition-all duration-200 p-2 2xl:px-4 2xl:py-2'
+const btnBase = 'cursor-pointer rounded-full transform transition-all duration-200 p-2 min-[1872px]:px-4 min-[1872px]:py-2'
 const btnNormal = `${btnBase} bg-white/15 text-white font-medium hover:bg-white/30 hover:scale-105 backdrop-blur-sm`
 const btnActive = `${btnBase} bg-white text-[#00a4ff] font-bold shadow-lg scale-105`
 
@@ -47,12 +48,12 @@ export default function NavBarFrame({
     <>
       {/* ---------- DESKTOP NAV (top) ---------- */}
       <nav className="hidden lg:block sticky top-0 z-50 w-full bg-linear-to-r from-[#004b8d] via-[#0075c4] to-[#004b8d] text-white shadow-lg">
-        <div className="flex items-center justify-between px-6 py-2">
+        <div className={`flex items-center justify-between py-2 ${minimal ? 'px-6' : 'px-4 xl:px-6'}`}>
           {/* LOGO */}
           {brand(
             <div className="flex items-center gap-3">
               <Image src="/logos/logoDorado.png" alt="VERyGANA" width={52} height={52} className="object-contain shrink-0" />
-              <div className="leading-tight">
+              <div className={minimal ? 'leading-tight' : 'hidden xl:block leading-tight'}>
                 <p className="text-base font-extrabold text-white tracking-tight">VERyGANA</p>
                 <p className="text-[10px] text-white/50 font-medium tracking-wide">La alegria de ganar</p>
               </div>
@@ -61,23 +62,24 @@ export default function NavBarFrame({
 
           {/* NAV BUTTONS */}
           {!minimal && (
-            <div className="flex gap-2 2xl:gap-3">
+            <div className="flex gap-2 min-[1872px]:gap-3">
               {DESKTOP_NAV_ITEMS.map(({ href, label, Icon }) => (
                 <Link
                   href={href}
                   key={href}
                   title={label}
+                  aria-label={label}
                   className={`${getNavClass(pathname === href)} inline-flex items-center justify-center`}
                 >
-                  <Icon className="w-5 h-5 2xl:hidden" />
-                  <span className="hidden 2xl:inline">{label}</span>
+                  <Icon className="w-5 h-5 min-[1872px]:hidden" aria-hidden="true" />
+                  <span className="hidden min-[1872px]:inline">{label}</span>
                 </Link>
               ))}
             </div>
           )}
 
           {/* -------- WALLET + CART + NOTIFS + USER -------- */}
-          <div className="flex items-center gap-6">
+          <div className={`flex items-center ${minimal ? 'gap-6' : 'gap-3 xl:gap-6'}`}>
             {desktopActions}
           </div>
         </div>

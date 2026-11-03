@@ -16,8 +16,8 @@ function entryOf(route: string) {
 
 test.describe('@paneles · RN-7 · dashboard de admin', () => {
   const CONNECTED = [
-    { name: /Ver todas las rifas/, href: '/admin/raffles' },
-    { name: /Nueva Rifa/, href: '/admin/raffles' },
+    { name: /Ver todos los sorteos/, href: '/admin/raffles' },
+    { name: /Nuevo Sorteo/, href: '/admin/raffles' },
     { name: /Gestionar Usuarios/, href: '/admin/users' },
     { name: /^Configuración Ajustes del sistema/, href: '/admin/config' },
   ];

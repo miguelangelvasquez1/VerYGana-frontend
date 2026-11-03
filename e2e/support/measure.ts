@@ -408,3 +408,98 @@ export async function hoverOnlyActions(page: Page): Promise<string[]> {
     return found;
   });
 }
+
+export interface DesktopHeaderReport {
+  viewport: number;
+  navWidth: number;
+  logo: number;
+  items: number;
+  actions: number;
+  /** Suma de los tres grupos con el relleno lateral (48) y un respiro de 16 px entre grupos (spec 016, plan 3.10). */
+  intrinsic: number;
+  crossings: string[];
+  outside: string[];
+  clipped: string[];
+  modes: { label: string; mode: 'icon' | 'text'; ariaLabel: string | null; title: string | null }[];
+}
+
+/**
+ * Header de escritorio (spec 016, CA-7, RN-5): cajas del logo, de los accesos y de las acciones; pares que se
+ * cruzan; elementos fuera del `nav`; textos cortados o partidos en dos líneas; y el modo (ícono o texto) de cada
+ * acceso. Mide solo las cajas de flujo: los menús desplegables son absolutos y no cuentan.
+ */
+export async function measureDesktopHeader(page: Page): Promise<DesktopHeaderReport> {
+  return page.evaluate(() => {
+    const nav = document.querySelector('nav.lg\\:block') as HTMLElement;
+    const row = nav.firstElementChild as HTMLElement;
+    const [logoEl, itemsEl, actionsEl] = Array.from(row.children) as HTMLElement[];
+    const rect = (el: Element) => el.getBoundingClientRect();
+    const navRect = rect(nav);
+    const boxes: { name: string; el: HTMLElement }[] = [{ name: 'logo', el: logoEl }];
+    Array.from(itemsEl.children).forEach((a) => boxes.push({ name: `acceso "${(a as HTMLElement).title}"`, el: a as HTMLElement }));
+    const actionNames = ['llaves', 'carrito', 'campana', 'perfil'];
+    // Las llaves llevan `order-first`: se nombran por contenido, no por posición.
+    Array.from(actionsEl.children).forEach((c, i) => {
+      const el = c as HTMLElement;
+      const name = el.textContent?.includes('Llaves disponibles') ? 'llaves' : (actionNames[i] ?? `acción ${i}`);
+      boxes.push({ name: `acción ${name}`, el });
+    });
+    const crossings: string[] = [];
+    const outside: string[] = [];
+    const visible = boxes.filter((b) => rect(b.el).width > 0);
+    for (let i = 0; i < visible.length; i++) {
+      const a = rect(visible[i].el);
+      if (a.left < navRect.left - 0.5 || a.right > navRect.right + 0.5) {
+        outside.push(`${visible[i].name} [${Math.round(a.left)}, ${Math.round(a.right)}] fuera de [0, ${Math.round(navRect.right)}]`);
+      }
+      for (let j = i + 1; j < visible.length; j++) {
+        const b = rect(visible[j].el);
+        const overlap = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+        if (overlap > 0.5) crossings.push(`${visible[i].name} y ${visible[j].name} se cruzan ${Math.round(overlap)} px`);
+      }
+    }
+    // Textos: hojas con texto dentro de la barra, sin los menús desplegables (ocultos con opacidad 0).
+    const clipped: string[] = [];
+    const walker = document.createTreeWalker(nav, NodeFilter.SHOW_ELEMENT);
+    for (let node = walker.nextNode() as HTMLElement | null; node; node = walker.nextNode() as HTMLElement | null) {
+      if (node.closest('[class*="pointer-events-none"]') || node.closest('.absolute')) continue;
+      // Texto solo para lectores (`sr-only` aplicado, como el nombre del perfil de 1024 a 1279 px): no se ve, no se mide.
+      let visuallyHidden = false;
+      for (let up: HTMLElement | null = node; up && up !== nav; up = up.parentElement) {
+        if (getComputedStyle(up).clipPath === 'inset(50%)') { visuallyHidden = true; break; }
+      }
+      if (visuallyHidden) continue;
+      const r = rect(node);
+      if (r.width === 0 || r.height === 0) continue;
+      const ownText = Array.from(node.childNodes).some((n) => n.nodeType === 3 && n.textContent?.trim());
+      if (!ownText) continue;
+      const text = node.textContent!.trim().slice(0, 30);
+      if (node.scrollWidth > node.clientWidth + 1) clipped.push(`"${text}" recortado (${node.scrollWidth} > ${node.clientWidth})`);
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const lines = new Set(Array.from(range.getClientRects()).map((q) => Math.round(q.top))).size;
+      if (lines > 1) clipped.push(`"${text}" se parte en ${lines} líneas`);
+    }
+    const modes = Array.from(itemsEl.children).map((a) => {
+      const link = a as HTMLElement;
+      const span = link.querySelector('span') as HTMLElement;
+      const mode: 'icon' | 'text' = getComputedStyle(span).display === 'none' ? 'icon' : 'text';
+      return { label: span.textContent ?? '', mode, ariaLabel: link.getAttribute('aria-label'), title: link.getAttribute('title') };
+    });
+    const logo = rect(logoEl).width;
+    const items = rect(itemsEl).width;
+    const actions = rect(actionsEl).width;
+    return {
+      viewport: document.documentElement.clientWidth,
+      navWidth: navRect.width,
+      logo,
+      items,
+      actions,
+      intrinsic: logo + items + actions + 48 + 32,
+      crossings,
+      outside,
+      clipped,
+      modes,
+    };
+  });
+}

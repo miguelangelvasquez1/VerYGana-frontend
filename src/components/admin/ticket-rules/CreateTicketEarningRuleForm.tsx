@@ -205,7 +205,7 @@ export default function CreateTicketEarningRuleForm({
             Nueva Regla de Tickets
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Configura cómo los usuarios ganan tickets en las rifas
+            Configura cómo los usuarios ganan tickets en los sorteos
           </p>
         </div>
 
