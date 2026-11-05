@@ -3,7 +3,7 @@ import { TEST_SECRET } from './__tests__/middleware/session';
 
 // Pruebas de navegador (spec 012; P-13). Solo Chromium. El front de pruebas (build `standalone`, puerto 3100)
 // y la API simulada (puerto 4010) viven en loopback; la red externa se cierra en `e2e/support/network.ts`.
-// Antes de correr: `npm run build:e2e`.
+// Antes de correr: `pnpm run build:e2e`.
 
 const WEB_SERVER_TIMEOUT_MS = 120_000;
 

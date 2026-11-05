@@ -1,33 +1,29 @@
 {
-  "auditReportVersion": 2,
-  "vulnerabilities": {
-    "lodash": {
-      "name": "lodash",
+  "actions": [],
+  "advisories": {
+    "2": {
+      "id": 2,
+      "module_name": "lodash",
       "severity": "moderate",
-      "isDirect": true,
-      "via": [
-        {
-          "source": 2,
-          "name": "lodash",
-          "dependency": "lodash",
-          "title": "Aviso de ejemplo",
-          "url": "https://github.com/advisories/GHSA-dddd-eeee-ffff",
-          "severity": "moderate",
-          "cwe": [],
-          "cvss": {
-            "score": 0,
-            "vectorString": null
-          },
-          "range": "*"
-        }
-      ],
-      "effects": [],
-      "range": "*",
-      "nodes": [
-        "node_modules/lodash"
-      ],
-      "fixAvailable": true
+      "title": "Aviso de ejemplo",
+      "url": "https://github.com/advisories/GHSA-dddd-eeee-ffff",
+      "github_advisory_id": "GHSA-dddd-eeee-ffff",
+      "vulnerable_versions": "*",
+      "patched_versions": ""
     }
   },
-  "metadata": {}
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 1,
+      "high": 0,
+      "critical": 0
+    },
+    "dependencies": 0,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 0
+  }
 }

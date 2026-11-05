@@ -33,10 +33,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # La versión de pnpm sale del campo `packageManager` de package.json.
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
       # Caché del build de Next (recomendada por la guía de Next para CI). La clave
       # incluye el lockfile y el código fuente; si cambia el código se parte de la
@@ -45,12 +48,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .next/cache
-          key: nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**') }}
+          key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**') }}
           restore-keys: |
-            nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
 
       - name: Instalar dependencias
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       # El tope de avisos (.lint-max-warnings) nunca sube: se compara con el de la
       # rama destino, que hay que traer porque el checkout es superficial.
@@ -77,16 +80,16 @@ jobs:
       - name: Lint (tope de avisos que solo baja)
         env:
           LINT_BASE_SHA: ${{ github.event_name == 'push' && github.event.before || '' }}
-        run: npm run lint:ci
+        run: pnpm run lint:ci
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       # Después del build a propósito: `next build` genera los tipos de rutas en
       # .next/types, y solo con ellos `tsc` ve los mismos errores que el build.
       # Antes del build, tsc no los vería (falso verde).
       - name: Tipos
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
 
   tests:
     name: Pruebas
@@ -97,16 +100,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # La versión de pnpm sale del campo `packageManager` de package.json.
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
       - name: Instalar dependencias
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Pruebas
-        run: npm test
+        run: pnpm test
 
   # Auditoría de dependencias de producción (--omit=dev: lo de desarrollo no llega
   # al bundle ni al contenedor). Bloqueante: los avisos altos conocidos (`xlsx` y el
@@ -121,16 +127,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # La versión de pnpm sale del campo `packageManager` de package.json.
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
       - name: Instalar dependencias
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Auditoría con excepciones
-        run: npm run audit:ci
+        run: pnpm run audit:ci
 
   # Pruebas de navegador (spec 012, P-13): Playwright con Chromium contra el build `standalone` de la
   # app y una API simulada en loopback con datos ficticios. No usa la red externa ni secretos de GitHub.
@@ -144,42 +153,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # La versión de pnpm sale del campo `packageManager` de package.json.
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
       - name: Caché de .next/cache (build de pruebas)
         uses: actions/cache@v4
         with:
           path: .next/cache
-          key: nextjs-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**') }}
+          key: nextjs-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**') }}
           restore-keys: |
-            nextjs-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            nextjs-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
 
       - name: Caché de navegadores de Playwright
         id: pw-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Instalar dependencias
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Instalar Chromium
         if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Dependencias del sistema de Chromium
         if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+        run: pnpm exec playwright install-deps chromium
 
       - name: Build de pruebas
-        run: npm run build:e2e
+        run: pnpm run build:e2e
 
       - name: Pruebas en navegador
-        run: npm run test:e2e
+        run: pnpm run test:e2e
 
       - name: Reporte (solo si falla)
         if: failure()

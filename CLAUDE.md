@@ -23,14 +23,16 @@ vecino no lo haga.
 
 ## Requisitos
 
-- Node 22 y npm 10 (los que usan el CI y la imagen). El repo no fija `engines`.
-- Git y acceso a internet: `npm ci` baja los paquetes y `next dev` / `next build` descargan
+- Node 22 (el que usan el CI y la imagen) y pnpm 10.28.0. La versión de pnpm la fija el campo
+  `packageManager` de `package.json`: con Corepack (`corepack enable`, viene con Node) se usa sola.
+  El repo no fija `engines`.
+- Git y acceso a internet: `pnpm install` baja los paquetes y `next dev` / `next build` descargan
   las fuentes de Google (`next/font/google`). El primer `build` de un clon tarda más (en el
   ensayo, unos 2 minutos; los siguientes, medio minuto).
 - Opcional, para traer las variables de entorno del equipo: la CLI de Infisical con sesión
   iniciada (`infisical login`) y el proyecto del front enlazado (`infisical init`, que crea
   `.infisical.json`; ese archivo está ignorado por git y no se sube).
-- Opcional, para correr las pruebas de navegador (`e2e/`): `npx playwright install chromium`, una sola
+- Opcional, para correr las pruebas de navegador (`e2e/`): `pnpm exec playwright install chromium`, una sola
   vez (baja Chromium a `~/.cache/ms-playwright`; no va en `node_modules`).
 - Opcional, para el flujo de specs con agentes: Claude Code (`claude`).
 
@@ -38,22 +40,23 @@ vecino no lo haga.
 
 ```bash
 git clone <url del repositorio> && cd <carpeta del clon>
-npm ci                      # instala exactamente lo que dice package-lock.json
+corepack enable             # una sola vez: activa la versión de pnpm de package.json
+pnpm install --frozen-lockfile   # instala exactamente lo que dice pnpm-lock.yaml
 ```
 
-Con Infisical (lo que usa el equipo): `npm run dev` ejecuta
+Con Infisical (lo que usa el equipo): `pnpm dev` ejecuta
 `infisical run --command "next dev --turbopack"`, así que las variables salen de Infisical.
 
 Sin Infisical: crea un archivo `.env.local` en la raíz (`.env*` está ignorado por git, nunca se
 sube) con las variables de la tabla de abajo, o expórtalas en la terminal, y corre:
 
 ```bash
-npx next dev --turbopack    # http://localhost:3000
-npx next dev --turbopack -p 3001   # si el 3000 está ocupado
+pnpm exec next dev --turbopack    # http://localhost:3000
+pnpm exec next dev --turbopack -p 3001   # si el 3000 está ocupado
 ```
 
-Si `npx next dev --turbopack` responde 500 con un error de `next/font/google` ("queries have
-exactly one entry") en la primera petición, reinícialo o usa `npx next dev` (sin Turbopack). Se
+Si `pnpm exec next dev --turbopack` responde 500 con un error de `next/font/google` ("queries have
+exactly one entry") en la primera petición, reinícialo o usa `pnpm exec next dev` (sin Turbopack). Se
 vio una vez en un clon limpio y no se pudo reproducir. Para comprobar que levantó:
 `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login` debe dar `200`.
 
@@ -100,19 +103,19 @@ export NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_API_URL=https://api.example.test \
 
 | Comando | Qué hace |
 |---------|----------|
-| `npm ci` | instalación reproducible desde el lockfile |
-| `npm test` | Vitest (`vitest run`, una pasada): todo `__tests__/**/*.test.ts` |
-| `npx vitest run <archivo>` | una sola prueba |
-| `npm run build:e2e` | `next build` con las `NEXT_PUBLIC_*` de las pruebas de navegador (API simulada en `127.0.0.1:4010`); **reemplaza `.next`**: vuelve a correr `npm run build` antes de `npx tsc --noEmit` |
-| `npm run test:e2e` | Playwright (Chromium) sobre `e2e/`, contra el build de `build:e2e`: levanta solo la API simulada (4010) y la app (3100) |
-| `npx playwright test <archivo> -g "<ruta>"` | una sola prueba de navegador, por ejemplo `e2e/layout.spec.ts -g "/home"` |
-| `npx playwright test --project=desktop-1280 --update-snapshots` | regenera las capturas de escritorio de referencia (solo local; ver `e2e/desktop.spec.ts`) |
-| `npm run lint` | `next lint` tal cual, para ver los avisos |
-| `npm run lint:ci` | la puerta de lint del CI (ver más abajo) |
-| `npm run build` | `next build` (salida `standalone`) |
-| `npx tsc --noEmit` | tipos; córrelo **después** de `build`, que genera los tipos de rutas en `.next/types` |
-| `npm run audit:ci` | la puerta de auditoría del CI (ver más abajo) |
-| `npm run dev` / `npm start` | desarrollo con Infisical / servir el build |
+| `pnpm install --frozen-lockfile` | instalación reproducible desde el lockfile |
+| `pnpm test` | Vitest (`vitest run`, una pasada): todo `__tests__/**/*.test.ts` |
+| `pnpm exec vitest run <archivo>` | una sola prueba |
+| `pnpm run build:e2e` | `next build` con las `NEXT_PUBLIC_*` de las pruebas de navegador (API simulada en `127.0.0.1:4010`); **reemplaza `.next`**: vuelve a correr `pnpm run build` antes de `pnpm exec tsc --noEmit` |
+| `pnpm run test:e2e` | Playwright (Chromium) sobre `e2e/`, contra el build de `build:e2e`: levanta solo la API simulada (4010) y la app (3100) |
+| `pnpm exec playwright test <archivo> -g "<ruta>"` | una sola prueba de navegador, por ejemplo `e2e/layout.spec.ts -g "/home"` |
+| `pnpm exec playwright test --project=desktop-1280 --update-snapshots` | regenera las capturas de escritorio de referencia (solo local; ver `e2e/desktop.spec.ts`) |
+| `pnpm run lint` | `next lint` tal cual, para ver los avisos |
+| `pnpm run lint:ci` | la puerta de lint del CI (ver más abajo) |
+| `pnpm run build` | `next build` (salida `standalone`) |
+| `pnpm exec tsc --noEmit` | tipos; córrelo **después** de `build`, que genera los tipos de rutas en `.next/types` |
+| `pnpm run audit:ci` | la puerta de auditoría del CI (ver más abajo) |
+| `pnpm dev` / `pnpm start` | desarrollo con Infisical / servir el build |
 
 Ninguna prueba toca la red externa, la API ni Infisical, y ninguna usa secretos reales. Las pruebas de
 navegador (`e2e/`, Playwright, P-13) hablan solo con `127.0.0.1`: la app y una API simulada con datos
@@ -126,17 +129,17 @@ qué ruta agregar.
 secretos de GitHub. Para el merge a `main` los cuatro deben pasar (el cuarto lo agrega Miguel a la
 protección de `main`; mientras no lo haga avisa pero no bloquea):
 
-1. **`Lint, tipos y build`**: `npm run lint:ci`, `npm run build`, `npx tsc --noEmit`.
-2. **`Pruebas`**: `npm test`.
-3. **`Auditoría de dependencias`**: `npm run audit:ci`.
-4. **`Pruebas en navegador`**: `npm run build:e2e` y `npm run test:e2e` (solo Chromium; Safari se
+1. **`Lint, tipos y build`**: `pnpm run lint:ci`, `pnpm run build`, `pnpm exec tsc --noEmit`.
+2. **`Pruebas`**: `pnpm test`.
+3. **`Auditoría de dependencias`**: `pnpm run audit:ci`.
+4. **`Pruebas en navegador`**: `pnpm run build:e2e` y `pnpm run test:e2e` (solo Chromium; Safari se
    comprueba a mano; las capturas de escritorio no corren aquí).
 
 No les cambies el nombre sin cambiar la protección de la rama `main`.
 
 ### Lint: el tope de avisos solo baja
 
-`npm run lint:ci` (`scripts/lint-ratchet.mjs`) lee el tope de `.lint-max-warnings` (un número).
+`pnpm run lint:ci` (`scripts/lint-ratchet.mjs`) lee el tope de `.lint-max-warnings` (un número).
 Códigos de salida: `0` pasa, `1` la puerta falla, `3` no se pudo ejecutar.
 Falla con `1` si:
 
@@ -158,7 +161,7 @@ push no se compara con el tope anterior. En GitHub Actions (`GITHUB_ACTIONS` def
 
 ### Auditoría: excepciones escritas
 
-`npm run audit:ci` (`scripts/audit-gate.mjs`) corre `npm audit --omit=dev --json` (solo
+`pnpm run audit:ci` (`scripts/audit-gate.mjs`) corre `pnpm audit --prod --json` (solo
 dependencias de producción) y bloquea los avisos de severidad alta o crítica. Códigos de salida:
 `0` pasa, `1` hay vulnerabilidades sin excepción o una excepción inválida o vencida, `2` el
 registro de npm no respondió (no es un hallazgo: reintenta), `3` error interno.
@@ -178,7 +181,7 @@ Un aviso sin corrección disponible solo se tolera con una excepción **por avis
 ```
 
 - Los seis campos son obligatorios y las fechas van en formato `AAAA-MM-DD`. El `id` y el
-  paquete salen de `npm audit --omit=dev --json`.
+  paquete salen de `pnpm audit --prod --json`.
 - La excepción casa por `id` y paquete: un aviso alto **nuevo** en el mismo paquete vuelve a
   fallar.
 - Pasada la fecha `reviewBy` la excepción vence y el CI falla en todos los PR hasta que se

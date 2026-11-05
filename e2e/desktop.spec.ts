@@ -5,7 +5,7 @@ import { signIn, type TestRole } from './support/session';
 // Capturas de escritorio de referencia (spec 012, CA-8 y D-4): las páginas que usan componentes
 // compartidos con otros roles, a 1280 × 800. Se generan sobre el código sin cambios y después de tocar los
 // compartidos se comparan. Dependen del sistema operativo: solo corren en local (el proyecto `desktop-1280`
-// no corre en el CI). Para regenerar: `npx playwright test --project=desktop-1280 --update-snapshots`.
+// no corre en el CI). Para regenerar: `pnpm exec playwright test --project=desktop-1280 --update-snapshots`.
 
 interface DesktopPage {
   name: string;

@@ -13,12 +13,15 @@
 
 FROM node:22-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+# Corepack trae la versión de pnpm que fija `packageManager` en package.json.
+RUN corepack enable
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 FROM node:22-alpine AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -51,7 +54,7 @@ RUN test -n "$NEXT_PUBLIC_API_URL" -a -n "$NEXT_PUBLIC_WS_URL" \
 RUN test -n "$NEXT_PUBLIC_PET_GAME_ORIGIN" \
     || { echo "Falta NEXT_PUBLIC_PET_GAME_ORIGIN (--build-arg): origen del build de mascotas, por ejemplo https://mascotas-beta.verygana.com"; exit 1; }
 
-RUN npm run build
+RUN pnpm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
