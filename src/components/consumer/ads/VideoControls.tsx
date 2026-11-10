@@ -1,15 +1,29 @@
 // components/VideoControls.tsx
 'use client';
-import { ExternalLink, Share2 } from 'lucide-react';
+import { ExternalLink, Heart, Share2 } from 'lucide-react';
 
 interface VideoControlsProps {
   onVisit: () => void;
+  onLike: () => void;
   onShare: () => void;
   onSave: () => void;
+  isLiked: boolean;
+  isLiking: boolean;
+  likesCount: string;
+  sharesCount: string;
   size?: 'sm' | 'md' | 'lg';
 }
 
-export default function VideoControls({ onVisit, onShare, size = 'lg' }: VideoControlsProps) {
+export default function VideoControls({
+  onVisit,
+  onLike,
+  onShare,
+  isLiked,
+  isLiking,
+  likesCount,
+  sharesCount,
+  size = 'lg',
+}: VideoControlsProps) {
   const iconSize =
     size === 'sm' ? 'w-6 h-6' :
     size === 'md' ? 'w-6 h-6' :
@@ -34,13 +48,37 @@ export default function VideoControls({ onVisit, onShare, size = 'lg' }: VideoCo
         className="flex flex-col items-center gap-1.5 group cursor-pointer min-h-11 min-w-11"
         aria-label="Visitar sitio del anunciante"
       >
-        <div className={`${btnSize} rounded-full bg-white/10 backdrop-blur-md
-          border border-white/20 flex items-center justify-center
-          group-hover:bg-white/20 group-active:scale-90
+        <div className={`${btnSize} rounded-full bg-black/50 backdrop-blur-md
+          border border-white/15 flex items-center justify-center
+          group-hover:bg-black/60 group-active:scale-90
           transition-all shadow-lg`}>
-          <ExternalLink className={`${iconSize} text-white`} />
+          <ExternalLink className={`${iconSize} text-white drop-shadow-md`} />
         </div>
-        <span className={`${labelSize} font-semibold text-white drop-shadow`}>Visitar</span>
+        <span className={`${labelSize} font-semibold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.8)]`}>Visitar</span>
+      </button>
+
+      {/* Like */}
+      <button
+        onClick={onLike}
+        disabled={isLiked || isLiking}
+        aria-label={`Me gusta, ${likesCount} likes`}
+        aria-pressed={isLiked}
+        className="flex flex-col items-center gap-1.5 group cursor-pointer min-h-11 min-w-11 disabled:cursor-not-allowed"
+      >
+        <div className={`${btnSize} rounded-full bg-black/50 backdrop-blur-md
+          border border-white/15 flex items-center justify-center
+          group-hover:bg-black/60 group-active:scale-90
+          transition-all shadow-lg`}>
+          <Heart
+            className={`${iconSize} drop-shadow-md transition-[color,transform] duration-200 ease-out motion-reduce:transition-none ${
+              isLiked
+                ? 'scale-110 text-[#fe2c55] fill-[#fe2c55]'
+                : 'scale-100 text-white fill-none'
+            }`}
+            fill={isLiked ? 'currentColor' : 'none'}
+          />
+        </div>
+        <span className={`${labelSize} font-semibold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.8)]`}>{likesCount}</span>
       </button>
 
       {/* Share */}
@@ -49,13 +87,13 @@ export default function VideoControls({ onVisit, onShare, size = 'lg' }: VideoCo
         className="flex flex-col items-center gap-1.5 group cursor-pointer min-h-11 min-w-11"
         aria-label="Compartir"
       >
-        <div className={`${btnSize} rounded-full bg-white/10 backdrop-blur-md
-          border border-white/20 flex items-center justify-center
-          group-hover:bg-white/20 group-active:scale-90
+        <div className={`${btnSize} rounded-full bg-black/50 backdrop-blur-md
+          border border-white/15 flex items-center justify-center
+          group-hover:bg-black/60 group-active:scale-90
           transition-all shadow-lg`}>
-          <Share2 className={`${iconSize} text-white`} />
+          <Share2 className={`${iconSize} text-white drop-shadow-md`} />
         </div>
-        <span className={`${labelSize} font-semibold text-white drop-shadow`}>Compartir</span>
+        <span className={`${labelSize} font-semibold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.8)]`}>{sharesCount}</span>
       </button>
 
     </div>

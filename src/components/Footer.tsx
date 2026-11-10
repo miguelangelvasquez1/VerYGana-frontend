@@ -69,7 +69,7 @@ export default function Footer({ guest = false }: { guest?: boolean }) {
         </div>
       </div>
       <div className="mx-auto mt-7 max-w-7xl border-t border-white/15 px-6 pt-4 lg:px-8">
-        <p className="text-center text-xs text-gray-400 md:text-left">© 2025 VerYGana. Todos los derechos reservados.</p>
+        <p className="text-center text-xs text-gray-400 md:text-left">© 2026 VerYGana. Todos los derechos reservados.</p>
       </div>
     </footer>
   );

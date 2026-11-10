@@ -30,6 +30,9 @@
 .DS_Store
 *.pem
 
+# IDE (JetBrains): configuración local, incluye estado de sesión (ej. pestañas abiertas)
+.idea/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
