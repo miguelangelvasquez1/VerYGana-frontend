@@ -120,7 +120,7 @@ const features = [
     icon: Gift,
     title: "Rifas Diarias",
     description: "Participa en rifas de celulares, laptops y más premios increíbles todos los días",
-    color: "from-purple-500 to-pink-500"
+    color: "from-[#0b1440] to-[#03548C]"
   },
   {
     icon: Coins,
@@ -230,14 +230,14 @@ export default function Home() {
       <NavBarNoAuth2 />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
+      <section className="relative overflow-hidden bg-linear-to-br from-[#0b1440] via-[#03548C] to-[#0b1440]">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="text-white">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                 Gana Premios
-                <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                <span className="block text-[#FFD700]">
                   Increíbles
                 </span>
                 Todos los Días
@@ -338,7 +338,7 @@ export default function Home() {
       </section>
 
       {/* Earn Credits Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 to-pink-600">
+      <section className="py-20 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -350,7 +350,7 @@ export default function Home() {
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Gana Créditos Gratis Viendo Anuncios
                 </h2>
-                <p className="text-xl text-purple-100 mb-8 leading-relaxed">
+                <p className="text-xl text-blue-100 mb-8 leading-relaxed">
                   Ve anuncios publicitarios cortos y gana créditos que puedes usar para participar en rifas 
                   sin gastar tu dinero. ¡Es gratis y fácil!
                 </p>
@@ -358,22 +358,22 @@ export default function Home() {
                 <div className="flex items-center gap-6 mb-8">
                   <div className="text-center">
                     <div className="text-2xl font-bold">50</div>
-                    <div className="text-purple-200 text-sm">Créditos por anuncio</div>
+                    <div className="text-blue-200 text-sm">Créditos por anuncio</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">30s</div>
-                    <div className="text-purple-200 text-sm">Duración promedio</div>
+                    <div className="text-blue-200 text-sm">Duración promedio</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">∞</div>
-                    <div className="text-purple-200 text-sm">Anuncios por día</div>
+                    <div className="text-blue-200 text-sm">Anuncios por día</div>
                   </div>
                 </div>
 
                 {!showAd ? (
                   <button
                     onClick={simulateAdWatch}
-                    className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg inline-flex items-center gap-3 cursor-pointer"
+                    className="bg-linear-to-r from-[#b8860b] via-[#FFD700] to-[#c9a227] hover:brightness-110 text-gray-900 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg inline-flex items-center gap-3 cursor-pointer"
                   >
                     <Play className="w-6 h-6" />
                     Ver Anuncio y Ganar Créditos
@@ -479,7 +479,7 @@ export default function Home() {
                       </div>
                     </div>
                     
-                    <Link href="/login" className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 cursor-pointer active:opacity-80">
+                    <Link href="/login" className="block w-full text-center bg-linear-to-r from-[#00a4ff] to-[#0089d6] text-white py-3 rounded-xl font-bold hover:brightness-110 transition-all duration-200 transform hover:scale-105 cursor-pointer active:opacity-80">
                       Participar Ahora
                     </Link>
                   </div>
@@ -523,7 +523,7 @@ export default function Home() {
                 title: "Gana Créditos",
                 description: "Ve anuncios, invita amigos o deposita dinero",
                 icon: Coins,
-                color: "from-purple-500 to-pink-500"
+                color: "from-[#0b1440] to-[#03548C]"
               },
               {
                 step: "03",
@@ -638,7 +638,7 @@ export default function Home() {
                       </span>
                     </div>
                     
-                    <Link href="/login" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 inline-flex items-center justify-center gap-2 cursor-pointer active:opacity-80">
+                    <Link href="/login" className="w-full bg-linear-to-r from-[#00a4ff] to-[#0089d6] text-white py-3 rounded-xl font-bold hover:brightness-110 transition-all duration-200 transform hover:scale-105 inline-flex items-center justify-center gap-2 cursor-pointer active:opacity-80">
                       <ShoppingCart className="w-4 h-4" />
                       Agregar al Carrito
                     </Link>
@@ -649,7 +649,7 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/login" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 inline-flex items-center gap-2 cursor-pointer active:opacity-80">
+            <Link href="/login" className="bg-linear-to-r from-[#00a4ff] to-[#0089d6] text-white px-8 py-3 rounded-xl font-bold hover:brightness-110 transition-all duration-200 inline-flex items-center gap-2 cursor-pointer active:opacity-80">
               Ver Toda la Tienda
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -658,7 +658,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-900 to-blue-900 text-white">
+      <section className="py-20 bg-linear-to-br from-[#0b1440] to-[#03548C] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -687,7 +687,7 @@ export default function Home() {
                 </blockquote>
                 
                 <div className="flex items-center justify-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-linear-to-r from-[#00a4ff] to-[#0089d6] rounded-full flex items-center justify-center">
                     <span className="text-white font-bold">
                       {testimonials[currentTestimonial].name.charAt(0)}
                     </span>
@@ -833,8 +833,8 @@ export default function Home() {
             </div>
             
             <div className="text-center">
-              <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Clock className="w-10 h-10 text-purple-600" />
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Clock className="w-10 h-10 text-[#0c5785]" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Soporte 24/7</h3>
               <p className="text-gray-600">
@@ -846,7 +846,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500">
+      <section className="py-20 bg-linear-to-r from-[#0b1440] via-[#03548C] to-[#0b1440]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
             ¿Listo para Empezar a Ganar?

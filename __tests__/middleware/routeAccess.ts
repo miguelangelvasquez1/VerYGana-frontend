@@ -45,10 +45,22 @@ export const ROLE_RULES: readonly RoleRule[] = [
     role: 'ROLE_GAME_DESIGNER',
     except: ['/game-designer/reset-password', '/game-designer/setup-password'],
   },
-  // Consumidor: el middleware solo protege estas tres, y por ruta exacta.
+  // Consumidor: rutas con dato personal o de billetera/compra.
   { path: '/raffles', match: 'exact', role: 'ROLE_CONSUMER' },
   { path: '/ads', match: 'exact', role: 'ROLE_CONSUMER' },
   { path: '/explore/recognitions', match: 'exact', role: 'ROLE_CONSUMER' },
+  { path: '/checkout', match: 'exact', role: 'ROLE_CONSUMER' },
+  { path: '/explore/favorites', match: 'exact', role: 'ROLE_CONSUMER' },
+  { path: '/explore/gamification', match: 'exact', role: 'ROLE_CONSUMER' },
+  { path: '/explore/participations', match: 'exact', role: 'ROLE_CONSUMER' },
+  // Prefijo: cubre también /explore/profile/edit.
+  { path: '/explore/profile', match: 'prefix', role: 'ROLE_CONSUMER' },
+  { path: '/explore/purchases', match: 'exact', role: 'ROLE_CONSUMER' },
+  { path: '/explore/referrals', match: 'exact', role: 'ROLE_CONSUMER' },
+  { path: '/explore/transactions', match: 'exact', role: 'ROLE_CONSUMER' },
+  { path: '/games/play', match: 'exact', role: 'ROLE_CONSUMER' },
+  // Prefijo: cubre /purchases/[id] y /purchases/[id]/confirmation.
+  { path: '/purchases', match: 'prefix', role: 'ROLE_CONSUMER' },
 ];
 
 /** Públicas de forma explícita (autenticación, aterrizaje, enlaces de correo). */
@@ -65,27 +77,9 @@ export const PUBLIC: readonly string[] = [
   // Enlaces de correo del diseñador: públicos por excepción en el middleware (defecto D-1 de la revisión 006).
   '/game-designer/reset-password',
   '/game-designer/setup-password',
-];
-
-/**
- * Sin protección de middleware hoy, decisión pendiente (D-7).
- * Páginas que por su nombre parecen necesitar sesión (cuenta, compras, rifas, planes) pero que el
- * `matcher` no alcanza: el middleware las deja pasar a cualquiera. Se listan tal cual para que el
- * cambio, cuando se decida, sea una edición visible de esta tabla y no un hallazgo accidental.
- */
-export const UNPROTECTED_PENDING: readonly string[] = [
-  '/checkout',
-  '/explore/favorites',
-  '/explore/gamification',
-  '/explore/participations',
-  '/explore/profile',
-  '/explore/profile/edit',
-  '/explore/purchases',
-  '/explore/referrals',
-  '/explore/transactions',
+  // Catálogo de consumidor: navegable sin sesión, decisión D-7 tomada.
   '/forum',
   '/games',
-  '/games/play',
   '/home',
   '/pet',
   '/plans',
@@ -93,13 +87,19 @@ export const UNPROTECTED_PENDING: readonly string[] = [
   '/plans/mobile-plans',
   '/products',
   '/products/[id]',
-  '/purchases/[id]/confirmation',
   '/raffles/[id]',
   '/raffles/[id]/live',
   '/raffles/[id]/results',
   '/support',
   '/surveys',
 ];
+
+/**
+ * Sin protección de middleware hoy, decisión pendiente (D-7).
+ * Páginas que por su nombre parecen necesitar sesión pero que el `matcher` no alcanza. Vacía: la
+ * decisión D-7 ya se tomó para todas las páginas de consumidor (ver PUBLIC y ROLE_RULES arriba).
+ */
+export const UNPROTECTED_PENDING: readonly string[] = [];
 
 export type RouteClass =
   | { kind: 'role'; role: Role; rule: RoleRule }

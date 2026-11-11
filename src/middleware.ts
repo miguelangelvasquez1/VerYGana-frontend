@@ -10,14 +10,20 @@ import type { NextRequest } from 'next/server';
 export const config = {
   matcher: [
     // consumer explicit routes (literal array)
-    '/consumer/home/:path*',
-    '/consumer/orders/:path*',
-    '/consumer/profile',
-    '/consumer/transactions/:path*',
     '/raffles',
-    "/ads",
+    '/ads',
     '/explore/recognitions',
-    // "/forum",
+    '/checkout',
+    '/explore/favorites',
+    '/explore/gamification',
+    '/explore/participations',
+    '/explore/profile',
+    '/explore/profile/:path*',
+    '/explore/purchases',
+    '/explore/referrals',
+    '/explore/transactions',
+    '/games/play',
+    '/purchases/:path*',
 
     // role prefixes (literal entries)
     '/commercial/:path*',
@@ -41,13 +47,20 @@ export const config = {
  *  pero **el export config debe usar un array literal**).
  */
 const CONSUMER_ALLOWED = [
-  '/consumer/home/:path*',
-  '/consumer/orders/:path*',
-  '/consumer/profile',       
-  '/consumer/transactions/:path*',
   '/raffles',
   '/ads',
   '/explore/recognitions',
+  '/checkout',
+  '/explore/favorites',
+  '/explore/gamification',
+  '/explore/participations',
+  '/explore/profile',
+  '/explore/profile/:path*',
+  '/explore/purchases',
+  '/explore/referrals',
+  '/explore/transactions',
+  '/games/play',
+  '/purchases/:path*',
 ] as const;
 
 /**

@@ -160,7 +160,7 @@ describe('páginas públicas', () => {
   });
 });
 
-describe('sin protección de middleware hoy, decisión pendiente (D-7)', () => {
+describe.skipIf(UNPROTECTED_PENDING.length === 0)('sin protección de middleware hoy, decisión pendiente (D-7)', () => {
   it.each(UNPROTECTED_PENDING)('%s: el matcher no la alcanza y pasa sin sesión', async (route) => {
     const page = pages.find((p) => p.route === route)!;
     expect(matches(page.url)).toBe(false);

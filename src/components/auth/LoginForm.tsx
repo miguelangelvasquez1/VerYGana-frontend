@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
+import { readRememberUsername, writeRememberUsername } from '@/lib/auth/rememberUsername';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
@@ -70,6 +71,16 @@ const LoginForm = () => {
 
   const [showPassword, setShowPassword] =
       useState(false);
+
+  const [rememberUsername, setRememberUsername] =
+      useState(true);
+
+  const rememberId =
+      useId();
+
+  useEffect(() => {
+    setRememberUsername(readRememberUsername());
+  }, []);
 
   const errorRef =
       useRef<HTMLDivElement>(null);
@@ -506,7 +517,7 @@ const LoginForm = () => {
 
                   }}
                   required
-                  autoComplete="username"
+                  autoComplete={rememberUsername ? 'username' : 'off'}
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck={false}
@@ -761,6 +772,48 @@ const LoginForm = () => {
                       />
                   )}
                 </button>
+
+              </div>
+
+              <div
+                  className="
+                mt-3
+                flex
+                items-center
+                gap-2
+              "
+              >
+
+                <input
+                    id={rememberId}
+                    type="checkbox"
+                    checked={rememberUsername}
+                    onChange={(e) => {
+                      const next = e.target.checked;
+                      setRememberUsername(next);
+                      writeRememberUsername(next);
+                    }}
+                    className="
+                  h-4
+                  w-4
+                  rounded
+                  border-gray-300
+                  text-[#03548C]
+                  focus:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-[#03548C]/40
+                "
+                />
+
+                <label
+                    htmlFor={rememberId}
+                    className="
+                  text-sm
+                  text-gray-600
+                "
+                >
+                  Recordar mi usuario en este navegador
+                </label>
 
               </div>
 
