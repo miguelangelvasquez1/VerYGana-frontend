@@ -246,7 +246,7 @@ export default function Login() {
     xl:text-[2.5rem]
   "
                   >
-                    Bienvenido de
+                    Te damos la bienvenida de
                     <br />
 
                     <span className="text-[#FFD700]">

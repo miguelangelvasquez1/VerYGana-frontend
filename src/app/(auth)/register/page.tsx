@@ -14,7 +14,7 @@ export default function RegisterPage() {
           <div className="text-center max-w-md mx-auto">
             <div className="mb-4">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">
-                Bienvenido a Ver y Gana
+                Te damos la bienvenida a Ver y Gana
               </h2>
               <p className="text-sm text-blue-100 mb-4">
                 ¡Descubre cómo puedes ganar recompensas!
@@ -49,7 +49,7 @@ export default function RegisterPage() {
                 </Link>
                 <div className="mb-6">
                   <h2 className="text-2xl xl:text-3xl font-bold mb-3 leading-tight">
-                    Bienvenido a Ver y Gana
+                    Te damos la bienvenida a Ver y Gana
                   </h2>
                   <p className="text-base text-blue-100 mb-6 leading-relaxed">
                     ¡Descubre cómo puedes ganar recompensas!

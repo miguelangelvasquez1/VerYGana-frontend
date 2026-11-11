@@ -123,7 +123,7 @@ const Dashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="bg-linear-to-br from-[#041521] to-admin-midnight rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">¡Bienvenido al Panel de Administración!</h1>
+        <h1 className="text-2xl font-bold mb-2">¡Te damos la bienvenida al Panel de Administración!</h1>
         <p className="text-white/70">Aquí tienes un resumen de la actividad de tu sistema</p>
         <div className="mt-4 flex items-center space-x-4 text-sm">
           <div className="flex items-center space-x-2">
